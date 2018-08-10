@@ -77,7 +77,7 @@ public class GraphicViewer extends JFrame
     protected GraphicViewerDocument myDoc;
     private int myDocCount;
     UndoMgr myUndoMgr;
-    static final String graphicViewerSVGXML = "Open Teradata Viewer SVG with XML extensions, read/write (*.svg)";
+    static final String graphicViewerSVGXML = "Graphic Viewer SVG with XML extensions (*.xhtml)";
     private String myDescription = "";
     public AppAction FileNewAction;
     public AppAction FileOpenAction;
@@ -3048,7 +3048,7 @@ public class GraphicViewer extends JFrame
             chooser.setCurrentDirectory(null);
         chooser.setAcceptAllFileFilterUsed(false);
         Filter svgInputFilter = new Filter(".xhtml",
-                "GraphicViewer SVG with XML extensions (*.xhtml)");
+                "Graphic Viewer SVG with XML extensions (*.xhtml)");
         chooser.addChoosableFileFilter(svgInputFilter);
         chooser.setFileFilter(svgInputFilter);
         int returnVal = chooser.showOpenDialog(parent);

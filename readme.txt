@@ -1,4 +1,4 @@
-Teradata JDBC Driver 14.00.00.14
+Teradata JDBC Driver 14.00.00.21
 
 Part of the Teradata Tools and Utilities 14.00 product suite
 
@@ -18,7 +18,7 @@ Teradata JDBC Driver section.
 System Requirements
 -------------------
 
-This release of the Teradata JDBC Driver requires JDK/JRE 1.4, 5.0, or 6.0.
+This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5.0, 6.0, or 7.0.
 
 Note that IBM WebSphere Application Server 5.0 is not supported, because
 WebSphere 5.0 uses JDK 1.3.1.
@@ -30,11 +30,32 @@ V2R6.2, 12.00, 13.00, 13.10, and 14.00.
 Release Notes
 -------------
 
-This section highlights issues that you should be aware of when upgrading to
-the 14.00.00.14 release of the Teradata JDBC Driver. Please refer to the Teradata
-JDBC Driver User Guide for more information about the driver.
+This section highlights issues that you should be aware of when upgrading to this release
+of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
+information about the driver.
 
-This release includes changes to address the following DRs:
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.18:
+
+DR 134645 Add support for the JDBC 4.0 SQLXML data type
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.17:
+
+DR 153117 JDBC FastLoad/FastExport GOVERN=OFF to use TASM fail-fast no-wait for Check Workload End
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.16:
+
+DR 159065 Support reconnect after database restart for MPP systems
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.15:
+
+DR 55968 Implement java.sql.Driver.getPropertyInfo
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.14:
 
 DR 157883 Increased Diffie-Hellman keysize to 2048bits used excessive CPU resulting in increased logon times
 
@@ -221,6 +242,12 @@ in release 13.10.00.03:
 
 DR 139067 DatabaseMetaData getSQLKeywords method to query SYSLIB.SQLRestrictedWords
 DR 140609 Additional support for DISTINCT user-defined types
+
+This release includes changes to address the following DRs, originally included
+in release 13.00.00.29:
+
+DR 155367 Intermittent socket communication failures when using setQueryTimeout with large result sets
+DR 160371 Intermittent "Read timeout after abort was sent" on Linux
 
 This release includes changes to address the following DRs, originally included
 in release 13.00.00.26:
@@ -965,7 +992,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.00.00.14.zip and TeraJDBC__indep_indep.14.00.00.14.tar
+TeraJDBC__indep_indep.14.00.00.21.zip and TeraJDBC__indep_indep.14.00.00.21.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

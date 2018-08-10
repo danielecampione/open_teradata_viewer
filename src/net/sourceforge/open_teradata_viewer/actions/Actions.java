@@ -86,6 +86,7 @@ public final class Actions
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
+    public static final CustomAction PRINT_PREVIEW = new PrintPreviewAction();
     public static final CustomAction FAVORITES = new FavoritesAction();
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
     public static final CustomAction HISTORY_NEXT = new HistoryNextAction();

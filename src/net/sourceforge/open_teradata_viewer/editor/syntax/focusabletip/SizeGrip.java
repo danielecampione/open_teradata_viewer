@@ -18,20 +18,22 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip;
 
-import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.MouseInputAdapter;
+
+import net.sourceforge.open_teradata_viewer.GenericStatusBarPanel;
+import net.sourceforge.open_teradata_viewer.editor.SizeGripIcon;
 
 /**
  * A component that allows its parent window to be resizable, similar to the
@@ -40,18 +42,66 @@ import javax.swing.event.MouseInputAdapter;
  * @author D. Campione
  * 
  */
-class SizeGrip extends JPanel {
+public class SizeGrip extends GenericStatusBarPanel {
 
     private static final long serialVersionUID = 5871803464041965865L;
 
-    /** The size grip to use if we're on OS X. */
-    private Image osxSizeGrip;
+    private Window window;
+    private ComponentAdapter maximizeWindow;
+    private SizeGripIcon sizeGripIcon;
 
+    /**
+     * Whether or not to paint the grip. This is set to <code>false</code> when
+     * the parent window is maximized.
+     */
+    private boolean paintGrip;
+
+    /** Ctor. */
     public SizeGrip() {
         MouseHandler adapter = new MouseHandler();
         addMouseListener(adapter);
         addMouseMotionListener(adapter);
-        setPreferredSize(new Dimension(16, 16));
+        possiblyFixCursor(ComponentOrientation.getOrientation(getLocale()));
+
+        sizeGripIcon = new SizeGripIcon();
+
+        // Listens for the parent window being maximized. When it is, the size
+        // grip doesn't paint itself to visually show that the window cannot be
+        // stretched anymore
+        maximizeWindow = new ComponentAdapter() {
+            long prevTime;
+            boolean isLastResize;
+            public void componentResized(ComponentEvent e) {
+                checkMaximize(true);
+            }
+            public void componentMoved(ComponentEvent e) {
+                checkMaximize(false);
+            }
+            public void componentShown(ComponentEvent e) {
+                // Must do this to display size grip on first display
+                checkMaximize(!isLastResize);
+            }
+            public void checkMaximize(boolean resize) {
+                long currTime = System.currentTimeMillis();
+                if ((isLastResize != resize) && (prevTime + 100 > currTime)) {
+                    paintGrip = getShouldPaintGrip();
+                    repaint();
+                }
+                isLastResize = resize;
+                prevTime = currTime;
+            }
+        };
+    }
+
+    /**
+     * Called when this component receives a parent. This method is overridden
+     * so we can add a component listener to the parent window to know when it
+     * is maximized/de-maximized.
+     */
+    public void addNotify() {
+        super.addNotify();
+        window = (Window) SwingUtilities.getRoot(this);
+        window.addComponentListener(maximizeWindow);
     }
 
     /**
@@ -61,8 +111,31 @@ class SizeGrip extends JPanel {
      * @param o The new orientation.
      */
     public void applyComponentOrientation(ComponentOrientation o) {
-        possiblyFixCursor(o.isLeftToRight());
+        possiblyFixCursor(o);
         super.applyComponentOrientation(o);
+    }
+
+    public Dimension getMinimumSize() {
+        return new Dimension(20, 20);
+    }
+
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
+    }
+
+    private boolean getShouldPaintGrip() {
+        Rectangle rect = window.getBounds();
+        Dimension dim = getToolkit().getScreenSize();
+        if ((rect.x == rect.y) && (rect.x <= 0) && (rect.x > -20)
+                && (dim.width - 20 < rect.width)
+                && (dim.width + 20 > rect.width)) {
+            return false;
+        }
+        return true;
+    }
+
+    public SizeGripIcon getSizeGripIcon() {
+        return sizeGripIcon;
     }
 
     /**
@@ -72,51 +145,9 @@ class SizeGrip extends JPanel {
      */
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        Dimension dim = getSize();
-
-        if (osxSizeGrip != null) {
-            g.drawImage(osxSizeGrip, dim.width - 16, dim.height - 16, null);
-            return;
-        }
-
-        Color c1 = UIManager.getColor("Label.disabledShadow");
-        Color c2 = UIManager.getColor("Label.disabledForeground");
-        ComponentOrientation orientation = getComponentOrientation();
-
-        if (orientation.isLeftToRight()) {
-            int width = dim.width -= 3;
-            int height = dim.height -= 3;
-            g.setColor(c1);
-            g.fillRect(width - 9, height - 1, 3, 3);
-            g.fillRect(width - 5, height - 1, 3, 3);
-            g.fillRect(width - 1, height - 1, 3, 3);
-            g.fillRect(width - 5, height - 5, 3, 3);
-            g.fillRect(width - 1, height - 5, 3, 3);
-            g.fillRect(width - 1, height - 9, 3, 3);
-            g.setColor(c2);
-            g.fillRect(width - 9, height - 1, 2, 2);
-            g.fillRect(width - 5, height - 1, 2, 2);
-            g.fillRect(width - 1, height - 1, 2, 2);
-            g.fillRect(width - 5, height - 5, 2, 2);
-            g.fillRect(width - 1, height - 5, 2, 2);
-            g.fillRect(width - 1, height - 9, 2, 2);
-        } else {
-            int height = dim.height -= 3;
-            g.setColor(c1);
-            g.fillRect(10, height - 1, 3, 3);
-            g.fillRect(6, height - 1, 3, 3);
-            g.fillRect(2, height - 1, 3, 3);
-            g.fillRect(6, height - 5, 3, 3);
-            g.fillRect(2, height - 5, 3, 3);
-            g.fillRect(2, height - 9, 3, 3);
-            g.setColor(c2);
-            g.fillRect(10, height - 1, 2, 2);
-            g.fillRect(6, height - 1, 2, 2);
-            g.fillRect(2, height - 1, 2, 2);
-            g.fillRect(6, height - 5, 2, 2);
-            g.fillRect(2, height - 5, 2, 2);
-            g.fillRect(2, height - 9, 2, 2);
+        // If the window isn't maximized, paint the grip part
+        if (paintGrip) {
+            sizeGripIcon.paintIcon(this, g, 0, 0);
         }
     }
 
@@ -124,16 +155,25 @@ class SizeGrip extends JPanel {
      * Ensures that the cursor for this component is appropriate for the
      * orientation.
      *
-     * @param ltr Whether the current component orientation is LTR.
+     * @param o The new orientation.
      */
-    protected void possiblyFixCursor(boolean ltr) {
+    protected void possiblyFixCursor(ComponentOrientation o) {
         int cursor = Cursor.NE_RESIZE_CURSOR;
-        if (ltr) {
+        if (o.isLeftToRight()) {
             cursor = Cursor.NW_RESIZE_CURSOR;
         }
         if (cursor != getCursor().getType()) {
             setCursor(Cursor.getPredefinedCursor(cursor));
         }
+    }
+
+    /**
+     * Called when this component loses its parent. This method is overridden so
+     * we can remove the component listener we added to the parent.
+     */
+    public void removeNotify() {
+        super.removeNotify();
+        window.removeComponentListener(maximizeWindow);
     }
 
     /**
@@ -154,30 +194,42 @@ class SizeGrip extends JPanel {
         private Point origPos;
 
         public void mouseDragged(MouseEvent e) {
+            if (origPos == null) {
+                // Happens, for example, when a menu is open, and the user then
+                // clicks on and drags the size grip. Swing doesn't send a
+                // mousePressed event to the grip, but does send the drag events
+                // (on Windows and OS X, at least)
+                mousePressed(e);
+            }
             Point newPos = e.getPoint();
             SwingUtilities.convertPointToScreen(newPos, SizeGrip.this);
             int xDelta = newPos.x - origPos.x;
             int yDelta = newPos.y - origPos.y;
-            Window wind = SwingUtilities.getWindowAncestor(SizeGrip.this);
-            if (wind != null) { // Should always be true
-                if (getComponentOrientation().isLeftToRight()) {
-                    int w = wind.getWidth();
-                    if (newPos.x >= wind.getX()) {
-                        w += xDelta;
-                    }
-                    int h = wind.getHeight();
-                    if (newPos.y >= wind.getY()) {
-                        h += yDelta;
-                    }
-                    wind.setSize(w, h);
-                } else { // RTL
-                    int newW = Math.max(1, wind.getWidth() - xDelta);
-                    int newH = Math.max(1, wind.getHeight() + yDelta);
-                    wind.setBounds(newPos.x, wind.getY(), newW, newH);
+            if (getComponentOrientation().isLeftToRight()) {
+                int w = window.getWidth();
+                if (newPos.x >= window.getX()) {
+                    w += xDelta;
                 }
-                wind.invalidate();
-                wind.validate();
+                int h = window.getHeight();
+                if (newPos.y >= window.getY()) {
+                    h += yDelta;
+                }
+                window.setSize(w, h);
+            } else { // RTL
+                Rectangle newBounds = window.getBounds();
+                if (newPos.x <= window.getX() + window.getWidth()) {
+                    newBounds.width -= xDelta;
+                    newBounds.x += xDelta;
+                }
+                if (newPos.y >= window.getY()) {
+                    newBounds.height += yDelta;
+                }
+                window.setBounds(newBounds.x, newBounds.y, newBounds.width,
+                        newBounds.height);
             }
+            // invalidate()/revalidate() needed pre-1.6
+            window.invalidate();
+            window.validate();
             origPos.setLocation(newPos);
         }
 

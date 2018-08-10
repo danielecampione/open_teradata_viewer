@@ -18,6 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.util;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,8 +40,12 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+
+import javax.swing.JComboBox;
+import javax.swing.ListCellRenderer;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -875,5 +882,55 @@ public class Utilities {
             rootDir = getLocationOfJar(executableFile.getName());
         }
         return conformizePath(rootDir);
+    }
+
+    /**
+     * Derives a color from another color by linearly shifting its blue, green,
+     * and blue values.
+     *
+     * @param orig The original color.
+     * @param darker The amount by which to decrease its r, g, and b values.
+     *        Note that you can use negative values for making a color component
+     *        "brighter". If this makes any of the three values less than zero,
+     *        zero is used for that component value; similarly, if it makes any
+     *        value greater than 255, 255 is used for that component's value.
+     */
+    public static final Color deriveColor(Color orig, int darker) {
+        int red = orig.getRed() - darker;
+        int green = orig.getGreen() - darker;
+        int blue = orig.getBlue() - darker;
+
+        if (red < 0) {
+            red = 0;
+        } else if (red > 255) {
+            red = 255;
+        }
+        if (green < 0) {
+            green = 0;
+        } else if (green > 255) {
+            green = 255;
+        }
+        if (blue < 0) {
+            blue = 0;
+        } else if (blue > 255) {
+            blue = 255;
+        }
+
+        return new Color(red, green, blue);
+    }
+
+    /**
+     * Fixes the orientation of the renderer of a combo box. It seems that Swing
+     * standard LaFs don't handle this on their own.
+     *
+     * @param combo The combo box.
+     */
+    public static void fixComboOrientation(JComboBox combo) {
+        ListCellRenderer r = combo.getRenderer();
+        if (r instanceof Component) {
+            ComponentOrientation o = ComponentOrientation.getOrientation(Locale
+                    .getDefault());
+            ((Component) r).setComponentOrientation(o);
+        }
     }
 }

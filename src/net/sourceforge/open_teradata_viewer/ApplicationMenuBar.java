@@ -83,6 +83,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
         menu.addSeparator();
+        menu.add(Actions.PRINT_PREVIEW);
+        menu.addSeparator();
         menu.add(Actions.FAVORITES);
 
         menu = new JMenu("Edit");

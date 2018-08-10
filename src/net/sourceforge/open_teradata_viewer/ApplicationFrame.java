@@ -387,7 +387,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         //        Good work, but a customizable editor is better
 
         //      9 OTVSyntaxTextArea
-        //        @see net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea
+        //        @see net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea
         //        Looks great, let's use it!
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
     }
