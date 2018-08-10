@@ -61,6 +61,9 @@ public final class Actions
     public static final CustomAction ANIMATE_BRACKET_MATCHING = new AnimateBracketMatchingAction();
     public static final CustomAction COMMENT = new CommentAction();
     public static final CustomAction UNCOMMENT = new UncommentAction();
+    public static final CustomAction DATE_TIME = new DateTimeAction();
+    public static final CustomAction INCREASE_INDENT = new IncreaseIndentAction();
+    public static final CustomAction DECREASE_INDENT = new DecreaseIndentAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction FIND = new FindAction();
     public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",

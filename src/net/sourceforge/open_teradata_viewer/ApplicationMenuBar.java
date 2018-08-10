@@ -21,13 +21,13 @@ package net.sourceforge.open_teradata_viewer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
@@ -63,8 +63,6 @@ public class ApplicationMenuBar extends JMenuBar {
     JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
     JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(
             Actions.ANIMATE_BRACKET_MATCHING);
-    JMenuItem mniComment = new JMenuItem(Actions.COMMENT);
-    JMenuItem mniUncomment = new JMenuItem(Actions.UNCOMMENT);
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -104,8 +102,13 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(cbTabLines);
         menu.add(cbAnimateBracketMatching);
         menu.addSeparator();
-        menu.add(mniComment);
-        menu.add(mniUncomment);
+        menu.add(Actions.COMMENT);
+        menu.add(Actions.UNCOMMENT);
+        menu.add(Actions.DATE_TIME);
+        subMenu = new JMenu("Indent");
+        menu.add(subMenu);
+        subMenu.add(Actions.INCREASE_INDENT);
+        subMenu.add(Actions.DECREASE_INDENT);
         menu.addSeparator();
         menu.add(Actions.GO_TO_LINE);
         menu.add(Actions.FIND);
@@ -178,21 +181,25 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
                 .getInstalledLookAndFeels();
-        String[] completePathOfLafClasses = new String[lafInfo.length];
+        Vector<String> completePathOfLafClasses = new Vector<String>(
+                lafInfo.length, 1);
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
-        JRadioButtonMenuItem[] _mnuAvailableLookAndFeel = new JRadioButtonMenuItem[lafInfo.length];
+        Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<JRadioButtonMenuItem>(
+                lafInfo.length, 1);
         for (int i = 0; i < lafInfo.length; i++) {
             String name = lafInfo[i].getName();
-            _mnuAvailableLookAndFeel[i] = new JRadioButtonMenuItem(name);
-            completePathOfLafClasses[i] = lafInfo[i].getClassName();
-            buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel[i]);
-            menu.add(_mnuAvailableLookAndFeel[i]);
-            _mnuAvailableLookAndFeel[i]
-                    .addActionListener(new LookAndFeelAction(
-                            completePathOfLafClasses[i]));
-            if (completePathOfLafClasses[i].equals(UIManager.getLookAndFeel()
-                    .getClass().toString().substring("class ".length()))) {
-                _mnuAvailableLookAndFeel[i].setSelected(true);
+            _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(name));
+            completePathOfLafClasses.add(lafInfo[i].getClassName());
+            buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(i));
+            menu.add(_mnuAvailableLookAndFeel.elementAt(i));
+            _mnuAvailableLookAndFeel.elementAt(i)
+                    .addActionListener(
+                            new LookAndFeelAction(completePathOfLafClasses
+                                    .elementAt(i)));
+            if (completePathOfLafClasses.elementAt(i).equals(
+                    UIManager.getLookAndFeel().getClass().toString()
+                            .substring("class ".length()))) {
+                _mnuAvailableLookAndFeel.elementAt(i).setSelected(true);
             }
         }
 
@@ -203,18 +210,24 @@ public class ApplicationMenuBar extends JMenuBar {
             for (int i = 0; i < info.length; i++) {
                 if (!Arrays.asList(completePathOfLafClasses).contains(
                         info[i].getClassName())) {
-                    _mnuAvailableLookAndFeel[i] = new JRadioButtonMenuItem(
-                            info[i].getName());
-                    completePathOfLafClasses[i] = info[i].getClassName();
-                    buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel[i]);
-                    menu.add(_mnuAvailableLookAndFeel[i]);
-                    _mnuAvailableLookAndFeel[i]
-                            .addActionListener(new LookAndFeelAction(
-                                    completePathOfLafClasses[i]));
-                    if (completePathOfLafClasses[i].equals(UIManager
-                            .getLookAndFeel().getClass().toString()
-                            .substring("class ".length()))) {
-                        _mnuAvailableLookAndFeel[i].setSelected(true);
+                    _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(
+                            info[i].getName()));
+                    completePathOfLafClasses.add(info[i].getClassName());
+                    buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel
+                            .elementAt(lafInfo.length + i));
+                    menu.add(_mnuAvailableLookAndFeel.elementAt(lafInfo.length
+                            + i));
+                    _mnuAvailableLookAndFeel.elementAt(lafInfo.length + i)
+                            .addActionListener(
+                                    new LookAndFeelAction(
+                                            completePathOfLafClasses
+                                                    .elementAt(lafInfo.length
+                                                            + i)));
+                    if (completePathOfLafClasses.elementAt(lafInfo.length + i)
+                            .equals(UIManager.getLookAndFeel().getClass()
+                                    .toString().substring("class ".length()))) {
+                        _mnuAvailableLookAndFeel.elementAt(lafInfo.length + i)
+                                .setSelected(true);
                     }
                 }
             }

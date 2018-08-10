@@ -60,9 +60,8 @@ public class Main {
         // implementations
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        String defaultLAF = UIManager.getSystemLookAndFeelClassName();
         try {
-            String className = defaultLAF;
+            String className = UIManager.getSystemLookAndFeelClassName();
             String startupLookAndFeelProperty = "startup_lookandfeel_class";
             String strStartupLookAndFeelClassName;
             strStartupLookAndFeelClassName = Config
@@ -99,19 +98,10 @@ public class Main {
             splashScreen.dispose();
         } catch (ClassNotFoundException cnfe) {
             ExceptionDialog.hideException(cnfe);
-            try {
-                String startupLookAndFeelProperty = "startup_lookandfeel_class";
-                Config.saveSetting(startupLookAndFeelProperty, defaultLAF);
-                UISupport.getDialogs().showInfoMessage(
-                        "Default Look And Feel has been restored.",
-                        APPLICATION_NAME);
-            } catch (Exception e) {
-                ExceptionDialog.ignoreException(e);
-            }
-        } catch (RuntimeException re) {
-            ExceptionDialog.hideException(re);
-        } catch (Exception e) {
-            ExceptionDialog.hideException(e);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (Throwable t) {
+            ExceptionDialog.hideException(t);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
         }
     }
 }

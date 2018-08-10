@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -346,5 +347,18 @@ public class ThirdPartyLookAndFeelManager {
         attr = doc.createAttribute(attributeName);
         attr.setValue(attributeValue);
         element.setAttributeNode(attr);
+    }
+
+    public static void restoreSystemLookAndFeel() {
+        try {
+            String defaultLAF = UIManager.getSystemLookAndFeelClassName();
+            String startupLookAndFeelProperty = "startup_lookandfeel_class";
+            Config.saveSetting(startupLookAndFeelProperty, defaultLAF);
+            UISupport.getDialogs().showInfoMessage(
+                    "Default Look And Feel has been restored.",
+                    Main.APPLICATION_NAME);
+        } catch (Exception e) {
+            ExceptionDialog.ignoreException(e);
+        }
     }
 }

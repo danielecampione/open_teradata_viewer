@@ -1,3 +1,8 @@
+0.12a (26/05/2012)
+    - Added the "DATE/TIME" command to the "Edit" menu.
+    - Added the "INCREASE INDENTATION" command to the "Edit" menu.
+    - Added the "DECREASE INDENTATION" command to the "Edit" menu.
+
 0.11c (25/05/2012)
     - Added the possibility to install the 3rd Party Look And Feels defined in
       the file "open_teradata_viewer_lookandfeels.xml"; this file is located in
