@@ -48,7 +48,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
@@ -1522,11 +1521,11 @@ public class GraphicViewer extends JFrame
     }
 
     void insertDrawingStroke() {
-        JOptionPane
-                .showMessageDialog(
-                        this,
+        UISupport
+                .getDialogs()
+                .showInfoMessage(
                         "Starting a mode to allow you to draw a stroke by specifying its points.\nThis mode stops when you type ENTER to accept the stroke or ESCAPE to cancel the new link.",
-                        "Drawing Stroke Mode", 1);
+                        "Drawing Stroke Mode");
         myView.startDrawingStroke();
     }
 
@@ -3077,13 +3076,16 @@ public class GraphicViewer extends JFrame
                 doc.setUndoManager(new GraphicViewerUndoManager());
                 return doc;
             } catch (IOException ioe) {
-                JOptionPane.showMessageDialog(null, ioe, "Open Document Error",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                String msg = "Open Document Error: "
+                        + ((ioe.getMessage() == null) ? ioe.toString() : ioe
+                                .getMessage());
+                UISupport.getDialogs().showErrorMessage(msg);
                 return null;
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e,
-                        "Loading Document Exception",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                String msg = "Loading Document Exception: "
+                        + ((e.getMessage() == null) ? e.toString() : e
+                                .getMessage());
+                UISupport.getDialogs().showErrorMessage(msg);
                 return null;
             } finally {
                 try {
@@ -3109,8 +3111,10 @@ public class GraphicViewer extends JFrame
                             + " ( " + this + " )");
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e, "Save Document Error",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                String msg = "Save Document Error: "
+                        + ((e.getMessage() == null) ? e.toString() : e
+                                .getMessage());
+                UISupport.getDialogs().showErrorMessage(msg);
             } finally {
                 try {
                     if (fstream != null)

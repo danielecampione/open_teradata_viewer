@@ -205,6 +205,7 @@ public class RunAction extends CustomAction {
                 }
             }
         } finally {
+            statement.close();
             waitingDialog.hide();
         }
         Context.getInstance().setQuery(originalSql);
@@ -214,6 +215,7 @@ public class RunAction extends CustomAction {
                 columnIdentifiers, waitingDialog.getExecutionTime());
         Actions.getInstance().validateActions();
     }
+
     private PreparedStatement createStatement(Connection connection, String sql)
             throws SQLException {
         boolean query = sql.trim().toLowerCase().startsWith("sel")

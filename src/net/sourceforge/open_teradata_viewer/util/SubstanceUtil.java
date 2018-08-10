@@ -26,13 +26,13 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 /**
- * Utility methods for interfacing with Substance 7.1 in applications that only
+ * Utility methods for interfacing with Substance 7.x in applications that only
  * require Java 7 or later.
  *
  * @author D. Campione
  * 
  */
-public class SubstanceUtils {
+public class SubstanceUtil {
 
     public static final String FOREGROUND_COLOR = "ForegroundColor";
 

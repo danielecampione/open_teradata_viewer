@@ -1,6 +1,11 @@
+0.14a (08/11/2012)
+    - Added the "SAVE AS WEB PAGE" option to the "SAVE FILE" command of the
+      "File" menu.
+    - Fixed errors due to the maximum limit of responses exceeded.
+
 0.13c (24/10/2012)
     - Added the "PRINT PREVIEW" command to the "File" menu.
-    - Upgraded Teradata JDBC driver 14.00.00.14 -> 14.00.00.21 
+    - Upgraded Teradata JDBC driver 14.00.00.14 -> 14.00.00.21
 
 0.13b (11/09/2012)
     - Fixed font rendering for Asian languages.
@@ -30,7 +35,7 @@
       different ClassLoaders.
     - Added the "INVERT CASE" command to the "Edit" menu.
     - Added the compatibility with the Substance Look And Feels (Insubstantial
-      7.1).
+      7.x).
 
 0.12c (28/05/2012)
     - Added the "COPY AS RTF" command to the "Edit" menu.

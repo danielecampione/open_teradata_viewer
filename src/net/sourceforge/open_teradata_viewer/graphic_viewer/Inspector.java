@@ -33,13 +33,13 @@ import java.util.ArrayList;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.UISupport;
 
 /**
  * 
@@ -175,21 +175,30 @@ public class Inspector {
                         Integer integer = Integer.valueOf(s);
                         invokeSetter(method, integer);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
                 else if (class1 == Float.TYPE)
                     try {
                         Float float1 = Float.valueOf(s);
                         invokeSetter(method, float1);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
                 else if (class1 == Double.TYPE)
                     try {
                         Double double1 = Double.valueOf(s);
                         invokeSetter(method, double1);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
                 else if (class1 == (Inspector.class$java$awt$Point != null
                         ? Inspector.class$java$awt$Point
@@ -202,7 +211,10 @@ public class Inspector {
                         Point point = new Point(j1, i2);
                         invokeSetter(method, point);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
                 else if (class1 == (Inspector.class$java$awt$Dimension != null
                         ? Inspector.class$java$awt$Dimension
@@ -215,7 +227,10 @@ public class Inspector {
                         Dimension dimension = new Dimension(k1, j2);
                         invokeSetter(method, dimension);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
                 else if (class1 == (Inspector.class$java$awt$Rectangle != null
                         ? Inspector.class$java$awt$Rectangle
@@ -233,16 +248,21 @@ public class Inspector {
                         Point point1 = new Point(l1, l2);
                         invokeSetter(method, point1);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString());
+                        String msg = (e.getMessage() == null)
+                                ? e.toString()
+                                : e.getMessage();
+                        UISupport.getDialogs().showErrorMessage(msg);
                     }
-                else
-                    JOptionPane.showMessageDialog(null, "not handled: type="
-                            + class1.toString() + " value=" + s);
+                else {
+                    String msg = "not handled: type=" + class1.toString()
+                            + " value=" + s;
+                    UISupport.getDialogs().showInfoMessage(msg);
+                }
             } else {
-                JOptionPane.showMessageDialog(null,
-                        "not handled: type=" + class1.toString()
-                                + ", valuetype=" + obj.getClass().toString()
-                                + " value=" + obj.toString());
+                String msg = "not handled: type=" + class1.toString()
+                        + ", valuetype=" + obj.getClass().toString()
+                        + " value=" + obj.toString();
+                UISupport.getDialogs().showInfoMessage(msg);
             }
             fireTableChanged(new TableModelEvent(this));
         }
@@ -268,7 +288,9 @@ public class Inspector {
             try {
                 method.invoke(myObject, new Object[]{obj});
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e.toString());
+                String msg = (e.getMessage() == null) ? e.toString() : e
+                        .getMessage();
+                UISupport.getDialogs().showErrorMessage(msg);
             }
             if (graphicviewerdocument != null)
                 graphicviewerdocument.endTransaction("modified property: "

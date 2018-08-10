@@ -29,7 +29,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -45,7 +45,7 @@ public class SchemaBrowser extends JTree {
     public SchemaBrowser(ConnectionData connectionData) {
         super(new ObjectNode(connectionData));
         try {
-            if (!SubstanceUtils.isSubstanceInstalled()) {
+            if (!SubstanceUtil.isSubstanceInstalled()) {
                 ((DefaultTreeCellRenderer) getCellRenderer()).setLeafIcon(null);
                 ((DefaultTreeCellRenderer) getCellRenderer()).setOpenIcon(null);
                 ((DefaultTreeCellRenderer) getCellRenderer())

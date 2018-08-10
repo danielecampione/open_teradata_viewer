@@ -62,7 +62,7 @@ import net.sourceforge.open_teradata_viewer.plugin.EntryDescriptor;
 import net.sourceforge.open_teradata_viewer.plugin.IPluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -206,8 +206,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 // that this change will occur on restart. Substance seems to be
                 // the only troublemaker here (Metal, for example, supports
                 // window decorations, but works fine without special logic)
-                boolean curSubstance = SubstanceUtils.isSubstanceInstalled();
-                boolean nextSubstance = SubstanceUtils
+                boolean curSubstance = SubstanceUtil.isSubstanceInstalled();
+                boolean nextSubstance = SubstanceUtil
                         .isASubstanceLookAndFeel(lnf);
                 if (curSubstance != nextSubstance) {
                     String startupLookAndFeelProperty = "startup_lookandfeel_class";
@@ -408,6 +408,15 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {
             Actions.DISCONNECT.actionPerformed(new ActionEvent(this, 0, null));
+        }
+
+        if (_OTVFindDialog != null) {
+            _OTVFindDialog.dispose();
+            _OTVFindDialog = null;
+        }
+        if (_OTVGoToDialog != null) {
+            _OTVGoToDialog.dispose();
+            _OTVGoToDialog = null;
         }
 
         if (helpFrame != null) {

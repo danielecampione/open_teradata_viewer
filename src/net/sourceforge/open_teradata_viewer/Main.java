@@ -29,7 +29,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -134,16 +134,16 @@ public class Main {
                 // OS-supplied frame to not appear (as of JVM 6u20)
                 lafName = UIManager.getLookAndFeel().getClass()
                         .getCanonicalName();
-                if (SubstanceUtils.isASubstanceLookAndFeel(lafName)) {
+                if (SubstanceUtil.isASubstanceLookAndFeel(lafName)) {
                     JFrame.setDefaultLookAndFeelDecorated(true);
                     JDialog.setDefaultLookAndFeelDecorated(true);
                 }
 
                 // The default speed of Substance animations is too slow
                 // (200ms), looks bad moving through JMenuItems quickly
-                if (SubstanceUtils.isSubstanceInstalled()) {
+                if (SubstanceUtil.isSubstanceInstalled()) {
                     try {
-                        SubstanceUtils.setAnimationSpeed(120);
+                        SubstanceUtil.setAnimationSpeed(120);
                     } catch (Exception e) {
                         ExceptionDialog.hideException(e);
                     }

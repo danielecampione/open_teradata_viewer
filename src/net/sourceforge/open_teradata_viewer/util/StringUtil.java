@@ -604,12 +604,73 @@ public class StringUtil {
         return result.toArray(new String[result.size()]);
     }
 
-    public static String escapeHtmlChars(String sql) {
-        String buf = sql.replaceAll("&", "&amp;");
-        buf = buf.replaceAll("<", "&lt;");
-        buf = buf.replaceAll(">", "&gt;");
-        buf = buf.replaceAll("\"", "&quot;");
-        return buf;
+    /**
+     * Returns a string with characters that are special to HTML (such as
+     * <code>&lt;</code>, <code>&gt;</code> and <code>&amp;</code>) replaced by
+     * their HTML escape sequences.
+     *
+     * @param s The input string.
+     * @param newlineReplacement What to replace newline characters with.
+     *        If this is <code>null</code>, they are simply removed.
+     * @return The escaped version of <code>s</code>.
+     */
+    public static final String escapeForHTML(String s, String newlineReplacement) {
+        return escapeForHTML(s, newlineReplacement, false);
+    }
+
+    /**
+     * Returns a string with characters that are special to HTML (such as
+     * <code>&lt;</code>, <code>&gt;</code> and <code>&amp;</code>) replaced by
+     * their HTML escape sequences.
+     *
+     * @param s The input string.
+     * @param newlineReplacement What to replace newline characters with.
+     *        If this is <code>null</code>, they are simply removed.
+     * @param inPreBlock Whether this HTML will be in within <code>pre</code>
+     *        tags. If this is <code>true</code>, spaces will be kept as-is;
+     *        otherwise, they will be converted to "<code>&nbsp;</code>".
+     * @return The escaped version of <code>s</code>.
+     */
+    public static final String escapeForHTML(String s,
+            String newlineReplacement, boolean inPreBlock) {
+        if (newlineReplacement == null) {
+            newlineReplacement = "";
+        }
+        String tabString = "   ";
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            switch (ch) {
+                case ' ' :
+                    if (inPreBlock) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("&nbsp;");
+                    }
+                    break;
+                case '\n' :
+                    sb.append(newlineReplacement);
+                    break;
+                case '&' :
+                    sb.append("&amp;");
+                    break;
+                case '\t' :
+                    sb.append(tabString);
+                    break;
+                case '<' :
+                    sb.append("&lt;");
+                    break;
+                case '>' :
+                    sb.append("&gt;");
+                    break;
+                default :
+                    sb.append(ch);
+                    break;
+            }
+        }
+
+        return sb.toString();
     }
 
     public static String unescape(String s) {

@@ -423,10 +423,6 @@ public class Utilities {
         System.gc();
     }
 
-    public static String escapeHtmlChars(String sql) {
-        return StringUtil.escapeHtmlChars(sql);
-    }
-
     public static boolean canBeATeradataObjectName(String text) {
         if (!isEmpty(text) && text.trim().length() > 0) {
             text = text.trim();
@@ -932,5 +928,44 @@ public class Utilities {
                     .getDefault());
             ((Component) r).setComponentOrientation(o);
         }
+    }
+
+    /**
+     * Returns a <code>String</code> of the form "#xxxxxx" good for use in HTML,
+     * representing the given color.
+     *
+     * @param color The color to get a string for.
+     * @return The HTML form of the color. If <code>color</code> is
+     *         <code>null</code>, <code>#000000</code> is returned.
+     */
+    public static final String getHTMLFormatForColor(Color color) {
+        if (color == null) {
+            return "#000000";
+        }
+        String hexRed = Integer.toHexString(color.getRed());
+        if (hexRed.length() == 1) {
+            hexRed = "0" + hexRed;
+        }
+        String hexGreen = Integer.toHexString(color.getGreen());
+        if (hexGreen.length() == 1) {
+            hexGreen = "0" + hexGreen;
+        }
+        String hexBlue = Integer.toHexString(color.getBlue());
+        if (hexBlue.length() == 1) {
+            hexBlue = "0" + hexBlue;
+        }
+        return "#" + hexRed + hexGreen + hexBlue;
+    }
+
+    /**
+     * Returns the extension of a file name.
+     *
+     * @param fileName The file name.
+     * @return The extension, or <code>null</code> if the file name has no
+     *         extension.
+     */
+    public static final String getExtension(String fileName) {
+        int lastDot = fileName.lastIndexOf('.');
+        return lastDot > -1 ? fileName.substring(lastDot + 1) : null;
     }
 }

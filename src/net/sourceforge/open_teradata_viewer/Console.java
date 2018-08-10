@@ -32,7 +32,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 import org.joda.time.DateTime;
@@ -55,7 +55,7 @@ public class Console extends JTextPane {
 
     public Console(int width, int height, int maxChars) {
         super();
-        curSubstance = SubstanceUtils.isSubstanceInstalled();
+        curSubstance = SubstanceUtil.isSubstanceInstalled();
         setSize(width, height);
         maxCharacters = maxChars;
 

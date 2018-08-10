@@ -20,8 +20,9 @@ package net.sourceforge.open_teradata_viewer.graphic_viewer;
 
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import net.sourceforge.open_teradata_viewer.UISupport;
 
 /**
  * 
@@ -47,8 +48,8 @@ public class DoubleVerifier extends InputVerifier {
             return true;
         } else {
             jcomponent.setInputVerifier(null);
-            JOptionPane.showMessageDialog(null,
-                    "An illegal double value was entered", "Input Error", 0);
+            UISupport.getDialogs().showErrorMessage(
+                    "An illegal double value was entered");
             jcomponent.setInputVerifier(this);
             return false;
         }
