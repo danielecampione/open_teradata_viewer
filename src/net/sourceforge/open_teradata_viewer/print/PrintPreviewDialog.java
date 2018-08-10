@@ -196,7 +196,7 @@ public class PrintPreviewDialog extends EscapableDialog
             while (printable.print(h, pageFormat, numPages) == Printable.PAGE_EXISTS)
                 numPages++;
         } catch (PrinterException pe) {
-            pe.printStackTrace();
+            ExceptionDialog.hideException(pe);
         }
         h.dispose();
 
@@ -270,7 +270,7 @@ public class PrintPreviewDialog extends EscapableDialog
             zoomInCursor1 = ImageIO.read(cl.getResource("icons/zoomin.gif"));
             zoomOutCursor1 = ImageIO.read(cl.getResource("icons/zoomout.gif"));
         } catch (Exception e) { // IOException or MalformedURLException
-            e.printStackTrace();
+            ExceptionDialog.hideException(e);
             Cursor defaultCursor = Cursor
                     .getPredefinedCursor(Cursor.DEFAULT_CURSOR);
             zoomInCursor = defaultCursor;

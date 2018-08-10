@@ -66,7 +66,7 @@ public class OTVGoToDialog extends EscapableDialog {
     /**
      * Creates a new <code>GoToDialog</code>.
      *
-     * @param owner          The rtext window that owns this dialog.
+     * @param owner          The main window that owns this dialog.
      */
     public OTVGoToDialog(JFrame parent) {
         // Let it be known who the owner of this dialog is

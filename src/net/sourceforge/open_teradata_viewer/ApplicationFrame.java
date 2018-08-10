@@ -64,6 +64,7 @@ import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+import net.sourceforge.open_teradata_viewer.util.TranslucencyUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -115,6 +116,32 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     /** Used to dynamically load 3rd-party LookAndFeels. */
     private ThirdPartyLookAndFeelManager lafManager;
+
+    /**
+     * Whether <code>findWindowOpacityListener</code> has been attempted to be
+     * created yet. This is kept in a variable instead of checking for
+     * <code>null</code> because the creation is done via reflection, so it is a
+     * fairly common case that creation is attempted but fails.
+     */
+    private boolean windowListenersInited;
+
+    /**
+     * Listens for focus events of certain child windows (those that can be made
+     * translucent on focus lost).
+     */
+    private ChildWindowListener findWindowOpacityListener;
+
+    /** Whether the Find dialog can have its opacity changed. */
+    private boolean findWindowOpacityEnabled;
+
+    /**
+     * The opacity with which to render unfocused child windows that support
+     * opacity changes.
+     */
+    private float findWindowOpacity;
+
+    /** The rule used for making certain unfocused child windows translucent. */
+    private int findWindowOpacityRule;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -595,6 +622,105 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         return new SplashScreen(img, "Initializing..");
     }
 
+    public void focusTextArea() {
+        textArea.requestFocusInWindow();
+    }
+
+    public void registerChildWindowListeners(Window w) {
+        if (!windowListenersInited) {
+            windowListenersInited = true;
+            if (TranslucencyUtil.get().isTranslucencySupported(false)) {
+                findWindowOpacityListener = new ChildWindowListener(this);
+                findWindowOpacityListener
+                        .setTranslucencyRule(findWindowOpacityRule);
+            }
+        }
+
+        if (findWindowOpacityListener != null) {
+            w.addWindowFocusListener(findWindowOpacityListener);
+            w.addComponentListener(findWindowOpacityListener);
+        }
+    }
+
+    /**
+     * Sets the opacity with which to render unfocused child windows, if this
+     * option is enabled.
+     *
+     * @param opacity The opacity. This should be between <code>0</code> and
+     *        <code>1</code>.
+     * @see #getFindWindowOpacity()
+     * @see #setFindWindowOpacityRule(int)
+     */
+    public void setFindWindowOpacity(float opacity) {
+        findWindowOpacity = Math.max(0, Math.min(opacity, 1));
+        if (windowListenersInited && isFindWindowOpacityEnabled()) {
+            findWindowOpacityListener.refreshTranslucencies();
+        }
+    }
+
+    /**
+     * Toggles whether find window opacity is enabled.
+     *
+     * @param enabled Whether find window opacity should be enabled.
+     * @see #isFindWindowOpacityEnabled()
+     */
+    public void setFindWindowOpacityEnabled(boolean enabled) {
+        if (enabled != findWindowOpacityEnabled) {
+            findWindowOpacityEnabled = enabled;
+            if (windowListenersInited && findWindowOpacityListener != null) {
+                findWindowOpacityListener.refreshTranslucencies();
+            }
+        }
+    }
+
+    /**
+     * Toggles whether certain child windows should be made translucent.
+     *
+     * @param rule The new opacity rule.
+     * @see #getFindWindowOpacityRule()
+     * @see #setFindWindowOpacity(float)
+     */
+    public void setFindWindowOpacityRule(int rule) {
+        if (rule != findWindowOpacityRule) {
+            findWindowOpacityRule = rule;
+            if (windowListenersInited) {
+                findWindowOpacityListener.setTranslucencyRule(rule);
+            }
+        }
+    }
+
+    /**
+     * Returns whether find window opacity is enabled.
+     *
+     * @return Whether find window opacity is enabled.
+     * @see #setFindWindowOpacityEnabled(boolean)
+     */
+    public boolean isFindWindowOpacityEnabled() {
+        return findWindowOpacityEnabled;
+    }
+
+    /**
+     * Returns the opacity with which to render unfocused child windows, if this
+     * option is enabled.
+     *
+     * @return The opacity.
+     * @see #setFindWindowOpacity(float)
+     */
+    public float getFindWindowOpacity() {
+        return findWindowOpacity;
+    }
+
+    /**
+     * Returns the rule used for making certain child windows translucent.
+     *
+     * @return The rule.
+     * @see #setFindWindowOpacityRule(int)
+     * @see #getFindWindowOpacity()
+     */
+    public int getFindWindowOpacityRule() {
+        return findWindowOpacityRule;
+    }
+
     /**
      * Returns the manager in charge of any 3rd-party LookAndFeels this
      * application is aware of.
@@ -684,10 +810,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     /** @return The textScrollPane */
     public TextScrollPane getTextScrollPane() {
         return textScrollPane;
-    }
-
-    public void focusTextArea() {
-        textArea.requestFocusInWindow();
     }
 
     /** @return The menubar. */
@@ -791,6 +913,9 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             getContentPane().add(mainSplitPane, BorderLayout.CENTER);
 
             splashScreen.updateStatus("Initializing the find dialog..", 50);
+            setFindWindowOpacityEnabled(true);
+            setFindWindowOpacity(0.6f);
+            setFindWindowOpacityRule(ChildWindowListener.TRANSLUCENT_WHEN_OVERLAPPING_APP);
             setFindDialog(new OTVFindDialog(ApplicationFrame.this));
 
             splashScreen

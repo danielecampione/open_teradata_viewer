@@ -48,11 +48,8 @@ public class FileIO {
 
     private static AcceptAllFileFilter acceptAllFileFilter;
 
-    private static HTMLFileFilter htmlFileFilter;
-
     static {
         acceptAllFileFilter = new AcceptAllFileFilter();
-        htmlFileFilter = new HTMLFileFilter();
     }
 
     private FileIO() {
@@ -78,13 +75,6 @@ public class FileIO {
                     .getCanonicalPath());
             File selectedFile = fileChooser.getSelectedFile();
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
-            // Ensure that it has an HTML extension
-            if (fileChooser.getFileFilter().getDescription()
-                    .equalsIgnoreCase(htmlFileFilter.getDescription())
-                    && !chosenFilePath.toLowerCase().matches(
-                            "[^\\.]*\\.htm[l]?")) {
-                chosenFilePath += ".html";
-            }
             if (!new File(chosenFilePath).exists()
                     || Dialog.YES_OPTION == Dialog.show("File exists",
                             "Overwrite existing file?",
@@ -135,8 +125,8 @@ public class FileIO {
         if (fileChooser == null) {
             fileChooser = new JFileChooser();
             fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.addChoosableFileFilter(acceptAllFileFilter);
             fileChooser.setFileFilter(acceptAllFileFilter);
-            fileChooser.addChoosableFileFilter(htmlFileFilter);
         }
         String dir = Config.getLastUsedDir();
         if (dir != null) {

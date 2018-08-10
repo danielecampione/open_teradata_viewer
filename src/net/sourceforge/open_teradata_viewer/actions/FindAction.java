@@ -26,6 +26,7 @@ import javax.swing.KeyStroke;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.search.OTVFindDialog;
 
 /**
  * 
@@ -57,8 +58,16 @@ public class FindAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
+        ensureFindDialogCreated();
         OTVSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
         textArea.showFindDialog(e);
+    }
+
+    /** Ensures the find dialog is created. */
+    protected void ensureFindDialogCreated() {
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        OTVFindDialog _OTVFindDialog = applicationFrame.getFindDialog();
+        applicationFrame.registerChildWindowListeners(_OTVFindDialog);
     }
 }
