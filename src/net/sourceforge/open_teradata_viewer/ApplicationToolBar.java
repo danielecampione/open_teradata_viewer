@@ -31,6 +31,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.GroupAction;
 
 /**
  * 
@@ -61,11 +62,16 @@ public class ApplicationToolBar extends JToolBar {
         addSeparator();
         add(Actions.HISTORY_PREVIOUS);
         add(Actions.HISTORY_NEXT);
+        addSeparator();
+        add(Actions.LOB_GROUP);
+        addSeparator();
+        add(Actions.EXPORT_GROUP);
         add(Box.createHorizontalGlue());
         schemaBrowserToggleButton.setAction(Actions.SCHEMA_BROWSER);
         schemaBrowserToggleButton.setText(null);
         add(setup(schemaBrowserToggleButton));
     }
+
     @Override
     public JButton add(Action action) {
         return (JButton) setup(super.add(action));
@@ -84,5 +90,15 @@ public class ApplicationToolBar extends JToolBar {
         }
         button.setToolTipText(toolTipText);
         return button;
+    }
+
+    public JToggleButton add(GroupAction action) {
+        JToggleButton toggleButton = (JToggleButton) add(new JToggleButton(
+                action));
+        toggleButton.setMargin(new Insets(1, 1, 1, 1));
+        toggleButton.setHorizontalTextPosition(JButton.LEFT);
+        toggleButton.setVerticalTextPosition(JButton.BOTTOM);
+        toggleButton.setFocusable(false);
+        return toggleButton;
     }
 }

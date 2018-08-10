@@ -1,3 +1,7 @@
+0.09a (22/09/2011)
+    - Some actions have been grouped.
+    - Fixed a bug related to the LOB IMPORT and LOB PASTE operations.
+
 0.08c (21/09/2011)
     - Added the EXPLAIN REQUEST command; the corresponding command button has
       been installed on the "Schema Browser" menu.

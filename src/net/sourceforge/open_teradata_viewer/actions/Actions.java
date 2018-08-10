@@ -69,10 +69,12 @@ public final class Actions
     public static final CustomAction LOB_EXPORT = new LobExportAction();
     public static final CustomAction LOB_COPY = new LobCopyAction();
     public static final CustomAction LOB_PASTE = new LobPasteAction();
+    public static final GroupAction LOB_GROUP = new LobGroupAction();
     public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
     public static final CustomAction EXPORT_PDF = new ExportPdfAction();
     public static final CustomAction EXPORT_FLAT_FILE = new ExportFlatFileAction();
     public static final CustomAction EXPORT_INSERTS = new ExportInsertsAction();
+    public static final GroupAction EXPORT_GROUP = new ExportGroupAction();
     public static final CustomAction FETCH_LIMIT = new FetchLimitAction();
     public static final CustomAction HELP = new HelpAction();
     public static final CustomAction SELECT_FROM = new SelectFromAction();
@@ -146,6 +148,7 @@ public final class Actions
         EXPORT_PDF.setEnabled(hasResultSet);
         EXPORT_FLAT_FILE.setEnabled(hasResultSet);
         EXPORT_INSERTS.setEnabled(hasResultSet);
+        EXPORT_GROUP.setEnabled(hasResultSet);
 
         boolean hasUpdatableResultSet;
         try {
@@ -169,8 +172,18 @@ public final class Actions
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         LOB_EXPORT.setEnabled(isLobSelected);
-        LOB_IMPORT.setEnabled(isLobSelected);
         LOB_COPY.setEnabled(isLobSelected);
-        LOB_PASTE.setEnabled(isLobSelected);
+        LOB_GROUP.setEnabled(isLobSelected);
+
+        boolean isUpdatableLobSelected = hasUpdatableResultSet
+                && ResultSetTable.isLob(ResultSetTable.getInstance()
+                        .getSelectedColumn());
+        LOB_IMPORT.setEnabled(isUpdatableLobSelected);
+
+        boolean canImportFromMemory = Context.getInstance().getSavedLobs() != null
+                && isUpdatableLobSelected
+                && ResultSetTable.getInstance().getSelectedRowCount() == Context
+                        .getInstance().getSavedLobs().length;
+        LOB_PASTE.setEnabled(canImportFromMemory);
     }
 }

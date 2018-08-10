@@ -46,6 +46,7 @@ public class ApplicationMenuBar extends JMenuBar {
 
     public ApplicationMenuBar() {
         JMenu menu;
+        JMenu subMenu;
 
         menu = new JMenu("Connection");
         add(menu);
@@ -88,21 +89,25 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.EDIT);
         menu.add(Actions.DUPLICATE);
         menu.addSeparator();
+        subMenu = new JMenu("Lob");
+        menu.add(subMenu);
+        subMenu.add(Actions.LOB_EXPORT);
+        subMenu.add(Actions.LOB_IMPORT);
+        subMenu.add(Actions.LOB_COPY);
+        subMenu.add(Actions.LOB_PASTE);
+        menu.addSeparator();
+        subMenu = new JMenu("Export");
+        menu.add(subMenu);
+        subMenu.add(Actions.EXPORT_EXCEL);
+        subMenu.add(Actions.EXPORT_PDF);
+        subMenu.add(Actions.EXPORT_FLAT_FILE);
+        subMenu.add(Actions.EXPORT_INSERTS);
+        menu.addSeparator();
         menu.add(Actions.SHOW_PROCEDURE);
         menu.add(Actions.SHOW_VIEW);
         menu.add(Actions.EXPLAIN_REQUEST);
         menu.addSeparator();
         menu.add(Actions.ANALYZE_QUERY);
-        menu.addSeparator();
-        menu.add(Actions.EXPORT_EXCEL);
-        menu.add(Actions.EXPORT_INSERTS);
-        menu.add(Actions.EXPORT_FLAT_FILE);
-        menu.add(Actions.EXPORT_PDF);
-        menu.addSeparator();
-        menu.add(Actions.LOB_COPY);
-        menu.add(Actions.LOB_PASTE);
-        menu.add(Actions.LOB_EXPORT);
-        menu.add(Actions.LOB_IMPORT);
         menu.addSeparator();
         menu.add(Actions.RUN);
         menu.add(Actions.RUN_SCRIPT);

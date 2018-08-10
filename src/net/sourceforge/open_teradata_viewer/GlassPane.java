@@ -192,8 +192,9 @@ public class GlassPane extends JComponent {
                     }
                 }
             }
+            super.paintComponent(g);
         } else {
-            super.paintComponents(g);
+            super.paintComponent(g);
         }
     }
 
