@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.CallableStatement;
@@ -163,7 +162,7 @@ public class RunAction extends CustomAction {
                             dataVector.size()));
                 }
                 ApplicationFrame.getInstance().changeLog.append(String.format(
-                        "%d rows retrieved\n", dataVector.size()));
+                        "[%d rows retrieved]\n", dataVector.size()));
             } else {
                 Context.getInstance().setResultSet(null);
                 int updateCount = statement.getUpdateCount();

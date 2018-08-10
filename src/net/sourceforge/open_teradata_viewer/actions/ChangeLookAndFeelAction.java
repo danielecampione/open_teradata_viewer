@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.util.StringTokenizer;
 
@@ -28,7 +27,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.MemoryMonitor;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 
 /**
@@ -75,19 +73,6 @@ public class ChangeLookAndFeelAction extends CustomAction {
     }
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        if (ApplicationFrame.getInstance().memoryMonitor.surf.thread != null
-                && ApplicationFrame.getInstance().memoryMonitor.surf.thread
-                        .isAlive()) {
-            boolean isDateStampCBSelected = MemoryMonitor.dateStampCB
-                    .isSelected();
-            MemoryMonitor.dateStampCB.setSelected(false);
-            ApplicationFrame.getInstance().memoryMonitor.surf.stop();
-            ApplicationFrame.getInstance().memoryMonitor.setSleepAmount(1000L);
-            inProgress = false;
-            performThreaded(e);
-            MemoryMonitor.dateStampCB.setSelected(isDateStampCBSelected);
-            return;
-        }
         if (UIManager.getLookAndFeel().getClass().toString()
                 .substring("class ".length()).equals(laf)) {
             return;

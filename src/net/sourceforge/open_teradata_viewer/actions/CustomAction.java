@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Toolkit;
@@ -189,6 +188,8 @@ public abstract class CustomAction extends AbstractAction
             "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
             "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
             "7", "8", "9", "_", "$", "#", "."};
+
+    private KeyStroke altKey;
 
     protected CustomAction(String name) {
         this(name, null, null, null);
@@ -423,5 +424,19 @@ public abstract class CustomAction extends AbstractAction
             }
         }
         return false;
+    }
+
+    /**
+     * @see SwingUtil.addAction()
+     */
+    public KeyStroke getAltShortCut() {
+        return altKey;
+    }
+
+    /**
+     * @see SwingUtil.addAction()
+     */
+    public void setAltShortCut(int keyCode, int modifiers) {
+        altKey = KeyStroke.getKeyStroke(keyCode, modifiers);
     }
 }

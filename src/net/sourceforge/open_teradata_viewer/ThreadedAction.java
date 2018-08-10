@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.KeyboardFocusManager;
@@ -47,7 +46,7 @@ public abstract class ThreadedAction implements Runnable {
         final Component glassPane = ApplicationFrame.getInstance()
                 .getRootPane().getGlassPane();
         try {
-            if (!glassPane.isVisible()) {
+            if (!SwingUtil.isVisible(glassPane)) {
                 SwingUtilities.invokeAndWait(new Runnable() {
                     @Override
                     public void run() {
@@ -67,7 +66,7 @@ public abstract class ThreadedAction implements Runnable {
             ExceptionDialog.showException(t);
         } finally {
             CustomAction.inProgress = false;
-            if (glassPane.isVisible()) {
+            if (SwingUtil.isVisible(glassPane)) {
                 try {
                     SwingUtilities.invokeAndWait(new Runnable() {
                         @Override

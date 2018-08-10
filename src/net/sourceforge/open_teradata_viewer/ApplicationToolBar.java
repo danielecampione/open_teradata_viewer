@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 
@@ -46,7 +45,10 @@ public class ApplicationToolBar extends JToolBar {
     public ApplicationToolBar(JToggleButton schemaBrowserToggleButton) {
         setFloatable(false);
         add(Actions.RUN);
+        add(Actions.RUN_SCRIPT);
         addSeparator();
+        add(Actions.FILE_OPEN);
+        add(Actions.FILE_SAVE);
         add(Box.createHorizontalGlue());
         schemaBrowserToggleButton.setAction(Actions.SCHEMA_BROWSER);
         schemaBrowserToggleButton.setText(null);

@@ -131,13 +131,12 @@ public class ShowViewAction extends CustomAction {
             String viewBody = resultSet.getString(1).trim();
             ApplicationFrame.getInstance().setText(viewBody);
         } else {
-            Throwable t = new JDBCException(
+            throw new JDBCException(
                     "Object '"
                             + ((databaseName != null && databaseName.trim()
                                     .length() > 0) ? databaseName + "." : "")
                             + viewName + "' does not exist.", "SQLState 42S02",
                     3807);
-            ApplicationFrame.getInstance().printStackTraceOnGUI(t);
         }
         statement.close();
         resultSet.close();

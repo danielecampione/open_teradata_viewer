@@ -1,9 +1,15 @@
+0.01c (17-jun-11)
+    - Added the "Run Script", "Open File" and "Save File" command buttons to the
+      application toolbar.
+    - The memory monitor component has been replaced by the application status
+      bar that allows the manual start of the Garbage Collector.
+
 0.01b (16-jun-11)
-    - Added "Open File" function. The "Open File" command can be found in the
-      "File" menu.
+    - Manual updated.
     - Added "Write File" function. The "Save File" command can be found in the
       "File" menu.
-    - Manual updated.
+    - Added "Open File" function. The "Open File" command can be found in the
+      "File" menu.
 
 0.01a (14-jun-11)
     - First release.

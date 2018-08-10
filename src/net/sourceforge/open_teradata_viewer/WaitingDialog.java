@@ -63,7 +63,7 @@ public class WaitingDialog extends TimerTask {
         while (!visible) {
             // x64 systems hang without this Thread.sleep(20)
             Thread.sleep(20);
-            visible = dialog.isVisible();
+            visible = SwingUtil.isVisible(dialog);
         }
         new Timer().schedule(this, 3000, 1000);
     }
@@ -73,7 +73,7 @@ public class WaitingDialog extends TimerTask {
     }
 
     public boolean isVisible() {
-        return dialog.isVisible();
+        return SwingUtil.isVisible(dialog);
     }
 
     public void hide() {

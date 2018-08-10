@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.SwingUtil;
 import net.sourceforge.open_teradata_viewer.Tools;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.help.ApplicationFiles;
@@ -60,7 +61,8 @@ public class HelpAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         if (ApplicationFrame.getInstance().helpFrame != null
-                && ApplicationFrame.getInstance().helpFrame.isVisible()) {
+                && SwingUtil
+                        .isVisible(ApplicationFrame.getInstance().helpFrame)) {
             return;
         }
         Tools.writeLocallyJARInternalFile("license.txt");

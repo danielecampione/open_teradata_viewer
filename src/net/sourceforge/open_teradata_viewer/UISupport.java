@@ -279,7 +279,7 @@ public class UISupport {
         Dimension sz = dialog.getSize();
         Rectangle b = frame == null ? null : frame.getBounds();
 
-        if ((owner != null) && owner.isVisible()) {
+        if ((owner != null) && SwingUtil.isVisible(owner)) {
             b = owner.getBounds();
         } else if (b == null) {
             GraphicsEnvironment ge = GraphicsEnvironment

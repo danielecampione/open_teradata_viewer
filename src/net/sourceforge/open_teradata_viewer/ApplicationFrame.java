@@ -88,7 +88,6 @@ public class ApplicationFrame extends JFrame {
     public JEditorPane results;
     public JFrame calendarFrame;
     public HelpViewerWindow helpFrame;
-    public MemoryMonitor memoryMonitor;
     public GraphicViewer graphicViewer;
 
     /** The schema browser toggle button. */
@@ -175,23 +174,14 @@ public class ApplicationFrame extends JFrame {
         changeLog.setCaretPosition(changeLog.getDocument().getLength());
         DefaultCaret caret = (DefaultCaret) changeLog.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        JSplitPane changeLogAndMemoryUsageSplitPane = new JSplitPane(
-                JSplitPane.HORIZONTAL_SPLIT);
-        changeLogAndMemoryUsageSplitPane.setOneTouchExpandable(true);
-        changeLogAndMemoryUsageSplitPane.setDividerSize(10);
-        changeLogAndMemoryUsageSplitPane.setDividerLocation(800);
         JScrollPane scrollPaneForLog = new JScrollPane(changeLog);
-        changeLogAndMemoryUsageSplitPane.setLeftComponent(scrollPaneForLog);
         splashScreen.progress(10);
-        memoryMonitor = new MemoryMonitor();
-        memoryMonitor.surf.start();
-        changeLogAndMemoryUsageSplitPane.setRightComponent(memoryMonitor);
         JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        mainSplitPane.setDividerSize(10);
+        mainSplitPane.setDividerSize(7);
         mainSplitPane.setDividerLocation(470);
         mainSplitPane.setOneTouchExpandable(true);
         mainSplitPane.setLeftComponent(globalPanel);
-        mainSplitPane.setRightComponent(changeLogAndMemoryUsageSplitPane);
+        mainSplitPane.setRightComponent(scrollPaneForLog);
         getContentPane().add(mainSplitPane, BorderLayout.CENTER);
         splashScreen.progress(10);
 
@@ -205,6 +195,7 @@ public class ApplicationFrame extends JFrame {
                 .getDocument();
         graphicViewerDocument.addDocumentListener(graphicViewer);
         graphicViewerDocument.setUndoManager(new UndoMgr());
+        getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
         splashScreen.progress(10);
     }
 
@@ -276,7 +267,7 @@ public class ApplicationFrame extends JFrame {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 createQueryEditor(), createQueryTable());
         queryArea.setOneTouchExpandable(true);
-        queryArea.setDividerSize(10);
+        queryArea.setDividerSize(7);
         queryArea.setDividerLocation(200);
         return queryArea;
     }
@@ -411,12 +402,6 @@ public class ApplicationFrame extends JFrame {
      * Handles the window closing.
      */
     public void handleWindowClose() {
-        if (memoryMonitor.surf.thread != null
-                && memoryMonitor.surf.thread.isAlive()) {
-            memoryMonitor.surf.stop();
-        }
-        memoryMonitor.surf = null;
-        memoryMonitor = null;
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {
             Actions.DISCONNECT.actionPerformed(new ActionEvent(this, 0, null));

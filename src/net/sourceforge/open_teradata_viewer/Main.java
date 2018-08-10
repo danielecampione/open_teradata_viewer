@@ -78,7 +78,7 @@ public class Main {
         mainWindow.setMinimumSize(new Dimension((int) (screenWidth * .2),
                 (int) (screenHeight * .2)));
 
-        mainWindow.setLocationRelativeTo(null);
+        SwingUtil.centerWithinScreen(mainWindow);
 
         mainWindow.setVisible(true);
         splashScreen.setVisible(false);
