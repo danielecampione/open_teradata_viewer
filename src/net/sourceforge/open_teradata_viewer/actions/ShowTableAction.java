@@ -36,19 +36,19 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
  * @author D. Campione
  * 
  */
-public class ShowViewAction extends CustomAction {
+public class ShowTableAction extends CustomAction {
 
-    private static final long serialVersionUID = -8555161081550563065L;
+    private static final long serialVersionUID = -4577594966966231651L;
 
-    protected ShowViewAction() {
-        super("Show view..", null, null, null);
+    protected ShowTableAction() {
+        super("Show table..", null, null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "show view" command can be performed altough other processes
+        // The "show table" command can be performed altough other processes
         // are running.
         new ThreadedAction() {
             @Override
@@ -67,41 +67,41 @@ public class ShowViewAction extends CustomAction {
             return;
         }
 
-        String viewName = null;
+        String tableName = null;
         String databaseName = null;
         boolean firstIteration = true;
-        while (viewName == null) {
+        while (tableName == null) {
             if (firstIteration) {
-                viewName = ApplicationFrame.getInstance().getTextComponent()
+                tableName = ApplicationFrame.getInstance().getTextComponent()
                         .getSelectedText();
                 firstIteration = false;
             }
-            if (viewName == null) {
-                viewName = Dialog.showInputDialog("Insert the view name: ");
-                if (viewName == null) {
+            if (tableName == null) {
+                tableName = Dialog.showInputDialog("Insert the table name: ");
+                if (tableName == null) {
                     return;
                 }
             }
-            if (!canBeAnObjectName(viewName)) {
-                viewName = null;
+            if (!canBeAnObjectName(tableName)) {
+                tableName = null;
             }
         }
 
-        viewName = viewName.trim().toUpperCase();
-        int lastTokenIndex = viewName.lastIndexOf(".");
+        tableName = tableName.trim().toUpperCase();
+        int lastTokenIndex = tableName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
-            databaseName = viewName.substring(
-                    viewName.lastIndexOf(".", lastTokenIndex - 1) == -1
+            databaseName = tableName.substring(
+                    tableName.lastIndexOf(".", lastTokenIndex - 1) == -1
                             ? 0
-                            : viewName.lastIndexOf(".", lastTokenIndex - 1),
+                            : tableName.lastIndexOf(".", lastTokenIndex - 1),
                     lastTokenIndex);
-            viewName = viewName
-                    .substring(lastTokenIndex + 1, viewName.length());
+            tableName = tableName.substring(lastTokenIndex + 1,
+                    tableName.length());
         }
-        String sqlQuery = "SHOW VIEW "
+        String sqlQuery = "SHOW TABLE "
                 + ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + viewName;
+                        : "") + tableName;
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -124,17 +124,17 @@ public class ShowViewAction extends CustomAction {
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();
         waitingDialog.hide();
-        String viewBody = "";
+        String tableBody = "";
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);
             if (obj == null) {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                viewBody += obj.toString().trim();
+                tableBody += obj.toString().trim();
             }
         }
-        ApplicationFrame.getInstance().setText(viewBody);
+        ApplicationFrame.getInstance().setText(tableBody);
         statement.close();
         resultSet.close();
     }

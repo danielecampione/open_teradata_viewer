@@ -87,10 +87,13 @@ public class ApplicationFrame extends JFrame {
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
 
+    /** The console. */
     public ChangeLog changeLog;
+
     private JEditorPane text;
-    public HelpViewerWindow helpFrame;
-    public GraphicViewer graphicViewer;
+    private HelpViewerWindow helpFrame;
+    private GraphicViewer graphicViewer;
+    private ApplicationToolBar toolbar;
 
     /** The schema browser toggle button. */
     private JToggleButton schemaBrowserToggleButton = new JToggleButton();
@@ -310,8 +313,8 @@ public class ApplicationFrame extends JFrame {
         JPanel globalQueryEditorPanel = new JPanel(new BorderLayout());
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         Actions.SCHEMA_BROWSER.setEnabled(isConnected);
-        globalQueryEditorPanel.add(new ApplicationToolBar(
-                schemaBrowserToggleButton), BorderLayout.NORTH);
+        setToolbar(new ApplicationToolBar(schemaBrowserToggleButton));
+        globalQueryEditorPanel.add(getToolbar(), BorderLayout.NORTH);
         text = new JEditorPane();
 
         JScrollPane scrollPaneQueryEditor = new JScrollPane(text);
@@ -603,10 +606,6 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    public JEditorPane getTextComponent() {
-        return text;
-    }
-
     public boolean isFullScreenModeActive() {
         return fullScreenMode;
     }
@@ -614,5 +613,40 @@ public class ApplicationFrame extends JFrame {
     public void setFullScreenMode(boolean fullScreenMode) {
         this.fullScreenMode = fullScreenMode;
         displayChanger.setDisplayMode(this.fullScreenMode);
+    }
+
+    /** @return the SQL editor. */
+    public JEditorPane getTextComponent() {
+        return text;
+    }
+
+    /** @return the help frame. */
+    public HelpViewerWindow getHelpFrame() {
+        return helpFrame;
+    }
+
+    /** @param helpFrame the help frame to set. */
+    public void setHelpFrame(HelpViewerWindow helpFrame) {
+        this.helpFrame = helpFrame;
+    }
+
+    /** @return the graphic viewer. */
+    public GraphicViewer getGraphicViewer() {
+        return graphicViewer;
+    }
+
+    /** @param graphicViewer the graphic viewer to set. */
+    public void setGraphicViewer(GraphicViewer graphicViewer) {
+        this.graphicViewer = graphicViewer;
+    }
+
+    /** @return the toolbar. */
+    public ApplicationToolBar getToolbar() {
+        return toolbar;
+    }
+
+    /** @param toolbar the toolbar to set. */
+    public void setToolbar(ApplicationToolBar toolbar) {
+        this.toolbar = toolbar;
     }
 }

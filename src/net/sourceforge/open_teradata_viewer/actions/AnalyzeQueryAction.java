@@ -84,7 +84,8 @@ public class AnalyzeQueryAction extends CustomAction {
                             .getTableList(selectStatement);
 
                     GraphicViewerDocument graphicViewerDocument = ApplicationFrame
-                            .getInstance().graphicViewer.myView.getDocument();
+                            .getInstance().getGraphicViewer().myView
+                            .getDocument();
 
                     int i = 1;
                     Vector<GraphicViewerBasicNode> nodes = new Vector<GraphicViewerBasicNode>(
@@ -92,8 +93,8 @@ public class AnalyzeQueryAction extends CustomAction {
                     for (Iterator iter = tableList.iterator(); iter.hasNext(); i++) {
                         String tableName = (String) iter.next();
                         GraphicViewerBasicNode graphicViewerBasicNode = ApplicationFrame
-                                .getInstance().graphicViewer.insertNode(
-                                new Point(50, 50), !(i % 2 == 0));
+                                .getInstance().getGraphicViewer()
+                                .insertNode(new Point(50, 50), !(i % 2 == 0));
                         graphicViewerBasicNode.setText(tableName);
                         nodes.add(graphicViewerBasicNode);
                         if (i >= 2) {
@@ -108,10 +109,10 @@ public class AnalyzeQueryAction extends CustomAction {
                     }
                 }
 
-                ApplicationFrame.getInstance().graphicViewer.LayeredDigraphAutoLayoutAction
+                ApplicationFrame.getInstance().getGraphicViewer().LayeredDigraphAutoLayoutAction
                         .actionPerformed(new ActionEvent(this, 0, null));
             }
-            ApplicationFrame.getInstance().graphicViewer.setVisible(true);
+            ApplicationFrame.getInstance().getGraphicViewer().setVisible(true);
             GraphicViewer.updateActions();
         } catch (Throwable localThrowable) {
             ApplicationFrame.getInstance().printStackTraceOnGUI(localThrowable);

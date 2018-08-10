@@ -104,7 +104,9 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu.add(Actions.EXPORT_INSERTS);
         menu.addSeparator();
         menu.add(Actions.SHOW_PROCEDURE);
+        menu.add(Actions.SHOW_MACRO);
         menu.add(Actions.SHOW_VIEW);
+        menu.add(Actions.SHOW_TABLE);
         menu.add(Actions.EXPLAIN_REQUEST);
         menu.addSeparator();
         menu.add(Actions.ANALYZE_QUERY);

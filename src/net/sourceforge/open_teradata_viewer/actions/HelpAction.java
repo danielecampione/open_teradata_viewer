@@ -66,9 +66,9 @@ public class HelpAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        if (ApplicationFrame.getInstance().helpFrame != null
-                && SwingUtil
-                        .isVisible(ApplicationFrame.getInstance().helpFrame)) {
+        if (ApplicationFrame.getInstance().getHelpFrame() != null
+                && SwingUtil.isVisible(ApplicationFrame.getInstance()
+                        .getHelpFrame())) {
             return;
         }
         Tools.writeLocallyJARInternalFile("license.txt");
@@ -105,10 +105,10 @@ public class HelpAction extends CustomAction {
                 + "FAQ.html");
 
         try {
-            ApplicationFrame.getInstance().helpFrame = new HelpViewerWindow();
-            ApplicationFrame.getInstance().helpFrame
+            ApplicationFrame.getInstance().setHelpFrame(new HelpViewerWindow());
+            ApplicationFrame.getInstance().getHelpFrame()
                     .setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            ApplicationFrame.getInstance().helpFrame.setVisible(true);
+            ApplicationFrame.getInstance().getHelpFrame().setVisible(true);
         } catch (IOException ioe) {
             String errorMsg = "Unable to start the Help module.\n";
             ApplicationFrame.getInstance().changeLog.append(errorMsg,

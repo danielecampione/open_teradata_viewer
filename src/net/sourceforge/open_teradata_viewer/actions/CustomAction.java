@@ -250,7 +250,7 @@ public abstract class CustomAction extends AbstractAction
             text = text.trim();
             // A Teradata object name must be from 1 to 30 characters long.
             int lastTokenIndex = text.lastIndexOf(".");
-            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex,
+            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
                     text.length()).length() > 30) {
                 ApplicationFrame.getInstance().changeLog
                         .append("A Teradata object name must be from 1 to 30 characters long.\n",
@@ -298,16 +298,12 @@ public abstract class CustomAction extends AbstractAction
         return false;
     }
 
-    /**
-     * @see SwingUtil.addAction()
-     */
+    /** @see SwingUtil.addAction() */
     public KeyStroke getAltShortCut() {
         return altKey;
     }
 
-    /**
-     * @see SwingUtil.addAction()
-     */
+    /** @see SwingUtil.addAction() */
     public void setAltShortCut(int keyCode, int modifiers) {
         altKey = KeyStroke.getKeyStroke(keyCode, modifiers);
     }

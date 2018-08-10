@@ -36,6 +36,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.graphicviewer.DomCDATASection;
 import net.sourceforge.open_teradata_viewer.graphicviewer.DomDoc;
 import net.sourceforge.open_teradata_viewer.graphicviewer.DomElement;
@@ -329,10 +330,10 @@ public class DefaultDocument implements DomDoc {
             _fldfor = Double.parseDouble(domelement
                     .getAttribute("graphicviewersvgversion"));
             if (_fldfor > 3D) {
-                System.out
-                        .println("Warning: attempting to read unknown future version GraphicViewer SVG.");
-                System.out
-                        .println("This application supports version 3.0 and earlier.");
+                ApplicationFrame.getInstance().changeLog
+                        .append("Warning: attempting to read unknown future version GraphicViewer SVG.\n");
+                ApplicationFrame.getInstance().changeLog
+                        .append("This application supports version 3.0 and earlier.\n");
             }
         }
         SVGTraverseChildren(graphicViewerDocument, domelement, null, true);

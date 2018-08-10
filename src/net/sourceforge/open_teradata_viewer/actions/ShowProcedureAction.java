@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
@@ -67,6 +68,7 @@ public class ShowProcedureAction extends CustomAction {
         }
 
         String procedureName = null;
+        String databaseName = null;
         boolean firstIteration = true;
         while (procedureName == null) {
             if (firstIteration) {
@@ -87,7 +89,21 @@ public class ShowProcedureAction extends CustomAction {
         }
 
         procedureName = procedureName.trim().toUpperCase();
-        String sqlQuery = "SHOW PROCEDURE " + procedureName;
+        int lastTokenIndex = procedureName.lastIndexOf(".");
+        if (lastTokenIndex != -1) {
+            databaseName = procedureName.substring(
+                    procedureName.lastIndexOf(".", lastTokenIndex - 1) == -1
+                            ? 0
+                            : procedureName
+                                    .lastIndexOf(".", lastTokenIndex - 1),
+                    lastTokenIndex);
+            procedureName = procedureName.substring(lastTokenIndex + 1,
+                    procedureName.length());
+        }
+        String sqlQuery = "SHOW PROCEDURE "
+                + ((databaseName != null && databaseName.trim().length() > 0)
+                        ? databaseName + "."
+                        : "") + procedureName;
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -114,9 +130,11 @@ public class ShowProcedureAction extends CustomAction {
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);
             if (obj == null) {
-                obj = "";
+                throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
+                        1048);
+            } else if (obj instanceof String) {
+                procedureBody += obj.toString().trim();
             }
-            procedureBody += obj.toString().trim();
         }
         ApplicationFrame.getInstance().setText(procedureBody);
         statement.close();

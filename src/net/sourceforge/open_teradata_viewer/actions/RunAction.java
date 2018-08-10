@@ -209,11 +209,9 @@ public class RunAction extends CustomAction {
                 columnIdentifiers, waitingDialog.getExecutionTime());
         Actions.getInstance().validateActions();
     }
-
     private PreparedStatement createStatement(Connection connection, String sql)
             throws SQLException {
         boolean query = sql.trim().toLowerCase().startsWith("sel")
-                || sql.trim().toLowerCase().startsWith("select")
                 || sql.trim().toLowerCase().startsWith("with");
         boolean call = sql.trim().toLowerCase().startsWith("call");
         PreparedStatement statement;

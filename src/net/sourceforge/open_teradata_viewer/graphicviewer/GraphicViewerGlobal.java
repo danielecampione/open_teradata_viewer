@@ -26,6 +26,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+
 /**
  * 
  * 
@@ -38,7 +40,8 @@ public class GraphicViewerGlobal {
     }
 
     public static void TRACE(String s) {
-        System.err.println(s);
+        ApplicationFrame.getInstance().changeLog.append(s,
+                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
     }
 
     public static double getJavaVersion() {

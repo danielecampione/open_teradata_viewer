@@ -31,24 +31,24 @@ import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
- *
- * 
- * @author D. Campione
- * 
- */
-public class ShowViewAction extends CustomAction {
+*
+* 
+* @author D. Campione
+* 
+*/
+public class ShowMacroAction extends CustomAction {
 
-    private static final long serialVersionUID = -8555161081550563065L;
+    private static final long serialVersionUID = 6799585250760196135L;
 
-    protected ShowViewAction() {
-        super("Show view..", null, null, null);
+    protected ShowMacroAction() {
+        super("Show macro..", null, null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "show view" command can be performed altough other processes
+        // The "show macro" command can be performed altough other processes
         // are running.
         new ThreadedAction() {
             @Override
@@ -67,41 +67,41 @@ public class ShowViewAction extends CustomAction {
             return;
         }
 
-        String viewName = null;
+        String macroName = null;
         String databaseName = null;
         boolean firstIteration = true;
-        while (viewName == null) {
+        while (macroName == null) {
             if (firstIteration) {
-                viewName = ApplicationFrame.getInstance().getTextComponent()
+                macroName = ApplicationFrame.getInstance().getTextComponent()
                         .getSelectedText();
                 firstIteration = false;
             }
-            if (viewName == null) {
-                viewName = Dialog.showInputDialog("Insert the view name: ");
-                if (viewName == null) {
+            if (macroName == null) {
+                macroName = Dialog.showInputDialog("Insert the table name: ");
+                if (macroName == null) {
                     return;
                 }
             }
-            if (!canBeAnObjectName(viewName)) {
-                viewName = null;
+            if (!canBeAnObjectName(macroName)) {
+                macroName = null;
             }
         }
 
-        viewName = viewName.trim().toUpperCase();
-        int lastTokenIndex = viewName.lastIndexOf(".");
+        macroName = macroName.trim().toUpperCase();
+        int lastTokenIndex = macroName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
-            databaseName = viewName.substring(
-                    viewName.lastIndexOf(".", lastTokenIndex - 1) == -1
+            databaseName = macroName.substring(
+                    macroName.lastIndexOf(".", lastTokenIndex - 1) == -1
                             ? 0
-                            : viewName.lastIndexOf(".", lastTokenIndex - 1),
+                            : macroName.lastIndexOf(".", lastTokenIndex - 1),
                     lastTokenIndex);
-            viewName = viewName
-                    .substring(lastTokenIndex + 1, viewName.length());
+            macroName = macroName.substring(lastTokenIndex + 1,
+                    macroName.length());
         }
-        String sqlQuery = "SHOW VIEW "
+        String sqlQuery = "SHOW MACRO "
                 + ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + viewName;
+                        : "") + macroName;
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -124,17 +124,17 @@ public class ShowViewAction extends CustomAction {
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();
         waitingDialog.hide();
-        String viewBody = "";
+        String macroBody = "";
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);
             if (obj == null) {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                viewBody += obj.toString().trim();
+                macroBody += obj.toString().trim();
             }
         }
-        ApplicationFrame.getInstance().setText(viewBody);
+        ApplicationFrame.getInstance().setText(macroBody);
         statement.close();
         resultSet.close();
     }
