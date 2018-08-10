@@ -431,9 +431,8 @@ public class TextPropsDialog extends JDialog {
         try {
             UpdateControl();
             dispose();
-        } catch (Exception exception) {
-            System.err.println(exception.toString());
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

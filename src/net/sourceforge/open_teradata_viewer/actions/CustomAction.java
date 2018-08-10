@@ -26,13 +26,13 @@ import java.awt.event.MouseListener;
 import java.net.URI;
 
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.Tools;
 
@@ -173,10 +173,7 @@ public abstract class CustomAction extends AbstractAction
             String shortDescription) {
         super(name);
         if (icon != null) {
-            putValue(
-                    SMALL_ICON,
-                    new ImageIcon(CustomAction.class.getResource("/icons/"
-                            + icon)));
+            putValue(SMALL_ICON, ImageManager.getImage("/icons/" + icon));
         }
         if (accelerator != null) {
             putValue(ACCELERATOR_KEY, accelerator);
@@ -190,14 +187,6 @@ public abstract class CustomAction extends AbstractAction
     public void actionPerformed(final ActionEvent e) {
         if (!inProgress) {
             inProgress = true;
-
-            if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                    .isLoadingAssistantActived()) {
-                Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
-                animatedLoading = new Thread(
-                        (AnimatedLoadingAction) Actions.ANIMATED_LOADING);
-                animatedLoading.start();
-            }
 
             new ThreadedAction() {
                 @Override

@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.graphicviewer;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -250,8 +249,8 @@ public class GraphicViewer extends JFrame
                             if (graphicviewerdocument != null)
                                 getCurrentView().setDocument(
                                         graphicviewerdocument);
-                        } catch (Exception exception) {
-                            System.err.println(exception);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         } finally {
                             try {
                                 if (fileinputstream != null)
@@ -265,8 +264,8 @@ public class GraphicViewer extends JFrame
                             fileoutputstream = new FileOutputStream(
                                     "GraphicViewer.serialized");
                             storeObjects(fileoutputstream);
-                        } catch (Exception exception1) {
-                            System.err.println(exception1);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         } finally {
                             try {
                                 if (fileoutputstream != null)
@@ -321,7 +320,6 @@ public class GraphicViewer extends JFrame
 
         initPalette();
     }
-
     public void start() {
         new Thread(this).start();
     }
@@ -1415,12 +1413,11 @@ public class GraphicViewer extends JFrame
         startTransaction();
         try {
             doEditProperties();
-        } catch (Exception exception) {
-            System.err.println(exception);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         endTransaction(PropertiesAction.toString());
     }
-
     public void insertGraphOfGraphs() {
         startTransaction();
         GraphicViewerSubGraph graphicviewersubgraph = makeSubGraph("one", "1");
@@ -1897,9 +1894,8 @@ public class GraphicViewer extends JFrame
             GridOptionsDialog gridoptionsdialog = new GridOptionsDialog(this,
                     "Grid View Options", true, myView);
             gridoptionsdialog.setVisible(true);
-        } catch (Exception exception) {
-            System.err.println(exception);
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -2519,9 +2515,10 @@ public class GraphicViewer extends JFrame
         Point point = getDefaultLocation();
         if (point == null)
             point = new Point(180, 150);
-        OpenTeradataViewerRoundRect OpenTeradataViewerRoundRect = new OpenTeradataViewerRoundRect(point,
-                new Dimension(80, 80), new Dimension(15, 30));
-        OpenTeradataViewerRoundRect.setPen(GraphicViewerPen.make(4, 3, Color.darkGray));
+        OpenTeradataViewerRoundRect OpenTeradataViewerRoundRect = new OpenTeradataViewerRoundRect(
+                point, new Dimension(80, 80), new Dimension(15, 30));
+        OpenTeradataViewerRoundRect.setPen(GraphicViewerPen.make(4, 3,
+                Color.darkGray));
         myMainLayer.addObjectAtTail(OpenTeradataViewerRoundRect);
         endTransaction(InsertRoundedRectangleAction.toString());
     }

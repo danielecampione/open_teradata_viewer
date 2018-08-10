@@ -30,8 +30,9 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
 
 /**
  * 
@@ -90,7 +91,9 @@ public class SystemStatusBar extends StatusBar {
 
     private void initStatusBarMemmory() {
         addPanel("memory-panel", new StatusPanel() {
-            private static final long serialVersionUID = 1L;
+
+            private static final long serialVersionUID = -2644840311355493304L;
+
             public void paint(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 Runtime rt = Runtime.getRuntime();
@@ -111,8 +114,7 @@ public class SystemStatusBar extends StatusBar {
         memoryPanel = getPanel("memory-panel");
         memoryPanel
                 .setToolTipText("<html>Shows the used and available memory.<br>Allows the system to perform memory cleanup program.</html>");
-        memoryPanel.setIcon(new ImageIcon(getClass().getResource(
-                "/icons/memory.gif")));
+        memoryPanel.setIcon(ImageManager.getImage("/icons/memory.gif"));
         memoryPanel.setDisplayActivation(true);
         timer.schedule(new TimerTask() {
             public void run() {
@@ -139,8 +141,7 @@ public class SystemStatusBar extends StatusBar {
     private void initStatusBarTime() {
         addPanel("time-panel");
         timePanel = getPanel("time-panel");
-        timePanel.setIcon(new ImageIcon(getClass().getResource(
-                "/icons/clock.png")));
+        timePanel.setIcon(ImageManager.getImage("/icons/clock.png"));
         timePanel.setMinimumSize(new Dimension(STATUS_PANEL_HEIGHT,
                 STATUS_PANEL_HEIGHT));
         timePanel.setHorizontalAlignment(JLabel.CENTER);
@@ -164,8 +165,7 @@ public class SystemStatusBar extends StatusBar {
     private void initStatusBarRunTime() {
         addPanel("runtime-panel");
         runTimePanel = getPanel("runtime-panel");
-        runTimePanel.setIcon(new ImageIcon(getClass().getResource(
-                "/icons/runner.gif")));
+        runTimePanel.setIcon(ImageManager.getImage("/icons/runner.gif"));
         runTimePanel.setHorizontalAlignment(JLabel.CENTER);
         timer.schedule(new TimerTask() {
             public void run() {

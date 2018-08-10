@@ -18,8 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +35,7 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.JTextComponent;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
+import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.ChangeLookAndFeelAction;
 
 /**
@@ -56,14 +54,12 @@ public class ApplicationMenuBar extends JMenuBar {
         JMenu menu;
 
         menu = new JMenu("Connection");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.CONNECT);
         menu.addSeparator();
         menu.add(Actions.DISCONNECT);
 
         menu = new JMenu("File");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
@@ -71,7 +67,6 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.FAVORITES);
 
         menu = new JMenu("Edit");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         // Set up the edit actions
         actions = createActionTable(ApplicationFrame.getInstance()
@@ -90,7 +85,6 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.HISTORY_NEXT);
 
         menu = new JMenu("Schema Browser");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.SCHEMA_BROWSER);
         menu.add(Actions.FETCH_LIMIT);
@@ -122,7 +116,6 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.RUN_SCRIPT);
 
         menu = new JMenu(ApplicationFrame.LAF_MENU_LABEL);
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
                 .getInstalledLookAndFeels();
@@ -146,21 +139,19 @@ public class ApplicationMenuBar extends JMenuBar {
         }
 
         menu = new JMenu("View");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
-        JCheckBoxMenuItem loadingAssistantMenuItem = new JCheckBoxMenuItem(
-                Actions.ANIMATED_LOADING);
-        loadingAssistantMenuItem
-                .setSelected(((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived());
-        menu.add(loadingAssistantMenuItem);
+        JCheckBoxMenuItem mniAnimatedAssistant = new JCheckBoxMenuItem(
+                Actions.ANIMATED_ASSISTANT);
+        mniAnimatedAssistant
+                .setSelected(((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                        .isAnimatedAssistantActived());
+        menu.add(mniAnimatedAssistant);
         menu.addSeparator();
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
                 Actions.FULL_SCREEN);
         menu.add(fullScreenMenuItem);
 
         menu = new JMenu("?");
-        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.HELP);
         menu.addSeparator();
@@ -169,34 +160,6 @@ public class ApplicationMenuBar extends JMenuBar {
         new UpdateChecker(this).check();
 
         setMnemonics(this);
-    }
-
-    private JMenu addMouseSensitivityToJMenu(JMenu menu) {
-        menu.addMouseListener(new MouseAdapter() {
-            public void forcesTheRepaint() {
-                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived()) {
-                    ApplicationFrame.getInstance().setRepainted(false);
-                }
-            }
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                forcesTheRepaint();
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                forcesTheRepaint();
-            }
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                forcesTheRepaint();
-            }
-            @Override
-            public void mousePressed(MouseEvent e) {
-                forcesTheRepaint();
-            }
-        });
-        return menu;
     }
 
     private void setMnemonics(MenuElement menuElement) {

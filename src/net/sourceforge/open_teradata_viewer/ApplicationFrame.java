@@ -22,17 +22,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -52,15 +46,13 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.text.DefaultCaret;
 
 import jsyntaxpane.DefaultSyntaxKit;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
-import net.sourceforge.open_teradata_viewer.actions.CustomAction;
+import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
+import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphicviewer.UndoMgr;
@@ -68,6 +60,7 @@ import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
 import net.sourceforge.open_teradata_viewer.plugin.DefaultPlugin;
 import net.sourceforge.open_teradata_viewer.plugin.Plugin;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
 
 import com.incors.plaf.kunststoff.KunststoffLookAndFeel;
 import com.incors.plaf.kunststoff.KunststoffTheme;
@@ -108,10 +101,7 @@ public class ApplicationFrame extends JFrame {
     private boolean fullScreenMode;
     private DisplayChanger displayChanger;
 
-    boolean necessaryResizingOfBufferedImage;
-    BufferedImage bufferedImage;
-    Graphics2D g2;
-    private boolean repainted;
+    private GlassPane glassPane;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -150,6 +140,10 @@ public class ApplicationFrame extends JFrame {
     public void drawIt(SplashScreen splashScreen) {
         setUI();
         splashScreen.progress(9);
+        setIconImage(ImageManager.getImage("/icons/open_teradata_viewer32.gif")
+                .getImage());
+        initGlassPane();
+        splashScreen.progress(10);
 
         getContentPane().setLayout(new BorderLayout());
         UISupport.setMainFrame(getInstance());
@@ -165,11 +159,6 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 handleWindowClose();
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent arg0) {
-                necessaryResizingOfBufferedImage = true;
             }
         });
         splashScreen.progress(10);
@@ -207,16 +196,16 @@ public class ApplicationFrame extends JFrame {
             if (StringUtil.isEmpty(Config.getDrivers())) {
                 Config.saveDrivers("com.teradata.jdbc.TeraDriver");
             }
-            String loadingAssistantProperty = "loading_assistant_actived";
-            String strLoadingAssistantActived = Config
-                    .getSetting(loadingAssistantProperty);
-            if (StringUtil.isEmpty(strLoadingAssistantActived)) {
-                Config.saveSetting(loadingAssistantProperty, "false");
-                ((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .setLoadingAssistantActived(false);
+            String animatedAssistantProperty = "animated_assistant_actived";
+            String strAnimatedAssistantActived = Config
+                    .getSetting(animatedAssistantProperty);
+            if (StringUtil.isEmpty(strAnimatedAssistantActived)) {
+                Config.saveSetting(animatedAssistantProperty, "false");
+                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                        .setAnimatedAssistantActived(false);
             } else {
-                ((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .setLoadingAssistantActived(strLoadingAssistantActived
+                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                        .setAnimatedAssistantActived(strAnimatedAssistantActived
                                 .equalsIgnoreCase("true"));
             }
         } catch (Exception e) {
@@ -227,15 +216,31 @@ public class ApplicationFrame extends JFrame {
         displayChanger = new DisplayChanger(this);
         displayChanger.setExclusiveMode(false);
         splashScreen.progress(10);
+    }
 
-        necessaryResizingOfBufferedImage = true;
-        addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent evt) {
-                necessaryResizingOfBufferedImage = true;
+    public void initGlassPane() {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                getRootPane().setGlassPane(glassPane = new GlassPane());
             }
         });
-        splashScreen.progress(10);
     }
+
+    public AnimatedAssistant startAnimatedAssistant(
+            AnimatedAssistant animatedAssistant) {
+        getGlassPane().addAnimatedAssistant(animatedAssistant);
+        return animatedAssistant;
+    }
+
+    public void stopAnimatedAssistant(AnimatedAssistant animatedAssistant) {
+        getGlassPane().removeAnimatedAssistant(animatedAssistant);
+    }
+
+    public GlassPane getGlassPane() {
+        return glassPane;
+    }
+
     public void installPlugin() {
         if (PLUGIN == null || PLUGIN instanceof DefaultPlugin) {
             Drivers.setInitialized(false);
@@ -297,15 +302,6 @@ public class ApplicationFrame extends JFrame {
         globalQueryEditorPanel.add(new ApplicationToolBar(
                 schemaBrowserToggleButton), BorderLayout.NORTH);
         text = new JEditorPane();
-        text.addCaretListener(new CaretListener() {
-            @Override
-            public void caretUpdate(CaretEvent ce) {
-                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived()) {
-                    repainted = false;
-                }
-            }
-        });
 
         JScrollPane scrollPaneQueryEditor = new JScrollPane(text);
         scrollPaneQueryEditor
@@ -449,12 +445,6 @@ public class ApplicationFrame extends JFrame {
         } catch (IOException e) {
         }
 
-        Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
-        if (animatedLoading != null && animatedLoading.isAlive()) {
-            animatedLoading.interrupt();
-            animatedLoading = null;
-        }
-
         dispose();
     }
 
@@ -573,7 +563,6 @@ public class ApplicationFrame extends JFrame {
             schemaBrowserToggleButton.setSelected(false);
             text.requestFocus();
         }
-        repainted = false;
     }
     public SchemaBrowser getObjectChooser() {
         return rightComponent == null ? null : (SchemaBrowser) rightComponent
@@ -604,42 +593,5 @@ public class ApplicationFrame extends JFrame {
     public void setFullScreenMode(boolean fullScreenMode) {
         this.fullScreenMode = fullScreenMode;
         displayChanger.setDisplayMode(this.fullScreenMode);
-    }
-
-    public void paint(Graphics gr) {
-        if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                .isLoadingAssistantActived()) {
-            if (CustomAction.inProgress) {
-                if (necessaryResizingOfBufferedImage) {
-                    if (g2 != null) {
-                        g2.dispose();
-                    }
-
-                    bufferedImage = ((BufferedImage) createImage(getWidth(),
-                            getHeight()));
-                    g2 = bufferedImage.createGraphics();
-                    necessaryResizingOfBufferedImage = false;
-                }
-                super.paint(g2);
-                Image theGIF = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).theGIF;
-                g2.drawImage(theGIF, getSize().width - theGIF.getWidth(this)
-                        - 5, getSize().height - theGIF.getHeight(this) - 5,
-                        this);
-                gr.drawImage(bufferedImage, 0, 0, this);
-            } else if (!repainted) {
-                super.paint(gr);
-                repainted = true;
-            }
-        } else {
-            super.paint(gr);
-        }
-    }
-
-    public boolean hasBeenRepainted() {
-        return repainted;
-    }
-
-    public void setRepainted(boolean repainted) {
-        this.repainted = repainted;
     }
 }

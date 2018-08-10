@@ -63,7 +63,8 @@ public class HTTPAuthProxy extends Authenticator {
 
         final JPasswordField proxyPasswordField = new JPasswordField();
         try {
-            proxyPasswordField.setText(Config.getSetting(proxyPasswordKey));
+            proxyPasswordField.setText(Config.decrypt(Config
+                    .getSetting(proxyPasswordKey)));
         } catch (Exception e) {
             // ignore.
         }
@@ -108,7 +109,8 @@ public class HTTPAuthProxy extends Authenticator {
             proxyPassword = new String(proxyPasswordField.getPassword());
             try {
                 Config.saveSetting(proxyUserKey, proxyUser);
-                Config.saveSetting(proxyPasswordKey, proxyPassword);
+                Config.saveSetting(proxyPasswordKey,
+                        Config.encrypt(proxyPassword));
             } catch (Exception e) {
                 // ignore.
             }

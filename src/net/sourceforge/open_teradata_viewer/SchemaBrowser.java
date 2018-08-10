@@ -29,9 +29,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
-
 /**
  * 
  * 
@@ -241,10 +238,6 @@ public class SchemaBrowser extends JTree {
             while (resultSet.next()) {
                 add(resultSet.getString(columnIndex), children);
             }
-            if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                    .isLoadingAssistantActived()) {
-                ApplicationFrame.getInstance().setRepainted(false);
-            }
         }
 
         private void add(String s, boolean children) {
@@ -304,9 +297,5 @@ public class SchemaBrowser extends JTree {
         }
         setSelectionRow(row + 1);
         scrollRowToVisible(row - 1);
-        if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                .isLoadingAssistantActived()) {
-            ApplicationFrame.getInstance().setRepainted(false);
-        }
     }
 }

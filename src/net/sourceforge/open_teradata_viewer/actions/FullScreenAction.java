@@ -77,15 +77,6 @@ public class FullScreenAction extends CustomAction {
                 ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
-                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived()) {
-                    ApplicationFrame.getInstance().setRepainted(false);
-                    Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
-                    if (animatedLoading != null && animatedLoading.isAlive()) {
-                        animatedLoading.interrupt();
-                        animatedLoading = null;
-                    }
-                }
                 CustomAction.inProgress = false;
             }
         } else {

@@ -41,7 +41,6 @@ import net.sourceforge.open_teradata_viewer.ConnectionData;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.Main;
 
 public class ConnectAction extends CustomAction {
 
@@ -90,9 +89,7 @@ public class ConnectAction extends CustomAction {
                         }
 
                         Context.getInstance().setConnectionData(connectionData);
-                        ApplicationFrame.getInstance().setTitle(
-                                String.format("%s - %s", Main.APPLICATION_NAME,
-                                        connectionData.getName()));
+                        ApplicationFrame.getInstance().updateTitle();
                         Actions.getInstance().validateActions();
                         ApplicationFrame.getInstance().initializeObjectChooser(
                                 connectionData);

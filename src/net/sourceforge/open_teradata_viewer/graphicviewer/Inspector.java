@@ -419,9 +419,8 @@ public class Inspector {
             }
             myModel.setObject(obj);
             myTable.getColumnModel().getColumn(0).setPreferredWidth(35);
-        } catch (Exception exception) {
-            System.err.println(exception);
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

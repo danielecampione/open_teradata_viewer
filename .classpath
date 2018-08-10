@@ -12,6 +12,5 @@
 	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
 	<classpathentry kind="lib" path="lib/looks-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
-	<classpathentry kind="lib" path="lib/tdgssconfig.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

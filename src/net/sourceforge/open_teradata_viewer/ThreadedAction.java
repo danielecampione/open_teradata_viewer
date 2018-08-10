@@ -23,12 +23,13 @@ import java.awt.Cursor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.MouseAdapter;
 
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
-import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
 import net.sourceforge.open_teradata_viewer.actions.CustomAction;
+import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+import net.sourceforge.open_teradata_viewer.util.task.Task;
+import net.sourceforge.open_teradata_viewer.util.task.TaskPool;
 
 /**
  * 
@@ -44,12 +45,6 @@ public abstract class ThreadedAction implements Runnable {
 
     @Override
     public final void run() {
-        ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).theGIF = new ImageIcon(
-                ApplicationFrame.class
-                        .getResource("/icons/animated_assistant ("
-                                + Math.round(Math.random() * 46) + ").gif"))
-                .getImage();
-
         final Component focusOwner = KeyboardFocusManager
                 .getCurrentKeyboardFocusManager().getFocusOwner();
         final Component glassPane = ApplicationFrame.getInstance()
@@ -69,20 +64,39 @@ public abstract class ThreadedAction implements Runnable {
                     }
                 });
             }
-            execute();
+            TaskPool.getTaskPool().addTask(new Task(Main.APPLICATION_NAME) {
+                public void run() {
+                    final AnimatedAssistant animatedAssistant = new AnimatedAssistant(
+                            ImageManager
+                                    .getImage("/icons/open_teradata_viewer32.gif"),
+                            getDescription());
+                    ApplicationFrame.getInstance().startAnimatedAssistant(
+                            animatedAssistant);
+                    try {
+                        execute();
+                    } catch (final Exception ex) {
+                        java.awt.EventQueue.invokeLater(new Runnable() {
+                            public void run() {
+                                ApplicationFrame.getInstance()
+                                        .printStackTraceOnGUI(ex);
+                                ExceptionDialog.showException(ex);
+                            }
+                        });
+                    } finally {
+                        java.awt.EventQueue.invokeLater(new Runnable() {
+                            public void run() {
+                                ApplicationFrame.getInstance()
+                                        .stopAnimatedAssistant(
+                                                animatedAssistant);
+                            }
+                        });
+                    }
+                }
+            });
         } catch (Throwable t) {
             ApplicationFrame.getInstance().printStackTraceOnGUI(t);
             ExceptionDialog.showException(t);
         } finally {
-            if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                    .isLoadingAssistantActived()) {
-                ApplicationFrame.getInstance().setRepainted(false);
-                Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
-                if (animatedLoading != null && animatedLoading.isAlive()) {
-                    animatedLoading.interrupt();
-                    animatedLoading = null;
-                }
-            }
             CustomAction.inProgress = false;
 
             if (SwingUtil.isVisible(glassPane)) {

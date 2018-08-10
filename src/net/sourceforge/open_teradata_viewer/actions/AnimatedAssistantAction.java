@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 
 import javax.swing.SwingUtilities;
@@ -33,32 +32,30 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  *
  */
-public class AnimatedLoadingAction extends CustomAction implements Runnable {
+public class AnimatedAssistantAction extends CustomAction implements Runnable {
 
     private static final long serialVersionUID = -4623999245908017490L;
 
-    public Thread animatedLoading;
-    public Image theGIF;
-    private boolean loadingAssistantActived;
+    private boolean animatedAssistantActived;
 
-    protected AnimatedLoadingAction() {
-        super("Animated loading", null, null,
+    protected AnimatedAssistantAction() {
+        super("Animated assistant", null, null,
                 "Shows an animated assistant while an operation is "
                         + "in progress.");
         setEnabled(true);
     }
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        loadingAssistantActived = !loadingAssistantActived;
+        animatedAssistantActived = !animatedAssistantActived;
 
-        String loadingAssistantProperty = "loading_assistant_actived";
-        Config.saveSetting(loadingAssistantProperty,
-                String.format("%b", loadingAssistantActived));
+        String animatedAssistantProperty = "animated_assistant_actived";
+        Config.saveSetting(animatedAssistantProperty,
+                String.format("%b", animatedAssistantActived));
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "animated loading" action can be performed only if
+        // The "animated assistant" action can be performed only if
         // other processes are NOT running. No ThreadAction object must be
         // instantiated.
         if (!inProgress) {
@@ -69,9 +66,6 @@ public class AnimatedLoadingAction extends CustomAction implements Runnable {
                 ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
-                if (!loadingAssistantActived) {
-                    ApplicationFrame.getInstance().setRepainted(false);
-                }
                 CustomAction.inProgress = false;
             }
         } else {
@@ -96,10 +90,10 @@ public class AnimatedLoadingAction extends CustomAction implements Runnable {
         }
     }
 
-    public void setLoadingAssistantActived(boolean loadingAssistantActived) {
-        this.loadingAssistantActived = loadingAssistantActived;
+    public void setAnimatedAssistantActived(boolean animatedAssistantActived) {
+        this.animatedAssistantActived = animatedAssistantActived;
     }
-    public boolean isLoadingAssistantActived() {
-        return loadingAssistantActived;
+    public boolean isAnimatedAssistantActived() {
+        return animatedAssistantActived;
     }
 }

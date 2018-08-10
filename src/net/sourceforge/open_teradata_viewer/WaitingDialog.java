@@ -27,6 +27,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+
 /**
  * 
  * 

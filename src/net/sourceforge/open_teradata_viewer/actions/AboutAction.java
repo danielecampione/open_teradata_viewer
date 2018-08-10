@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.sql.DatabaseMetaData;
 
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -52,6 +51,7 @@ import net.sourceforge.open_teradata_viewer.Config;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.Main;
 
 /**
@@ -130,8 +130,7 @@ public class AboutAction extends CustomAction implements MouseListener {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Image background = new ImageIcon(
-                        AboutAction.class.getResource("/icons/logo.png"))
+                Image background = ImageManager.getImage("/icons/logo.png")
                         .getImage();
                 g.drawImage(background, 5, 17, null);
                 g.setColor(getBackground());

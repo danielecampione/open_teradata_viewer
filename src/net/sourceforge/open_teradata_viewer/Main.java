@@ -21,10 +21,14 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+
+import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * Entry point for the application
@@ -84,5 +88,7 @@ public class Main {
         mainWindow.setVisible(true);
         splashScreen.setVisible(false);
         splashScreen.dispose();
+
+        Actions.CONNECT.actionPerformed(new ActionEvent(mainWindow, 0, null));
     }
 }

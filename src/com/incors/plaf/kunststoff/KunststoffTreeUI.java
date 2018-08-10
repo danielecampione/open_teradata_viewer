@@ -28,6 +28,8 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreePath;
 
+import net.sourceforge.open_teradata_viewer.ImageManager;
+
 /**
  * 
  * 
@@ -61,10 +63,8 @@ public class KunststoffTreeUI extends BasicTreeUI {
 
     public KunststoffTreeUI(JComponent tree) {
         try {
-            m_iconExpanded = new ImageIcon(getClass().getResource(
-                    "icons/treeex.gif"));
-            m_iconCollapsed = new ImageIcon(getClass().getResource(
-                    "icons/treecol.gif"));
+            m_iconExpanded = ImageManager.getImage("icons/treeex.gif");
+            m_iconCollapsed = ImageManager.getImage("icons/treecol.gif");
         } catch (Exception e) {
             e.printStackTrace();
         }

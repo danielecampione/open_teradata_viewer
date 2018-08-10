@@ -158,6 +158,7 @@ public class SplashScreen extends JWindow {
         progressbar_ = new JProgressBar(1, 100);
         progressbar_.setStringPainted(true);
 
+        // The ImageManager is not yet ready at this time.
         main_pane.add(new JLabel(new ImageIcon(getClass().getClassLoader()
                 .getResource("icons/logo.png"))), BorderLayout.NORTH);
         main_pane.add(progressbar_, BorderLayout.CENTER);

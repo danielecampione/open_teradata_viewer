@@ -223,8 +223,9 @@ public final class Config {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder();
         try {
-            InputStream inputStream = new FileInputStream(new File(
-                    System.getProperty("user.home"), "OpenTeradataViewer.xml"));
+            InputStream inputStream = new FileInputStream(
+                    new File(System.getProperty("user.home"),
+                            "open_teradata_viewer.xml"));
             config = documentBuilder.parse(inputStream).getDocumentElement();
             inputStream.close();
         } catch (Exception e) {
@@ -253,7 +254,7 @@ public final class Config {
         transformer.transform(new DOMSource(config), new StreamResult(
                 new ByteArrayOutputStream())); // test first
         transformer.transform(new DOMSource(config), new StreamResult(new File(
-                System.getProperty("user.home"), "OpenTeradataViewer.xml")));
+                System.getProperty("user.home"), "open_teradata_viewer.xml")));
     }
 
     protected static String decrypt(String encrypted)

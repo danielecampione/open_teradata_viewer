@@ -24,6 +24,8 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+
 /**
  * 
  *  
@@ -120,7 +122,7 @@ public class DisplayChanger {
     public void setDisplayMode(boolean fullScreen) {
         boolean disposed = false;
         if (fullScreen) {
-            if (window.isVisible()) {
+            if (SwingUtil.isVisible(window)) {
                 window.dispose();
                 disposed = true;
             }
@@ -130,7 +132,7 @@ public class DisplayChanger {
                 window.repaint();
             }
         } else {
-            if (window.isVisible()) {
+            if (SwingUtil.isVisible(window)) {
                 window.dispose();
                 disposed = true;
             }
@@ -141,7 +143,6 @@ public class DisplayChanger {
             }
         }
     }
-
     public void setDisplayMode(int width, int height, int depth) {
         setDisplayMode(width, height, depth,
                 (graphicsDevice.getDisplayMode() == null ? 60 : graphicsDevice
@@ -172,7 +173,8 @@ public class DisplayChanger {
                 oryginalDisplayMode = graphicsDevice.getDisplayMode();
                 displayMode = new DisplayMode(width, height, depth, refreshRate);
             }
-            if (window instanceof Frame && !window.isVisible() && undecorable) {
+            if (window instanceof Frame && !SwingUtil.isVisible(window)
+                    && undecorable) {
                 undecorated = ((Frame) window).isUndecorated();
                 ((Frame) window).setUndecorated(true);
             } else {
@@ -199,7 +201,8 @@ public class DisplayChanger {
                 graphicsDevice.setFullScreenWindow(null);
             }
         }
-        if (window instanceof Frame && !window.isVisible() && undecorable) {
+        if (window instanceof Frame && !SwingUtil.isVisible(window)
+                && undecorable) {
             ((Frame) window).setUndecorated(undecorated);
         }
         window.setSize(oryginalWidth, oryginalHeight);

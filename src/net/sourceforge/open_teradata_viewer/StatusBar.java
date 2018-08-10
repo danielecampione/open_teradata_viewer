@@ -26,6 +26,8 @@ import java.awt.FlowLayout;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+
 /**
  * 
  * 

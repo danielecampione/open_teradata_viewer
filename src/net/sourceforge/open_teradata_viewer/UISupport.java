@@ -56,6 +56,8 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+
 import com.jgoodies.looks.HeaderStyle;
 import com.jgoodies.looks.Options;
 

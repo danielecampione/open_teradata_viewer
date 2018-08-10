@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( kernel )
+ * Open Teradata Viewer ( util )
  * Copyright (C) 2011, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer;
+package net.sourceforge.open_teradata_viewer.util;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -50,6 +50,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.text.JTextComponent;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.actions.CustomAction;
 
 /**
@@ -60,7 +62,14 @@ import net.sourceforge.open_teradata_viewer.actions.CustomAction;
  */
 public class SwingUtil {
 
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
     public interface Color {
+
         public final static java.awt.Color GREEN = new java.awt.Color(0, 0x80,
                 0);
         public final static java.awt.Color NAVY = new java.awt.Color(0, 0, 128);
@@ -68,6 +77,7 @@ public class SwingUtil {
                 150, 0);
         public final static java.awt.Color FUCHSIA = new java.awt.Color(255, 0,
                 255);
+
     }
 
     public static String setButtonText(AbstractButton button, String text) {
@@ -289,7 +299,9 @@ public class SwingUtil {
     public static void loadImage(Image image) throws InterruptedException,
             IllegalArgumentException {
         Component dummy = new Component() {
-            private static final long serialVersionUID = 1L;
+
+            private static final long serialVersionUID = 3146726167466531403L;
+
         };
         MediaTracker tracker = new MediaTracker(dummy);
         tracker.addImage(image, 0);

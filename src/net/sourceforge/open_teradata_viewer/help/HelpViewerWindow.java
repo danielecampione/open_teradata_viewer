@@ -49,6 +49,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
 
@@ -60,7 +61,7 @@ import net.sourceforge.open_teradata_viewer.UISupport;
  */
 public class HelpViewerWindow extends JFrame {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 8870795705401546865L;
 
     /** Tree containing a node for each help document. */
     private JTree _tree;
@@ -122,8 +123,8 @@ public class HelpViewerWindow extends JFrame {
      */
     private void createGUI() throws IOException {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        final ImageIcon icon = new ImageIcon(
-                HelpViewerWindow.class.getResource("/icons/help.png"));
+        final ImageIcon icon = ImageManager.getImage("/icons/help.png");
+
         if (icon != null) {
             setIconImage(icon.getImage());
         }
@@ -164,14 +165,13 @@ public class HelpViewerWindow extends JFrame {
             }
         });
     }
-
     /**
      * Create a tree each node being a link to a document.
      *
      * @return  The contents tree.
      */
     private JScrollPane createContentsTree() throws IOException {
-        final ApplicationFiles appFiles = new ApplicationFiles();
+        final HelpFiles appFiles = new HelpFiles();
         final FolderNode root = new FolderNode("Help");
         _tree = new JTree(new DefaultTreeModel(root));
         _tree.setShowsRootHandles(true);
@@ -179,12 +179,10 @@ public class HelpViewerWindow extends JFrame {
 
         // Renderer for tree.
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-        renderer.setLeafIcon(new ImageIcon(HelpViewerWindow.class
-                .getResource("/icons/help_topic.png")));
-        renderer.setOpenIcon(new ImageIcon(HelpViewerWindow.class
-                .getResource("/icons/help_toc_open.png")));
-        renderer.setClosedIcon(new ImageIcon(HelpViewerWindow.class
-                .getResource("/icons/help_toc_closed.png")));
+        renderer.setLeafIcon(ImageManager.getImage("/icons/help_topic.png"));
+        renderer.setOpenIcon(ImageManager.getImage("/icons/help_toc_open.png"));
+        renderer.setClosedIcon(ImageManager
+                .getImage("/icons/help_toc_closed.png"));
         _tree.setCellRenderer(renderer);
 
         // Add Help, Licence and Change Log nodes to the tree.
@@ -279,7 +277,7 @@ public class HelpViewerWindow extends JFrame {
      */
     private class DocumentNode extends DefaultMutableTreeNode {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -7798649742879211917L;
 
         private URL _url;
 
@@ -309,7 +307,8 @@ public class HelpViewerWindow extends JFrame {
      */
     private class FolderNode extends DocumentNode {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -6574834940741510025L;
+
         private final List<String> _docTitles = new ArrayList<String>();
         private final List<URL> _docURLs = new ArrayList<URL>();
         private final File _contentsFile;

@@ -32,7 +32,6 @@ import net.sourceforge.open_teradata_viewer.Config;
 import net.sourceforge.open_teradata_viewer.ConnectionData;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.Main;
 
 /**
  * 
@@ -65,7 +64,7 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
             }
             Context.getInstance().setConnectionData(null);
             Context.getInstance().setResultSet(null);
-            ApplicationFrame.getInstance().setTitle(Main.APPLICATION_NAME);
+            ApplicationFrame.getInstance().updateTitle();
             Actions.getInstance().validateActions();
             ApplicationFrame.getInstance().changeLog.append("disconnected.\n");
         }
