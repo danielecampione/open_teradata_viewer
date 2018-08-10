@@ -123,25 +123,29 @@ public final class ResultSetTable extends JTable {
     }
 
     @SuppressWarnings("rawtypes")
-    public void setDataVector(Vector<Vector> dataVector,
-            Vector columnIdentifiers, String executionTime) {
-        originalOrder = new ArrayList<Vector>(dataVector);
-        ((DefaultTableModel) getModel()).setDataVector(dataVector,
-                columnIdentifiers);
-        String rows = String.format("%d %s", dataVector.size(),
-                dataVector.size() != 1 ? "rows" : "row");
-        JComponent scrollPane = (JComponent) getParent().getParent();
-        if (dataVector.isEmpty()) {
-            scrollPane.setToolTipText(String.format("%s - %s", rows,
-                    executionTime));
-            setToolTipText(null);
-        } else {
-            setToolTipText(String.format("%s - %s", rows, executionTime));
-            scrollPane.setToolTipText(null);
-        }
+    public void setDataVector(final Vector<Vector> dataVector,
+            final Vector columnIdentifiers, final String executionTime) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                originalOrder = new ArrayList<Vector>(dataVector);
+                ((DefaultTableModel) getModel()).setDataVector(dataVector,
+                        columnIdentifiers);
+                validate();
+                // i18n[Application.resultSetTable.rows=rows]
+                // i18n[Application.resultSetTable.row=row]
+                String rows = String.format("%d %s", dataVector.size(),
+                        dataVector.size() != 1 ? "rows" : "row");
+                JComponent scrollPane = (JComponent) getParent().getParent();
+                if (dataVector.isEmpty()) {
+                    scrollPane.setToolTipText(String.format("%s - %s", rows,
+                            executionTime));
+                    setToolTipText(null);
+                } else {
+                    setToolTipText(String
+                            .format("%s - %s", rows, executionTime));
+                    scrollPane.setToolTipText(null);
+                }
                 resizeColumns();
             }
         });

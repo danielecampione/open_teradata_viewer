@@ -41,11 +41,11 @@ public class DisplayChanger {
     private boolean displayChangeSupported;
     private Window window;
     private DisplayMode[] displayModes;
-    private DisplayMode oryginalDisplayMode = null;
+    private DisplayMode originalDisplayMode = null;
     private DisplayMode displayMode;
     private boolean undecorated;
-    private int oryginalWidth;
-    private int oryginalHeight;
+    private int originalWidth;
+    private int originalHeight;
     private boolean undecorable = true;
     private boolean exclusiveMode = true;
 
@@ -103,8 +103,8 @@ public class DisplayChanger {
         return displayModes;
     }
 
-    public DisplayMode getOryginalDisplayMode() {
-        return oryginalDisplayMode;
+    public DisplayMode getOriginalDisplayMode() {
+        return originalDisplayMode;
     }
 
     public DisplayMode getDisplayMode() {
@@ -158,8 +158,8 @@ public class DisplayChanger {
 
     public void setDisplayMode(int width, int height, int depth,
             int refreshRate, boolean fullScreen) {
-        oryginalWidth = window.getWidth();
-        oryginalHeight = window.getHeight();
+        originalWidth = window.getWidth();
+        originalHeight = window.getHeight();
         if (width != -1 && height != -1) {
             window.setSize(width, height);
             SwingUtil.centerWithinScreen(window);
@@ -170,7 +170,7 @@ public class DisplayChanger {
         }
         if (fullScreenSupported && fullScreen) {
             if (width != -1 && height != -1) {
-                oryginalDisplayMode = graphicsDevice.getDisplayMode();
+                originalDisplayMode = graphicsDevice.getDisplayMode();
                 displayMode = new DisplayMode(width, height, depth, refreshRate);
             }
             if (window instanceof Frame && !SwingUtil.isVisible(window)
@@ -189,14 +189,14 @@ public class DisplayChanger {
                 }
             } catch (Throwable e) {
                 graphicsDevice.setFullScreenWindow(null);
-                oryginalDisplayMode = null;
+                originalDisplayMode = null;
             }
         }
     }
 
     public void restoreDisplayMode() {
-        if (oryginalDisplayMode != null) {
-            graphicsDevice.setDisplayMode(oryginalDisplayMode);
+        if (originalDisplayMode != null) {
+            graphicsDevice.setDisplayMode(originalDisplayMode);
             if (exclusiveMode) {
                 graphicsDevice.setFullScreenWindow(null);
             }
@@ -205,7 +205,7 @@ public class DisplayChanger {
                 && undecorable) {
             ((Frame) window).setUndecorated(undecorated);
         }
-        window.setSize(oryginalWidth, oryginalHeight);
+        window.setSize(originalWidth, originalHeight);
         SwingUtil.centerWithinScreen(window);
     }
 

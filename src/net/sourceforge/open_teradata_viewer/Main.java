@@ -51,12 +51,12 @@ public class Main {
         if (!Tools.isJDK16OrAbove()) {
             System.err.println("The installed JDK version is NOT supported.\n"
                     + "The program will be terminated.");
-            return;
+            System.exit(-1);
         }
 
         if (args.length > 0) {
             printUsage();
-            return;
+            System.exit(-2);
         }
 
         JFrame.setDefaultLookAndFeelDecorated(false);

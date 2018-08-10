@@ -110,13 +110,8 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void setUI() {
-        try {
-            KunststoffLookAndFeel kunststoffLnF = new KunststoffLookAndFeel();
-            KunststoffLookAndFeel.setCurrentTheme(new KunststoffTheme());
-            UIManager.setLookAndFeel(kunststoffLnF);
-        } catch (UnsupportedLookAndFeelException ex) {
-            // handle exception or not, whatever you prefer
-        }
+        KunststoffLookAndFeel.setCurrentTheme(new KunststoffTheme());
+        setLookAndFeel(new KunststoffLookAndFeel().getClass().getName());
 
         // this lines need to be implemented in order to make JWS work properly
         try {

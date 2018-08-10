@@ -42,40 +42,40 @@ public final class Actions
             ListSelectionListener,
             TableColumnModelListener {
 
+    public static final CustomAction CONNECT = new ConnectAction();
+    public static final CustomAction DISCONNECT = new DisconnectAction();
+    public static final CustomAction RUN = new RunAction();
+    public static final CustomAction RUN_SCRIPT = new RunScriptAction();
+    public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
     public static final CustomAction FAVORITES = new FavoritesAction();
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
     public static final CustomAction HISTORY_NEXT = new HistoryNextAction();
-    public static final CustomAction RUN = new RunAction();
-    public static final CustomAction CONNECT = new ConnectAction();
-    public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
-    public static final CustomAction HELP = new HelpAction();
     public static final CustomAction FORMAT_SQL = new FormatSQLAction();
     public static final CustomAction INSERT = new InsertAction();
     public static final CustomAction EDIT = new EditAction();
     public static final CustomAction DUPLICATE = new DuplicateAction();
     public static final CustomAction DELETE = new DeleteAction();
-    public static final CustomAction SELECT_FROM = new SelectFromAction();
-    public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
-    public static final CustomAction EXPORT_INSERTS = new ExportInsertsAction();
-    public static final CustomAction EXPORT_FLAT_FILE = new ExportFlatFileAction();
-    public static final CustomAction EXPORT_PDF = new ExportPdfAction();
-    public static final CustomAction FETCH_LIMIT = new FetchLimitAction();
+    public static final CustomAction LOB_IMPORT = new LobImportAction();
+    public static final CustomAction LOB_EXPORT = new LobExportAction();
     public static final CustomAction LOB_COPY = new LobCopyAction();
     public static final CustomAction LOB_PASTE = new LobPasteAction();
-    public static final CustomAction LOB_EXPORT = new LobExportAction();
-    public static final CustomAction LOB_IMPORT = new LobImportAction();
-    public static final CustomAction DISCONNECT = new DisconnectAction();
-    public static final CustomAction RUN_SCRIPT = new RunScriptAction();
+    public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
+    public static final CustomAction EXPORT_PDF = new ExportPdfAction();
+    public static final CustomAction EXPORT_FLAT_FILE = new ExportFlatFileAction();
+    public static final CustomAction EXPORT_INSERTS = new ExportInsertsAction();
+    public static final CustomAction FETCH_LIMIT = new FetchLimitAction();
+    public static final CustomAction HELP = new HelpAction();
+    public static final CustomAction SELECT_FROM = new SelectFromAction();
+    public static final CustomAction DRIVERS = new DriversAction();
+    public static final CustomAction ABOUT = new AboutAction();
+    public static final CustomAction UPDATE = new UpdateAction();
     public static final CustomAction SHOW_PROCEDURE = new ShowProcedureAction();
     public static final CustomAction SHOW_VIEW = new ShowViewAction();
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
-    public static final CustomAction DRIVERS = new DriversAction();
     public static final CustomAction ANIMATED_ASSISTANT = new AnimatedAssistantAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
-    public static final CustomAction ABOUT = new AboutAction();
-    public static final CustomAction UPDATE = new UpdateAction();
 
     private static final Actions ACTIONS = new Actions();
 
@@ -89,6 +89,34 @@ public final class Actions
     @Override
     public void valueChanged(ListSelectionEvent e) {
         validateActions();
+    }
+
+    @Override
+    public void columnSelectionChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {
+            validateActions();
+        }
+    }
+
+    @Override
+    public void columnAdded(TableColumnModelEvent e) {
+    }
+
+    @Override
+    public void columnRemoved(TableColumnModelEvent e) {
+    }
+
+    @Override
+    public void columnMoved(TableColumnModelEvent e) {
+    }
+
+    @Override
+    public void columnMarginChanged(ChangeEvent e) {
+    }
+
+    protected void validateTextActions() {
+        HISTORY_PREVIOUS.setEnabled(History.getInstance().hasPrevious());
+        HISTORY_NEXT.setEnabled(History.getInstance().hasNext());
     }
 
     protected void validateActions() {
@@ -132,30 +160,5 @@ public final class Actions
         LOB_IMPORT.setEnabled(isLobSelected);
         LOB_COPY.setEnabled(isLobSelected);
         LOB_PASTE.setEnabled(isLobSelected);
-    }
-
-    @Override
-    public void columnAdded(TableColumnModelEvent e) {
-    }
-
-    @Override
-    public void columnMarginChanged(ChangeEvent e) {
-    }
-
-    @Override
-    public void columnMoved(TableColumnModelEvent e) {
-    }
-
-    @Override
-    public void columnRemoved(TableColumnModelEvent e) {
-    }
-
-    @Override
-    public void columnSelectionChanged(ListSelectionEvent e) {
-    }
-
-    protected void validateTextActions() {
-        HISTORY_PREVIOUS.setEnabled(History.getInstance().hasPrevious());
-        HISTORY_NEXT.setEnabled(History.getInstance().hasNext());
     }
 }

@@ -1,3 +1,6 @@
+0.07c (15/09/2011)
+    - BUG0001 fixed.
+
 0.07b (31/08/2011)
     - Added the capability to manage multiple plugins.
 
@@ -48,8 +51,8 @@
 
 0.04b (13/07/2011)
     - Management of plugins has been improved.
-    - forms-1.0.3 library has been upgraded to 1.0.7 version.
-    - looks-2.0.2 library has been upgraded to 2.2.1 version.
+    - Upgraded forms library 1.0.3 -> 1.0.7
+    - Upgraded looks library 2.0.2 -> 2.2.1
 
 0.04a (05/07/2011)
     - Added "Liquid" l&f.
