@@ -58,7 +58,10 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(Actions.DISCONNECT);
 
-        menu = new JMenu("Grid");
+        menu = new JMenu("File");
+        add(menu);
+        menu.add(Actions.FILE_OPEN);
+        menu.add(Actions.FILE_SAVE);
 
         menu = new JMenu("Edit");
         add(menu);

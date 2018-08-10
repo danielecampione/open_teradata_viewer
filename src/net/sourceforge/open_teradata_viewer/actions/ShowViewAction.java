@@ -29,6 +29,8 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
+import com.teradata.jdbc.jdbc_4.util.JDBCException;
+
 /**
  * 
  * 
@@ -128,6 +130,14 @@ public class ShowViewAction extends CustomAction {
         if (resultSet.next()) {
             String viewBody = resultSet.getString(1).trim();
             ApplicationFrame.getInstance().setText(viewBody);
+        } else {
+            Throwable t = new JDBCException(
+                    "Object '"
+                            + ((databaseName != null && databaseName.trim()
+                                    .length() > 0) ? databaseName + "." : "")
+                            + viewName + "' does not exist.", "SQLState 42S02",
+                    3807);
+            ApplicationFrame.getInstance().printStackTraceOnGUI(t);
         }
         statement.close();
         resultSet.close();

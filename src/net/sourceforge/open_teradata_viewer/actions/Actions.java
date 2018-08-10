@@ -38,6 +38,8 @@ public final class Actions
             ListSelectionListener,
             TableColumnModelListener {
 
+    public static final CustomAction FILE_OPEN = new FileOpenAction();
+    public static final CustomAction FILE_SAVE = new FileSaveAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction ABOUT = new AboutAction();
     public static final CustomAction EDIT_CONNECTION_DATA = new EditConnectionDataAction();

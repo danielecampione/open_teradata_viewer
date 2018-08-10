@@ -47,7 +47,7 @@ public class ApplicationArguments {
     private static volatile ApplicationArguments s_instance;
 
     /** Project home directory. */
-    private String _applicationPanelHome = null;
+    private String _applicationFrameHome = null;
 
     /**
      * If not <TT>null</TT> then is an override for the users .OpenTeradataViewer
@@ -111,8 +111,8 @@ public class ApplicationArguments {
      * @return  override for the user settings directory. Will be
      *              <TT>null</TT> if not overridden.
      */
-    public String get_applicationPanelHomeHomeDirectory() {
-        return _applicationPanelHome;
+    public String get_applicationFrameHomeHomeDirectory() {
+        return _applicationFrameHome;
     }
 
     /**

@@ -1,2 +1,9 @@
+0.01b (16-jun-11)
+    - Added "Open File" function. The "Open File" command can be found in the
+      "File" menu.
+    - Added "Write File" function. The "Save File" command can be found in the
+      "File" menu.
+    - Manual updated.
+
 0.01a (14-jun-11)
     - First release.

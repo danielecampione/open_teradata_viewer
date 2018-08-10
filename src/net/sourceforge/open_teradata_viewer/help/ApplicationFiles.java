@@ -41,7 +41,7 @@ public class ApplicationFiles {
     private String _userSettingsDir;
 
     /** Name of folder that contains Open Teradata Viewer app. */
-    private final File _applicationPanelHomeDir;
+    private final File _applicationFrameHomeDir;
 
     /** Name of folder that contains library jars */
     private String _libraryDir;
@@ -58,11 +58,11 @@ public class ApplicationFiles {
         super();
         ApplicationArguments args = ApplicationArguments.getInstance();
 
-        final String homeDir = args.get_applicationPanelHomeHomeDirectory();
-        _applicationPanelHomeDir = new File(homeDir != null
+        final String homeDir = args.get_applicationFrameHomeHomeDirectory();
+        _applicationFrameHomeDir = new File(homeDir != null
                 ? homeDir
                 : Tools.conformizePath(System.getProperty("user.dir")));
-        String homeDirPath = _applicationPanelHomeDir.getPath()
+        String homeDirPath = _applicationFrameHomeDir.getPath()
                 + File.separator;
         _libraryDir = homeDirPath + "lib";
         _updateDir = homeDirPath + "update";
@@ -187,8 +187,8 @@ public class ApplicationFiles {
         return new File(_updateDir);
     }
 
-    public File get_applicationPanelHomeDir() {
-        return _applicationPanelHomeDir;
+    public File get_applicationFrameHomeDir() {
+        return _applicationFrameHomeDir;
     }
 
     /**
