@@ -84,19 +84,22 @@ public class ConnectionData implements Comparable, Cloneable {
     }
 
     public void connect() throws Exception {
-        Drivers.initialize();
-
         try {
+            Drivers.initialize();
             driver = DriverManager.getDriver(url);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             ExceptionDialog.showException(new Exception(String.format(
                     "No suitable driver for URL \"%s\"", url), e));
-            Drivers.editDrivers();
-            try {
-                driver = DriverManager.getDriver(url);
-            } catch (SQLException e1) {
-                throw new Exception(String.format(
-                        "No suitable driver for URL \"%s\"", url), e1);
+            int response = Drivers.editDrivers();
+            if (Dialog.OK_OPTION == response) {
+                try {
+                    driver = DriverManager.getDriver(url);
+                } catch (SQLException e1) {
+                    throw new Exception(String.format(
+                            "No suitable driver for URL \"%s\"", url), e1);
+                }
+            } else if (Dialog.CANCEL_OPTION == response) {
+                return;
             }
         }
         Properties properties = new Properties();

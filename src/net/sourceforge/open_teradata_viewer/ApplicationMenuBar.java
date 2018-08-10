@@ -88,6 +88,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.FETCH_LIMIT);
         menu.add(Actions.SELECT_FROM);
         menu.addSeparator();
+        menu.add(Actions.DRIVERS);
+        menu.addSeparator();
         menu.add(Actions.SHOW_SELECTED_RECORD);
         menu.add(Actions.SHOW_PROCEDURE);
         menu.add(Actions.SHOW_VIEW);

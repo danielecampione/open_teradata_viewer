@@ -89,7 +89,7 @@ public class ShowProcedureAction extends CustomAction {
         procedureName = procedureName.trim().toUpperCase();
         String querySQL = "SHOW PROCEDURE " + procedureName;
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().connectionData
+        Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);

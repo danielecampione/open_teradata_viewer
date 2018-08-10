@@ -27,7 +27,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 /**
  * 
@@ -46,24 +46,20 @@ public class ChangeLookAndFeelAction extends CustomAction {
         this.laf = laf;
     }
 
-    /**
-     * The method overrides the original one to hide the exception stacktrace. 
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
+        // The "set l&f" action can be performed only if other processes are NOT
+        // running. No ThreadAction object must be instantiated.
         if (!inProgress) {
             inProgress = true;
-            new ThreadedAction() {
-                @Override
-                protected void execute() throws Exception {
-                    Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                        public void uncaughtException(Thread t, Throwable e) {
-                            // Ignore all general errors relative to the L&F setup.
-                        }
-                    });
-                    performThreaded(e);
-                }
-            };
+            try {
+                performThreaded(e);
+            } catch (Throwable t) {
+                ApplicationFrame.getInstance().printStackTraceOnGUI(t);
+                ExceptionDialog.showException(t);
+            } finally {
+                CustomAction.inProgress = false;
+            }
         } else {
             ApplicationFrame.getInstance().changeLog.append(
                     "Another process is already running..\n",
@@ -71,6 +67,7 @@ public class ChangeLookAndFeelAction extends CustomAction {
             selectPrecedingLookAndFeelMenuItem();
         }
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         if (UIManager.getLookAndFeel().getClass().toString()

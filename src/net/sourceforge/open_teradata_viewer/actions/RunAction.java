@@ -80,8 +80,8 @@ public class RunAction extends CustomAction {
         Vector<Vector> dataVector = new Vector<Vector>();
         int[] columnTypes;
         String[] columnTypeNames;
-        PreparedStatement statement = createStatement(
-                Context.getInstance().connectionData.getConnection(), sql);
+        PreparedStatement statement = createStatement(Context.getInstance()
+                .getConnectionData().getConnection(), sql);
         statement.setMaxRows(Context.getInstance().getFetchLimit());
 
         String[] bindVariables = handleBindVariables(statement);
@@ -109,7 +109,7 @@ public class RunAction extends CustomAction {
             } catch (SQLException e1) {
                 if (statement.getResultSetConcurrency() != ResultSet.CONCUR_READ_ONLY) {
                     // try read-only and without modifications
-                    statement = Context.getInstance().connectionData
+                    statement = Context.getInstance().getConnectionData()
                             .getConnection().prepareStatement(originalSql);
                     // Bind variables
                     handleBindVariables(statement, bindVariables);

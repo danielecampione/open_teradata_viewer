@@ -78,8 +78,11 @@ public class RunScriptAction extends CustomAction {
         @SuppressWarnings("rawtypes")
         final Vector<Vector> dataVector = new Vector<Vector>();
         int count = 0;
-        final Statement statement = Context.getInstance().connectionData
-                .getConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        final Statement statement = Context
+                .getInstance()
+                .getConnectionData()
+                .getConnection()
+                .createStatement(ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
         Runnable onCancel = new Runnable() {
             @Override

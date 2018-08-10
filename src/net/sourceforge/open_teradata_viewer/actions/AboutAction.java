@@ -180,8 +180,8 @@ public class AboutAction extends CustomAction implements MouseListener {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {
             try {
-                DatabaseMetaData metaData = Context.getInstance().connectionData
-                        .getConnection().getMetaData();
+                DatabaseMetaData metaData = Context.getInstance()
+                        .getConnectionData().getConnection().getMetaData();
                 c.gridy++;
                 panel.add(new JLabel("Database: "), c);
                 panel.add(new JLabel(metaData.getDatabaseProductName()), c);

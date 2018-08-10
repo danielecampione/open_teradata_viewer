@@ -94,7 +94,7 @@ public class SelectFromAction extends CustomAction {
         relationName = relationName.toUpperCase();
         String querySQL = "HELP TABLE " + relationName;
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().connectionData
+        Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);

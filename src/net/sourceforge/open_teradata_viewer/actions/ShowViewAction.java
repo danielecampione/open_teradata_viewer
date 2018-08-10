@@ -105,7 +105,7 @@ public class ShowViewAction extends CustomAction {
                         ? " AND DatabaseName='" + databaseName + "'"
                         : "");
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().connectionData
+        Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);

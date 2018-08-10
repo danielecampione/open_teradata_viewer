@@ -45,7 +45,6 @@ public final class Actions
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
     public static final CustomAction HISTORY_NEXT = new HistoryNextAction();
     public static final CustomAction RUN = new RunAction();
-    public static final CustomAction ABOUT = new AboutAction();
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
     public static final CustomAction HELP = new HelpAction();
@@ -66,6 +65,8 @@ public final class Actions
     public static final CustomAction SHOW_PROCEDURE = new ShowProcedureAction();
     public static final CustomAction SHOW_VIEW = new ShowViewAction();
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
+    public static final CustomAction DRIVERS = new DriversAction();
+    public static final CustomAction ABOUT = new AboutAction();
 
     private static final Actions ACTIONS = new Actions();
 

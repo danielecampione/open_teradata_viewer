@@ -127,8 +127,10 @@ public final class ExceptionDialog {
                 msg.append(Main.APPLICATION_NAME
                         + " has a memory limit of 512 MB.\n");
             } else {
-                msg.append(ApplicationFrame.getInstance().PLUGIN
-                        .analyzeException(exception));
+                if (ApplicationFrame.getInstance().PLUGIN != null) {
+                    msg.append(ApplicationFrame.getInstance().PLUGIN
+                            .analyzeException(exception));
+                }
             }
         }
         if (msg.length() > 0) {

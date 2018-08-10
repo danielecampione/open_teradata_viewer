@@ -69,7 +69,6 @@ public class ApplicationFrame extends JFrame {
 
     private static final long serialVersionUID = -8572855678886323789L;
     private static ApplicationFrame APPLICATION_FRAME;
-    public static final String SECTION_SEPARATOR = "----------------------------------------------------------------------------------------------------\n\n";
     public static final Color DEFAULT_FOREGROUND_COLOR_LOG = Color.DARK_GRAY;
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
     public static final int MAX_CHARACTERS_LOG = 100000;
@@ -117,15 +116,10 @@ public class ApplicationFrame extends JFrame {
         splashScreen.progress(9);
 
         getContentPane().setLayout(new BorderLayout());
-
         UISupport.setMainFrame(getInstance());
-
         splashScreen.progress(20);
-
         JPanel globalPanel = new JPanel(new BorderLayout());
-
         globalPanel.add(createWorkArea(), BorderLayout.CENTER);
-
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -169,8 +163,11 @@ public class ApplicationFrame extends JFrame {
         getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
 
         try {
-            Config.saveDrivers("com.teradata.jdbc.TeraDriver");
+            if (Config.getDrivers().trim().length() == 0) {
+                Config.saveDrivers("com.teradata.jdbc.TeraDriver");
+            }
         } catch (Exception e) {
+            // ignore
         }
 
         splashScreen.progress(10);

@@ -77,6 +77,10 @@ public class ConnectAction extends CustomAction {
                         ApplicationFrame.getInstance().changeLog
                                 .append("connecting..\n");
                         connectionData.connect();
+                        if (connectionData.getConnection() == null) {
+                            performThreaded(e);
+                            return;
+                        }
                         ApplicationFrame.getInstance().changeLog
                                 .append("connected.\n");
 

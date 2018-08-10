@@ -57,7 +57,11 @@ public class Drivers {
     public static void initialize() throws Exception {
         if (!initialized) {
             addAllJarsToClasspath();
-            loadCustomDrivers();
+            try {
+                loadCustomDrivers();
+            } catch (ClassNotFoundException e) {
+                throw e;
+            }
             initialized = true;
         }
     }
@@ -121,14 +125,15 @@ public class Drivers {
                     stringBuilder.append(driver);
                     stringBuilder.append("\n");
                 } catch (ClassNotFoundException e) {
-                    ExceptionDialog.hideException(e);
+                    initialized = false;
+                    throw e;
                 }
             }
         }
         Config.saveDrivers(stringBuilder.toString());
     }
 
-    public static void editDrivers() throws Exception {
+    public static int editDrivers() throws Exception {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.WEST;
@@ -141,7 +146,7 @@ public class Drivers {
                         "The JDBC driver jar files are located in \"%s\".",
                         new File(".").getCanonicalPath())), c);
         c.gridy++;
-        panel.add(new JLabel("Most drivers are automatically detected."), c);
+        panel.add(new JLabel(" "), c);
         c.gridy++;
         panel.add(new JLabel(" "), c);
         c.gridy++;
@@ -192,10 +197,21 @@ public class Drivers {
         String drivers = Config.getDrivers();
         JTextArea driverfield = new JTextArea(drivers, 4, 0);
         panel.add(new JScrollPane(driverfield), c);
-        if (Dialog.OK_OPTION == Dialog.show("Drivers", panel,
-                Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
+        int response = Dialog.show("Drivers", panel, Dialog.PLAIN_MESSAGE,
+                Dialog.OK_CANCEL_OPTION);
+        if (Dialog.OK_OPTION == response) {
             Config.saveDrivers(driverfield.getText());
-            loadCustomDrivers();
+            try {
+                initialized = false;
+                initialize();
+            } catch (ClassNotFoundException e) {
+                // Show the error only in the text area.
+                ApplicationFrame.getInstance().changeLog.append(
+                        "Driver NOT found.\n",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+
+            }
         }
+        return response;
     }
 }
