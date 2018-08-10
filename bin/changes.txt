@@ -1,3 +1,7 @@
+0.09b (27/09/2011)
+    - BUG0003 fixed.
+    - Upgraded Teradata JDBC driver 13.10.00.18 -> 14.00.00.01
+
 0.09a (22/09/2011)
     - Some actions have been grouped.
     - Fixed a bug related to the LOB IMPORT and LOB PASTE operations.
