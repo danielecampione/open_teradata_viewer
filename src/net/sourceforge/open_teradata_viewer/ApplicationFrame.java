@@ -52,6 +52,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.text.DefaultCaret;
 
 import jsyntaxpane.DefaultSyntaxKit;
@@ -295,6 +297,15 @@ public class ApplicationFrame extends JFrame {
         globalQueryEditorPanel.add(new ApplicationToolBar(
                 schemaBrowserToggleButton), BorderLayout.NORTH);
         text = new JEditorPane();
+        text.addCaretListener(new CaretListener() {
+            @Override
+            public void caretUpdate(CaretEvent ce) {
+                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                        .isLoadingAssistantActived()) {
+                    repainted = false;
+                }
+            }
+        });
 
         JScrollPane scrollPaneQueryEditor = new JScrollPane(text);
         scrollPaneQueryEditor

@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,14 +54,16 @@ public class ApplicationMenuBar extends JMenuBar {
 
     public ApplicationMenuBar() {
         JMenu menu;
-
+        
         menu = new JMenu("Connection");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.CONNECT);
         menu.addSeparator();
         menu.add(Actions.DISCONNECT);
 
         menu = new JMenu("File");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
@@ -67,6 +71,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.FAVORITES);
 
         menu = new JMenu("Edit");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         // Set up the edit actions
         actions = createActionTable(ApplicationFrame.getInstance()
@@ -85,6 +90,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.HISTORY_NEXT);
 
         menu = new JMenu("Schema Browser");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.SCHEMA_BROWSER);
         menu.add(Actions.FETCH_LIMIT);
@@ -116,6 +122,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.RUN_SCRIPT);
 
         menu = new JMenu(ApplicationFrame.LAF_MENU_LABEL);
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
                 .getInstalledLookAndFeels();
@@ -139,6 +146,7 @@ public class ApplicationMenuBar extends JMenuBar {
         }
 
         menu = new JMenu("View");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         JCheckBoxMenuItem loadingAssistantMenuItem = new JCheckBoxMenuItem(
                 Actions.ANIMATED_LOADING);
@@ -152,12 +160,41 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(fullScreenMenuItem);
 
         menu = new JMenu("?");
+        menu = addMouseSensitivityToJMenu(menu);
         add(menu);
         menu.add(Actions.HELP);
         menu.addSeparator();
         menu.add(Actions.ABOUT);
 
         setMnemonics(this);
+    }
+    
+    private JMenu addMouseSensitivityToJMenu(JMenu menu) {
+    	menu.addMouseListener(new MouseAdapter() {
+        	public void forcesTheRepaint() {
+        		if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                        .isLoadingAssistantActived()) {
+                    ApplicationFrame.getInstance().setRepainted(false);
+                }
+        	}
+        	@Override
+			public void mouseEntered(MouseEvent e) {
+        		forcesTheRepaint();
+        	}
+        	@Override
+			public void mouseExited(MouseEvent e) {
+        		forcesTheRepaint();
+        	}
+        	@Override
+			public void mouseReleased(MouseEvent e) {
+        		forcesTheRepaint();
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				forcesTheRepaint();
+			}
+		});
+    	return menu;
     }
 
     private void setMnemonics(MenuElement menuElement) {

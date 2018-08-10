@@ -1,3 +1,7 @@
+0.06b (28-jul-11)
+    - The redrawing of the main frame has been enhanced in the "animated
+      loading" mode.
+
 0.06a (26-jul-11)
     - The animated assistant is disabled by default.
     - The table sorter repaints the result set also in the "animated loading"

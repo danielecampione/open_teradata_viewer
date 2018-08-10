@@ -304,5 +304,9 @@ public class SchemaBrowser extends JTree {
         }
         setSelectionRow(row + 1);
         scrollRowToVisible(row - 1);
+        if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                .isLoadingAssistantActived()) {
+            ApplicationFrame.getInstance().setRepainted(false);
+        }
     }
 }
