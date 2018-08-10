@@ -29,12 +29,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
-/**
- * 
- * 
- * @author D. Campione
- *
- */
+/** @author D. Campione */
 public class ShowProcedureAction extends CustomAction {
 
     private static final long serialVersionUID = -603744266487784355L;
@@ -112,11 +107,13 @@ public class ShowProcedureAction extends CustomAction {
         waitingDialog.hide();
         String procedureBody = "";
         while (resultSet.next()) {
-            procedureBody += resultSet.getString(1).trim();
+            Object obj = resultSet.getString(1);
+            if (obj == null) {
+                obj = "";
+            }
+            procedureBody += obj.toString().trim();
         }
-        // Do not use the ApplicationFrame.setText(String s) method 
-        ApplicationFrame.getInstance().getTextComponent()
-                .setText(procedureBody);
+        ApplicationFrame.getInstance().setText(procedureBody);
         statement.close();
         resultSet.close();
     }

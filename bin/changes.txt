@@ -1,3 +1,8 @@
+0.03c (01-jul-11)
+    - Fixed a bug relative to the "SHOW VIEW" command. When the command was
+      performed on an object that is not a view, the returned resultset was in
+      a null record. Now this situation is suitably managed.
+
 0.03b (29-jun-11)
     - Added the full-screen mode. Added the "Full Screen" menu voice to the
       "View" menu.

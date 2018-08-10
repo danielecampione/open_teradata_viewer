@@ -30,12 +30,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
-/**
- * 
- * 
- * @author D. Campione
- *
- */
+/** @author D. Campione */
 public class ShowViewAction extends CustomAction {
 
     private static final long serialVersionUID = -8555161081550563065L;
@@ -127,8 +122,14 @@ public class ShowViewAction extends CustomAction {
         resultSet = statement.executeQuery();
         waitingDialog.hide();
         if (resultSet.next()) {
-            String viewBody = resultSet.getString(1).trim();
-            ApplicationFrame.getInstance().setText(viewBody);
+            Object obj = resultSet.getString(1);
+            if (obj == null) {
+                throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
+                        1048);
+            } else if (obj instanceof String) {
+                String viewBody = obj.toString().trim();
+                ApplicationFrame.getInstance().setText(viewBody);
+            }
         } else {
             throw new SQLException(
                     "Object '"
