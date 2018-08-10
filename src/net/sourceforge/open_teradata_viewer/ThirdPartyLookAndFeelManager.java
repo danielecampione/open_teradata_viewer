@@ -57,7 +57,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * NOTE: Specifying LookAndFeels in this XML file is done at your own risk.
+ * NOTE: Specifying LookAndFeels in this XML file is done at your own risk. If a
+ * LookAndFeel throws an Exception on the EDT, for any reason (needs special
+ * configuration not handled by this LAF manager, requires a newer JRE version
+ * than is specified in the XML, etc..), it can hose the GUI application and
+ * keep it from running.<p>
  *
  * A class capable of reading an XML file specifying 3rd party Look and Feel JAR
  * files, and returning an array of information about the Look and Feels, so

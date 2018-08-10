@@ -44,6 +44,7 @@ import javax.swing.table.TableColumnModel;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.CopyCellValueAction;
+import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
  * 
@@ -74,6 +75,8 @@ public final class ResultSetTable extends JTable {
         setDefaultRenderer(Object.class, new ResultSetTableCellRenderer());
         getActionMap().put("copy",
                 new CopyCellValueAction(getActionMap().get("copy")));
+        UIUtil.fixJTableRendererOrientations(this);
+        UIUtil.possiblyFixGridColor(this);
     }
 
     public static ResultSetTable getInstance() {

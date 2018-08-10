@@ -1136,7 +1136,7 @@ public class SyntaxUtilities implements SwingConstants {
         try {
             p = Pattern.compile(sb.toString(), flags);
         } catch (PatternSyntaxException pse) {
-            pse.printStackTrace();
+            ExceptionDialog.hideException(pse);
             p = Pattern.compile(".+");
         }
 

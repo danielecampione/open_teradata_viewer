@@ -31,12 +31,12 @@ public class DecoratedTextNode extends GraphicViewerTextNode {
     private static final long serialVersionUID = -7979415432735633257L;
 
     public DecoratedTextNode() {
-        myImgName = "icons/star.gif";
+        myImgName = "star.gif";
     }
 
     public DecoratedTextNode(String s) {
         super(s);
-        myImgName = "icons/star.gif";
+        myImgName = "star.gif";
         setTopPort(null);
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage();
         graphicviewerimage.setSelectable(false);
@@ -76,10 +76,11 @@ public class DecoratedTextNode extends GraphicViewerTextNode {
     public boolean doMouseDblClick(int i, Point point, Point point1,
             GraphicViewerView graphicviewerview) {
         if (getDecoration() != null) {
-            if (myImgName.equals("icons/star.gif"))
-                myImgName = "icons/document.png";
-            else
-                myImgName = "icons/star.gif";
+            if (myImgName.equals("star.gif")) {
+                myImgName = "document.png";
+            } else {
+                myImgName = "star.gif";
+            }
             getDecoration().loadImage(
                     (DecoratedTextNode.class).getResource(myImgName), true);
         }

@@ -1,3 +1,7 @@
+0.15a (02/12/2012)
+    - Fixed the grid color of the results table on Windows XP / Vista, when
+      using the Windows Look and Feel.
+
 0.14c (25/11/2012)
     - Allow tool tips to be specified for icons in IconRowHeader.
     - Fixed an issue with CompleteMarkupTagAction and ToggleLineCommentAction
