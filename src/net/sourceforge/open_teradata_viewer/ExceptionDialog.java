@@ -126,6 +126,9 @@ public final class ExceptionDialog {
             } else if (t instanceof OutOfMemoryError) {
                 msg.append(Main.APPLICATION_NAME
                         + " has a memory limit of 512 MB.\n");
+            } else {
+                msg.append(ApplicationFrame.getInstance().PLUGIN
+                        .analyzeException(exception));
             }
         }
         if (msg.length() > 0) {
@@ -134,7 +137,7 @@ public final class ExceptionDialog {
         }
     }
     public static void hideException(Throwable t) {
-        t.printStackTrace();
+        ApplicationFrame.getInstance().printStackTraceOnGUI(t);
     }
 
     public static void ignoreException(Throwable t) {

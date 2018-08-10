@@ -266,4 +266,19 @@ public final class Config {
     public static String getLastUsedDir() throws Exception {
         return getSetting("dir");
     }
+
+    /**
+     * Used by plug-ins.
+     */
+    public static void saveExtraProperty(String propertyName,
+            String propertyValue) throws Exception {
+        saveSetting(propertyName, propertyValue);
+    }
+
+    /**
+     * Used by plug-ins.
+     */
+    public static String getExtraProperty(String propertyName) throws Exception {
+        return getSetting(propertyName);
+    }
 }

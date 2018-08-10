@@ -55,6 +55,7 @@ import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphicviewer.UndoMgr;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
+import net.sourceforge.open_teradata_viewer.plugin.Plugin;
 
 import com.incors.plaf.kunststoff.KunststoffLookAndFeel;
 import com.incors.plaf.kunststoff.KunststoffTheme;
@@ -72,17 +73,15 @@ public class ApplicationFrame extends JFrame {
     public static final Color DEFAULT_FOREGROUND_COLOR_LOG = Color.DARK_GRAY;
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
     public static final int MAX_CHARACTERS_LOG = 100000;
-
     /**
      * Shared variable used by ChangeLookAndFeelAction and
      * ApplicationMenuBar
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
+    public Plugin PLUGIN;
 
     public ChangeLog changeLog;
     private JEditorPane text;
-    public JEditorPane results;
-    public JFrame calendarFrame;
     public HelpViewerWindow helpFrame;
     public GraphicViewer graphicViewer;
 
@@ -344,10 +343,6 @@ public class ApplicationFrame extends JFrame {
         if (helpFrame != null) {
             helpFrame.dispose();
             helpFrame = null;
-        }
-        if (calendarFrame != null) {
-            calendarFrame.dispose();
-            calendarFrame = null;
         }
         if (graphicViewer != null) {
             graphicViewer.dispose();
