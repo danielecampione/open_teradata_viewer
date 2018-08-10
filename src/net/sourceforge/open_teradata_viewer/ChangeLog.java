@@ -57,8 +57,8 @@ public class ChangeLog extends JTextPane {
         DateTime dateTime = new DateTime(new java.util.Date());
         logFile = new File(
                 Tools.conformizePath(System.getProperty("user.home"))
-                        + "OpenTeradataViewer_" + String.format("%04d", dateTime.getYear())
-                        + "-"
+                        + "open_teradata_viewer_"
+                        + String.format("%04d", dateTime.getYear()) + "-"
                         + String.format("%02d", dateTime.getMonthOfYear())
                         + "-" + String.format("%02d", dateTime.getDayOfMonth())
                         + ".log");
@@ -105,7 +105,7 @@ public class ChangeLog extends JTextPane {
                 DateTime dateTime = new DateTime(new java.util.Date());
                 logFile = new File(Tools.conformizePath(System
                         .getProperty("user.home"))
-                        + "OpenTeradataViewer_"
+                        + "open_teradata_viewer_"
                         + String.format("%04d", dateTime.getYear())
                         + "-"
                         + String.format("%02d", dateTime.getMonthOfYear())
@@ -141,8 +141,9 @@ public class ChangeLog extends JTextPane {
 
     private int getGreatestFileIndex() {
         DateTime dateTime = new DateTime(new java.util.Date());
-        String fileName = "OpenTeradataViewer_" + String.format("%04d", dateTime.getYear())
-                + "-" + String.format("%02d", dateTime.getMonthOfYear()) + "-"
+        String fileName = "open_teradata_viewer_"
+                + String.format("%04d", dateTime.getYear()) + "-"
+                + String.format("%02d", dateTime.getMonthOfYear()) + "-"
                 + String.format("%02d", dateTime.getDayOfMonth()) + ".log-";
         File userHome = new File(Tools.conformizePath(System
                 .getProperty("user.home")));

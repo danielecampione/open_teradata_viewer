@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -63,6 +64,7 @@ import net.sourceforge.open_teradata_viewer.plugin.EntryDescriptor;
 import net.sourceforge.open_teradata_viewer.plugin.PluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 import com.incors.plaf.kunststoff.KunststoffLookAndFeel;
 import com.incors.plaf.kunststoff.KunststoffTheme;
@@ -138,7 +140,7 @@ public class ApplicationFrame extends JFrame {
         splashScreen.progress(9);
         setIconImage(ImageManager.getImage("/icons/open_teradata_viewer32.gif")
                 .getImage());
-        initGlassPane();
+        getRootPane().setGlassPane(glassPane = new GlassPane());
         splashScreen.progress(10);
 
         getContentPane().setLayout(new BorderLayout());
@@ -178,7 +180,7 @@ public class ApplicationFrame extends JFrame {
 
         //Add some key bindings.
         addBindings();
-        splashScreen.progress(10);
+        splashScreen.progress(5);
 
         graphicViewer = new GraphicViewer();
         splashScreen.progress(10);
@@ -207,20 +209,30 @@ public class ApplicationFrame extends JFrame {
         } catch (Exception e) {
             // ignore
         }
-        splashScreen.progress(10);
+        splashScreen.progress(5);
 
         displayChanger = new DisplayChanger(this);
         displayChanger.setExclusiveMode(false);
-        splashScreen.progress(10);
-    }
+        splashScreen.progress(5);
 
-    public void initGlassPane() {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                getRootPane().setGlassPane(glassPane = new GlassPane());
-            }
-        });
+        setJMenuBar(new ApplicationMenuBar());
+        splashScreen.progress(5);
+
+        installPlugins();
+        splashScreen.progress(5);
+
+        pack();
+        double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()
+                .getWidth();
+        double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
+                .getHeight();
+        setSize((int) (screenWidth * .8), (int) (screenHeight * .8));
+        setMinimumSize(new Dimension((int) (screenWidth * .2),
+                (int) (screenHeight * .2)));
+        SwingUtil.centerWithinScreen(this);
+        splashScreen.progress(5);
+
+        Actions.CONNECT.actionPerformed(new ActionEvent(this, 0, null));
     }
 
     public AnimatedAssistant startAnimatedAssistant(

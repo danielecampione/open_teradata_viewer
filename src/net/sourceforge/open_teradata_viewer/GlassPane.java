@@ -132,63 +132,68 @@ public class GlassPane extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
+        if (((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                .isAnimatedAssistantActived()) {
+            Graphics2D g2 = (Graphics2D) g;
 
-        Toolkit.getDefaultToolkit().sync();
-        synchronized (this.animatedAssistantList) {
-            if (this.animatedAssistantRendererOn) {
-                boolean showAnimatedAssistant = false;
-                for (AnimatedAssistant animatedAssistant : this.animatedAssistantList) {
-                    if (animatedAssistant.isShowTime()) {
-                        showAnimatedAssistant = true;
-                        break;
-                    }
-                }
-
-                if ((this.animatedAssistantList.size() > 0)
-                        && (showAnimatedAssistant)) {
-                    FontMetrics fm = g2.getFontMetrics();
-                    int left = this.component.getWidth() - 50;
-                    int top = this.component.getHeight() - 60;
-                    Image image = (Image) this.animatedAssistantImageList
-                            .get(this.indexAnim);
-                    g2.drawImage(image, left - image.getWidth(null), top
-                            - image.getHeight(null), null);
-
-                    int picWidth = 0;
-                    for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
-                        if (animatedAssistant.getImage() != null) {
-                            picWidth += animatedAssistant.getImage().getWidth(
-                                    null);
+            Toolkit.getDefaultToolkit().sync();
+            synchronized (this.animatedAssistantList) {
+                if (this.animatedAssistantRendererOn) {
+                    boolean showAnimatedAssistant = false;
+                    for (AnimatedAssistant animatedAssistant : this.animatedAssistantList) {
+                        if (animatedAssistant.isShowTime()) {
+                            showAnimatedAssistant = true;
+                            break;
                         }
                     }
-                    int picPos = 0;
-                    for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
-                        if (animatedAssistant.getImage() != null) {
-                            g2.drawImage(animatedAssistant.getImage(), left
-                                    - (image.getWidth(null) + picWidth) / 2
-                                    + picPos, top + 2, null);
 
-                            picPos += animatedAssistant.getImage().getWidth(
-                                    null);
+                    if ((this.animatedAssistantList.size() > 0)
+                            && (showAnimatedAssistant)) {
+                        FontMetrics fm = g2.getFontMetrics();
+                        int left = this.component.getWidth() - 50;
+                        int top = this.component.getHeight() - 60;
+                        Image image = (Image) this.animatedAssistantImageList
+                                .get(this.indexAnim);
+                        g2.drawImage(image, left - image.getWidth(null), top
+                                - image.getHeight(null), null);
+
+                        int picWidth = 0;
+                        for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
+                            if (animatedAssistant.getImage() != null) {
+                                picWidth += animatedAssistant.getImage()
+                                        .getWidth(null);
+                            }
                         }
-                    }
-                    int textPos = 0;
-                    for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
-                        if (animatedAssistant.getMessage() != null) {
-                            g2.drawString(
-                                    animatedAssistant.getMessage(),
-                                    left
-                                            - (image.getWidth(null) + fm
-                                                    .stringWidth(animatedAssistant
-                                                            .getMessage())) / 2,
-                                    top + textPos + 20);
+                        int picPos = 0;
+                        for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
+                            if (animatedAssistant.getImage() != null) {
+                                g2.drawImage(animatedAssistant.getImage(), left
+                                        - (image.getWidth(null) + picWidth) / 2
+                                        + picPos, top + 2, null);
 
-                            textPos += fm.getHeight() + 4;
+                                picPos += animatedAssistant.getImage()
+                                        .getWidth(null);
+                            }
+                        }
+                        int textPos = 0;
+                        for (AnimatedAssistant animatedAssistant : animatedAssistantArray) {
+                            if (animatedAssistant.getMessage() != null) {
+                                g2.drawString(
+                                        animatedAssistant.getMessage(),
+                                        left
+                                                - (image.getWidth(null) + fm
+                                                        .stringWidth(animatedAssistant
+                                                                .getMessage()))
+                                                / 2, top + textPos + 20);
+
+                                textPos += fm.getHeight() + 4;
+                            }
                         }
                     }
                 }
             }
+        } else {
+            super.paintComponents(g);
         }
     }
 

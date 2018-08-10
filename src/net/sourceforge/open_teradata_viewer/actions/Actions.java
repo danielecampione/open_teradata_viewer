@@ -42,8 +42,14 @@ public final class Actions
             ListSelectionListener,
             TableColumnModelListener {
 
+    //  Included in jsyntaxpane
+    public static final Boolean CUT_COPY_PASTE_ENABLED = true;
+
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
+    public static final CustomAction CUT = new CutAction();
+    public static final CustomAction COPY = new CopyAction();
+    public static final CustomAction PASTE = new PasteAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();

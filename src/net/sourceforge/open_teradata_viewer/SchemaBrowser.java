@@ -78,12 +78,12 @@ public class SchemaBrowser extends JTree {
                 ApplicationFrame.getInstance().changeLog.append(t.getMessage()
                         + "\n", ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 String relationName = toString().toUpperCase();
-                String querySQL = "HELP TABLE " + relationName;
+                String sqlQuery = "HELP TABLE " + relationName;
                 ResultSet resultSet = null;
                 Connection connection = connectionData.getConnection();
                 try {
                     final PreparedStatement statement = connection
-                            .prepareStatement(querySQL);
+                            .prepareStatement(sqlQuery);
                     Runnable onCancel = new Runnable() {
                         @Override
                         public void run() {

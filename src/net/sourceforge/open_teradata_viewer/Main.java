@@ -18,17 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
-
-import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * Entry point for the application
@@ -71,24 +65,9 @@ public class Main {
         ApplicationFrame mainWindow = new ApplicationFrame();
         SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
         mainWindow.drawIt(splashScreen);
-        mainWindow.setJMenuBar(new ApplicationMenuBar());
-        mainWindow.installPlugins();
-        mainWindow.pack();
-
-        double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()
-                .getWidth();
-        double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
-                .getHeight();
-        mainWindow.setSize((int) (screenWidth * .8), (int) (screenHeight * .8));
-        mainWindow.setMinimumSize(new Dimension((int) (screenWidth * .2),
-                (int) (screenHeight * .2)));
-
-        SwingUtil.centerWithinScreen(mainWindow);
 
         mainWindow.setVisible(true);
         splashScreen.setVisible(false);
         splashScreen.dispose();
-
-        Actions.CONNECT.actionPerformed(new ActionEvent(mainWindow, 0, null));
     }
 }

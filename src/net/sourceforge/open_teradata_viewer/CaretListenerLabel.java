@@ -40,24 +40,23 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
         super(label);
     }
 
-    //Might not be invoked from the event dispatch thread.
+    /** Might not be invoked from the event dispatch thread */
     public void caretUpdate(CaretEvent e) {
         displaySelectionInfo(e.getDot(), e.getMark());
     }
 
-    //This method can be invoked from any thread.  It 
-    //invokes the setText and modelToView methods, which 
-    //must run on the event dispatch thread. We use
-    //invokeLater to schedule the code for execution
-    //on the event dispatch thread.
+    // This method can be invoked from any thread. It invokes the setText and
+    // modelToView methods, which must run on the event dispatch thread. We use
+    // invokeLater to schedule the code for execution on the event dispatch
+    // thread.
     protected void displaySelectionInfo(final int dot, final int mark) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                if (dot == mark) { // no selection
+                if (dot == mark) { // No selection
                     try {
                         Rectangle caretCoords = ApplicationFrame.getInstance()
                                 .getTextComponent().modelToView(dot);
-                        //Convert it to view coordinates.
+                        // Convert it to view coordinates
                         setText(dot + ", [" + caretCoords.x + ", "
                                 + caretCoords.y + "]\n");
                     } catch (BadLocationException ble) {

@@ -98,7 +98,7 @@ public class ShowViewAction extends CustomAction {
             viewName = viewName
                     .substring(lastTokenIndex + 1, viewName.length());
         }
-        String querySQL = "SELECT TOP 1 RequestText FROM DBC.TABLESV WHERE TableName = '"
+        String sqlQuery = "SELECT TOP 1 RequestText FROM DBC.TABLESV WHERE TableName = '"
                 + viewName
                 + "'"
                 + ((databaseName != null && databaseName.trim().length() > 0)
@@ -108,7 +108,7 @@ public class ShowViewAction extends CustomAction {
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
         final PreparedStatement statement = connection
-                .prepareStatement(querySQL);
+                .prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {

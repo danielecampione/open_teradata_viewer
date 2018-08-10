@@ -47,9 +47,14 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.RUN);
         add(Actions.RUN_SCRIPT);
         addSeparator();
+        if (Actions.CUT_COPY_PASTE_ENABLED) {
+            add(Actions.CUT);
+            add(Actions.COPY);
+            add(Actions.PASTE);
+            addSeparator();
+        }
         add(Actions.FILE_OPEN);
         add(Actions.FILE_SAVE);
-        addSeparator();
         add(Actions.FAVORITES);
         addSeparator();
         add(Actions.HISTORY_PREVIOUS);

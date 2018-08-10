@@ -69,12 +69,6 @@ import com.jgoodies.looks.Options;
 
 public class UISupport {
 
-    public static final String IMAGES_RESOURCE_PATH = "/icons";
-    public static final String TOOL_ICON_PATH = "/applications-system.png";
-    public static final String OPTIONS_ICON_PATH = "/preferences-system.png";
-    public static final String LOADUI_ICON_PATH = "/runWithLoadui.png";
-    public static final String CONVERT_TO_LOADUI_ICON_PATH = "/convertLoadTestToLoadUI.png";
-
     // This is needed in Eclipse that has strict class loader constraints.
     private static List<ClassLoader> secondaryResourceLoaders = new ArrayList<ClassLoader>();
 
@@ -164,19 +158,6 @@ public class UISupport {
 
     public static XFileDialogs getFileDialogs() {
         return fileDialogs;
-    }
-
-    /**
-     * @deprecated use XForm related classes instead
-     */
-
-    public static void showErrorMessage(String message) {
-        if (message.length() > 120) {
-            dialogs.showExtendedInfo("Error", "An error occurred", message,
-                    null);
-        } else {
-            dialogs.showErrorMessage(message);
-        }
     }
 
     public static boolean confirm(String question, String title) {

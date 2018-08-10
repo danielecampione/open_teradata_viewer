@@ -132,8 +132,6 @@ public final class ResultSetTable extends JTable {
                 ((DefaultTableModel) getModel()).setDataVector(dataVector,
                         columnIdentifiers);
                 validate();
-                // i18n[Application.resultSetTable.rows=rows]
-                // i18n[Application.resultSetTable.row=row]
                 String rows = String.format("%d %s", dataVector.size(),
                         dataVector.size() != 1 ? "rows" : "row");
                 JComponent scrollPane = (JComponent) getParent().getParent();

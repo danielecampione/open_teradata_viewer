@@ -87,12 +87,12 @@ public class ShowProcedureAction extends CustomAction {
         }
 
         procedureName = procedureName.trim().toUpperCase();
-        String querySQL = "SHOW PROCEDURE " + procedureName;
+        String sqlQuery = "SHOW PROCEDURE " + procedureName;
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
         final PreparedStatement statement = connection
-                .prepareStatement(querySQL);
+                .prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {

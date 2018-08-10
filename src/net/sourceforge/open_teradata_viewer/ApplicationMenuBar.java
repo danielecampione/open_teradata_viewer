@@ -18,12 +18,10 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.AbstractButton;
-import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -31,8 +29,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.JTextComponent;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
@@ -47,8 +43,6 @@ import net.sourceforge.open_teradata_viewer.actions.ChangeLookAndFeelAction;
 public class ApplicationMenuBar extends JMenuBar {
 
     private static final long serialVersionUID = -3435078396857591267L;
-
-    private HashMap<Object, Action> actions;
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -68,17 +62,12 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu("Edit");
         add(menu);
-        // Set up the edit actions
-        actions = createActionTable(ApplicationFrame.getInstance()
-                .getTextComponent());
-        //These actions come from the default editor kit.
-        //Get the ones we want and stick them in the menu.
-        menu.add(getActionByName(DefaultEditorKit.cutAction));
-        menu.add(getActionByName(DefaultEditorKit.copyAction));
-        menu.add(getActionByName(DefaultEditorKit.pasteAction));
-        menu.addSeparator();
-        menu.add(getActionByName(DefaultEditorKit.selectAllAction));
-        menu.addSeparator();
+        if (Actions.CUT_COPY_PASTE_ENABLED) {
+            menu.add(Actions.CUT);
+            menu.add(Actions.COPY);
+            menu.add(Actions.PASTE);
+            menu.addSeparator();
+        }
         menu.add(Actions.FORMAT_SQL);
         menu.addSeparator();
         menu.add(Actions.HISTORY_PREVIOUS);
@@ -178,22 +167,5 @@ public class ApplicationMenuBar extends JMenuBar {
                 setMnemonics(((JMenu) item).getPopupMenu());
             }
         }
-    }
-
-    private Action getActionByName(String name) {
-        return actions.get(name);
-    }
-
-    //The following two methods allow us to find an
-    //action provided by the editor kit by its name.
-    private HashMap<Object, Action> createActionTable(
-            JTextComponent textComponent) {
-        HashMap<Object, Action> actions = new HashMap<Object, Action>();
-        Action[] actionsArray = textComponent.getActions();
-        for (int i = 0; i < actionsArray.length; i++) {
-            Action a = actionsArray[i];
-            actions.put(a.getValue(Action.NAME), a);
-        }
-        return actions;
     }
 }
