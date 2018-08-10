@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -192,10 +193,19 @@ public class ConnectAction extends CustomAction {
         final JTextField url = new JTextField(connectionData.getUrl());
         panel.add(url, c);
         c.gridy++;
+        panel.add(new JLabel("User"), c);
+        JTextField user = new JTextField(connectionData.getUser());
+        panel.add(user, c);
+        c.gridy++;
+        panel.add(new JLabel("Password"), c);
+        JTextField password = new JPasswordField(connectionData.getPassword());
+        panel.add(password, c);
         int i = Dialog.show("Connection", panel, Dialog.PLAIN_MESSAGE,
                 Dialog.OK_CANCEL_OPTION);
         connectionData.setName(name.getText());
         connectionData.setUrl(url.getText());
+        connectionData.setUser(user.getText().trim());
+        connectionData.setPassword(password.getText());
         if (Dialog.OK_OPTION == i && connectionData.getName().trim().isEmpty()) {
             Dialog.show("Empty name", "Why would you want an empty name?",
                     Dialog.ERROR_MESSAGE,

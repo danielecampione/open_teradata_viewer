@@ -1,3 +1,10 @@
+0.04c (19-jul-11)
+    - Added the user and password text fields for connections that don't use the
+      LDAP logging mechanism. 
+    - Fixed a bug relative to the "EDIT DRIVERS" command. If a JDBC driver was
+      not found and the user closed the drivers dialog box, the returned
+      response was causing an error. Now this situation is suitably managed.
+
 0.04b (13-jul-11)
     - Management of plugins has been improved.
     - forms-1.0.3 library has been upgraded to 1.0.7 version.

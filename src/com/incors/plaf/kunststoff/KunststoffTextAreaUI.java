@@ -1,46 +1,77 @@
-package com.incors.plaf.kunststoff;
-
 /*
- * This code was developed by INCORS GmbH (www.incors.com)
- * based on a contribution by Timo Haberkern.
- * It is published under the terms of the Lesser GNU Public License.
+ * Open Teradata Viewer ( look and feel )
+ * Copyright (C) 2011, D. Campione
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.*;
+package com.incors.plaf.kunststoff;
 
-public class KunststoffTextAreaUI extends BasicTextAreaUI{
-  protected JComponent myComponent;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
-  public KunststoffTextAreaUI(JComponent c) {
-    super();
-    myComponent = c;
-  }
+import javax.swing.JComponent;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicTextAreaUI;
 
-  public static ComponentUI createUI(JComponent c) {
-    return new KunststoffTextAreaUI(c);
-  }
+/**
+ * 
+ * 
+ * @author Timo Haberkern
+ * 
+ */
+public class KunststoffTextAreaUI extends BasicTextAreaUI {
 
-  protected void paintBackground(Graphics g) {
-    super.paintBackground(g);
-    Rectangle editorRect = getVisibleEditorRect();
+    protected JComponent myComponent;
 
-    // paint upper gradient
-    Color colorReflection = KunststoffLookAndFeel.getTextComponentGradientColorReflection();
-    if (colorReflection != null) {
-      Color colorReflectionFaded = KunststoffUtilities.getTranslucentColor(colorReflection, 0);
-      Rectangle rect = new Rectangle(editorRect.x, editorRect.y, editorRect.width, editorRect.height/2);
-      KunststoffUtilities.drawGradient(g, colorReflection, colorReflectionFaded, rect, true);
+    public KunststoffTextAreaUI(JComponent c) {
+        super();
+        myComponent = c;
     }
 
-    // paint lower gradient
-    Color colorShadow = KunststoffLookAndFeel.getTextComponentGradientColorShadow();
-    if (colorShadow != null) {
-      Color colorShadowFaded = KunststoffUtilities.getTranslucentColor(colorShadow, 0);
-      Rectangle rect = new Rectangle(editorRect.x, editorRect.y+editorRect.height/2, editorRect.width, editorRect.height/2);
-      KunststoffUtilities.drawGradient(g, colorShadowFaded, colorShadow, rect, true);
+    public static ComponentUI createUI(JComponent c) {
+        return new KunststoffTextAreaUI(c);
     }
-  }
+
+    protected void paintBackground(Graphics g) {
+        super.paintBackground(g);
+        Rectangle editorRect = getVisibleEditorRect();
+
+        // paint upper gradient
+        Color colorReflection = KunststoffLookAndFeel
+                .getTextComponentGradientColorReflection();
+        if (colorReflection != null) {
+            Color colorReflectionFaded = KunststoffUtilities
+                    .getTranslucentColor(colorReflection, 0);
+            Rectangle rect = new Rectangle(editorRect.x, editorRect.y,
+                    editorRect.width, editorRect.height / 2);
+            KunststoffUtilities.drawGradient(g, colorReflection,
+                    colorReflectionFaded, rect, true);
+        }
+
+        // paint lower gradient
+        Color colorShadow = KunststoffLookAndFeel
+                .getTextComponentGradientColorShadow();
+        if (colorShadow != null) {
+            Color colorShadowFaded = KunststoffUtilities.getTranslucentColor(
+                    colorShadow, 0);
+            Rectangle rect = new Rectangle(editorRect.x, editorRect.y
+                    + editorRect.height / 2, editorRect.width,
+                    editorRect.height / 2);
+            KunststoffUtilities.drawGradient(g, colorShadowFaded, colorShadow,
+                    rect, true);
+        }
+    }
 }

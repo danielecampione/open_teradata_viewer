@@ -98,8 +98,7 @@ public class Tools {
      * @param size the size to pad to
      * @param padChar the character to pad with
      * @return left padded String or original String if no padding is necessary,
-     * <code>null</code> if null String input
-     * @since 2.0
+     * <code>null</code> if null String input.
      */
     public static String leftPad(String str, int size, char padChar) {
         if (str == null) {

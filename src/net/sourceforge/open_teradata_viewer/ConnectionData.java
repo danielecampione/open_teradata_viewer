@@ -35,6 +35,9 @@ public class ConnectionData implements Comparable, Cloneable {
 
     private String name;
     private String url;
+    private String user;
+    private String password;
+    private String transientPassword;
 
     private Driver driver;
     private Connection connection;
@@ -46,9 +49,12 @@ public class ConnectionData implements Comparable, Cloneable {
     public ConnectionData() {
     }
 
-    public ConnectionData(String newName, String newUrl) {
+    public ConnectionData(String newName, String newUrl, String newUser,
+            String newPassword) {
         this.name = newName;
         this.url = newUrl;
+        this.user = newUser;
+        this.password = newPassword;
     }
 
     public String getName() {
@@ -65,6 +71,30 @@ public class ConnectionData implements Comparable, Cloneable {
 
     public void setUrl(String newUrl) {
         this.url = newUrl;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String newUser) {
+        this.user = newUser;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public String getTransientPassword() {
+        return transientPassword;
+    }
+
+    public void setTransientPassword(String newTransientPassword) {
+        this.transientPassword = newTransientPassword;
     }
 
     public Driver getDriver() {
@@ -97,13 +127,22 @@ public class ConnectionData implements Comparable, Cloneable {
                     throw new Exception(String.format(
                             "No suitable driver for URL \"%s\"", url), e1);
                 }
-            } else if (Dialog.CANCEL_OPTION == response) {
+            } else if (Dialog.CANCEL_OPTION == response
+                    || Dialog.CLOSED_OPTION == response) {
                 return;
             }
         }
+
         Properties properties = new Properties();
+        if (user.length() > 0) {
+            properties.setProperty("user", user);
+            properties.setProperty("password", password.isEmpty()
+                    ? transientPassword
+                    : password);
+        }
         addExtraProperties(properties);
         connection = driver.connect(url, properties);
+
         if (connection == null) {
             throw new Exception(String.format(
                     "Unable to connect.\nURL = %s\nDriver = %s", url, driver

@@ -124,7 +124,9 @@ public final class Config {
             Element element = (Element) nodeList.item(i);
             connectionDatas.add(new ConnectionData(
                     element.getAttribute("name"), element
-                            .getAttribute("connection")));
+                            .getAttribute("connection"), element
+                            .getAttribute("user"), Config.decrypt(element
+                            .getAttribute("password"))));
         }
         return connectionDatas;
     }
@@ -142,6 +144,9 @@ public final class Config {
             Element element = config.getOwnerDocument().createElement(
                     "database");
             element.setAttribute("name", connectionData.getName());
+            element.setAttribute("user", connectionData.getUser());
+            element.setAttribute("password",
+                    Config.encrypt(connectionData.getPassword()));
             element.setAttribute("connection", connectionData.getUrl());
             config.appendChild(element);
         }

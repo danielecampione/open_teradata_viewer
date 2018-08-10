@@ -1,9 +1,22 @@
-package com.incors.plaf.kunststoff;
-
 /*
- * This code was developed by Jerason Banes (jbanes@techie.com).
- * It is published under the terms of the GNU Lesser General Public License.
+ * Open Teradata Viewer ( look and feel )
+ * Copyright (C) 2011, D. Campione
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package com.incors.plaf.kunststoff;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -15,7 +28,34 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.metal.MetalInternalFrameTitlePane;
 import javax.swing.plaf.metal.MetalInternalFrameUI;
 
+/**
+ * 
+ * 
+ * @author Aljoscha Rittner
+ * @author C.J. Kent
+ * @author Christian Peter
+ * @author Christoph Wilhelms
+ * @author Eric Georges
+ * @author Gerald Bauer
+ * @author Ingo Kegel
+ * @author Jamie LaScolea
+ * @author <A HREF="mailto:jens@jensn.de">Jens Niemeyer</A>
+ * @author Jerason Banes
+ * @author Jim Wissner
+ * @author Johannes Ernst
+ * @author Jonas Kilian
+ * @author <A HREF="mailto:julien@izforge.com">Julien Ponge</A>
+ * @author Karsten Lentzsch
+ * @author Matthew Philips
+ * @author Romain Guy
+ * @author Sebastian Ferreyra
+ * @author Steve Varghese
+ * @author Taoufik Romdhane
+ * @author Timo Haberkern
+ * 
+ */
 public class KunststoffInternalFrameUI extends MetalInternalFrameUI {
+
     private MetalInternalFrameTitlePane titlePane;
     private PropertyChangeListener paletteListener;
 
@@ -71,6 +111,32 @@ public class KunststoffInternalFrameUI extends MetalInternalFrameUI {
         }
     }
 
+    /**
+     * 
+     * 
+     * @author Aljoscha Rittner
+     * @author C.J. Kent
+     * @author Christian Peter
+     * @author Christoph Wilhelms
+     * @author Eric Georges
+     * @author Gerald Bauer
+     * @author Ingo Kegel
+     * @author Jamie LaScolea
+     * @author <A HREF="mailto:jens@jensn.de">Jens Niemeyer</A>
+     * @author Jerason Banes
+     * @author Jim Wissner
+     * @author Johannes Ernst
+     * @author Jonas Kilian
+     * @author <A HREF="mailto:julien@izforge.com">Julien Ponge</A>
+     * @author Karsten Lentzsch
+     * @author Matthew Philips
+     * @author Romain Guy
+     * @author Sebastian Ferreyra
+     * @author Steve Varghese
+     * @author Taoufik Romdhane
+     * @author Timo Haberkern
+     * 
+     */
     class PaletteListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent e) {
             String name = e.getPropertyName();

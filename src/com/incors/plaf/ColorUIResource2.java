@@ -1,11 +1,23 @@
+/*
+ * Open Teradata Viewer ( look and feel )
+ * Copyright (C) 2011, D. Campione
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.incors.plaf;
 
-/**
- * This class had to be created because <code>ColorUIResouce</code> does not allow
- * transparency. Hopefully one day support for transparency will be added to we
- * ColorUIResouce and we can get rid of this class. Wrapping a <code>Color</color>
- * object to make a pseudo subclass is very ugly.
- */
 import java.awt.Color;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
@@ -17,6 +29,15 @@ import java.awt.image.ColorModel;
 
 import javax.swing.plaf.ColorUIResource;
 
+/**
+ * This class had to be created because <code>ColorUIResouce</code> does not allow
+ * transparency. Hopefully one day support for transparency will be added to we
+ * ColorUIResouce and we can get rid of this class. Wrapping a <code>Color</color>
+ * object to make a pseudo subclass is very ugly.
+ * 
+ * @author Christoph Wilhelms
+ * 
+ */
 public class ColorUIResource2 extends ColorUIResource {
 
     private static final long serialVersionUID = 4261040681968142273L;
