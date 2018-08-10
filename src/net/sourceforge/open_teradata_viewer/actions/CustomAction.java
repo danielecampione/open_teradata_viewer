@@ -50,6 +50,8 @@ public abstract class CustomAction extends AbstractAction
 
     public static boolean inProgress;
 
+    public final String LINE_SEPARATOR = "=======================================";
+
     /**
      * An object name cannot be a Teradata reserved word.
      */

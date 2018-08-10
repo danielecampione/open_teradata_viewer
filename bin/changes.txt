@@ -1,3 +1,10 @@
+0.08c (21/09/2011)
+    - Added the EXPLAIN REQUEST command; the corresponding command button has
+      been installed on the "Schema Browser" menu.
+    - Fixed a bug related to the lack of JAR files in the plugins directory;
+      despite the absence of JAR files (JDBC driver included) in the plugins
+      directory, you can run the application.
+
 0.08b (20/09/2011)
     - Added the COMMIT command; the corresponding command button has been
       installed on the tool bar and on the "Connection" menu.

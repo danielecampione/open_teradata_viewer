@@ -263,6 +263,9 @@ public class ApplicationFrame extends JFrame {
         PluginFactory pluginFactory = new PluginFactory(pluginsPath);
         // The application obtains the loaded EntryDescriptors
         Collection pluginsCollection = pluginFactory.getAllEntryDescriptor();
+        if (pluginsCollection == null) { // No JAR file in the plugins path 
+            return;
+        }
         Iterator pluginsIterator = pluginsCollection.iterator();
         // Searching for plugins.. 
         while (pluginsIterator.hasNext()) {

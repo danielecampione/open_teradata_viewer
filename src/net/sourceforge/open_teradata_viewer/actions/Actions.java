@@ -82,6 +82,7 @@ public final class Actions
     public static final CustomAction SHOW_PROCEDURE = new ShowProcedureAction();
     public static final CustomAction SHOW_VIEW = new ShowViewAction();
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
+    public static final CustomAction EXPLAIN_REQUEST = new ExplainRequestAction();
     public static final CustomAction ANIMATED_ASSISTANT = new AnimatedAssistantAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
 
@@ -137,6 +138,7 @@ public final class Actions
         SELECT_FROM.setEnabled(isConnected);
         SHOW_PROCEDURE.setEnabled(isConnected);
         SHOW_VIEW.setEnabled(isConnected);
+        EXPLAIN_REQUEST.setEnabled(isConnected);
 
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
