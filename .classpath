@@ -8,7 +8,6 @@
 	<classpathentry kind="lib" path="lib/joda-time-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsqlparser.jar"/>
 	<classpathentry kind="lib" path="lib/l2fprod-common-all.jar"/>
-	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
 	<classpathentry kind="lib" path="lib/looks-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
 	<classpathentry kind="output" path="bin"/>

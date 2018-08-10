@@ -63,9 +63,7 @@ import net.sourceforge.open_teradata_viewer.plugin.IPluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
-
-import com.incors.plaf.kunststoff.KunststoffLookAndFeel;
-import com.incors.plaf.kunststoff.KunststoffTheme;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * The main frame.
@@ -76,6 +74,7 @@ import com.incors.plaf.kunststoff.KunststoffTheme;
 public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     private static final long serialVersionUID = -8572855678886323789L;
+
     private static ApplicationFrame APPLICATION_FRAME;
     public static final Color DEFAULT_FOREGROUND_COLOR_LOG = Color.DARK_GRAY;
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
@@ -113,37 +112,15 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     private OTVFindDialog _OTVFindDialog;
     private OTVGoToDialog _OTVGoToDialog;
 
+    /** Used to dynamically load 3rd-party LookAndFeels. */
+    private ThirdPartyLookAndFeelManager lafManager;
+
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
         APPLICATION_FRAME = this;
     }
 
-    private void setUI() {
-        KunststoffLookAndFeel.setCurrentTheme(new KunststoffTheme());
-        setLookAndFeel(new KunststoffLookAndFeel().getClass().getName());
-
-        // These lines need to be implemented in order to make JWS work properly
-        try {
-            UIManager.getLookAndFeelDefaults().put(
-                    "ClassLoader",
-                    Class.forName(
-                            "com.incors.plaf.kunststoff.KunststoffLookAndFeel")
-                            .newInstance().getClass().getClassLoader());
-            UIManager.getLookAndFeelDefaults().put(
-                    "ClassLoader",
-                    Class.forName("com.birosoft.liquid.LiquidLookAndFeel")
-                            .newInstance().getClass().getClassLoader());
-        } catch (InstantiationException ie) {
-            ExceptionDialog.hideException(ie);
-        } catch (IllegalAccessException iae) {
-            ExceptionDialog.hideException(iae);
-        } catch (ClassNotFoundException cnfe) {
-            ExceptionDialog.hideException(cnfe);
-        }
-    }
-
     public void drawIt(SplashScreen splashScreen) {
-        setUI();
         splashScreen.progress(9);
         setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
         getRootPane().setGlassPane(glassPane = new GlassPane());
@@ -178,6 +155,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 globalPanel, scrollPaneConsole);
         mainSplitPane.setOneTouchExpandable(true);
+        mainSplitPane.setDividerSize(4);
         mainSplitPane.setDividerLocation(510);
         getContentPane().add(mainSplitPane, BorderLayout.CENTER);
         splashScreen.progress(5);
@@ -303,13 +281,19 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 SwingUtilities.updateComponentTreeUI(w);
             }
         }
+        String startupLookAndFeelProperty = "startup_lookandfeel_class";
+        try {
+            Config.saveSetting(startupLookAndFeelProperty, className);
+        } catch (Exception e) {
+            ExceptionDialog.ignoreException(e);
+        }
     }
 
     private JSplitPane createWorkArea() {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 createQueryEditor(), createQueryTable());
         queryArea.setOneTouchExpandable(true);
-        queryArea.setDividerSize(7);
+        queryArea.setDividerSize(4);
         queryArea.setDividerLocation(200);
         return queryArea;
     }
@@ -463,7 +447,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     }
 
     private void deleteHelpFiles() {
-        String directoryPath = Tools.conformizePath(System
+        String directoryPath = Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"));
 
         File file = new File(directoryPath + "help" + File.separator
@@ -487,12 +471,12 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             file.delete();
         }
 
-        directoryPath = Tools.conformizePath(System
+        directoryPath = Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + "help"
                 + File.separator
                 + "manual_file" + File.separator;
-        File[] files = Tools.listFiles(new File(directoryPath));
+        File[] files = Utilities.listFiles(new File(directoryPath));
         if (files != null) {
             for (int i = 0; i < files.length; i++) {
                 file = files[i];
@@ -505,7 +489,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         if (file.exists()) {
             file.delete();
         }
-        file = new File(Tools.conformizePath(System
+        file = new File(Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir")) + "help");
         if (file.exists()) {
             file.delete();
@@ -547,6 +531,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             }
         }).start();
     }
+
     public void showHideObjectChooser() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
@@ -573,13 +558,60 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             focusTextArea();
         }
     }
-    public SchemaBrowser getObjectChooser() {
-        return rightComponent == null ? null : (SchemaBrowser) rightComponent
-                .getViewport().getComponent(0);
-    }
 
     public void replaceText(String t) {
         textArea.replaceSelection(t);
+    }
+
+    /**
+     * Sets the utility used to dynamically load 3rd-party LookAndFeels.
+     *
+     * @param manager The utility, or <code>null</code> for none.
+     * @see #getLookAndFeelManager()
+     */
+    public void initLookAndFeelManager(ThirdPartyLookAndFeelManager manager) {
+        lafManager = manager;
+
+        if (lafManager != null) {
+            // We must add our class loader capable of loading 3rd party LaF
+            // jars as this property as it is used internally by Swing when
+            // loading classes
+            ClassLoader cl = lafManager.getLAFClassLoader();
+            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+        }
+    }
+
+    /**
+     * Returns the manager in charge of any 3rd-party LookAndFeels this
+     * application is aware of.
+     *
+     * @return The manager, or <code>null</code> if there is none.
+     * @see #initLookAndFeelManager(ThirdPartyLookAndFeelManager)
+     */
+    public ThirdPartyLookAndFeelManager getLookAndFeelManager() {
+        return lafManager;
+    }
+
+    /**
+     * Returns an array of info. for JAR files containing 3rd party Look and
+     * Feels. These JAR files will be added to the <code>UIManager</code>'s
+     * classpath so that these LnFs can be used in this GUI application.<p>
+     *
+     * For this method to return anything, you must install a {@link
+     * ThirdPartyLookAndFeelManager}.
+     *
+     * @return An array of information on JAR files containing Look and Feels.
+     * @see #initLookAndFeelManager(ThirdPartyLookAndFeelManager)
+     */
+    public ExtendedLookAndFeelInfo[] get3rdPartyLookAndFeelInfo() {
+        return lafManager != null
+                ? lafManager.get3rdPartyLookAndFeelInfo()
+                : null;
+    }
+
+    public SchemaBrowser getObjectChooser() {
+        return rightComponent == null ? null : (SchemaBrowser) rightComponent
+                .getViewport().getComponent(0);
     }
 
     public void setText(final String t) {

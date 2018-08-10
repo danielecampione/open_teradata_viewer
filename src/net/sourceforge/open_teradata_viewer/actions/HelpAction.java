@@ -28,13 +28,13 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.Tools;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.help.HelpFiles;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
 import net.sourceforge.open_teradata_viewer.util.StreamUtil;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -70,12 +70,12 @@ public class HelpAction extends CustomAction {
                         .getHelpFrame())) {
             return;
         }
-        Tools.writeLocallyJARInternalFile("license.txt");
-        Tools.writeLocallyJARInternalFile("changes.txt");
+        Utilities.writeLocallyJARInternalFile("license.txt");
+        Utilities.writeLocallyJARInternalFile("changes.txt");
 
         // Guide files
-        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
-                + "manual.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                + File.separator + "manual.html");
 
         StringList sl = new StringList();
         sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream(
@@ -85,7 +85,7 @@ public class HelpAction extends CustomAction {
                 continue;
             }
             try {
-                Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
                         + File.separator + "manual_file" + File.separator
                         + (String) sl.get(i));
             } catch (Throwable ex) {
@@ -98,12 +98,12 @@ public class HelpAction extends CustomAction {
             }
         }
 
-        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
-                + "license.html");
-        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
-                + "changes.html");
-        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
-                + "FAQ.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                + File.separator + "license.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                + File.separator + "changes.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                + File.separator + "FAQ.html");
 
         try {
             ApplicationFrame.getInstance().setHelpFrame(new HelpViewerWindow());

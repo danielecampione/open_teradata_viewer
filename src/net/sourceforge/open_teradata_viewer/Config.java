@@ -46,6 +46,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -221,9 +223,9 @@ public final class Config {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder();
         try {
-            InputStream inputStream = new FileInputStream(
-                    new File(System.getProperty("user.home"),
-                            "open_teradata_viewer.xml"));
+            InputStream inputStream = new FileInputStream(new File(
+                    Utilities.conformizePath(System.getProperty("user.home")),
+                    "open_teradata_viewer.xml"));
             config = documentBuilder.parse(inputStream).getDocumentElement();
             inputStream.close();
         } catch (Exception e) {
@@ -252,7 +254,8 @@ public final class Config {
         transformer.transform(new DOMSource(config), new StreamResult(
                 new ByteArrayOutputStream())); // test first
         transformer.transform(new DOMSource(config), new StreamResult(new File(
-                System.getProperty("user.home"), "open_teradata_viewer.xml")));
+                Utilities.conformizePath(System.getProperty("user.home")),
+                "open_teradata_viewer.xml")));
     }
 
     protected static String decrypt(String encrypted)

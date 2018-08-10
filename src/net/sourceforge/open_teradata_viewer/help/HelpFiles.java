@@ -20,7 +20,7 @@ package net.sourceforge.open_teradata_viewer.help;
 
 import java.io.File;
 
-import net.sourceforge.open_teradata_viewer.Tools;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * This class contains information about files and directories used by the
@@ -36,40 +36,32 @@ public class HelpFiles {
         super();
     }
 
-    /**
-     * @return the quickstart guide.
-     */
+    /** @return the quickstart guide. */
     public File getQuickStartGuideFile() {
-        return new File(Tools.conformizePath(System
+        return new File(Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + HelpFiles.helpFolder
                 + File.separator + "manual.html");
     }
 
-    /**
-     * @return the FAQ.
-     */
+    /** @return the FAQ. */
     public File getFAQFile() {
-        return new File(Tools.conformizePath(System
+        return new File(Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + HelpFiles.helpFolder
                 + File.separator + "FAQ.html");
     }
 
-    /**
-     * @return the changelog.
-     */
+    /** @return the changelog. */
     public File getChangeLogFile() {
-        return new File(Tools.conformizePath(System
+        return new File(Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + HelpFiles.helpFolder
                 + File.separator + "changes.html");
     }
-    /**
-     * @return the licence file.
-     */
+    /** @return the licence file. */
     public File getLicenceFile() {
-        return new File(Tools.conformizePath(System
+        return new File(Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + HelpFiles.helpFolder
                 + File.separator + "license.html");

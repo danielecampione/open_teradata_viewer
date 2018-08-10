@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -181,19 +182,42 @@ public class ApplicationMenuBar extends JMenuBar {
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
         JRadioButtonMenuItem[] _mnuAvailableLookAndFeel = new JRadioButtonMenuItem[lafInfo.length];
         for (int i = 0; i < lafInfo.length; i++) {
+            String name = lafInfo[i].getName();
+            _mnuAvailableLookAndFeel[i] = new JRadioButtonMenuItem(name);
             completePathOfLafClasses[i] = lafInfo[i].getClassName();
-            _mnuAvailableLookAndFeel[i] = new JRadioButtonMenuItem(
-                    completePathOfLafClasses[i]
-                            .substring(completePathOfLafClasses[i]
-                                    .lastIndexOf(".") + 1));
             buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel[i]);
             menu.add(_mnuAvailableLookAndFeel[i]);
             _mnuAvailableLookAndFeel[i]
                     .addActionListener(new LookAndFeelAction(
                             completePathOfLafClasses[i]));
             if (completePathOfLafClasses[i].equals(UIManager.getLookAndFeel()
-                    .getClass().toString().substring("class ".length())))
+                    .getClass().toString().substring("class ".length()))) {
                 _mnuAvailableLookAndFeel[i].setSelected(true);
+            }
+        }
+
+        // Add any 3rd party Look and Feels in the lookandfeels subdirectory
+        ExtendedLookAndFeelInfo[] info = ApplicationFrame.getInstance()
+                .get3rdPartyLookAndFeelInfo();
+        if (info != null && info.length > 0) {
+            for (int i = 0; i < info.length; i++) {
+                if (!Arrays.asList(completePathOfLafClasses).contains(
+                        info[i].getClassName())) {
+                    _mnuAvailableLookAndFeel[i] = new JRadioButtonMenuItem(
+                            info[i].getName());
+                    completePathOfLafClasses[i] = info[i].getClassName();
+                    buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel[i]);
+                    menu.add(_mnuAvailableLookAndFeel[i]);
+                    _mnuAvailableLookAndFeel[i]
+                            .addActionListener(new LookAndFeelAction(
+                                    completePathOfLafClasses[i]));
+                    if (completePathOfLafClasses[i].equals(UIManager
+                            .getLookAndFeel().getClass().toString()
+                            .substring("class ".length()))) {
+                        _mnuAvailableLookAndFeel[i].setSelected(true);
+                    }
+                }
+            }
         }
 
         menu = new JMenu("View");

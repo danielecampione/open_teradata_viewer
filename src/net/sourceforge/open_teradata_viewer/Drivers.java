@@ -41,6 +41,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 /**
  * 
  * 
@@ -56,7 +58,7 @@ public class Drivers {
 
     public static void initialize() throws Exception {
         if (!initialized) {
-            addAllJarsToClasspath();
+            addAllJarsToClasspath(".");
             try {
                 loadCustomDrivers();
             } catch (ClassNotFoundException cnfe) {
@@ -66,15 +68,15 @@ public class Drivers {
         }
     }
 
-    private static URL[] retrieveAllJars() throws MalformedURLException {
-        File[] files = new File(Tools.conformizePath("."))
+    static URL[] retrieveAllJars(String path) throws MalformedURLException {
+        File[] files = new File(Utilities.conformizePath(path))
                 .listFiles(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String fileName) {
                         Vector<String> filesToIgnore = new Vector<String>(1, 1);
                         String currentFileInClassPath = null;
                         StringTokenizer classesPaths = new StringTokenizer(
-                                Tools.conformizePath(System
+                                Utilities.conformizePath(System
                                         .getProperty("java.class.path")), ";");
                         while (classesPaths.hasMoreTokens()) {
                             StringTokenizer pathTokenizer = new StringTokenizer(
@@ -101,12 +103,13 @@ public class Drivers {
         }
         return urls;
     }
-    private static void addAllJarsToClasspath() throws Exception {
+
+    static void addAllJarsToClasspath(String path) throws Exception {
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
         Method addURL = URLClassLoader.class.getDeclaredMethod("addURL",
                 URL.class);
         addURL.setAccessible(true);
-        URL[] urls = retrieveAllJars();
+        URL[] urls = retrieveAllJars(path);
         for (URL url1 : urls) {
             addURL.invoke(systemClassLoader, url1);
         }

@@ -20,9 +20,11 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Font;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * Entry point for the application.
@@ -42,7 +44,7 @@ public class Main {
 
     public static void main(final String[] args) {
         // Check if the used JDK is supported
-        if (!Tools.isJDK16OrAbove()) {
+        if (!Utilities.isJDK16OrAbove()) {
             System.err.println("The installed JDK version is NOT supported.\n"
                     + "The program will be terminated.");
             System.exit(-1);
@@ -53,19 +55,63 @@ public class Main {
             System.exit(-2);
         }
 
-        JFrame.setDefaultLookAndFeelDecorated(false);
-        JDialog.setDefaultLookAndFeelDecorated(false);
-        UIManager.put("TextArea.font",
-                new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        // Turn off metal's use of bold fonts
-        // UIManager.put("swing.boldMetal", Boolean.FALSE);
+        // Setting this property makes the menu appear on top of the screen on
+        // Apple Mac OS X systems. It is ignored by all other other Java
+        // implementations
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        ApplicationFrame mainWindow = new ApplicationFrame();
-        SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
-        mainWindow.drawIt(splashScreen);
+        String defaultLAF = UIManager.getSystemLookAndFeelClassName();
+        try {
+            String className = defaultLAF;
+            String startupLookAndFeelProperty = "startup_lookandfeel_class";
+            String strStartupLookAndFeelClassName;
+            strStartupLookAndFeelClassName = Config
+                    .getSetting(startupLookAndFeelProperty);
+            if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
+                Config.saveSetting(startupLookAndFeelProperty, className);
+            } else {
+                className = strStartupLookAndFeelClassName;
+            }
 
-        mainWindow.setVisible(true);
-        splashScreen.setVisible(false);
-        splashScreen.dispose();
+            ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager();
+
+            ClassLoader cl = lafManager.getLAFClassLoader();
+            // Must set UIManager's ClassLoader before instantiating the LAF
+            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+            Class clazz = cl.loadClass(className);
+            LookAndFeel laf = (LookAndFeel) clazz.newInstance();
+            UIManager.setLookAndFeel(laf);
+            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+            UISupport.installOsSpecificLafTweaks();
+
+            UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
+                    Font.PLAIN, 12));
+            // Turn off metal's use of bold fonts
+            // UIManager.put("swing.boldMetal", Boolean.FALSE);
+
+            ApplicationFrame mainWindow = new ApplicationFrame();
+            mainWindow.initLookAndFeelManager(lafManager);
+            SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
+            mainWindow.drawIt(splashScreen);
+
+            mainWindow.setVisible(true);
+            splashScreen.setVisible(false);
+            splashScreen.dispose();
+        } catch (ClassNotFoundException cnfe) {
+            ExceptionDialog.hideException(cnfe);
+            try {
+                String startupLookAndFeelProperty = "startup_lookandfeel_class";
+                Config.saveSetting(startupLookAndFeelProperty, defaultLAF);
+                UISupport.getDialogs().showInfoMessage(
+                        "Default Look And Feel has been restored.",
+                        APPLICATION_NAME);
+            } catch (Exception e) {
+                ExceptionDialog.ignoreException(e);
+            }
+        } catch (RuntimeException re) {
+            ExceptionDialog.hideException(re);
+        } catch (Exception e) {
+            ExceptionDialog.hideException(e);
+        }
     }
 }

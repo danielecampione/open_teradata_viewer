@@ -32,6 +32,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 import org.joda.time.DateTime;
 
 /**
@@ -56,13 +58,14 @@ public class Console extends JTextPane {
 
         fileIndex = getGreatestFileIndex();
         DateTime dateTime = new DateTime(new java.util.Date());
-        logFile = new File(
-                Tools.conformizePath(System.getProperty("user.home"))
-                        + "open_teradata_viewer_"
-                        + String.format("%04d", dateTime.getYear()) + "-"
-                        + String.format("%02d", dateTime.getMonthOfYear())
-                        + "-" + String.format("%02d", dateTime.getDayOfMonth())
-                        + ".log");
+        logFile = new File(Utilities.conformizePath(System
+                .getProperty("user.home"))
+                + "open_teradata_viewer_"
+                + String.format("%04d", dateTime.getYear())
+                + "-"
+                + String.format("%02d", dateTime.getMonthOfYear())
+                + "-"
+                + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
@@ -105,7 +108,7 @@ public class Console extends JTextPane {
                 logFile.renameTo(new File(logFile.getAbsolutePath() + "-"
                         + fileIndex++));
                 DateTime dateTime = new DateTime(new java.util.Date());
-                logFile = new File(Tools.conformizePath(System
+                logFile = new File(Utilities.conformizePath(System
                         .getProperty("user.home"))
                         + "open_teradata_viewer_"
                         + String.format("%04d", dateTime.getYear())
@@ -172,9 +175,9 @@ public class Console extends JTextPane {
                 + String.format("%04d", dateTime.getYear()) + "-"
                 + String.format("%02d", dateTime.getMonthOfYear()) + "-"
                 + String.format("%02d", dateTime.getDayOfMonth()) + ".log-";
-        File userHome = new File(Tools.conformizePath(System
+        File userHome = new File(Utilities.conformizePath(System
                 .getProperty("user.home")));
-        File[] listedFiles = Tools.listFiles(userHome);
+        File[] listedFiles = Utilities.listFiles(userHome);
         Vector<Integer> listedFilesIndexVector = new Vector<Integer>(1, 1);
         for (int i = 0; i < listedFiles.length; i++) {
             if (!listedFiles[i].isDirectory()) {

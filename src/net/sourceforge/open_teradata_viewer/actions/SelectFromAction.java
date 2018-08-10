@@ -31,7 +31,6 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
-import net.sourceforge.open_teradata_viewer.Tools;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -125,7 +124,8 @@ public class SelectFromAction extends CustomAction {
         String text = "SELECT ";
         while (resultSet.next()) {
             String columnName = resultSet.getString(1);
-            if (Tools.isEmpty(columnName) || columnName.trim().length() == 0) {
+            if (Utilities.isEmpty(columnName)
+                    || columnName.trim().length() == 0) {
                 columnName = "";
             }
             text += columnName.toUpperCase().trim();

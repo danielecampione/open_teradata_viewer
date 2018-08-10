@@ -54,7 +54,7 @@ public class ThemeAction extends CustomAction {
             try {
                 performThreaded(e);
             } catch (Throwable t) {
-                ExceptionDialog.showException(t);
+                ExceptionDialog.hideException(t);
             } finally {
                 CustomAction.inProgress = false;
             }

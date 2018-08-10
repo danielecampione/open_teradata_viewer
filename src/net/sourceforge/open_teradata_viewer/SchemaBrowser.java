@@ -29,6 +29,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 /**
  * 
  * 
@@ -110,7 +112,7 @@ public class SchemaBrowser extends JTree {
 
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(1).trim();
-                        if (Tools.isEmpty(columnName)
+                        if (Utilities.isEmpty(columnName)
                                 || columnName.trim().length() == 0) {
                             columnName = "";
                         }

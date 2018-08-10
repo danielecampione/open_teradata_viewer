@@ -24,6 +24,8 @@ import javax.swing.JEditorPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 /**
  * 
  * 
@@ -44,7 +46,7 @@ public class DefaultHyperlinkListener implements HyperlinkListener {
                 if (e.getURL().getRef() != null) {
                     editorPane.scrollToReference(e.getURL().getRef());
                 } else {
-                    Tools.openURLWithDefaultBrowser(e.getURL().toString());
+                    Utilities.openURLWithDefaultBrowser(e.getURL().toString());
                 }
             }
         }
