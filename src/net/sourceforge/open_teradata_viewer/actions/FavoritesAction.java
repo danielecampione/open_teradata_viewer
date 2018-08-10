@@ -61,7 +61,7 @@ public class FavoritesAction extends CustomAction {
     public void favorites() throws ParserConfigurationException, IOException,
             TransformerException, SAXException {
         Map<String, String> favorites = Config.getFavorites();
-        final JList list = new JList(favorites.keySet().toArray());
+        final JList<?> list = new JList<Object>(favorites.keySet().toArray());
         list.addMouseListener(this);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         Object value = Dialog.show("Favorites", new JScrollPane(list),
@@ -85,7 +85,8 @@ public class FavoritesAction extends CustomAction {
             }
             favorites();
         } else if ("Add".equals(value)) {
-            JComboBox comboBox = new JComboBox(favorites.keySet().toArray());
+            JComboBox<?> comboBox = new JComboBox<Object>(favorites.keySet()
+                    .toArray());
             comboBox.setEditable(true);
             comboBox.setSelectedIndex(-1);
             if (Dialog.OK_OPTION == Dialog.show("Name", comboBox,

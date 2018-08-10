@@ -38,7 +38,7 @@ import javax.swing.JList;
  * @author D. Campione
  *
  */
-public class OpenTeradataViewerList extends JList
+public class OpenTeradataViewerList extends JList<Object>
         implements
             DragSourceListener,
             DragGestureListener {

@@ -97,7 +97,10 @@ public class HelpAction extends CustomAction {
             }
         }
 
-        // FAQ
+        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
+                + "license.html");
+        Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
+                + "changes.html");
         Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
                 + "FAQ.html");
 

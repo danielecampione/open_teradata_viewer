@@ -100,13 +100,13 @@ public class PortPropsDialog extends JDialog {
         raised = new JCheckBox();
         fComponentsAdjusted = false;
         jLabel1 = new JLabel();
-        portStyleComboBox = new JComboBox(sPortStyles);
+        portStyleComboBox = new JComboBox<Object>(sPortStyles);
         validDestinationCheckBox = new JCheckBox();
         validSourceCheckBox = new JCheckBox();
         validDuplicateLinksCheckBox = new JCheckBox();
         validSelfNodeCheckBox = new JCheckBox();
-        fromSpotCombo = new JComboBox(sSpots);
-        toSpotCombo = new JComboBox(sSpots);
+        fromSpotCombo = new JComboBox<Object>(sSpots);
+        toSpotCombo = new JComboBox<Object>(sSpots);
         jLabel2 = new JLabel();
         jLabel3 = new JLabel();
         jLabel4 = new JLabel();
@@ -593,7 +593,7 @@ public class PortPropsDialog extends JDialog {
     JLabel jLabel1;
     String sPortStyles[] = {"Hidden", "GraphicViewerObject", "Ellipse",
             "Triangle", "Rectangle", "Diamond"};
-    JComboBox portStyleComboBox;
+    JComboBox<?> portStyleComboBox;
     JCheckBox validDestinationCheckBox;
     JCheckBox validSourceCheckBox;
     JCheckBox validDuplicateLinksCheckBox;
@@ -601,8 +601,8 @@ public class PortPropsDialog extends JDialog {
     String sSpots[] = {"Center", "Top-Left", "Top-Center", "Top-Right",
             "Right-Center", "Bottom-Right", "Bottom-Center", "Bottom-Left",
             "Left-Center", "No-Spot"};
-    JComboBox fromSpotCombo;
-    JComboBox toSpotCombo;
+    JComboBox<?> fromSpotCombo;
+    JComboBox<?> toSpotCombo;
     JLabel jLabel2;
     JLabel jLabel3;
     JLabel jLabel4;

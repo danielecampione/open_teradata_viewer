@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -88,7 +87,7 @@ public class LobExportAction extends CustomAction {
                         columnNames.add(table.getColumnName(i));
                     }
                 }
-                final JList list = new JList(columnNames.toArray());
+                final JList<?> list = new JList<Object>(columnNames.toArray());
                 list.addMouseListener(this);
                 list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 if (Dialog.OK_OPTION == Dialog.show("Column for file name",

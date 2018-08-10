@@ -114,15 +114,15 @@ public class KunststoffComboBoxUI extends MetalComboBoxUI {
 
         private static final long serialVersionUID = -467026017297807915L;
 
-        public MyMetalComboBoxButton(JComboBox cb, Icon i, boolean onlyIcon,
-                CellRendererPane pane, JList list) {
+        public MyMetalComboBoxButton(JComboBox<?> cb, Icon i, boolean onlyIcon,
+                CellRendererPane pane, JList<?> list) {
             super(cb, i, onlyIcon, pane, list);
         }
 
         public void paintComponent(Graphics g) {
             if (!iconOnly && MyMetalComboBoxButton.this.comboBox != null) {
                 boolean isSetRendererOpaque = false;
-                ListCellRenderer renderer = MyMetalComboBoxButton.this.comboBox
+                ListCellRenderer<?> renderer = MyMetalComboBoxButton.this.comboBox
                         .getRenderer();
                 if (renderer instanceof JComponent) {
                     JComponent jRenderer = (JComponent) renderer;

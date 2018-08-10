@@ -61,22 +61,17 @@ public class HelpFiles {
      */
     public File getChangeLogFile() {
         return new File(Tools.conformizePath(System
-                .getProperty("java.io.tmpdir")) + "changes.txt");
+                .getProperty("java.io.tmpdir"))
+                + HelpFiles.helpFolder
+                + File.separator + "changes.html");
     }
     /**
      * @return the licence file.
      */
     public File getLicenceFile() {
         return new File(Tools.conformizePath(System
-                .getProperty("java.io.tmpdir")) + "license.txt");
-    }
-    /**
-     * @return the Welcome document..
-     */
-    public File getWelcomeFile() {
-        return new File(Tools.conformizePath(System
                 .getProperty("java.io.tmpdir"))
                 + HelpFiles.helpFolder
-                + File.separator + "welcome.html");
+                + File.separator + "license.html");
     }
 }

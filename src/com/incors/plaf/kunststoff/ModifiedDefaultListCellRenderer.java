@@ -54,7 +54,7 @@ public class ModifiedDefaultListCellRenderer extends DefaultListCellRenderer {
 
     private static final long serialVersionUID = -3319669560194338863L;
 
-    public Component getListCellRendererComponent(JList list, Object value,
+    public Component getListCellRendererComponent(JList<?> list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected,
                 cellHasFocus);

@@ -22,8 +22,6 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -52,6 +50,13 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
+import net.sourceforge.open_teradata_viewer.util.FileWrapper;
+import net.sourceforge.open_teradata_viewer.util.FileWrapperFactory;
+import net.sourceforge.open_teradata_viewer.util.FileWrapperFactoryImpl;
+import net.sourceforge.open_teradata_viewer.util.HelpFileWrappers;
+import net.sourceforge.open_teradata_viewer.util.HelpFileWrappersImpl;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * 
@@ -76,6 +81,19 @@ public class HelpViewerWindow extends JFrame {
     private final Map<String, DefaultMutableTreeNode> _nodes = new HashMap<String, DefaultMutableTreeNode>();
 
     /**
+     * Factory for creating FileWrappers which insulate the application from
+     * direct reference to File.
+     */
+    private FileWrapperFactory fileWrapperFactory = new FileWrapperFactoryImpl();
+
+    /**
+     * A FileWrapper-enhanced version of HelpFiles that removes direct
+     * references to File.
+     */
+    private HelpFileWrappers helpFiles = new HelpFileWrappersImpl();
+
+    /**
+     * Ctor.
      *
      * @throws  IllegalArgumentException
      *          Thrown if <TT>null</TT> <TT>IApplication</TT> passed.
@@ -83,6 +101,24 @@ public class HelpViewerWindow extends JFrame {
     public HelpViewerWindow() throws IOException {
         super(Main.APPLICATION_NAME + " ( Help )");
         createGUI();
+    }
+
+    /**
+     * @param fileWrapperFactory
+     *           the fileWrapperFactory to set
+     */
+    public void setFileWrapperFactory(FileWrapperFactory fileWrapperFactory) {
+        Utilities.checkNull("setFileWrapperFactory", "fileWrapperFactory",
+                fileWrapperFactory);
+        this.fileWrapperFactory = fileWrapperFactory;
+    }
+
+    /**
+     * @param helpFiles the helpFiles to set
+     */
+    public void setHelpFiles(HelpFileWrappers helpFiles) {
+        Utilities.checkNull("setHelpFiles", "helpFiles", helpFiles);
+        this.helpFiles = helpFiles;
     }
 
     /**
@@ -171,7 +207,6 @@ public class HelpViewerWindow extends JFrame {
      * @return  The contents tree.
      */
     private JScrollPane createContentsTree() throws IOException {
-        final HelpFiles appFiles = new HelpFiles();
         final FolderNode root = new FolderNode("Help");
         _tree = new JTree(new DefaultTreeModel(root));
         _tree.setShowsRootHandles(true);
@@ -197,7 +232,7 @@ public class HelpViewerWindow extends JFrame {
         _nodes.put(changeLogRoot.getURL().toString(), changeLogRoot);
 
         // Add the Manual node.
-        File file = appFiles.getQuickStartGuideFile();
+        FileWrapper file = helpFiles.getQuickStartGuideFile();
         try {
             DocumentNode dn = new DocumentNode("Guidance", file);
             helpRoot.add(dn);
@@ -212,7 +247,7 @@ public class HelpViewerWindow extends JFrame {
         }
 
         // Add the Licence node.
-        file = appFiles.getLicenceFile();
+        file = helpFiles.getLicenceFile();
         try {
             DocumentNode dn = new DocumentNode(
                     "GNU General Public License (GPL)", file);
@@ -227,7 +262,7 @@ public class HelpViewerWindow extends JFrame {
         }
 
         // Add the Change Log node.
-        file = appFiles.getChangeLogFile();
+        file = helpFiles.getChangeLogFile();
         try {
             DocumentNode dn = new DocumentNode("What's new?", file);
             changeLogRoot.add(dn);
@@ -241,7 +276,7 @@ public class HelpViewerWindow extends JFrame {
         }
 
         // FAQ.
-        file = appFiles.getFAQFile();
+        file = helpFiles.getFAQFile();
         try {
             DocumentNode dn = new DocumentNode("FAQ", file);
             root.add(dn);
@@ -281,7 +316,8 @@ public class HelpViewerWindow extends JFrame {
 
         private URL _url;
 
-        DocumentNode(String title, File file) throws MalformedURLException {
+        DocumentNode(String title, FileWrapper file)
+                throws MalformedURLException {
             super(title, false);
             setFile(file);
         }
@@ -294,7 +330,7 @@ public class HelpViewerWindow extends JFrame {
             return _url;
         }
 
-        void setFile(File file) throws MalformedURLException {
+        void setFile(FileWrapper file) throws MalformedURLException {
             _url = file.toURI().toURL();
         }
     }
@@ -311,11 +347,12 @@ public class HelpViewerWindow extends JFrame {
 
         private final List<String> _docTitles = new ArrayList<String>();
         private final List<URL> _docURLs = new ArrayList<URL>();
-        private final File _contentsFile;
+        private final FileWrapper _contentsFile;
 
         FolderNode(String title) throws IOException {
             super(title, true);
-            _contentsFile = File.createTempFile("sqschelp", "html");
+            _contentsFile = fileWrapperFactory
+                    .createTempFile("otvhelp", "html");
             _contentsFile.deleteOnExit();
             setFile(_contentsFile);
         }
@@ -327,7 +364,7 @@ public class HelpViewerWindow extends JFrame {
                 final URL docURL = dn.getURL();
                 if (docURL != null) {
                     String docTitle = dn.toString();
-                    if (docTitle.length() == 0) {
+                    if (StringUtil.isEmpty(docTitle)) {
                         docTitle = docURL.toExternalForm();
                     }
                     _docTitles.add(docTitle);
@@ -335,11 +372,10 @@ public class HelpViewerWindow extends JFrame {
                 }
             }
         }
-
         synchronized void generateContentsFile() {
             try {
-                final PrintWriter pw = new PrintWriter(new FileWriter(
-                        _contentsFile));
+                final PrintWriter pw = new PrintWriter(
+                        _contentsFile.getFileWriter());
                 try {
                     StringBuffer buf = new StringBuffer(50);
                     buf.append("<HTML><BODY><H1>").append(toString())
@@ -376,7 +412,6 @@ public class HelpViewerWindow extends JFrame {
     private final class ObjectTreeSelectionListener
             implements
                 TreeSelectionListener {
-
         public void valueChanged(TreeSelectionEvent evt) {
             final TreePath path = evt.getNewLeadSelectionPath();
             if (path != null) {

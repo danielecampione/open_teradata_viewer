@@ -22,7 +22,10 @@ import java.text.BreakIterator;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.StringTokenizer;
+
+import jsyntaxpane.util.StringUtils;
 
 /**
  * 
@@ -515,6 +518,98 @@ public class StringUtil {
             sb.append(line);
         }
         return sb.toString();
+    }
+
+    /**
+     * Clean the passed string. Replace whitespace characters with a single
+     * space. If a <TT>null</TT> string passed return an empty string. E.G.
+     * replace
+     *
+     * [pre]
+     * \t\tselect\t* from\t\ttab01
+     * [/pre]
+     *
+     * with
+     *
+     * [pre]
+     * select * from tab01
+     * [/pre]
+     *
+     * @param   str String to be cleaned.
+     *
+     * @return  Cleaned string.
+     */
+    public static String cleanString(String str) {
+        final StringBuffer buf = new StringBuffer(str.length());
+        char prevCh = ' ';
+
+        for (int i = 0, limit = str.length(); i < limit; ++i) {
+            char ch = str.charAt(i);
+            if (Character.isWhitespace(ch)) {
+                if (!Character.isWhitespace(prevCh)) {
+                    buf.append(' ');
+                }
+            } else {
+                buf.append(ch);
+            }
+            prevCh = ch;
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Split a string based on the given delimiter, but don't remove
+     * empty elements.
+     *
+     * @param   str         The string to be split.
+     * @param   delimiter   Split string based on this delimiter.
+     * <p />
+     * <b>Not compatible to {@link StringUtils#split(String)}<b>
+     * @return  Array of split strings. Guaranteeded to be not null.
+     */
+    public static String[] split(String str, char delimiter) {
+        return split(str, delimiter, false);
+    }
+
+    /**
+     * Split a string based on the given delimiter, optionally removing
+     * empty elements.
+     *
+     * @param   str         The string to be split.
+     * @param   delimiter   Split string based on this delimiter.
+     * @param   removeEmpty If <tt>true</tt> then remove empty elements.
+     * <p />
+     * <b>Not compatible to {@link StringUtils#split(String)}<b>
+     * @return  Array of split strings. Guaranteeded to be not null.
+     */
+    public static String[] split(String str, char delimiter, boolean removeEmpty) {
+        // Return empty list if source string is empty.
+        final int len = (str == null) ? 0 : str.length();
+        if (len == 0) {
+            return new String[0];
+        }
+
+        final List<String> result = new ArrayList<String>();
+        String elem = null;
+        int i = 0, j = 0;
+        while (j != -1 && j < len) {
+            j = str.indexOf(delimiter, i);
+            elem = (j != -1) ? str.substring(i, j) : str.substring(i);
+            i = j + 1;
+            if (!removeEmpty || !(elem == null || elem.length() == 0)) {
+                result.add(elem);
+            }
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    public static String escapeHtmlChars(String sql) {
+        String buf = sql.replaceAll("&", "&amp;");
+        buf = buf.replaceAll("<", "&lt;");
+        buf = buf.replaceAll(">", "&gt;");
+        buf = buf.replaceAll("\"", "&quot;");
+        return buf;
     }
 
 }

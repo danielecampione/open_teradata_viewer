@@ -489,6 +489,16 @@ public class ApplicationFrame extends JFrame {
         if (file.exists()) {
             file.delete();
         }
+        file = new File(directoryPath + File.separator + "help"
+                + File.separator + "license.html");
+        if (file.exists()) {
+            file.delete();
+        }
+        file = new File(directoryPath + File.separator + "help"
+                + File.separator + "changes.html");
+        if (file.exists()) {
+            file.delete();
+        }
 
         directoryPath = Tools.conformizePath(System
                 .getProperty("java.io.tmpdir"))

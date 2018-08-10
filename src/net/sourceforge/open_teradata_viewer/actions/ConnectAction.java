@@ -55,7 +55,7 @@ public class ConnectAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         ((DisconnectAction) Actions.DISCONNECT).saveDefaultOwner();
         Vector<ConnectionData> connectionDatas = Config.getDatabases();
-        final JList list = new JList(connectionDatas);
+        final JList<?> list = new JList<Object>(connectionDatas);
         list.addMouseListener(this);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         Object value = Dialog.show("Connections", new JScrollPane(list),

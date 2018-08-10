@@ -57,8 +57,6 @@ public class Main {
         JDialog.setDefaultLookAndFeelDecorated(false);
         UIManager.put("TextArea.font",
                 new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        UIManager.put("Menu.checkIcon", "No icon");
-        UIManager.put("MenuItem.checkIcon", "No icon");
         // Turn off metal's use of bold fonts
         // UIManager.put("swing.boldMetal", Boolean.FALSE);
 

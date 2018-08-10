@@ -275,7 +275,7 @@ public class GraphicViewerPrintPreview extends JDialog {
         jbutton.setMargin(new Insets(4, 6, 4, 6));
         jtoolbar.add(jbutton);
         String as[] = {"10 %", "25 %", "50 %", "100 %"};
-        m_cbScale = new JComboBox(as);
+        m_cbScale = new JComboBox<Object>(as);
         m_cbScale.setSelectedIndex(1);
         actionlistener = new ActionListener() {
 
@@ -346,7 +346,7 @@ public class GraphicViewerPrintPreview extends JDialog {
     protected int m_hPage;
     protected int m_orientation;
     protected Printable m_target;
-    protected JComboBox m_cbScale;
+    protected JComboBox<?> m_cbScale;
     protected PreviewContainer m_preview;
     protected PageFormat m_pageFormat;
     protected int m_pageCount;

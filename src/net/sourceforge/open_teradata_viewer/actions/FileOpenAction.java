@@ -18,8 +18,13 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
+
+import javax.swing.JEditorPane;
+import javax.swing.TransferHandler;
+import javax.swing.TransferHandler.TransferSupport;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
@@ -45,8 +50,20 @@ public class FileOpenAction extends CustomAction {
         File file = FileIO.openFile();
         if (file != null) {
             Context.getInstance().setOpenedFile(file);
-            ApplicationFrame.getInstance().setText(
-                    new String(FileIO.readFile(file)));
+            JEditorPane textComponent = ApplicationFrame.getInstance()
+                    .getTextComponent();
+            resetEditorPaneToAvoidMemoryLeak(textComponent);
+            TransferHandler transferHandler = textComponent
+                    .getTransferHandler();
+            StringSelection stringSelection = new StringSelection(new String(
+                    FileIO.readFile(file)));
+            transferHandler.importData(new TransferSupport(textComponent,
+                    stringSelection));
         }
+    }
+
+    private void resetEditorPaneToAvoidMemoryLeak(JEditorPane textComponent) {
+        textComponent.setContentType("text/plain");
+        textComponent.setContentType("text/sql");
     }
 }

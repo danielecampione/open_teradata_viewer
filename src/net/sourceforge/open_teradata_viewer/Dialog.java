@@ -43,8 +43,8 @@ public class Dialog extends JOptionPane {
     public static int show(String title, Object message, int messageType,
             int optionType) {
         Dialog dialog = new Dialog(message, messageType, optionType, null, null);
-        dialog.createDialog(ApplicationFrame.getInstance(), title)
-                .setVisible(true);
+        dialog.createDialog(ApplicationFrame.getInstance(), title).setVisible(
+                true);
         if (dialog.getValue() == null) {
             return CLOSED_OPTION;
         } else {
@@ -90,7 +90,8 @@ public class Dialog extends JOptionPane {
             minWidth = 0;
             minHeight = 0;
             scrollBarWidth = 0;
-            JList jList = (JList) scrollPane.getViewport().getComponent(0);
+            JList<?> jList = (JList<?>) scrollPane.getViewport()
+                    .getComponent(0);
             jList.setVisibleRowCount(Math.max(15, jList.getModel().getSize()));
         }
         double maxWidth = Toolkit.getDefaultToolkit().getScreenSize()
