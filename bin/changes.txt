@@ -1,3 +1,9 @@
+0.05a (21-jul-11)
+    - Added an animated assistant that is shown while a process is running.
+    - The "SHOW RECORD" command can be perfomed only if a record has been
+      selected.
+    - Updated the "EDIT CONNECTION" dialog screenshot in the user manual.
+
 0.04c (19-jul-11)
     - Added the user and password text fields for connections that don't use the
       LDAP logging mechanism. 

@@ -79,9 +79,6 @@ public class HelpAction extends CustomAction {
                 + "colorschememapping.xml");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "colorschememapping.xml");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
                 + "filelist.xml");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
@@ -91,130 +88,70 @@ public class HelpAction extends CustomAction {
                 + "image002.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image003.png");
+                + "image003.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image004.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image005.png");
+                + "image005.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image006.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image007.png");
+                + "image007.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image008.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image009.png");
+                + "image009.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image010.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image011.png");
+                + "image011.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image012.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image013.png");
+                + "image013.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image014.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image015.png");
+                + "image015.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image016.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image017.png");
+                + "image017.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "image018.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image019.png");
+                + "image019.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image020.gif");
+                + "image020.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image021.png");
+                + "image022.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image022.gif");
+                + "image023.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image023.png");
+                + "item0027.xml");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image024.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image025.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image026.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image027.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image028.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image029.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image030.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image031.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image032.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image033.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image034.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image035.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image036.gif");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image037.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image038.jpg");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image042.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image044.png");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image062.jpg");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "image063.jpg");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "item0048.xml");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
-                + "props0049.xml");
+                + "props0028.xml");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "themedata.thmx");

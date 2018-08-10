@@ -98,7 +98,11 @@ public final class Actions
         EXPORT_PDF.setEnabled(hasResultSet);
         EXPORT_FLAT_FILE.setEnabled(hasResultSet);
         EXPORT_INSERTS.setEnabled(hasResultSet);
-        SHOW_SELECTED_RECORD.setEnabled(hasResultSet);
+
+        boolean isRowSelected = hasResultSet
+                && !ResultSetTable.getInstance().getSelectionModel()
+                        .isSelectionEmpty();
+        SHOW_SELECTED_RECORD.setEnabled(isRowSelected);
 
         boolean isLobSelected = hasResultSet
                 && ResultSetTable.isLob(ResultSetTable.getInstance()

@@ -22,17 +22,25 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.MediaTracker;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -50,6 +58,7 @@ import javax.swing.text.DefaultCaret;
 
 import jsyntaxpane.DefaultSyntaxKit;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.CustomAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
@@ -96,8 +105,13 @@ public class ApplicationFrame extends JFrame {
     private JScrollPane rightComponent;
 
     private boolean fullScreenMode;
-
     private DisplayChanger displayChanger;
+
+    public Thread animatedLoading;
+    Image theGIF;
+    boolean necessaryResizingOfBufferedImage;
+    BufferedImage bufferedImage;
+    Graphics2D g2;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -112,11 +126,14 @@ public class ApplicationFrame extends JFrame {
         } catch (UnsupportedLookAndFeelException ex) {
             // handle exception or not, whatever you prefer
         }
-        // this line needs to be implemented in order to make JWS work properly
-        UIManager.getLookAndFeelDefaults().put("ClassLoader",
-                getClass().getClassLoader());
 
+        // this lines need to be implemented in order to make JWS work properly
         try {
+            UIManager.getLookAndFeelDefaults().put(
+                    "ClassLoader",
+                    Class.forName(
+                            "com.incors.plaf.kunststoff.KunststoffLookAndFeel")
+                            .newInstance().getClass().getClassLoader());
             UIManager.getLookAndFeelDefaults().put(
                     "ClassLoader",
                     Class.forName("com.birosoft.liquid.LiquidLookAndFeel")
@@ -148,6 +165,11 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 handleWindowClose();
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {
+                necessaryResizingOfBufferedImage = true;
             }
         });
         splashScreen.progress(10);
@@ -192,7 +214,51 @@ public class ApplicationFrame extends JFrame {
 
         displayChanger = new DisplayChanger(this);
         displayChanger.setExclusiveMode(false);
-        splashScreen.progress(20);
+        splashScreen.progress(10);
+
+        necessaryResizingOfBufferedImage = true;
+        addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent evt) {
+                necessaryResizingOfBufferedImage = true;
+            }
+        });
+        theGIF = new ImageIcon(
+                ApplicationFrame.class.getResource("/icons/dancer.gif"))
+                .getImage();
+        MediaTracker mediatracker = new MediaTracker(this);
+        mediatracker.addImage(theGIF, 0);
+        try {
+            mediatracker.waitForID(0);
+        } catch (InterruptedException ie) {
+            UISupport.getDialogs().showErrorMessage(
+                    "Animated assistant loading has been interrupted.");
+        }
+        if (mediatracker.isErrorID(0)) {
+            UISupport.getDialogs().showErrorMessage(
+                    "Error loading the animated assistant.");
+        }
+        animatedLoading = new Thread(new Runnable() {
+
+            @SuppressWarnings("static-access")
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.currentThread().sleep(20L);
+
+                        synchronized (this) {
+                            while (!CustomAction.inProgress)
+                                wait();
+                        }
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                    repaint();
+                }
+            }
+
+        });
+        splashScreen.progress(10);
     }
 
     public void installPlugin() {
@@ -398,6 +464,11 @@ public class ApplicationFrame extends JFrame {
             }
         } catch (IOException e) {
         }
+
+        if (animatedLoading != null && animatedLoading.isAlive()) {
+            animatedLoading.interrupt();
+        }
+
         dispose();
     }
 
@@ -546,5 +617,28 @@ public class ApplicationFrame extends JFrame {
     public void setFullScreenMode(boolean fullScreenMode) {
         this.fullScreenMode = fullScreenMode;
         displayChanger.setDisplayMode(this.fullScreenMode);
+    }
+
+    public void paint(Graphics gr) {
+        update(gr);
+    }
+
+    public void update(Graphics gr) {
+        if (necessaryResizingOfBufferedImage) {
+            if (g2 != null) {
+                g2.dispose();
+            }
+
+            bufferedImage = ((BufferedImage) createImage(getWidth(),
+                    getHeight()));
+            g2 = bufferedImage.createGraphics();
+            necessaryResizingOfBufferedImage = false;
+        }
+        super.paint(g2);
+        if (CustomAction.inProgress) {
+            g2.drawImage(theGIF, getSize().width - theGIF.getWidth(this) - 5,
+                    getSize().height - theGIF.getHeight(this) - 5, this);
+        }
+        gr.drawImage(bufferedImage, 0, 0, this);
     }
 }

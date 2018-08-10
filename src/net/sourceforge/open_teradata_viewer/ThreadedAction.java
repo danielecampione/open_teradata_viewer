@@ -37,6 +37,10 @@ public abstract class ThreadedAction implements Runnable {
 
     public ThreadedAction() {
         new Thread(this).start();
+        if (ApplicationFrame.getInstance().animatedLoading != null
+                && !ApplicationFrame.getInstance().animatedLoading.isAlive()) {
+            ApplicationFrame.getInstance().animatedLoading.start();
+        }
     }
 
     @Override
@@ -66,6 +70,13 @@ public abstract class ThreadedAction implements Runnable {
             ExceptionDialog.showException(t);
         } finally {
             CustomAction.inProgress = false;
+            if (ApplicationFrame.getInstance().animatedLoading != null
+                    && ApplicationFrame.getInstance().animatedLoading.isAlive()) {
+                synchronized (this) {
+                    if (CustomAction.inProgress)
+                        notify();
+                }
+            }
             if (SwingUtil.isVisible(glassPane)) {
                 try {
                     SwingUtilities.invokeAndWait(new Runnable() {
