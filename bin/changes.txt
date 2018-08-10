@@ -1,3 +1,8 @@
+0.06a (26-jul-11)
+    - The animated assistant is disabled by default.
+    - The table sorter repaints the result set also in the "animated loading"
+      mode.
+
 0.05c (25-jul-11)
     X [BUG0003] Although it has been implemented the algorithm to change the
       result set, it is not possible to update the Teradata database because of

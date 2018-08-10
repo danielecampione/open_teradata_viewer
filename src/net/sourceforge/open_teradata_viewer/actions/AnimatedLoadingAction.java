@@ -18,13 +18,13 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowListener;
 
-import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.Config;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 /**
@@ -33,40 +33,32 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  *
  */
-public class FullScreenAction extends CustomAction {
+public class AnimatedLoadingAction extends CustomAction implements Runnable {
 
-    private static final long serialVersionUID = 1052503682296759923L;
+    private static final long serialVersionUID = -4623999245908017490L;
 
-    public FullScreenAction() {
-        super("Full Screen", null, KeyStroke.getKeyStroke(KeyEvent.VK_F11,
-                KeyEvent.VK_UNDEFINED), null);
+    public Thread animatedLoading;
+    public Image theGIF;
+    private boolean loadingAssistantActived;
+
+    protected AnimatedLoadingAction() {
+        super("Animated loading", null, null,
+                "Shows an animated assistant while an operation is "
+                        + "in progress.");
         setEnabled(true);
     }
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        final WindowListener[] wl = ApplicationFrame.getInstance()
-                .getWindowListeners();
-        for (WindowListener w : wl) {
-            ApplicationFrame.getInstance().removeWindowListener(w);
-        }
-        boolean fullScreenMode = ApplicationFrame.getInstance()
-                .isFullScreenModeActive();
-        fullScreenMode = !fullScreenMode;
-        ApplicationFrame.getInstance().setFullScreenMode(fullScreenMode);
-        ApplicationFrame.getInstance().repaint();
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                for (WindowListener w : wl) {
-                    ApplicationFrame.getInstance().addWindowListener(w);
-                }
-            }
-        });
+        loadingAssistantActived = !loadingAssistantActived;
+
+        String loadingAssistantProperty = "loading_assistant_actived";
+        Config.saveExtraProperty(loadingAssistantProperty,
+                String.format("%b", loadingAssistantActived));
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "switch to full screen mode" action can be performed only if
+        // The "animated loading" action can be performed only if
         // other processes are NOT running. No ThreadAction object must be
         // instantiated.
         if (!inProgress) {
@@ -77,14 +69,8 @@ public class FullScreenAction extends CustomAction {
                 ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
-                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived()) {
+                if (!loadingAssistantActived) {
                     ApplicationFrame.getInstance().setRepainted(false);
-                    Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
-                    if (animatedLoading != null && animatedLoading.isAlive()) {
-                        animatedLoading.interrupt();
-                        animatedLoading = null;
-                    }
                 }
                 CustomAction.inProgress = false;
             }
@@ -93,5 +79,27 @@ public class FullScreenAction extends CustomAction {
                     "Another process is already running..\n",
                     ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
+    }
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                Thread.sleep(200L);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        ApplicationFrame.getInstance().repaint();
+                    }
+                });
+            }
+        } catch (InterruptedException e) {
+            return;
+        }
+    }
+
+    public void setLoadingAssistantActived(boolean loadingAssistantActived) {
+        this.loadingAssistantActived = loadingAssistantActived;
+    }
+    public boolean isLoadingAssistantActived() {
+        return loadingAssistantActived;
     }
 }

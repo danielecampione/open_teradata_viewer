@@ -28,6 +28,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
+
 /**
  * 
  * 
@@ -62,11 +65,16 @@ public class TableSorter implements MouseListener, Comparator<List> {
         List<List> list = ((DefaultTableModel) tableHeader.getTable()
                 .getModel()).getDataVector();
         Collections.sort(list, this);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                ApplicationFrame.getInstance().repaint();
-            }
-        });
+        if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                .isLoadingAssistantActived()) {
+            ApplicationFrame.getInstance().setRepainted(false);
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    ApplicationFrame.getInstance().repaint();
+                }
+            });
+        }
     }
 
     @Override

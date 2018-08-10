@@ -43,6 +43,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
 import net.sourceforge.open_teradata_viewer.actions.CopyCellValueAction;
 
 /**
@@ -143,7 +144,10 @@ public final class ResultSetTable extends JTable {
             @Override
             public void run() {
                 resizeColumns();
-                ApplicationFrame.getInstance().setRepainted(false);
+                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                        .isLoadingAssistantActived()) {
+                    ApplicationFrame.getInstance().setRepainted(false);
+                }
             }
         });
     }

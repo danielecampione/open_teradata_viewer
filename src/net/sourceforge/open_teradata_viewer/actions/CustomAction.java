@@ -190,6 +190,15 @@ public abstract class CustomAction extends AbstractAction
     public void actionPerformed(final ActionEvent e) {
         if (!inProgress) {
             inProgress = true;
+
+            if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                    .isLoadingAssistantActived()) {
+                Thread animatedLoading = ((AnimatedLoadingAction) Actions.ANIMATED_LOADING).animatedLoading;
+                animatedLoading = new Thread(
+                        (AnimatedLoadingAction) Actions.ANIMATED_LOADING);
+                animatedLoading.start();
+            }
+
             new ThreadedAction() {
                 @Override
                 protected void execute() throws Exception {

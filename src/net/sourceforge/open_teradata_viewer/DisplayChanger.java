@@ -52,7 +52,7 @@ public class DisplayChanger {
         graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         graphicsDevices = graphicsEnvironment.getScreenDevices();
         if (graphicsDevices == null) {
-            System.out.println("No Graphics Devices !");
+            System.err.println("No Graphics Devices.");
             System.exit(-1);
         }
         setGraphicsDevice(graphicsEnvironment.getDefaultScreenDevice());

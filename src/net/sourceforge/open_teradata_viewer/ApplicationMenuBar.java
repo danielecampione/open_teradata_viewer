@@ -35,6 +35,7 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.JTextComponent;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.AnimatedLoadingAction;
 import net.sourceforge.open_teradata_viewer.actions.ChangeLookAndFeelAction;
 
 /**
@@ -139,6 +140,13 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu("View");
         add(menu);
+        JCheckBoxMenuItem loadingAssistantMenuItem = new JCheckBoxMenuItem(
+                Actions.ANIMATED_LOADING);
+        loadingAssistantMenuItem
+                .setSelected(((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+                        .isLoadingAssistantActived());
+        menu.add(loadingAssistantMenuItem);
+        menu.addSeparator();
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
                 Actions.FULL_SCREEN);
         menu.add(fullScreenMenuItem);
