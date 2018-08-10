@@ -19,31 +19,34 @@
 package net.sourceforge.open_teradata_viewer.plugin;
 
 /**
- * 
- * 
- * @author D. Campione
+ * This interface represents a Plugin entry point.
  *
+ * @author D. Campione
+ * 
  */
-public class DefaultPlugin implements Plugin {
+public interface PluginEntry {
 
-    boolean installed;
+    /** 
+     * This method must be used to configure a plugin entry point with some
+     * parameters. These parameters are objects that the plugin will use.
+     */
+    public void initPluginEntry(Object param);
 
-    @Override
-    public void setup() {
-        installed = false;
-    }
+    /**
+     * This method must be used to define the sequence of actions that starts
+     * the plugin entry.
+     */
+    public void startPluginEntry();
 
-    @Override
-    public String analyzeException(String exception) {
-        return "";
-    }
+    /**
+     * This method must be used to define the sequence of actions that stops the
+     * plugin entry.
+     */
+    public void stopPluginEntry();
 
-    @Override
-    public void showPanel() {
-    }
-
-    @Override
-    public boolean isInstalled() {
-        return installed;
-    }
+    /**
+     * This method must be used to define the sequence of actions that pauses
+     * the plugin entry.
+     */
+    public void pausePluginEntry();
 }

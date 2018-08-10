@@ -31,6 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.Action;
 import javax.swing.InputMap;
@@ -57,8 +59,8 @@ import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphicviewer.UndoMgr;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
-import net.sourceforge.open_teradata_viewer.plugin.DefaultPlugin;
-import net.sourceforge.open_teradata_viewer.plugin.Plugin;
+import net.sourceforge.open_teradata_viewer.plugin.EntryDescriptor;
+import net.sourceforge.open_teradata_viewer.plugin.PluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 
@@ -82,7 +84,6 @@ public class ApplicationFrame extends JFrame {
      * Shared variable used by ChangeLookAndFeelAction and ApplicationMenuBar
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
-    public Plugin PLUGIN;
 
     public ChangeLog changeLog;
     private JEditorPane text;
@@ -95,7 +96,7 @@ public class ApplicationFrame extends JFrame {
     /** The split pane that shows or hides the schema browser. */
     private JSplitPane splitPane;
 
-    /** The scollpane containing the schema browser. */
+    /** The scrollpane containing the schema browser. */
     private JScrollPane rightComponent;
 
     private boolean fullScreenMode;
@@ -241,27 +242,27 @@ public class ApplicationFrame extends JFrame {
         return glassPane;
     }
 
-    public void installPlugin() {
-        if (PLUGIN == null || PLUGIN instanceof DefaultPlugin) {
-            Drivers.setInitialized(false);
-            try {
-                Drivers.initialize();
-            } catch (Exception e) {
-                // ignore
-            }
-            PLUGIN = PluginFactory.getPlugin();
-            if (!(PLUGIN instanceof DefaultPlugin)) {
-                if (!PLUGIN.isInstalled()) {
-                    try {
-                        PLUGIN.setup();
-                    } catch (Throwable t) {
-                        changeLog.append(
-                                PLUGIN.analyzeException(t.getMessage()),
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                        PLUGIN = null;
-                    }
-                }
-            }
+    @SuppressWarnings({"rawtypes", "unused"})
+    public void installPlugins() {
+        Drivers.setInitialized(false);
+        try {
+            Drivers.initialize();
+        } catch (Exception e) {
+            // ignore
+        }
+
+        String pluginsPath = "./";
+        // The PluginFactory is instantiated
+        PluginFactory pluginFactory = new PluginFactory(pluginsPath);
+        // The application obtains the loaded EntryDescriptors
+        Collection pluginsCollection = pluginFactory.getAllEntryDescriptor();
+        Iterator pluginsIterator = pluginsCollection.iterator();
+        // Searching for plugins.. 
+        while (pluginsIterator.hasNext()) {
+            EntryDescriptor entryDescriptor = (EntryDescriptor) pluginsIterator
+                    .next();
+            PluginEntry pluginEntry = (PluginEntry) pluginFactory
+                    .getPluginEntry(entryDescriptor.getId());
         }
     }
 

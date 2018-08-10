@@ -128,15 +128,17 @@ public class UpdateChecker implements Runnable {
             } catch (ProtocolException e) { // The exception is caught if the Server has redirected too many times.
                 // ignore.
             } catch (IOException e) { // The authentication is required if the HTTP status is 407.
-                ApplicationFrame.getInstance().changeLog.append(e.getMessage(),
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().changeLog.append(e.getMessage()
+                        + "\n", ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
-            int index = localVersion.indexOf('(');
-            if (index != -1) {
+            int localVersionBracketIndex = localVersion.indexOf('('), latestVersionBracketIndex = latestVersion
+                    .indexOf('(');
+            if (localVersionBracketIndex != -1
+                    && latestVersionBracketIndex != -1) {
                 Date localVersionDate = format.parse(localVersion
-                        .substring(index));
+                        .substring(localVersionBracketIndex));
                 Date latestVersionDate = format.parse(latestVersion
-                        .substring(latestVersion.indexOf('(')));
+                        .substring(latestVersionBracketIndex));
                 if (localVersionDate.compareTo(latestVersionDate) < 0) {
                     JMenu menu;
                     menuBar.add(Box.createHorizontalGlue());

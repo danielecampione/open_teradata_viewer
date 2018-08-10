@@ -259,16 +259,12 @@ public class TablesNamesFinder
      * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.CaseExpression)
      */
     public void visit(CaseExpression caseExpression) {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
      * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.WhenClause)
      */
     public void visit(WhenClause whenClause) {
-        // TODO Auto-generated method stub
-
     }
 
     public void visit(AllComparisonExpression allComparisonExpression) {

@@ -483,7 +483,6 @@ public class SelectTest extends TestCase {
     }
 
     public void testOrderBy() throws JSQLParserException {
-        //TODO: should there be a DESC marker in the OrderByElement class?
         String statement = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a DESC, tab1.b ASC";
         String statementToString = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a DESC, tab1.b";
         PlainSelect plainSelect = (PlainSelect) ((Select) parserManager

@@ -126,11 +126,6 @@ public final class ExceptionDialog {
             } else if (t instanceof OutOfMemoryError) {
                 msg.append(Main.APPLICATION_NAME
                         + " has a memory limit of 512 MB.\n");
-            } else {
-                if (ApplicationFrame.getInstance().PLUGIN != null) {
-                    msg.append(ApplicationFrame.getInstance().PLUGIN
-                            .analyzeException(exception));
-                }
             }
         }
         if (msg.length() > 0) {

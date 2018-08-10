@@ -63,8 +63,6 @@ public class StatementDeParser implements StatementVisitor {
     }
 
     public void visit(Drop drop) {
-        // TODO Auto-generated method stub
-
     }
 
     public void visit(Insert insert) {
@@ -114,8 +112,6 @@ public class StatementDeParser implements StatementVisitor {
     }
 
     public void visit(Truncate truncate) {
-        // TODO Auto-generated method stub
-
     }
 
     public void visit(Update update) {

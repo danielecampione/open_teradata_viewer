@@ -103,8 +103,6 @@ public class ReplaceTest extends TestCase {
         assertEquals("col3",
                 ((Column) replace.getColumns().get(2)).getColumnName());
         assertTrue(replace.getItemsList() instanceof SubSelect);
-        //TODO:
-        //assertEquals(statement, ""+replace);
     }
 
     public static void main(String[] args) {

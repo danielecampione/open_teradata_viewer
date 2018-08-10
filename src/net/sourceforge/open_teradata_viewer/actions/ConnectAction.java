@@ -94,8 +94,6 @@ public class ConnectAction extends CustomAction {
                         ApplicationFrame.getInstance().initializeObjectChooser(
                                 connectionData);
                         connected = true;
-
-                        ApplicationFrame.getInstance().installPlugin();
                     } catch (Throwable t) {
                         ExceptionDialog.showException(t);
                         if (editConnection(connectionData)) {
