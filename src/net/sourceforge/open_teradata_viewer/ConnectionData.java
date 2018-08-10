@@ -85,7 +85,6 @@ public class ConnectionData implements Comparable, Cloneable {
 
     public void connect() throws Exception {
         try {
-            Drivers.initialize();
             driver = DriverManager.getDriver(url);
         } catch (Exception e) {
             ExceptionDialog.showException(new Exception(String.format(

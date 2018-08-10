@@ -214,4 +214,12 @@ public class Drivers {
         }
         return response;
     }
+
+    public static void setInitialized(boolean initialized) {
+        Drivers.initialized = initialized;
+    }
+
+    public static boolean hasBeenInitialized() {
+        return initialized;
+    }
 }

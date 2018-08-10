@@ -55,7 +55,9 @@ import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphicviewer.UndoMgr;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
+import net.sourceforge.open_teradata_viewer.plugin.DefaultPlugin;
 import net.sourceforge.open_teradata_viewer.plugin.Plugin;
+import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 
 import com.incors.plaf.kunststoff.KunststoffLookAndFeel;
 import com.incors.plaf.kunststoff.KunststoffTheme;
@@ -134,7 +136,7 @@ public class ApplicationFrame extends JFrame {
 
         getContentPane().setLayout(new BorderLayout());
         UISupport.setMainFrame(getInstance());
-        splashScreen.progress(20);
+        splashScreen.progress(10);
         JPanel globalPanel = new JPanel(new BorderLayout());
         globalPanel.add(createWorkArea(), BorderLayout.CENTER);
         addWindowListener(new WindowAdapter() {
@@ -190,8 +192,33 @@ public class ApplicationFrame extends JFrame {
 
         displayChanger = new DisplayChanger(this);
         displayChanger.setExclusiveMode(false);
-        splashScreen.progress(10);
+        splashScreen.progress(20);
     }
+
+    public void installPlugin() {
+        if (PLUGIN == null || PLUGIN instanceof DefaultPlugin) {
+            Drivers.setInitialized(false);
+            try {
+                Drivers.initialize();
+            } catch (Exception e) {
+                // ignore
+            }
+            PLUGIN = PluginFactory.getPlugin();
+            if (!(PLUGIN instanceof DefaultPlugin)) {
+                if (!PLUGIN.isInstalled()) {
+                    try {
+                        PLUGIN.setup();
+                    } catch (Throwable t) {
+                        changeLog.append(
+                                PLUGIN.analyzeException(t.getMessage()),
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                        PLUGIN = null;
+                    }
+                }
+            }
+        }
+    }
+
     public void setLookAndFeel(String className) {
         try {
             UIManager.setLookAndFeel(className);

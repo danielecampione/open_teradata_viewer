@@ -34,7 +34,7 @@ public final class PluginFactory {
     }
 
     public static Plugin getPlugin() {
-        if (plugin == null) {
+        if (plugin == null || plugin instanceof DefaultPlugin) {
             try {
                 plugin = (Plugin) Class.forName(
                         "open_teradata_viewer.plugin.CustomPlugin")

@@ -68,6 +68,7 @@ public class Main {
         SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
         mainWindow.drawIt(splashScreen);
         mainWindow.setJMenuBar(new ApplicationMenuBar());
+        mainWindow.installPlugin();
         mainWindow.pack();
 
         double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()

@@ -3,14 +3,14 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/forms-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/forms-1.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/iText-5.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsqlparser.jar"/>
 	<classpathentry kind="lib" path="lib/jsyntaxpane-0.9.5-b29.jar"/>
 	<classpathentry kind="lib" path="lib/l2fprod-common-all.jar"/>
 	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
-	<classpathentry kind="lib" path="lib/looks-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/looks-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/tdgssconfig.jar"/>
 	<classpathentry kind="output" path="bin"/>

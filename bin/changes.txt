@@ -1,3 +1,8 @@
+0.04b (13-jul-11)
+    - Management of plugins has been improved.
+    - forms-1.0.3 library has been upgraded to 1.0.7 version.
+    - looks-2.0.2 library has been upgraded to 2.2.1 version.
+
 0.04a (05-jul-11)
     - Added "Liquid" l&f.
     - Removed an unused library.

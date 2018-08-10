@@ -26,8 +26,11 @@ package net.sourceforge.open_teradata_viewer.plugin;
  */
 public class DefaultPlugin implements Plugin {
 
+    boolean installed;
+
     @Override
     public void setup() {
+        installed = false;
     }
 
     @Override
@@ -39,4 +42,8 @@ public class DefaultPlugin implements Plugin {
     public void showPanel() {
     }
 
+    @Override
+    public boolean isInstalled() {
+        return installed;
+    }
 }

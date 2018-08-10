@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.sql.SQLWarning;
 import java.util.Vector;
 
-import javax.security.auth.login.AccountException;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -42,14 +41,10 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.Main;
-import net.sourceforge.open_teradata_viewer.plugin.DefaultPlugin;
-import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 
 public class ConnectAction extends CustomAction {
 
     private static final long serialVersionUID = -1992828047874871010L;
-
-    private boolean isPluginInstalled;
 
     protected ConnectAction() {
         super("Connect", "connect.png", null, null);
@@ -102,24 +97,7 @@ public class ConnectAction extends CustomAction {
                                 connectionData);
                         connected = true;
 
-                        if (!isPluginInstalled) {
-                            ApplicationFrame.getInstance().PLUGIN = PluginFactory
-                                    .getPlugin();
-                            if (!(ApplicationFrame.getInstance().PLUGIN instanceof DefaultPlugin)) {
-                                try {
-                                    ApplicationFrame.getInstance().PLUGIN
-                                            .setup();
-                                    isPluginInstalled = true;
-                                } catch (AccountException ae) {
-                                    String message = ApplicationFrame
-                                            .getInstance().PLUGIN
-                                            .analyzeException(ae.getMessage());
-                                    ApplicationFrame.getInstance().changeLog
-                                            .append(message,
-                                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                                }
-                            }
-                        }
+                        ApplicationFrame.getInstance().installPlugin();
                     } catch (Throwable t) {
                         ExceptionDialog.showException(t);
                         if (editConnection(connectionData)) {

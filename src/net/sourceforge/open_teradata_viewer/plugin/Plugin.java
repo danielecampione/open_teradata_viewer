@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.plugin;
 
-import javax.security.auth.login.AccountException;
 
 /**
  * 
@@ -28,7 +27,9 @@ import javax.security.auth.login.AccountException;
  */
 public interface Plugin {
 
-    void setup() throws AccountException;
+    void setup() throws Throwable;
+
+    boolean isInstalled();
 
     String analyzeException(String exception);
 

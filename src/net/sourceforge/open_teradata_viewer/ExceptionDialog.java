@@ -119,7 +119,7 @@ public final class ExceptionDialog {
                 if (text.toLowerCase().contains("order")
                         && (exception.contains("updateRow")
                                 || exception.contains("insertRow") || exception
-                                .contains("deleteRow"))) {
+                                    .contains("deleteRow"))) {
                     msg.append("Updating a resultset mostly fails when the ORDER BY clause is used.\n");
                     msg.append("Try the select without ORDER BY and sort the column afterwards.");
                 }
