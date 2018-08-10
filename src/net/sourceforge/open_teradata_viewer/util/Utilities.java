@@ -50,6 +50,7 @@ import javax.swing.ListCellRenderer;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -740,15 +741,14 @@ public class Utilities {
             // invoking java.awt.Desktop.getDesktop().browse()
         } catch (Exception e) {
             // Library not available or failed attempt
-            String osName = System.getProperty("os.name").toLowerCase(
-                    java.util.Locale.ENGLISH);
+            int os = SyntaxUtilities.getOS();
             try {
-                if (osName.startsWith("mac os")) {
+                if (os == SyntaxUtilities.OS_MAC_OSX) {
                     Class.forName("com.apple.eio.FileManager")
                             .getDeclaredMethod("openURL",
                                     new Class[]{String.class})
                             .invoke(null, new Object[]{url});
-                } else if (UISupport.isWindows()) {
+                } else if (os == SyntaxUtilities.OS_WINDOWS) {
                     Runtime.getRuntime().exec(
                             "rundll32 url.dll,FileProtocolHandler " + url);
                 } else {

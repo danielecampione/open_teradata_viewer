@@ -30,6 +30,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -100,7 +101,7 @@ public class Main {
                     LookAndFeel laf = (LookAndFeel) clazz.newInstance();
                     UIManager.setLookAndFeel(laf);
                     UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-                    UISupport.installOsSpecificLafTweaks();
+                    UIUtil.installOsSpecificLafTweaks();
 
                     UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
                             Font.PLAIN, 12));

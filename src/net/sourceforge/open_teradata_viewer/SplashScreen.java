@@ -36,6 +36,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JWindow;
 
+import net.sourceforge.open_teradata_viewer.util.UIUtil;
+
 /**
  * Screen displayed while the long lasting startup.
  *
@@ -176,7 +178,7 @@ public class SplashScreen extends JWindow {
             // Paint the status text
             if (text != null) {
                 // Try to use the rendering hint set that is "native"
-                Map old = UISupport.setNativeRenderingHints(g2d);
+                Map old = UIUtil.setNativeRenderingHints(g2d);
 
                 g2d.setColor(textColor);
                 g2d.drawString(text, textX, textY);

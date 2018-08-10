@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.UISupport;
-
 /**
  * Generates RTF text via a simple Java API.<p>
  *
@@ -410,7 +408,9 @@ public class RtfGenerator {
                     .getLocalGraphicsEnvironment();
             String[] familyNames = ge.getAvailableFontFamilyNames();
             Arrays.sort(familyNames);
-            boolean windows = UISupport.isWindows();
+            int os = SyntaxUtilities.getOS();
+            boolean windows = new Boolean(os == SyntaxUtilities.OS_WINDOWS)
+                    .booleanValue();
 
             // "Monaco" is the "standard" monospaced font on OS X. We'll check
             // for it first so on Macs we don't get stuck with the uglier

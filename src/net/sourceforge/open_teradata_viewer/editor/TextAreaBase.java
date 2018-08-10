@@ -41,7 +41,7 @@ import javax.swing.text.Caret;
 import javax.swing.text.StyleContext;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.UISupport;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
  * This is the base class for <code>TextArea</code>; basically it's just an
@@ -377,8 +377,9 @@ abstract class TextAreaBase extends JTextArea {
         // support; see Sun bug S282887
         StyleContext sc = StyleContext.getDefaultStyleContext();
         Font font = null;
+        int os = SyntaxUtilities.getOS();
 
-        if (UISupport.isOSX()) {
+        if (os == SyntaxUtilities.OS_MAC_OSX) {
             // Snow Leopard (1.6) uses Menlo as default monospaced font,
             // pre-Snow Leopard used Monaco
             font = sc.getFont("Menlo", Font.PLAIN, 12);

@@ -1,3 +1,6 @@
+0.15b (18/12/2012)
+    - Fixed an issue with CloseMarkupTagAction on non-QWERTY keyboards.
+
 0.15a (02/12/2012)
     - Fixed the grid color of the results table on Windows XP / Vista, when
       using the Windows Look and Feel.

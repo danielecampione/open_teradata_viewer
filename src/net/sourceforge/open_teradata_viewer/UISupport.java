@@ -25,7 +25,6 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -37,8 +36,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -56,8 +53,6 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.plaf.BorderUIResource;
-import javax.swing.plaf.UIResource;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
@@ -410,23 +405,6 @@ public class UISupport {
         return panel;
     }
 
-    public static boolean isWindows() {
-        if (isWindows == null) {
-            isWindows = new Boolean(System.getProperty("os.name")
-                    .toLowerCase(Locale.ENGLISH).indexOf("windows") >= 0);
-        }
-
-        return isWindows.booleanValue();
-    }
-
-    /** @return Whether the OS we're running on is OS X. */
-    public static boolean isOSX() {
-        // Recommended at:
-        // http://developer.apple.com/mac/library/technotes/tn2002/tn2110.html
-        String osName = System.getProperty("os.name").toLowerCase();
-        return osName.startsWith("mac os x");
-    }
-
     public static void setHourglassCursor() {
         if (frame == null) {
             return;
@@ -598,49 +576,5 @@ public class UISupport {
         panel.setBorder(BorderFactory.createEmptyBorder(top, left, bottom,
                 right));
         return panel;
-    }
-
-    /**
-     * Tweaks certain LookAndFeels (i.e., Windows XP) to look just a tad more
-     * like the native Look.
-     */
-    public static void installOsSpecificLafTweaks() {
-        String lafName = UIManager.getLookAndFeel().getName();
-        String os = System.getProperty("os.name");
-
-        // XP has insets between the edge of popup menus and the selection
-        if ("Windows XP".equals(os) && "Windows".equals(lafName)) {
-            Border insetsBorder = BorderFactory.createEmptyBorder(2, 3, 2, 3);
-
-            String key = "PopupMenu.border";
-            Border origBorder = UIManager.getBorder(key);
-            UIResource res = new BorderUIResource.CompoundBorderUIResource(
-                    origBorder, insetsBorder);
-            UIManager.getLookAndFeelDefaults().put(key, res);
-        }
-    }
-
-    /**
-     * Sets the rendering hints on a graphics object to those closest to the
-     * system's desktop values.<p>
-     * 
-     * See <a
-     * href="http://download.oracle.com/javase/6/docs/api/java/awt/doc-files/DesktopProperties.html">AWT
-     * Desktop Properties</a> for more information.
-     *
-     * @param g2d The graphics context.
-     * @return The old rendering hints.
-     */
-    public static Map setNativeRenderingHints(Graphics2D g2d) {
-        Map old = g2d.getRenderingHints();
-
-        // Try to use the rendering hint set that is "native"
-        Map hints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty(
-                "awt.font.desktophints");
-        if (hints != null) {
-            g2d.addRenderingHints(hints);
-        }
-
-        return old;
     }
 }

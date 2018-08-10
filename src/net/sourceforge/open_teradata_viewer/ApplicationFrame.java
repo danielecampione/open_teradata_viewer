@@ -65,6 +65,7 @@ import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.TranslucencyUtil;
+import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -259,7 +260,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 // this property (if non-null) to load classes from, and if we
                 // don't set it, exceptions will be thrown
                 UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-                UISupport.installOsSpecificLafTweaks();
+                UIUtil.installOsSpecificLafTweaks();
                 Runnable updateUIRunnable = new Runnable() {
                     public void run() {
                         updateLookAndFeel(lnf);

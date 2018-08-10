@@ -21,9 +21,17 @@ package net.sourceforge.open_teradata_viewer.util;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.util.Locale;
+import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.plaf.BorderUIResource;
+import javax.swing.plaf.UIResource;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -76,6 +84,27 @@ public class UIUtil {
     }
 
     /**
+     * Tweaks certain LookAndFeels (i.e., Windows XP) to look just a tad more
+     * like the native Look.
+     */
+    public static void installOsSpecificLafTweaks() {
+        String lafName = UIManager.getLookAndFeel().getName()
+                .toLowerCase(Locale.ENGLISH);
+        String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+
+        // XP has insets between the edge of popup menus and the selection
+        if ("windows xp".equals(os) && "windows".equals(lafName)) {
+            Border insetsBorder = BorderFactory.createEmptyBorder(2, 3, 2, 3);
+
+            String key = "PopupMenu.border";
+            Border origBorder = UIManager.getBorder(key);
+            UIResource res = new BorderUIResource.CompoundBorderUIResource(
+                    origBorder, insetsBorder);
+            UIManager.getLookAndFeelDefaults().put(key, res);
+        }
+    }
+
+    /**
      * Make a table use the right grid color on Windows XP / Vista, when using
      * the Windows Look and Feel.
      *
@@ -91,5 +120,29 @@ public class UIUtil {
                 }
             }
         }
+    }
+
+    /**
+     * Sets the rendering hints on a graphics object to those closest to the
+     * system's desktop values.<p>
+     * 
+     * See <a
+     * href="http://download.oracle.com/javase/6/docs/api/java/awt/doc-files/DesktopProperties.html">AWT
+     * Desktop Properties</a> for more information.
+     *
+     * @param g2d The graphics context.
+     * @return The old rendering hints.
+     */
+    public static Map setNativeRenderingHints(Graphics2D g2d) {
+        Map old = g2d.getRenderingHints();
+
+        // Try to use the rendering hint set that is "native"
+        Map hints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty(
+                "awt.font.desktophints");
+        if (hints != null) {
+            g2d.addRenderingHints(hints);
+        }
+
+        return old;
     }
 }

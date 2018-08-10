@@ -49,17 +49,27 @@ public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
                 SyntaxTextAreaEditorKit.staDecreaseIndentAction);
         put(KeyStroke.getKeyStroke('}'),
                 SyntaxTextAreaEditorKit.staCloseCurlyBraceAction);
-        // *nix causes trouble with CloseMarkupTagAction and
-        // ToggleCommentAction. It triggers both KEY_PRESSED ctrl+'/' and
-        // KEY_TYPED '/' events when the user presses ctrl+'/', but Windows and
-        // OS X do not. So to appease *nix, we remove the KEY_TYPED action and
-        // act on the KEY_PRESSED action. Note we cannot simply remove the
-        // key-typed action; we must map it to nothing to stop default action
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, 0),
+        put(KeyStroke.getKeyStroke('/'),
                 SyntaxTextAreaEditorKit.staCloseMarkupTagAction);
-        put(KeyStroke.getKeyStroke('/', KeyEvent.KEY_TYPED), "DoNothing");
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, defaultMod),
-                SyntaxTextAreaEditorKit.staToggleCommentAction);
+        int os = SyntaxUtilities.getOS();
+        if (os == SyntaxUtilities.OS_WINDOWS
+                || os == SyntaxUtilities.OS_MAC_OSX) {
+            // *nix causes trouble with CloseMarkupTagAction and
+            // ToggleCommentAction. It triggers both KEY_PRESSED ctrl+'/' and
+            // KEY_TYPED '/' events when the user presses ctrl+'/', but Windows
+            // and OS X do not. If we try to "move" the KEY_TYPED event for '/'
+            // to KEY_PRESSED, it'll work for Linux boxes with QWERTY keyboard
+            // layouts, but non-QUERTY users won't be able to type a '/'
+            // character at all then. Rather than try to hack together a
+            // solution by trying to detect the IM locale and do different
+            // things for different OSes & keyboard layouts, we do the simplest
+            // thing and (unfortunately) don't have a ToggleCommentAction for
+            // *nix out-of-the-box. Applications can add one easily enough if
+            // they want one
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, defaultMod),
+                    SyntaxTextAreaEditorKit.staToggleCommentAction);
+        }
+
         put(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, defaultMod),
                 SyntaxTextAreaEditorKit.staGoToMatchingBracketAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, defaultMod),
