@@ -34,6 +34,7 @@ import javax.swing.UIManager;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -93,6 +94,13 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.COPY);
         menu.add(Actions.COPY_AS_RTF);
         menu.add(Actions.PASTE);
+        menu.addSeparator();
+        subMenu = new JMenu("Folding");
+        menu.add(subMenu);
+        subMenu.add(new SyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
+        subMenu.add(new SyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
+        subMenu.add(new SyntaxTextAreaEditorKit.CollapseAllFoldsAction());
+        subMenu.add(new SyntaxTextAreaEditorKit.ExpandAllFoldsAction());
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
         menu.addSeparator();

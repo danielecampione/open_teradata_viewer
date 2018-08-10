@@ -216,7 +216,7 @@ public class Utilities {
      * select * from tab01
      * [/pre]
      *
-     * @deprecated Use <tt>StringUtilities.cleanString(String)</tt> instead.
+     * @deprecated Use <tt>StringUtil.cleanString(String)</tt> instead.
      * @param str String to be cleaned.
      * @return Cleaned string.
      */
@@ -296,7 +296,7 @@ public class Utilities {
      * Split a string based on the given delimiter, but don't remove
      * empty elements.
      *
-     * @deprecated Use <tt>StringUtilities.split(String, char)</tt> instead.
+     * @deprecated Use <tt>StringUtil.split(String, char)</tt> instead.
      * @param str The string to be split.
      * @param delimiter Split string based on this delimiter.
      * @return Array of split strings. Guaranteeded to be not null.
@@ -309,7 +309,7 @@ public class Utilities {
      * Split a string based on the given delimiter, optionally removing empty
      * elements.
      *
-     * @deprecated Use <tt>StringUtilities.split(String, char, boolean)</tt>
+     * @deprecated Use <tt>StringUtil.split(String, char, boolean)</tt>
      *             instead.
      * @param str The string to be split.
      * @param delimiter Split string based on this delimiter.

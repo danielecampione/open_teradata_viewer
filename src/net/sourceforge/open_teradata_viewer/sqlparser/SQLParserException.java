@@ -22,7 +22,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * An exception class with stack trace informations
+ * An exception class with stack trace information.
  * 
  * @author D. Campione
  * 

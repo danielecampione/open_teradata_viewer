@@ -231,7 +231,8 @@ public class ErrorStrip extends JComponent {
         int line = yToLine(e.getY());
         if (line > -1) {
             text = "Line: {0}";
-            text = MessageFormat.format(text, new Object[]{new Integer(line)});
+            text = MessageFormat.format(text,
+                    new Object[]{new Integer(line + 1)});
         }
         return text;
     }

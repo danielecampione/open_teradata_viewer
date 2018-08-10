@@ -49,8 +49,15 @@ public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
                 SyntaxTextAreaEditorKit.staDecreaseIndentAction);
         put(KeyStroke.getKeyStroke('}'),
                 SyntaxTextAreaEditorKit.staCloseCurlyBraceAction);
-        put(KeyStroke.getKeyStroke('/'),
+        // *nix causes trouble with CloseMarkupTagAction and
+        // ToggleCommentAction. It triggers both KEY_PRESSED ctrl+'/' and
+        // KEY_TYPED '/' events when the user presses ctrl+'/', but Windows and
+        // OS X do not. So to appease *nix, we remove the KEY_TYPED action and
+        // act on the KEY_PRESSED action. Note we cannot simply remove the
+        // key-typed action; we must map it to nothing to stop default action
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, 0),
                 SyntaxTextAreaEditorKit.staCloseMarkupTagAction);
+        put(KeyStroke.getKeyStroke('/', KeyEvent.KEY_TYPED), "DoNothing");
         put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, defaultMod),
                 SyntaxTextAreaEditorKit.staToggleCommentAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, defaultMod),

@@ -61,7 +61,7 @@ public class CurlyFoldParser implements IFoldParser {
     private boolean foldableMultiLineComments;
 
     /** Whether this parser is folding Java. */
-    private boolean java;
+    private final boolean java;
 
     /** Used to find import statements when folding Java code. */
     private static final char[] KEYWORD_IMPORT = "import".toCharArray();
@@ -212,9 +212,7 @@ public class CurlyFoldParser implements IFoldParser {
                             Fold parentFold = currentFold.getParent();
                             // Don't add fold markers for single-line blocks
                             if (currentFold.isOnSingleLine()) {
-                                if (parentFold != null) {
-                                    currentFold.removeFromParent();
-                                } else {
+                                if (!currentFold.removeFromParent()) {
                                     folds.remove(folds.size() - 1);
                                 }
                             }

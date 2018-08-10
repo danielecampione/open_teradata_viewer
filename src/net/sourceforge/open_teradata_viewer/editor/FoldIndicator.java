@@ -604,7 +604,9 @@ public class FoldIndicator extends AbstractGutterComponent {
 
         public void mouseMoved(MouseEvent e) {
             Fold newSelectedFold = findOpenFoldClosestTo(e.getPoint());
-            if (newSelectedFold != foldWithOutlineShowing) {
+            if (newSelectedFold != foldWithOutlineShowing
+                    && newSelectedFold != null
+                    && !newSelectedFold.isOnSingleLine()) {
                 foldWithOutlineShowing = newSelectedFold;
                 repaint();
             }

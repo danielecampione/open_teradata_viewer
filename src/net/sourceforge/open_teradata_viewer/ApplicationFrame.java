@@ -417,6 +417,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         //        @see net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea
         //        Looks great, let's use it!
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
+        textArea.setCodeFoldingEnabled(true);
     }
 
     private JScrollPane createQueryTable() {

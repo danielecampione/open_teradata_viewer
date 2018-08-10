@@ -19,7 +19,6 @@
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -59,6 +58,7 @@ import javax.swing.text.Highlighter;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
+import net.sourceforge.open_teradata_viewer.editor.RecordableTextAction;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextAreaUI;
 import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
@@ -135,6 +135,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             0, 0, 128);
     private static final Color DEFAULT_SELECTION_COLOR = new Color(200, 200,
             255);
+
+    private JMenu foldingMenu;
+    private static RecordableTextAction toggleCurrentFoldAction;
+    private static RecordableTextAction collapseAllCommentFoldsAction;
+    private static RecordableTextAction collapseAllFoldsAction;
+    private static RecordableTextAction expandAllFoldsAction;
 
     /** The key for the syntax style to be highlighting. */
     private String syntaxStyleKey;
@@ -485,18 +491,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @see #setPopupMenu(JPopupMenu)
      */
     protected void configurePopupMenu(JPopupMenu popupMenu) {
-        super.configurePopupMenu(popupMenu); // Currently does nothing
+        super.configurePopupMenu(popupMenu);
 
-        // Be nice and let them set the popup to null without overriding this
-        // method
-        if (popupMenu != null && popupMenu.getComponentCount() > 0) {
-            Component c = popupMenu
-                    .getComponent(popupMenu.getComponentCount() - 1);
-            if (c instanceof JMenu) { // Assume it's the folding menu
-                JMenu foldingMenu = (JMenu) c;
-                foldingMenu.setEnabled(foldManager
-                        .isCodeFoldingSupportedAndEnabled());
-            }
+        // They may have overridden createPopupMenu()..
+        if (popupMenu != null && popupMenu.getComponentCount() > 0
+                && foldingMenu != null) {
+            foldingMenu.setEnabled(foldManager
+                    .isCodeFoldingSupportedAndEnabled());
         }
     }
 
@@ -584,12 +585,39 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     protected JPopupMenu createPopupMenu() {
         JPopupMenu popup = super.createPopupMenu();
         popup.addSeparator();
+
+        foldingMenu = new JMenu("Folding");
+        foldingMenu.add(createPopupMenuItem(toggleCurrentFoldAction));
+        foldingMenu.add(createPopupMenuItem(collapseAllCommentFoldsAction));
+        foldingMenu.add(createPopupMenuItem(collapseAllFoldsAction));
+        foldingMenu.add(createPopupMenuItem(expandAllFoldsAction));
+        popup.add(foldingMenu);
+        popup.addSeparator();
+
         popup.add(createPopupMenuItem(Actions.FORMAT_SQL));
         popup.addSeparator();
         popup.add(createPopupMenuItem(Actions.COMMENT));
         popup.add(createPopupMenuItem(Actions.UNCOMMENT));
 
         return popup;
+    }
+
+    /** See createPopupMenuActions() in TextArea. */
+    private static void createStaPopupMenuActions() {
+        toggleCurrentFoldAction = new SyntaxTextAreaEditorKit.ToggleCurrentFoldAction();
+        toggleCurrentFoldAction.setName("Toggle Current Fold");
+        toggleCurrentFoldAction.setMnemonic("F".charAt(0));
+        toggleCurrentFoldAction
+                .setShortDescription("Toggles the fold at the caret position.");
+
+        collapseAllCommentFoldsAction = new SyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction();
+        collapseAllCommentFoldsAction.setName("Collapse All Comments");
+        collapseAllCommentFoldsAction.setMnemonic("C".charAt(0));
+        collapseAllCommentFoldsAction
+                .setShortDescription("Collapses all comment folds.");
+
+        collapseAllFoldsAction = new SyntaxTextAreaEditorKit.CollapseAllFoldsAction();
+        expandAllFoldsAction = new SyntaxTextAreaEditorKit.ExpandAllFoldsAction();
     }
 
     /**
@@ -1517,6 +1545,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         // before. There have been reports of users calling static getters (e.g.
         // SyntaxTextArea.getDefaultBracketMatchBGColor()) which would cause
         // these actions to be created if they were in a static block
+        if (toggleCurrentFoldAction == null) {
+            createStaPopupMenuActions();
+        }
 
         // Set some SyntaxTextArea default values
         syntaxStyleKey = SYNTAX_STYLE_NONE;

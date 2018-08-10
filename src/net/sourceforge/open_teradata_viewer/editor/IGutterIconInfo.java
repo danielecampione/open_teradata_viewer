@@ -44,4 +44,7 @@ public interface IGutterIconInfo {
      * @return The offset being tracked.
      */
     public int getMarkedOffset();
+
+    /** @return The tool tip to display when the mouse hovers over this icon. */
+    public String getToolTip();
 }

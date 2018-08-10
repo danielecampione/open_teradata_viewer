@@ -1,3 +1,23 @@
+0.14c (25/11/2012)
+    - Allow tool tips to be specified for icons in IconRowHeader.
+    - Fixed an issue with CompleteMarkupTagAction and ToggleLineCommentAction
+      conflicting with each other only on *nix (Windows and OS X didn't have
+      this issue).
+    - Allow for non-ConfigurableCarets to be set via setCaret(), to allow for
+      Swing's "composed text" changes (hidden in private API).
+    - Fixed possible NPE in XmlTreeCellUI for environments where desktop AA
+      hints cannot be determined.
+    - Added the "TOGGLE CURRENT FOLD" command to the "Edit" menu and to the
+      contextual menu of the SQL editor.
+    - Added the "COLLAPSE ALL COMMENT FOLDS" command to the "Edit" menu and to
+      the contextual menu of the SQL editor.
+    - Added the "COLLAPSE ALL FOLDS" command to the "Edit" menu and to the
+      contextual menu of the SQL editor.
+    - Added the "EXPAND ALL FOLDS" command to the "Edit" menu and to the
+      contextual menu of the SQL editor.
+    - The user manual has been updated with the added capabilities.
+    - Added the "ACCESS" keyword to the Teradata reserved words.
+
 0.14b (09/11/2012)
     - Added a translucent effect to the Find dialog (active only when supported
       by the installed LaF).
@@ -219,7 +239,7 @@
       bar that allows the manual start of the Garbage Collector.
 
 0.01b (16/06/2011)
-    - Manual updated.
+    - The user manual has been updated with the added capabilities.
     - Added "Write File" function. The "Save File" command can be found in the
       "File" menu.
     - Added "Open File" function. The "Open File" command can be found in the

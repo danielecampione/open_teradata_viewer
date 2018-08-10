@@ -86,8 +86,7 @@ public class XmlFoldParser implements IFoldParser {
                                 mlcStart = t.offset;
                             }
                         }
-                    } else if (t.type == Token.MARKUP_TAG_DELIMITER
-                            && t.isSingleChar('<')) {
+                    } else if (t.isSingleChar(Token.MARKUP_TAG_DELIMITER, '<')) {
                         if (currentFold == null) {
                             currentFold = new Fold(IFoldType.CODE, textArea,
                                     t.offset);
@@ -100,7 +99,7 @@ public class XmlFoldParser implements IFoldParser {
                             MARKUP_SHORT_TAG_END)) {
                         if (currentFold != null) {
                             Fold parentFold = currentFold.getParent();
-                            currentFold.removeFromParent();
+                            removeFold(currentFold, folds);
                             currentFold = parentFold;
                         }
                     } else if (t.is(Token.MARKUP_TAG_DELIMITER,
@@ -110,7 +109,7 @@ public class XmlFoldParser implements IFoldParser {
                             Fold parentFold = currentFold.getParent();
                             // Don't add fold markers for single-line blocks
                             if (currentFold.isOnSingleLine()) {
-                                currentFold.removeFromParent();
+                                removeFold(currentFold, folds);
                             }
                             currentFold = parentFold;
                         }
@@ -124,5 +123,19 @@ public class XmlFoldParser implements IFoldParser {
         }
 
         return folds;
+    }
+
+    /**
+     * If this fold has a parent fold, this method removes it from its parent.
+     * Otherwise, it's assumed to be the most recent (top-level) fold in the
+     * <code>folds</code> list, and is removed from that.
+     *
+     * @param fold The fold to remove.
+     * @param folds The list of top-level folds.
+     */
+    private static final void removeFold(Fold fold, List folds) {
+        if (!fold.removeFromParent()) {
+            folds.remove(folds.size() - 1);
+        }
     }
 }
