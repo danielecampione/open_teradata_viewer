@@ -6,6 +6,12 @@
     </HEAD>
     <BODY>
         <H1>FAQ</H1>
-            TBD.
+            <H2>How to create a volatile table without generating errors</H2>
+            To create a volatile table without generating the error <B>"Only an
+            ET or null statement is legal after a DDL Statement"</B>, do a
+            COMMIT after the creation of the volatile table and before
+            submitting any SQL instruction that acts on the volatile table.
+            <BR>Do a commit after populating the same table to be able to use
+            it.
     </BODY>
 </HTML>

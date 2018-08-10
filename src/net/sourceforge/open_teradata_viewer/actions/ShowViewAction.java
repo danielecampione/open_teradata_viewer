@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ public class ShowViewAction extends CustomAction {
             viewName = viewName
                     .substring(lastTokenIndex + 1, viewName.length());
         }
-        String sqlQuery = "SELECT TOP 1 RequestText FROM DBC.TABLESV WHERE TableName = '"
+        String sqlQuery = "LOCK ROW FOR ACCESS SELECT TOP 1 RequestText FROM DBC.TABLESV WHERE TableName = '"
                 + viewName
                 + "'"
                 + ((databaseName != null && databaseName.trim().length() > 0)

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -251,7 +251,7 @@ public abstract class CustomAction extends AbstractAction
             // A Teradata object name must be from 1 to 30 characters long.
             int lastTokenIndex = text.lastIndexOf(".");
             if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex,
-                    text.length()).length() >= 30) {
+                    text.length()).length() > 30) {
                 ApplicationFrame.getInstance().changeLog
                         .append("A Teradata object name must be from 1 to 30 characters long.\n",
                                 ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);

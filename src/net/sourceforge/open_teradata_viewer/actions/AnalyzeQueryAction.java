@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,10 +73,10 @@ public class AnalyzeQueryAction extends CustomAction {
             if (sql.trim().length() > 0) {
                 Statement statement = pm.parse(new StringReader(sql));
 
-                //now you should use a class that implements StatementVisitor to decide what to do
-                //based on the kind of the statement, that is SELECT or INSERT etc. but here we are only
-                //interested in SELECTS
-
+                // Now you should use a class that implements StatementVisitor
+                // to decide what to do based on the kind of the statement, that
+                // is SELECT or INSERT etc. but here we are only interested in
+                // SELECTS
                 if (statement instanceof Select) {
                     Select selectStatement = (Select) statement;
                     TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,11 @@ public class RunAction extends CustomAction {
             return;
         }
         if (sql.trim().endsWith(";")) {
-            sql = sql.trim().substring(0, sql.trim().length() - 1);
+            String sqlWithoutSemicolon = sql.trim().substring(0,
+                    sql.trim().length() - 1);
+            if (!sqlWithoutSemicolon.trim().toLowerCase().endsWith("end")) {
+                sql = sqlWithoutSemicolon;
+            }
         }
         String originalSql = sql;
         History.getInstance().add(sql);
@@ -143,11 +147,11 @@ public class RunAction extends CustomAction {
                     for (int i = 0; i < columnCount; i++) {
                         try {
                             Object object = resultSet.getObject(i + 1);
-                            //                        System.out.println((i + 1) + " "
-                            //                                + resultSet.getMetaData().getColumnName(i+1) + " - "
-                            //                                + resultSet.getMetaData().getColumnType(i+1) + " - "
-                            //                                + resultSet.getMetaData().getColumnTypeName(i+1) + " - "
-                            //                                + resultSet.getMetaData().getColumnClassName(i+1) + " - \"" + object + "\"");
+                            // System.out.println((i + 1) + " "
+                            //     + resultSet.getMetaData().getColumnName(i+1) + " - "
+                            //     + resultSet.getMetaData().getColumnType(i+1) + " - "
+                            //     + resultSet.getMetaData().getColumnTypeName(i+1) + " - "
+                            //     + resultSet.getMetaData().getColumnClassName(i+1) + " - \"" + object + "\"");
                             row.add(object);
                         } catch (Exception e1) {
                             row.add("###");
@@ -208,7 +212,8 @@ public class RunAction extends CustomAction {
 
     private PreparedStatement createStatement(Connection connection, String sql)
             throws SQLException {
-        boolean query = sql.trim().toLowerCase().startsWith("select")
+        boolean query = sql.trim().toLowerCase().startsWith("sel")
+                || sql.trim().toLowerCase().startsWith("select")
                 || sql.trim().toLowerCase().startsWith("with");
         boolean call = sql.trim().toLowerCase().startsWith("call");
         PreparedStatement statement;

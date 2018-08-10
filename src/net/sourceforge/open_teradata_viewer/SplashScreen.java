@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class SplashScreen extends JWindow {
                     + Config.getVersion()
                     + "</td><td align='right'>"
                     + Config.HOME_PAGE
-                    + "</td></tr><tr><td>Copyright &copy 2011, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
+                    + "</td></tr><tr><td>Copyright &copy 2012, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
         } catch (IOException e) {
         }
     }

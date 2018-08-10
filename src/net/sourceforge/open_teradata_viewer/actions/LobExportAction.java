@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,6 +161,8 @@ public class LobExportAction extends CustomAction {
             return ".png";
         } else if (startsWith(b, 'P', 'K', 3, 4)) {
             return ".zip";
+        } else if (startsWith(b, 0x1F, 0x8B, 0x08)) {
+            return ".gz";
         } else if (startsWith(b, 0x1b, '*')) {
             return ".pcl";
         } else if (startsWith(b, 0x1b, '%')) {

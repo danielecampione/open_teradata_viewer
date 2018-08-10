@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2011, D. Campione
+ * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +186,6 @@ public final class ResultSetTable extends JTable {
         }
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void editingStopped(ChangeEvent e) {
         super.editingStopped(e);
@@ -199,11 +198,13 @@ public final class ResultSetTable extends JTable {
             resultSet.relative(origRow);
             value = resultSet.getObject(column + 1);
             if (value == null || !value.toString().equals(getTableValue())) {
-                String log = ("" + value).trim();
                 update(column + 1, getTableValue());
                 resultSet.updateRow();
-                value = resultSet.getObject(column + 1);
-                log += " -> " + ("" + resultSet.getObject(column + 1)).trim();
+                try {
+                    value = resultSet.getObject(column + 1);
+                } catch (SQLException e1) {
+                    ExceptionDialog.hideException(e1);
+                }
             }
         } catch (Throwable t) {
             if (e == null) {
