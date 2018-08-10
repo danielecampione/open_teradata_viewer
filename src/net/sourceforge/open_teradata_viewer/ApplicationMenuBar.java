@@ -78,6 +78,9 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(getActionByName(DefaultEditorKit.selectAllAction));
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
+        menu.addSeparator();
+        menu.add(Actions.HISTORY_PREVIOUS);
+        menu.add(Actions.HISTORY_NEXT);
 
         menu = new JMenu("Schema Browser");
         add(menu);

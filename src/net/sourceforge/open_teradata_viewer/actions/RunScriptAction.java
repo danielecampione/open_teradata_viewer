@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
@@ -57,6 +58,10 @@ public class RunScriptAction extends CustomAction {
                     ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
+        if (text.trim().length() == 0) {
+            return;
+        }
+        History.getInstance().add(text);
         Actions.getInstance().validateTextActions();
         // Search and capture all text that is followed by a semicolon,
         // zero or more whitespace characters [ \t\n\x0B\f\r],

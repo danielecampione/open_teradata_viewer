@@ -1,3 +1,6 @@
+0.02b (21-jun-11)
+    - Added the historicizing of queries.
+
 0.02a (20-jun-11)
     - The driver is dynamically installed.
     - The connection details are shown when an exception occurs.

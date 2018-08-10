@@ -25,6 +25,7 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 
 import net.sourceforge.open_teradata_viewer.Context;
+import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
 /**
@@ -41,6 +42,8 @@ public final class Actions
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
     public static final CustomAction FAVORITES = new FavoritesAction();
+    public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
+    public static final CustomAction HISTORY_NEXT = new HistoryNextAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction ABOUT = new AboutAction();
     public static final CustomAction CONNECT = new ConnectAction();
@@ -125,5 +128,7 @@ public final class Actions
     }
 
     protected void validateTextActions() {
+        HISTORY_PREVIOUS.setEnabled(History.getInstance().hasPrevious());
+        HISTORY_NEXT.setEnabled(History.getInstance().hasNext());
     }
 }

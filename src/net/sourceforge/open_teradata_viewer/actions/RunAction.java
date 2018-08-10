@@ -37,6 +37,7 @@ import javax.swing.KeyStroke;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
@@ -72,6 +73,7 @@ public class RunAction extends CustomAction {
             sql = sql.trim().substring(0, sql.trim().length() - 1);
         }
         String originalSql = sql;
+        History.getInstance().add(sql);
         Actions.getInstance().validateTextActions();
         Vector<String> columnIdentifiers = new Vector<String>();
         @SuppressWarnings("rawtypes")
