@@ -1,13 +1,16 @@
-0.06b (28-jul-11)
+0.06c (28/07/2011)
+    - Added the update checker.
+
+0.06b (28/07/2011)
     - The redrawing of the main frame has been enhanced in the "animated
       loading" mode.
 
-0.06a (26-jul-11)
+0.06a (26/07/2011)
     - The animated assistant is disabled by default.
     - The table sorter repaints the result set also in the "animated loading"
       mode.
 
-0.05c (25-jul-11)
+0.05c (25/07/2011)
     X [BUG0003] Although it has been implemented the algorithm to change the
       result set, it is not possible to update the Teradata database because of
       a problem with the relative JDBC driver (wrong selected column index).
@@ -16,11 +19,11 @@
     - Added the "Duplicate" action and the relative menu voice.
     - The user manual has been updated with the added capabilities.
 
-0.05b (25-jul-11)
+0.05b (25/07/2011)
     - Added some animated assistants.
     - Updated the "CONNECTION PANEL" dialog screenshot in the user manual.
 
-0.05a (21-jul-11)
+0.05a (21/07/2011)
     X [BUG0002] Added an animated assistant that is shown while a process is
       running. Once the animated assistant appears, an infinite loop of
       invocations to the repaint method begins.
@@ -28,60 +31,60 @@
       selected.
     - Updated the "EDIT CONNECTION" dialog screenshot in the user manual.
 
-0.04c (19-jul-11)
+0.04c (19/07/2011)
     - Added the user and password text fields for connections that don't use the
       LDAP logging mechanism. 
     - Fixed a bug relative to the "EDIT DRIVERS" command. If a JDBC driver was
       not found and the user closed the drivers dialog box, the returned
       response was causing an error. Now this situation is suitably managed.
 
-0.04b (13-jul-11)
+0.04b (13/07/2011)
     - Management of plugins has been improved.
     - forms-1.0.3 library has been upgraded to 1.0.7 version.
     - looks-2.0.2 library has been upgraded to 2.2.1 version.
 
-0.04a (05-jul-11)
+0.04a (05/07/2011)
     - Added "Liquid" l&f.
     - Removed an unused library.
 
-0.03c (01-jul-11)
+0.03c (01/07/2011)
     - Fixed a bug relative to the "SHOW VIEW" command. When the command was
       performed on an object that is not a view, the returned resultset was in
       a null record. Now this situation is suitably managed.
 
-0.03b (29-jun-11)
+0.03b (29/06/2011)
     - Added the full-screen mode. Added the "Full Screen" menu voice to the
       "View" menu.
 
-0.03a (27-jun-11)
+0.03a (27/06/2011)
     - Added the capability to install other JDBC drivers at Runtime. Added the
       "Drivers" menu voice to the "Schema Browser" menu.
 
-0.02c (22-jun-11)
+0.02c (22/06/2011)
     - Added support for plug-ins.
 
-0.02b (21-jun-11)
+0.02b (21/06/2011)
     - Added the historicizing of queries.
 
-0.02a (20-jun-11)
+0.02a (20/06/2011)
     - The driver is dynamically installed.
     - The connection details are shown when an exception occurs.
     - Added the capability to store multiple connections.
     - Added the capability to store bookmarks.
 
-0.01c (17-jun-11)
+0.01c (17/06/2011)
     - Added the "Run Script", "Open File" and "Save File" command buttons to the
       application toolbar.
     - The memory monitor component has been replaced by the application status
       bar that allows the manual start of the Garbage Collector.
 
-0.01b (16-jun-11)
+0.01b (16/06/2011)
     - Manual updated.
     - Added "Write File" function. The "Save File" command can be found in the
       "File" menu.
     - Added "Open File" function. The "Open File" command can be found in the
       "File" menu.
 
-0.01a (14-jun-11)
+0.01a (14/06/2011)
     X [BUG0001] First release. Sometimes, with the execution of different
       "SELECT" statements, an error occurs.

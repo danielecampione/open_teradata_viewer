@@ -54,7 +54,7 @@ public class ApplicationMenuBar extends JMenuBar {
 
     public ApplicationMenuBar() {
         JMenu menu;
-        
+
         menu = new JMenu("Connection");
         menu = addMouseSensitivityToJMenu(menu);
         add(menu);
@@ -166,35 +166,37 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(Actions.ABOUT);
 
+        new UpdateChecker(this).check();
+
         setMnemonics(this);
     }
-    
+
     private JMenu addMouseSensitivityToJMenu(JMenu menu) {
-    	menu.addMouseListener(new MouseAdapter() {
-        	public void forcesTheRepaint() {
-        		if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
+        menu.addMouseListener(new MouseAdapter() {
+            public void forcesTheRepaint() {
+                if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
                         .isLoadingAssistantActived()) {
                     ApplicationFrame.getInstance().setRepainted(false);
                 }
-        	}
-        	@Override
-			public void mouseEntered(MouseEvent e) {
-        		forcesTheRepaint();
-        	}
-        	@Override
-			public void mouseExited(MouseEvent e) {
-        		forcesTheRepaint();
-        	}
-        	@Override
-			public void mouseReleased(MouseEvent e) {
-        		forcesTheRepaint();
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				forcesTheRepaint();
-			}
-		});
-    	return menu;
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                forcesTheRepaint();
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                forcesTheRepaint();
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                forcesTheRepaint();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                forcesTheRepaint();
+            }
+        });
+        return menu;
     }
 
     private void setMnemonics(MenuElement menuElement) {

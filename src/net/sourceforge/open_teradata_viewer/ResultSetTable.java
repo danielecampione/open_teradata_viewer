@@ -20,8 +20,6 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.io.ByteArrayInputStream;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -78,17 +76,6 @@ public final class ResultSetTable extends JTable {
         setDefaultRenderer(Object.class, new ResultSetTableCellRenderer());
         getActionMap().put("copy",
                 new CopyCellValueAction(getActionMap().get("copy")));
-        addMouseWheelListener(new MouseWheelListener() {
-
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				if (((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
-                        .isLoadingAssistantActived()) {
-                    ApplicationFrame.getInstance().setRepainted(false);
-                }
-			}
-        	
-        });
     }
 
     public static ResultSetTable getInstance() {

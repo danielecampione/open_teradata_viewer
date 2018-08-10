@@ -209,9 +209,9 @@ public class ApplicationFrame extends JFrame {
             }
             String loadingAssistantProperty = "loading_assistant_actived";
             String strLoadingAssistantActived = Config
-                    .getExtraProperty(loadingAssistantProperty);
+                    .getSetting(loadingAssistantProperty);
             if (StringUtil.isEmpty(strLoadingAssistantActived)) {
-                Config.saveExtraProperty(loadingAssistantProperty, "false");
+                Config.saveSetting(loadingAssistantProperty, "false");
                 ((AnimatedLoadingAction) Actions.ANIMATED_LOADING)
                         .setLoadingAssistantActived(false);
             } else {

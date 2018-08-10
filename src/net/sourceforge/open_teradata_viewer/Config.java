@@ -53,11 +53,19 @@ import org.xml.sax.SAXException;
 
 import com.itextpdf.text.pdf.codec.Base64;
 
+/**
+ * 
+ * 
+ * @author D. Campione
+ * 
+ */
 public final class Config {
 
     private static String version;
 
     public static final String HOME_PAGE = "http://openteradata.sourceforge.net/";
+    public static final String SOURCEFORGE_MIRROR = "http://sourceforge.net/projects/openteradata/";
+    public static final String JAVANET_MIRROR = "http://java.net/downloads/openteradata/Open%20Teradata%20Viewer/";
 
     private Config() {
     }
@@ -89,7 +97,10 @@ public final class Config {
         return version;
     }
 
-    private static String getSetting(String name) throws Exception {
+    /**
+     * Used by plug-ins.
+     */
+    public static String getSetting(String name) throws Exception {
         Element config = getConfig();
         NodeList list = config.getElementsByTagName("settings");
         if (list.getLength() > 0) {
@@ -185,7 +196,10 @@ public final class Config {
         Config.saveConfig(config);
     }
 
-    private static void saveSetting(String name, String value) throws Exception {
+    /**
+     * Used by plug-ins.
+     */
+    public static void saveSetting(String name, String value) throws Exception {
         Element config = getConfig();
         NodeList list = config.getElementsByTagName("settings");
         if (list.getLength() > 0) {
@@ -269,20 +283,5 @@ public final class Config {
 
     public static String getLastUsedDir() throws Exception {
         return getSetting("dir");
-    }
-
-    /**
-     * Used by plug-ins.
-     */
-    public static void saveExtraProperty(String propertyName,
-            String propertyValue) throws Exception {
-        saveSetting(propertyName, propertyValue);
-    }
-
-    /**
-     * Used by plug-ins.
-     */
-    public static String getExtraProperty(String propertyName) throws Exception {
-        return getSetting(propertyName);
     }
 }

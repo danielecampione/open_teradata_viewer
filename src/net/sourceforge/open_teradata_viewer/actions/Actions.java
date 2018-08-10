@@ -75,6 +75,7 @@ public final class Actions
     public static final CustomAction ANIMATED_LOADING = new AnimatedLoadingAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
     public static final CustomAction ABOUT = new AboutAction();
+    public static final CustomAction UPDATE = new UpdateAction();
 
     private static final Actions ACTIONS = new Actions();
 

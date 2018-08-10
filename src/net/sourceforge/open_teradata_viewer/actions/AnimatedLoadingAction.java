@@ -52,7 +52,7 @@ public class AnimatedLoadingAction extends CustomAction implements Runnable {
         loadingAssistantActived = !loadingAssistantActived;
 
         String loadingAssistantProperty = "loading_assistant_actived";
-        Config.saveExtraProperty(loadingAssistantProperty,
+        Config.saveSetting(loadingAssistantProperty,
                 String.format("%b", loadingAssistantActived));
     }
 
