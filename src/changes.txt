@@ -1,3 +1,7 @@
+0.05b (25-jul-11)
+    - Added some animated assistants.
+    - Updated the "CONNECTION PANEL" dialog screenshot in the user manual.
+
 0.05a (21-jul-11)
     - Added an animated assistant that is shown while a process is running.
     - The "SHOW RECORD" command can be perfomed only if a record has been

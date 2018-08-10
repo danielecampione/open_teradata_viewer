@@ -139,19 +139,22 @@ public class HelpAction extends CustomAction {
                 + "image019.gif");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image020.jpg");
-        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
-                + File.separator + "manual_file" + File.separator
                 + "image022.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "image023.jpg");
+                + "image024.png");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "item0027.xml");
+                + "image025.jpg");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
-                + "props0028.xml");
+                + "image026.jpg");
+        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
+                + File.separator + "manual_file" + File.separator
+                + "item0029.xml");
+        Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
+                + File.separator + "manual_file" + File.separator
+                + "props0030.xml");
         Tools.writeLocallyJARInternalFile(ApplicationFiles.helpFolder
                 + File.separator + "manual_file" + File.separator
                 + "themedata.thmx");

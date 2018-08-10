@@ -23,6 +23,7 @@ import java.awt.Cursor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.MouseAdapter;
 
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.actions.CustomAction;
@@ -37,14 +38,16 @@ public abstract class ThreadedAction implements Runnable {
 
     public ThreadedAction() {
         new Thread(this).start();
-        if (ApplicationFrame.getInstance().animatedLoading != null
-                && !ApplicationFrame.getInstance().animatedLoading.isAlive()) {
-            ApplicationFrame.getInstance().animatedLoading.start();
-        }
     }
 
     @Override
     public final void run() {
+        ApplicationFrame.getInstance().theGIF = new ImageIcon(
+                ApplicationFrame.class
+                        .getResource("/icons/animated_assistant ("
+                                + Math.round(Math.random() * 47) + ").gif"))
+                .getImage();
+
         final Component focusOwner = KeyboardFocusManager
                 .getCurrentKeyboardFocusManager().getFocusOwner();
         final Component glassPane = ApplicationFrame.getInstance()
@@ -69,14 +72,8 @@ public abstract class ThreadedAction implements Runnable {
             ApplicationFrame.getInstance().printStackTraceOnGUI(t);
             ExceptionDialog.showException(t);
         } finally {
+            ApplicationFrame.getInstance().setRepainted(false);
             CustomAction.inProgress = false;
-            if (ApplicationFrame.getInstance().animatedLoading != null
-                    && ApplicationFrame.getInstance().animatedLoading.isAlive()) {
-                synchronized (this) {
-                    if (CustomAction.inProgress)
-                        notify();
-                }
-            }
             if (SwingUtil.isVisible(glassPane)) {
                 try {
                     SwingUtilities.invokeAndWait(new Runnable() {

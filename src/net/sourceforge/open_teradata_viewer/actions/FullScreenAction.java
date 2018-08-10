@@ -77,6 +77,7 @@ public class FullScreenAction extends CustomAction {
                 ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
+                ApplicationFrame.getInstance().setRepainted(false);
                 CustomAction.inProgress = false;
             }
         } else {

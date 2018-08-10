@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -107,11 +106,12 @@ public class ApplicationFrame extends JFrame {
     private boolean fullScreenMode;
     private DisplayChanger displayChanger;
 
-    public Thread animatedLoading;
+    private Thread animatedLoading;
     Image theGIF;
     boolean necessaryResizingOfBufferedImage;
     BufferedImage bufferedImage;
     Graphics2D g2;
+    private boolean repainted;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -222,9 +222,6 @@ public class ApplicationFrame extends JFrame {
                 necessaryResizingOfBufferedImage = true;
             }
         });
-        theGIF = new ImageIcon(
-                ApplicationFrame.class.getResource("/icons/dancer.gif"))
-                .getImage();
         MediaTracker mediatracker = new MediaTracker(this);
         mediatracker.addImage(theGIF, 0);
         try {
@@ -237,30 +234,31 @@ public class ApplicationFrame extends JFrame {
             UISupport.getDialogs().showErrorMessage(
                     "Error loading the animated assistant.");
         }
-        animatedLoading = new Thread(new Runnable() {
 
-            @SuppressWarnings("static-access")
+        animatedLoading = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    try {
-                        Thread.currentThread().sleep(20L);
-
-                        synchronized (this) {
-                            while (!CustomAction.inProgress)
-                                wait();
+                try {
+                    while (true) {
+                        Thread.sleep(1000L);
+                        while (CustomAction.inProgress) {
+                            Thread.sleep(20L);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    repaint();
+                                }
+                            });
                         }
-                    } catch (InterruptedException e) {
-                        // ignore
                     }
-                    repaint();
+                } catch (InterruptedException e) {
+                    return;
                 }
             }
 
         });
+        animatedLoading.start();
         splashScreen.progress(10);
     }
-
     public void installPlugin() {
         if (PLUGIN == null || PLUGIN instanceof DefaultPlugin) {
             Drivers.setInitialized(false);
@@ -620,25 +618,32 @@ public class ApplicationFrame extends JFrame {
     }
 
     public void paint(Graphics gr) {
-        update(gr);
-    }
-
-    public void update(Graphics gr) {
-        if (necessaryResizingOfBufferedImage) {
-            if (g2 != null) {
-                g2.dispose();
-            }
-
-            bufferedImage = ((BufferedImage) createImage(getWidth(),
-                    getHeight()));
-            g2 = bufferedImage.createGraphics();
-            necessaryResizingOfBufferedImage = false;
-        }
-        super.paint(g2);
         if (CustomAction.inProgress) {
+            if (necessaryResizingOfBufferedImage) {
+                if (g2 != null) {
+                    g2.dispose();
+                }
+
+                bufferedImage = ((BufferedImage) createImage(getWidth(),
+                        getHeight()));
+                g2 = bufferedImage.createGraphics();
+                necessaryResizingOfBufferedImage = false;
+            }
+            super.paint(g2);
             g2.drawImage(theGIF, getSize().width - theGIF.getWidth(this) - 5,
                     getSize().height - theGIF.getHeight(this) - 5, this);
+            gr.drawImage(bufferedImage, 0, 0, this);
+        } else if (!repainted) {
+            super.paint(gr);
+            repainted = true;
         }
-        gr.drawImage(bufferedImage, 0, 0, this);
+    }
+
+    public boolean hasBeenRepainted() {
+        return repainted;
+    }
+
+    public void setRepainted(boolean repainted) {
+        this.repainted = repainted;
     }
 }
