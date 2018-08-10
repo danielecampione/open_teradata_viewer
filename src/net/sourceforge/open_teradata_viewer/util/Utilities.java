@@ -30,6 +30,9 @@ import java.io.StringWriter;
 import java.text.NumberFormat;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.Tools;
+import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
  * General purpose utilities functions.
@@ -39,8 +42,39 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 public class Utilities {
 
     /**
-     * Ctor. <TT>private</TT> as all methods are static.
+     * A Teradata object name can contain the letters A through Z, the digits 0
+     * through 9, the underscore (_), $, and #. A name in double quotation marks
+     * can contain any characters except double quotation marks.
      */
+    public static String[] teradataLegalChars = {"A", "B", "C", "D", "E", "F",
+            "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+            "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "_", "$", "#", "."};
+
+    /** An object name cannot be a Teradata reserved word. */
+    public static StringList teradataReservedWords = new StringList();
+
+    /** Used to indicate a &quot;Start Of Line&quot; comment in SQL. */
+    public final static String START_OF_LINE_COMMENT = "--";
+
+    public final static String LINE_SEPARATOR = "=======================================";
+
+    static {
+        try {
+            teradataReservedWords
+                    .setText(StreamUtil.stream2String(Utilities.class
+                            .getResourceAsStream("/res/teradata_reserved_words.list")));
+            for (int i = 0; i < teradataReservedWords.size(); i++) {
+                if (StringUtil.isEmpty((String) teradataReservedWords.get(i))) {
+                    continue;
+                }
+            }
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
+    }
+
+    /** Ctor. <TT>private</TT> as all methods are static. */
     private Utilities() {
         super();
     }
@@ -48,29 +82,24 @@ public class Utilities {
     /**
      * Print the current stack trace to <TT>ps</TT>.
      *
-     * @param    ps  The <TT>PrintStream</TT> to print stack trace to.
-     *
-     * @throws   IllegalArgumentException    If a null <TT>ps</TT> passed.
+     * @param ps The <TT>PrintStream</TT> to print stack trace to.     
+     * @throws IllegalArgumentException If a null <TT>ps</TT> passed.
      */
-    public static void printStackTrace(PrintStream ps) {
+    public static void printStackTrace(Throwable t, PrintStream ps) {
         if (ps == null) {
             throw new IllegalArgumentException("PrintStream == null");
         }
 
-        try {
-            throw new Exception();
-        } catch (Exception ex) {
-            ps.println(getStackTrace(ex));
-        }
+        ps.println(getStackTrace(t));
     }
 
     /**
-     * Return the stack trace from the passed exception as a string
+     * Return the stack trace from the passed exception as a string.
      *
-     * @param    th  The exception to retrieve stack trace for.
+     * @param t The exception to retrieve stack trace for.
      */
-    public static String getStackTrace(Throwable th) {
-        if (th == null) {
+    public static String getStackTrace(Throwable t) {
+        if (t == null) {
             throw new IllegalArgumentException("Throwable == null");
         }
 
@@ -78,7 +107,7 @@ public class Utilities {
         try {
             PrintWriter pw = new PrintWriter(sw);
             try {
-                th.printStackTrace(pw);
+                t.printStackTrace(pw);
                 return sw.toString();
             } finally {
                 pw.close();
@@ -86,10 +115,12 @@ public class Utilities {
         } finally {
             try {
                 sw.close();
-            } catch (IOException ex) {
-                ApplicationFrame.getInstance().changeLog.append(
-                        "Unexpected error closing StringWriter",
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            } catch (IOException ioe) {
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println("Unexpected error closing StringWriter.",
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
         }
     }
@@ -105,12 +136,11 @@ public class Utilities {
     }
 
     /**
-     * Change the passed class name to its corresponding file name. E.G.
-     * change &quot;Utilities&quot; to &quot;Utilities.class&quot;.
+     * Change the passed class name to its corresponding file name. E.G. change
+     * &quot;Utilities&quot; to &quot;Utilities.class&quot;.
      *
-     * @param    name    Class name to be changed.
-     *
-     * @throws   IllegalArgumentException    If a null <TT>name</TT> passed.
+     * @param name Class name to be changed.
+     * @throws IllegalArgumentException If a null <TT>name</TT> passed.
      */
     public static String changeClassNameToFileName(String name) {
         if (name == null) {
@@ -123,9 +153,8 @@ public class Utilities {
      * Change the passed file name to its corresponding class name. E.G.
      * change &quot;Utilities.class&quot; to &quot;Utilities&quot;.
      *
-     * @param    name    Class name to be changed. If this does not represent
-     *                   a Java class then <TT>null</TT> is returned.
-     *
+     * @param name Class name to be changed. If this does not represent a Java
+     *             class then <TT>null</TT> is returned.
      * @throws IllegalArgumentException  If a null <TT>name</TT> passed.
      */
     public static String changeFileNameToClassName(String name) {
@@ -144,7 +173,7 @@ public class Utilities {
     /**
      * Clean the passed string. Replace whitespace characters with a single
      * space. If a <TT>null</TT> string passed return an empty string. E.G.
-     * replace
+     * replace.
      *
      * [pre]
      * \t\tselect\t* from\t\ttab01
@@ -156,11 +185,9 @@ public class Utilities {
      * select * from tab01
      * [/pre]
      *
-     * @deprecated   Use <tt>StringUtilities.cleanString(String)</tt> instead.
-     *
-     * @param    str String to be cleaned.
-     *
-     * @return   Cleaned string.
+     * @deprecated Use <tt>StringUtilities.cleanString(String)</tt> instead.
+     * @param str String to be cleaned.
+     * @return Cleaned string.
      */
     public static String cleanString(String str) {
         return StringUtil.cleanString(str);
@@ -169,12 +196,10 @@ public class Utilities {
     /**
      * Return the suffix of the passed file name.
      *
-     * @param    fileName    File name to retrieve suffix for.
-     *
-     * @return   Suffix for <TT>fileName</TT> or an empty string
-     *           if unable to get the suffix.
-     *
-     * @throws   IllegalArgumentException    if <TT>null</TT> file name passed.
+     * @param fileName File name to retrieve suffix for.
+     * @return Suffix for <TT>fileName</TT> or an empty string if unable to get
+     *         the suffix.
+     * @throws IllegalArgumentException if <TT>null</TT> file name passed.
      */
     public static String getFileNameSuffix(String fileName) {
         if (fileName == null) {
@@ -195,17 +220,14 @@ public class Utilities {
         } else {
             return o1.equals(o2);
         }
-
     }
 
     /**
      * Remove the suffix from the passed file name.
      *
-     * @param    fileName    File name to remove suffix from.
-     *
-     * @return   <TT>fileName</TT> without a suffix.
-     *
-     * @throws   IllegalArgumentException    if <TT>null</TT> file name passed.
+     * @param fileName File name to remove suffix from.
+     * @return <TT>fileName</TT> without a suffix.
+     * @throws IllegalArgumentException If <TT>null</TT> file name passed.
      */
     public static String removeFileNameSuffix(String fileName) {
         if (fileName == null) {
@@ -243,30 +265,25 @@ public class Utilities {
      * Split a string based on the given delimiter, but don't remove
      * empty elements.
      *
-     * @deprecated   Use <tt>StringUtilities.split(String, char)</tt>
-     *               instead.
-     *
-     * @param    str         The string to be split.
-     * @param    delimiter   Split string based on this delimiter.
-     *
-     * @return   Array of split strings. Guaranteeded to be not null.
+     * @deprecated Use <tt>StringUtilities.split(String, char)</tt> instead.
+     * @param str The string to be split.
+     * @param delimiter Split string based on this delimiter.
+     * @return Array of split strings. Guaranteeded to be not null.
      */
     public static String[] splitString(String str, char delimiter) {
         return StringUtil.split(str, delimiter);
     }
 
     /**
-     * Split a string based on the given delimiter, optionally removing
-     * empty elements.
+     * Split a string based on the given delimiter, optionally removing empty
+     * elements.
      *
-     * @deprecated   Use <tt>StringUtilities.split(String, char, boolean)</tt>
-     *               instead.
-     *
-     * @param    str         The string to be split.
-     * @param    delimiter   Split string based on this delimiter.
-     * @param    removeEmpty If <tt>true</tt> then remove empty elements.
-     *
-     * @return   Array of split strings. Guaranteeded to be not null.
+     * @deprecated Use <tt>StringUtilities.split(String, char, boolean)</tt>
+     *             instead.
+     * @param str The string to be split.
+     * @param delimiter Split string based on this delimiter.
+     * @param removeEmpty If <tt>true</tt> then remove empty elements.
+     * @return Array of split strings. Guaranteeded to be not null.
      */
     public static String[] splitString(String str, char delimiter,
             boolean removeEmpty) {
@@ -274,8 +291,8 @@ public class Utilities {
     }
 
     /**
-     * Creates a clone of any serializable object. Collections and arrays
-     * may be cloned if the entries are serializable.
+     * Creates a clone of any serializable object. Collections and arrays may be
+     * cloned if the entries are serializable.
      *
      * Caution super class members are not cloned if a super class is not
      * serializable.
@@ -308,7 +325,6 @@ public class Utilities {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
@@ -316,13 +332,10 @@ public class Utilities {
       * This prevents you from having to place SuppressWarnings throughout your
       * code.
       * 
-      * @param <T>
-      *           the return type to cast the object to
-      * @param x
-      *           the object to cast.
+      * @param <T> The return type to cast the object to.
+      * @param x The object to cast.
       * @return a type-casted version of the specified object.
       */
-    @SuppressWarnings("unchecked")
     public static <T> T cast(Object x) {
         return (T) x;
     }
@@ -331,10 +344,8 @@ public class Utilities {
      * Checks the specified list of argument to see if any are null and throws a
      * runtime exception if one is.
      * 
-     * @param methodName
-     *           the name of the method checking it's arguments
-     * @param arguments
-     *           the arguments - these should be in name/value pairs
+     * @param methodName The name of the method checking it's arguments.
+     * @param arguments The arguments - these should be in name/value pairs.
      */
     public static void checkNull(String methodName, Object... arguments) {
         if (arguments.length % 2 != 0) {
@@ -363,9 +374,12 @@ public class Utilities {
         }
         try {
             Thread.sleep(millis);
-        } catch (Exception e) {
-            ApplicationFrame.getInstance().changeLog.append(e.getMessage(),
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+        } catch (InterruptedException ie) {
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(ie.getMessage(),
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
     }
 
@@ -382,4 +396,68 @@ public class Utilities {
         return StringUtil.escapeHtmlChars(sql);
     }
 
+    public static boolean canBeATeradataObjectName(String text) {
+        if (!Tools.isEmpty(text) && text.trim().length() > 0) {
+            text = text.trim();
+            // A Teradata object name must be from 1 to 30 characters long
+            int lastTokenIndex = text.lastIndexOf(".");
+            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
+                    text.length()).length() > 30) {
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(
+                                "A Teradata object name must be from 1 to 30 characters long.",
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                return false;
+            }
+            int numRetries;
+            for (int i = 0; i < text.length(); i++) {
+                numRetries = 0;
+                for (int j = 0; j < teradataLegalChars.length; j++) {
+                    if (text.toUpperCase().charAt(i) != teradataLegalChars[j]
+                            .charAt(0)) {
+                        numRetries++;
+                    } else {
+                        break;
+                    }
+                }
+                if (numRetries == teradataLegalChars.length) {
+                    ApplicationFrame
+                            .getInstance()
+                            .getConsole()
+                            .println(
+                                    "You're trying to perform a SQL command using an illegal character.",
+                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                    return false;
+                }
+            }
+            for (int i = 0; i < teradataReservedWords.size(); i++) {
+                if (text.equalsIgnoreCase(teradataReservedWords.get(i))) {
+                    ApplicationFrame
+                            .getInstance()
+                            .getConsole()
+                            .println(
+                                    "You're trying to perform a SQL command using a Teradata reserved word: \""
+                                            + teradataReservedWords.get(i)
+                                            + "\".",
+                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                    return false;
+                }
+            }
+            // A Teradata object name cannot be a number
+            try {
+                Double.parseDouble(text);
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println("A Teradata object name cannot be a number.",
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                return false;
+            } catch (NumberFormatException nfe) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

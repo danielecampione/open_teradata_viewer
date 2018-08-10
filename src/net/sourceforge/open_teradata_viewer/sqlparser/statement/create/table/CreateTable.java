@@ -18,37 +18,31 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * A "CREATE TABLE" statement
+ * A "CREATE TABLE" statement.
  * 
  * @author D. Campione
  * 
  */
-public class CreateTable implements Statement {
+public class CreateTable implements IStatement {
 
     private Table table;
-    @SuppressWarnings("rawtypes")
-    private List tableOptionsStrings;
-    @SuppressWarnings("rawtypes")
-    private List columnDefinitions;
-    @SuppressWarnings("rawtypes")
-    private List indexes;
+    private List<?> tableOptionsStrings;
+    private List<?> columnDefinitions;
+    private List<?> indexes;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
-    /**
-     * The name of the table to be created
-     */
+    /** The name of the table to be created. */
     public Table getTable() {
         return table;
     }
@@ -57,43 +51,37 @@ public class CreateTable implements Statement {
         this.table = table;
     }
 
-    /**
-     * A list of {@link ColumnDefinition}s of this table.
-     */
-    @SuppressWarnings("rawtypes")
-    public List getColumnDefinitions() {
+    /** A list of {@link ColumnDefinition}s of this table. */
+    public List<?> getColumnDefinitions() {
         return columnDefinitions;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setColumnDefinitions(List list) {
+    public void setColumnDefinitions(List<?> list) {
         columnDefinitions = list;
     }
 
     /**
-     * A list of options (as simple strings) of this table definition, as ("TYPE", "=", "MYISAM") 
+     * A list of options (as simple strings) of this table definition, as
+     * ("TYPE", "=", "MYISAM"). 
      */
-    @SuppressWarnings("rawtypes")
-    public List getTableOptionsStrings() {
+    public List<?> getTableOptionsStrings() {
         return tableOptionsStrings;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setTableOptionsStrings(List list) {
+    public void setTableOptionsStrings(List<?> list) {
         tableOptionsStrings = list;
     }
 
     /**
      * A list of {@link Index}es (for example "PRIMARY KEY") of this table.<br>
-     * Indexes created with column definitions (as in mycol INT PRIMARY KEY) are not inserted into this list.  
+     * Indexes created with column definitions (as in mycol INT PRIMARY KEY) are
+     * not inserted into this list.  
      */
-    @SuppressWarnings("rawtypes")
-    public List getIndexes() {
+    public List<?> getIndexes() {
         return indexes;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setIndexes(List list) {
+    public void setIndexes(List<?> list) {
         indexes = list;
     }
 

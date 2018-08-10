@@ -65,9 +65,8 @@ public class GlassPane extends JComponent {
     private AnimatedAssistant[] animatedAssistantArray;
     private boolean repainting;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public GlassPane() {
-        this.animatedAssistantImageList = new ArrayList();
+        this.animatedAssistantImageList = new ArrayList<Image>();
         StringList sl = new StringList();
         try {
             sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream(
@@ -82,15 +81,15 @@ public class GlassPane extends JComponent {
                     System.err.println((String) sl.get(i));
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
         }
 
         setIgnoreRepaint(true);
         setBackground(Color.WHITE);
         setDoubleBuffered(true);
         setFont(new Font("Default", 1, 11));
-        this.animatedAssistantList = new ArrayList();
+        this.animatedAssistantList = new ArrayList<AnimatedAssistant>();
         setComponent(this);
         this.animatedAssistantTimer = new Timer(100L) {
             public void run() {
@@ -285,5 +284,4 @@ public class GlassPane extends JComponent {
     public Rectangle getRenderBounds() {
         return this.renderRectangle;
     }
-
 }

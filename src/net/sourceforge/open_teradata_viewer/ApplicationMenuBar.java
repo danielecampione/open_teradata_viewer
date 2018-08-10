@@ -26,13 +26,14 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
-import net.sourceforge.open_teradata_viewer.actions.ChangeLookAndFeelAction;
+import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 
 /**
  * 
@@ -43,6 +44,26 @@ import net.sourceforge.open_teradata_viewer.actions.ChangeLookAndFeelAction;
 public class ApplicationMenuBar extends JMenuBar {
 
     private static final long serialVersionUID = -3435078396857591267L;
+
+    JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(
+            Actions.VIEW_LINE_HIGHLIGHT);
+    JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(
+            Actions.FADE_CURRENT_LINE_HIGHLIGHT);
+    JCheckBoxMenuItem cbViewLineNumbers = new JCheckBoxMenuItem(
+            Actions.VIEW_LINE_NUMBERS);
+    JCheckBoxMenuItem cbBookmarks = new JCheckBoxMenuItem(Actions.BOOKMARKS);
+    JCheckBoxMenuItem cbWordWrap = new JCheckBoxMenuItem(Actions.WORD_WRAP);
+    JCheckBoxMenuItem cbAntialiasing = new JCheckBoxMenuItem(
+            Actions.ANTIALIASING);
+    JCheckBoxMenuItem cbMarkOccurrences = new JCheckBoxMenuItem(
+            Actions.MARK_OCCURRENCES);
+    JCheckBoxMenuItem cbRightToLeft = new JCheckBoxMenuItem(
+            Actions.RIGHT_TO_LEFT);
+    JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
+    JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(
+            Actions.ANIMATE_BRACKET_MATCHING);
+    JMenuItem mniComment = new JMenuItem(Actions.COMMENT);
+    JMenuItem mniUncomment = new JMenuItem(Actions.UNCOMMENT);
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -65,16 +86,33 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu("Edit");
         add(menu);
-        if (Actions.CUT_COPY_PASTE_ENABLED) {
-            menu.add(Actions.CUT);
-            menu.add(Actions.COPY);
-            menu.add(Actions.PASTE);
-            menu.addSeparator();
-        }
+        menu.add(Actions.CUT);
+        menu.add(Actions.COPY);
+        menu.add(Actions.PASTE);
+        menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
+        menu.addSeparator();
+        menu.add(cbViewLineHighlight);
+        menu.add(cbFadeCurrentLineHighlight);
+        menu.add(cbViewLineNumbers);
+        menu.add(cbBookmarks);
+        menu.add(cbWordWrap);
+        menu.add(cbAntialiasing);
+        menu.add(cbMarkOccurrences);
+        menu.add(cbRightToLeft);
+        menu.add(cbTabLines);
+        menu.add(cbAnimateBracketMatching);
+        menu.addSeparator();
+        menu.add(mniComment);
+        menu.add(mniUncomment);
+        menu.addSeparator();
+        menu.add(Actions.GO_TO_LINE);
+        menu.add(Actions.FIND);
         menu.addSeparator();
         menu.add(Actions.HISTORY_PREVIOUS);
         menu.add(Actions.HISTORY_NEXT);
+
+        refreshEditOptions();
 
         menu = new JMenu("Schema Browser");
         add(menu);
@@ -95,14 +133,12 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu.add(Actions.LOB_IMPORT);
         subMenu.add(Actions.LOB_COPY);
         subMenu.add(Actions.LOB_PASTE);
-        menu.addSeparator();
         subMenu = new JMenu("Export");
         menu.add(subMenu);
         subMenu.add(Actions.EXPORT_EXCEL);
         subMenu.add(Actions.EXPORT_PDF);
         subMenu.add(Actions.EXPORT_FLAT_FILE);
         subMenu.add(Actions.EXPORT_INSERTS);
-        menu.addSeparator();
         subMenu = new JMenu("Show");
         menu.add(subMenu);
         subMenu.add(Actions.SHOW_TABLE);
@@ -111,7 +147,6 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu.add(Actions.SHOW_MACRO);
         menu.addSeparator();
         menu.add(Actions.EXPLAIN_REQUEST);
-        menu.addSeparator();
         menu.add(Actions.ANALYZE_QUERY);
         menu.addSeparator();
         menu.add(Actions.RUN);
@@ -119,6 +154,27 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu(ApplicationFrame.LAF_MENU_LABEL);
         add(menu);
+        subMenu = new JMenu("Editor Theme");
+        JRadioButtonMenuItem radioButtonDefaultTheme = new JRadioButtonMenuItem(
+                Actions.DEFAULT_THEME);
+        radioButtonDefaultTheme.setSelected(true);
+        JRadioButtonMenuItem radioButtonDarkTheme = new JRadioButtonMenuItem(
+                Actions.DARK_THEME);
+        JRadioButtonMenuItem radioButtonEclipseTheme = new JRadioButtonMenuItem(
+                Actions.ECLIPSE_THEME);
+        JRadioButtonMenuItem radioButtonVisualStudioTheme = new JRadioButtonMenuItem(
+                Actions.VISUAL_STUDIO_THEME);
+        ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
+        buttonGroupEditorTheme.add(radioButtonDefaultTheme);
+        buttonGroupEditorTheme.add(radioButtonDarkTheme);
+        buttonGroupEditorTheme.add(radioButtonEclipseTheme);
+        buttonGroupEditorTheme.add(radioButtonVisualStudioTheme);
+        subMenu.add(radioButtonDefaultTheme);
+        subMenu.add(radioButtonDarkTheme);
+        subMenu.add(radioButtonEclipseTheme);
+        subMenu.add(radioButtonVisualStudioTheme);
+        menu.add(subMenu);
+        menu.addSeparator();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
                 .getInstalledLookAndFeels();
         String[] completePathOfLafClasses = new String[lafInfo.length];
@@ -133,7 +189,7 @@ public class ApplicationMenuBar extends JMenuBar {
             buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel[i]);
             menu.add(_mnuAvailableLookAndFeel[i]);
             _mnuAvailableLookAndFeel[i]
-                    .addActionListener(new ChangeLookAndFeelAction(
+                    .addActionListener(new LookAndFeelAction(
                             completePathOfLafClasses[i]));
             if (completePathOfLafClasses[i].equals(UIManager.getLookAndFeel()
                     .getClass().toString().substring("class ".length())))
@@ -180,5 +236,28 @@ public class ApplicationMenuBar extends JMenuBar {
                 setMnemonics(((JMenu) item).getPopupMenu());
             }
         }
+    }
+
+    public void refreshEditOptions() {
+        cbViewLineHighlight.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getHighlightCurrentLine());
+        cbFadeCurrentLineHighlight.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getFadeCurrentLineHighlight());
+        cbViewLineNumbers.setSelected(ApplicationFrame.getInstance()
+                .getTextScrollPane().getLineNumbersEnabled());
+        cbBookmarks.setSelected(ApplicationFrame.getInstance()
+                .getTextScrollPane().isIconRowHeaderEnabled());
+        cbWordWrap.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getLineWrap());
+        cbAntialiasing.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getAntiAliasingEnabled());
+        cbMarkOccurrences.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getMarkOccurrences());
+        cbRightToLeft.setSelected(!ApplicationFrame.getInstance()
+                .getTextScrollPane().getComponentOrientation().isLeftToRight());
+        cbTabLines.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getPaintTabLines());
+        cbAnimateBracketMatching.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getAnimateBracketMatching());
     }
 }

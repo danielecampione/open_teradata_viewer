@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
@@ -32,11 +31,10 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class ColDataType {
 
     private String dataType;
-    @SuppressWarnings("rawtypes")
-    private List argumentsStringList;
 
-    @SuppressWarnings("rawtypes")
-    public List getArgumentsStringList() {
+    private List<?> argumentsStringList;
+
+    public List<?> getArgumentsStringList() {
         return argumentsStringList;
     }
 
@@ -44,8 +42,7 @@ public class ColDataType {
         return dataType;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setArgumentsStringList(List list) {
+    public void setArgumentsStringList(List<?> list) {
         argumentsStringList = list;
     }
 

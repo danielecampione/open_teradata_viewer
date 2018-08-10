@@ -53,6 +53,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.Main;
+import net.sourceforge.open_teradata_viewer.UISupport;
 
 /**
  * 
@@ -70,9 +71,9 @@ public class AboutAction extends CustomAction implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getSource() instanceof JLabel) {
-            JLabel label = (JLabel) e.getSource();
+    public void mouseClicked(MouseEvent me) {
+        if (me.getSource() instanceof JLabel) {
+            JLabel label = (JLabel) me.getSource();
             try {
                 if (label.getText().startsWith("GNU")) {
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -94,11 +95,11 @@ public class AboutAction extends CustomAction implements MouseListener {
                 } else {
                     openURL(label.getText());
                 }
-            } catch (Exception e1) {
-                ExceptionDialog.showException(e1);
+            } catch (Exception e) {
+                ExceptionDialog.showException(e);
             }
         } else {
-            ((JDialog) e.getSource()).setVisible(false);
+            ((JDialog) me.getSource()).setVisible(false);
         }
     }
 
@@ -218,6 +219,6 @@ public class AboutAction extends CustomAction implements MouseListener {
         dialog.setSize(panel.getPreferredSize());
         dialog.setMinimumSize(dialog.getSize());
         dialog.setLocationRelativeTo(dialog.getOwner());
-        dialog.setVisible(true);
+        UISupport.showDialog(dialog);
     }
 }

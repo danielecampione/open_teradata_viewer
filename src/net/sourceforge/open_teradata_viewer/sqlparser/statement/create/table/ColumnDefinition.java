@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
@@ -34,20 +33,18 @@ public class ColumnDefinition {
 
     private String columnName;
     private ColDataType colDataType;
-    @SuppressWarnings("rawtypes")
-    private List columnSpecStrings;
+    private List<?> columnSpecStrings;
 
     /**
      * A list of strings of every word after the datatype of the column.<br>
      * Example ("NOT", "NULL")
      */
-    @SuppressWarnings("rawtypes")
-    public List getColumnSpecStrings() {
+
+    public List<?> getColumnSpecStrings() {
         return columnSpecStrings;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setColumnSpecStrings(List list) {
+    public void setColumnSpecStrings(List<?> list) {
         columnSpecStrings = list;
     }
 
@@ -74,5 +71,4 @@ public class ColumnDefinition {
         return columnName + " " + colDataType + " "
                 + PlainSelect.getStringList(columnSpecStrings, false, false);
     }
-
 }

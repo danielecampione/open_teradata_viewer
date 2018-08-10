@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
@@ -72,13 +71,16 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "No result to write.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("No result to write.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
@@ -92,8 +94,8 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
             }
             selection = "Selection".equals(option);
         }
-        @SuppressWarnings("rawtypes")
-        List list = ((DefaultTableModel) table.getModel()).getDataVector();
+
+        List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
         int columnCount = table.getColumnCount();
         PdfPTable pdfPTable = new PdfPTable(columnCount);
         pdfPTable.setWidthPercentage(100);
@@ -118,8 +120,7 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
         // Body
         for (int i = 0; i < list.size(); i++) {
             if (!selection || table.isRowSelected(i)) {
-                @SuppressWarnings("rawtypes")
-                List record = (List) list.get(i);
+                List<?> record = (List<?>) list.get(i);
                 for (int j = 0; j < record.size(); j++) {
                     Object o = record.get(j);
                     if (o != null) {
@@ -169,11 +170,7 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
                 byteArrayOutputStream.toByteArray());
     }
 
-    /**
-     * Print page numbers on right bottom corner
-     * @param writer
-     * @param document
-     */
+    /** Print page numbers on right bottom corner. */
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
         PdfContentByte cb = writer.getDirectContent();
@@ -189,11 +186,7 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
         cb.addTemplate(pdfTemplate, document.right() - adjust, textBase);
     }
 
-    /**
-     * Append total number of pages on each page after the page number
-     * @param writer
-     * @param document
-     */
+    /** Append total number of pages on each page after the page number. */
     @Override
     public void onCloseDocument(PdfWriter writer, Document document) {
         pdfTemplate.beginText();

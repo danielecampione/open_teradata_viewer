@@ -20,10 +20,11 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.statement.delete.Delete;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * A class to de-parse (that is, tranform from SqlParser hierarchy into a string)
- * a {@link net.sf.jsqlparser.statement.delete.Delete}
+ * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * string) a {@link net.sf.jsqlparser.statement.delete.Delete}.
  * 
  * @author D. Campione
  * 
@@ -37,9 +38,10 @@ public class DeleteDeParser {
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param buffer the buffer that will be filled with the select
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
+     *        expressions. It has to share the same<br>
+     *        StringBuffer (buffer parameter) as this object in order to work.
+     * @param buffer the buffer that will be filled with the select.
      */
     public DeleteDeParser(ExpressionVisitor expressionVisitor,
             StringBuffer buffer) {
@@ -70,5 +72,4 @@ public class DeleteDeParser {
     public void setExpressionVisitor(ExpressionVisitor visitor) {
         expressionVisitor = visitor;
     }
-
 }

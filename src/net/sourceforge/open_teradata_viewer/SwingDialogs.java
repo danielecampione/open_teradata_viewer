@@ -45,7 +45,7 @@ import com.jgoodies.forms.factories.ButtonBarFactory;
  * @author D. Campione
  *
  */
-public class SwingDialogs implements XDialogs {
+public class SwingDialogs implements IXDialogs {
     private final Component parent;
     private JDialog extendedInfoDialog;
     private Boolean extendedInfoResult;

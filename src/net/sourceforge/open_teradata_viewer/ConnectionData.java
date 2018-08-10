@@ -30,8 +30,8 @@ import java.util.Properties;
  * @author D. Campione
  *
  */
-@SuppressWarnings("rawtypes")
-public class ConnectionData implements Comparable, Cloneable {
+
+public class ConnectionData implements Comparable<Object>, Cloneable {
 
     private String name;
     private String url;
@@ -124,9 +124,9 @@ public class ConnectionData implements Comparable, Cloneable {
             if (Dialog.OK_OPTION == response) {
                 try {
                     driver = DriverManager.getDriver(url);
-                } catch (SQLException e1) {
+                } catch (SQLException sqle) {
                     throw new Exception(String.format(
-                            "No suitable driver for URL \"%s\"", url), e1);
+                            "No suitable driver for URL \"%s\"", url), sqle);
                 }
             } else if (Dialog.CANCEL_OPTION == response
                     || Dialog.CLOSED_OPTION == response) {
@@ -156,7 +156,6 @@ public class ConnectionData implements Comparable, Cloneable {
     private void addExtraProperties(Properties properties) {
     }
 
-    @SuppressWarnings("unused")
     private void addProperty(Properties properties, String name, String value) {
         if (!url.toLowerCase().contains(name.toLowerCase())) {
             properties.setProperty(name, value);

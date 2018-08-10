@@ -59,8 +59,8 @@ public class Drivers {
             addAllJarsToClasspath();
             try {
                 loadCustomDrivers();
-            } catch (ClassNotFoundException e) {
-                throw e;
+            } catch (ClassNotFoundException cnfe) {
+                throw cnfe;
             }
             initialized = true;
         }
@@ -124,9 +124,9 @@ public class Drivers {
                     Class.forName(driver);
                     stringBuilder.append(driver);
                     stringBuilder.append("\n");
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException cnfe) {
                     initialized = false;
-                    throw e;
+                    throw cnfe;
                 }
             }
         }
@@ -204,11 +204,13 @@ public class Drivers {
             try {
                 initialized = false;
                 initialize();
-            } catch (ClassNotFoundException e) {
-                // Show the error only in the text area.
-                ApplicationFrame.getInstance().changeLog.append(
-                        "Driver NOT found.\n",
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            } catch (ClassNotFoundException cnfe) {
+                // Show the error only in the text area
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println("Driver NOT found.",
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
 
             }
         }

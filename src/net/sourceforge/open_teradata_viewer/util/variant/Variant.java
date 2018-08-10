@@ -44,7 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.util.StreamUtil;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 
@@ -56,8 +56,8 @@ import net.sourceforge.open_teradata_viewer.util.StringUtil;
  */
 public final class Variant implements Cloneable, Comparable<Object> {
 
-    private static HashMap<Long, Class<? extends VariantConnectable>> registeredClasses = new HashMap<Long, Class<? extends VariantConnectable>>();
-    private static HashMap<Class<? extends VariantConnectable>, Long> registeredIds = new HashMap<Class<? extends VariantConnectable>, Long>();
+    private static HashMap<Long, Class<? extends IVariantConnectable>> registeredClasses = new HashMap<Long, Class<? extends IVariantConnectable>>();
+    private static HashMap<Class<? extends IVariantConnectable>, Long> registeredIds = new HashMap<Class<? extends IVariantConnectable>, Long>();
 
     private static SimpleDateFormat dateFormat = null;
     private static SimpleDateFormat timeFormat = null;
@@ -73,7 +73,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
     private boolean ignoreCase = false;
 
     public Variant() {
-        //super();
     }
 
     public Variant(DataInput di) throws VariantException, IOException {
@@ -172,7 +171,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
     }
 
     public static void registerVariantClass(long id,
-            Class<? extends VariantConnectable> clazz) {
+            Class<? extends IVariantConnectable> clazz) {
         registeredClasses.put(id, clazz);
         registeredIds.put(clazz, id);
     }
@@ -208,13 +207,12 @@ public final class Variant implements Cloneable, Comparable<Object> {
         try {
             dip.readFully(buffer);
         } catch (Exception e) {
-            ;
+            ExceptionDialog.ignoreException(e);
         }
         return buffer;
     }
 
     public void write(DataOutput dop) throws VariantException, IOException {
-        //    System.out.print("writeb:" +(new Long(raf.getFilePointer())).toString() +"\n");
         if (isNullValue()) {
             dop.writeByte(VariantType.varNull);
             return;
@@ -270,13 +268,13 @@ public final class Variant implements Cloneable, Comparable<Object> {
                 dop.write(binaryData, 0, size);
                 break;
             case VariantType.varJavaObject : {
-                if (value instanceof VariantConnectable) {
+                if (value instanceof IVariantConnectable) {
                     dop.writeInt(VariantType.varSubConnectable);
-                    Long id = registeredIds.get(((VariantConnectable) value)
+                    Long id = registeredIds.get(((IVariantConnectable) value)
                             .getClass());
                     dop.writeLong(id);
                     dop.writeInt(size);
-                    ((VariantConnectable) value).write(dop);
+                    ((IVariantConnectable) value).write(dop);
                 } else if (value instanceof Serializable) {
                     dop.writeInt(VariantType.varSubSerializable);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -329,14 +327,12 @@ public final class Variant implements Cloneable, Comparable<Object> {
         try {
             dip.readFully(buffer, 0, buffer.length);
         } catch (Exception e) {
-            ;
+            ExceptionDialog.ignoreException(e);
         }
         setBinary(buffer);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Variant read(DataInput dip) throws VariantException, IOException {
-        //    System.out.print("readb:" +(new Long(raf.getFilePointer())).toString() +"\n");
         int vt = dip.readByte();
         switch (vt) {
             case VariantType.varNull :
@@ -396,19 +392,19 @@ public final class Variant implements Cloneable, Comparable<Object> {
                 if (subType == VariantType.varSubConnectable) {
                     long id = dip.readLong();
                     size = dip.readInt();
-                    if (value instanceof VariantConnectable) {
-                        ((VariantConnectable) value).read(dip);
+                    if (value instanceof IVariantConnectable) {
+                        ((IVariantConnectable) value).read(dip);
                     } else {
-                        Class clazz = registeredClasses.get(id);
+                        Class<?> clazz = registeredClasses.get(id);
                         if (clazz == null) {
                             readBinary(dip, size);
                         } else {
                             try {
                                 value = clazz.newInstance();
-                                ((VariantConnectable) value).read(dip);
-                            } catch (InstantiationException e) {
+                                ((IVariantConnectable) value).read(dip);
+                            } catch (InstantiationException ie) {
                                 readBinary(dip, size);
-                            } catch (IllegalAccessException e) {
+                            } catch (IllegalAccessException iae) {
                                 readBinary(dip, size);
                             }
                         }
@@ -421,8 +417,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     try {
                         setObject(ois.readObject());
-                    } catch (ClassNotFoundException e) {
-                        ;
+                    } catch (ClassNotFoundException cnfe) {
+                        ExceptionDialog.ignoreException(cnfe);
                     }
                     ois.close();
                 }
@@ -431,22 +427,22 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varList : {
                 long count = dip.readLong();
                 String className = readString(dip);
-                AbstractCollection ac;
+                AbstractCollection<Object> ac;
                 try {
-                    ac = (AbstractCollection) (Class.forName(className)
+                    ac = (AbstractCollection<Object>) (Class.forName(className)
                             .newInstance());
-                } catch (InstantiationException e) {
+                } catch (InstantiationException ie) {
                     throw new VariantException(
                             VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{e.getMessage()});
-                } catch (IllegalAccessException e) {
+                            new Object[]{ie.getMessage()});
+                } catch (IllegalAccessException iae) {
                     throw new VariantException(
                             VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{e.getMessage()});
-                } catch (ClassNotFoundException e) {
+                            new Object[]{iae.getMessage()});
+                } catch (ClassNotFoundException cnfe) {
                     throw new VariantException(
                             VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{e.getMessage()});
+                            new Object[]{cnfe.getMessage()});
                 }
                 for (int i = 0; i < count; i++) {
                     int subType = dip.readInt();
@@ -459,8 +455,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                         ObjectInputStream ois = new ObjectInputStream(bais);
                         try {
                             ac.add(ois.readObject());
-                        } catch (ClassNotFoundException e) {
-                            ;
+                        } catch (ClassNotFoundException cnfe) {
+                            ExceptionDialog.ignoreException(cnfe);
                         }
                         ois.close();
                     } else if (subType == VariantType.varSubVariant) {
@@ -532,8 +528,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varBinary :
                 return binaryData == null ? 0 : binaryData.length;
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return ((VariantConnectable) value).getSize();
+                if (value instanceof IVariantConnectable) {
+                    return ((IVariantConnectable) value).getSize();
                 } else {
                     return size;
                 }
@@ -675,8 +671,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varString :
                 return Byte.parseByte((String) value);
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Byte) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Byte) ((IVariantConnectable) value)
                             .castTo(VariantType.varByte);
                 } else {
                     noCastThrow(value.getClass().getName(), "byte");
@@ -726,8 +722,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varString :
                 return Short.parseShort((String) value);
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Short) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Short) ((IVariantConnectable) value)
                             .castTo(VariantType.varShort);
                 } else {
                     noCastThrow(value.getClass().getName(), "short");
@@ -777,8 +773,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varString :
                 return ((Double) Double.parseDouble((String) value)).intValue();
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Integer) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Integer) ((IVariantConnectable) value)
                             .castTo(VariantType.varInteger);
                 } else {
                     noCastThrow(value.getClass().getName(), "int");
@@ -830,8 +826,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                         .longValue();
             }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Long) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Long) ((IVariantConnectable) value)
                             .castTo(VariantType.varLong);
                 } else {
                     noCastThrow(value.getClass().getName(), "long");
@@ -888,8 +884,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     return Float.parseFloat((String) value);
                 }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Float) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Float) ((IVariantConnectable) value)
                             .castTo(VariantType.varFloat);
                 } else {
                     noCastThrow(value.getClass().getName(), "float");
@@ -948,8 +944,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     return Double.parseDouble((String) value);
                 }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Double) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Double) ((IVariantConnectable) value)
                             .castTo(VariantType.varDouble);
                 } else {
                     noCastThrow(value.getClass().getName(), "double");
@@ -1003,8 +999,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varString :
                 return Boolean.parseBoolean((String) value);
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Boolean) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Boolean) ((IVariantConnectable) value)
                             .castTo(VariantType.varBoolean);
                 } else {
                     noCastThrow(value.getClass().getName(), "boolean");
@@ -1020,7 +1016,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         if (value == null) {
             this.value = null;
         } else {
-            //      this.value = new Date(value.getTime());
             this.value = value;
         }
         this.size = resolveSize();
@@ -1060,14 +1055,14 @@ public final class Variant implements Cloneable, Comparable<Object> {
                         return dateFormat.parse((String) value);
                     }
                     return DateFormat.getDateInstance().parse((String) value);
-                } catch (ParseException e) {
+                } catch (ParseException pe) {
                     return DateFormat.getDateTimeInstance().parse(
                             (String) value);
                 }
             }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Date) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Date) ((IVariantConnectable) value)
                             .castTo(VariantType.varDate);
                 } else {
                     noCastThrow(value.getClass().getName(), "date");
@@ -1083,7 +1078,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         if (value == null) {
             this.value = null;
         } else {
-            //      this.value = new Time(value.getTime());
             this.value = value;
         }
         this.size = resolveSize();
@@ -1125,14 +1119,14 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     }
                     return new Time(DateFormat.getTimeInstance()
                             .parse((String) value).getTime());
-                } catch (ParseException e) {
+                } catch (ParseException pe) {
                     return new Time(DateFormat.getDateTimeInstance()
                             .parse((String) value).getTime());
                 }
             }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Time) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Time) ((IVariantConnectable) value)
                             .castTo(VariantType.varTime);
                 } else {
                     noCastThrow(value.getClass().getName(), "time");
@@ -1148,7 +1142,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         if (value == null) {
             this.value = null;
         } else {
-            //      this.value = new Timestamp(value.getTime());
             this.value = value;
         }
         this.size = resolveSize();
@@ -1190,14 +1183,14 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     }
                     return new Timestamp(DateFormat.getDateTimeInstance()
                             .parse((String) value).getTime());
-                } catch (ParseException e) {
+                } catch (ParseException pe) {
                     return new Timestamp(DateFormat.getDateInstance()
                             .parse((String) value).getTime());
                 }
             }
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Timestamp) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Timestamp) ((IVariantConnectable) value)
                             .castTo(VariantType.varTimestamp);
                 } else {
                     noCastThrow(value.getClass().getName(), "time");
@@ -1305,7 +1298,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
         try {
             return getString();
         } catch (Exception e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            ExceptionDialog.notifyException(e);
             return "";
         }
     }
@@ -1315,7 +1308,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         if (value == null) {
             this.value = null;
         } else {
-            //      this.value = new BigInteger(value.toByteArray());
             this.value = value;
         }
         this.binaryData = null;
@@ -1359,8 +1351,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varBinary :
                 return new BigInteger(binaryData);
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (BigInteger) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (BigInteger) ((IVariantConnectable) value)
                             .castTo(VariantType.varBigInteger);
                 } else {
                     noCastThrow(value.getClass().getName(), "BigInteger");
@@ -1384,7 +1376,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         if (value == null) {
             this.value = null;
         } else {
-            //      this.value = new BigDecimal(value.toString());
             this.value = value;
         }
         this.binaryData = null;
@@ -1433,8 +1424,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varVariant :
                 return ((Variant) value).getBigDecimal();
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (BigDecimal) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (BigDecimal) ((IVariantConnectable) value)
                             .castTo(VariantType.varBigDecimal);
                 } else {
                     noCastThrow(value.getClass().getName(), "BigDecimal");
@@ -1460,8 +1451,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varList :
                 return (AbstractCollection<?>) value;
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (AbstractCollection<?>) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (AbstractCollection<?>) ((IVariantConnectable) value)
                             .castTo(VariantType.varList);
                 } else {
                     noCastThrow(value.getClass().getName(), "List");
@@ -1480,13 +1471,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
     }
 
     public Object getObject() throws VariantException {
-        //if (valueType != VariantType.varBinary) { 
         return value;
-        //    }
-        //    else {
-        //      noCastThrow("binary", "Object");
-        //    }
-        //    return null;
     }
 
     public void setBinary(byte[] value) {
@@ -1523,8 +1508,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
             ((InputStream) value).read(buffer);
             return buffer;
         } else if (valueType == VariantType.varJavaObject) {
-            if (value instanceof VariantConnectable) {
-                return (byte[]) ((VariantConnectable) value)
+            if (value instanceof IVariantConnectable) {
+                return (byte[]) ((IVariantConnectable) value)
                         .castTo(VariantType.varBinary);
             } else {
                 noCastThrow(value.getClass().getName(), "binary");
@@ -1584,12 +1569,11 @@ public final class Variant implements Cloneable, Comparable<Object> {
             case VariantType.varList :
                 return new Variant(value);
             case VariantType.varJavaObject :
-                if (value instanceof VariantConnectable) {
-                    return (Variant) ((VariantConnectable) value)
+                if (value instanceof IVariantConnectable) {
+                    return (Variant) ((IVariantConnectable) value)
                             .castTo(VariantType.varVariant);
                 } else {
                     return new Variant(value);
-                    //noCastThrow(value.getClass().getName(), "Variant");
                 }
             default :
                 noCastThrow(value.getClass().getName(), "Variant");
@@ -2070,7 +2054,6 @@ public final class Variant implements Cloneable, Comparable<Object> {
         return ignoreCase;
     }
 
-    @SuppressWarnings("rawtypes")
     public int compareTo(Variant variant) throws VariantException,
             ParseException, IOException {
         if (isNullValue()) {
@@ -2112,16 +2095,16 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     return ((Variant) value).compareTo(variant.getVariant());
                 case VariantType.varJavaObject : {
                     if (ignoreCase) {
-                        if (value instanceof VariantConnectable) {
-                            return ((VariantConnectable) value)
+                        if (value instanceof IVariantConnectable) {
+                            return ((IVariantConnectable) value)
                                     .compareTo(variant);
                         } else {
                             return Integer.signum(toString()
                                     .compareToIgnoreCase(variant.toString()));
                         }
                     }
-                    if (value instanceof VariantConnectable) {
-                        return ((VariantConnectable) value).compareTo(variant);
+                    if (value instanceof IVariantConnectable) {
+                        return ((IVariantConnectable) value).compareTo(variant);
                     } else {
                         return Integer.signum(toString().compareTo(
                                 variant.toString()));
@@ -2136,8 +2119,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                                 ? 1
                                 : -1);
                     }
-                    Iterator left = getList().iterator();
-                    Iterator right = variant.getList().iterator();
+                    Iterator<?> left = getList().iterator();
+                    Iterator<?> right = variant.getList().iterator();
                     while (left.hasNext()) {
                         int retValue = (new Variant(left.next()))
                                 .compareTo(new Variant(right.next()));
@@ -2186,8 +2169,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
         } else {
             try {
                 Variant.dateFormat = new SimpleDateFormat(dateFormat);
-            } catch (java.lang.IllegalArgumentException e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            } catch (IllegalArgumentException iae) {
+                ExceptionDialog.notifyException(iae);
             }
         }
     }
@@ -2202,8 +2185,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
         } else {
             try {
                 Variant.timeFormat = new SimpleDateFormat(timeFormat);
-            } catch (java.lang.IllegalArgumentException e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            } catch (IllegalArgumentException iae) {
+                ExceptionDialog.notifyException(iae);
             }
         }
     }
@@ -2218,8 +2201,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
         } else {
             try {
                 Variant.timeStampFormat = new SimpleDateFormat(timeStampFormat);
-            } catch (java.lang.IllegalArgumentException e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            } catch (IllegalArgumentException iae) {
+                ExceptionDialog.notifyException(iae);
             }
         }
     }
@@ -2239,8 +2222,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                 } else {
                     Variant.decimalFormat = new DecimalFormat(decimalFormat);
                 }
-            } catch (java.lang.IllegalArgumentException e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            } catch (IllegalArgumentException iae) {
+                ExceptionDialog.notifyException(iae);
             }
         }
     }
@@ -2261,8 +2244,8 @@ public final class Variant implements Cloneable, Comparable<Object> {
                     Variant.bigDecimalFormat = new DecimalFormat(
                             bigDecimalFormat);
                 }
-            } catch (java.lang.IllegalArgumentException e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            } catch (IllegalArgumentException iae) {
+                ExceptionDialog.notifyException(iae);
             }
         }
     }
@@ -2303,14 +2286,14 @@ public final class Variant implements Cloneable, Comparable<Object> {
                 try {
                     return compareTo((Variant) o);
                 } catch (Exception e) {
-                    ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+                    ExceptionDialog.notifyException(e);
                     return -1;
                 }
             } else {
                 try {
                     return compareTo(new Variant(o));
                 } catch (Exception e) {
-                    ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+                    ExceptionDialog.notifyException(e);
                     return -1;
                 }
             }
@@ -2352,10 +2335,10 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Object clone() {
         try {
             return getVariant();
-        } catch (VariantException e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
-        } catch (IOException e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+        } catch (VariantException ve) {
+            ExceptionDialog.notifyException(ve);
+        } catch (IOException ioe) {
+            ExceptionDialog.notifyException(ioe);
         }
         return new Variant();
     }
@@ -2408,5 +2391,4 @@ public final class Variant implements Cloneable, Comparable<Object> {
         }
         return result.append("]").toString();
     }
-
 }

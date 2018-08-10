@@ -24,7 +24,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  * @author D. Campione
  * 
  */
-public class DoubleValue implements Expression {
+public class DoubleValue implements IExpression {
 
     private double value;
     private String stringValue;
@@ -37,8 +37,8 @@ public class DoubleValue implements Expression {
         this.stringValue = value;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public double getValue() {

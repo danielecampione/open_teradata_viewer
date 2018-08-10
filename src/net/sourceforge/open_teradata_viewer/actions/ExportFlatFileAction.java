@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -49,13 +48,16 @@ public class ExportFlatFileAction extends CustomAction {
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "No result to write.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("No result to write.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
@@ -74,14 +76,14 @@ public class ExportFlatFileAction extends CustomAction {
             grid.set(i, 0, table.getColumnName(i));
         }
         grid.addSeparator();
-        @SuppressWarnings("rawtypes")
-        List list = ((DefaultTableModel) table.getModel()).getDataVector();
+
+        List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
         int count = 2;
         int[] rightAlignedColumns = new int[table.getColumnCount()];
         for (int i = 0; i < list.size(); i++) {
             if (!selection || table.isRowSelected(i)) {
-                @SuppressWarnings("rawtypes")
-                List row = (List) list.get(i);
+
+                List<?> row = (List<?>) list.get(i);
                 for (int j = 0; j < row.size(); j++) {
                     rightAlignedColumns[j] = (rightAlignedColumns[j] > 0 || row
                             .get(j) instanceof Number) ? j : -1;

@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 
 import javax.swing.JSpinner;

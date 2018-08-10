@@ -26,7 +26,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  * @author D. Campione
  *
  */
-public class AllComparisonExpression implements Expression {
+public class AllComparisonExpression implements IExpression {
 
     private SubSelect subSelect;
 
@@ -38,8 +38,7 @@ public class AllComparisonExpression implements Expression {
         return subSelect;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
-
 }

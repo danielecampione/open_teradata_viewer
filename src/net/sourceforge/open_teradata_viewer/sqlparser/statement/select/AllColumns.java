@@ -24,10 +24,10 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  * @author D. Campione
  * 
  */
-public class AllColumns implements SelectItem {
+public class AllColumns implements ISelectItem {
 
-    public void accept(SelectItemVisitor selectItemVisitor) {
-        selectItemVisitor.visit(this);
+    public void accept(ISelectItemVisitor iSelectItemVisitor) {
+        iSelectItemVisitor.visit(this);
     }
 
     public String toString() {

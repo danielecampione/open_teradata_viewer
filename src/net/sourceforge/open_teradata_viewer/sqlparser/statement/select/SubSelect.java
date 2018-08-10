@@ -18,10 +18,10 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ItemsList;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ItemsListVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsList;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsListVisitor;
 
 /**
  * A subselect followed by an optional alias.
@@ -29,25 +29,25 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
  * @author D. Campione
  * 
  */
-public class SubSelect implements FromItem, Expression, ItemsList {
+public class SubSelect implements IFromItem, IExpression, IItemsList {
 
-    private SelectBody selectBody;
+    private ISelectBody iSelectBody;
     private String alias;
 
-    public void accept(FromItemVisitor fromItemVisitor) {
-        fromItemVisitor.visit(this);
+    public void accept(IFromItemVisitor iFromItemVisitor) {
+        iFromItemVisitor.visit(this);
     }
 
-    public SelectBody getSelectBody() {
-        return selectBody;
+    public ISelectBody getSelectBody() {
+        return iSelectBody;
     }
 
-    public void setSelectBody(SelectBody body) {
-        selectBody = body;
+    public void setSelectBody(ISelectBody body) {
+        iSelectBody = body;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String getAlias() {
@@ -58,11 +58,12 @@ public class SubSelect implements FromItem, Expression, ItemsList {
         alias = string;
     }
 
-    public void accept(ItemsListVisitor itemsListVisitor) {
-        itemsListVisitor.visit(this);
+    public void accept(IItemsListVisitor iItemsListVisitor) {
+        iItemsListVisitor.visit(this);
     }
 
     public String toString() {
-        return "(" + selectBody + ")" + ((alias != null) ? " AS " + alias : "");
+        return "(" + iSelectBody + ")"
+                + ((alias != null) ? " AS " + alias : "");
     }
 }

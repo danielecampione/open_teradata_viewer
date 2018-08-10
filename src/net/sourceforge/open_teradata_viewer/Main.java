@@ -25,7 +25,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 /**
- * Entry point for the application
+ * Entry point for the application.
  * 
  * @author <A HREF="mailto:nonametekno@gmail.com">D. Campione</A>
  *

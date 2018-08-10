@@ -1,7 +1,19 @@
+0.11a (16/05/2012)
+    - Added the animate bracket matching, current line highlight, bookmarks,
+      word wrap, themes for the SQL editor, ...
+      Navigate the "Edit" and the "Look & Feel" menus to see all the added
+      features.
+    - Fixed too large initial screen width on multiple monitors.
+    - Fixed a bug related to the search capability: after repeating some text
+      searches, if the user focused the editor after having found an occurrence
+      of the searched text, the visible portion of the SQL code wasn't the
+      expected one.
+
 0.10c (19/03/2012)
-    - Fixed the text retrieval of the DDL scripts.
+    - Fixed the text retrieval of the DDL scripts: the returned text was
+      partially trimmed.
     - The "SHOW OBJECT" commands have been grouped.
-    - Upgrated 14.00.00.12 -> 14.00.00.13
+    - Upgraded Teradata JDBC driver 14.00.00.12 -> 14.00.00.13
 
 0.10b (01/03/2012)
     - Added the "SHOW MACRO" command to the "Schema Browser" menu.
@@ -20,7 +32,8 @@
     - Fixed occasional inability to open very large SQL files.
 
 0.09b (27/09/2011)
-    - BUG0003 fixed.
+    - Fixed a bug related to the selected column index of the result set during
+      the update process of the Teradata database.
     - Upgraded Teradata JDBC driver 13.10.00.18 -> 14.00.00.01
 
 0.09a (22/09/2011)
@@ -50,7 +63,8 @@
       area.
 
 0.07c (15/09/2011)
-    - BUG0001 fixed.
+    - Fixed a bug related to the execution of the SQL queries: sometimes, with
+      the execution of different "SELECT" statements, an error occured.
 
 0.07b (31/08/2011)
     - Added the capability to manage multiple plugins.
@@ -58,7 +72,8 @@
 0.07a (17/08/2011)
     - The proxy password is encrypted.
     - Upgraded Teradata JDBC driver 13.00.00.06 -> 13.10.00.18
-    - BUG0002 fixed.
+    - Fixed a bug related to the animated assistant: once the animated assistant
+      appeared, an infinite loop of invocations to the repaint method begun.
 
 0.06c (28/07/2011)
     - Added the update checker.
@@ -73,9 +88,6 @@
       actived.
 
 0.05c (25/07/2011)
-    X [BUG0003] Although it has been implemented the algorithm to change the
-      result set, it is not possible to update the Teradata database because of
-      a problem with the relative JDBC driver (wrong selected column index).
     - Added the "Insert" action and the relative menu voice.
     - Added the "Delete" action and the relative menu voice.
     - Added the "Duplicate" action and the relative menu voice.
@@ -86,9 +98,8 @@
     - Updated the "CONNECTION PANEL" dialog screenshot in the user manual.
 
 0.05a (21/07/2011)
-    X [BUG0002] Added an animated assistant that is shown while a process is
-      running. Once the animated assistant appears, an infinite loop of
-      invocations to the repaint method begins.
+    - Added an animated assistant that is shown while a process is
+      running.
     - The "SHOW RECORD" command can be perfomed only if a record has been
       selected.
     - Updated the "EDIT CONNECTION" dialog screenshot in the user manual.
@@ -106,7 +117,7 @@
     - Upgraded looks library 2.0.2 -> 2.2.1
 
 0.04a (05/07/2011)
-    - Added "Liquid" l&f.
+    - Added the "Liquid" laf.
     - Removed an unused library.
 
 0.03c (01/07/2011)
@@ -149,5 +160,3 @@
 
 0.01a (14/06/2011)
     - First release.
-    X [BUG0001] Sometimes, with the execution of different "SELECT" statements,
-      an error occurs.

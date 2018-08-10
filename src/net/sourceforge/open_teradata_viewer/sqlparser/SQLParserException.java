@@ -18,6 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 /**
  * An exception class with stack trace informations
  * 
@@ -55,7 +58,7 @@ public class SQLParserException extends Exception {
         printStackTrace(System.err);
     }
 
-    public void printStackTrace(java.io.PrintWriter pw) {
+    public void printStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
         if (cause != null) {
             pw.println("Caused by:");
@@ -63,12 +66,11 @@ public class SQLParserException extends Exception {
         }
     }
 
-    public void printStackTrace(java.io.PrintStream ps) {
+    public void printStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
         if (cause != null) {
             ps.println("Caused by:");
             cause.printStackTrace(ps);
         }
     }
-
 }

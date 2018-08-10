@@ -30,9 +30,9 @@ import java.awt.image.ColorModel;
 import javax.swing.plaf.ColorUIResource;
 
 /**
- * This class had to be created because <code>ColorUIResouce</code> does not allow
+ * This class had to be created because <code>ColorUIResource</code> does not allow
  * transparency. Hopefully one day support for transparency will be added to we
- * ColorUIResouce and we can get rid of this class. Wrapping a <code>Color</color>
+ * ColorUIResource and we can get rid of this class. Wrapping a <code>Color</color>
  * object to make a pseudo subclass is very ugly.
  * 
  * @author Christoph Wilhelms
@@ -43,7 +43,7 @@ public class ColorUIResource2 extends ColorUIResource {
     private static final long serialVersionUID = 4261040681968142273L;
     private Color myColor;
 
-    // constructors
+    // Ctors.
 
     public ColorUIResource2(Color c) {
         super(0, 0, 0);
@@ -158,5 +158,4 @@ public class ColorUIResource2 extends ColorUIResource {
     public int getTransparency() {
         return myColor.getTransparency();
     }
-
 }

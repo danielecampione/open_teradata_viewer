@@ -18,12 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-
 import java.util.Iterator;
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 
 /**
  * 
@@ -31,30 +30,28 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor
  * @author D. Campione
  *
  */
-public class Select implements Statement {
+public class Select implements IStatement {
 
-    private SelectBody selectBody;
-    @SuppressWarnings("rawtypes")
-    private List withItemsList;
+    private ISelectBody iSelectBody;
+    private List<?> withItemsList;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
-    public SelectBody getSelectBody() {
-        return selectBody;
+    public ISelectBody getSelectBody() {
+        return iSelectBody;
     }
 
-    public void setSelectBody(SelectBody body) {
-        selectBody = body;
+    public void setSelectBody(ISelectBody body) {
+        iSelectBody = body;
     }
 
-    @SuppressWarnings("rawtypes")
     public String toString() {
         StringBuffer retval = new StringBuffer();
         if (withItemsList != null && !withItemsList.isEmpty()) {
             retval.append("WITH ");
-            for (Iterator iter = withItemsList.iterator(); iter.hasNext();) {
+            for (Iterator<?> iter = withItemsList.iterator(); iter.hasNext();) {
                 WithItem withItem = (WithItem) iter.next();
                 retval.append(withItem);
                 if (iter.hasNext())
@@ -62,17 +59,15 @@ public class Select implements Statement {
                 retval.append(" ");
             }
         }
-        retval.append(selectBody);
+        retval.append(iSelectBody);
         return retval.toString();
     }
 
-    @SuppressWarnings("rawtypes")
-    public List getWithItemsList() {
+    public List<?> getWithItemsList() {
         return withItemsList;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setWithItemsList(List withItemsList) {
+    public void setWithItemsList(List<?> withItemsList) {
         this.withItemsList = withItemsList;
     }
 }

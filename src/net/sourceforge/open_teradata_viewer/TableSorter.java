@@ -34,7 +34,7 @@ import javax.swing.table.JTableHeader;
  * @author D. Campione
  *
  */
-@SuppressWarnings("rawtypes")
+
 public class TableSorter implements MouseListener, Comparator<List> {
 
     private int col = -1;
@@ -58,7 +58,6 @@ public class TableSorter implements MouseListener, Comparator<List> {
         JTableHeader tableHeader = (JTableHeader) e.getSource();
         col = tableHeader.columnAtPoint(e.getPoint());
         mouseButton = e.getButton();
-        @SuppressWarnings("unchecked")
         List<List> list = ((DefaultTableModel) tableHeader.getTable()
                 .getModel()).getDataVector();
         Collections.sort(list, this);

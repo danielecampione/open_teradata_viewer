@@ -29,6 +29,8 @@ import java.sql.SQLException;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import net.sourceforge.open_teradata_viewer.util.Utilities;
+
 /**
  * 
  * 
@@ -49,6 +51,7 @@ public final class ExceptionDialog {
         } catch (Throwable e) {
             ExceptionDialog.hideException(e);
         }
+        notifyException(t);
         if ("Details"
                 .equals(Dialog.show(t.getClass().getName(),
                         t.getMessage() != null ? t.getMessage() : "Error",
@@ -61,8 +64,8 @@ public final class ExceptionDialog {
             textArea.append(Main.APPLICATION_NAME + " ");
             try {
                 textArea.append(Config.getVersion());
-            } catch (IOException e) {
-                hideException(e);
+            } catch (IOException ioe) {
+                hideException(ioe);
             }
             textArea.append("\n");
             textArea.append(System.getProperty("os.name"));
@@ -133,8 +136,18 @@ public final class ExceptionDialog {
                     Dialog.DEFAULT_OPTION);
         }
     }
+
+    public static void notifyException(Throwable t) {
+        String msg = t.getMessage();
+        ApplicationFrame
+                .getInstance()
+                .getConsole()
+                .println((msg == null ? Utilities.getStackTrace(t) : msg),
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+    }
+
     public static void hideException(Throwable t) {
-        ApplicationFrame.getInstance().printStackTraceOnGUI(t);
+        t.printStackTrace();
     }
 
     public static void ignoreException(Throwable t) {

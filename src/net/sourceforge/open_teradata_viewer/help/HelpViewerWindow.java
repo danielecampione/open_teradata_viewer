@@ -47,14 +47,13 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
-import net.sourceforge.open_teradata_viewer.util.FileWrapper;
-import net.sourceforge.open_teradata_viewer.util.FileWrapperFactory;
 import net.sourceforge.open_teradata_viewer.util.FileWrapperFactoryImpl;
-import net.sourceforge.open_teradata_viewer.util.HelpFileWrappers;
-import net.sourceforge.open_teradata_viewer.util.HelpFileWrappersImpl;
+import net.sourceforge.open_teradata_viewer.util.IFileWrapper;
+import net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -84,39 +83,34 @@ public class HelpViewerWindow extends JFrame {
      * Factory for creating FileWrappers which insulate the application from
      * direct reference to File.
      */
-    private FileWrapperFactory fileWrapperFactory = new FileWrapperFactoryImpl();
+    private IFileWrapperFactory iFileWrapperFactory = new FileWrapperFactoryImpl();
 
     /**
-     * A FileWrapper-enhanced version of HelpFiles that removes direct
+     * A IFileWrapper-enhanced version of HelpFiles that removes direct
      * references to File.
      */
-    private HelpFileWrappers helpFiles = new HelpFileWrappersImpl();
+    private IHelpFileWrappers helpFiles = new HelpFileWrappersImpl();
 
     /**
      * Ctor.
      *
-     * @throws  IllegalArgumentException
-     *          Thrown if <TT>null</TT> <TT>IApplication</TT> passed.
+     * @throws IllegalArgumentException Thrown if <TT>null</TT>
+     *         <TT>IApplication</TT> passed.
      */
     public HelpViewerWindow() throws IOException {
         super(Main.APPLICATION_NAME + " ( Help )");
         createGUI();
     }
 
-    /**
-     * @param fileWrapperFactory
-     *           the fileWrapperFactory to set
-     */
-    public void setFileWrapperFactory(FileWrapperFactory fileWrapperFactory) {
-        Utilities.checkNull("setFileWrapperFactory", "fileWrapperFactory",
-                fileWrapperFactory);
-        this.fileWrapperFactory = fileWrapperFactory;
+    /** @param iFileWrapperFactory the iFileWrapperFactory to set. */
+    public void setFileWrapperFactory(IFileWrapperFactory iFileWrapperFactory) {
+        Utilities.checkNull("setFileWrapperFactory", "iFileWrapperFactory",
+                iFileWrapperFactory);
+        this.iFileWrapperFactory = iFileWrapperFactory;
     }
 
-    /**
-     * @param helpFiles the helpFiles to set
-     */
-    public void setHelpFiles(HelpFileWrappers helpFiles) {
+    /** @param helpFiles the helpFiles to set. */
+    public void setHelpFiles(IHelpFileWrappers helpFiles) {
         Utilities.checkNull("setHelpFiles", "helpFiles", helpFiles);
         this.helpFiles = helpFiles;
     }
@@ -124,26 +118,25 @@ public class HelpViewerWindow extends JFrame {
     /**
      * Set the Document displayed to that defined by the passed URL.
      *
-     * @param   url     URL of document to be displayed.
+     * @param url URL of document to be displayed.
      */
     private void setSelectedDocument(URL url) {
         try {
             _detailPnl.gotoURL(url);
-        } catch (IOException ex) {
-            // ignore
+        } catch (IOException ioe) {
+            ExceptionDialog.ignoreException(ioe);
         }
     }
 
     private void selectTreeNodeForURL(URL url) {
-        // Strip local part of URL.
+        // Strip local part of URL
         String key = url.toString();
         final int idx = key.lastIndexOf('#');
         if (idx > -1) {
             key = key.substring(0, idx);
         }
         DefaultMutableTreeNode node = _nodes.get(key);
-        if (node != null) // && node != _tree.getLastSelectedPathComponent())
-        {
+        if (node != null) {
             DefaultTreeModel model = (DefaultTreeModel) _tree.getModel();
             TreePath path = new TreePath(model.getPathToRoot(node));
             if (path != null) {
@@ -154,9 +147,7 @@ public class HelpViewerWindow extends JFrame {
         }
     }
 
-    /**
-     * Create user interface.
-     */
+    /** Create user interface. */
     private void createGUI() throws IOException {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         final ImageIcon icon = ImageManager.getImage("/icons/help.png");
@@ -197,10 +188,11 @@ public class HelpViewerWindow extends JFrame {
                 selectTreeNodeForURL(evt.getHtmlViewerPanel().getURL());
             }
             public void homeURLHasChanged(HtmlViewerPanelListenerEvent evt) {
-                // Nothing to do.
+                // Nothing to do
             }
         });
     }
+
     /**
      * Create a tree each node being a link to a document.
      *
@@ -212,7 +204,7 @@ public class HelpViewerWindow extends JFrame {
         _tree.setShowsRootHandles(true);
         _tree.addTreeSelectionListener(new ObjectTreeSelectionListener());
 
-        // Renderer for tree.
+        // Renderer for tree
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
         renderer.setLeafIcon(ImageManager.getImage("/icons/help_topic.png"));
         renderer.setOpenIcon(ImageManager.getImage("/icons/help_toc_open.png"));
@@ -220,76 +212,88 @@ public class HelpViewerWindow extends JFrame {
                 .getImage("/icons/help_toc_closed.png"));
         _tree.setCellRenderer(renderer);
 
-        // Add Help, Licence and Change Log nodes to the tree.
+        // Add Help, Licence and Change Log nodes to the tree
         final FolderNode helpRoot = new FolderNode("Help");
         root.add(helpRoot);
         _nodes.put(helpRoot.getURL().toString(), helpRoot);
         final FolderNode licenceRoot = new FolderNode("Licences");
         root.add(licenceRoot);
         _nodes.put(licenceRoot.getURL().toString(), licenceRoot);
-        final FolderNode changeLogRoot = new FolderNode("Change logs");
+        final FolderNode changeLogRoot = new FolderNode("ChangeLog");
         root.add(changeLogRoot);
         _nodes.put(changeLogRoot.getURL().toString(), changeLogRoot);
 
-        // Add the Manual node.
-        FileWrapper file = helpFiles.getQuickStartGuideFile();
+        // Add the Manual node
+        IFileWrapper file = helpFiles.getQuickStartGuideFile();
         try {
-            DocumentNode dn = new DocumentNode("Guidance", file);
+            DocumentNode dn = new DocumentNode("Guide", file);
             helpRoot.add(dn);
             _homeURL = dn.getURL();
             _nodes.put(_homeURL.toString(), dn);
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
-            String errorMsg = "Load help file not found.\n" + msg + "\n";
-            ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Load help file not found.\n" + msg;
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(errorMsg,
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
-        // Add the Licence node.
+        // Add the Licence node
         file = helpFiles.getLicenceFile();
         try {
             DocumentNode dn = new DocumentNode(
                     "GNU General Public License (GPL)", file);
             licenceRoot.add(dn);
             _nodes.put(dn.getURL().toString(), dn);
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
-            String errorMsg = "Load license file not found.\n" + msg + "\n";
-            ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Load license file not found." + msg;
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(errorMsg,
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
-        // Add the Change Log node.
+        // Add the Change Log node
         file = helpFiles.getChangeLogFile();
         try {
             DocumentNode dn = new DocumentNode("What's new?", file);
             changeLogRoot.add(dn);
             _nodes.put(dn.getURL().toString(), dn);
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
-            String errorMsg = "Load change log file not found.\n" + msg + "\n";
-            ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Load change log file not found.\n" + msg;
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(errorMsg,
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
-        // FAQ.
+        // FAQ
         file = helpFiles.getFAQFile();
         try {
             DocumentNode dn = new DocumentNode("FAQ", file);
             root.add(dn);
             _nodes.put(dn.getURL().toString(), dn);
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
-            String errorMsg = "Load FAQ file not found.\n" + msg + "\n";
-            ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Load FAQ file not found.\n" + msg;
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(errorMsg,
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
-        // Generate contents file.
+        // Generate contents file
         helpRoot.generateContentsFile();
         licenceRoot.generateContentsFile();
         changeLogRoot.generateContentsFile();
@@ -316,7 +320,7 @@ public class HelpViewerWindow extends JFrame {
 
         private URL _url;
 
-        DocumentNode(String title, FileWrapper file)
+        DocumentNode(String title, IFileWrapper file)
                 throws MalformedURLException {
             super(title, false);
             setFile(file);
@@ -330,7 +334,7 @@ public class HelpViewerWindow extends JFrame {
             return _url;
         }
 
-        void setFile(FileWrapper file) throws MalformedURLException {
+        void setFile(IFileWrapper file) throws MalformedURLException {
             _url = file.toURI().toURL();
         }
     }
@@ -347,12 +351,12 @@ public class HelpViewerWindow extends JFrame {
 
         private final List<String> _docTitles = new ArrayList<String>();
         private final List<URL> _docURLs = new ArrayList<URL>();
-        private final FileWrapper _contentsFile;
+        private final IFileWrapper _contentsFile;
 
         FolderNode(String title) throws IOException {
             super(title, true);
-            _contentsFile = fileWrapperFactory
-                    .createTempFile("otvhelp", "html");
+            _contentsFile = iFileWrapperFactory.createTempFile("otvhelp",
+                    "html");
             _contentsFile.deleteOnExit();
             setFile(_contentsFile);
         }
@@ -382,7 +386,6 @@ public class HelpViewerWindow extends JFrame {
                             .append("</H1>");
                     pw.println(buf.toString());
                     for (int i = 0, limit = _docTitles.size(); i < limit; ++i) {
-                        //                      final String docTitle = (String)_docTitles.get(i);
                         final URL docUrl = _docURLs.get(i);
                         buf = new StringBuffer(50);
                         buf.append("<A HREF=\"").append(docUrl).append("\">")
@@ -393,18 +396,21 @@ public class HelpViewerWindow extends JFrame {
                 } finally {
                     pw.close();
                 }
-            } catch (IOException ex) {
-                String errorMsg = "Error: congen.\n";
-                ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            } catch (IOException ioe) {
+                String errorMsg = "Error: congen.";
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(errorMsg,
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 UISupport.getDialogs().showErrorMessage(errorMsg);
             }
         }
     }
 
     /**
-     * This class listens for changes in the node selected in the tree
-     * and displays the appropriate help document for the node.
+     * This class listens for changes in the node selected in the tree and
+     * displays the appropriate help document for the node.
      * 
      * @author D. Campione
      * 

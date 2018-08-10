@@ -19,8 +19,8 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.conditional;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * 
@@ -30,13 +30,13 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisit
  */
 public class OrExpression extends BinaryExpression {
 
-    public OrExpression(Expression leftExpression, Expression rightExpression) {
+    public OrExpression(IExpression leftExpression, IExpression rightExpression) {
         setLeftExpression(leftExpression);
         setRightExpression(rightExpression);
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String getStringExpression() {

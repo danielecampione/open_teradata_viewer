@@ -69,15 +69,15 @@ public class ConnectAction extends CustomAction {
                 boolean connected = false;
                 while (!connected) {
                     try {
-                        ApplicationFrame.getInstance().changeLog
-                                .append("connecting..\n");
+                        ApplicationFrame.getInstance().getConsole()
+                                .println("connecting..");
                         connectionData.connect();
                         if (connectionData.getConnection() == null) {
                             performThreaded(e);
                             return;
                         }
-                        ApplicationFrame.getInstance().changeLog
-                                .append("connected.\n");
+                        ApplicationFrame.getInstance().getConsole()
+                                .println("connected.");
 
                         SQLWarning warnings = connectionData.getConnection()
                                 .getWarnings();
@@ -146,6 +146,7 @@ public class ConnectAction extends CustomAction {
             performThreaded(e);
         }
     }
+
     private ConnectionData newConnectionWizard() throws IOException {
         ConnectionData connectionData = new ConnectionData();
         Object db = Dialog.show("New Connection", "Choose database",
@@ -163,6 +164,7 @@ public class ConnectAction extends CustomAction {
         }
         return connectionData;
     }
+
     private String checkString(String s) {
         return s == null ? "" : s;
     }

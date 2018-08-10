@@ -68,10 +68,10 @@ public class Dialog extends JOptionPane {
         Dialog dialog = new Dialog(message, messageType, DEFAULT_OPTION,
                 options, initialValue);
         try {
-            dialog.createDialog(ApplicationFrame.getInstance(), title)
-                    .setVisible(true);
+            UISupport.showDialog(dialog.createDialog(
+                    ApplicationFrame.getInstance(), title));
         } catch (NoClassDefFoundError e) {
-            dialog.createDialog(null, title).setVisible(true);
+            UISupport.showDialog(dialog.createDialog(null, title));
         }
         return dialog.getValue();
     }

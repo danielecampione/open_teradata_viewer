@@ -28,10 +28,12 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.replace.Replace;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 
 /**
- * A class to de-parse (that is, tranform from SqlParser hierarchy into a string)
- * a {@link net.sf.jsqlparser.statement.replace.Replace}
+ * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * string) a {@link net.sf.jsqlparser.statement.replace.Replace}.
  * 
  * @author D. Campione
  * 
@@ -46,11 +48,14 @@ public class ReplaceDeParser implements ItemsListVisitor {
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param selectVisitor a {@link SelectVisitor} to de-parse {@link net.sf.jsqlparser.statement.select.Select}s.
-     * It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
+     *                          expressions. It has to share the same<br>
+     *                          StringBuffer (buffer parameter) as this object
+     *                          in order to work.
+     * @param selectVisitor a {@link ISelectVisitor} to de-parse {@link
+     *                      net.sf.jsqlparser.statement.select.Select}s. It has
+     *                      to share the same<br> StringBuffer (buffer
+     *                      parameter) as this object in order to work.
      * @param buffer the buffer that will be filled with the select
      */
     public ReplaceDeParser(ExpressionVisitor expressionVisitor,
@@ -84,7 +89,6 @@ public class ReplaceDeParser implements ItemsListVisitor {
             } else {
                 buffer.append(" ");
             }
-
         } else {
             buffer.append(" SET ");
             for (int i = 0; i < replace.getColumns().size(); i++) {
@@ -97,16 +101,13 @@ public class ReplaceDeParser implements ItemsListVisitor {
                 if (i < replace.getColumns().size() - 1) {
                     buffer.append(", ");
                 }
-
             }
         }
-
     }
 
-    @SuppressWarnings("rawtypes")
     public void visit(ExpressionList expressionList) {
         buffer.append(" VALUES (");
-        for (Iterator iter = expressionList.getExpressions().iterator(); iter
+        for (Iterator<?> iter = expressionList.getExpressions().iterator(); iter
                 .hasNext();) {
             Expression expression = (Expression) iter.next();
             expression.accept(expressionVisitor);
@@ -135,5 +136,4 @@ public class ReplaceDeParser implements ItemsListVisitor {
     public void setSelectVisitor(SelectVisitor visitor) {
         selectVisitor = visitor;
     }
-
 }

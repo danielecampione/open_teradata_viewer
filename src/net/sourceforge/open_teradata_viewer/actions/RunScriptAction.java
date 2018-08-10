@@ -48,14 +48,18 @@ public class RunScriptAction extends CustomAction {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
+
     @Override
-    protected void performThreaded(ActionEvent e) throws Exception {
+    protected void performThreaded(ActionEvent ae) throws Exception {
         String text = ApplicationFrame.getInstance().getTextComponent()
                 .getText();
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         if (text.trim().length() == 0) {
@@ -63,10 +67,10 @@ public class RunScriptAction extends CustomAction {
         }
         History.getInstance().add(text);
         Actions.getInstance().validateTextActions();
-        // Search and capture all text that is followed by a semicolon,
-        // zero or more whitespace characters [ \t\n\x0B\f\r],
-        // end of the line and again zero or more whitespace characters
-        // the regular expression is ran in dotall mode and multiline mode.
+        // Search and capture all text that is followed by a semicolon, zero or
+        // more whitespace characters [ \t\n\x0B\f\r], end of the line and again
+        // zero or more whitespace characters the regular expression is ran in
+        // dotall mode and multiline mode
         Pattern pattern = Pattern.compile("(.*?);\\s*?$\\s*", Pattern.DOTALL
                 + Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(text);
@@ -75,7 +79,7 @@ public class RunScriptAction extends CustomAction {
             total++;
         }
         matcher.reset();
-        @SuppressWarnings("rawtypes")
+
         final Vector<Vector> dataVector = new Vector<Vector>();
         int count = 0;
         final Statement statement = Context
@@ -105,13 +109,13 @@ public class RunScriptAction extends CustomAction {
                 dataVector.add(row);
                 waitingDialog.setText(String.format("%d/%d", count++, total));
             }
-        } catch (Exception ex) {
+        } catch (Exception e) {
             ApplicationFrame.getInstance().getTextComponent()
                     .setSelectionStart(matcher.start(1));
             ApplicationFrame.getInstance().getTextComponent()
                     .setSelectionEnd(matcher.end(1));
-            ApplicationFrame.getInstance().getTextComponent().requestFocus();
-            throw ex;
+            ApplicationFrame.getInstance().focusTextArea();
+            throw e;
         } finally {
             waitingDialog.hide();
             Context.getInstance().setResultSet(null);

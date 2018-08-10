@@ -27,8 +27,11 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ShowViewValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  *
@@ -50,8 +53,11 @@ public class ShowViewAction extends ShowObjectAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -70,7 +76,7 @@ public class ShowViewAction extends ShowObjectAction {
                     return;
                 }
             }
-            if (!canBeAnObjectName(viewName)) {
+            if (!Utilities.canBeATeradataObjectName(viewName)) {
                 viewName = null;
             }
         }
@@ -102,6 +108,7 @@ public class ShowViewAction extends ShowObjectAction {
                 try {
                     statement.cancel();
                 } catch (Throwable t) {
+                    ExceptionDialog.ignoreException(t);
                 }
             }
         };
@@ -109,6 +116,7 @@ public class ShowViewAction extends ShowObjectAction {
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
+            ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();
@@ -123,7 +131,7 @@ public class ShowViewAction extends ShowObjectAction {
                 viewBody += obj.toString();
             }
         }
-        ApplicationFrame.getInstance().setText(viewBody);
+        ApplicationFrame.getInstance().setText(StringUtil.conformize(viewBody));
         statement.close();
         resultSet.close();
     }

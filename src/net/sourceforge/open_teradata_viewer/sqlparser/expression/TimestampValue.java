@@ -26,7 +26,7 @@ import java.sql.Timestamp;
  * @author D. Campione
  * 
  */
-public class TimestampValue implements Expression {
+public class TimestampValue implements IExpression {
 
     private Timestamp value;
 
@@ -34,8 +34,8 @@ public class TimestampValue implements Expression {
         this.value = Timestamp.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public Timestamp getValue() {

@@ -21,45 +21,40 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import java.util.List;
 
 /**
- * A UNION statement
+ * A UNION statement.
  * 
  * @author D. Campione
  */
-public class Union implements SelectBody {
+public class Union implements ISelectBody {
 
-    @SuppressWarnings("rawtypes")
-    private List plainSelects;
-    @SuppressWarnings("rawtypes")
-    private List orderByElements;
+    private List<?> plainSelects;
+    private List<?> orderByElements;
     private Limit limit;
     private boolean distinct;
     private boolean all;
 
-    public void accept(SelectVisitor selectVisitor) {
-        selectVisitor.visit(this);
+    public void accept(ISelectVisitor iSelectVisitor) {
+        iSelectVisitor.visit(this);
     }
 
-    @SuppressWarnings("rawtypes")
-    public List getOrderByElements() {
+    public List<?> getOrderByElements() {
         return orderByElements;
     }
 
     /**
-     * the list of {@link PlainSelect}s in this UNION
-     * @return the list of {@link PlainSelect}s
+     * The list of {@link PlainSelect}s in this UNION.
+     * 
+     * @return the list of {@link PlainSelect}s.
      */
-    @SuppressWarnings("rawtypes")
-    public List getPlainSelects() {
+    public List<?> getPlainSelects() {
         return plainSelects;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setOrderByElements(List orderByElements) {
+    public void setOrderByElements(List<?> orderByElements) {
         this.orderByElements = orderByElements;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setPlainSelects(List list) {
+    public void setPlainSelects(List<?> list) {
         plainSelects = list;
     }
 
@@ -71,9 +66,6 @@ public class Union implements SelectBody {
         this.limit = limit;
     }
 
-    /**
-     * This is not 100% right; every UNION should have their own All/Distinct clause...
-     */
     public boolean isAll() {
         return all;
     }
@@ -82,9 +74,6 @@ public class Union implements SelectBody {
         this.all = all;
     }
 
-    /**
-     * This is not 100% right; every UNION should have their own All/Distinct clause...
-     */
     public boolean isDistinct() {
         return distinct;
     }
@@ -94,7 +83,6 @@ public class Union implements SelectBody {
     }
 
     public String toString() {
-
         String selects = "";
         String allDistinct = "";
         if (isAll()) {
@@ -116,5 +104,4 @@ public class Union implements SelectBody {
                         .orderByToString(orderByElements) : "")
                 + ((limit != null) ? limit + "" : "");
     }
-
 }

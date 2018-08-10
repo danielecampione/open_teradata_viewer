@@ -38,6 +38,8 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+
 /**
  * This panel shows the contents of a HTML file.
  *
@@ -198,8 +200,8 @@ public class HtmlViewerPanel extends JPanel {
                 _contentsTxt.setPage(url);
                 _currentURL = url;
                 fireURLChanged();
-            } catch (Exception ex) {
-                // ignore.
+            } catch (Exception e) {
+                ExceptionDialog.ignoreException(e);
             }
         }
     }
@@ -246,17 +248,13 @@ public class HtmlViewerPanel extends JPanel {
         }
     }
 
-    /**
-     * Create user interface.
-     */
+    /** Create user interface. */
     private void createGUI() {
         setLayout(new BorderLayout());
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
-    /**
-     * Create the main panel.
-     */
+    /** Create the main panel. */
     private JPanel createMainPanel() {
         _contentsTxt.setEditable(false);
         _contentsTxt.setContentType("text/html");
@@ -292,8 +290,8 @@ public class HtmlViewerPanel extends JPanel {
                     } else {
                         try {
                             gotoURL(e.getURL());
-                        } catch (IOException ex) {
-                            // ignore.
+                        } catch (IOException ioe) {
+                            ExceptionDialog.ignoreException(ioe);
                         }
                     }
                 }

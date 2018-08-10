@@ -18,10 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 
 /**
  * A join clause.
@@ -38,14 +37,14 @@ public class Join {
     private boolean full = false;
     private boolean inner = false;
     private boolean simple = false;
-    private FromItem rightItem;
-    private Expression onExpression;
-    @SuppressWarnings("rawtypes")
-    private List usingColumns;
+    private IFromItem rightItem;
+    private IExpression onExpression;
+    private List<?> usingColumns;
 
     /**
-     * Whether is a tab1,tab2 join
-     * @return true if is a "tab1,tab2" join
+     * Whether is a tab1,tab2 join.
+     * 
+     * @return true if is a "tab1,tab2" join.
      */
     public boolean isSimple() {
         return simple;
@@ -54,9 +53,11 @@ public class Join {
     public void setSimple(boolean b) {
         simple = b;
     }
+
     /**
-     * Whether is a "INNER" join
-     * @return true if is a "INNER" join
+     * Whether is a "INNER" join.
+     * 
+     * @return true if is a "INNER" join.
      */
     public boolean isInner() {
         return inner;
@@ -67,8 +68,9 @@ public class Join {
     }
 
     /**
-     * Whether is a "OUTER" join
-     * @return true if is a "OUTER" join
+     * Whether is a "OUTER" join.
+     * 
+     * @return true if is a "OUTER" join.
      */
     public boolean isOuter() {
         return outer;
@@ -79,8 +81,9 @@ public class Join {
     }
 
     /**
-     * Whether is a "LEFT" join
-     * @return true if is a "LEFT" join
+     * Whether is a "LEFT" join.
+     * 
+     * @return true if is a "LEFT" join.
      */
     public boolean isLeft() {
         return left;
@@ -91,8 +94,9 @@ public class Join {
     }
 
     /**
-     * Whether is a "RIGHT" join
-     * @return true if is a "RIGHT" join
+     * Whether is a "RIGHT" join.
+     * 
+     * @return true if is a "RIGHT" join.
      */
     public boolean isRight() {
         return right;
@@ -103,8 +107,9 @@ public class Join {
     }
 
     /**
-     * Whether is a "NATURAL" join
-     * @return true if is a "NATURAL" join
+     * Whether is a "NATURAL" join.
+     * 
+     * @return true if is a "NATURAL" join.
      */
     public boolean isNatural() {
         return natural;
@@ -115,8 +120,9 @@ public class Join {
     }
 
     /**
-     * Whether is a "FULL" join
-     * @return true if is a "FULL" join
+     * Whether is a "FULL" join.
+     * 
+     * @return true if is a "FULL" join.
      */
     public boolean isFull() {
         return full;
@@ -126,38 +132,33 @@ public class Join {
         full = b;
     }
 
-    /**
-     * Returns the right item of the join
-     */
-    public FromItem getRightItem() {
+    /** Returns the right item of the join. */
+    public IFromItem getRightItem() {
         return rightItem;
     }
 
-    public void setRightItem(FromItem item) {
+    public void setRightItem(IFromItem item) {
         rightItem = item;
     }
 
-    /**
-     * Returns the "ON" expression (if any)
-     */
-    public Expression getOnExpression() {
+    /** Returns the "ON" expression (if any). */
+    public IExpression getOnExpression() {
         return onExpression;
     }
 
-    public void setOnExpression(Expression expression) {
-        onExpression = expression;
+    public void setOnExpression(IExpression iExpression) {
+        onExpression = iExpression;
     }
 
     /**
-     * Returns the "USING" list of {@link net.sf.jsqlparser.schema.Column}s (if any)
+     * Returns the "USING" list of {@link net.sf.jsqlparser.schema.Column}s (if
+     * any).
      */
-    @SuppressWarnings("rawtypes")
-    public List getUsingColumns() {
+    public List<?> getUsingColumns() {
         return usingColumns;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setUsingColumns(List list) {
+    public void setUsingColumns(List<?> list) {
         usingColumns = list;
     }
 
@@ -188,6 +189,5 @@ public class Join {
                     + PlainSelect.getFormatedList(usingColumns, "USING", true,
                             true);
         }
-
     }
 }

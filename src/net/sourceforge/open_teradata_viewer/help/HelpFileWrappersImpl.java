@@ -18,31 +18,32 @@
 
 package net.sourceforge.open_teradata_viewer.help;
 
-import net.sourceforge.open_teradata_viewer.util.FileWrapper;
-import net.sourceforge.open_teradata_viewer.util.FileWrapperFactory;
 import net.sourceforge.open_teradata_viewer.util.FileWrapperFactoryImpl;
+import net.sourceforge.open_teradata_viewer.util.IFileWrapper;
+import net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory;
 
 /**
  * This class wraps access to HelpFiles presenting an interface that consists of
  * FileWrappers instead of Files.
  * 
  * @author D. Campione
+ * 
  */
-public class HelpFileWrappersImpl implements HelpFileWrappers {
+public class HelpFileWrappersImpl implements IHelpFileWrappers {
 
-    private FileWrapperFactory _fileWrapperFactory = new FileWrapperFactoryImpl();
+    private IFileWrapperFactory _fileWrapperFactory = new FileWrapperFactoryImpl();
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.HelpFileWrappers#setFileWrapperFactory(net.sourceforge.open_teradata_viewer.util.FileWrapperFactory)
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#setFileWrapperFactory(net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory)
      */
-    public void setFileWrapperFactory(FileWrapperFactory factory) {
+    public void setFileWrapperFactory(IFileWrapperFactory factory) {
         _fileWrapperFactory = factory;
     }
 
     private HelpFiles _helpFiles = new HelpFiles();
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.HelpFileWrappers#setHelpFiles(net.sourceforge.open_teradata_viewer.help.HelpFiles)
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#setHelpFiles(net.sourceforge.open_teradata_viewer.help.HelpFiles)
      */
     public void setHelpFiles(HelpFiles files) {
         _helpFiles = files;
@@ -52,31 +53,30 @@ public class HelpFileWrappersImpl implements HelpFileWrappers {
     }
 
     /**
-     * @see net.sourceforge.HelpFileWrappers.client.util.HelpFileWrappers#getQuickStartGuideFile()
+     * @see net.sourceforge.IHelpFileWrappers.client.util.HelpFileWrappers#getQuickStartGuideFile()
      */
-    public FileWrapper getQuickStartGuideFile() {
+    public IFileWrapper getQuickStartGuideFile() {
         return _fileWrapperFactory.create(_helpFiles.getQuickStartGuideFile());
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.HelpFileWrappers#getFAQFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getFAQFile()
      */
-    public FileWrapper getFAQFile() {
+    public IFileWrapper getFAQFile() {
         return _fileWrapperFactory.create(_helpFiles.getFAQFile());
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.HelpFileWrappers#getChangeLogFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getChangeLogFile()
      */
-    public FileWrapper getChangeLogFile() {
+    public IFileWrapper getChangeLogFile() {
         return _fileWrapperFactory.create(_helpFiles.getChangeLogFile());
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.HelpFileWrappers#getLicenceFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getLicenceFile()
      */
-    public FileWrapper getLicenceFile() {
+    public IFileWrapper getLicenceFile() {
         return _fileWrapperFactory.create(_helpFiles.getLicenceFile());
     }
-
 }

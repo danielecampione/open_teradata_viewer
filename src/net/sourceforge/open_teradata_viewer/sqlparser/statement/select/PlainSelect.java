@@ -18,42 +18,38 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-
 import java.util.Iterator;
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 
 /**
- * The core of a "SELECT" statement (no UNION, no ORDER BY)
+ * The core of a "SELECT" statement (no UNION, no ORDER BY).
  * 
  * @author D. Campione
  */
-public class PlainSelect implements SelectBody {
+public class PlainSelect implements ISelectBody {
 
     private Distinct distinct = null;
-    @SuppressWarnings("rawtypes")
-    private List selectItems;
+    private List<?> selectItems;
     private Table into;
-    private FromItem fromItem;
-    @SuppressWarnings("rawtypes")
-    private List joins;
-    private Expression where;
-    @SuppressWarnings("rawtypes")
-    private List groupByColumnReferences;
-    @SuppressWarnings("rawtypes")
-    private List orderByElements;
-    private Expression having;
+    private IFromItem iFromItem;
+    private List<?> joins;
+    private IExpression where;
+    private List<?> groupByColumnReferences;
+    private List<?> orderByElements;
+    private IExpression having;
     private Limit limit;
     private Top top;
 
     /**
-     * The {@link FromItem} in this query
-     * @return the {@link FromItem}
+     * The {@link IFromItem} in this query.
+     * 
+     * @return the {@link IFromItem}.
      */
-    public FromItem getFromItem() {
-        return fromItem;
+    public IFromItem getFromItem() {
+        return iFromItem;
     }
 
     public Table getInto() {
@@ -61,60 +57,53 @@ public class PlainSelect implements SelectBody {
     }
 
     /**
-     * The {@link SelectItem}s in this query (for example the A,B,C in "SELECT A,B,C")
-     * @return a list of {@link SelectItem}s
+     * The {@link ISelectItem}s in this query (for example the A,B,C in "SELECT
+     * A,B,C").
+     * 
+     * @return a list of {@link ISelectItem}s.
      */
-    @SuppressWarnings("rawtypes")
-    public List getSelectItems() {
+    public List<?> getSelectItems() {
         return selectItems;
     }
 
-    public Expression getWhere() {
+    public IExpression getWhere() {
         return where;
     }
 
-    public void setFromItem(FromItem item) {
-        fromItem = item;
+    public void setFromItem(IFromItem item) {
+        iFromItem = item;
     }
 
     public void setInto(Table table) {
         into = table;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setSelectItems(List list) {
+    public void setSelectItems(List<?> list) {
         selectItems = list;
     }
 
-    public void setWhere(Expression where) {
+    public void setWhere(IExpression where) {
         this.where = where;
     }
 
-    /**
-     * The list of {@link Join}s
-     * @return the list of {@link Join}s
-     */
-    @SuppressWarnings("rawtypes")
-    public List getJoins() {
+    /** @return the list of {@link Join}s. */
+    public List<?> getJoins() {
         return joins;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setJoins(List list) {
+    public void setJoins(List<?> list) {
         joins = list;
     }
 
-    public void accept(SelectVisitor selectVisitor) {
-        selectVisitor.visit(this);
+    public void accept(ISelectVisitor iSelectVisitor) {
+        iSelectVisitor.visit(this);
     }
 
-    @SuppressWarnings("rawtypes")
-    public List getOrderByElements() {
+    public List<?> getOrderByElements() {
         return orderByElements;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setOrderByElements(List orderByElements) {
+    public void setOrderByElements(List<?> orderByElements) {
         this.orderByElements = orderByElements;
     }
 
@@ -142,30 +131,28 @@ public class PlainSelect implements SelectBody {
         this.distinct = distinct;
     }
 
-    public Expression getHaving() {
+    public IExpression getHaving() {
         return having;
     }
 
-    public void setHaving(Expression expression) {
-        having = expression;
+    public void setHaving(IExpression iExpression) {
+        having = iExpression;
     }
 
     /**
-     * A list of {@link Expression}s of the GROUP BY clause.
-     * It is null in case there is no GROUP BY clause
-     * @return a list of {@link Expression}s 
+     * A list of {@link IExpression}s of the GROUP BY clause. It is null in case
+     * there is no GROUP BY clause.
+     * 
+     * @return a list of {@link IExpression}s. 
      */
-    @SuppressWarnings("rawtypes")
-    public List getGroupByColumnReferences() {
+    public List<?> getGroupByColumnReferences() {
         return groupByColumnReferences;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setGroupByColumnReferences(List list) {
+    public void setGroupByColumnReferences(List<?> list) {
         groupByColumnReferences = list;
     }
 
-    @SuppressWarnings("rawtypes")
     public String toString() {
         String sql = "";
 
@@ -173,9 +160,9 @@ public class PlainSelect implements SelectBody {
         sql += ((distinct != null) ? "" + distinct + " " : "");
         sql += ((top != null) ? "" + top + " " : "");
         sql += getStringList(selectItems);
-        sql += " FROM " + fromItem;
+        sql += " FROM " + iFromItem;
         if (joins != null) {
-            Iterator it = joins.iterator();
+            Iterator<?> it = joins.iterator();
             while (it.hasNext()) {
                 Join join = (Join) it.next();
                 if (join.isSimple()) {
@@ -185,7 +172,6 @@ public class PlainSelect implements SelectBody {
                 }
             }
         }
-        //sql += getFormatedList(joins, "", false, false);
         sql += ((where != null) ? " WHERE " + where : "");
         sql += getFormatedList(groupByColumnReferences, "GROUP BY");
         sql += ((having != null) ? " HAVING " + having : "");
@@ -195,18 +181,15 @@ public class PlainSelect implements SelectBody {
         return sql;
     }
 
-    @SuppressWarnings("rawtypes")
-    public static String orderByToString(List orderByElements) {
+    public static String orderByToString(List<?> orderByElements) {
         return getFormatedList(orderByElements, "ORDER BY");
     }
 
-    @SuppressWarnings("rawtypes")
-    public static String getFormatedList(List list, String expression) {
+    public static String getFormatedList(List<?> list, String expression) {
         return getFormatedList(list, expression, true, false);
     }
 
-    @SuppressWarnings("rawtypes")
-    public static String getFormatedList(List list, String expression,
+    public static String getFormatedList(List<?> list, String expression,
             boolean useComma, boolean useBrackets) {
         String sql = getStringList(list, useComma, useBrackets);
 
@@ -225,28 +208,26 @@ public class PlainSelect implements SelectBody {
      * List the toString out put of the objects in the List comma separated. If
      * the List is null or empty an empty string is returned.
      * 
-     * The same as getStringList(list, true, false)
+     * The same as getStringList(list, true, false).
+     * 
      * @see #getStringList(List, boolean, boolean)
-     * @param list
-     *            list of objects with toString methods
-     * @return comma separated list of the elements in the list
+     * @param list List of objects with toString methods.
+     * @return comma separated list of the elements in the list.
      */
-    @SuppressWarnings("rawtypes")
-    public static String getStringList(List list) {
+    public static String getStringList(List<?> list) {
         return getStringList(list, true, false);
     }
 
     /**
-     * List the toString out put of the objects in the List that can be comma separated. If
-     * the List is null or empty an empty string is returned.
+     * List the toString out put of the objects in the List that can be comma
+     * separated. If the List is null or empty an empty string is returned.
      * 
-     * @param list list of objects with toString methods
-     * @param useComma true if the list has to be comma separated
-     * @param useBrackets true if the list has to be enclosed in brackets
-     * @return comma separated list of the elements in the list
+     * @param list list of objects with toString methods.
+     * @param useComma true if the list has to be comma separated.
+     * @param useBrackets true if the list has to be enclosed in brackets.
+     * @return comma separated list of the elements in the list.
      */
-    @SuppressWarnings("rawtypes")
-    public static String getStringList(List list, boolean useComma,
+    public static String getStringList(List<?> list, boolean useComma,
             boolean useBrackets) {
         String ans = "";
         String comma = ",";

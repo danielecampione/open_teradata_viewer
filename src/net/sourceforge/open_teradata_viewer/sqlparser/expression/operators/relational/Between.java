@@ -18,30 +18,30 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * A "BETWEEN" expr1 expr2 statement
  * 
  * @author D. Campione
  */
-public class Between implements Expression {
+public class Between implements IExpression {
 
-    private Expression leftExpression;
+    private IExpression leftExpression;
     private boolean not = false;
-    private Expression betweenExpressionStart;
-    private Expression betweenExpressionEnd;
+    private IExpression betweenExpressionStart;
+    private IExpression betweenExpressionEnd;
 
-    public Expression getBetweenExpressionEnd() {
+    public IExpression getBetweenExpressionEnd() {
         return betweenExpressionEnd;
     }
 
-    public Expression getBetweenExpressionStart() {
+    public IExpression getBetweenExpressionStart() {
         return betweenExpressionStart;
     }
 
-    public Expression getLeftExpression() {
+    public IExpression getLeftExpression() {
         return leftExpression;
     }
 
@@ -49,24 +49,24 @@ public class Between implements Expression {
         return not;
     }
 
-    public void setBetweenExpressionEnd(Expression expression) {
-        betweenExpressionEnd = expression;
+    public void setBetweenExpressionEnd(IExpression iExpression) {
+        betweenExpressionEnd = iExpression;
     }
 
-    public void setBetweenExpressionStart(Expression expression) {
-        betweenExpressionStart = expression;
+    public void setBetweenExpressionStart(IExpression iExpression) {
+        betweenExpressionStart = iExpression;
     }
 
-    public void setLeftExpression(Expression expression) {
-        leftExpression = expression;
+    public void setLeftExpression(IExpression iExpression) {
+        leftExpression = iExpression;
     }
 
     public void setNot(boolean b) {
         not = b;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String toString() {

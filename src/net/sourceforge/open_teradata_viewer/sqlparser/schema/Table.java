@@ -18,9 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.schema;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.FromItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.FromItemVisitor;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IntoTableVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IIntoTableVisitor;
 
 /**
  * A table. It can have an alias and the schema name it belongs to.
@@ -28,7 +28,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IntoTable
  * @author D. Campione
  * 
  */
-public class Table implements FromItem {
+public class Table implements IFromItem {
 
     private String schemaName;
     private String name;
@@ -82,12 +82,12 @@ public class Table implements FromItem {
 
     }
 
-    public void accept(FromItemVisitor fromItemVisitor) {
-        fromItemVisitor.visit(this);
+    public void accept(IFromItemVisitor iFromItemVisitor) {
+        iFromItemVisitor.visit(this);
     }
 
-    public void accept(IntoTableVisitor intoTableVisitor) {
-        intoTableVisitor.visit(this);
+    public void accept(IIntoTableVisitor iIntoTableVisitor) {
+        iIntoTableVisitor.visit(this);
     }
 
     public String toString() {

@@ -18,8 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * 
@@ -27,12 +27,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisit
  * @author D. Campione
  *
  */
-public class IsNullExpression implements Expression {
+public class IsNullExpression implements IExpression {
 
-    private Expression leftExpression;
+    private IExpression leftExpression;
     private boolean not = false;
 
-    public Expression getLeftExpression() {
+    public IExpression getLeftExpression() {
         return leftExpression;
     }
 
@@ -40,20 +40,19 @@ public class IsNullExpression implements Expression {
         return not;
     }
 
-    public void setLeftExpression(Expression expression) {
-        leftExpression = expression;
+    public void setLeftExpression(IExpression iExpression) {
+        leftExpression = iExpression;
     }
 
     public void setNot(boolean b) {
         not = b;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String toString() {
         return leftExpression + " IS " + ((not) ? "NOT " : "") + "NULL";
     }
-
 }

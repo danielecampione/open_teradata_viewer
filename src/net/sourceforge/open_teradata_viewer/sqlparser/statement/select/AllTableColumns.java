@@ -26,7 +26,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
  * @author D. Campione
  * 
  */
-public class AllTableColumns implements SelectItem {
+public class AllTableColumns implements ISelectItem {
 
     private Table table;
 
@@ -45,12 +45,11 @@ public class AllTableColumns implements SelectItem {
         this.table = table;
     }
 
-    public void accept(SelectItemVisitor selectItemVisitor) {
-        selectItemVisitor.visit(this);
+    public void accept(ISelectItemVisitor iSelectItemVisitor) {
+        iSelectItemVisitor.visit(this);
     }
 
     public String toString() {
         return table + ".*";
     }
-
 }

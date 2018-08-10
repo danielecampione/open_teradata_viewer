@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
@@ -58,13 +57,16 @@ public class ExportExcelAction extends CustomAction {
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "No result to write.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("No result to write.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
@@ -78,8 +80,8 @@ public class ExportExcelAction extends CustomAction {
             }
             selection = "Selection".equals(option);
         }
-        @SuppressWarnings("rawtypes")
-        List list = ((DefaultTableModel) table.getModel()).getDataVector();
+
+        List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet();
         HSSFRow row = sheet.createRow(0);
@@ -100,8 +102,7 @@ public class ExportExcelAction extends CustomAction {
         int count = 1;
         for (int i = 0; i < list.size(); i++) {
             if (!selection || table.isRowSelected(i)) {
-                @SuppressWarnings("rawtypes")
-                List data = (List) list.get(i);
+                List<?> data = (List<?>) list.get(i);
                 row = sheet.createRow(count++);
                 for (int j = 0; j < data.size(); j++) {
                     Object o = data.get(j);

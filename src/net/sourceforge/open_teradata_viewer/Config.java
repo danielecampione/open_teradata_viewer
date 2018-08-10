@@ -139,7 +139,6 @@ public final class Config {
         return connectionDatas;
     }
 
-    @SuppressWarnings("unchecked")
     public static void saveDatabases(List<ConnectionData> connectionDatas)
             throws Exception {
         Collections.sort(connectionDatas);
@@ -176,8 +175,7 @@ public final class Config {
         return map;
     }
 
-    @SuppressWarnings("rawtypes")
-    public static void saveFavorites(Map favorites)
+    public static void saveFavorites(Map<?, ?> favorites)
             throws ParserConfigurationException, IOException,
             TransformerException, SAXException {
         Element config = getConfig();

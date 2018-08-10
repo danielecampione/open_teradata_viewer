@@ -66,9 +66,11 @@ public class EditAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "No result to view.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("No result to view.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         ResultSet resultSet = Context.getInstance().getResultSet();
@@ -78,8 +80,7 @@ public class EditAction extends CustomAction {
         GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0,
                 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 new Insets(5, 5, 5, 5), 0, 0);
-        List<String> selectedRow = ResultSetTable.getInstance()
-                .getSelectedRowData();
+        List selectedRow = ResultSetTable.getInstance().getSelectedRowData();
         for (int column = 0; column < resultSet.getMetaData().getColumnCount(); column++) {
             String columnName = resultSet.getMetaData().getColumnName(
                     column + 1);
@@ -131,12 +132,10 @@ public class EditAction extends CustomAction {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     protected void fillTextArea(JTextArea textArea, List selectedRow, int column) {
         textArea.setText(getOriginalValue(selectedRow, column));
     }
 
-    @SuppressWarnings("rawtypes")
     private String getOriginalValue(List selectedRow, int column) {
         return selectedRow == null || selectedRow.get(column) == null
                 ? ""
@@ -153,8 +152,7 @@ public class EditAction extends CustomAction {
         resultSet.relative(origRow);
     }
 
-    protected void updateSelectedRow(List<String> selectedRow, int column,
-            String text) {
+    protected void updateSelectedRow(List selectedRow, int column, String text) {
         selectedRow.set(column, text);
     }
 

@@ -42,9 +42,6 @@ public final class Actions
             ListSelectionListener,
             TableColumnModelListener {
 
-    //  Included in jsyntaxpane
-    public static final Boolean CUT_COPY_PASTE_ENABLED = true;
-
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
     public static final CustomAction COMMIT = new CommitAction();
@@ -52,6 +49,28 @@ public final class Actions
     public static final CustomAction CUT = new CutAction();
     public static final CustomAction COPY = new CopyAction();
     public static final CustomAction PASTE = new PasteAction();
+    public static final CustomAction VIEW_LINE_HIGHLIGHT = new ViewLineHighlightAction();
+    public static final CustomAction FADE_CURRENT_LINE_HIGHLIGHT = new FadeCurrentLineHighlightAction();
+    public static final CustomAction VIEW_LINE_NUMBERS = new ViewLineNumbersAction();
+    public static final CustomAction BOOKMARKS = new BookmarksAction();
+    public static final CustomAction WORD_WRAP = new WordWrapAction();
+    public static final CustomAction ANTIALIASING = new AntiAliasingAction();
+    public static final CustomAction MARK_OCCURRENCES = new MarkOccurrencesAction();
+    public static final CustomAction RIGHT_TO_LEFT = new RightToLeftAction();
+    public static final CustomAction TAB_LINES = new TabLinesAction();
+    public static final CustomAction ANIMATE_BRACKET_MATCHING = new AnimateBracketMatchingAction();
+    public static final CustomAction COMMENT = new CommentAction();
+    public static final CustomAction UNCOMMENT = new UncommentAction();
+    public static final CustomAction GO_TO_LINE = new GoToLineAction();
+    public static final CustomAction FIND = new FindAction();
+    public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",
+            "/res/default.xml");
+    public static final CustomAction DARK_THEME = new ThemeAction("Dark",
+            "/res/dark.xml");
+    public static final CustomAction ECLIPSE_THEME = new ThemeAction("Eclipse",
+            "/res/eclipse.xml");
+    public static final CustomAction VISUAL_STUDIO_THEME = new ThemeAction(
+            "Visual Studio", "/res/vs.xml");
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
@@ -160,7 +179,7 @@ public final class Actions
         try {
             hasUpdatableResultSet = hasResultSet
                     && Context.getInstance().getResultSet().getConcurrency() == ResultSet.CONCUR_UPDATABLE;
-        } catch (SQLException e) {
+        } catch (SQLException sqle) {
             hasUpdatableResultSet = false;
         }
         INSERT.setEnabled(hasUpdatableResultSet);

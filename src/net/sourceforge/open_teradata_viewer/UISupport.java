@@ -36,6 +36,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -76,8 +77,8 @@ public class UISupport {
     private static Boolean isWindows;
     private static Boolean isMac;
 
-    private static XDialogs dialogs;
-    private static XFileDialogs fileDialogs;
+    private static IXDialogs dialogs;
+    private static IXFileDialogs fileDialogs;
     private static Cursor hourglassCursor;
     private static Cursor defaultCursor;
     private static Boolean isHeadless;
@@ -124,18 +125,19 @@ public class UISupport {
                 url = UISupport.class.getResource("/icons/" + filename);
             else
                 url = file.toURI().toURL();
-        } catch (Exception e1) {
+        } catch (Exception e) {
+            ExceptionDialog.ignoreException(e);
         }
 
         return url;
     }
 
-    public static void setDialogs(XDialogs xDialogs) {
-        dialogs = xDialogs;
+    public static void setDialogs(IXDialogs iXDialogs) {
+        dialogs = iXDialogs;
     }
 
-    public static void setFileDialogs(XFileDialogs xFileDialogs) {
-        fileDialogs = xFileDialogs;
+    public static void setFileDialogs(IXFileDialogs iXFileDialogs) {
+        fileDialogs = iXFileDialogs;
     }
 
     public static Frame getMainFrame() {
@@ -151,11 +153,11 @@ public class UISupport {
         return getMainFrame();
     }
 
-    public static XDialogs getDialogs() {
+    public static IXDialogs getDialogs() {
         return dialogs;
     }
 
-    public static XFileDialogs getFileDialogs() {
+    public static IXFileDialogs getFileDialogs() {
         return fileDialogs;
     }
 
@@ -195,7 +197,7 @@ public class UISupport {
                     cellEditor.stopCellEditing();
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException re) {
             return false;
         }
         return true;
@@ -296,13 +298,11 @@ public class UISupport {
         dialogs.showInfoMessage(message, title);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Object> T prompt(String question, String title,
             T[] objects) {
         return (T) dialogs.prompt(question, title, objects);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Object> T prompt(String question, String title,
             T[] objects, String value) {
         return (T) dialogs.prompt(question, title, objects, value);
@@ -408,22 +408,19 @@ public class UISupport {
 
     public static boolean isWindows() {
         if (isWindows == null) {
-            isWindows = new Boolean(
-                    System.getProperty("os.name")
-                            .toLowerCase(java.util.Locale.ENGLISH)
-                            .indexOf("windows") >= 0);
+            isWindows = new Boolean(System.getProperty("os.name")
+                    .toLowerCase(Locale.ENGLISH).indexOf("windows") >= 0);
         }
 
         return isWindows.booleanValue();
     }
 
-    public static boolean isMac() {
-        if (isMac == null) {
-            isMac = new Boolean(System.getProperty("os.name")
-                    .toLowerCase(java.util.Locale.ENGLISH).indexOf("mac") >= 0);
-        }
-
-        return isMac.booleanValue();
+    /** @return Whether the OS we're running on is OS X. */
+    public static boolean isOSX() {
+        // Recommended at:
+        // http://developer.apple.com/mac/library/technotes/tn2002/tn2110.html
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.startsWith("mac os x");
     }
 
     public static void setHourglassCursor() {
@@ -522,13 +519,11 @@ public class UISupport {
         Toolkit.getDefaultToolkit().beep();
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Object> T prompt(String question, String title,
             List<T> objects) {
         return (T) dialogs.prompt(question, title, objects.toArray());
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Object> T prompt(String question, String title,
             List<T> objects, String value) {
         return (T) dialogs.prompt(question, title, objects.toArray(), value);

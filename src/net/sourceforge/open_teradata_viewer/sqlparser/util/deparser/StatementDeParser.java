@@ -74,7 +74,6 @@ public class StatementDeParser implements StatementVisitor {
         InsertDeParser insertDeParser = new InsertDeParser(expressionDeParser,
                 selectDeParser, buffer);
         insertDeParser.deParse(insert);
-
     }
 
     public void visit(Replace replace) {
@@ -88,7 +87,6 @@ public class StatementDeParser implements StatementVisitor {
         replaceDeParser.deParse(replace);
     }
 
-    @SuppressWarnings("rawtypes")
     public void visit(Select select) {
         SelectDeParser selectDeParser = new SelectDeParser();
         selectDeParser.setBuffer(buffer);
@@ -98,17 +96,17 @@ public class StatementDeParser implements StatementVisitor {
         if (select.getWithItemsList() != null
                 && !select.getWithItemsList().isEmpty()) {
             buffer.append("WITH ");
-            for (Iterator iter = select.getWithItemsList().iterator(); iter
+            for (Iterator<?> iter = select.getWithItemsList().iterator(); iter
                     .hasNext();) {
                 WithItem withItem = (WithItem) iter.next();
                 buffer.append(withItem);
-                if (iter.hasNext())
+                if (iter.hasNext()) {
                     buffer.append(",");
+                }
                 buffer.append(" ");
             }
         }
         select.getSelectBody().accept(selectDeParser);
-
     }
 
     public void visit(Truncate truncate) {
@@ -123,7 +121,6 @@ public class StatementDeParser implements StatementVisitor {
                 buffer);
         selectDeParser.setExpressionVisitor(expressionDeParser);
         updateDeParser.deParse(update);
-
     }
 
     public StringBuffer getBuffer() {
@@ -133,5 +130,4 @@ public class StatementDeParser implements StatementVisitor {
     public void setBuffer(StringBuffer buffer) {
         this.buffer = buffer;
     }
-
 }

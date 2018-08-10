@@ -24,12 +24,12 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  * @author D. Campione
  * 
  */
-public class StringValue implements Expression {
+public class StringValue implements IExpression {
 
     private String value = "";
 
     public StringValue(String escapedValue) {
-        // romoving "'" at the start and at the end 
+        // Removing "'" at the start and at the end 
         value = escapedValue.substring(1, escapedValue.length() - 1);
     }
 
@@ -53,8 +53,8 @@ public class StringValue implements Expression {
         value = string;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String toString() {

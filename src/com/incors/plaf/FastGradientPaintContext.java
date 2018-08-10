@@ -23,6 +23,7 @@ import java.awt.Rectangle;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
@@ -76,14 +77,12 @@ class FastGradientPaintContext implements PaintContext {
         GradientInfo info;
         int perpendicularLength = 0;
         WritableRaster raster;
-        @SuppressWarnings("rawtypes")
-        HashMap childRasterCache;
+        HashMap<Integer, Raster> childRasterCache;
 
         Gradient(GradientInfo i) {
             info = i;
         }
 
-        @SuppressWarnings("unchecked")
         private Raster getRaster(int parallelPos, int perpendicularLength,
                 int parallelLength) {
             if (raster == null
@@ -106,7 +105,6 @@ class FastGradientPaintContext implements PaintContext {
                                     - parallelPos, this.perpendicularLength, 0,
                                     0, null);
                 childRasterCache.put(key, r);
-                //System.out.println( "Storing child raster in cache. Position: " + Integer.toString(parallelPos) );
                 return r;
             }
 
@@ -116,7 +114,6 @@ class FastGradientPaintContext implements PaintContext {
             //			raster = null;
         }
 
-        @SuppressWarnings("rawtypes")
         private void createRaster(int perpendicularLength) {
             int gradientWidth, gradientHeight;
             if (info.isVertical) {
@@ -146,33 +143,33 @@ class FastGradientPaintContext implements PaintContext {
                         | (sr + (i * dr) / pl) << 16
                         | (sg + (i * dg) / pl) << 8 | (sb + (i * db) / pl), c);
                 for (int j = 0; j < perpendicularLength; j++) {
-                    if (info.isVertical)
+                    if (info.isVertical) {
                         raster.setDataElements(j, i, c);
-                    else
+                    } else {
                         raster.setDataElements(i, j, c);
+                    }
                 }
             }
-            childRasterCache = new HashMap();
+            childRasterCache = new HashMap<Integer, Raster>();
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private static WeakHashMap gradientCache = new WeakHashMap();
-    @SuppressWarnings("rawtypes")
-    private static LinkedList recentInfos = new LinkedList();
+    private static WeakHashMap<GradientInfo, WeakReference<Gradient>> gradientCache = new WeakHashMap<GradientInfo, WeakReference<Gradient>>();
+
+    private static LinkedList<GradientInfo> recentInfos = new LinkedList<GradientInfo>();
 
     GradientInfo info;
     int parallelDevicePos;
     Gradient gradient;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     FastGradientPaintContext(ColorModel cm, Rectangle r, int sc, int ec,
             boolean ver) {
         info = new GradientInfo();
-        if ((((sc & ec) >> 24) & 0xFF) != 0xFF)
+        if ((((sc & ec) >> 24) & 0xFF) != 0xFF) {
             info.model = ColorModel.getRGBdefault();
-        else
+        } else {
             info.model = cm;
+        }
         info.startColor = sc;
         info.endColor = ec;
         if (info.isVertical = ver) {
@@ -188,13 +185,12 @@ class FastGradientPaintContext implements PaintContext {
             recentInfos.removeLast();
         Object o = gradientCache.get(info);
         if (o != null)
-            o = ((java.lang.ref.WeakReference) o).get();
+            o = ((WeakReference<?>) o).get();
         if (o != null) {
             gradient = (Gradient) o;
         } else {
-            gradientCache.put(info, new java.lang.ref.WeakReference(
+            gradientCache.put(info, new WeakReference<Gradient>(
                     gradient = new Gradient(info)));
-            //System.out.println( "Storing gradient in cache. Info: " + info.toString() );
         }
     }
 
@@ -207,9 +203,10 @@ class FastGradientPaintContext implements PaintContext {
     }
 
     public synchronized Raster getRaster(int x, int y, int w, int h) {
-        if (info.isVertical)
+        if (info.isVertical) {
             return gradient.getRaster(y - parallelDevicePos, w, h);
-        else
+        } else {
             return gradient.getRaster(x - parallelDevicePos, h, w);
+        }
     }
 }

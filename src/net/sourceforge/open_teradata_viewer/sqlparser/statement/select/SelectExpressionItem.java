@@ -18,40 +18,40 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 
 /**
- * An expression as in "SELECT expr1 AS EXPR"
+ * An iExpression as in "SELECT expr1 AS EXPR".
  * 
  * @author D. Campione
  * 
  */
-public class SelectExpressionItem implements SelectItem {
+public class SelectExpressionItem implements ISelectItem {
 
-    private Expression expression;
+    private IExpression iExpression;
     private String alias;
 
     public String getAlias() {
         return alias;
     }
 
-    public Expression getExpression() {
-        return expression;
+    public IExpression getExpression() {
+        return iExpression;
     }
 
     public void setAlias(String string) {
         alias = string;
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+    public void setExpression(IExpression iExpression) {
+        this.iExpression = iExpression;
     }
 
-    public void accept(SelectItemVisitor selectItemVisitor) {
-        selectItemVisitor.visit(this);
+    public void accept(ISelectItemVisitor iSelectItemVisitor) {
+        iSelectItemVisitor.visit(this);
     }
 
     public String toString() {
-        return expression + ((alias != null) ? " AS " + alias : "");
+        return iExpression + ((alias != null) ? " AS " + alias : "");
     }
 }

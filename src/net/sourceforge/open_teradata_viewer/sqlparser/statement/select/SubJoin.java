@@ -24,21 +24,21 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  * @author D. Campione
  * 
  */
-public class SubJoin implements FromItem {
+public class SubJoin implements IFromItem {
 
-    private FromItem left;
+    private IFromItem left;
     private Join join;
     private String alias;
 
-    public void accept(FromItemVisitor fromItemVisitor) {
-        fromItemVisitor.visit(this);
+    public void accept(IFromItemVisitor iFromItemVisitor) {
+        iFromItemVisitor.visit(this);
     }
 
-    public FromItem getLeft() {
+    public IFromItem getLeft() {
         return left;
     }
 
-    public void setLeft(FromItem l) {
+    public void setLeft(IFromItem l) {
         left = l;
     }
 

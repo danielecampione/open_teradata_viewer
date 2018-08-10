@@ -28,20 +28,19 @@ import java.util.List;
  */
 public class Distinct {
 
-    @SuppressWarnings("rawtypes")
-    private List onSelectItems;
+    private List<?> onSelectItems;
 
     /**
-     * A list of {@link SelectItem}s expressions, as in "select DISTINCT ON (a,b,c) a,b FROM..." 
-     * @return a list of {@link SelectItem}s expressions
+     * A list of {@link ISelectItem}s expressions, as in "select DISTINCT ON
+     * (a,b,c) a,b FROM...".
+     * 
+     * @return a list of {@link ISelectItem}s expressions.
      */
-    @SuppressWarnings("rawtypes")
-    public List getOnSelectItems() {
+    public List<?> getOnSelectItems() {
         return onSelectItems;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setOnSelectItems(List list) {
+    public void setOnSelectItems(List<?> list) {
         onSelectItems = list;
     }
 

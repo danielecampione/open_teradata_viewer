@@ -26,7 +26,7 @@ import java.sql.Time;
  * @author D. Campione
  * 
  */
-public class TimeValue implements Expression {
+public class TimeValue implements IExpression {
 
     private Time value;
 
@@ -34,8 +34,8 @@ public class TimeValue implements Expression {
         this.value = Time.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public Time getValue() {
@@ -49,5 +49,4 @@ public class TimeValue implements Expression {
     public String toString() {
         return "{t '" + value + "'}";
     }
-
 }

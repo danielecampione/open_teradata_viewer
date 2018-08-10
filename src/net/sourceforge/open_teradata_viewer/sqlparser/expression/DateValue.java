@@ -26,7 +26,7 @@ import java.sql.Date;
  * @author D. Campione
  * 
  */
-public class DateValue implements Expression {
+public class DateValue implements IExpression {
 
     private Date value;
 
@@ -34,8 +34,8 @@ public class DateValue implements Expression {
         this.value = Date.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public Date getValue() {
@@ -45,5 +45,4 @@ public class DateValue implements Expression {
     public void setValue(Date d) {
         value = d;
     }
-
 }

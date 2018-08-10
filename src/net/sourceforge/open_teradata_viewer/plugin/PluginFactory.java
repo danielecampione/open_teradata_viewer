@@ -37,6 +37,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,13 +51,11 @@ import org.w3c.dom.NodeList;
  */
 public class PluginFactory {
 
-    @SuppressWarnings("rawtypes")
-    private Hashtable plugins = null;
+    private Hashtable<Integer, EntryDescriptor> plugins = null;
 
     private URLClassLoader classLoader = null;
 
-    @SuppressWarnings("rawtypes")
-    private Vector idNotAvailable = new Vector();
+    private Vector<Integer> idNotAvailable = new Vector<Integer>();
 
     public PluginFactory(String pluginsPath) {
         this.loadPlugins(pluginsPath);
@@ -64,11 +63,11 @@ public class PluginFactory {
 
     /**
      * The method takes an ID representing a pluginEntry ID and returns an
-     * instance of that PluginEntry.
+     * instance of that IPluginEntry.
      * 
-     * @return an instance of that PluginEntry.
+     * @return an instance of that IPluginEntry.
      */
-    public PluginEntry getPluginEntry(Integer id) {
+    public IPluginEntry getPluginEntry(Integer id) {
         if (plugins == null)
             return null;
         EntryDescriptor entryDescriptor = (EntryDescriptor) plugins.get(id);
@@ -76,19 +75,18 @@ public class PluginFactory {
         try {
             Object object = classLoader.loadClass(
                     entryDescriptor.getMain().trim()).newInstance();
-            pluginEntry = (PluginEntry) object;
-        } catch (Exception e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            pluginEntry = (IPluginEntry) object;
+        } catch (Throwable t) {
+            ExceptionDialog.hideException(t);
         }
-        return (PluginEntry) pluginEntry;
+        return (IPluginEntry) pluginEntry;
     }
 
     /**
      * Returns a Collection of all EntryDescriptor objects, one for each
      * detected entry point.
      */
-    @SuppressWarnings("rawtypes")
-    public Collection getAllEntryDescriptor() {
+    public Collection<EntryDescriptor> getAllEntryDescriptor() {
         if (plugins == null)
             return null;
         return plugins.values();
@@ -98,10 +96,9 @@ public class PluginFactory {
      * Returns a Vector containing EntryDescriptor objects of entry points that
      * have the specified name.
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Vector getEntryDescriptorsByName(String name) {
-        Iterator pluginsIterator = plugins.values().iterator();
-        Vector pluginsByName = new Vector();
+    public Vector<EntryDescriptor> getEntryDescriptorsByName(String name) {
+        Iterator<EntryDescriptor> pluginsIterator = plugins.values().iterator();
+        Vector<EntryDescriptor> pluginsByName = new Vector<EntryDescriptor>();
         while (pluginsIterator.hasNext()) {
             EntryDescriptor pd = (EntryDescriptor) pluginsIterator.next();
             if (pd.getName().equals(name)) {
@@ -115,13 +112,12 @@ public class PluginFactory {
      * The method loads an EntryDescriptor object for each entry point detected
      * in plugins path end puts it in plugins HashMap using a pluginID.
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private void loadPlugins(String pluginsPath) {
         try {
             String[] jar = (new File(pluginsPath)).list(new PluginFileFilter());
             if (jar.length == 0)
                 return;
-            plugins = new Hashtable();
+            plugins = new Hashtable<Integer, EntryDescriptor>();
 
             URL[] url = new URL[jar.length];
             for (int i = 0; i < jar.length; i++) {
@@ -134,8 +130,8 @@ public class PluginFactory {
                 ZipEntry xmlDescriptor = this
                         .getPluginPathFileDescriptor(pluginsPath + jar[i]);
                 if (xmlDescriptor != null) {
-                    ApplicationFrame.getInstance().changeLog.append("Loading "
-                            + jar[i] + "..\n");
+                    ApplicationFrame.getInstance().getConsole()
+                            .println("Loading " + jar[i] + "..");
                     InputStream inputStream = jarFile
                             .getInputStream(xmlDescriptor);
                     DocumentBuilderFactory dbf = DocumentBuilderFactory
@@ -146,14 +142,20 @@ public class PluginFactory {
                     try {
                         entryTags = doc.getElementsByTagName("entry");
                     } catch (Exception e) {
-                        ApplicationFrame.getInstance().changeLog
-                                .append("    Warning: There are not entry tags in descriptor.xml\n",
+                        ApplicationFrame
+                                .getInstance()
+                                .getConsole()
+                                .println(
+                                        "    Warning: There are not entry tags in descriptor.xml",
                                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
 
                     }
                     if (entryTags.getLength() == 0) {
-                        ApplicationFrame.getInstance().changeLog
-                                .append("    Warning: There are not entry tags in descriptor.xml\n",
+                        ApplicationFrame
+                                .getInstance()
+                                .getConsole()
+                                .println(
+                                        "    Warning: There are not entry tags in descriptor.xml",
                                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                     }
                     for (int j = 0; j < entryTags.getLength(); j++) {
@@ -166,11 +168,17 @@ public class PluginFactory {
                                     .getElementsByTagName("name").item(0)
                                     .getFirstChild().getNodeValue());
                         } catch (Exception e) {
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    Warning: name tag not present.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    Warning: name tag not present.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    It is not possibile to load this Entry Point.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    It is not possibile to load this Entry Point.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                             break;
                         }
@@ -179,11 +187,17 @@ public class PluginFactory {
                                     .getElementsByTagName("main").item(0)
                                     .getFirstChild().getNodeValue());
                         } catch (Exception e) {
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    Warning: main tag not present.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    Warning: main tag not present.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    It is not possibile to load this Entry Point.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    It is not possibile to load this Entry Point.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                             break;
                         }
@@ -192,8 +206,11 @@ public class PluginFactory {
                                     .getElementsByTagName("author").item(0)
                                     .getFirstChild().getNodeValue());
                         } catch (Exception e) {
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    author tag not present.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    author tag not present.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                         }
                         try {
@@ -201,44 +218,47 @@ public class PluginFactory {
                                     .getElementsByTagName("description")
                                     .item(0).getFirstChild().getNodeValue());
                         } catch (Exception e) {
-                            ApplicationFrame.getInstance().changeLog
-                                    .append("    description tag not present.\n",
+                            ApplicationFrame
+                                    .getInstance()
+                                    .getConsole()
+                                    .println(
+                                            "    description tag not present.",
                                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                         }
                         plugins.put(key, entryDescriptor);
                     }
                 }
             }
-        } catch (IOException e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+        } catch (IOException ioe) {
+            ExceptionDialog.notifyException(ioe);
         } catch (Exception e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+            ExceptionDialog.notifyException(e);
         }
     }
 
     /**
      * @return the ZipEntry object of descriptor.xml or null if it doesn't
-     * exist.
+     *         exist.
      */
-    @SuppressWarnings("rawtypes")
     private ZipEntry getPluginPathFileDescriptor(String fileName) {
         JarFile jarFile = null;
         try {
             jarFile = new JarFile(fileName);
 
-            for (Enumeration e = jarFile.entries(); e.hasMoreElements();) {
+            for (Enumeration<?> e = jarFile.entries(); e.hasMoreElements();) {
                 JarEntry jarEntry = (JarEntry) e.nextElement();
                 String file = jarEntry.getName();
                 if (file.endsWith(("descriptor.xml")))
                     return jarFile.getEntry(file);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            ExceptionDialog.notifyException(ioe);
         } finally {
             if (jarFile != null) {
                 try {
                     jarFile.close();
                 } catch (IOException ioe) {
+                    ExceptionDialog.ignoreException(ioe);
                 }
             }
         }
@@ -246,7 +266,6 @@ public class PluginFactory {
     }
 
     /** Generates a unique Plugin Entry ID */
-    @SuppressWarnings("unchecked")
     private Integer getNewEntryID() {
         int id = idNotAvailable.size() + 1;
         Integer ris = new Integer(id);

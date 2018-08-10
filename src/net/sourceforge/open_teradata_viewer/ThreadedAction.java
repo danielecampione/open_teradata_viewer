@@ -67,19 +67,16 @@ public abstract class ThreadedAction implements Runnable {
             TaskPool.getTaskPool().addTask(new Task(Main.APPLICATION_NAME) {
                 public void run() {
                     final AnimatedAssistant animatedAssistant = new AnimatedAssistant(
-                            ImageManager
-                                    .getImage("/icons/open_teradata_viewer32.gif"),
+                            ImageManager.getImage("/icons/logo32.png"),
                             getDescription());
                     ApplicationFrame.getInstance().startAnimatedAssistant(
                             animatedAssistant);
                     try {
                         execute();
-                    } catch (final Exception ex) {
+                    } catch (final Exception e) {
                         java.awt.EventQueue.invokeLater(new Runnable() {
                             public void run() {
-                                ApplicationFrame.getInstance()
-                                        .printStackTraceOnGUI(ex);
-                                ExceptionDialog.showException(ex);
+                                ExceptionDialog.showException(e);
                             }
                         });
                     } finally {
@@ -94,7 +91,6 @@ public abstract class ThreadedAction implements Runnable {
                 }
             });
         } catch (Throwable t) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(t);
             ExceptionDialog.showException(t);
         } finally {
             CustomAction.inProgress = false;
@@ -116,5 +112,6 @@ public abstract class ThreadedAction implements Runnable {
             }
         }
     }
+
     protected abstract void execute() throws Exception;
 }

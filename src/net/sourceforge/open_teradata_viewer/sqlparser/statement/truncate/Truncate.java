@@ -19,21 +19,21 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 
 /**
- * A TRUNCATE TABLE statement
+ * A TRUNCATE TABLE statement.
  * 
  * @author D. Campione
  * 
  */
-public class Truncate implements Statement {
+public class Truncate implements IStatement {
 
     private Table table;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
     public Table getTable() {

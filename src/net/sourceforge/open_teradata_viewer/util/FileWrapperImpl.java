@@ -28,6 +28,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -44,10 +46,10 @@ public class FileWrapperImpl
         implements
             Serializable,
             Comparable<FileWrapperImpl>,
-            FileWrapper {
+            IFileWrapper {
 
     /** Use serialVersionUID from JDK 1.0.2 for interoperability */
-    private static final long serialVersionUID = 3604329498504393029L;
+    private static final long serialVersionUID = -2635051733080527682L;
 
     /**
      * The File that is wrapped by this class. All public methods delegate to
@@ -61,8 +63,7 @@ public class FileWrapperImpl
      * Copy constructor factory method. This is a shallow copy as the underlying
      * file is not cloned.
      * 
-     * @param impl
-     *           the instance to copy.
+     * @param impl The instance to copy.
      * @return a shallow copy of the specified instance.
      */
     public FileWrapperImpl(FileWrapperImpl impl) {
@@ -72,8 +73,7 @@ public class FileWrapperImpl
     /**
      * Used internally, so this is not exposed.
      * 
-     * @param wrappedFile
-     *           the file that is to be wrapped by the new instance.
+     * @param wrappedFile The file that is to be wrapped by the new instance.
      */
     public FileWrapperImpl(File wrappedFile) {
         this._wrappedFile = wrappedFile;
@@ -81,13 +81,12 @@ public class FileWrapperImpl
 
     /**
      * Creates a new <code>File</code> instance by converting the given pathname
-     * string into an abstract pathname. If the given string is the empty string,
-     * then the result is the empty abstract pathname.
+     * string into an abstract pathname. If the given string is the empty
+     * string, then the result is the empty abstract pathname.
      * 
-     * @param pathname
-     *           A pathname string
-     * @throws NullPointerException
-     *            If the <code>pathname</code> argument is <code>null</code>
+     * @param pathname A pathname string.
+     * @throws NullPointerException If the <code>pathname</code> argument is
+     *         <code>null</code>.
      */
     public FileWrapperImpl(String pathname) {
         _wrappedFile = new File(pathname);
@@ -113,12 +112,9 @@ public class FileWrapperImpl
      * string is converted into an abstract pathname and the child abstract
      * pathname is resolved against the parent.
      * 
-     * @param parent
-     *           The parent pathname string
-     * @param child
-     *           The child pathname string
-     * @throws NullPointerException
-     *            If <code>child</code> is <code>null</code>
+     * @param parent The parent pathname string.
+     * @param child The child pathname string.
+     * @throws NullPointerException If <code>child</code> is <code>null</code>.
      */
     public FileWrapperImpl(String parent, String child) {
         _wrappedFile = new File(parent, child);
@@ -144,15 +140,11 @@ public class FileWrapperImpl
      * string is converted into an abstract pathname and the child abstract
      * pathname is resolved against the parent.
      * 
-     * @param parent
-     *           The parent abstract pathname
-     * @param child
-     *           The child pathname string
-     * @throws NullPointerException
-     *            If <code>child</code> is <code>null</code>
+     * @param parent The parent abstract pathname.
+     * @param child The child pathname string.
+     * @throws NullPointerException If <code>child</code> is <code>null</code>.
      */
-    public FileWrapperImpl(FileWrapper parent, String child) {
-
+    public FileWrapperImpl(IFileWrapper parent, String child) {
         if (parent != null) {
             FileWrapperImpl parentImpl = (FileWrapperImpl) parent;
             _wrappedFile = new File(parentImpl._wrappedFile, child);
@@ -169,27 +161,24 @@ public class FileWrapperImpl
      * transformation performed by this constructor is also system-dependent.
      * <p>
      * For a given abstract pathname <i>f</i> it is guaranteed that
-     * <blockquote><tt> new File(</tt><i>&nbsp;f</i>
-     * <tt>.{@link #toURI() toURI}()).equals(</tt><i>&nbsp;f</i>
-     * <tt>.{@link #getAbsoluteFile() getAbsoluteFile}())
-     * </tt></blockquote> so long as the original abstract pathname, the URI,
-     * and the new abstract pathname are all created in (possibly different
-     * invocations of) the same Java virtual machine. This relationship
-     * typically does not hold, however, when a <tt>file:</tt> URI that is
-     * created in a virtual machine on one operating system is converted into an
-     * abstract pathname in a virtual machine on a different operating system.
+     * <blockquote><tt> new File(</tt><i>&nbsp;f</i> <tt>.{@link #toURI()
+     * toURI}()).equals(</tt><i>&nbsp;f</i> <tt>.{@link #getAbsoluteFile()
+     * getAbsoluteFile}()) </tt></blockquote> so long as the original abstract
+     * pathname, the URI, and the new abstract pathname are all created in
+     * (possibly different invocations of) the same Java virtual machine. This
+     * relationship typically does not hold, however, when a <tt>file:</tt> URI
+     * that is created in a virtual machine on one operating system is converted
+     * into an abstract pathname in a virtual machine on a different operating
+     * system.
      * 
-     * @param uri
-     *            An absolute, hierarchical URI with a scheme equal to
+     * @param uri An absolute, hierarchical URI with a scheme equal to
      *            <tt>"file"</tt>, a non-empty path component, and undefined
-     *            authority, query, and fragment components
-     * @throws NullPointerException
-     *            If <tt>uri</tt> is <tt>null</tt>
-     * @throws IllegalArgumentException
-     *            If the preconditions on the parameter do not hold
+     *            authority, query, and fragment components.
+     * @throws NullPointerException If <tt>uri</tt> is <tt>null</tt>.
+     * @throws IllegalArgumentException If the preconditions on the parameter do
+     *         not hold.
      * @see #toURI()
      * @see java.net.URI
-     * @since 1.4
      */
     public FileWrapperImpl(URI uri) {
         _wrappedFile = new File(uri);
@@ -197,33 +186,29 @@ public class FileWrapperImpl
 
     /* -- Path-component accessors -- */
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getName()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getName() */
     public String getName() {
         return _wrappedFile.getName();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getParent()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getParent()
      */
     public String getParent() {
         return _wrappedFile.getParent();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getParentFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getParentFile()
      */
-    public FileWrapper getParentFile() {
+    public IFileWrapper getParentFile() {
         if (_wrappedFile.getParentFile() == null) {
             return null;
         }
         return new FileWrapperImpl(_wrappedFile.getParentFile());
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getPath()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getPath() */
     public String getPath() {
         return _wrappedFile.getPath();
     }
@@ -231,108 +216,96 @@ public class FileWrapperImpl
     /* -- Path operations -- */
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#isAbsolute()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#isAbsolute()
      */
     public boolean isAbsolute() {
         return _wrappedFile.isAbsolute();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getAbsolutePath()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getAbsolutePath()
      */
     public String getAbsolutePath() {
         return _wrappedFile.getAbsolutePath();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getAbsoluteFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getAbsoluteFile()
      */
-    public FileWrapper getAbsoluteFile() {
+    public IFileWrapper getAbsoluteFile() {
         return new FileWrapperImpl(_wrappedFile.getAbsoluteFile());
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getCanonicalPath()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getCanonicalPath()
      */
     public String getCanonicalPath() throws IOException {
         return _wrappedFile.getCanonicalPath();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getCanonicalFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getCanonicalFile()
      */
-    public FileWrapper getCanonicalFile() throws IOException {
+    public IFileWrapper getCanonicalFile() throws IOException {
         return new FileWrapperImpl(_wrappedFile.getCanonicalFile());
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#toURL()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#toURL() */
     public URL toURL() throws MalformedURLException {
         return _wrappedFile.toURI().toURL();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#toURI()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#toURI() */
     public URI toURI() {
         return _wrappedFile.toURI();
     }
 
     /* -- Attribute accessors -- */
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#canRead()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#canRead() */
     public boolean canRead() {
         return _wrappedFile.canRead();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#canWrite()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#canWrite()
      */
     public boolean canWrite() {
         return _wrappedFile.canWrite();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#exists()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#exists() */
     public boolean exists() {
         return _wrappedFile.exists();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#isDirectory()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#isDirectory()
      */
     public boolean isDirectory() {
         return _wrappedFile.isDirectory();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#isFile()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#isFile() */
     public boolean isFile() {
         return _wrappedFile.isFile();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#isHidden()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#isHidden()
      */
     public boolean isHidden() {
         return _wrappedFile.isHidden();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#lastModified()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#lastModified()
      */
     public long lastModified() {
         return _wrappedFile.lastModified();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#length()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#length() */
     public long length() {
         return _wrappedFile.length();
     }
@@ -340,91 +313,83 @@ public class FileWrapperImpl
     /* -- File operations -- */
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#createNewFile()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#createNewFile()
      */
     public boolean createNewFile() throws IOException {
         return _wrappedFile.createNewFile();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#delete()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#delete() */
     public boolean delete() {
         return _wrappedFile.delete();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#deleteOnExit()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#deleteOnExit()
      */
     public void deleteOnExit() {
         _wrappedFile.deleteOnExit();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#list()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#list() */
     public String[] list() {
         return _wrappedFile.list();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#list(java.io.FilenameFilter)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#list(java.io.FilenameFilter)
      */
     public String[] list(FilenameFilter filter) {
         return _wrappedFile.list(filter);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#listFiles()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#listFiles()
      */
-    public FileWrapper[] listFiles() {
+    public IFileWrapper[] listFiles() {
         return wrapFiles(_wrappedFile.listFiles());
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#listFiles(java.io.FilenameFilter)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#listFiles(java.io.FilenameFilter)
      */
-    public FileWrapper[] listFiles(FilenameFilter filter) {
+    public IFileWrapper[] listFiles(FilenameFilter filter) {
         return wrapFiles(_wrappedFile.listFiles(filter));
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#listFiles(java.io.FileFilter)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#listFiles(java.io.FileFilter)
      */
-    public FileWrapper[] listFiles(FileFilter filter) {
+    public IFileWrapper[] listFiles(FileFilter filter) {
         return wrapFiles(_wrappedFile.listFiles(filter));
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#mkdir()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#mkdir() */
     public boolean mkdir() {
         return _wrappedFile.mkdir();
     }
 
-    /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#mkdirs()
-     */
+    /** @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#mkdirs() */
     public boolean mkdirs() {
         return _wrappedFile.mkdirs();
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#renameTo(net.sourceforge.open_teradata_viewer.util.FileWrapper)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#renameTo(net.sourceforge.open_teradata_viewer.util.IFileWrapper)
      */
-    public boolean renameTo(FileWrapper dest) {
+    public boolean renameTo(IFileWrapper dest) {
         return _wrappedFile.renameTo(((FileWrapperImpl) dest)._wrappedFile);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#setLastModified(long)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#setLastModified(long)
      */
     public boolean setLastModified(long time) {
         return _wrappedFile.setLastModified(time);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#setReadOnly()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#setReadOnly()
      */
     public boolean setReadOnly() {
         return _wrappedFile.setReadOnly();
@@ -470,9 +435,8 @@ public class FileWrapperImpl
      *         filesystem roots, or <code>null</code> if the set of roots could
      *         not be determined. The array will be empty if there are no
      *         filesystem roots.
-     * @since 1.2
      */
-    public static FileWrapper[] listRoots() {
+    public static IFileWrapper[] listRoots() {
         return wrapFiles(File.listRoots());
     }
 
@@ -518,31 +482,25 @@ public class FileWrapperImpl
      * not guaranteed to have any effect upon the temporary directory used by
      * this method.
      * 
-     * @param prefix
-     *           The prefix string to be used in generating the file's name;
-     *           must be at least three characters long
-     * @param suffix
-     *           The suffix string to be used in generating the file's name; may
-     *           be <code>null</code>, in which case the suffix
-     *           <code>".tmp"</code> will be used
-     * @param directory
-     *           The directory in which the file is to be created, or
-     *           <code>null</code> if the default temporary-file directory is to
-     *           be used
-     * @return An abstract pathname denoting a newly-created empty file
-     * @throws IllegalArgumentException
-     *            If the <code>prefix</code> argument contains fewer than three
-     *            characters
-     * @throws IOException
-     *            If a file could not be created
-     * @throws SecurityException
-     *            If a security manager exists and its <code>
-     *            {@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-     *            method does not allow a file to be created
-     * @since 1.2
+     * @param prefix The prefix string to be used in generating the file's name;
+     *               must be at least three characters long.
+     * @param suffix The suffix string to be used in generating the file's name;
+     *               may be <code>null</code>, in which case the suffix
+     *               <code>".tmp"</code> will be used.
+     * @param directory The directory in which the file is to be created, or
+     *                  <code>null</code> if the default temporary-file
+     *                  directory is to be used.
+     * @return An abstract pathname denoting a newly-created empty file.
+     * @throws IllegalArgumentException If the <code>prefix</code> argument
+     *         contains fewer than three characters.
+     * @throws IOException If a file could not be created.
+     * @throws SecurityException If a security manager exists and its <code>
+     *         {@link
+     *         java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *         method does not allow a file to be created.
      */
-    public static FileWrapper createTempFile(String prefix, String suffix,
-            FileWrapper directory) throws IOException {
+    public static IFileWrapper createTempFile(String prefix, String suffix,
+            IFileWrapper directory) throws IOException {
         if (directory == null) {
             return new FileWrapperImpl(
                     File.createTempFile(prefix, suffix, null));
@@ -555,30 +513,25 @@ public class FileWrapperImpl
     /**
      * Creates an empty file in the default temporary-file directory, using the
      * given prefix and suffix to generate its name. Invoking this method is
-     * equivalent to invoking <code>
-     * {@link #createTempFile(java.lang.String, java.lang.String, java.io.File)
+     * equivalent to invoking <code> {@link
+     * #createTempFile(java.lang.String, java.lang.String, java.io.File)
      * createTempFile(prefix,&nbsp;suffix,&nbsp;null)}</code>.
      * 
-     * @param prefix
-     *            The prefix string to be used in generating the file's name;
-     *            must be at least three characters long
-     * @param suffix
-     *            The suffix string to be used in generating the file's name;
-     *            may be <code>null</code>, in which case the suffix
-     *            <code>".tmp"</code> will be used
-     * @return An abstract pathname denoting a newly-created empty file
-     * @throws IllegalArgumentException
-     *            If the <code>prefix</code> argument contains fewer than three
-     *            characters
-     * @throws IOException
-     *            If a file could not be created
-     * @throws SecurityException
-     *            If a security manager exists and its <code>
-     *            {@link java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-     *            method does not allow a file to be created
-     * @since 1.2
+     * @param prefix The prefix string to be used in generating the file's name;
+     *               must be at least three characters long.
+     * @param suffix The suffix string to be used in generating the file's name;
+     *               may be <code>null</code>, in which case the suffix
+     *               <code>".tmp"</code> will be used.
+     * @return An abstract pathname denoting a newly-created empty file.
+     * @throws IllegalArgumentException If the <code>prefix</code> argument
+     *         contains fewer than three characters.
+     * @throws IOException If a file could not be created.
+     * @throws SecurityException If a security manager exists and its <code>
+     *         {@link
+     *         java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *         method does not allow a file to be created.
      */
-    public static FileWrapper createTempFile(String prefix, String suffix)
+    public static IFileWrapper createTempFile(String prefix, String suffix)
             throws IOException {
         return createTempFile(prefix, suffix, null);
     }
@@ -591,21 +544,19 @@ public class FileWrapperImpl
      * alphabetic case is significant in comparing pathnames; on Microsoft
      * Windows systems it is not.
      * 
-     * @param pathname
-     *           The abstract pathname to be compared to this abstract pathname
+     * @param pathname The abstract pathname to be compared to this abstract
+     *                 pathname.
      * @return Zero if the argument is equal to this abstract pathname, a value
-     *           less than zero if this abstract pathname is lexicographically
-     *           less than the argument, or a value greater than zero if this
-     *           abstract pathname is lexicographically greater than the
-     *           argument
-     * @since 1.2
+     *         less than zero if this abstract pathname is lexicographically
+     *         less than the argument, or a value greater than zero if this
+     *         abstract pathname is lexicographically greater than the argument.
      */
     public int compareTo(FileWrapperImpl pathname) {
         return _wrappedFile.compareTo(pathname._wrappedFile);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#toString()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#toString()
      */
     @Override
     public String toString() {
@@ -613,7 +564,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#hashCode()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#hashCode()
      */
     @Override
     public int hashCode() {
@@ -625,7 +576,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#equals(java.lang.Object)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
@@ -654,7 +605,7 @@ public class FileWrapperImpl
      * saved also so it can be replaced in case the path is reconstituted on a
      * different host type.
      */
-    private synchronized void writeObject(java.io.ObjectOutputStream s)
+    private synchronized void writeObject(ObjectOutputStream s)
             throws IOException {
     }
 
@@ -663,29 +614,21 @@ public class FileWrapperImpl
      * character is read. If it is different than the separator character on
      * this system, then the old separator is replaced by the local separator.
      */
-    private void readObject(java.io.ObjectInputStream s) throws IOException,
+    private void readObject(ObjectInputStream s) throws IOException,
             ClassNotFoundException {
-
     }
 
-    private static FileWrapper[] wrapFiles(File[] resultFiles) {
+    private static IFileWrapper[] wrapFiles(File[] resultFiles) {
         if (resultFiles == null) {
             return null;
         }
-        FileWrapper[] wrappedFiles = new FileWrapper[resultFiles.length];
+        IFileWrapper[] wrappedFiles = new IFileWrapper[resultFiles.length];
         for (int i = 0; i < resultFiles.length; i++) {
             wrappedFiles[i] = new FileWrapperImpl(resultFiles[i]);
         }
         return wrappedFiles;
     }
 
-    /**
-     * @param prefix
-     * @param suffix
-     * @param directory
-     * @return
-     * @throws IOException
-     */
     public static FileWrapperImpl createTempFile(String prefix, String suffix,
             FileWrapperImpl directory) throws IOException {
         if (directory != null) {
@@ -698,7 +641,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getFileInputStream()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getFileInputStream()
      */
     @Override
     public FileInputStream getFileInputStream() throws FileNotFoundException {
@@ -706,7 +649,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getFileOutputStream()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getFileOutputStream()
      */
     @Override
     public FileOutputStream getFileOutputStream() throws FileNotFoundException {
@@ -714,7 +657,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getFileWriter()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getFileWriter()
      */
     @Override
     public FileWriter getFileWriter() throws IOException {
@@ -722,7 +665,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getFileReader()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getFileReader()
      */
     @Override
     public FileReader getFileReader() throws IOException {
@@ -730,7 +673,7 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getBufferedReader()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getBufferedReader()
      */
     @Override
     public BufferedReader getBufferedReader() throws IOException {
@@ -738,11 +681,10 @@ public class FileWrapperImpl
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapper#getPrintWriter()
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapper#getPrintWriter()
      */
     @Override
     public PrintWriter getPrintWriter() throws IOException {
         return new PrintWriter(getFileWriter());
     }
-
 }

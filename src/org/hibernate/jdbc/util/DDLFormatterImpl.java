@@ -27,14 +27,15 @@ import java.util.StringTokenizer;
  * @author Steve Ebersole
  * 
  */
-public class DDLFormatterImpl implements Formatter {
+public class DDLFormatterImpl implements IFormatter {
+
     /**
      * Format an SQL statement using simple rules<ul>
      * <li>Insert newline after each comma</li>
      * <li>Indent three spaces after each inserted newline</li>
      * </ul>
-     * If the statement contains single/double quotes return unchanged,
-     * it is too complex and could be broken by simple formatting.
+     * If the statement contains single/double quotes return unchanged, it is
+     * too complex and could be broken by simple formatting.
      * 
      * @param sql The statement to be fornmatted.
      */
@@ -136,5 +137,4 @@ public class DDLFormatterImpl implements Formatter {
         return "\"".equals(tok) || "`".equals(tok) || "]".equals(tok)
                 || "[".equals(tok) || "'".equals(tok);
     }
-
 }

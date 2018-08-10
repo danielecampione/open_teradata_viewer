@@ -27,75 +27,67 @@ import java.net.URI;
  * interface of java.io.File. All of the public constructors of java.io.File can
  * be accessed using the analogous factory methods given here which accept and
  * return FileWrappers instead of Files. The original java.io.File constructor
- * javadoc comments are used here to help choose the right factory method; also
- * I'm just plain lazy.
+ * javadoc comments are used here to help choose the right factory method.
  * 
  * @author D. Campione
+ * 
  */
-public class FileWrapperFactoryImpl implements FileWrapperFactory {
+public class FileWrapperFactoryImpl implements IFileWrapperFactory {
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(net.sourceforge.open_teradata_viewer.util.FileWrapperImpl)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(net.sourceforge.open_teradata_viewer.util.FileWrapperImpl)
      */
-    public FileWrapper create(FileWrapperImpl impl) {
+    public IFileWrapper create(FileWrapperImpl impl) {
         return new FileWrapperImpl(impl);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(java.lang.String)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(java.lang.String)
      */
-    public FileWrapper create(String pathname) {
+    public IFileWrapper create(String pathname) {
         return new FileWrapperImpl(pathname);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(java.lang.String, java.lang.String)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(java.lang.String, java.lang.String)
      */
-    public FileWrapper create(String parent, String child) {
+    public IFileWrapper create(String parent, String child) {
         return new FileWrapperImpl(parent, child);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(net.sourceforge.open_teradata_viewer.util.FileWrapper, java.lang.String)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(net.sourceforge.open_teradata_viewer.util.IFileWrapper, java.lang.String)
      */
-    public FileWrapper create(FileWrapper parent, String child) {
+    public IFileWrapper create(IFileWrapper parent, String child) {
         return new FileWrapperImpl(parent, child);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(java.net.URI)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(java.net.URI)
      */
-    public FileWrapper create(URI uri) {
+    public IFileWrapper create(URI uri) {
         return new FileWrapperImpl(uri);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#create(java.io.File)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#create(java.io.File)
      */
-    public FileWrapper create(File f) {
+    public IFileWrapper create(File f) {
         return new FileWrapperImpl(f);
     }
 
-    /**
-     * @param prefix
-     * @param suffix
-     * @param directory
-     * @return
-     * @throws IOException
-     */
     public FileWrapperImpl createTempFile(String prefix, String suffix,
-            FileWrapper directory) throws IOException {
+            IFileWrapper directory) throws IOException {
         return FileWrapperImpl.createTempFile(prefix, suffix,
                 (FileWrapperImpl) directory);
     }
 
     /**
-     * @see net.sourceforge.open_teradata_viewer.util.FileWrapperFactory#createTempFile(java.lang.String, java.lang.String)
+     * @see net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory#createTempFile(java.lang.String, java.lang.String)
      */
     @Override
-    public FileWrapper createTempFile(String prefix, String suffix)
+    public IFileWrapper createTempFile(String prefix, String suffix)
             throws IOException {
         return FileWrapperImpl.createTempFile(prefix, suffix);
     }
-
 }

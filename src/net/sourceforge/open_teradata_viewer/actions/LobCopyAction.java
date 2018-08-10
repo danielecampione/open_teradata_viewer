@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -59,9 +58,11 @@ public class LobCopyAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         if (!isLobSelected) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "The field is NOT a Lob.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("The field is NOT a Lob.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         saveLobs(null);

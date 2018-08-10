@@ -18,10 +18,10 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.delete;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 
 /**
  * 
@@ -29,20 +29,20 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor
  * @author D. Campione
  *
  */
-public class Delete implements Statement {
+public class Delete implements IStatement {
 
     private Table table;
-    private Expression where;
+    private IExpression where;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
     public Table getTable() {
         return table;
     }
 
-    public Expression getWhere() {
+    public IExpression getWhere() {
         return where;
     }
 
@@ -50,8 +50,8 @@ public class Delete implements Statement {
         table = name;
     }
 
-    public void setWhere(Expression expression) {
-        where = expression;
+    public void setWhere(IExpression iExpression) {
+        where = iExpression;
     }
 
     public String toString() {

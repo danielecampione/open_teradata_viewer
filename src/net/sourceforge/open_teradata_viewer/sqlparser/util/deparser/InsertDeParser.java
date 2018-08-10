@@ -28,10 +28,12 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 
 /**
- * A class to de-parse (that is, tranform from SqlParser hierarchy into a string)
- * an {@link net.sf.jsqlparser.statement.insert.Insert}
+ * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * string) an {@link net.sf.jsqlparser.statement.insert.Insert}.
  * 
  * @author D. Campione
  * 
@@ -46,12 +48,15 @@ public class InsertDeParser implements ItemsListVisitor {
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse {@link net.sf.jsqlparser.expression.Expression}s. It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param selectVisitor a {@link SelectVisitor} to de-parse {@link net.sf.jsqlparser.statement.select.Select}s.
-     * It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param buffer the buffer that will be filled with the insert
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse {@link
+     *                          net.sf.jsqlparser.expression.Expression}s. It
+     *                          has to share the same<br> StringBuffer (buffer
+     *                          parameter) as this object in order to work.
+     * @param selectVisitor a {@link ISelectVisitor} to de-parse {@link
+     *                      net.sf.jsqlparser.statement.select.Select}s. It has
+     *                      to share the same<br> StringBuffer (buffer
+     *                      parameter) as this object in order to work.
+     * @param buffer the buffer that will be filled with the insert.
      */
     public InsertDeParser(ExpressionVisitor expressionVisitor,
             SelectVisitor selectVisitor, StringBuffer buffer) {
@@ -68,13 +73,13 @@ public class InsertDeParser implements ItemsListVisitor {
         this.buffer = buffer;
     }
 
-    @SuppressWarnings("rawtypes")
     public void deParse(Insert insert) {
         buffer.append("INSERT INTO ");
         buffer.append(insert.getTable().getWholeTableName());
         if (insert.getColumns() != null) {
             buffer.append("(");
-            for (Iterator iter = insert.getColumns().iterator(); iter.hasNext();) {
+            for (Iterator<?> iter = insert.getColumns().iterator(); iter
+                    .hasNext();) {
                 Column column = (Column) iter.next();
                 buffer.append(column.getColumnName());
                 if (iter.hasNext()) {
@@ -85,13 +90,11 @@ public class InsertDeParser implements ItemsListVisitor {
         }
 
         insert.getItemsList().accept(this);
-
     }
 
-    @SuppressWarnings("rawtypes")
     public void visit(ExpressionList expressionList) {
         buffer.append(" VALUES (");
-        for (Iterator iter = expressionList.getExpressions().iterator(); iter
+        for (Iterator<?> iter = expressionList.getExpressions().iterator(); iter
                 .hasNext();) {
             Expression expression = (Expression) iter.next();
             expression.accept(expressionVisitor);
@@ -104,6 +107,7 @@ public class InsertDeParser implements ItemsListVisitor {
     public void visit(SubSelect subSelect) {
         subSelect.getSelectBody().accept(selectVisitor);
     }
+
     public ExpressionVisitor getExpressionVisitor() {
         return expressionVisitor;
     }
@@ -119,5 +123,4 @@ public class InsertDeParser implements ItemsListVisitor {
     public void setSelectVisitor(SelectVisitor visitor) {
         selectVisitor = visitor;
     }
-
 }

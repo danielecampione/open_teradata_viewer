@@ -18,7 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.util.task;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.util.Generator;
 
 /**
@@ -63,7 +63,7 @@ public class TaskExecutor extends Thread {
                             currentTask = null;
                         }
                     } catch (Throwable t) {
-                        ApplicationFrame.getInstance().printStackTraceOnGUI(t);
+                        ExceptionDialog.notifyException(t);
                     }
                 } else {
                     break;
@@ -77,5 +77,4 @@ public class TaskExecutor extends Thread {
     public Task getCurrentTask() {
         return currentTask;
     }
-
 }

@@ -18,7 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 
 /**
  * An element (column reference) in an "ORDER BY" clause.
@@ -28,7 +28,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
  */
 public class OrderByElement {
 
-    private Expression expression;
+    private IExpression iExpression;
     private boolean asc = true;
 
     public boolean isAsc() {
@@ -39,19 +39,19 @@ public class OrderByElement {
         asc = b;
     }
 
-    public void accept(OrderByVisitor orderByVisitor) {
-        orderByVisitor.visit(this);
+    public void accept(IOrderByVisitor iOrderByVisitor) {
+        iOrderByVisitor.visit(this);
     }
 
-    public Expression getExpression() {
-        return expression;
+    public IExpression getExpression() {
+        return iExpression;
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+    public void setExpression(IExpression iExpression) {
+        this.iExpression = iExpression;
     }
 
     public String toString() {
-        return "" + expression + ((asc) ? "" : " DESC");
+        return "" + iExpression + ((asc) ? "" : " DESC");
     }
 }

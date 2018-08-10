@@ -79,14 +79,14 @@ public class UpdateChecker implements Runnable {
                 try {
                     proxyHostField.setText(Config.getSetting(proxyHostKey));
                 } catch (Exception e) {
-                    // ignore.
+                    ExceptionDialog.ignoreException(e);
                 }
 
                 final JTextField proxyPortField = new JTextField();
                 try {
                     proxyPortField.setText(Config.getSetting(proxyPortKey));
                 } catch (Exception e) {
-                    // ignore.
+                    ExceptionDialog.ignoreException(e);
                 }
 
                 JOptionPane proxyPane = new JOptionPane(new Object[]{
@@ -94,7 +94,7 @@ public class UpdateChecker implements Runnable {
                         proxyPortField}, JOptionPane.QUESTION_MESSAGE,
                         JOptionPane.OK_CANCEL_OPTION);
                 JDialog dialog = proxyPane.createDialog("Server proxy");
-                dialog.setVisible(true);
+                UISupport.showDialog(dialog);
                 Integer objResult = (Integer) proxyPane.getValue();
                 result = JOptionPane.CANCEL_OPTION;
                 if (objResult != null) {
@@ -125,11 +125,14 @@ public class UpdateChecker implements Runnable {
                 latestVersion = new BufferedReader(new InputStreamReader(
                         new URL(Config.JAVANET_MIRROR + "changes.txt")
                                 .openStream())).readLine();
-            } catch (ProtocolException e) { // The exception is caught if the Server has redirected too many times.
-                // ignore.
-            } catch (IOException e) { // The authentication is required if the HTTP status is 407.
-                ApplicationFrame.getInstance().changeLog.append(e.getMessage()
-                        + "\n", ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            } catch (ProtocolException pe) { // The exception is caught if the Server has redirected too many times
+                ExceptionDialog.ignoreException(pe);
+            } catch (IOException ioe) { // The authentication is required if the HTTP status is 407
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(ioe.getMessage(),
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
             int localVersionBracketIndex = localVersion.indexOf('('), latestVersionBracketIndex = latestVersion
                     .indexOf('(');

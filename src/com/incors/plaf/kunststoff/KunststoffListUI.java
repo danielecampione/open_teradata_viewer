@@ -131,7 +131,6 @@ public class KunststoffListUI extends BasicListUI {
     // and the renderer is a JComponent (like DefaultListCellRenderer) and the
     // background color is a ColorUIResource (which means it probably has the
     // original color assigned by the Look&Feel).
-    @SuppressWarnings("rawtypes")
     protected void paintCell(Graphics g, int row, Rectangle rowBounds,
             ListCellRenderer cellRenderer, ListModel dataModel,
             ListSelectionModel selModel, int leadIndex) {
@@ -150,5 +149,4 @@ public class KunststoffListUI extends BasicListUI {
         super.paintCell(g, row, rowBounds, cellRenderer, dataModel, selModel,
                 leadIndex);
     }
-
 }

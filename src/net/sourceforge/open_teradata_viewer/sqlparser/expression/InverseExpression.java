@@ -19,32 +19,31 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * It represents a "-" before an expression
+ * It represents a "-" before an iExpression
  * 
  * @author D. Campione
  *  
  */
-public class InverseExpression implements Expression {
+public class InverseExpression implements IExpression {
 
-    private Expression expression;
+    private IExpression iExpression;
 
     public InverseExpression() {
     }
 
-    public InverseExpression(Expression expression) {
-        setExpression(expression);
+    public InverseExpression(IExpression iExpression) {
+        setExpression(iExpression);
     }
 
-    public Expression getExpression() {
-        return expression;
+    public IExpression getExpression() {
+        return iExpression;
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+    public void setExpression(IExpression iExpression) {
+        this.iExpression = iExpression;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
-
 }

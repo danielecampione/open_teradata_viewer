@@ -25,29 +25,29 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  * @author D. Campione
  * 
  */
-public abstract class BinaryExpression implements Expression {
+public abstract class BinaryExpression implements IExpression {
 
-    private Expression leftExpression;
-    private Expression rightExpression;
+    private IExpression leftExpression;
+    private IExpression rightExpression;
     private boolean not = false;
 
     public BinaryExpression() {
     }
 
-    public Expression getLeftExpression() {
+    public IExpression getLeftExpression() {
         return leftExpression;
     }
 
-    public Expression getRightExpression() {
+    public IExpression getRightExpression() {
         return rightExpression;
     }
 
-    public void setLeftExpression(Expression expression) {
-        leftExpression = expression;
+    public void setLeftExpression(IExpression iExpression) {
+        leftExpression = iExpression;
     }
 
-    public void setRightExpression(Expression expression) {
-        rightExpression = expression;
+    public void setRightExpression(IExpression iExpression) {
+        rightExpression = iExpression;
     }
 
     public void setNot() {
@@ -64,5 +64,4 @@ public abstract class BinaryExpression implements Expression {
     }
 
     public abstract String getStringExpression();
-
 }

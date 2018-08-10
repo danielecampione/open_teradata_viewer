@@ -50,7 +50,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.text.JTextComponent;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.actions.CustomAction;
 
@@ -61,24 +60,6 @@ import net.sourceforge.open_teradata_viewer.actions.CustomAction;
  *
  */
 public class SwingUtil {
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    public interface Color {
-
-        public final static java.awt.Color GREEN = new java.awt.Color(0, 0x80,
-                0);
-        public final static java.awt.Color NAVY = new java.awt.Color(0, 0, 128);
-        public final static java.awt.Color DARKORANGE = new java.awt.Color(205,
-                150, 0);
-        public final static java.awt.Color FUCHSIA = new java.awt.Color(255, 0,
-                255);
-
-    }
 
     public static String setButtonText(AbstractButton button, String text) {
         if (text == null || text.equals("")) {
@@ -603,36 +584,31 @@ public class SwingUtil {
                 task.run();
             }
             return task.get();
-        } catch (Exception ex) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(ex);
-            ExceptionDialog.showException(ex);
+        } catch (Exception e) {
+            ExceptionDialog.showException(e);
             return null;
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void invokeLater(Callable callable) {
+    public static void invokeLater(Callable<Object> callable) {
         try {
-            FutureTask task = new FutureTask(callable);
+            FutureTask<Object> task = new FutureTask<Object>(callable);
             if (!java.awt.EventQueue.isDispatchThread()) {
                 java.awt.EventQueue.invokeLater(task);
             } else {
                 task.run();
             }
-        } catch (Exception ex) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(ex);
-            ExceptionDialog.showException(ex);
+        } catch (Exception e) {
+            ExceptionDialog.showException(e);
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    public void doInBackground(final Callable callable) {
-        SwingWorker worker = new SwingWorker() {
+    public void doInBackground(final Callable<?> callable) {
+        SwingWorker<Object, Object> worker = new SwingWorker<Object, Object>() {
             protected Object doInBackground() throws Exception {
                 try {
                     return callable.call();
                 } catch (Exception e) {
-                    ApplicationFrame.getInstance().printStackTraceOnGUI(e);
                     ExceptionDialog.showException(e);
                     return null;
                 }

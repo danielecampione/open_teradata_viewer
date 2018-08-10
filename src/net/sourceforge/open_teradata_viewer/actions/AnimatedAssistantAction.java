@@ -44,6 +44,7 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
                         + "in progress.");
         setEnabled(true);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         animatedAssistantActived = !animatedAssistantActived;
@@ -55,23 +56,24 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "animated assistant" action can be performed only if
-        // other processes are NOT running. No ThreadAction object must be
-        // instantiated.
+        // The "animated assistant" process can be performed only if other
+        // processes are NOT running. No ThreadAction object must be
+        // instantiated
         if (!inProgress) {
             inProgress = true;
             try {
                 performThreaded(e);
             } catch (Throwable t) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
                 CustomAction.inProgress = false;
             }
         } else {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "Another process is already running..\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("Another process is already running..",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
     }
     @Override
@@ -85,7 +87,7 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
                     }
                 });
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ie) {
             return;
         }
     }

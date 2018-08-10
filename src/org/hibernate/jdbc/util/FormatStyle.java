@@ -33,19 +33,19 @@ public class FormatStyle {
             new NoFormatImpl());
 
     private final String name;
-    private final Formatter formatter;
+    private final IFormatter iFormatter;
 
-    private FormatStyle(String name, Formatter formatter) {
+    private FormatStyle(String name, IFormatter iFormatter) {
         this.name = name;
-        this.formatter = formatter;
+        this.iFormatter = iFormatter;
     }
 
     public String getName() {
         return name;
     }
 
-    public Formatter getFormatter() {
-        return formatter;
+    public IFormatter getFormatter() {
+        return iFormatter;
     }
 
     public boolean equals(Object o) {
@@ -66,7 +66,14 @@ public class FormatStyle {
         return name.hashCode();
     }
 
-    private static class NoFormatImpl implements Formatter {
+    /**
+     *
+     * 
+     * @author Gavin King
+     * @author Steve Ebersole
+     * 
+     */
+    private static class NoFormatImpl implements IFormatter {
         public String format(String source) {
             return source;
         }

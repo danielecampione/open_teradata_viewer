@@ -42,10 +42,11 @@ import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.Top;
 import net.sf.jsqlparser.statement.select.Union;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * A class to de-parse (that is, tranform from SqlParser hierarchy into a string)
- * a {@link net.sf.jsqlparser.statement.select.Select}
+ * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * string) a {@link net.sf.jsqlparser.statement.select.Select}.
  * 
  * @author D. Campione
  * 
@@ -64,9 +65,11 @@ public class SelectDeParser
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param buffer the buffer that will be filled with the select
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
+     *                          expressions. It has to share the same<br>
+     *                          StringBuffer (buffer parameter) as this object
+     *                          in order to work.
+     * @param buffer the buffer that will be filled with the select.
      */
     public SelectDeParser(ExpressionVisitor expressionVisitor,
             StringBuffer buffer) {
@@ -74,7 +77,6 @@ public class SelectDeParser
         this.expressionVisitor = expressionVisitor;
     }
 
-    @SuppressWarnings("rawtypes")
     public void visit(PlainSelect plainSelect) {
         buffer.append("SELECT ");
         Top top = plainSelect.getTop();
@@ -84,7 +86,7 @@ public class SelectDeParser
             buffer.append("DISTINCT ");
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
                 buffer.append("ON (");
-                for (Iterator iter = plainSelect.getDistinct()
+                for (Iterator<?> iter = plainSelect.getDistinct()
                         .getOnSelectItems().iterator(); iter.hasNext();) {
                     SelectItem selectItem = (SelectItem) iter.next();
                     selectItem.accept(this);
@@ -94,10 +96,9 @@ public class SelectDeParser
                 }
                 buffer.append(") ");
             }
-
         }
 
-        for (Iterator iter = plainSelect.getSelectItems().iterator(); iter
+        for (Iterator<?> iter = plainSelect.getSelectItems().iterator(); iter
                 .hasNext();) {
             SelectItem selectItem = (SelectItem) iter.next();
             selectItem.accept(this);
@@ -114,7 +115,7 @@ public class SelectDeParser
         }
 
         if (plainSelect.getJoins() != null) {
-            for (Iterator iter = plainSelect.getJoins().iterator(); iter
+            for (Iterator<?> iter = plainSelect.getJoins().iterator(); iter
                     .hasNext();) {
                 Join join = (Join) iter.next();
                 deparseJoin(join);
@@ -128,7 +129,7 @@ public class SelectDeParser
 
         if (plainSelect.getGroupByColumnReferences() != null) {
             buffer.append(" GROUP BY ");
-            for (Iterator iter = plainSelect.getGroupByColumnReferences()
+            for (Iterator<?> iter = plainSelect.getGroupByColumnReferences()
                     .iterator(); iter.hasNext();) {
                 Expression columnReference = (Expression) iter.next();
                 columnReference.accept(expressionVisitor);
@@ -150,12 +151,11 @@ public class SelectDeParser
         if (plainSelect.getLimit() != null) {
             deparseLimit(plainSelect.getLimit());
         }
-
     }
 
-    @SuppressWarnings("rawtypes")
     public void visit(Union union) {
-        for (Iterator iter = union.getPlainSelects().iterator(); iter.hasNext();) {
+        for (Iterator<?> iter = union.getPlainSelects().iterator(); iter
+                .hasNext();) {
             buffer.append("(");
             PlainSelect plainSelect = (PlainSelect) iter.next();
             plainSelect.accept(this);
@@ -163,7 +163,6 @@ public class SelectDeParser
             if (iter.hasNext()) {
                 buffer.append(" UNION ");
             }
-
         }
 
         if (union.getOrderByElements() != null) {
@@ -173,15 +172,15 @@ public class SelectDeParser
         if (union.getLimit() != null) {
             deparseLimit(union.getLimit());
         }
-
     }
 
     public void visit(OrderByElement orderBy) {
         orderBy.getExpression().accept(expressionVisitor);
-        if (orderBy.isAsc())
+        if (orderBy.isAsc()) {
             buffer.append(" ASC");
-        else
+        } else {
             buffer.append(" DESC");
+        }
     }
 
     public void visit(Column column) {
@@ -201,7 +200,6 @@ public class SelectDeParser
         if (selectExpressionItem.getAlias() != null) {
             buffer.append(" AS " + selectExpressionItem.getAlias());
         }
-
     }
 
     public void visit(SubSelect subSelect) {
@@ -218,10 +216,9 @@ public class SelectDeParser
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    public void deparseOrderBy(List orderByElements) {
+    public void deparseOrderBy(List<?> orderByElements) {
         buffer.append(" ORDER BY ");
-        for (Iterator iter = orderByElements.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter = orderByElements.iterator(); iter.hasNext();) {
             OrderByElement orderByElement = (OrderByElement) iter.next();
             orderByElement.accept(this);
             if (iter.hasNext()) {
@@ -238,12 +235,6 @@ public class SelectDeParser
         } else if (limit.getRowCount() != 0) {
             buffer.append(limit.getRowCount());
         } else {
-            /*
-             from mysql docs:
-             For compatibility with PostgreSQL, MySQL also supports the LIMIT row_count OFFSET offset syntax.
-             To retrieve all rows from a certain offset up to the end of the result set, you can use some large number
-             for the second parameter. 
-             */
             buffer.append("18446744073709551615");
         }
 
@@ -252,7 +243,6 @@ public class SelectDeParser
         } else if (limit.getOffset() != 0) {
             buffer.append(" OFFSET " + limit.getOffset());
         }
-
     }
 
     public StringBuffer getBuffer() {
@@ -279,28 +269,27 @@ public class SelectDeParser
         buffer.append(")");
     }
 
-    @SuppressWarnings("rawtypes")
     public void deparseJoin(Join join) {
-        if (join.isSimple())
+        if (join.isSimple()) {
             buffer.append(", ");
-        else {
-
-            if (join.isRight())
+        } else {
+            if (join.isRight()) {
                 buffer.append("RIGHT ");
-            else if (join.isNatural())
+            } else if (join.isNatural()) {
                 buffer.append("NATURAL ");
-            else if (join.isFull())
+            } else if (join.isFull()) {
                 buffer.append("FULL ");
-            else if (join.isLeft())
+            } else if (join.isLeft()) {
                 buffer.append("LEFT ");
+            }
 
-            if (join.isOuter())
+            if (join.isOuter()) {
                 buffer.append("OUTER ");
-            else if (join.isInner())
+            } else if (join.isInner()) {
                 buffer.append("INNER ");
+            }
 
             buffer.append("JOIN ");
-
         }
 
         FromItem fromItem = join.getRightItem();
@@ -311,7 +300,7 @@ public class SelectDeParser
         }
         if (join.getUsingColumns() != null) {
             buffer.append(" USING ( ");
-            for (Iterator iterator = join.getUsingColumns().iterator(); iterator
+            for (Iterator<?> iterator = join.getUsingColumns().iterator(); iterator
                     .hasNext();) {
                 Column column = (Column) iterator.next();
                 buffer.append(column.getWholeColumnName());
@@ -321,7 +310,5 @@ public class SelectDeParser
             }
             buffer.append(")");
         }
-
     }
-
 }

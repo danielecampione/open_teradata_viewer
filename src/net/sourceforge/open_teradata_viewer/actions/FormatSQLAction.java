@@ -27,7 +27,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 
 import org.hibernate.jdbc.util.FormatStyle;
-import org.hibernate.jdbc.util.Formatter;
+import org.hibernate.jdbc.util.IFormatter;
 
 /**
  * 
@@ -48,8 +48,8 @@ public class FormatSQLAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The formatting process can be performed altough other processes are
-        // running.
+        // The "formatting" process can be performed altough other processes are
+        // running
         new ThreadedAction() {
             @Override
             protected void execute() throws Exception {
@@ -60,9 +60,9 @@ public class FormatSQLAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        Formatter formatter = FormatStyle.BASIC.getFormatter();
+        IFormatter iFormatter = FormatStyle.BASIC.getFormatter();
         String original = ApplicationFrame.getInstance().getText();
-        String formatted = formatter.format(original);
+        String formatted = iFormatter.format(original);
         ApplicationFrame.getInstance().setText(formatted);
     }
 }

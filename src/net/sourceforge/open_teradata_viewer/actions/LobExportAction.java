@@ -71,9 +71,11 @@ public class LobExportAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         if (!isLobSelected) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "The field is NOT a Lob.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("The field is NOT a Lob.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         JTable table = ResultSetTable.getInstance();
@@ -81,13 +83,13 @@ public class LobExportAction extends CustomAction {
         if (selectedRows.length > 1) {
             File dir = DirectoryChooser.chooseDirectory();
             if (dir != null) {
-                List<String> columnNames = new ArrayList<String>();
+                List columnNames = new ArrayList();
                 for (int i = 0; i < table.getColumnCount(); i++) {
                     if (table.getSelectedColumn() != i) {
                         columnNames.add(table.getColumnName(i));
                     }
                 }
-                final JList<?> list = new JList<Object>(columnNames.toArray());
+                final JList list = new JList(columnNames.toArray());
                 list.addMouseListener(this);
                 list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 if (Dialog.OK_OPTION == Dialog.show("Column for file name",

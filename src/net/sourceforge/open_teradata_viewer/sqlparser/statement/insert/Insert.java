@@ -18,32 +18,30 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.insert;
 
-
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ItemsList;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsList;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
  * The insert statement.
- * Every column name in <code>columnNames</code> matches an item in <code>itemsList</code>
+ * Every column name in <code>columnNames</code> matches an item in <code>iItemsList</code>
  * 
  * @author D. Campione
  * 
  */
-public class Insert implements Statement {
+public class Insert implements IStatement {
 
     private Table table;
-    @SuppressWarnings("rawtypes")
-    private List columns;
-    private ItemsList itemsList;
+    private List<?> columns;
+    private IItemsList iItemsList;
     private boolean useValues = true;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
     public Table getTable() {
@@ -55,29 +53,30 @@ public class Insert implements Statement {
     }
 
     /**
-     * Get the columns (found in "INSERT INTO (col1,col2..) [...]" )
+     * Get the columns (found in "INSERT INTO (col1,col2..) [...]" ).
+     * 
      * @return a list of {@link net.sf.jsqlparser.schema.Column}
      */
-    @SuppressWarnings("rawtypes")
-    public List getColumns() {
+
+    public List<?> getColumns() {
         return columns;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setColumns(List list) {
+    public void setColumns(List<?> list) {
         columns = list;
     }
 
     /**
-     * Get the values (as VALUES (...) or SELECT) 
+     * Get the values (as VALUES (...) or SELECT).
+     *  
      * @return the values of the insert
      */
-    public ItemsList getItemsList() {
-        return itemsList;
+    public IItemsList getItemsList() {
+        return iItemsList;
     }
 
-    public void setItemsList(ItemsList list) {
-        itemsList = list;
+    public void setItemsList(IItemsList list) {
+        iItemsList = list;
     }
 
     public boolean isUseValues() {
@@ -97,12 +96,11 @@ public class Insert implements Statement {
                 true) + " " : "");
 
         if (useValues) {
-            sql += "VALUES " + itemsList + "";
+            sql += "VALUES " + iItemsList + "";
         } else {
-            sql += "" + itemsList + "";
+            sql += "" + iItemsList + "";
         }
 
         return sql;
     }
-
 }

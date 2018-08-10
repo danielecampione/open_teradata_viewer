@@ -30,11 +30,11 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.graphicviewer.AnimatedLink;
-import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
-import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerBasicNode;
-import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
-import test.net.sourceforge.open_teradata_viewer.tablesfinder.TablesNamesFinder;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.AnimatedLink;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
+import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNamesFinder;
 
 /**
  * 
@@ -53,19 +53,17 @@ public class AnalyzeQueryAction extends CustomAction {
     }
 
     public void actionPerformed(final ActionEvent e) {
-        // The graphic viewer command can be performed altough other processes
+        // The "analyze query" process can be performed altough other processes
         // are running. No ThreadAction object must be instantiated because the
-        // focus must still remains on the graphic viewer frame.
+        // focus must still remains on the graphic viewer frame
         try {
             performThreaded(e);
         } catch (Throwable t) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(t);
             ExceptionDialog.showException(t);
         }
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     protected void performThreaded(ActionEvent e) throws Exception {
         try {
             CCJSqlParserManager pm = new CCJSqlParserManager();
@@ -73,14 +71,14 @@ public class AnalyzeQueryAction extends CustomAction {
             if (sql.trim().length() > 0) {
                 Statement statement = pm.parse(new StringReader(sql));
 
-                // Now you should use a class that implements StatementVisitor
+                // Now you should use a class that implements IStatementVisitor
                 // to decide what to do based on the kind of the statement, that
                 // is SELECT or INSERT etc. but here we are only interested in
                 // SELECTS
                 if (statement instanceof Select) {
                     Select selectStatement = (Select) statement;
                     TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-                    List tableList = tablesNamesFinder
+                    List<String> tableList = tablesNamesFinder
                             .getTableList(selectStatement);
 
                     GraphicViewerDocument graphicViewerDocument = ApplicationFrame
@@ -90,7 +88,8 @@ public class AnalyzeQueryAction extends CustomAction {
                     int i = 1;
                     Vector<GraphicViewerBasicNode> nodes = new Vector<GraphicViewerBasicNode>(
                             1, 1);
-                    for (Iterator iter = tableList.iterator(); iter.hasNext(); i++) {
+                    for (Iterator<?> iter = tableList.iterator(); iter
+                            .hasNext(); i++) {
                         String tableName = (String) iter.next();
                         GraphicViewerBasicNode graphicViewerBasicNode = ApplicationFrame
                                 .getInstance().getGraphicViewer()
@@ -114,9 +113,8 @@ public class AnalyzeQueryAction extends CustomAction {
             }
             ApplicationFrame.getInstance().getGraphicViewer().setVisible(true);
             GraphicViewer.updateActions();
-        } catch (Throwable localThrowable) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(localThrowable);
-            ExceptionDialog.showException(localThrowable);
+        } catch (Throwable t) {
+            ExceptionDialog.showException(t);
         }
     }
 }

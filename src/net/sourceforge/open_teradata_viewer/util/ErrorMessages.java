@@ -59,7 +59,6 @@ public class ErrorMessages {
     }
 
     public String getString(String code, Object[] argCode) {
-        // System.out.println(languages.getKeys().nextElement());
         if (argCode == null) {
             return code;
         }
@@ -69,8 +68,8 @@ public class ErrorMessages {
         }
         return code + ": " + postMessages(code) + "\n" + postMessages(msg);
     }
+
     public String getPrefix() {
         return prefix;
     }
-
 }

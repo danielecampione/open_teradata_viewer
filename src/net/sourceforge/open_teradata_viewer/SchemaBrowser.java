@@ -75,8 +75,11 @@ public class SchemaBrowser extends JTree {
                     addChildren();
                 }
             } catch (Throwable t) {
-                ApplicationFrame.getInstance().changeLog.append(t.getMessage()
-                        + "\n", ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(t.getMessage(),
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 String relationName = toString().toUpperCase();
                 String sqlQuery = "HELP TABLE " + relationName;
                 ResultSet resultSet = null;
@@ -90,6 +93,7 @@ public class SchemaBrowser extends JTree {
                             try {
                                 statement.cancel();
                             } catch (Throwable t) {
+                                ExceptionDialog.ignoreException(t);
                             }
                         }
                     };
@@ -98,6 +102,7 @@ public class SchemaBrowser extends JTree {
                     try {
                         waitingDialog = new WaitingDialog(onCancel);
                     } catch (InterruptedException ie) {
+                        ExceptionDialog.ignoreException(ie);
                     }
                     waitingDialog.setText("Executing statement..");
                     resultSet = statement.executeQuery();
@@ -113,9 +118,9 @@ public class SchemaBrowser extends JTree {
                     }
                     statement.close();
                     resultSet.close();
-                } catch (SQLException e) {
+                } catch (SQLException sqle) {
+                    ExceptionDialog.ignoreException(sqle);
                 }
-
             }
         }
 

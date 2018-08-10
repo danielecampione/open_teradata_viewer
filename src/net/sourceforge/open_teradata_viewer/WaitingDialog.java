@@ -52,8 +52,9 @@ public class WaitingDialog extends TimerTask {
             @Override
             public void run() {
                 try {
-                    dialog.setVisible(true);
+                    UISupport.showDialog(dialog);
                 } catch (ConcurrentModificationException cme) {
+                    ExceptionDialog.ignoreException(cme);
                 }
                 if ((onCancel != null) && "Cancel".equals(pane.getValue())) {
                     onCancel.run();
@@ -69,7 +70,6 @@ public class WaitingDialog extends TimerTask {
         }
         new Timer().schedule(this, 3000, 1000);
     }
-
     public void setText(String text) {
         message1.setText(text);
     }

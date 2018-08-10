@@ -57,8 +57,7 @@ public final class ResultSetTable extends JTable {
 
     private static final ResultSetTable RESULT_SET_TABLE = new ResultSetTable();
 
-    @SuppressWarnings("rawtypes")
-    private List<Vector> originalOrder;
+    private List originalOrder;
 
     private ResultSetTable() {
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -93,12 +92,11 @@ public final class ResultSetTable extends JTable {
         setValueAt(o, row, column);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<String> getSelectedRowData() {
+    public List getSelectedRowData() {
         int row = getSelectedRow();
         if (row != -1) {
-            return (List<String>) ((DefaultTableModel) getModel())
-                    .getDataVector().get(row);
+            return (List) ((DefaultTableModel) getModel()).getDataVector().get(
+                    row);
         } else {
             return null;
         }
@@ -110,7 +108,6 @@ public final class ResultSetTable extends JTable {
     }
 
     public int getOriginalSelectedRow(int selectedRow) {
-        @SuppressWarnings("rawtypes")
         Vector row = (Vector) ((DefaultTableModel) getModel()).getDataVector()
                 .get(selectedRow);
         return originalOrder.indexOf(row);
@@ -122,13 +119,12 @@ public final class ResultSetTable extends JTable {
         originalOrder.remove(originalSelectedRow);
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setDataVector(final Vector<Vector> dataVector,
+    public void setDataVector(final Vector dataVector,
             final Vector columnIdentifiers, final String executionTime) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                originalOrder = new ArrayList<Vector>(dataVector);
+                originalOrder = new ArrayList(dataVector);
                 ((DefaultTableModel) getModel()).setDataVector(dataVector,
                         columnIdentifiers);
                 validate();
@@ -187,8 +183,8 @@ public final class ResultSetTable extends JTable {
     }
 
     @Override
-    public void editingStopped(ChangeEvent e) {
-        super.editingStopped(e);
+    public void editingStopped(ChangeEvent ce) {
+        super.editingStopped(ce);
         ResultSet resultSet = Context.getInstance().getResultSet();
         int column = getSelectedColumn();
         Object value = null;
@@ -202,13 +198,13 @@ public final class ResultSetTable extends JTable {
                 resultSet.updateRow();
                 try {
                     value = resultSet.getObject(column + 1);
-                } catch (SQLException e1) {
-                    ExceptionDialog.hideException(e1);
+                } catch (SQLException sqle) {
+                    ExceptionDialog.hideException(sqle);
                 }
             }
         } catch (Throwable t) {
-            if (e == null) {
-                // explicitly invoked
+            if (ce == null) {
+                // Explicitly invoked
                 throw new RuntimeException(t.getMessage(), t);
             }
             ExceptionDialog.showException(t);
@@ -217,8 +213,8 @@ public final class ResultSetTable extends JTable {
                 if (value != null) {
                     setTableValue(value);
                 }
-            } catch (Exception e1) {
-                ExceptionDialog.hideException(e1);
+            } catch (Exception e) {
+                ExceptionDialog.hideException(e);
             }
         }
     }
@@ -277,7 +273,7 @@ public final class ResultSetTable extends JTable {
                         && Context.getInstance().getResultSet()
                                 .getConcurrency() == ResultSet.CONCUR_UPDATABLE
                         && !isLob(column);
-            } catch (SQLException e) {
+            } catch (SQLException sqle) {
                 return false;
             }
         }

@@ -46,5 +46,4 @@ public class FileSaveAction extends CustomAction {
         FileIO.saveFile(openedFile == null ? "" : openedFile.toString(),
                 ApplicationFrame.getInstance().getText().getBytes());
     }
-
 }

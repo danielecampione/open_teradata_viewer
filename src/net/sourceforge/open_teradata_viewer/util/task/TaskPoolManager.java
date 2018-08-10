@@ -103,18 +103,18 @@ public class TaskPoolManager {
         return taskPoolList;
     }
 
-    public static void addTaskPoolListener(TaskPoolListener listener) {
-        taskPoolListenerList.add(TaskPoolListener.class, listener);
+    public static void addTaskPoolListener(ITaskPoolListener listener) {
+        taskPoolListenerList.add(ITaskPoolListener.class, listener);
     }
 
-    public static void removeTaskPoolListener(TaskPoolListener listener) {
-        taskPoolListenerList.remove(TaskPoolListener.class, listener);
+    public static void removeTaskPoolListener(ITaskPoolListener listener) {
+        taskPoolListenerList.remove(ITaskPoolListener.class, listener);
     }
 
     public static void fireTaskPoolListener(EventPool event,
             TaskExecutor taskExecutor, Task task) {
-        TaskPoolListener[] listeners = taskPoolListenerList
-                .getListeners(TaskPoolListener.class);
+        ITaskPoolListener[] listeners = taskPoolListenerList
+                .getListeners(ITaskPoolListener.class);
         for (int i = 0; i < listeners.length; i++) {
             switch (event) {
                 case BEGIN_POOL :
@@ -136,19 +136,19 @@ public class TaskPoolManager {
     }
 
     public static void addTaskPoolContainerListener(
-            TaskPoolContainerListener listener) {
-        taskPoolListenerList.add(TaskPoolContainerListener.class, listener);
+            ITaskPoolContainerListener listener) {
+        taskPoolListenerList.add(ITaskPoolContainerListener.class, listener);
     }
 
     public static void removeTaskPoolContainerListener(
-            TaskPoolContainerListener listener) {
-        taskPoolListenerList.remove(TaskPoolContainerListener.class, listener);
+            ITaskPoolContainerListener listener) {
+        taskPoolListenerList.remove(ITaskPoolContainerListener.class, listener);
     }
 
     public static void fireTaskPoolContainerListener(EventContainer event,
             Task task) {
-        TaskPoolContainerListener[] listeners = taskPoolListenerList
-                .getListeners(TaskPoolContainerListener.class);
+        ITaskPoolContainerListener[] listeners = taskPoolListenerList
+                .getListeners(ITaskPoolContainerListener.class);
         for (int i = 0; i < listeners.length; i++) {
             switch (event) {
                 case ADD_TASK :
@@ -160,5 +160,4 @@ public class TaskPoolManager {
             }
         }
     }
-
 }

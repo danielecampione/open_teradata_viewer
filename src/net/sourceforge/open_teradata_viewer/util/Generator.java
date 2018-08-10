@@ -22,10 +22,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.animated_assistant.GeneratorException;
+import net.sourceforge.open_teradata_viewer.util.variant.IVariantConnectable;
 import net.sourceforge.open_teradata_viewer.util.variant.Variant;
-import net.sourceforge.open_teradata_viewer.util.variant.VariantConnectable;
 
 /**
  * 
@@ -33,7 +33,7 @@ import net.sourceforge.open_teradata_viewer.util.variant.VariantConnectable;
  * @author D. Campione
  * 
  */
-public class Generator implements VariantConnectable {
+public class Generator implements IVariantConnectable {
 
     private static final long serialVersionUID = 7886277492925405188L;
 
@@ -127,9 +127,9 @@ public class Generator implements VariantConnectable {
             raf.writeLong(maxVal);
             raf.writeLong(startVal);
             raf.writeLong(increment);
-        } catch (IOException e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(
-                    (new GeneratorException(UTL_01003_CANT_WRITE, e)));
+        } catch (IOException ioe) {
+            ExceptionDialog.notifyException((new GeneratorException(
+                    UTL_01003_CANT_WRITE, ioe)));
         }
     }
 
@@ -140,10 +140,9 @@ public class Generator implements VariantConnectable {
             maxVal = raf.readLong();
             startVal = raf.readLong();
             increment = raf.readLong();
-        } catch (IOException e) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(
-                    (new GeneratorException(new GeneratorException(
-                            UTL_01002_CANT_READ, e))));
+        } catch (IOException ioe) {
+            ExceptionDialog.notifyException((new GeneratorException(
+                    new GeneratorException(UTL_01002_CANT_READ, ioe))));
         }
     }
     public int compareTo(Variant variant) {
@@ -163,5 +162,4 @@ public class Generator implements VariantConnectable {
                 + "maxVal:" + maxVal + ", " + "startVal:" + startVal + ", "
                 + "increment:" + increment + "]";
     }
-
 }

@@ -24,10 +24,10 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  * @author D. Campione
  * 
  */
-public class NullValue implements Expression {
+public class NullValue implements IExpression {
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String toString() {

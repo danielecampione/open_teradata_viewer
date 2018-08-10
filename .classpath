@@ -7,7 +7,6 @@
 	<classpathentry kind="lib" path="lib/iText-5.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsqlparser.jar"/>
-	<classpathentry kind="lib" path="lib/jsyntaxpane-0.9.5-b29.jar"/>
 	<classpathentry kind="lib" path="lib/l2fprod-common-all.jar"/>
 	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
 	<classpathentry kind="lib" path="lib/looks-2.2.1.jar"/>

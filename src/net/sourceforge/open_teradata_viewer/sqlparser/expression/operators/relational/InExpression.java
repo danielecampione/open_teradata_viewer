@@ -18,8 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * 
@@ -27,34 +27,34 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisit
  * @author D. Campione
  *
  */
-public class InExpression implements Expression {
+public class InExpression implements IExpression {
 
-    private Expression leftExpression;
-    private ItemsList itemsList;
+    private IExpression leftExpression;
+    private IItemsList iItemsList;
     private boolean not = false;
 
     public InExpression() {
     }
 
-    public InExpression(Expression leftExpression, ItemsList itemsList) {
+    public InExpression(IExpression leftExpression, IItemsList iItemsList) {
         setLeftExpression(leftExpression);
-        setItemsList(itemsList);
+        setItemsList(iItemsList);
     }
 
-    public ItemsList getItemsList() {
-        return itemsList;
+    public IItemsList getItemsList() {
+        return iItemsList;
     }
 
-    public Expression getLeftExpression() {
+    public IExpression getLeftExpression() {
         return leftExpression;
     }
 
-    public void setItemsList(ItemsList list) {
-        itemsList = list;
+    public void setItemsList(IItemsList list) {
+        iItemsList = list;
     }
 
-    public void setLeftExpression(Expression expression) {
-        leftExpression = expression;
+    public void setLeftExpression(IExpression iExpression) {
+        leftExpression = iExpression;
     }
 
     public boolean isNot() {
@@ -65,12 +65,12 @@ public class InExpression implements Expression {
         not = b;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String toString() {
-        return leftExpression + " " + ((not) ? "NOT " : "") + "IN " + itemsList
-                + "";
+        return leftExpression + " " + ((not) ? "NOT " : "") + "IN "
+                + iItemsList + "";
     }
 }

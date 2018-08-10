@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
@@ -51,63 +50,51 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
  * https://aurora.vcu.edu/db2help/db2s0/frame3.htm#casexp
  * http://sybooks.sybase.com/onlinebooks/group-as/asg1251e/commands/@ebt-link;pt=5954?target=%25N%15_52628_START_RESTART_N%25
  *  
- * @author Havard Rast Blok
+ * @author D. Campione
  * 
  */
-public class CaseExpression implements Expression {
+public class CaseExpression implements IExpression {
 
-    private Expression switchExpression;
+    private IExpression switchExpression;
 
-    @SuppressWarnings("rawtypes")
-    private List whenClauses;
+    private List<?> whenClauses;
 
-    private Expression elseExpression;
+    private IExpression elseExpression;
 
     /* (non-Javadoc)
      * @see net.sf.jsqlparser.expression.Expression#accept(net.sf.jsqlparser.expression.ExpressionVisitor)
      */
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
-    /**
-     * @return Returns the switchExpression.
-     */
-    public Expression getSwitchExpression() {
+    /** @return Returns the switchExpression. */
+    public IExpression getSwitchExpression() {
         return switchExpression;
     }
-    /**
-     * @param switchExpression The switchExpression to set.
-     */
-    public void setSwitchExpression(Expression switchExpression) {
+
+    /** @param switchExpression The switchExpression to set. */
+    public void setSwitchExpression(IExpression switchExpression) {
         this.switchExpression = switchExpression;
     }
 
-    /**
-     * @return Returns the elseExpression.
-     */
-    public Expression getElseExpression() {
+    /** @return Returns the elseExpression. */
+    public IExpression getElseExpression() {
         return elseExpression;
     }
-    /**
-     * @param elseExpression The elseExpression to set.
-     */
-    public void setElseExpression(Expression elseExpression) {
+
+    /** @param elseExpression The elseExpression to set. */
+    public void setElseExpression(IExpression elseExpression) {
         this.elseExpression = elseExpression;
     }
-    /**
-     * @return Returns the whenClauses.
-     */
-    @SuppressWarnings("rawtypes")
-    public List getWhenClauses() {
+
+    /** @return Returns the whenClauses. */
+    public List<?> getWhenClauses() {
         return whenClauses;
     }
 
-    /**
-     * @param whenClauses The whenClauses to set.
-     */
-    @SuppressWarnings("rawtypes")
-    public void setWhenClauses(List whenClauses) {
+    /** @param whenClauses The whenClauses to set. */
+    public void setWhenClauses(List<?> whenClauses) {
         this.whenClauses = whenClauses;
     }
 

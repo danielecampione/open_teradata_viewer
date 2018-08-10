@@ -22,10 +22,11 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.update.Update;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * A class to de-parse (that is, tranform from SqlParser hierarchy into a string)
- * an {@link net.sf.jsqlparser.statement.update.Update}
+ * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * string) an {@link net.sf.jsqlparser.statement.update.Update}.
  * 
  * @author D. Campione
  * 
@@ -39,9 +40,11 @@ public class UpdateDeParser {
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
-     * StringBuffer (buffer parameter) as this object in order to work
-     * @param buffer the buffer that will be filled with the select
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
+     *                          expressions. It has to share the same<br>
+     *                          StringBuffer (buffer parameter) as this object
+     *                          in order to work.
+     * @param buffer the buffer that will be filled with the select.
      */
     public UpdateDeParser(ExpressionVisitor expressionVisitor,
             StringBuffer buffer) {
@@ -69,14 +72,12 @@ public class UpdateDeParser {
             if (i < update.getColumns().size() - 1) {
                 buffer.append(", ");
             }
-
         }
 
         if (update.getWhere() != null) {
             buffer.append(" WHERE ");
             update.getWhere().accept(expressionVisitor);
         }
-
     }
 
     public ExpressionVisitor getExpressionVisitor() {
@@ -86,5 +87,4 @@ public class UpdateDeParser {
     public void setExpressionVisitor(ExpressionVisitor visitor) {
         expressionVisitor = visitor;
     }
-
 }

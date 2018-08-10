@@ -18,8 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * 
@@ -27,17 +27,17 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisit
  * @author D. Campione
  *
  */
-public class ExistsExpression implements Expression {
+public class ExistsExpression implements IExpression {
 
-    private Expression rightExpression;
+    private IExpression rightExpression;
     private boolean not = false;
 
-    public Expression getRightExpression() {
+    public IExpression getRightExpression() {
         return rightExpression;
     }
 
-    public void setRightExpression(Expression expression) {
-        rightExpression = expression;
+    public void setRightExpression(IExpression iExpression) {
+        rightExpression = iExpression;
     }
 
     public boolean isNot() {
@@ -48,8 +48,8 @@ public class ExistsExpression implements Expression {
         not = b;
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String getStringExpression() {

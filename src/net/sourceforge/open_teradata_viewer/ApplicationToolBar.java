@@ -50,12 +50,10 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.COMMIT);
         add(Actions.ROLLBACK);
         addSeparator();
-        if (Actions.CUT_COPY_PASTE_ENABLED) {
-            add(Actions.CUT);
-            add(Actions.COPY);
-            add(Actions.PASTE);
-            addSeparator();
-        }
+        add(Actions.CUT);
+        add(Actions.COPY);
+        add(Actions.PASTE);
+        addSeparator();
         add(Actions.FILE_OPEN);
         add(Actions.FILE_SAVE);
         add(Actions.FAVORITES);

@@ -46,7 +46,6 @@ public class DuplicateAction extends EditAction {
         resultSet.moveToInsertRow();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected void updateSelectedRow(List selectedRow, int column, String text) {
     }

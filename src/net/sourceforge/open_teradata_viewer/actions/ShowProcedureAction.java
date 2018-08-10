@@ -27,8 +27,11 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ShowProcedureValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  *
@@ -50,8 +53,11 @@ public class ShowProcedureAction extends ShowObjectAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -71,7 +77,7 @@ public class ShowProcedureAction extends ShowObjectAction {
                     return;
                 }
             }
-            if (!canBeAnObjectName(procedureName)) {
+            if (!Utilities.canBeATeradataObjectName(procedureName)) {
                 procedureName = null;
             }
         }
@@ -104,6 +110,7 @@ public class ShowProcedureAction extends ShowObjectAction {
                 try {
                     statement.cancel();
                 } catch (Throwable t) {
+                    ExceptionDialog.ignoreException(t);
                 }
             }
         };
@@ -111,6 +118,7 @@ public class ShowProcedureAction extends ShowObjectAction {
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
+            ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();
@@ -125,7 +133,8 @@ public class ShowProcedureAction extends ShowObjectAction {
                 procedureBody += obj.toString();
             }
         }
-        ApplicationFrame.getInstance().setText(procedureBody);
+        ApplicationFrame.getInstance().setText(
+                StringUtil.conformize(procedureBody));
         statement.close();
         resultSet.close();
     }

@@ -30,22 +30,15 @@ import java.util.StringTokenizer;
  * @author Steve Ebersole
  * 
  */
-@SuppressWarnings("unchecked")
-public class BasicFormatterImpl implements Formatter {
+public class BasicFormatterImpl implements IFormatter {
 
     public static final String WHITESPACE = " \n\r\f\t";
-    @SuppressWarnings("rawtypes")
-    private static final Set BEGIN_CLAUSES = new HashSet();
-    @SuppressWarnings("rawtypes")
-    private static final Set END_CLAUSES = new HashSet();
-    @SuppressWarnings("rawtypes")
-    private static final Set LOGICAL = new HashSet();
-    @SuppressWarnings("rawtypes")
-    private static final Set QUANTIFIERS = new HashSet();
-    @SuppressWarnings("rawtypes")
-    private static final Set DML = new HashSet();
-    @SuppressWarnings("rawtypes")
-    private static final Set MISC = new HashSet();
+    private static final Set<String> BEGIN_CLAUSES = new HashSet<String>();
+    private static final Set<String> END_CLAUSES = new HashSet<String>();
+    private static final Set<String> LOGICAL = new HashSet<String>();
+    private static final Set<String> QUANTIFIERS = new HashSet<String>();
+    private static final Set<String> DML = new HashSet<String>();
+    private static final Set<String> MISC = new HashSet<String>();
 
     static {
         BEGIN_CLAUSES.add("left");
@@ -92,21 +85,24 @@ public class BasicFormatterImpl implements Formatter {
         return new FormatProcess(source).perform();
     }
 
+    /**
+     *
+     * 
+     * @author Gavin King
+     * @author Steve Ebersole
+     * 
+     */
     private static class FormatProcess {
         boolean beginLine = true;
         boolean afterBeginBeforeEnd = false;
         boolean afterByOrSetOrFromOrSelect = false;
-        @SuppressWarnings("unused")
-        boolean afterValues = false;
         boolean afterOn = false;
         boolean afterBetween = false;
         boolean afterInsert = false;
         int inFunction = 0;
         int parensSinceSelect = 0;
-        @SuppressWarnings("rawtypes")
-        private LinkedList parenCounts = new LinkedList();
-        @SuppressWarnings("rawtypes")
-        private LinkedList afterByOrFromOrSelects = new LinkedList();
+        private LinkedList<Integer> parenCounts = new LinkedList<Integer>();
+        private LinkedList<Boolean> afterByOrFromOrSelects = new LinkedList<Boolean>();
 
         int indent = 1;
 
@@ -322,7 +318,6 @@ public class BasicFormatterImpl implements Formatter {
             out();
             indent++;
             newline();
-            afterValues = true;
         }
 
         private void closeParen() {

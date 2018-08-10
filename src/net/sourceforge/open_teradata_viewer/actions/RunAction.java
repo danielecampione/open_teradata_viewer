@@ -58,14 +58,16 @@ public class RunAction extends CustomAction {
         setEnabled(isConnected);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    protected void performThreaded(ActionEvent e) throws Exception {
+    protected void performThreaded(ActionEvent ae) throws Exception {
         String sql = ApplicationFrame.getInstance().getText();
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         if (sql.trim().length() == 0) {
@@ -99,7 +101,7 @@ public class RunAction extends CustomAction {
                 try {
                     if (!executed[0]) {
                         // Don't cancel when we're already going through the
-                        // result set.
+                        // result set
                         statements[0].cancel();
                     }
                 } catch (Throwable t) {
@@ -113,9 +115,9 @@ public class RunAction extends CustomAction {
             boolean hasResultSet;
             try {
                 hasResultSet = statement.execute();
-            } catch (SQLException e1) {
+            } catch (SQLException sqle) {
                 if (statement.getResultSetConcurrency() != ResultSet.CONCUR_READ_ONLY) {
-                    // try read-only and without modifications
+                    // Try read-only and without modifications
                     statement = Context.getInstance().getConnectionData()
                             .getConnection().prepareStatement(originalSql);
                     // Bind variables
@@ -123,12 +125,11 @@ public class RunAction extends CustomAction {
                     statements[0] = statement;
                     hasResultSet = statement.execute();
                 } else {
-                    throw e1;
+                    throw sqle;
                 }
             }
             executed[0] = true;
             if (hasResultSet) {
-
                 ResultSet resultSet = statement.getResultSet();
                 Context.getInstance().setResultSet(resultSet);
                 int columnCount = resultSet.getMetaData().getColumnCount();
@@ -153,20 +154,24 @@ public class RunAction extends CustomAction {
                             //     + resultSet.getMetaData().getColumnTypeName(i+1) + " - "
                             //     + resultSet.getMetaData().getColumnClassName(i+1) + " - \"" + object + "\"");
                             row.add(object);
-                        } catch (Exception e1) {
+                        } catch (Exception e) {
                             row.add("###");
                             System.err
                                     .format("Unable to retrieve value for row %s col %s",
                                             dataVector.size() + 1, i + 1);
-                            ExceptionDialog.hideException(e1);
+                            ExceptionDialog.hideException(e);
                         }
                     }
                     dataVector.add(row);
                     waitingDialog.setText(String.format("%d rows retrieved",
                             dataVector.size()));
                 }
-                ApplicationFrame.getInstance().changeLog.append(String.format(
-                        "[%d rows retrieved]\n", dataVector.size()));
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(
+                                String.format("[%d rows retrieved]",
+                                        dataVector.size()));
             } else {
                 Context.getInstance().setResultSet(null);
                 int updateCount = statement.getUpdateCount();
@@ -185,9 +190,9 @@ public class RunAction extends CustomAction {
                             Vector<Object> row = new Vector<Object>(1);
                             row.add(o);
                             dataVector.add(row);
-                        } catch (SQLException e1) {
+                        } catch (SQLException sqle) {
                             // Not an output parameter
-                            ExceptionDialog.ignoreException(e1);
+                            ExceptionDialog.ignoreException(sqle);
                         }
                     }
                     columnIdentifiers.add("Statement executed");
@@ -234,7 +239,7 @@ public class RunAction extends CustomAction {
                                 ResultSet.TYPE_SCROLL_SENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE,
                                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
-                    } catch (SQLException e) {
+                    } catch (SQLException sqle) {
                         statement = connection.prepareStatement(sql,
                                 ResultSet.TYPE_SCROLL_SENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
@@ -265,8 +270,7 @@ public class RunAction extends CustomAction {
             }
             handleBindVariables(statement, bindVariables);
             return bindVariables;
-        } catch (Exception e1) {
-            ExceptionDialog.ignoreException(e1);
+        } catch (Exception e) {
             return new String[0];
         }
     }

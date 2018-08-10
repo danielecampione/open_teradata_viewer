@@ -48,7 +48,7 @@ import com.incors.plaf.ColorUIResource2;
  * @author Timo Haberkern
  * 
  */
-public class KunststoffGradientTheme implements GradientTheme {
+public class KunststoffGradientTheme implements IGradientTheme {
 
     // gradient colors
 
@@ -92,5 +92,4 @@ public class KunststoffGradientTheme implements GradientTheme {
     public int getBackgroundGradientShadow() {
         return backgroundGradientShadow;
     }
-
 }

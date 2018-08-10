@@ -32,7 +32,7 @@ import com.l2fprod.common.swing.JDirectoryChooser;
  * 
  * @author D. Campione
  */
-public class SwingFileDialogs implements XFileDialogs {
+public class SwingFileDialogs implements IXFileDialogs {
     private static Component parent;
     private static Map<Object, JFileChooser> choosers = new HashMap<Object, JFileChooser>();
 

@@ -60,7 +60,8 @@ public class SplashScreen extends JWindow {
                     + "</td><td align='right'>"
                     + Config.HOME_PAGE
                     + "</td></tr><tr><td>Copyright &copy 2012, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
-        } catch (IOException e) {
+        } catch (IOException ioe) {
+            ExceptionDialog.ignoreException(ioe);
         }
     }
 
@@ -135,7 +136,7 @@ public class SplashScreen extends JWindow {
                         SwingUtilities.invokeAndWait(closer_runner);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ExceptionDialog.hideException(e);
                 }
             }
         };

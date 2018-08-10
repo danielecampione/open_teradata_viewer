@@ -26,7 +26,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
  * @author D. Campione
  * 
  */
-public class Function implements Expression {
+public class Function implements IExpression {
 
     private String name;
     private ExpressionList parameters;
@@ -34,8 +34,8 @@ public class Function implements Expression {
     private boolean distinct = false;
     private boolean isEscaped = false;
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     /**

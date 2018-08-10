@@ -24,6 +24,8 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.MetalTheme;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+
 /**
  * The main class for the Kunststoff Look&Feel.
  *
@@ -53,7 +55,7 @@ import javax.swing.plaf.metal.MetalTheme;
 public class KunststoffLookAndFeel extends MetalLookAndFeel {
 
     private static final long serialVersionUID = -2022166877246168939L;
-    private static GradientTheme gradientTheme;
+    private static IGradientTheme iGradientTheme;
     private static boolean isInstalled = false;
     private static boolean themeHasBeenSet = false; // Thanks to Jonas Kilian for
                                                     // fixing the themes-bug
@@ -110,25 +112,14 @@ public class KunststoffLookAndFeel extends MetalLookAndFeel {
         putDefault(table, "ProgressBarUI");
         putDefault(table, "TableHeaderUI");
         putDefault(table, "InternalFrameUI");
-        // if you want a check box icon with gradients, just remove the comment from
-        // the following lines. We prefer the standard icon.
-        /*
-        putDefault(table, "CheckBoxUI");
-        try {
-          String className = "com.incors.plaf.kunststoff.KunststoffCheckBoxIcon";
-          table.put("CheckBox.icon", className);
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        */
     }
 
     protected void putDefault(UIDefaults table, String uiKey) {
         try {
             String className = "com.incors.plaf.kunststoff.Kunststoff" + uiKey;
             table.put(uiKey, className);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            ExceptionDialog.hideException(e);
         }
     }
 
@@ -136,20 +127,20 @@ public class KunststoffLookAndFeel extends MetalLookAndFeel {
         if (!themeHasBeenSet) {
             setCurrentTheme(new KunststoffTheme());
         }
-        if (gradientTheme == null) {
-            gradientTheme = new KunststoffGradientTheme();
+        if (iGradientTheme == null) {
+            iGradientTheme = new KunststoffGradientTheme();
         }
     }
 
     /**
      * Sets the theme that defines the colors for gradients.
      */
-    public static void setCurrentGradientTheme(GradientTheme theme) {
+    public static void setCurrentGradientTheme(IGradientTheme theme) {
         if (theme == null) {
             throw new NullPointerException(
                     "Gradient Theme cannot have null value");
         }
-        gradientTheme = theme;
+        iGradientTheme = theme;
     }
 
     /**
@@ -175,34 +166,34 @@ public class KunststoffLookAndFeel extends MetalLookAndFeel {
         table.put("SplitPane.dividerSize", new Integer(8)); // will result in only one row of bumps
     }
 
-    // ******** getter methods for the gradient colors *********
+    // ******** Getter methods for the gradient colors *********
 
     /**
      * Returns the reflection color for a standard component (such as JButton).
      */
     public static ColorUIResource getComponentGradientColorReflection() {
-        return gradientTheme.getComponentGradientColorReflection();
+        return iGradientTheme.getComponentGradientColorReflection();
     }
 
     /**
      * Returns the shadow color for a standard component (such as JButton).
      */
     public static ColorUIResource getComponentGradientColorShadow() {
-        return gradientTheme.getComponentGradientColorShadow();
+        return iGradientTheme.getComponentGradientColorShadow();
     }
 
     /**
      * Returns the reflection color for a text component (such as JTextField).
      */
     public static ColorUIResource getTextComponentGradientColorReflection() {
-        return gradientTheme.getTextComponentGradientColorReflection();
+        return iGradientTheme.getTextComponentGradientColorReflection();
     }
 
     /**
      * Returns the reflection color for a text component (such as JTextField).
      */
     public static ColorUIResource getTextComponentGradientColorShadow() {
-        return gradientTheme.getTextComponentGradientColorShadow();
+        return iGradientTheme.getTextComponentGradientColorShadow();
     }
 
     /**
@@ -210,7 +201,6 @@ public class KunststoffLookAndFeel extends MetalLookAndFeel {
      * use this color for the background of JTree.
      */
     public static int getBackgroundGradientShadow() {
-        return gradientTheme.getBackgroundGradientShadow();
+        return iGradientTheme.getBackgroundGradientShadow();
     }
-
 }

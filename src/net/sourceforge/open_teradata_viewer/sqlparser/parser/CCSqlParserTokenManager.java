@@ -18,20 +18,25 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.parser;
 
+import java.io.IOException;
+import java.io.PrintStream;
+
 /**
  * Token Manager.
  * 
  * @author D. Campione
  * 
  */
-public class CCSqlParserTokenManager implements CCSqlParserConstants {
+public class CCSqlParserTokenManager implements ICCSqlParserConstants {
 
     /** Debug output. */
-    public java.io.PrintStream debugStream = System.out;
+    public PrintStream debugStream = System.out;
+
     /** Set debug output. */
-    public void setDebugStream(java.io.PrintStream ds) {
+    public void setDebugStream(PrintStream ds) {
         debugStream = ds;
     }
+
     private final int jjStopStringLiteralDfa_0(int pos, long active0,
             long active1) {
         switch (pos) {
@@ -125,15 +130,18 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
                 return -1;
         }
     }
+
     private final int jjStartNfa_0(int pos, long active0, long active1) {
         return jjMoveNfa_0(jjStopStringLiteralDfa_0(pos, active0, active1),
                 pos + 1);
     }
+
     private int jjStopAtPos(int pos, int kind) {
         jjmatchedKind = kind;
         jjmatchedPos = pos;
         return pos + 1;
     }
+
     private int jjMoveStringLiteralDfa0_0() {
         switch (curChar) {
             case 33 :
@@ -246,10 +254,11 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
                 return jjMoveNfa_0(7, 0);
         }
     }
+
     private int jjMoveStringLiteralDfa1_0(long active0, long active1) {
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(0, active0, active1);
             return 1;
         }
@@ -365,13 +374,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(0, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa2_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(0, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(1, active0, active1);
             return 2;
         }
@@ -474,13 +484,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(1, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa3_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(1, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(2, active0, active1);
             return 3;
         }
@@ -579,13 +590,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(2, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa4_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(2, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(3, active0, active1);
             return 4;
         }
@@ -656,13 +668,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(3, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa5_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(3, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(4, active0, active1);
             return 5;
         }
@@ -720,13 +733,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(4, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa6_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(4, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(5, active0, active1);
             return 6;
         }
@@ -763,13 +777,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(5, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa7_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(5, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(6, active0, active1);
             return 7;
         }
@@ -792,13 +807,14 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(6, active0, active1);
     }
+
     private int jjMoveStringLiteralDfa8_0(long old0, long active0, long old1,
             long active1) {
         if (((active0 &= old0) | (active1 &= old1)) == 0L)
             return jjStartNfa_0(6, old0, old1);
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             jjStopStringLiteralDfa_0(7, 0L, active1);
             return 8;
         }
@@ -813,18 +829,21 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         }
         return jjStartNfa_0(7, 0L, active1);
     }
+
     private int jjStartNfaWithStates_0(int pos, int kind, int state) {
         jjmatchedKind = kind;
         jjmatchedPos = pos;
         try {
             curChar = input_stream.readChar();
-        } catch (java.io.IOException e) {
+        } catch (IOException ioe) {
             return pos + 1;
         }
         return jjMoveNfa_0(state, pos + 1);
     }
+
     static final long[] jjbitVec0 = {0x0L, 0x0L, 0xffffffffffffffffL,
             0xffffffffffffffffL};
+
     private int jjMoveNfa_0(int startState, int curPos) {
         int startsAt = 0;
         jjnewStateCnt = 36;
@@ -1141,11 +1160,12 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
                 return curPos;
             try {
                 curChar = input_stream.readChar();
-            } catch (java.io.IOException e) {
+            } catch (IOException ioe) {
                 return curPos;
             }
         }
     }
+
     static final int[] jjnextStates = {29, 0, 30, 31, 32, 35, 10, 11, 13, 26,
             27, 30, 31, 32, 3, 4, 23, 24, 33, 34,};
 
@@ -1171,7 +1191,8 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
     private final int[] jjrounds = new int[36];
     private final int[] jjstateSet = new int[72];
     protected char curChar;
-    /** Constructor. */
+
+    /** Ctor. */
     public CCSqlParserTokenManager(SimpleCharStream stream) {
         if (SimpleCharStream.staticFlag)
             throw new Error(
@@ -1179,7 +1200,7 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         input_stream = stream;
     }
 
-    /** Constructor. */
+    /** Ctor. */
     public CCSqlParserTokenManager(SimpleCharStream stream, int lexState) {
         this(stream);
         SwitchTo(lexState);
@@ -1192,6 +1213,7 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         input_stream = stream;
         ReInitRounds();
     }
+
     private void ReInitRounds() {
         int i;
         jjround = 0x80000001;
@@ -1254,7 +1276,7 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
         EOFLoop : for (;;) {
             try {
                 curChar = input_stream.BeginToken();
-            } catch (java.io.IOException e) {
+            } catch (IOException ioe) {
                 jjmatchedKind = 0;
                 matchedToken = jjFillToken();
                 matchedToken.specialToken = specialToken;
@@ -1265,7 +1287,7 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
                 input_stream.backup(0);
                 while (curChar <= 32 && (0x100002600L & (1L << curChar)) != 0L)
                     curChar = input_stream.BeginToken();
-            } catch (java.io.IOException e1) {
+            } catch (IOException ioe) {
                 continue EOFLoop;
             }
             jjmatchedKind = 0x7fffffff;
@@ -1298,7 +1320,7 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
             try {
                 input_stream.readChar();
                 input_stream.backup(1);
-            } catch (java.io.IOException e1) {
+            } catch (IOException ioe) {
                 EOFSeen = true;
                 error_after = curPos <= 1 ? "" : input_stream.GetImage();
                 if (curChar == '\n' || curChar == '\r') {
@@ -1323,11 +1345,13 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
             jjrounds[state] = jjround;
         }
     }
+
     private void jjAddStates(int start, int end) {
         do {
             jjstateSet[jjnewStateCnt++] = jjnextStates[start];
         } while (start++ != end);
     }
+
     private void jjCheckNAddTwoStates(int state1, int state2) {
         jjCheckNAdd(state1);
         jjCheckNAdd(state2);
@@ -1338,5 +1362,4 @@ public class CCSqlParserTokenManager implements CCSqlParserConstants {
             jjCheckNAdd(jjnextStates[start]);
         } while (start++ != end);
     }
-
 }

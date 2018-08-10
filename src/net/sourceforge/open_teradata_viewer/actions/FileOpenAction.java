@@ -22,13 +22,14 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
-import javax.swing.JEditorPane;
 import javax.swing.TransferHandler;
 import javax.swing.TransferHandler.TransferSupport;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.FileIO;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * 
@@ -36,7 +37,7 @@ import net.sourceforge.open_teradata_viewer.FileIO;
  * @author D. Campione
  *
  */
-public class FileOpenAction extends CustomAction {
+public class FileOpenAction extends CustomAction implements ISyntaxConstants {
 
     private static final long serialVersionUID = -2948843917732757209L;
 
@@ -50,20 +51,18 @@ public class FileOpenAction extends CustomAction {
         File file = FileIO.openFile();
         if (file != null) {
             Context.getInstance().setOpenedFile(file);
-            JEditorPane textComponent = ApplicationFrame.getInstance()
+            SyntaxTextArea textArea = ApplicationFrame.getInstance()
                     .getTextComponent();
-            resetEditorPaneToAvoidMemoryLeak(textComponent);
-            TransferHandler transferHandler = textComponent
-                    .getTransferHandler();
+            resetEditorPaneToAvoidMemoryLeak(textArea);
+            TransferHandler transferHandler = textArea.getTransferHandler();
             StringSelection stringSelection = new StringSelection(new String(
                     FileIO.readFile(file)));
-            transferHandler.importData(new TransferSupport(textComponent,
+            transferHandler.importData(new TransferSupport(textArea,
                     stringSelection));
         }
     }
 
-    private void resetEditorPaneToAvoidMemoryLeak(JEditorPane textComponent) {
-        textComponent.setContentType("text/plain");
-        textComponent.setContentType("text/sql");
+    private void resetEditorPaneToAvoidMemoryLeak(SyntaxTextArea textArea) {
+        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
     }
 }

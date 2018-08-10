@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
@@ -32,15 +31,15 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class Index {
 
     private String type;
-    @SuppressWarnings("rawtypes")
-    private List columnsNames;
+
+    private List<?> columnsNames;
     private String name;
 
     /**
      * A list of strings of all the columns regarding this index  
      */
-    @SuppressWarnings("rawtypes")
-    public List getColumnsNames() {
+
+    public List<?> getColumnsNames() {
         return columnsNames;
     }
 
@@ -55,8 +54,7 @@ public class Index {
         return type;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setColumnsNames(List list) {
+    public void setColumnsNames(List<?> list) {
         columnsNames = list;
     }
 

@@ -57,7 +57,7 @@ public class HTTPAuthProxy extends Authenticator {
         try {
             proxyUserField.setText(Config.getSetting(proxyUserKey));
         } catch (Exception e) {
-            // ignore.
+            ExceptionDialog.ignoreException(e);
         }
         proxyUserField.setEnabled(isAuthenticationRequired.isSelected());
 
@@ -66,7 +66,7 @@ public class HTTPAuthProxy extends Authenticator {
             proxyPasswordField.setText(Config.decrypt(Config
                     .getSetting(proxyPasswordKey)));
         } catch (Exception e) {
-            // ignore.
+            ExceptionDialog.ignoreException(e);
         }
         proxyPasswordField.setEnabled(isAuthenticationRequired.isSelected());
 
@@ -97,7 +97,7 @@ public class HTTPAuthProxy extends Authenticator {
                 new JLabel("proxy password"), proxyPasswordField},
                 JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
         JDialog dialog = passwordPane.createDialog("Input");
-        dialog.setVisible(true);
+        UISupport.showDialog(dialog);
         Integer objResult = (Integer) passwordPane.getValue();
         int result = JOptionPane.CANCEL_OPTION;
         if (objResult != null) {
@@ -112,7 +112,7 @@ public class HTTPAuthProxy extends Authenticator {
                 Config.saveSetting(proxyPasswordKey,
                         Config.encrypt(proxyPassword));
             } catch (Exception e) {
-                // ignore.
+                ExceptionDialog.ignoreException(e);
             }
         }
     }

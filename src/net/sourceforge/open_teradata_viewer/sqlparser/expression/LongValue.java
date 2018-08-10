@@ -24,7 +24,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  * @author D. Campione
  * 
  */
-public class LongValue implements Expression {
+public class LongValue implements IExpression {
 
     private long value;
     private String stringValue;
@@ -37,8 +37,8 @@ public class LongValue implements Expression {
         setStringValue(value);
     }
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public long getValue() {

@@ -18,13 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.update;
 
-
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Expression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 
 /**
  * The update statement.
@@ -32,24 +31,22 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor
  * @author D. Campione
  * 
  */
-public class Update implements Statement {
+public class Update implements IStatement {
 
     private Table table;
-    private Expression where;
-    @SuppressWarnings("rawtypes")
-    private List columns;
-    @SuppressWarnings("rawtypes")
-    private List expressions;
+    private IExpression where;
+    private List<?> columns;
+    private List<?> expressions;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
     public Table getTable() {
         return table;
     }
 
-    public Expression getWhere() {
+    public IExpression getWhere() {
         return where;
     }
 
@@ -57,36 +54,35 @@ public class Update implements Statement {
         table = name;
     }
 
-    public void setWhere(Expression expression) {
-        where = expression;
+    public void setWhere(IExpression iExpression) {
+        where = iExpression;
     }
 
     /**
-     * The {@link net.sf.jsqlparser.schema.Column}s in this update (as col1 and col2 in UPDATE col1='a', col2='b')
-     * @return a list of {@link net.sf.jsqlparser.schema.Column}s
+     * The {@link net.sf.jsqlparser.schema.Column}s in this update (as col1 and
+     * col2 in UPDATE col1='a', col2='b').
+     * 
+     * @return a list of {@link net.sf.jsqlparser.schema.Column}s.
      */
-    @SuppressWarnings("rawtypes")
-    public List getColumns() {
+    public List<?> getColumns() {
         return columns;
     }
 
     /**
-     * The {@link Expression}s in this update (as 'a' and 'b' in UPDATE col1='a', col2='b')
-     * @return a list of {@link Expression}s
+     * The {@link IExpression}s in this update (as 'a' and 'b' in UPDATE
+     * col1='a', col2='b').
+     * 
+     * @return a list of {@link IExpression}s.
      */
-    @SuppressWarnings("rawtypes")
-    public List getExpressions() {
+    public List<?> getExpressions() {
         return expressions;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setColumns(List list) {
+    public void setColumns(List<?> list) {
         columns = list;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setExpressions(List list) {
+    public void setExpressions(List<?> list) {
         expressions = list;
     }
-
 }

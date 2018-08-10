@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -47,6 +46,7 @@ public class LobImportAction extends CustomAction {
                         .getSelectedColumn());
         setEnabled(isLobSelected);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
@@ -56,9 +56,11 @@ public class LobImportAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         if (!isLobSelected) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "The field is NOT a Lob.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("The field is NOT a Lob.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         File file = FileIO.openFile();

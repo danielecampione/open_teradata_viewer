@@ -26,8 +26,10 @@ import java.sql.ResultSet;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  *
@@ -51,7 +53,7 @@ public class ExplainRequestAction extends CustomAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         // The "explain request" command can be performed altough other
-        // processes are running.
+        // processes are running
         new ThreadedAction() {
             @Override
             protected void execute() throws Exception {
@@ -64,8 +66,11 @@ public class ExplainRequestAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -102,6 +107,7 @@ public class ExplainRequestAction extends CustomAction {
                 try {
                     statement.cancel();
                 } catch (Throwable t) {
+                    ExceptionDialog.ignoreException(t);
                 }
             }
         };
@@ -109,17 +115,21 @@ public class ExplainRequestAction extends CustomAction {
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
+            ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();
         waitingDialog.hide();
-        ApplicationFrame.getInstance().changeLog.append(LINE_SEPARATOR
-                + "\nExplanation\n" + LINE_SEPARATOR + "\n");
+        ApplicationFrame
+                .getInstance()
+                .getConsole()
+                .println(
+                        Utilities.LINE_SEPARATOR + "\nExplanation\n"
+                                + Utilities.LINE_SEPARATOR);
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);
             String executionPlan = obj.toString().trim();
-            ApplicationFrame.getInstance().changeLog.append(executionPlan
-                    + "\n");
+            ApplicationFrame.getInstance().getConsole().println(executionPlan);
         }
         statement.close();
         resultSet.close();

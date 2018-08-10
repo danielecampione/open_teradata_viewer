@@ -38,7 +38,6 @@ public class InsertAction extends EditAction {
         super("Insert", "add.png");
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected void fillTextArea(JTextArea textArea, List selectedRow, int column) {
     }
@@ -53,7 +52,6 @@ public class InsertAction extends EditAction {
         resultSet.moveToInsertRow();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected void updateSelectedRow(List selectedRow, int column, String text) {
     }

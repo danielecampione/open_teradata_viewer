@@ -20,7 +20,7 @@ package net.sourceforge.open_teradata_viewer.util.timer;
 
 import java.util.ArrayList;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 /**
  * 
@@ -35,7 +35,6 @@ public class TimerQueue extends Thread {
 
     public TimerQueue(String name) {
         super(name);
-        //setPriority(MIN_PRIORITY);
         setDaemon(true);
         start();
     }
@@ -59,7 +58,7 @@ public class TimerQueue extends Thread {
     public void add(Timer timer) {
         synchronized (timerArray) {
             timerArray.add(timer);
-            timer.lastExecuted = System.nanoTime(); //System.currentTimeMillis();
+            timer.lastExecuted = System.nanoTime();
             timer.timerManager = this;
         }
         synchronized (this) {
@@ -88,7 +87,7 @@ public class TimerQueue extends Thread {
 
     private long calcWait() {
         long waitTime = 10000000000L;
-        long currTime = System.nanoTime(); //System.currentTimeMillis();
+        long currTime = System.nanoTime();
 
         synchronized (timerArray) {
             for (int i = 0; i < timerArray.size(); i++) {
@@ -112,8 +111,8 @@ public class TimerQueue extends Thread {
                 synchronized (this) {
                     wait(waitTime / 1000000L, (int) (waitTime % 1000000L));
                 }
-            } catch (InterruptedException e) {
-                ;
+            } catch (InterruptedException ie) {
+                ExceptionDialog.ignoreException(ie);
             }
 
             if (!stopExecute) {
@@ -128,16 +127,12 @@ public class TimerQueue extends Thread {
                             if (timer.isEnabled()
                                     && timer.nextExecution <= time) {
                                 timer.nextExecution = time + timer.interval;
-                                //              if (timer.isEnabled() && timer.nextExecution <= System.currentTimeMillis()) {
-                                //                timer.nextExecution = System.currentTimeMillis() +timer.getInterval();
-                                ;
                                 try {
                                     timer.run();
                                 } catch (Throwable t) {
-                                    ApplicationFrame.getInstance()
-                                            .printStackTraceOnGUI(t);
+                                    ExceptionDialog.notifyException(t);
                                 }
-                                timer.lastExecuted = time; //System.currentTimeMillis();
+                                timer.lastExecuted = time;
                                 if (timer.isOnce()) {
                                     timer.cancel();
                                 }

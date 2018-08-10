@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.util.Scanner;
 
@@ -45,13 +44,16 @@ public class ExportInsertsAction extends CustomAction {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "No result to write.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("No result to write.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;

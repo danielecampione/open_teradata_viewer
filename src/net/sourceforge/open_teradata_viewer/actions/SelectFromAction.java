@@ -29,9 +29,11 @@ import javax.swing.KeyStroke;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.Tools;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * 
@@ -53,7 +55,7 @@ public class SelectFromAction extends CustomAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         // The "select from" process can be performed altough other processes
-        // are running.
+        // are running
         new ThreadedAction() {
             @Override
             protected void execute() throws Exception {
@@ -66,8 +68,11 @@ public class SelectFromAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame.getInstance().changeLog.append("NOT connected.\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("NOT connected.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -86,7 +91,7 @@ public class SelectFromAction extends CustomAction {
                     return;
                 }
             }
-            if (!canBeAnObjectName(relationName)) {
+            if (!Utilities.canBeATeradataObjectName(relationName)) {
                 relationName = null;
             }
         }
@@ -104,6 +109,7 @@ public class SelectFromAction extends CustomAction {
                 try {
                     statement.cancel();
                 } catch (Throwable t) {
+                    ExceptionDialog.ignoreException(t);
                 }
             }
         };
@@ -111,6 +117,7 @@ public class SelectFromAction extends CustomAction {
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
+            ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
         resultSet = statement.executeQuery();

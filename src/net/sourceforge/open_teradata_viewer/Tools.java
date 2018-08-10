@@ -223,21 +223,20 @@ public class Tools {
 
     /**
      * The method eliminates the differences between the path obtained by the
-     * system property invocation on Linux family os and on Windows
+     * system property invocation on Linux family os and on Windows.
      * 
-     * @param systemProperty
-     * @return path in line with expectations
+     * @param path.
+     * @return path in line with expectations.
      */
-    public static String conformizePath(String systemProperty) {
-        if (systemProperty == null) {
+    public static String conformizePath(String path) {
+        if (path == null) {
             return null;
         }
-        if (systemProperty.endsWith(File.separator)) {
-            systemProperty = systemProperty.substring(0,
-                    systemProperty.lastIndexOf(File.separator));
+        if (path.endsWith(File.separator)) {
+            path = path.substring(0, path.lastIndexOf(File.separator));
         }
-        systemProperty += File.separator;
-        return systemProperty;
+        path += File.separator;
+        return path;
     }
 
     public static int getRowCount(ResultSet rs) throws SQLException {
@@ -274,7 +273,7 @@ public class Tools {
                             new Object[]{java.net.URI.create(url)});
             // The above code performs the same operations carried out by
             // invoking java.awt.Desktop.getDesktop().browse()
-        } catch (Exception ignore) {
+        } catch (Exception e) {
             // Library not available or failed attempt
             String osName = System.getProperty("os.name").toLowerCase(
                     java.util.Locale.ENGLISH);
@@ -303,9 +302,8 @@ public class Tools {
                         throw new Exception(Arrays.toString(browsers));
                     }
                 }
-            } catch (Exception e) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(e);
-                ExceptionDialog.showException(e);
+            } catch (Exception e1) {
+                ExceptionDialog.showException(e1);
             }
         }
     }
@@ -356,8 +354,8 @@ public class Tools {
             fileOutputStream.write(out.toByteArray());
         } catch (FileNotFoundException fnfe) {
             UISupport.getDialogs().showErrorMessage(fnfe.getMessage());
-        } catch (IOException e) {
-            UISupport.getDialogs().showErrorMessage(e.getMessage());
+        } catch (IOException ioe) {
+            UISupport.getDialogs().showErrorMessage(ioe.getMessage());
         }
     }
 

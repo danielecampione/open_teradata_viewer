@@ -53,13 +53,12 @@ public class HelpAction extends CustomAction {
     }
 
     public void actionPerformed(final ActionEvent e) {
-        // The help command can be performed altough other processes are
+        // The "help" process can be performed altough other processes are
         // running. No ThreadAction object must be instantiated because the
-        // focus must still remains on the guidance frame.
+        // focus must still remains on the guide frame
         try {
             performThreaded(e);
         } catch (Throwable t) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(t);
             ExceptionDialog.showException(t);
         }
     }
@@ -74,7 +73,7 @@ public class HelpAction extends CustomAction {
         Tools.writeLocallyJARInternalFile("license.txt");
         Tools.writeLocallyJARInternalFile("changes.txt");
 
-        // guidance files
+        // Guide files
         Tools.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator
                 + "manual.html");
 
@@ -90,9 +89,11 @@ public class HelpAction extends CustomAction {
                         + File.separator + "manual_file" + File.separator
                         + (String) sl.get(i));
             } catch (Throwable ex) {
-                ApplicationFrame.getInstance().changeLog.append(
-                        "Missing resource: " + (String) sl.get(i),
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println("Missing resource: " + (String) sl.get(i),
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return;
             }
         }
@@ -110,9 +111,12 @@ public class HelpAction extends CustomAction {
                     .setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             ApplicationFrame.getInstance().getHelpFrame().setVisible(true);
         } catch (IOException ioe) {
-            String errorMsg = "Unable to start the Help module.\n";
-            ApplicationFrame.getInstance().changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Unable to start the Help module.";
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println(errorMsg,
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(
                     "Unable to start the Help module.\n" + ioe.getMessage()
                             + "\n");

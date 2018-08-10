@@ -42,6 +42,7 @@ public class FullScreenAction extends CustomAction {
                 KeyEvent.VK_UNDEFINED), null);
         setEnabled(true);
     }
+
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         final WindowListener[] wl = ApplicationFrame.getInstance()
@@ -66,23 +67,24 @@ public class FullScreenAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "switch to full screen mode" action can be performed only if
+        // The "switch to full screen mode" process can be performed only if
         // other processes are NOT running. No ThreadAction object must be
-        // instantiated.
+        // instantiated
         if (!inProgress) {
             inProgress = true;
             try {
                 performThreaded(e);
             } catch (Throwable t) {
-                ApplicationFrame.getInstance().printStackTraceOnGUI(t);
                 ExceptionDialog.showException(t);
             } finally {
                 CustomAction.inProgress = false;
             }
         } else {
-            ApplicationFrame.getInstance().changeLog.append(
-                    "Another process is already running..\n",
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame
+                    .getInstance()
+                    .getConsole()
+                    .println("Another process is already running..",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
     }
 }

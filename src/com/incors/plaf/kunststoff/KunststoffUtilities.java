@@ -57,9 +57,7 @@ import com.incors.plaf.FastGradientPaint;
  */
 public class KunststoffUtilities {
 
-    /**
-     * Convenience method to create a translucent <code>Color</color>.
-     */
+    /** Convenience method to create a translucent <code>Color</color>. */
     public static Color getTranslucentColor(Color color, int alpha) {
         if (color == null) {
             return null;
@@ -85,9 +83,7 @@ public class KunststoffUtilities {
         }
     }
 
-    /**
-     * Convenience method to draw a gradient on the specified rectangle
-     */
+    /** Convenience method to draw a gradient on the specified rectangle. */
     public static void drawGradient(Graphics g, Color color1, Color color2,
             Rectangle rect, boolean isVertical) {
         Graphics2D g2D = (Graphics2D) g;
@@ -97,13 +93,14 @@ public class KunststoffUtilities {
     }
 
     /**
-     * Convenience method to draw a gradient. The first rectangle defines the drawing region,
-     * the second rectangle defines the size of the gradient.
+     * Convenience method to draw a gradient. The first rectangle defines the
+     * drawing region, the second rectangle defines the size of the gradient.
      */
     public static void drawGradient(Graphics g, Color color1, Color color2,
             Rectangle rect, Rectangle rect2, boolean isVertical) {
-        // We are currently not using the FastGradientPaint to render this gradient, because we have to decide how
-        // we can use FastGradientPaint if rect and rect2 are different.
+        // We are currently not using the FastGradientPaint to render this
+        // gradient, because we have to decide how we can use FastGradientPaint
+        // if rect and rect2 are different
         if (isVertical) {
             Graphics2D g2D = (Graphics2D) g;
             GradientPaint gradient = new GradientPaint(0f, (float) rect.getY(),

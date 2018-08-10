@@ -66,13 +66,12 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
             Context.getInstance().setResultSet(null);
             ApplicationFrame.getInstance().updateTitle();
             Actions.getInstance().validateActions();
-            ApplicationFrame.getInstance().changeLog.append("disconnected.\n");
+            ApplicationFrame.getInstance().getConsole()
+                    .println("disconnected.");
         }
     }
 
-    /**
-     * Remember last selected schema
-     */
+    /** Remember last selected schema. */
     public void saveDefaultOwner() throws Exception {
         ConnectionData thisConnectionData = Context.getInstance()
                 .getConnectionData();

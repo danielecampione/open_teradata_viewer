@@ -28,40 +28,38 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.swing.Action;
-import javax.swing.InputMap;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultCaret;
 
-import jsyntaxpane.DefaultSyntaxKit;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
-import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewer;
-import net.sourceforge.open_teradata_viewer.graphicviewer.GraphicViewerDocument;
-import net.sourceforge.open_teradata_viewer.graphicviewer.UndoMgr;
+import net.sourceforge.open_teradata_viewer.editor.Gutter;
+import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
+import net.sourceforge.open_teradata_viewer.editor.search.OTVFindDialog;
+import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.UndoMgr;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
 import net.sourceforge.open_teradata_viewer.plugin.EntryDescriptor;
-import net.sourceforge.open_teradata_viewer.plugin.PluginEntry;
+import net.sourceforge.open_teradata_viewer.plugin.IPluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
@@ -75,7 +73,7 @@ import com.incors.plaf.kunststoff.KunststoffTheme;
  * @author D. Campione
  *
  */
-public class ApplicationFrame extends JFrame {
+public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     private static final long serialVersionUID = -8572855678886323789L;
     private static ApplicationFrame APPLICATION_FRAME;
@@ -83,16 +81,17 @@ public class ApplicationFrame extends JFrame {
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
     public static final int MAX_CHARACTERS_LOG = 100000;
     /**
-     * Shared variable used by ChangeLookAndFeelAction and ApplicationMenuBar
+     * Shared variable used by LookAndFeelAction and ApplicationMenuBar
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
 
-    /** The console. */
-    public ChangeLog changeLog;
+    /** The output console. */
+    private Console console;
 
-    private JEditorPane text;
+    private OTVSyntaxTextArea textArea;
     private HelpViewerWindow helpFrame;
     private GraphicViewer graphicViewer;
+    private ApplicationMenuBar menubar;
     private ApplicationToolBar toolbar;
 
     /** The schema browser toggle button. */
@@ -104,10 +103,15 @@ public class ApplicationFrame extends JFrame {
     /** The scrollpane containing the schema browser. */
     private JScrollPane rightComponent;
 
+    private TextScrollPane textScrollPane;
+
     private boolean fullScreenMode;
     private DisplayChanger displayChanger;
 
     private GlassPane glassPane;
+
+    private OTVFindDialog _OTVFindDialog;
+    private OTVGoToDialog _OTVGoToDialog;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -129,20 +133,19 @@ public class ApplicationFrame extends JFrame {
                     "ClassLoader",
                     Class.forName("com.birosoft.liquid.LiquidLookAndFeel")
                             .newInstance().getClass().getClassLoader());
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (InstantiationException ie) {
+            ExceptionDialog.hideException(ie);
+        } catch (IllegalAccessException iae) {
+            ExceptionDialog.hideException(iae);
+        } catch (ClassNotFoundException cnfe) {
+            ExceptionDialog.hideException(cnfe);
         }
     }
 
     public void drawIt(SplashScreen splashScreen) {
         setUI();
         splashScreen.progress(9);
-        setIconImage(ImageManager.getImage("/icons/open_teradata_viewer32.gif")
-                .getImage());
+        setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
         getRootPane().setGlassPane(glassPane = new GlassPane());
         splashScreen.progress(10);
 
@@ -164,25 +167,24 @@ public class ApplicationFrame extends JFrame {
         });
         splashScreen.progress(10);
 
-        // Create the text area for the status log and configure it.
-        changeLog = new ChangeLog(5, 30, MAX_CHARACTERS_LOG);
-        changeLog.setEditable(true);
-        changeLog.setCaretPosition(changeLog.getDocument().getLength());
-        DefaultCaret caret = (DefaultCaret) changeLog.getCaret();
+        // Create the console and configure it
+        setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
+        getConsole().setEditable(true);
+        getConsole().setCaretPosition(getConsole().getDocument().getLength());
+        DefaultCaret caret = (DefaultCaret) getConsole().getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        JScrollPane scrollPaneForLog = new JScrollPane(changeLog);
-        splashScreen.progress(10);
-        JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        mainSplitPane.setDividerSize(7);
-        mainSplitPane.setDividerLocation(470);
+        JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
+        splashScreen.progress(5);
+        JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                globalPanel, scrollPaneConsole);
         mainSplitPane.setOneTouchExpandable(true);
-        mainSplitPane.setLeftComponent(globalPanel);
-        mainSplitPane.setRightComponent(scrollPaneForLog);
+        mainSplitPane.setDividerLocation(510);
         getContentPane().add(mainSplitPane, BorderLayout.CENTER);
-        splashScreen.progress(10);
+        splashScreen.progress(5);
 
-        //Add some key bindings.
-        addBindings();
+        setFindDialog(new OTVFindDialog(this));
+        splashScreen.progress(5);
+        setGoToDialog(new OTVGoToDialog(this));
         splashScreen.progress(5);
 
         graphicViewer = new GraphicViewer();
@@ -210,15 +212,16 @@ public class ApplicationFrame extends JFrame {
                                 .equalsIgnoreCase("true"));
             }
         } catch (Exception e) {
-            // ignore
+            ExceptionDialog.ignoreException(e);
         }
-        splashScreen.progress(5);
+        splashScreen.progress(10);
 
         displayChanger = new DisplayChanger(this);
         displayChanger.setExclusiveMode(false);
         splashScreen.progress(5);
 
-        setJMenuBar(new ApplicationMenuBar());
+        setApplicationMenuBar(new ApplicationMenuBar());
+        Actions.DEFAULT_THEME.actionPerformed(new ActionEvent(this, 0, null));
         splashScreen.progress(5);
 
         installPlugins();
@@ -229,7 +232,8 @@ public class ApplicationFrame extends JFrame {
                 .getWidth();
         double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
                 .getHeight();
-        setSize((int) (screenWidth * .8), (int) (screenHeight * .8));
+        setSize(Math.min(1150, (int) (screenWidth * .8)),
+                Math.min(720, (int) (screenHeight * .8)));
         setMinimumSize(new Dimension((int) (screenWidth * .2),
                 (int) (screenHeight * .2)));
         SwingUtil.centerWithinScreen(this);
@@ -252,29 +256,30 @@ public class ApplicationFrame extends JFrame {
         return glassPane;
     }
 
-    @SuppressWarnings({"rawtypes", "unused"})
     public void installPlugins() {
         Drivers.setInitialized(false);
         try {
             Drivers.initialize();
         } catch (Exception e) {
-            // ignore
+            ExceptionDialog.ignoreException(e);
         }
 
         String pluginsPath = "./";
         // The PluginFactory is instantiated
         PluginFactory pluginFactory = new PluginFactory(pluginsPath);
         // The application obtains the loaded EntryDescriptors
-        Collection pluginsCollection = pluginFactory.getAllEntryDescriptor();
+        Collection<EntryDescriptor> pluginsCollection = pluginFactory
+                .getAllEntryDescriptor();
         if (pluginsCollection == null) { // No JAR file in the plugins path 
             return;
         }
-        Iterator pluginsIterator = pluginsCollection.iterator();
+        Iterator<EntryDescriptor> pluginsIterator = pluginsCollection
+                .iterator();
         // Searching for plugins.. 
         while (pluginsIterator.hasNext()) {
             EntryDescriptor entryDescriptor = (EntryDescriptor) pluginsIterator
                     .next();
-            PluginEntry pluginEntry = (PluginEntry) pluginFactory
+            IPluginEntry iPluginEntry = (IPluginEntry) pluginFactory
                     .getPluginEntry(entryDescriptor.getId());
         }
     }
@@ -283,13 +288,13 @@ public class ApplicationFrame extends JFrame {
         try {
             UIManager.setLookAndFeel(className);
         } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
+            ExceptionDialog.hideException(cnfe);
         } catch (InstantiationException ie) {
-            ie.printStackTrace();
+            ExceptionDialog.hideException(ie);
         } catch (IllegalAccessException iae) {
-            iae.printStackTrace();
+            ExceptionDialog.hideException(iae);
         } catch (UnsupportedLookAndFeelException ulafe) {
-            ulafe.printStackTrace();
+            ExceptionDialog.hideException(ulafe);
         }
         SwingUtilities.updateComponentTreeUI(this);
         for (Frame f : ApplicationFrame.getFrames()) {
@@ -309,21 +314,30 @@ public class ApplicationFrame extends JFrame {
         return queryArea;
     }
 
+    private OTVSyntaxTextArea createTextArea() {
+        OTVSyntaxTextArea textArea = new OTVSyntaxTextArea();
+        textArea.setCaretPosition(0);
+        textArea.requestFocusInWindow();
+        textArea.setMarkOccurrences(true);
+        return textArea;
+    }
+
     private JPanel createQueryEditor() {
         JPanel globalQueryEditorPanel = new JPanel(new BorderLayout());
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         Actions.SCHEMA_BROWSER.setEnabled(isConnected);
         setToolbar(new ApplicationToolBar(schemaBrowserToggleButton));
         globalQueryEditorPanel.add(getToolbar(), BorderLayout.NORTH);
-        text = new JEditorPane();
+        textArea = createTextArea();
 
-        JScrollPane scrollPaneQueryEditor = new JScrollPane(text);
-        scrollPaneQueryEditor
+        textScrollPane = new TextScrollPane(textArea, true);
+        Gutter gutter = textScrollPane.getGutter();
+        gutter.setBookmarkingEnabled(true);
+        gutter.setBookmarkIcon(ImageManager.getImage("/icons/bookmark.png"));
+        textScrollPane
                 .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPaneQueryEditor.getViewport().setPreferredSize(
-                new Dimension(0, 100));
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                scrollPaneQueryEditor, null);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, textScrollPane,
+                null);
         globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
 
         // Create the status area
@@ -332,7 +346,7 @@ public class ApplicationFrame extends JFrame {
         statusPane.add(caretListenerLabel);
         globalQueryEditorPanel.add(statusPane, BorderLayout.PAGE_END);
 
-        text.addCaretListener(caretListenerLabel);
+        textArea.addCaretListener(caretListenerLabel);
 
         addSyntaxHighlighting();
 
@@ -391,48 +405,23 @@ public class ApplicationFrame extends JFrame {
 
         //      8 jsyntaxpane
         //        http://code.google.com/p/jsyntaxpane/
+        //        Good work, but a customizable editor is better
+
+        //      9 OTVSyntaxTextArea
+        //        @see net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea
         //        Looks great, let's use it!
-
-        DefaultSyntaxKit.initKit();
-        text.setContentType("text/sql");
-
-        // Rearrange the menu a bit
-        JPopupMenu menu = text.getComponentPopupMenu();
-        menu.remove(17); // "Goto line" defined twice
-        menu.remove(15); // "Show abbreviations", not implemented for text/sql
-        menu.remove(12); // "Jump to Pair", not implemented for text/sql
-        menu.add(text.getActionMap().get("toggle-lines"));
-
-        // Set proper menu texts
-        DefaultSyntaxKit kit = (DefaultSyntaxKit) text.getEditorKit();
-        for (Object key : text.getActionMap().keys()) {
-            Action action = text.getActionMap().get(key);
-            action.putValue(
-                    Action.NAME,
-                    kit.getProperty(String.format("Action.%s.MenuText",
-                            action.getValue(Action.NAME))));
-        }
+        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
     }
 
     private JScrollPane createQueryTable() {
         return new JScrollPane(ResultSetTable.getInstance());
     }
 
-    protected void addBindings() {
-        InputMap inputMap = text.getInputMap();
-
-        KeyStroke key = KeyStroke.getKeyStroke("F5");
-        inputMap.put(key, Actions.RUN);
-    }
-
     public void updateTitle() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (isConnected) {
-            setTitle(Context.getInstance().getConnectionData().getName()
-                    + " - " + Main.APPLICATION_NAME);
-        } else {
-            setTitle(Main.APPLICATION_NAME);
-        }
+        setTitle(isConnected ? Context.getInstance().getConnectionData()
+                .getName()
+                + " - " + Main.APPLICATION_NAME : Main.APPLICATION_NAME);
     }
 
     /** Handles the window closing. */
@@ -453,10 +442,11 @@ public class ApplicationFrame extends JFrame {
 
         deleteHelpFiles();
         try {
-            if (changeLog.bw != null) {
-                changeLog.bw.close();
+            if (getConsole().bw != null) {
+                getConsole().bw.close();
             }
-        } catch (IOException e) {
+        } catch (IOException ioe) {
+            ExceptionDialog.ignoreException(ioe);
         }
 
         dispose();
@@ -467,15 +457,9 @@ public class ApplicationFrame extends JFrame {
     }
 
     public String getText() {
-        return text.getSelectedText() != null ? text.getSelectedText() : text
-                .getText();
-    }
-
-    public void printStackTraceOnGUI(Throwable t) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        t.printStackTrace(new PrintStream(out));
-        changeLog.append(new String(out.toByteArray()),
-                WARNING_FOREGROUND_COLOR_LOG);
+        return textArea.getSelectedText() != null
+                ? textArea.getSelectedText()
+                : textArea.getText();
     }
 
     private void deleteHelpFiles() {
@@ -556,9 +540,9 @@ public class ApplicationFrame extends JFrame {
                     schemaBrowser.expand(new String[]{connectionData.getName(),
                             "username", "TABLES"});
                     Actions.SCHEMA_BROWSER.setEnabled(true);
-                } catch (IllegalStateException e) {
-                    // ignore: connection has been closed
-                    ExceptionDialog.ignoreException(e);
+                } catch (IllegalStateException ise) {
+                    // Ignore: connection has been closed
+                    ExceptionDialog.ignoreException(ise);
                 }
             }
         }).start();
@@ -566,13 +550,14 @@ public class ApplicationFrame extends JFrame {
     public void showHideObjectChooser() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            changeLog
-                    .append("Connect to a Teradata database to use the Schema Browser functionality.\n",
+            getConsole()
+                    .println(
+                            "Connect to a Teradata database to use the Schema Browser functionality.",
                             WARNING_FOREGROUND_COLOR_LOG);
             splitPane.setRightComponent(null);
             splitPane.setDividerSize(0);
             schemaBrowserToggleButton.setSelected(false);
-            text.requestFocus();
+            focusTextArea();
             return;
         }
         if (splitPane.getRightComponent() == null) {
@@ -585,7 +570,7 @@ public class ApplicationFrame extends JFrame {
             splitPane.setRightComponent(null);
             splitPane.setDividerSize(0);
             schemaBrowserToggleButton.setSelected(false);
-            text.requestFocus();
+            focusTextArea();
         }
     }
     public SchemaBrowser getObjectChooser() {
@@ -594,14 +579,14 @@ public class ApplicationFrame extends JFrame {
     }
 
     public void replaceText(String t) {
-        text.replaceSelection(t);
+        textArea.replaceSelection(t);
     }
 
     public void setText(final String t) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                text.setText(t);
+                textArea.setText(t);
             }
         });
     }
@@ -615,38 +600,88 @@ public class ApplicationFrame extends JFrame {
         displayChanger.setDisplayMode(this.fullScreenMode);
     }
 
-    /** @return the SQL editor. */
-    public JEditorPane getTextComponent() {
-        return text;
+    /** @return The SQL editor. */
+    public OTVSyntaxTextArea getTextComponent() {
+        return textArea;
     }
 
-    /** @return the help frame. */
+    /** @return The help frame. */
     public HelpViewerWindow getHelpFrame() {
         return helpFrame;
     }
 
-    /** @param helpFrame the help frame to set. */
+    /** @param helpFrame The help frame to set. */
     public void setHelpFrame(HelpViewerWindow helpFrame) {
         this.helpFrame = helpFrame;
     }
 
-    /** @return the graphic viewer. */
+    /** @return The graphic viewer. */
     public GraphicViewer getGraphicViewer() {
         return graphicViewer;
     }
 
-    /** @param graphicViewer the graphic viewer to set. */
+    /** @param graphicViewer The graphic viewer to set. */
     public void setGraphicViewer(GraphicViewer graphicViewer) {
         this.graphicViewer = graphicViewer;
     }
 
-    /** @return the toolbar. */
+    /** @return The toolbar. */
     public ApplicationToolBar getToolbar() {
         return toolbar;
     }
 
-    /** @param toolbar the toolbar to set. */
+    /** @param toolbar The toolbar to set. */
     public void setToolbar(ApplicationToolBar toolbar) {
         this.toolbar = toolbar;
+    }
+
+    /** @return The textScrollPane */
+    public TextScrollPane getTextScrollPane() {
+        return textScrollPane;
+    }
+
+    public void focusTextArea() {
+        textArea.requestFocusInWindow();
+    }
+
+    /** @return The menubar. */
+    public ApplicationMenuBar getApplicationMenuBar() {
+        return menubar;
+    }
+
+    /** @param menubar The menubar to set. */
+    public void setApplicationMenuBar(ApplicationMenuBar menubar) {
+        this.menubar = menubar;
+        setJMenuBar(this.menubar);
+    }
+
+    /** @return The output console. */
+    public Console getConsole() {
+        return console;
+    }
+
+    /** @param console The output console to set. */
+    private void setConsole(Console console) {
+        this.console = console;
+    }
+
+    /** @return The find dialog. */
+    public OTVFindDialog getFindDialog() {
+        return _OTVFindDialog;
+    }
+
+    /** @param _OTVFindDialog The find dialog to set. */
+    public void setFindDialog(OTVFindDialog _OTVFindDialog) {
+        this._OTVFindDialog = _OTVFindDialog;
+    }
+
+    /** @return The goto dialog. */
+    public OTVGoToDialog getGoToDialog() {
+        return _OTVGoToDialog;
+    }
+
+    /** @param _OTVGoToDialog The goto dialog to set. */
+    public void setGoToDialog(OTVGoToDialog _OTVGoToDialog) {
+        this._OTVGoToDialog = _OTVGoToDialog;
     }
 }

@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
@@ -29,31 +28,27 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
  * @author D. Campione
  * 
  */
-public class ExpressionList implements ItemsList {
+public class ExpressionList implements IItemsList {
 
-    @SuppressWarnings("rawtypes")
-    private List expressions;
+    private List<?> expressions;
 
     public ExpressionList() {
     }
 
-    @SuppressWarnings("rawtypes")
-    public ExpressionList(List expressions) {
+    public ExpressionList(List<?> expressions) {
         this.expressions = expressions;
     }
 
-    @SuppressWarnings("rawtypes")
-    public List getExpressions() {
+    public List<?> getExpressions() {
         return expressions;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setExpressions(List list) {
+    public void setExpressions(List<?> list) {
         expressions = list;
     }
 
-    public void accept(ItemsListVisitor itemsListVisitor) {
-        itemsListVisitor.visit(this);
+    public void accept(IItemsListVisitor iItemsListVisitor) {
+        iItemsListVisitor.visit(this);
     }
 
     public String toString() {

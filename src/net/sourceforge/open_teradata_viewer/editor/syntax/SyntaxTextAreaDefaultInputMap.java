@@ -1,0 +1,63 @@
+/*
+ * Open Teradata Viewer ( editor syntax )
+ * Copyright (C) 2012, D. Campione
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.sourceforge.open_teradata_viewer.editor.syntax;
+
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+
+import net.sourceforge.open_teradata_viewer.editor.TADefaultInputMap;
+
+/**
+ * The default input map for an <code>SyntaxTextArea</code>.
+ * Currently, the new key bindings include:
+ * <ul>
+ *   <li>Shift+Tab indents the current line or currently selected lines to the
+ *       left.
+ * </ul>
+ *
+ * @author D. Campione
+ * 
+ */
+public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
+
+    private static final long serialVersionUID = -8887284768510591809L;
+
+    /** Constructs the default input map for an <code>SyntaxTextArea</code>. */
+    public SyntaxTextAreaDefaultInputMap() {
+        int defaultMod = getDefaultModifier();
+        int shift = InputEvent.SHIFT_MASK;
+
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, shift),
+                SyntaxTextAreaEditorKit.staDecreaseIndentAction);
+        put(KeyStroke.getKeyStroke('}'),
+                SyntaxTextAreaEditorKit.staCloseCurlyBraceAction);
+        put(KeyStroke.getKeyStroke('/'),
+                SyntaxTextAreaEditorKit.staCloseMarkupTagAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, defaultMod),
+                SyntaxTextAreaEditorKit.staGoToMatchingBracketAction);
+
+        // NOTE: no modifiers => mapped to keyTyped. If we had "0" as a second
+        // parameter, we'd get the template action (keyPressed) AND the default
+        // space action (keyTyped)
+        put(CodeTemplateManager.TEMPLATE_KEYSTROKE,
+                SyntaxTextAreaEditorKit.staPossiblyInsertTemplateAction);
+    }
+}

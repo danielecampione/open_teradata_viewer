@@ -18,11 +18,10 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.drop;
 
-
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.StatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
@@ -31,23 +30,21 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
  * @author D. Campione
  *
  */
-public class Drop implements Statement {
+public class Drop implements IStatement {
 
     private String type;
     private String name;
-    @SuppressWarnings("rawtypes")
-    private List parameters;
+    private List<?> parameters;
 
-    public void accept(StatementVisitor statementVisitor) {
-        statementVisitor.visit(this);
+    public void accept(IStatementVisitor iStatementVisitor) {
+        iStatementVisitor.visit(this);
     }
 
     public String getName() {
         return name;
     }
 
-    @SuppressWarnings("rawtypes")
-    public List getParameters() {
+    public List<?> getParameters() {
         return parameters;
     }
 
@@ -59,8 +56,7 @@ public class Drop implements Statement {
         name = string;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void setParameters(List list) {
+    public void setParameters(List<?> list) {
         parameters = list;
     }
 

@@ -19,7 +19,7 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
  * 
@@ -29,12 +29,11 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExpressionVisit
  */
 public class EqualsTo extends BinaryExpression {
 
-    public void accept(ExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public void accept(IExpressionVisitor iExpressionVisitor) {
+        iExpressionVisitor.visit(this);
     }
 
     public String getStringExpression() {
         return "=";
     }
-
 }

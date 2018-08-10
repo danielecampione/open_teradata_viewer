@@ -1,0 +1,553 @@
+/*
+ * Open Teradata Viewer ( editor )
+ * Copyright (C) 2012, D. Campione
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.sourceforge.open_teradata_viewer.editor;
+
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.plaf.ActionMapUIResource;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.InputMapUIResource;
+import javax.swing.plaf.InsetsUIResource;
+import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.plaf.basic.BasicTextAreaUI;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.EditorKit;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Keymap;
+import javax.swing.text.PlainView;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
+import javax.swing.text.WrappedPlainView;
+
+/**
+ * The UI used by instances of <code>TextArea</code>. This UI takes into account
+ * all of the "extras" involved in an <code>TextArea</code>, including having a
+ * special caret (for insert and overwrite), background images, highlighting the
+ * current line, etc..
+ *
+ * @author D. Campione
+ * 
+ */
+public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
+
+    private static final String SHARED_ACTION_MAP_NAME = "TextAreaUI.actionMap";
+    private static final String SHARED_INPUT_MAP_NAME = "TextAreaUI.inputMap";
+
+    /** The text area for which we are the UI. */
+    protected TextArea textArea;
+
+    private static final EditorKit defaultKit = new TextAreaEditorKit();
+    private static final TransferHandler defaultTransferHandler = new TATextTransferHandler();
+
+    private static final String RTEXTAREA_KEYMAP_NAME = "TextAreaKeymap";
+
+    /**
+     * Creates a UI for an TextArea.
+     *
+     * @param textArea A text area.
+     * @return The UI.
+     */
+    public static ComponentUI createUI(JComponent textArea) {
+        return new TextAreaUI(textArea);
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param textArea An instance of <code>TextArea</code>.
+     * @throws IllegalArgumentException If <code>textArea</code> is not an
+     *         instance of <code>TextArea</code>.
+     */
+    public TextAreaUI(JComponent textArea) {
+        if (!(textArea instanceof TextArea)) {
+            throw new IllegalArgumentException("TextAreaUI is for "
+                    + "instances of TextArea only!");
+        }
+        this.textArea = (TextArea) textArea;
+    }
+
+    /**
+     * The Nimbus LAF (and any Synth laf might have similar issues) doesn't set
+     * many UIManager properties that BasicLAF UI's look for. This causes
+     * problems for custom Basic-based UI's such as TextAreaUI. This method
+     * attempts to detect if Nimbus has been installed, and if so, sets proper
+     * values for some editor properties.
+     *
+     * @param editor The text area.
+     */
+    private void correctNimbusDefaultProblems(JTextComponent editor) {
+        // Don't check UIManager.getLookAndFeel().getName() for "Nimbus", as
+        // other Synth-based LaFs might have not set these properties, in which
+        // case we'll need to use our fallback values.
+
+        // Check for null, but not for UIResource, for these properties, because
+        // if Nimbus was installed these values would all be given null values.
+        // Another laf might have successfully installed UIResource values,
+        // which we don't want to override
+
+        Color c = editor.getCaretColor();
+        if (c == null) {
+            editor.setCaretColor(TextArea.getDefaultCaretColor());
+        }
+
+        c = editor.getSelectionColor();
+        if (c == null) {
+            c = UIManager.getColor("nimbusSelectionBackground");
+            if (c == null) { // Not Nimbus, but still need a value - fallback
+                c = UIManager.getColor("textHighlight");
+                if (c == null) {
+                    c = new ColorUIResource(Color.BLUE);
+                }
+            }
+            editor.setSelectionColor(c);
+        }
+
+        c = editor.getSelectedTextColor();
+        if (c == null) {
+            c = UIManager.getColor("nimbusSelectedText");
+            if (c == null) { // Not Nimbus, but still need a value - fallback
+                c = UIManager.getColor("textHighlightText");
+                if (c == null) {
+                    c = new ColorUIResource(Color.WHITE);
+                }
+            }
+            editor.setSelectedTextColor(c);
+        }
+
+        c = editor.getDisabledTextColor();
+        if (c == null) {
+            c = UIManager.getColor("nimbusDisabledText");
+            if (c == null) { // Not Nimbus, but still need a value - fallback
+                c = UIManager.getColor("textInactiveText");
+                if (c == null) {
+                    c = new ColorUIResource(Color.DARK_GRAY);
+                }
+            }
+            editor.setDisabledTextColor(c);
+        }
+
+        Border border = editor.getBorder();
+        if (border == null) {
+            editor.setBorder(new BasicBorders.MarginBorder());
+        }
+
+        Insets margin = editor.getMargin();
+        if (margin == null) {
+            editor.setMargin(new InsetsUIResource(2, 2, 2, 2));
+        }
+    }
+
+    /**
+     * Creates the view for an element. Returns a WrappedPlainView or PlainView.
+     *
+     * @param elem The element.
+     * @return The view.
+     */
+    public View create(Element elem) {
+        if (textArea.getLineWrap()) {
+            return new WrappedPlainView(elem, textArea.getWrapStyleWord());
+        } else {
+            return new PlainView(elem);
+        }
+    }
+
+    /**
+     * Returns the default caret for an <code>TextArea</code>. This caret is
+     * capable of displaying itself differently for insert/overwrite modes.
+     *
+     * @return The caret.
+     */
+    protected Caret createCaret() {
+        Caret caret = new ConfigurableCaret();
+        caret.setBlinkRate(500);
+        return caret;
+    }
+
+    /**
+     * Creates the keymap for this text area. This takes the super class's
+     * keymap, but sets the default keystroke to be TextAreaEditorKit's
+     * DefaultKeyTypedAction. This must be done to override the default keymap's
+     * default key-typed action.
+     *
+     * @return The keymap.
+     */
+    protected Keymap createKeymap() {
+        // Load the keymap we'll be using (it's saved by
+        // JTextComponent.addKeymap)
+        Keymap map = JTextComponent.getKeymap(RTEXTAREA_KEYMAP_NAME);
+        if (map == null) {
+            Keymap parent = JTextComponent
+                    .getKeymap(JTextComponent.DEFAULT_KEYMAP);
+            map = JTextComponent.addKeymap(RTEXTAREA_KEYMAP_NAME, parent);
+            map.setDefaultAction(new TextAreaEditorKit.DefaultKeyTypedAction());
+        }
+
+        return map;
+    }
+
+    /**
+     * Creates a default action map. This action map contains actions for all
+     * basic text area work - cut, copy, paste, select, caret motion, etc.<p>
+     *
+     * This isn't named <code>createActionMap()</code> because there is a
+     * package-private member by that name in <code>BasicTextAreaUI</code>, and
+     * some compilers will give warnings that we are not overriding that method
+     * since it is package-private.
+     *
+     * @return The action map.
+     */
+    protected ActionMap createTextAreaActionMap() {
+        // Get the actions of the text area (which in turn gets them from its
+        // DefaultEditorKit)
+        ActionMap map = new ActionMapUIResource();
+        Action[] actions = textArea.getActions();
+        int n = actions.length;
+        for (int i = 0; i < n; i++) {
+            Action a = actions[i];
+            map.put(a.getValue(Action.NAME), a);
+        }
+
+        map.put(TransferHandler.getCutAction().getValue(Action.NAME),
+                TransferHandler.getCutAction());
+        map.put(TransferHandler.getCopyAction().getValue(Action.NAME),
+                TransferHandler.getCopyAction());
+        map.put(TransferHandler.getPasteAction().getValue(Action.NAME),
+                TransferHandler.getPasteAction());
+
+        return map;
+    }
+
+    /**
+     * Returns the name to use to cache/fetch the shared action map. This should
+     * be overridden by subclasses if the subclass has its own custom editor kit
+     * to install, so its actions get picked up.
+     *
+     * @return The name of the cached action map.
+     */
+    protected String getActionMapName() {
+        return SHARED_ACTION_MAP_NAME;
+    }
+
+    /**
+     * Fetches the EditorKit for the UI.
+     *
+     * @param tc the text component for which this UI is installed.
+     * @return the editor capabilities.
+     * @see TextUI#getEditorKit.
+     */
+    public EditorKit getEditorKit(JTextComponent tc) {
+        return defaultKit;
+    }
+
+    /**
+     * Returns the text area for which we are the UI.
+     *
+     * @return The text area.
+     */
+    public TextArea getTextArea() {
+        return textArea;
+    }
+
+    /**
+     * Returns an action map to use by a text area.<p>
+     *
+     * This method is not named <code>getActionMap()</code> because there is a
+     * package-private method in <code>BasicTextAreaUI</code> with that name.
+     * Thus, creating a new method with that name causes certain compilers to
+     * issue warnings that you are not actually overriding the original method
+     * (since it is package-private).
+     *
+     * @return The action map.
+     * @see #createTextAreaActionMap()
+     */
+    private ActionMap getTextAreaActionMap() {
+        // Get the UIManager-cached action map; if this is the first TextArea
+        // created, create the action map and cache it
+        ActionMap map = (ActionMap) UIManager.get(getActionMapName());
+        if (map == null) {
+            map = createTextAreaActionMap();
+            UIManager.put(getActionMapName(), map);
+        }
+
+        ActionMap componentMap = new ActionMapUIResource();
+        componentMap.put("requestFocus", new FocusAction());
+
+        if (map != null) {
+            componentMap.setParent(map);
+        }
+        return componentMap;
+    }
+
+    /**
+     * Get the InputMap to use for the UI.<p>
+     *  
+     * This method is not named <code>getInputMap()</code> because there is a
+     * package-private method in <code>BasicTextAreaUI</code> with that name.
+     * Thus, creating a new method with that name causes certain compilers to
+     * issue warnings that you are not actually overriding the original method
+     * (since it is package-private).
+     */
+    protected InputMap getTextAreaInputMap() {
+        InputMap map = new InputMapUIResource();
+        InputMap shared = (InputMap) UIManager.get(SHARED_INPUT_MAP_NAME);
+        if (shared == null) {
+            shared = new TADefaultInputMap();
+            UIManager.put(SHARED_INPUT_MAP_NAME, shared);
+        }
+        map.setParent(shared);
+        return map;
+    }
+
+    /**
+     * Gets the allocation to give the root View. Due to an unfortunate set of
+     * historical events this method is inappropriately named. The Rectangle
+     * returned has nothing to do with visibility. The component must have a
+     * non-zero positive size for this translation to be computed.
+     *
+     * @return the bounding box for the root view
+     */
+    protected Rectangle getVisibleEditorRect() {
+        Rectangle alloc = textArea.getBounds();
+        if ((alloc.width > 0) && (alloc.height > 0)) {
+            alloc.x = alloc.y = 0;
+            Insets insets = textArea.getInsets();
+            alloc.x += insets.left;
+            alloc.y += insets.top;
+            alloc.width -= insets.left + insets.right;
+            alloc.height -= insets.top + insets.bottom;
+            return alloc;
+        }
+        return null;
+    }
+
+    protected void installDefaults() {
+        super.installDefaults();
+
+        JTextComponent editor = getComponent();
+        editor.setFont(TextAreaBase.getDefaultFont());
+
+        // Nimbus (and possibly other Synth lafs) doesn't play by BasicLaf rules
+        // and doesn't set properties needed by custom BasicTextAreaUI's
+        correctNimbusDefaultProblems(editor);
+
+        editor.setTransferHandler(defaultTransferHandler);
+    }
+
+    /** {@inheritDoc} */
+    protected void installKeyboardActions() {
+        // NOTE: Don't call super.installKeyboardActions(), as that causes
+        // JTextAreas to stop responding to certain keystrokes if an TextArea is
+        // the first-instantiated text area. This is because of the code path
+        // installKeyboardActions() -> getActionMap() -> createActionMap(). In
+        // BasicTextUI#createActionMap(), "editor.getActions()" is called, and
+        // the current editor's returned Actions are used to create the
+        // ActionMap, which is then cached and used in all future J/TextAreas.
+        // Unfortunately, TextArea actions don't worn in JTextAreas.
+
+        TextArea textArea = getTextArea();
+        textArea.setKeymap(createKeymap());
+
+        // Since BasicTextUI.getInputMap() is package-private, instead use our
+        // own version here
+        InputMap map = getTextAreaInputMap();
+        SwingUtilities
+                .replaceUIInputMap(textArea, JComponent.WHEN_FOCUSED, map);
+
+        // Same thing here with action map
+        ActionMap am = getTextAreaActionMap();
+        if (am != null) {
+            SwingUtilities.replaceUIActionMap(textArea, am);
+        }
+    }
+
+    /** Installs this UI to the given text component. */
+    public void installUI(JComponent c) {
+        if (!(c instanceof TextArea)) {
+            throw new Error("TextAreaUI needs an instance of TextArea!");
+        }
+        super.installUI(c);
+    }
+
+    protected void paintBackground(Graphics g) {
+        // Only fill in the background if an image isn't being used
+        Color bg = textArea.getBackground();
+        if (bg != null) {
+            g.setColor(bg);
+            Rectangle r = g.getClipBounds();
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+
+        Rectangle visibleRect = textArea.getVisibleRect();
+
+        paintLineHighlights(g);
+        paintCurrentLineHighlight(g, visibleRect);
+        paintMarginLine(g, visibleRect);
+    }
+
+    /**
+     * Paints the highlighted current line, if it is enabled.
+     *
+     * @param g The graphics context with which to paint.
+     * @param visibleRect The visible rectangle of the text area.
+     */
+    protected void paintCurrentLineHighlight(Graphics g, Rectangle visibleRect) {
+        if (textArea.getHighlightCurrentLine()) {
+            Caret caret = textArea.getCaret();
+            if (caret.getDot() == caret.getMark()) {
+                Color highlight = textArea.getCurrentLineHighlightColor();
+                // NOTE: We use the getLineHeight() method below instead of
+                // currentCaretRect.height because of a bug where
+                // currentCaretRect.height is incorrect when an SyntaxTextArea
+                // is first displayed (it is initialized with the text area's
+                // font.getHeight() (via TextArea), but isn't changed to account
+                // for the syntax styles before it is displayed)
+                int height = textArea.getLineHeight();
+
+                if (textArea.getFadeCurrentLineHighlight()) {
+                    Graphics2D g2d = (Graphics2D) g;
+                    Color bg = textArea.getBackground();
+                    GradientPaint paint = new GradientPaint(visibleRect.x, 0,
+                            highlight, visibleRect.x + visibleRect.width, 0,
+                            bg == null ? Color.WHITE : bg);
+                    g2d.setPaint(paint);
+                    g2d.fillRect(visibleRect.x, textArea.currentCaretY,
+                            visibleRect.width, height);
+                } else {
+                    g.setColor(highlight);
+                    g.fillRect(visibleRect.x, textArea.currentCaretY,
+                            visibleRect.width, height);
+                }
+            } // End of if (caret.getDot()==caret.getMark())
+        } // End of if (textArea.isCurrentLineHighlightEnabled()..
+    }
+
+    /**
+     * Paints any line highlights.
+     *
+     * @param g The graphics context.
+     */
+    protected void paintLineHighlights(Graphics g) {
+        LineHighlightManager lhm = textArea.getLineHighlightManager();
+        if (lhm != null) {
+            lhm.paintLineHighlights(g);
+        }
+    }
+
+    /**
+     * Draws the "margin line" if enabled.
+     *
+     * @param g The graphics context to paint with.
+     * @param visibleRect The visible rectangle of this text area.
+     */
+    protected void paintMarginLine(Graphics g, Rectangle visibleRect) {
+        if (textArea.isMarginLineEnabled()) {
+            g.setColor(textArea.getMarginLineColor());
+            Insets insets = textArea.getInsets();
+            int marginLineX = textArea.getMarginLinePixelLocation()
+                    + (insets == null ? 0 : insets.left);
+            g.drawLine(marginLineX, visibleRect.y, marginLineX, visibleRect.y
+                    + visibleRect.height);
+        }
+    }
+
+    /**
+     * Returns the y-coordinate of the specified line.<p>
+     *
+     * The default implementation is equivalent to:
+     * <pre>
+     * int startOffs = textArea.getLineStartOffset(line);
+     * return yForLineContaining(startOffs);</code>
+     * </pre>
+     *
+     * Subclasses that can calculate this value more quickly than traditional
+     * {@link #modelToView(JTextComponent, int)} calls should override this
+     * method to do so. This method may be used when the entire bounding box
+     * isn't needed, to speed up rendering.
+     *
+     * @param line The line number.
+     * @return The y-coordinate of the top of the line, or <code>-1</code> if
+     *         this text area doesn't yet have a positive size or the line is
+     *         hidden (i.e. from folding).
+     * @throws BadLocationException If <code>line</code> isn't a valid line
+     *         number for this document.
+     */
+    public int yForLine(int line) throws BadLocationException {
+        int startOffs = textArea.getLineStartOffset(line);
+        return yForLineContaining(startOffs);
+    }
+
+    /**
+     * Returns the y-coordinate of the line containing an offset.<p>
+     *
+     * The default implementation is equivalent to:
+     * <pre>
+     * int line = textArea.getLineOfOffset(offs);
+     * int startOffs = textArea.getLineStartOffset(line);
+     * return modelToView(startOffs).y;</code>
+     * </pre>
+     *
+     * Subclasses that can calculate this value more quickly than traditional
+     * {@link #modelToView(JTextComponent, int)} calls should override this
+     * method to do so. This method may be used when the entire bounding box
+     * isn't needed, to speed up rendering.
+     *
+     * @param offs The offset info the document.
+     * @return The y-coordinate of the top of the offset, or <code>-1</code> if
+     *         this text area doesn't yet have a positive size or the line is
+     *         hidden (i.e. from folding).
+     * @throws BadLocationException If <code>offs</code> isn't a valid offset
+     *         into the document.
+     */
+    public int yForLineContaining(int offs) throws BadLocationException {
+        Rectangle r = modelToView(textArea, offs);
+        return r != null ? r.y : -1;
+    }
+
+    /** Registered in the ActionMap. */
+    class FocusAction extends AbstractAction {
+
+        private static final long serialVersionUID = -3898391799242008836L;
+
+        public void actionPerformed(ActionEvent e) {
+            textArea.requestFocus();
+        }
+
+        public boolean isEnabled() {
+            return textArea.isEditable();
+        }
+    }
+}
