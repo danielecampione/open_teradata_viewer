@@ -120,104 +120,16 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         APPLICATION_FRAME = this;
     }
 
-    public void drawIt(SplashScreen splashScreen) {
-        splashScreen.progress(9);
-        setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
-        getRootPane().setGlassPane(glassPane = new GlassPane());
-        splashScreen.progress(10);
-
-        getContentPane().setLayout(new BorderLayout());
-        UISupport.setMainFrame(getInstance());
-        splashScreen.progress(10);
-        JPanel globalPanel = new JPanel(new BorderLayout());
-        globalPanel.add(createWorkArea(), BorderLayout.CENTER);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                System.exit(0);
-            }
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-                handleWindowClose();
-            }
-        });
-        splashScreen.progress(10);
-
-        // Create the console and configure it
-        setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
-        getConsole().setEditable(true);
-        getConsole().setCaretPosition(getConsole().getDocument().getLength());
-        DefaultCaret caret = (DefaultCaret) getConsole().getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
-        splashScreen.progress(5);
-        JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                globalPanel, scrollPaneConsole);
-        mainSplitPane.setOneTouchExpandable(true);
-        mainSplitPane.setDividerSize(4);
-        mainSplitPane.setDividerLocation(510);
-        getContentPane().add(mainSplitPane, BorderLayout.CENTER);
-        splashScreen.progress(5);
-
-        setFindDialog(new OTVFindDialog(this));
-        splashScreen.progress(5);
-        setGoToDialog(new OTVGoToDialog(this));
-        splashScreen.progress(5);
-
-        graphicViewer = new GraphicViewer();
-        splashScreen.progress(10);
-        GraphicViewerDocument graphicViewerDocument = graphicViewer.myView
-                .getDocument();
-        graphicViewerDocument.addDocumentListener(graphicViewer);
-        graphicViewerDocument.setUndoManager(new UndoMgr());
-        getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
-
-        try {
-            if (StringUtil.isEmpty(Config.getDrivers())) {
-                Config.saveDrivers("com.teradata.jdbc.TeraDriver");
-            }
-            String animatedAssistantProperty = "animated_assistant_actived";
-            String strAnimatedAssistantActived = Config
-                    .getSetting(animatedAssistantProperty);
-            if (StringUtil.isEmpty(strAnimatedAssistantActived)) {
-                Config.saveSetting(animatedAssistantProperty, "false");
-                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                        .setAnimatedAssistantActived(false);
-            } else {
-                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                        .setAnimatedAssistantActived(strAnimatedAssistantActived
-                                .equalsIgnoreCase("true"));
-            }
-        } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
+    public void drawIt() {
+        // Create the splash screen, if this application has one
+        final SplashScreen splashScreen = createSplashScreen();
+        if (splashScreen != null) {
+            splashScreen.setVisible(true);
         }
-        splashScreen.progress(10);
 
-        displayChanger = new DisplayChanger(this);
-        displayChanger.setExclusiveMode(false);
-        splashScreen.progress(5);
-
-        setApplicationMenuBar(new ApplicationMenuBar());
-        Actions.DEFAULT_THEME.actionPerformed(new ActionEvent(this, 0, null));
-        splashScreen.progress(5);
-
-        installPlugins();
-        splashScreen.progress(5);
-
-        pack();
-        double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()
-                .getWidth();
-        double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
-                .getHeight();
-        setSize(Math.min(1150, (int) (screenWidth * .8)),
-                Math.min(720, (int) (screenHeight * .8)));
-        setMinimumSize(new Dimension((int) (screenWidth * .2),
-                (int) (screenHeight * .2)));
-        SwingUtil.centerWithinScreen(this);
-        splashScreen.progress(5);
-
-        Actions.CONNECT.actionPerformed(new ActionEvent(this, 0, null));
+        // Do the rest of this stuff "later", so that the EDT has time to
+        // actually display the splash screen and update it
+        SwingUtilities.invokeLater(new StartupRunnable(splashScreen));
     }
 
     public AnimatedAssistant startAnimatedAssistant(
@@ -582,6 +494,18 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     }
 
     /**
+     * Returns the splash screen to display while this GUI application is
+     * loading.
+     *
+     * @return The splash screen. If <code>null</code> is returned, no splash
+     *         screen is displayed.
+     */
+    protected SplashScreen createSplashScreen() {
+        String img = "icons/logo.png";
+        return new SplashScreen(img, "Initializing..");
+    }
+
+    /**
      * Returns the manager in charge of any 3rd-party LookAndFeels this
      * application is aware of.
      *
@@ -715,5 +639,177 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     /** @param _OTVGoToDialog The goto dialog to set. */
     public void setGoToDialog(OTVGoToDialog _OTVGoToDialog) {
         this._OTVGoToDialog = _OTVGoToDialog;
+    }
+
+    /**
+     * Returns the location of the specified jar file in the currently-running
+     * application's classpath. This can be useful if you wish to know the
+     * location of the installation of the currently-running application.<p> For
+     * example, a Java program running from the executable jar
+     * <code>Foo.jar</code> can call this method with <code>Foo.jar</code> as
+     * the parameter, and the location of the jar file would be returned. With
+     * this knowledge, along with knowledge of the directory layout of the
+     * application, the programmer can access other files in the installation.
+     *
+     * @param jarFileName The name of the jar file for which to search.
+     * @return The directory in which the jar file resides.
+     */
+    public static String getLocationOfJar(String jarFileName) {
+        String classPath = System.getProperty("java.class.path");
+        int index = classPath.indexOf(jarFileName);
+
+        // A jar file on a classpath must be explicitly given; a jar file in a
+        // directory, for example, will not be picked up by specifying
+        // "-classpath /my/directory/". So, we can simply search for the jar
+        // name in the classpath string, and if it isn't there, it must be in
+        // the current directory
+        if (index > -1) {
+            int pathBeginning = classPath.lastIndexOf(File.pathSeparator,
+                    index - 1) + 1;
+            String loc = classPath.substring(pathBeginning, index);
+            File file = new File(loc);
+            return file.getAbsolutePath();
+        }
+
+        // Otherwise, it must be in the current directory
+        return System.getProperty("user.dir");
+    }
+
+    /**
+     * Actually creates the GUI. This is called after the splash screen is
+     * displayed via <code>SwingUtilities#invokeLater()</code>.
+     *
+     * @author D. Campione
+     * 
+     */
+    private class StartupRunnable implements Runnable {
+
+        private SplashScreen splashScreen;
+
+        public StartupRunnable(SplashScreen splashScreen) {
+            this.splashScreen = splashScreen;
+        }
+
+        public void run() {
+            splashScreen.updateStatus(
+                    "The LookAndFeel has been installed successfully.", 10);
+
+            setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
+            getRootPane().setGlassPane(glassPane = new GlassPane());
+
+            splashScreen.updateStatus("Initializing the main window..", 20);
+            getContentPane().setLayout(new BorderLayout());
+            UISupport.setMainFrame(getInstance());
+
+            splashScreen.updateStatus("Initializing the work area..", 30);
+            JPanel globalPanel = new JPanel(new BorderLayout());
+            globalPanel.add(createWorkArea(), BorderLayout.CENTER);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    System.exit(0);
+                }
+
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    handleWindowClose();
+                }
+            });
+
+            // Create the console and configure it
+            splashScreen.updateStatus("Initializing the console..", 40);
+            setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
+            getConsole().setEditable(true);
+            getConsole().setCaretPosition(
+                    getConsole().getDocument().getLength());
+            DefaultCaret caret = (DefaultCaret) getConsole().getCaret();
+            caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+            JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
+
+            splashScreen.updateStatus("Initializing the work panels..", 45);
+            JSplitPane mainSplitPane = new JSplitPane(
+                    JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
+            mainSplitPane.setOneTouchExpandable(true);
+            mainSplitPane.setDividerSize(4);
+            mainSplitPane.setDividerLocation(510);
+            getContentPane().add(mainSplitPane, BorderLayout.CENTER);
+
+            splashScreen.updateStatus("Initializing the find dialog..", 50);
+            setFindDialog(new OTVFindDialog(ApplicationFrame.this));
+
+            splashScreen
+                    .updateStatus("Initializing the goto line dialog..", 55);
+            setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
+
+            splashScreen.updateStatus("Initializing the graphic viewer..", 60);
+            graphicViewer = new GraphicViewer();
+
+            splashScreen.updateStatus(
+                    "Initializing the graphic viewer undo manager..", 65);
+            GraphicViewerDocument graphicViewerDocument = graphicViewer.myView
+                    .getDocument();
+            graphicViewerDocument.addDocumentListener(graphicViewer);
+            graphicViewerDocument.setUndoManager(new UndoMgr());
+
+            splashScreen.updateStatus("Initializing the status bar..", 70);
+            getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
+
+            try {
+                if (StringUtil.isEmpty(Config.getDrivers())) {
+                    Config.saveDrivers("com.teradata.jdbc.TeraDriver");
+                }
+
+                splashScreen.updateStatus(
+                        "Initializing the animated assistant..", 75);
+                String animatedAssistantProperty = "animated_assistant_actived";
+                String strAnimatedAssistantActived = Config
+                        .getSetting(animatedAssistantProperty);
+                if (StringUtil.isEmpty(strAnimatedAssistantActived)) {
+                    Config.saveSetting(animatedAssistantProperty, "false");
+                    ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                            .setAnimatedAssistantActived(false);
+                } else {
+                    ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+                            .setAnimatedAssistantActived(strAnimatedAssistantActived
+                                    .equalsIgnoreCase("true"));
+                }
+            } catch (Exception e) {
+                ExceptionDialog.ignoreException(e);
+            }
+
+            splashScreen.updateStatus("Initializing the display changer..", 80);
+            displayChanger = new DisplayChanger(ApplicationFrame.this);
+            displayChanger.setExclusiveMode(false);
+
+            splashScreen.updateStatus("Initializing the menu bar..", 85);
+            setApplicationMenuBar(new ApplicationMenuBar());
+            Actions.DEFAULT_THEME
+                    .actionPerformed(new ActionEvent(this, 0, null));
+
+            splashScreen.updateStatus("Installing the plugins..", 90);
+            installPlugins();
+
+            splashScreen.updateStatus("Configuring the main window..", 98);
+            pack();
+            double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()
+                    .getWidth();
+            double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
+                    .getHeight();
+            setSize(Math.min(1150, (int) (screenWidth * .8)),
+                    Math.min(720, (int) (screenHeight * .8)));
+            setMinimumSize(new Dimension((int) (screenWidth * .2),
+                    (int) (screenHeight * .2)));
+            SwingUtil.centerWithinScreen(ApplicationFrame.this);
+            splashScreen.updateStatus("Done.", 100);
+
+            // Clean up the splash screen, if necessary
+            if (splashScreen != null) {
+                splashScreen.setVisible(false);
+                splashScreen.dispose();
+            }
+            setVisible(true);
+
+            Actions.CONNECT.actionPerformed(new ActionEvent(this, 0, null));
+        }
     }
 }

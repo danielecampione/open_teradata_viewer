@@ -87,6 +87,7 @@ public class ApplicationMenuBar extends JMenuBar {
         add(menu);
         menu.add(Actions.CUT);
         menu.add(Actions.COPY);
+        menu.add(Actions.COPY_AS_RTF);
         menu.add(Actions.PASTE);
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);

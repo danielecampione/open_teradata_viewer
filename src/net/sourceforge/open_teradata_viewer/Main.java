@@ -19,8 +19,10 @@
 package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Font;
+import java.io.File;
 
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -61,60 +63,81 @@ public class Main {
         // implementations
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        try {
-            String className = UIManager.getSystemLookAndFeelClassName();
+        // Catch any uncaught Throwables on the EDT and log them
+        AWTExceptionHandler.register();
 
-            String startupLookAndFeelProperty = "startup_lookandfeel_class";
-            String strStartupLookAndFeelClassName;
-            strStartupLookAndFeelClassName = Config
-                    .getSetting(startupLookAndFeelProperty);
-            if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
-                Config.saveSetting(startupLookAndFeelProperty, className);
-            } else {
-                className = strStartupLookAndFeelClassName;
+        // Swing stuff should always be done on the EDT..
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                String lafName = UIManager.getSystemLookAndFeelClassName();
+
+                try {
+                    String startupLookAndFeelProperty = "startup_lookandfeel_class";
+                    String strStartupLookAndFeelClassName = Config
+                            .getSetting(startupLookAndFeelProperty);
+                    if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
+                        Config.saveSetting(startupLookAndFeelProperty, lafName);
+                    } else {
+                        lafName = strStartupLookAndFeelClassName;
+                    }
+                } catch (Exception e) {
+                    ExceptionDialog.hideException(e);
+                }
+
+                String rootDir = null;
+                String javaClassPath = System.getProperty("java.class.path");
+                String pathSeparator = System.getProperty("path.separator");
+                if (javaClassPath.contains(pathSeparator)) {
+                    rootDir = System.getProperty("user.dir");
+                } else {
+                    File executableFile = new File(javaClassPath);
+                    rootDir = ApplicationFrame.getLocationOfJar(executableFile
+                            .getName());
+                }
+
+                ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(
+                        Utilities.conformizePath(rootDir) + "lookandfeels"
+                                + System.getProperty("file.separator"));
+
+                try {
+                    ClassLoader cl = lafManager.getLAFClassLoader();
+                    // Must set UIManager's ClassLoader before instantiating the LAF
+                    UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+                    Class clazz = cl.loadClass(lafName);
+                    LookAndFeel laf = (LookAndFeel) clazz.newInstance();
+                    UIManager.setLookAndFeel(laf);
+                    UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+                    UISupport.installOsSpecificLafTweaks();
+
+                    UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
+                            Font.PLAIN, 12));
+                    // Turn off metal's use of bold fonts
+                    // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                } catch (ClassNotFoundException cnfe) {
+                    ExceptionDialog.hideException(cnfe);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (UnsupportedLookAndFeelException ulafe) {
+                    ExceptionDialog.hideException(ulafe);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (IllegalAccessException iae) {
+                    ExceptionDialog.hideException(iae);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (InstantiationException ie) {
+                    ExceptionDialog.hideException(ie);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (IllegalStateException ise) {
+                    ExceptionDialog.hideException(ise);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (RuntimeException re) {
+                    throw re;
+                } catch (Throwable t) {
+                    ExceptionDialog.hideException(t);
+                }
+
+                ApplicationFrame mainWindow = new ApplicationFrame();
+                mainWindow.initLookAndFeelManager(lafManager);
+                mainWindow.drawIt();
             }
-
-            ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager();
-
-            ClassLoader cl = lafManager.getLAFClassLoader();
-            // Must set UIManager's ClassLoader before instantiating the LAF
-            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-            Class clazz = cl.loadClass(className);
-            LookAndFeel laf = (LookAndFeel) clazz.newInstance();
-            UIManager.setLookAndFeel(laf);
-            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-            UISupport.installOsSpecificLafTweaks();
-
-            UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
-                    Font.PLAIN, 12));
-            // Turn off metal's use of bold fonts
-            // UIManager.put("swing.boldMetal", Boolean.FALSE);
-            ApplicationFrame mainWindow = new ApplicationFrame();
-            mainWindow.initLookAndFeelManager(lafManager);
-            SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
-            mainWindow.drawIt(splashScreen);
-            mainWindow.setVisible(true);
-            splashScreen.setVisible(false);
-            splashScreen.dispose();
-        } catch (ClassNotFoundException cnfe) {
-            ExceptionDialog.hideException(cnfe);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-        } catch (UnsupportedLookAndFeelException ulafe) {
-            ExceptionDialog.hideException(ulafe);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-        } catch (IllegalAccessException iae) {
-            ExceptionDialog.hideException(iae);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-        } catch (InstantiationException ie) {
-            ExceptionDialog.hideException(ie);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-        } catch (IllegalStateException ise) {
-            ExceptionDialog.hideException(ise);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-        } catch (RuntimeException re) {
-            ExceptionDialog.hideException(re);
-        } catch (Throwable t) {
-            ExceptionDialog.hideException(t);
-        }
+        });
     }
 }

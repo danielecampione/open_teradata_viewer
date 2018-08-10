@@ -20,177 +20,186 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.ComponentOrientation;
+import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.net.URL;
+import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EtchedBorder;
 
 /**
- * Screen displayed while the long lasting startup
- * 
- * @author D. Campione
+ * Screen displayed while the long lasting startup.
  *
+ * @author D. Campione
+ * 
  */
 public class SplashScreen extends JWindow {
 
     private static final long serialVersionUID = -8630351955402071722L;
 
-    public static String INFO_MESSAGE;
+    private JLabel imageLabel; // Forced repaint needed on OS X
+    private ProgressBar progressBar;
 
-    /** the progressbar which has to be resized */
-    private JProgressBar progressbar_;
+    private static final int statusBarHeight = 25;
 
-    static {
-        try {
-            INFO_MESSAGE = "<html><table><tr><td>"
-                    + Main.APPLICATION_NAME
-                    + " "
-                    + Config.getVersion()
-                    + "</td><td align='right'>"
-                    + Config.HOME_PAGE
-                    + "</td></tr><tr><td>Copyright &copy 2012, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
-        } catch (IOException ioe) {
-            ExceptionDialog.ignoreException(ioe);
+    /**
+     * Creates a new <code>SplashScreen</code> with default color scheme.
+     *
+     * @param splashScreenPath Path to an image file that a
+     *                         <code>ClassLoader</code> will understand.
+     * @param statusText The status text to initially display.
+     */
+    public SplashScreen(String splashScreenPath, String statusText) {
+        this(splashScreenPath, statusText, new Color(190, 190, 190), new Color(
+                44, 70, 154), new Color(75, 141, 199), Color.WHITE);
+    }
+
+    /**
+     * Creates a new <code>SplashScreen</code>.
+     *
+     * @param splashScreenPath Path to an image file that a
+     *                         <code>ClassLoader</code> will understand.
+     * @param statusText The status text to initially display.
+     * @param statusBackground The color to use as the status bar's background.
+     * @param foreground1 The color to use for the first part of the gradient
+     *                    fill of the status bar.
+     * @param foreground2 The color to use for the second part of the gradient
+     *                    fill of the status bar.
+     * @param textColor The color to use for the status text.
+     */
+    public SplashScreen(String splashScreenPath, String statusText,
+            Color statusBackground, Color foreground1, Color foreground2,
+            Color textColor) {
+        JPanel contentPane = new JPanel(new BorderLayout());
+
+        // Get the splash screen image
+        ClassLoader cl = this.getClass().getClassLoader();
+        URL imageURL = cl.getResource(splashScreenPath);
+        ImageIcon image = new ImageIcon(imageURL);
+
+        // Create a panel for the splash screen image
+        imageLabel = new JLabel(image);
+        contentPane.add(imageLabel);
+
+        // Create the "progress bar" at the bottom
+        progressBar = new ProgressBar(image.getIconWidth(), statusText,
+                statusBackground, foreground1, foreground2, textColor);
+        contentPane.add(progressBar, BorderLayout.SOUTH);
+
+        // Combine everything and get ready to go
+        setContentPane(contentPane);
+        ComponentOrientation orientation = ComponentOrientation
+                .getOrientation(getLocale());
+        applyComponentOrientation(orientation);
+        this.pack();
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        this.setLocationRelativeTo(null); // Center on the screen
+
+    }
+
+    /**
+     * Updates the percent complete bar and the associated status text.
+     *
+     * @param statusText The new status text to display.
+     * @param percentComplete The new percentage to have filled in the percent
+     *                        complete bar.
+     */
+    public void updateStatus(String statusText, int percentComplete) {
+        progressBar.update(statusText, percentComplete);
+        // Force a repaint since we (should be) on the EDT. Note that repainting
+        // the imageLabel only seems necessary on OS X (and possibly Linux); on
+        // Windows it is not needed
+        progressBar.paintImmediately(0, 0, progressBar.getWidth(),
+                progressBar.getHeight());
+        imageLabel.paintImmediately(0, 0, imageLabel.getWidth(),
+                imageLabel.getHeight());
+    }
+
+    /**
+     * The "progress bar" part of the splash screen. This component is somewhat
+     * configurable; you can:
+     * <ul>
+     *   <li>Configure the background color
+     *   <li>Configure the progress "fill in" color, even make it a gradient
+     *   <li>Set the status text and its color
+     * </ul>
+     */
+    private static class ProgressBar extends JPanel {
+
+        private static final long serialVersionUID = -2795019144995810581L;
+
+        private Dimension preferredSize;
+        private Color textColor;
+        private GradientPaint paint;
+        private int percentComplete;
+        private String text;
+        private int textX, textY;
+
+        ProgressBar(int width, String initialText, Color background,
+                Color foreground1, Color foreground2, Color textColor) {
+            setBackground(background);
+            preferredSize = new Dimension(width, statusBarHeight);
+            paint = new GradientPaint(0.0f, 0.0f, foreground1, 0.0f,
+                    statusBarHeight, foreground2);
+            this.textColor = textColor;
+            update(text, percentComplete);
         }
-    }
 
-    //----------------------------------------------------------------------------  
+        public Dimension getPreferredSize() {
+            return preferredSize;
+        }
 
-    /** 
-     * creates the new splashscreen window
-     * @param frame the main window the splashscreen is depending on => if main window closed also
-     * splash is closed
-     * @param wait_time time how long the window is diplayed
-     */
-    public SplashScreen(JFrame frame, int wait_time) {
-        super(frame);
+        public void paintComponent(Graphics g) {
+            // Fill in background
+            super.paintComponent(g);
 
-        Dimension screen_size;
-        Dimension label_size;
-        JPanel main_pain = new JPanel();
+            // Paint the filled-in portion of the status bar
+            int width = getWidth();
+            Graphics2D g2d = (Graphics2D) g;
+            Paint oldPaint = g2d.getPaint();
+            g2d.setPaint(paint);
+            int filledWidth = width * percentComplete / 100;
+            int x = getComponentOrientation().isLeftToRight() ? 0 : getWidth()
+                    - filledWidth;
+            g2d.fillRect(x, 0, filledWidth, getHeight());
+            g2d.setPaint(oldPaint);
 
-        getContentPane().add(main_pain);
+            // Paint the status text
+            if (text != null) {
+                // Try to use the rendering hint set that is "native"
+                Map old = UISupport.setNativeRenderingHints(g2d);
 
-        main_pain.setBackground(Color.white);
-        main_pain.setBorder(BorderFactory
-                .createEtchedBorder(EtchedBorder.LOWERED));
+                g2d.setColor(textColor);
+                g2d.drawString(text, textX, textY);
 
-        main_pain.setLayout(new BorderLayout(0, 10));
-
-        addContainers(main_pain);
-        pack();
-
-        screen_size = Toolkit.getDefaultToolkit().getScreenSize();
-        label_size = getContentPane().getComponent(0).getPreferredSize();
-
-        setLocation(screen_size.width / 2 - (label_size.width / 2),
-                screen_size.height / 2 - (label_size.height / 2));
-        addListeners();
-
-        threadIt(wait_time * 1000);
-    }
-
-    //----------------------------------------------------------------------------
-    /** adds a Listeners to the window */
-    private void addListeners() {
-        addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                setVisible(false);
-                dispose();
-            }
-        });
-    }
-
-    //----------------------------------------------------------------------------
-    /** 
-     * Starts a thread to for the splash screen
-     * @param wait_time time to wait until splashscreen vanishes if this param is set 0 the splash
-     * screen does not vanish automatically. It has to be closed manually.
-     */
-    private void threadIt(int wait_time) {
-        final int pause = wait_time;
-
-        final Runnable closer_runner = new Runnable() {
-            public void run() {
-                setVisible(false);
-                dispose();
-            }
-        };
-
-        Runnable wait_runner = new Runnable() {
-            public void run() {
-                try {
-                    if (pause > 0) {
-                        Thread.sleep(pause);
-                        SwingUtilities.invokeAndWait(closer_runner);
-                    }
-                } catch (Exception e) {
-                    ExceptionDialog.hideException(e);
+                if (old != null) {
+                    g2d.addRenderingHints(old);
                 }
             }
-        };
-
-        setVisible(true);
-        Thread splashThread = new Thread(wait_runner, "SplashThread");
-        splashThread.start();
-    }
-
-    //----------------------------------------------------------------------------
-    /** 
-     * Adds containers the the main pane
-     *
-     * @param main_pane the main pane
-     */
-    private void addContainers(JPanel main_pane) {
-        JLabel text_label = new JLabel(INFO_MESSAGE);
-        text_label.setHorizontalAlignment(JLabel.CENTER);
-
-        progressbar_ = new JProgressBar(1, 100);
-        progressbar_.setStringPainted(true);
-
-        // The ImageManager is not yet ready at this time.
-        main_pane.add(new JLabel(new ImageIcon(getClass().getClassLoader()
-                .getResource("icons/logo.png"))), BorderLayout.NORTH);
-        main_pane.add(progressbar_, BorderLayout.CENTER);
-        main_pane.add(text_label, BorderLayout.SOUTH);
-    }
-
-    //----------------------------------------------------------------------------
-    /** 
-     * The progressbar has the capability to display text. If the text displayed has to
-     * changed only call this method.
-     *
-     * @param task new text displayed in progressbar
-     */
-    public void showNewTask(String task) {
-        progressbar_.setString(task);
-    }
-
-    //----------------------------------------------------------------------------
-    /** 
-     * The progressbar has to grow while the application is loading. If a task has been
-     * completed the progressbar has to be resized by invoking this method
-     *
-     * @param amount_of_progress portion of load has been down with this class
-     */
-    public void progress(int amount_of_progress) {
-        int total_progress = progressbar_.getValue() + amount_of_progress;
-
-        if (total_progress > 100) {
-            total_progress = 100;
         }
 
-        progressbar_.setValue(total_progress);
+        void update(String text, int percentComplete) {
+            this.text = text;
+            if (text != null) {
+                FontMetrics fm = getFontMetrics(getFont());
+                if (fm != null) {
+                    int stringLength = fm.charsWidth(text.toCharArray(), 0,
+                            text.length());
+                    textX = (getWidth() - stringLength) / 2;
+                    textY = (statusBarHeight + fm.getAscent()) / 2;
+                }
+            }
+            this.percentComplete = percentComplete;
+            repaint();
+        }
     }
 }

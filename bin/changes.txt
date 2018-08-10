@@ -1,3 +1,8 @@
+0.12c (28/05/2012)
+    - Added the "COPY AS RTF" command to the "Edit" menu.
+    - Added the status text to the initial Splash Screen.
+    - Upgraded Teradata JDBC driver 14.00.00.13 -> 14.00.00.14
+
 0.12b (27/05/2012)
     - Added the "INCREASE FONT SIZES" command to the "Edit" menu.
     - Added the "DECREASE FONT SIZES" command to the "Edit" menu.

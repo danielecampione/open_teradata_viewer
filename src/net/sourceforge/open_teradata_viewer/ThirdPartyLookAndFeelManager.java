@@ -94,26 +94,18 @@ public class ThirdPartyLookAndFeelManager {
     private static final String MIN_JAVA_VERSION = "minJavaVersion";
     private static final String NAME = "name";
 
-    public static URL[] ALL_LNFS_JARS;
+    /** Ctor. */
+    public ThirdPartyLookAndFeelManager(String path) {
+        URL[] urls = null;
 
-    static {
         try {
-            String path = Utilities.conformizePath(System
-                    .getProperty("user.dir"))
-                    + "lookandfeels"
-                    + System.getProperty("file.separator");
-            ALL_LNFS_JARS = Drivers.retrieveAllJars(path);
+            urls = Drivers.retrieveAllJars(path);
             Drivers.addAllJarsToClasspath(path);
         } catch (MalformedURLException murle) {
             ExceptionDialog.ignoreException(murle);
         } catch (Exception e) {
-            ALL_LNFS_JARS = new URL[0];
+            urls = new URL[0];
         }
-    }
-
-    /** Ctor. */
-    public ThirdPartyLookAndFeelManager() {
-        URL[] urls = null;
 
         lnfInfo = load3rdPartyLookAndFeelInfo("open_teradata_viewer_lookandfeels.xml");
 
@@ -126,7 +118,6 @@ public class ThirdPartyLookAndFeelManager {
                 for (Iterator i = lnfInfo.iterator(); i.hasNext();) {
                     ExtendedLookAndFeelInfo info = (ExtendedLookAndFeelInfo) i
                             .next();
-                    urls = ALL_LNFS_JARS;
                     for (int j = 0; j < urls.length; j++) {
                         if (!lnfJarUrlList.contains(urls[j])) {
                             lnfJarUrlList.add(urls[j]);
@@ -354,9 +345,7 @@ public class ThirdPartyLookAndFeelManager {
             String defaultLAF = UIManager.getSystemLookAndFeelClassName();
             String startupLookAndFeelProperty = "startup_lookandfeel_class";
             Config.saveSetting(startupLookAndFeelProperty, defaultLAF);
-            UISupport.getDialogs().showInfoMessage(
-                    "Default Look And Feel has been restored.",
-                    Main.APPLICATION_NAME);
+            System.err.println("Default Look And Feel has been restored.");
         } catch (Exception e) {
             ExceptionDialog.ignoreException(e);
         }
