@@ -67,6 +67,7 @@ public final class Actions
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
     public static final CustomAction DRIVERS = new DriversAction();
     public static final CustomAction ABOUT = new AboutAction();
+    public static final CustomAction FULL_SCREEN = new FullScreenAction();
 
     private static final Actions ACTIONS = new Actions();
 

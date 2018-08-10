@@ -93,6 +93,10 @@ public class ApplicationFrame extends JFrame {
     /** The scollpane containing the schema browser. */
     private JScrollPane rightComponent;
 
+    private boolean fullScreenMode;
+
+    private DisplayChanger displayChanger;
+
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
         APPLICATION_FRAME = this;
@@ -131,7 +135,7 @@ public class ApplicationFrame extends JFrame {
                 handleWindowClose();
             }
         });
-        splashScreen.progress(20);
+        splashScreen.progress(10);
 
         // Create the text area for the status log and configure it.
         changeLog = new ChangeLog(5, 30, MAX_CHARACTERS_LOG);
@@ -169,7 +173,10 @@ public class ApplicationFrame extends JFrame {
         } catch (Exception e) {
             // ignore
         }
+        splashScreen.progress(10);
 
+        displayChanger = new DisplayChanger(this);
+        displayChanger.setExclusiveMode(false);
         splashScreen.progress(10);
     }
     public void setLookAndFeel(String className) {
@@ -492,5 +499,14 @@ public class ApplicationFrame extends JFrame {
 
     public JEditorPane getTextComponent() {
         return text;
+    }
+
+    public boolean isFullScreenModeActive() {
+        return fullScreenMode;
+    }
+
+    public void setFullScreenMode(boolean fullScreenMode) {
+        this.fullScreenMode = fullScreenMode;
+        displayChanger.setDisplayMode(this.fullScreenMode);
     }
 }

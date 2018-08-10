@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
@@ -131,6 +132,12 @@ public class ApplicationMenuBar extends JMenuBar {
                     .getClass().toString().substring("class ".length())))
                 _mnuAvailableLookAndFeel[i].setSelected(true);
         }
+
+        menu = new JMenu("View");
+        add(menu);
+        JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
+                Actions.FULL_SCREEN);
+        menu.add(fullScreenMenuItem);
 
         menu = new JMenu("?");
         add(menu);

@@ -44,8 +44,8 @@ public class HelpAction extends CustomAction {
     private static final long serialVersionUID = 1572333979959917847L;
 
     public HelpAction() {
-        super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
-                "Shows the user manual.");
+        super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1,
+                KeyEvent.VK_UNDEFINED), "Shows the user manual.");
         setEnabled(true);
     }
 
