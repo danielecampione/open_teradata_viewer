@@ -47,6 +47,8 @@ public final class Actions
 
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
+    public static final CustomAction COMMIT = new CommitAction();
+    public static final CustomAction ROLLBACK = new RollbackAction();
     public static final CustomAction CUT = new CutAction();
     public static final CustomAction COPY = new CopyAction();
     public static final CustomAction PASTE = new PasteAction();
@@ -128,6 +130,8 @@ public final class Actions
     protected void validateActions() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         DISCONNECT.setEnabled(isConnected);
+        COMMIT.setEnabled(isConnected);
+        ROLLBACK.setEnabled(isConnected);
         RUN.setEnabled(isConnected);
         RUN_SCRIPT.setEnabled(isConnected);
         SELECT_FROM.setEnabled(isConnected);

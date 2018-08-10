@@ -46,6 +46,8 @@ public class ApplicationToolBar extends JToolBar {
         setFloatable(false);
         add(Actions.RUN);
         add(Actions.RUN_SCRIPT);
+        add(Actions.COMMIT);
+        add(Actions.ROLLBACK);
         addSeparator();
         if (Actions.CUT_COPY_PASTE_ENABLED) {
             add(Actions.CUT);

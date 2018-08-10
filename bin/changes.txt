@@ -1,3 +1,9 @@
+0.08b (20/09/2011)
+    - Added the COMMIT command; the corresponding command button has been
+      installed on the tool bar and on the "Connection" menu.
+    - Added the ROLLBACK command; the corresponding command button has been
+      installed on the tool bar and on the "Connection" menu.
+
 0.08a (19/09/2011)
     - Added the "Copy" command button to the tool bar.
     - Added the "Cut" command button to the tool bar.
@@ -107,5 +113,5 @@
 
 0.01a (14/06/2011)
     - First release.
-    X [BUG0001] Sometimes, with the execution of different
-      "SELECT" statements, an error occurs.
+    X [BUG0001] Sometimes, with the execution of different "SELECT" statements,
+      an error occurs.

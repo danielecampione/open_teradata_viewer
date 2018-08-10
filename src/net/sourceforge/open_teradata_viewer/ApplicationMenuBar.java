@@ -50,8 +50,10 @@ public class ApplicationMenuBar extends JMenuBar {
         menu = new JMenu("Connection");
         add(menu);
         menu.add(Actions.CONNECT);
-        menu.addSeparator();
         menu.add(Actions.DISCONNECT);
+        menu.addSeparator();
+        menu.add(Actions.COMMIT);
+        menu.add(Actions.ROLLBACK);
 
         menu = new JMenu("File");
         add(menu);
