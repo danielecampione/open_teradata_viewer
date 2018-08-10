@@ -50,11 +50,12 @@ public class ConnectionData implements Comparable, Cloneable {
     }
 
     public ConnectionData(String newName, String newUrl, String newUser,
-            String newPassword) {
+            String newPassword, String newDefaultOwner) {
         this.name = newName;
         this.url = newUrl;
         this.user = newUser;
         this.password = newPassword;
+        this.defaultOwner = newDefaultOwner;
     }
 
     public String getName() {
@@ -153,8 +154,13 @@ public class ConnectionData implements Comparable, Cloneable {
     }
 
     private void addExtraProperties(Properties properties) {
-        // No extra property is available for the installed version of the
-        // Teradata driver.
+    }
+
+    @SuppressWarnings("unused")
+    private void addProperty(Properties properties, String name, String value) {
+        if (!url.toLowerCase().contains(name.toLowerCase())) {
+            properties.setProperty(name, value);
+        }
     }
 
     private void setMixedCaseQuotedIdentifiers() {

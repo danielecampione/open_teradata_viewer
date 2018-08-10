@@ -18,12 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.swing.Action;
@@ -46,19 +46,19 @@ import net.sourceforge.open_teradata_viewer.ResultSetTable;
  * @author D. Campione
  *
  */
-public class ShowSelectedRecordAction extends CustomAction {
+public class EditAction extends CustomAction {
 
-    private static final long serialVersionUID = -359356003157442886L;
+    private static final long serialVersionUID = -6208272234164147803L;
 
-    protected ShowSelectedRecordAction() {
-        super("Show selected record", "edit.png", null, null);
+    protected EditAction() {
+        super("Edit..", "edit.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
     }
 
-    protected ShowSelectedRecordAction(String name, String icon) {
+    protected EditAction(String name, String icon) {
         super(name, icon, null, null);
     }
 
@@ -102,23 +102,63 @@ public class ShowSelectedRecordAction extends CustomAction {
             constraints.gridy++;
         }
         JScrollPane scrollPane = new JScrollPane(panel);
-        try {
-            Dialog.show((String) getValue(Action.NAME), scrollPane,
-                    Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
-        } catch (Throwable t) {
-            ExceptionDialog.showException(t);
+        while (true) {
+            try {
+                if (Dialog.OK_OPTION == Dialog.show(
+                        (String) getValue(Action.NAME), scrollPane,
+                        Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION)
+                        && resultSet.getConcurrency() == ResultSet.CONCUR_UPDATABLE) {
+                    position(resultSet);
+                    boolean changed = false;
+                    for (int i = 0; i < textAreas.length; i++) {
+                        String text = textAreas[i].getText();
+                        if (textAreas[i].isEnabled()
+                                && change(text,
+                                        getOriginalValue(selectedRow, i))) {
+                            ResultSetTable.getInstance().update(i + 1, text);
+                            updateSelectedRow(selectedRow, i, text);
+                            changed = true;
+                        }
+                    }
+                    if (changed) {
+                        store(resultSet);
+                    }
+                }
+                break;
+            } catch (Throwable t) {
+                ExceptionDialog.showException(t);
+            }
         }
     }
 
-    protected void fillTextArea(JTextArea textArea,
-            @SuppressWarnings("rawtypes") List selectedRow, int column) {
+    @SuppressWarnings("rawtypes")
+    protected void fillTextArea(JTextArea textArea, List selectedRow, int column) {
         textArea.setText(getOriginalValue(selectedRow, column));
     }
 
-    private String getOriginalValue(
-            @SuppressWarnings("rawtypes") List selectedRow, int column) {
+    @SuppressWarnings("rawtypes")
+    private String getOriginalValue(List selectedRow, int column) {
         return selectedRow == null || selectedRow.get(column) == null
                 ? ""
                 : selectedRow.get(column).toString();
+    }
+
+    protected boolean change(String text, String originalText) {
+        return !text.equals(originalText);
+    }
+
+    protected void position(ResultSet resultSet) throws SQLException {
+        int origRow = ResultSetTable.getInstance().getOriginalSelectedRow();
+        resultSet.first();
+        resultSet.relative(origRow);
+    }
+
+    protected void updateSelectedRow(List<String> selectedRow, int column,
+            String text) {
+        selectedRow.set(column, text);
+    }
+
+    protected void store(ResultSet resultSet) throws SQLException {
+        resultSet.updateRow();
     }
 }

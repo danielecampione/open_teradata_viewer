@@ -1,9 +1,20 @@
+0.05c (25-jul-11)
+    X [BUG0003] Although it has been implemented the algorithm to change the
+      result set, it is not possible to update the Teradata database because of
+      a problem with the relative JDBC driver (wrong selected column index).
+    - Added the "Insert" action and the relative menu voice.
+    - Added the "Delete" action and the relative menu voice.
+    - Added the "Duplicate" action and the relative menu voice.
+    - The user manual has been updated with the added capabilities.
+
 0.05b (25-jul-11)
     - Added some animated assistants.
     - Updated the "CONNECTION PANEL" dialog screenshot in the user manual.
 
 0.05a (21-jul-11)
-    - Added an animated assistant that is shown while a process is running.
+    X [BUG0002] Added an animated assistant that is shown while a process is
+      running. Once the animated assistant appears, an infinite loop of
+      invocations to the repaint method begins.
     - The "SHOW RECORD" command can be perfomed only if a record has been
       selected.
     - Updated the "EDIT CONNECTION" dialog screenshot in the user manual.
@@ -63,4 +74,5 @@
       "File" menu.
 
 0.01a (14-jun-11)
-    - First release.
+    X [BUG0001] First release. Sometimes, with the execution of different
+      "SELECT" statements, an error occurs.

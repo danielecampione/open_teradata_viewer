@@ -1,7 +1,7 @@
 <xml xmlns:o="urn:schemas-microsoft-com:office:office">
  <o:MainFile HRef="../manual.html"/>
- <o:File HRef="item0029.xml"/>
- <o:File HRef="props0030.xml"/>
+ <o:File HRef="item0037.xml"/>
+ <o:File HRef="props0038.xml"/>
  <o:File HRef="themedata.thmx"/>
  <o:File HRef="colorschememapping.xml"/>
  <o:File HRef="image002.jpg"/>
@@ -12,6 +12,14 @@
  <o:File HRef="image007.gif"/>
  <o:File HRef="image008.gif"/>
  <o:File HRef="image009.gif"/>
+ <o:File HRef="image023.png"/>
+ <o:File HRef="image020.gif"/>
+ <o:File HRef="image028.png"/>
+ <o:File HRef="image021.gif"/>
+ <o:File HRef="image030.png"/>
+ <o:File HRef="image027.gif"/>
+ <o:File HRef="image032.png"/>
+ <o:File HRef="image029.gif"/>
  <o:File HRef="image010.gif"/>
  <o:File HRef="image011.gif"/>
  <o:File HRef="image012.gif"/>
@@ -23,9 +31,9 @@
  <o:File HRef="image018.gif"/>
  <o:File HRef="image019.gif"/>
  <o:File HRef="image024.png"/>
- <o:File HRef="image025.jpg"/>
+ <o:File HRef="image031.jpg"/>
  <o:File HRef="image001.png"/>
- <o:File HRef="image026.jpg"/>
+ <o:File HRef="image033.jpg"/>
  <o:File HRef="image022.jpg"/>
  <o:File HRef="filelist.xml"/>
 </xml>

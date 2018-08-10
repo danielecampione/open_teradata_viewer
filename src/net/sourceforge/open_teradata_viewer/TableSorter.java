@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
@@ -61,7 +62,11 @@ public class TableSorter implements MouseListener, Comparator<List> {
         List<List> list = ((DefaultTableModel) tableHeader.getTable()
                 .getModel()).getDataVector();
         Collections.sort(list, this);
-        ApplicationFrame.getInstance().repaint();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                ApplicationFrame.getInstance().repaint();
+            }
+        });
     }
 
     @Override

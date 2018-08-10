@@ -29,6 +29,7 @@ import java.util.List;
  *
  */
 public class Grid {
+
     private List<List<Object>> rows;
     private String columnSeparator = "  ";
 

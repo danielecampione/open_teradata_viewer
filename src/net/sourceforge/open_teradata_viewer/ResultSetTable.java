@@ -18,9 +18,14 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-
 import java.awt.Component;
 import java.awt.Font;
+import java.io.ByteArrayInputStream;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.NClob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +36,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -45,9 +51,9 @@ import net.sourceforge.open_teradata_viewer.actions.CopyCellValueAction;
  * @author D. Campione
  *
  */
-public class ResultSetTable extends JTable {
+public final class ResultSetTable extends JTable {
 
-    private static final long serialVersionUID = 1565094396033102066L;
+    private static final long serialVersionUID = -6752248958512135384L;
 
     private static final ResultSetTable RESULT_SET_TABLE = new ResultSetTable();
 
@@ -110,6 +116,12 @@ public class ResultSetTable extends JTable {
         return originalOrder.indexOf(row);
     }
 
+    public void removeRow(int row) {
+        int originalSelectedRow = getOriginalSelectedRow(row);
+        ((DefaultTableModel) getModel()).removeRow(row);
+        originalOrder.remove(originalSelectedRow);
+    }
+
     @SuppressWarnings("rawtypes")
     public void setDataVector(Vector<Vector> dataVector,
             Vector columnIdentifiers, String executionTime) {
@@ -131,6 +143,7 @@ public class ResultSetTable extends JTable {
             @Override
             public void run() {
                 resizeColumns();
+                ApplicationFrame.getInstance().setRepainted(false);
             }
         });
     }
@@ -143,8 +156,7 @@ public class ResultSetTable extends JTable {
         int columnType = Context.getInstance().getColumnTypes()[column];
         return Types.LONGVARBINARY == columnType
                 || Types.VARBINARY == columnType || Types.BLOB == columnType
-                || Types.CLOB == columnType
-                || 2007 /* oracle xmltype */== columnType;
+                || Types.CLOB == columnType || 2007 == columnType;
     }
 
     protected void resizeColumns() {
@@ -173,6 +185,78 @@ public class ResultSetTable extends JTable {
         }
     }
 
+    @SuppressWarnings("unused")
+    @Override
+    public void editingStopped(ChangeEvent e) {
+        super.editingStopped(e);
+        ResultSet resultSet = Context.getInstance().getResultSet();
+        int column = getSelectedColumn();
+        Object value = null;
+        try {
+            int origRow = getOriginalSelectedRow();
+            resultSet.first();
+            resultSet.relative(origRow);
+            value = resultSet.getObject(column + 1);
+            if (value == null || !value.toString().equals(getTableValue())) {
+                String log = ("" + value).trim();
+                update(column + 1, getTableValue());
+                resultSet.updateRow();
+                value = resultSet.getObject(column + 1);
+                log += " -> " + ("" + resultSet.getObject(column + 1)).trim();
+            }
+        } catch (Throwable t) {
+            if (e == null) {
+                // explicitly invoked
+                throw new RuntimeException(t.getMessage(), t);
+            }
+            ExceptionDialog.showException(t);
+        } finally {
+            try {
+                if (value != null) {
+                    setTableValue(value);
+                }
+            } catch (Exception e1) {
+                ExceptionDialog.hideException(e1);
+            }
+        }
+    }
+
+    public void update(int column, Object o) throws Exception {
+        ConnectionData connectionData = Context.getInstance()
+                .getConnectionData();
+        ResultSet resultSet = Context.getInstance().getResultSet();
+        int columnType = resultSet.getMetaData().getColumnType(column);
+        if (Types.LONGVARBINARY == columnType || Types.VARBINARY == columnType) {
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
+                    (byte[]) o);
+            resultSet.updateBinaryStream(column, byteArrayInputStream,
+                    byteArrayInputStream.available());
+        } else if (Types.BLOB == columnType) {
+            Blob blob = connectionData.getConnection().createBlob();
+            resultSet.updateBlob(column, blob);
+            resultSet.updateRow();
+            blob = resultSet.getBlob(column);
+            blob.setBytes(1, (byte[]) o);
+        } else if (Types.CLOB == columnType) {
+            Clob clob = connectionData.getConnection().createClob();
+            resultSet.updateClob(column, clob);
+            resultSet.updateRow();
+            clob = resultSet.getClob(column);
+            clob.setString(1, new String((byte[]) o));
+        } else if (Types.NCLOB == columnType) {
+            NClob nclob = connectionData.getConnection().createNClob();
+            resultSet.updateNClob(column, nclob);
+            resultSet.updateRow();
+            nclob = resultSet.getNClob(column);
+            nclob.setString(1, new String((byte[]) o));
+        } else {
+            if (o != null && "".equals(o.toString())) {
+                o = null;
+            }
+            resultSet.updateObject(column, o);
+        }
+    }
+
     /**
      * 
      * 
@@ -181,11 +265,19 @@ public class ResultSetTable extends JTable {
      */
     private class ResultSetTableModel extends DefaultTableModel {
 
-        private static final long serialVersionUID = -6686889204709944699L;
+        private static final long serialVersionUID = 7920598339438064227L;
 
         @Override
         public boolean isCellEditable(int row, int column) {
-            return false;
+            try {
+                return Context.getInstance().getConnectionData() != null
+                        && Context.getInstance().getResultSet() != null
+                        && Context.getInstance().getResultSet()
+                                .getConcurrency() == ResultSet.CONCUR_UPDATABLE
+                        && !isLob(column);
+            } catch (SQLException e) {
+                return false;
+            }
         }
     }
 
@@ -197,7 +289,7 @@ public class ResultSetTable extends JTable {
      */
     private class ResultSetTableCellRenderer extends DefaultTableCellRenderer {
 
-        private static final long serialVersionUID = 3879463001635743124L;
+        private static final long serialVersionUID = -3668802599224220842L;
 
         @Override
         public Component getTableCellRendererComponent(JTable componentTable,

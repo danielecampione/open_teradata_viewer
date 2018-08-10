@@ -45,11 +45,11 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
  * 
  * 
  * @author D. Campione
- * 
+ *
  */
 public class RunAction extends CustomAction {
 
-    private static final long serialVersionUID = 7642349337492843537L;
+    private static final long serialVersionUID = -502870390309110470L;
 
     protected RunAction() {
         super("Run", "run.png", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
@@ -57,6 +57,8 @@ public class RunAction extends CustomAction {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
+
+    @SuppressWarnings("rawtypes")
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         String sql = ApplicationFrame.getInstance().getText();
@@ -76,7 +78,6 @@ public class RunAction extends CustomAction {
         History.getInstance().add(sql);
         Actions.getInstance().validateTextActions();
         Vector<String> columnIdentifiers = new Vector<String>();
-        @SuppressWarnings("rawtypes")
         Vector<Vector> dataVector = new Vector<Vector>();
         int[] columnTypes;
         String[] columnTypeNames;
@@ -93,6 +94,8 @@ public class RunAction extends CustomAction {
             public void run() {
                 try {
                     if (!executed[0]) {
+                        // Don't cancel when we're already going through the
+                        // result set.
                         statements[0].cancel();
                     }
                 } catch (Throwable t) {
@@ -223,18 +226,22 @@ public class RunAction extends CustomAction {
                             ResultSet.CONCUR_UPDATABLE)) {
                 if (metaData
                         .supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT)) {
-                    // IBM DB2
-                    statement = connection.prepareStatement(sql,
-                            ResultSet.TYPE_SCROLL_SENSITIVE,
-                            ResultSet.CONCUR_UPDATABLE,
-                            ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                    try {
+                        statement = connection.prepareStatement(sql,
+                                ResultSet.TYPE_SCROLL_SENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE,
+                                ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                    } catch (SQLException e) {
+                        statement = connection.prepareStatement(sql,
+                                ResultSet.TYPE_SCROLL_SENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE);
+                    }
                 } else {
                     statement = connection.prepareStatement(sql,
                             ResultSet.TYPE_SCROLL_SENSITIVE,
                             ResultSet.CONCUR_UPDATABLE);
                 }
             } else {
-                // SQLite
                 statement = connection.prepareStatement(sql);
             }
         } else if (call) {

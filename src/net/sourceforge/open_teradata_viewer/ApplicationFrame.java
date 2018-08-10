@@ -585,6 +585,7 @@ public class ApplicationFrame extends JFrame {
             schemaBrowserToggleButton.setSelected(false);
             text.requestFocus();
         }
+        repainted = false;
     }
     public SchemaBrowser getObjectChooser() {
         return rightComponent == null ? null : (SchemaBrowser) rightComponent

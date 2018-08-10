@@ -27,7 +27,8 @@ import java.sql.ResultSet;
  * @author D. Campione
  *
  */
-public class Context {
+public final class Context {
+
     private static final Context CONTEXT = new Context();
 
     private ConnectionData connectionData;

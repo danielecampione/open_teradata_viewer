@@ -91,7 +91,11 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(Actions.DRIVERS);
         menu.addSeparator();
-        menu.add(Actions.SHOW_SELECTED_RECORD);
+        menu.add(Actions.INSERT);
+        menu.add(Actions.DELETE);
+        menu.add(Actions.EDIT);
+        menu.add(Actions.DUPLICATE);
+        menu.addSeparator();
         menu.add(Actions.SHOW_PROCEDURE);
         menu.add(Actions.SHOW_VIEW);
         menu.addSeparator();

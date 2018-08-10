@@ -18,6 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -49,7 +52,10 @@ public final class Actions
     public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
     public static final CustomAction HELP = new HelpAction();
     public static final CustomAction FORMAT_SQL = new FormatSQLAction();
-    public static final CustomAction SHOW_SELECTED_RECORD = new ShowSelectedRecordAction();
+    public static final CustomAction INSERT = new InsertAction();
+    public static final CustomAction EDIT = new EditAction();
+    public static final CustomAction DUPLICATE = new DuplicateAction();
+    public static final CustomAction DELETE = new DeleteAction();
     public static final CustomAction SELECT_FROM = new SelectFromAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
     public static final CustomAction EXPORT_INSERTS = new ExportInsertsAction();
@@ -99,10 +105,23 @@ public final class Actions
         EXPORT_FLAT_FILE.setEnabled(hasResultSet);
         EXPORT_INSERTS.setEnabled(hasResultSet);
 
+        boolean hasUpdatableResultSet;
+        try {
+            hasUpdatableResultSet = hasResultSet
+                    && Context.getInstance().getResultSet().getConcurrency() == ResultSet.CONCUR_UPDATABLE;
+        } catch (SQLException e) {
+            hasUpdatableResultSet = false;
+        }
+        INSERT.setEnabled(hasUpdatableResultSet);
+
         boolean isRowSelected = hasResultSet
                 && !ResultSetTable.getInstance().getSelectionModel()
                         .isSelectionEmpty();
-        SHOW_SELECTED_RECORD.setEnabled(isRowSelected);
+        EDIT.setEnabled(isRowSelected);
+
+        boolean isUpdatableRowSelected = hasUpdatableResultSet && isRowSelected;
+        DUPLICATE.setEnabled(isUpdatableRowSelected);
+        DELETE.setEnabled(isUpdatableRowSelected);
 
         boolean isLobSelected = hasResultSet
                 && ResultSetTable.isLob(ResultSetTable.getInstance()

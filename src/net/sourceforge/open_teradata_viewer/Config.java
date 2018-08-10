@@ -51,20 +51,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import com.itextpdf.text.pdf.codec.Base64;
 
-/**
- * 
- * 
- * @author D. Campione
- *
- */
 public final class Config {
 
     private static String version;
 
-    public static final String HOME_PAGE = "http://openteradata.sourceforge.net";
+    public static final String HOME_PAGE = "http://openteradata.sourceforge.net/";
+
+    private Config() {
+    }
 
     private static final Key KEY = new PrivateKey() {
 
@@ -107,8 +103,8 @@ public final class Config {
         return getSetting("drivers");
     }
 
-    public static void saveDrivers(String driver) throws Exception {
-        saveSetting("drivers", driver);
+    public static void saveDrivers(String drivers) throws Exception {
+        saveSetting("drivers", drivers);
     }
 
     public static Vector<ConnectionData> getDatabases() throws Exception {
@@ -126,7 +122,8 @@ public final class Config {
                     element.getAttribute("name"), element
                             .getAttribute("connection"), element
                             .getAttribute("user"), Config.decrypt(element
-                            .getAttribute("password"))));
+                            .getAttribute("password")), element
+                            .getAttribute("defaultOwner")));
         }
         return connectionDatas;
     }
@@ -148,6 +145,8 @@ public final class Config {
             element.setAttribute("password",
                     Config.encrypt(connectionData.getPassword()));
             element.setAttribute("connection", connectionData.getUrl());
+            element.setAttribute("defaultOwner",
+                    connectionData.getDefaultOwner());
             config.appendChild(element);
         }
         Config.saveConfig(config);
@@ -244,24 +243,24 @@ public final class Config {
     }
 
     protected static String decrypt(String encrypted)
-            throws GeneralSecurityException, IOException {
-        if ((encrypted == null) || "".equals(encrypted)) {
+            throws GeneralSecurityException {
+        if (encrypted == null || "".equals(encrypted)) {
             return encrypted;
         }
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, KEY);
-        return new String(cipher.doFinal(new BASE64Decoder()
-                .decodeBuffer(encrypted)));
+        return new String(cipher.doFinal(Base64.decode(encrypted)));
+
     }
 
     protected static String encrypt(String decrypted)
             throws GeneralSecurityException {
-        if ((decrypted == null) || "".equals(decrypted)) {
+        if (decrypted == null || "".equals(decrypted)) {
             return decrypted;
         }
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, KEY);
-        return new BASE64Encoder().encode(cipher.doFinal(decrypted.getBytes()));
+        return Base64.encodeBytes(cipher.doFinal(decrypted.getBytes()));
     }
 
     public static void saveLastUsedDir(String dir) throws Exception {

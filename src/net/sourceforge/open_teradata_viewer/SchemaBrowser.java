@@ -238,6 +238,7 @@ public class SchemaBrowser extends JTree {
             while (resultSet.next()) {
                 add(resultSet.getString(columnIndex), children);
             }
+            ApplicationFrame.getInstance().setRepainted(false);
         }
 
         private void add(String s, boolean children) {
