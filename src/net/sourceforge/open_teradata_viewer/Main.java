@@ -22,6 +22,7 @@ import java.awt.Font;
 
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
@@ -62,6 +63,7 @@ public class Main {
 
         try {
             String className = UIManager.getSystemLookAndFeelClassName();
+
             String startupLookAndFeelProperty = "startup_lookandfeel_class";
             String strStartupLookAndFeelClassName;
             strStartupLookAndFeelClassName = Config
@@ -87,21 +89,32 @@ public class Main {
                     Font.PLAIN, 12));
             // Turn off metal's use of bold fonts
             // UIManager.put("swing.boldMetal", Boolean.FALSE);
-
             ApplicationFrame mainWindow = new ApplicationFrame();
             mainWindow.initLookAndFeelManager(lafManager);
             SplashScreen splashScreen = new SplashScreen(mainWindow, 0);
             mainWindow.drawIt(splashScreen);
-
             mainWindow.setVisible(true);
             splashScreen.setVisible(false);
             splashScreen.dispose();
         } catch (ClassNotFoundException cnfe) {
             ExceptionDialog.hideException(cnfe);
             ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (UnsupportedLookAndFeelException ulafe) {
+            ExceptionDialog.hideException(ulafe);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (IllegalAccessException iae) {
+            ExceptionDialog.hideException(iae);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (InstantiationException ie) {
+            ExceptionDialog.hideException(ie);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (IllegalStateException ise) {
+            ExceptionDialog.hideException(ise);
+            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+        } catch (RuntimeException re) {
+            ExceptionDialog.hideException(re);
         } catch (Throwable t) {
             ExceptionDialog.hideException(t);
-            ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
         }
     }
 }

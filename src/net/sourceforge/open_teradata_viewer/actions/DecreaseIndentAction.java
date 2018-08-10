@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
@@ -36,16 +37,19 @@ public class DecreaseIndentAction extends CustomAction {
 
     private static final long serialVersionUID = -1690909378881683266L;
 
+    private Action decreaseIndent;
+
     protected DecreaseIndentAction() {
         super("Decrease indentation", "format_decreaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK),
                 "Decreases the indentation amount for all selected lines.");
+        decreaseIndent = new SyntaxTextAreaEditorKit.DecreaseIndentAction();
         setEnabled(true);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        new SyntaxTextAreaEditorKit.DecreaseIndentAction().actionPerformed(e);
+        decreaseIndent.actionPerformed(e);
     }
 
     @Override

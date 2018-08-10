@@ -19,10 +19,12 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
-import net.sourceforge.open_teradata_viewer.editor.TextAreaEditorKit;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 
 /**
  * 
@@ -30,22 +32,23 @@ import net.sourceforge.open_teradata_viewer.editor.TextAreaEditorKit;
  * @author D. Campione
  * 
  */
-public class DateTimeAction extends CustomAction {
+public class IncreaseFontSizesAction extends CustomAction {
 
-    private static final long serialVersionUID = 3002564219607149147L;
+    private static final long serialVersionUID = -430344416918941237L;
 
-    private Action dateTime;
-    
-    protected DateTimeAction() {
-        super("Date/Time", "clock.png", null,
-                "Puts date/time stamp at current location.");
-        dateTime = new TextAreaEditorKit.TimeDateAction(); 
+    private Action increaseFontSize;
+
+    protected IncreaseFontSizesAction() {
+        super("Increase font sizes", "fontsizeup.png", KeyStroke.getKeyStroke(
+                KeyEvent.VK_PLUS, KeyEvent.CTRL_DOWN_MASK),
+                "Increases the size of all text area fonts.");
+        increaseFontSize = new SyntaxTextAreaEditorKit.IncreaseFontSizeAction();
         setEnabled(true);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        dateTime.actionPerformed(e);
+        increaseFontSize.actionPerformed(e);
     }
 
     @Override

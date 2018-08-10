@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
@@ -35,16 +36,19 @@ public class IncreaseIndentAction extends CustomAction {
 
     private static final long serialVersionUID = 1668796223229494619L;
 
+    private Action increaseIndent;
+
     protected IncreaseIndentAction() {
         super("Increase indentation", "format_increaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, 0),
                 "Increases the indentation amount for all selected lines.");
+        increaseIndent = new SyntaxTextAreaEditorKit.InsertTabAction();
         setEnabled(true);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        new SyntaxTextAreaEditorKit.InsertTabAction().actionPerformed(e);
+        increaseIndent.actionPerformed(e);
     }
 
     @Override

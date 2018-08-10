@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -35,6 +34,7 @@ import javax.swing.UIManager;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
+import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
  * 
@@ -109,6 +109,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(subMenu);
         subMenu.add(Actions.INCREASE_INDENT);
         subMenu.add(Actions.DECREASE_INDENT);
+        menu.add(Actions.INCREASE_FONT_SIZES);
+        menu.add(Actions.DECREASE_FONT_SIZES);
         menu.addSeparator();
         menu.add(Actions.GO_TO_LINE);
         menu.add(Actions.FIND);
@@ -181,8 +183,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
                 .getInstalledLookAndFeels();
-        Vector<String> completePathOfLafClasses = new Vector<String>(
-                lafInfo.length, 1);
+        StringList completePathOfLafClasses = new StringList(true,
+                lafInfo.length);
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
         Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<JRadioButtonMenuItem>(
                 lafInfo.length, 1);
@@ -192,11 +194,9 @@ public class ApplicationMenuBar extends JMenuBar {
             completePathOfLafClasses.add(lafInfo[i].getClassName());
             buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(i));
             menu.add(_mnuAvailableLookAndFeel.elementAt(i));
-            _mnuAvailableLookAndFeel.elementAt(i)
-                    .addActionListener(
-                            new LookAndFeelAction(completePathOfLafClasses
-                                    .elementAt(i)));
-            if (completePathOfLafClasses.elementAt(i).equals(
+            _mnuAvailableLookAndFeel.elementAt(i).addActionListener(
+                    new LookAndFeelAction(completePathOfLafClasses.get(i)));
+            if (completePathOfLafClasses.get(i).equals(
                     UIManager.getLookAndFeel().getClass().toString()
                             .substring("class ".length()))) {
                 _mnuAvailableLookAndFeel.elementAt(i).setSelected(true);
@@ -206,27 +206,29 @@ public class ApplicationMenuBar extends JMenuBar {
         // Add any 3rd party Look and Feels in the lookandfeels subdirectory
         ExtendedLookAndFeelInfo[] info = ApplicationFrame.getInstance()
                 .get3rdPartyLookAndFeelInfo();
-        if (info != null && info.length > 0) {
+        if (info != null) {
             for (int i = 0; i < info.length; i++) {
-                if (!Arrays.asList(completePathOfLafClasses).contains(
-                        info[i].getClassName())) {
+                if (!completePathOfLafClasses.exists(info[i].getClassName())) {
                     _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(
                             info[i].getName()));
                     completePathOfLafClasses.add(info[i].getClassName());
                     buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel
-                            .elementAt(lafInfo.length + i));
-                    menu.add(_mnuAvailableLookAndFeel.elementAt(lafInfo.length
-                            + i));
-                    _mnuAvailableLookAndFeel.elementAt(lafInfo.length + i)
+                            .elementAt(completePathOfLafClasses.size() - 1));
+                    menu.add(_mnuAvailableLookAndFeel
+                            .elementAt(completePathOfLafClasses.size() - 1));
+                    _mnuAvailableLookAndFeel
+                            .elementAt(completePathOfLafClasses.size() - 1)
                             .addActionListener(
                                     new LookAndFeelAction(
                                             completePathOfLafClasses
-                                                    .elementAt(lafInfo.length
-                                                            + i)));
-                    if (completePathOfLafClasses.elementAt(lafInfo.length + i)
-                            .equals(UIManager.getLookAndFeel().getClass()
-                                    .toString().substring("class ".length()))) {
-                        _mnuAvailableLookAndFeel.elementAt(lafInfo.length + i)
+                                                    .get(completePathOfLafClasses
+                                                            .size() - 1)));
+                    if (completePathOfLafClasses.get(
+                            completePathOfLafClasses.size() - 1).equals(
+                            UIManager.getLookAndFeel().getClass().toString()
+                                    .substring("class ".length()))) {
+                        _mnuAvailableLookAndFeel.elementAt(
+                                completePathOfLafClasses.size() - 1)
                                 .setSelected(true);
                     }
                 }
