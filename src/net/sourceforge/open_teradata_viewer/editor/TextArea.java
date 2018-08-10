@@ -374,6 +374,17 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
     }
 
     /**
+     * Creates the default implementation of the model to be used at
+     * construction if one isn't explicitly given. A new instance of OTVDocument
+     * is returned.
+     *
+     * @return The default document.
+     */
+    protected Document createDefaultModel() {
+        return new OTVDocument();
+    }
+
+    /**
      * Returns the caret event/mouse listener for <code>TextArea</code>s.
      *
      * @return The caret event/mouse listener.
@@ -1051,7 +1062,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         }
 
         if (getTabsEmulated() && text.indexOf('\t') > -1) {
-            text = replaceTabsWithSpaces(text);
+            text = replaceTabsWithSpaces(text, getTabSize());
         }
 
         // If the user wants to overwrite text..
@@ -1089,7 +1100,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         handleReplaceSelection(text);
     }
 
-    private StringBuffer repTabsSB;
+    private static StringBuffer repTabsSB;
 
     /**
      * Replaces all instances of the tab character in <code>text</code> with the
@@ -1104,10 +1115,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @return A <code>java.lang.String</code> just like <code>text</code>, but
      *         with spaces instead of tabs.
      */
-    private final String replaceTabsWithSpaces(String text) {
+    public static final String replaceTabsWithSpaces(String text, int tabSize) {
         String tabText = "";
-        int temp = getTabSize();
-        for (int i = 0; i < temp; i++) {
+        for (int i = 0; i < tabSize; i++) {
             tabText += ' ';
         }
 
@@ -1243,12 +1253,12 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @param document The new document to use.
      * @throws IllegalArgumentException If the document is not an instance of
-     *         {@link AbstractDocument}.
+     *         {@link OTVDocument}.
      */
     public void setDocument(Document document) {
-        if (!(document instanceof AbstractDocument)) {
+        if (!(document instanceof OTVDocument)) {
             throw new IllegalArgumentException("TextArea requires "
-                    + "instances of AbstractDocument for its document");
+                    + "instances of OTVDocument for its document");
         }
         if (undoManager != null) { // First time through, undoManager==null
             Document old = getDocument();

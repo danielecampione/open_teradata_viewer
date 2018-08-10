@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
@@ -316,6 +315,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      * Returns whether or not the text in this editor has unsaved changes.
      *
      * @return Whether or not the text has unsaved changes.
+     * @see #setDirty(boolean)
      */
     public boolean isDirty() {
         return dirty;
@@ -378,6 +378,9 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
                     ? defaultEnc
                     : getDefaultEncoding();
             this.loc = loc;
+            setText(null);
+            discardAllEdits();
+            setDirty(false);
             return;
         }
 
@@ -401,6 +404,8 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
         charSet = ur.getEncoding();
         String old = getFileFullPath();
         this.loc = loc;
+        setDirty(false);
+        setCaretPosition(0);
         firePropertyChange(FULL_PATH_PROPERTY, old, getFileFullPath());
     }
 
@@ -491,8 +496,8 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      */
     private void saveImpl(FileLocation loc) throws IOException {
         OutputStream out = loc.getOutputStream();
-        PrintWriter w = new PrintWriter(new BufferedWriter(new UnicodeWriter(
-                out, getEncoding())));
+        BufferedWriter w = new BufferedWriter(new UnicodeWriter(out,
+                getEncoding()));
         try {
             write(w);
         } finally {
@@ -501,13 +506,22 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
     }
 
     /**
-     * Sets whether or not this text in this editor has unsaved changes. This
-     * fires a property change event of type {@link #DIRTY_PROPERTY}.
+     * Sets whether or not this text in this editor has unsaved changes.
+     * This fires a property change event of type {@link #DIRTY_PROPERTY}.<p>
+     *
+     * Applications will usually have no need to call this method directly; the
+     * only time you might have a need to call this method directly is if you
+     * have to initialize an instance of TextEditorPane with content that does
+     * not come from a file. <code>TextEditorPane</code> automatically sets its
+     * own dirty flag when its content is edited, when its encoding is changed,
+     * or when its line ending property is changed. It is cleared whenever
+     * <code>load()</code>, <code>reload()</code>, <code>save()</code>, or
+     * <code>saveAs()</code> are called.
      *
      * @param dirty Whether or not the text has been modified.
      * @see #isDirty()
      */
-    private void setDirty(boolean dirty) {
+    public void setDirty(boolean dirty) {
         if (this.dirty != dirty) {
             this.dirty = dirty;
             firePropertyChange(DIRTY_PROPERTY, !dirty, dirty);

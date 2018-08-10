@@ -2,7 +2,7 @@
 <!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-	Theme that mimics Eclipse's defaults.
+    Theme that mimics Eclipse's defaults.
 -->
 <SyntaxTheme version="1.0">
 
@@ -17,8 +17,14 @@
    <marginLine fg="b0b4b9"/>
    <markAllHighlight color="6b8189"/>
    <markOccurrencesHighlight color="d4d4d4" border="false"/>
-   <matchedBracket fg="c0c0c0" animate="false"/>
+   <matchedBracket fg="c0c0c0" highlightBoth="true" animate="false"/>
    <hyperlinks fg="0000ff"/>
+   <secondaryLanguages>
+      <language index="1" bg="fff0cc"/>
+      <language index="2" bg="dafeda"/>
+      <language index="3" bg="ffe0f0"/>
+   </secondaryLanguages>
+   
    
    <!-- Gutter styling. -->
    <gutterBorder color="dddddd"/>

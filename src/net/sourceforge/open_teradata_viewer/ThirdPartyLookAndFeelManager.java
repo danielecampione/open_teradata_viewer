@@ -136,6 +136,8 @@ public class ThirdPartyLookAndFeelManager {
             urls = new URL[0];
         }
 
+        // Specifying a parent ClassLoader other than the default hoses some
+        // LAFs, such as Substance
         lafLoader = new URLClassLoader(urls);
     }
 

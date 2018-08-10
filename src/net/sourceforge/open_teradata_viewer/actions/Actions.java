@@ -67,6 +67,7 @@ public final class Actions
     public static final CustomAction DECREASE_INDENT = new DecreaseIndentAction();
     public static final CustomAction INCREASE_FONT_SIZES = new IncreaseFontSizesAction();
     public static final CustomAction DECREASE_FONT_SIZES = new DecreaseFontSizesAction();
+    public static final CustomAction INVERT_SELECTION_CASE = new InvertSelectionCaseAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction FIND = new FindAction();
     public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",

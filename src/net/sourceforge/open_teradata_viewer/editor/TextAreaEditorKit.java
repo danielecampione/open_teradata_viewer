@@ -1044,8 +1044,16 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                 }
 
                 while (searchOffs > 0) {
-                    int wordStart = Utilities.getPreviousWord(textArea,
-                            searchOffs);
+                    int wordStart = 0;
+                    try {
+                        wordStart = Utilities.getPreviousWord(textArea,
+                                searchOffs);
+                    } catch (BadLocationException ble) {
+                        // No more words. Sometimes happens for example if the
+                        // document starts off with whitespace - then searchOffs
+                        // is > 0 but there are no more words
+                        wordStart = BreakIterator.DONE;
+                    }
                     if (wordStart == BreakIterator.DONE) {
                         UIManager.getLookAndFeel().provideErrorFeedback(
                                 textArea);

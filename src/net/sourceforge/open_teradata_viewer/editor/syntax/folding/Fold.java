@@ -74,6 +74,7 @@ public class Fold implements Comparable<Object> {
      * @param startOffs The starting offset of the fold.
      * @return The child fold.
      * @throws BadLocationException If <code>startOffs</code> is invalid.
+     * @see FoldType
      */
     public Fold createChild(int type, int startOffs)
             throws BadLocationException {
@@ -180,7 +181,11 @@ public class Fold implements Comparable<Object> {
         return children == null ? 0 : children.size();
     }
 
-    /** @return The array of child folds. */
+    /**
+     * Returns the array of child folds. This is a shallow copy.
+     *
+     * @return The array of child folds, or <code>null</code> if there are none.
+     */
     List<Fold> getChildren() {
         return children;
     }

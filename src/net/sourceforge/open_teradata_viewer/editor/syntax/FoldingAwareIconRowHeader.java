@@ -90,11 +90,13 @@ public class FoldingAwareIconRowHeader extends IconRowHeader {
         // Get the first line to paint
         int cellHeight = textArea.getLineHeight();
         int topLine = (visibleRect.y - textAreaInsets.top) / cellHeight;
-        topLine += fm.getHiddenLineCountAbove(topLine, true);
 
         // Get where to start painting (top of the row). We need to be "scrolled
         // up" up just enough for the missing part of the first line
         int y = topLine * cellHeight + textAreaInsets.top;
+
+        // AFTER calculating visual offset to paint at, account for folding.
+        topLine += fm.getHiddenLineCountAbove(topLine, true);
 
         // Paint the active line range
         if (activeLineRangeStart > -1 && activeLineRangeEnd > -1) {
@@ -146,19 +148,21 @@ public class FoldingAwareIconRowHeader extends IconRowHeader {
                     int line = root.getElementIndex(offs);
                     if (line <= lastLine && line >= topLine) {
                         try {
-                            int lineY = sta.yForLine(line);
-                            if (lineY >= y && lineY < y + visibleRect.height) {
-                                Icon icon = ti.getIcon();
-                                if (icon != null) {
+                            Icon icon = ti.getIcon();
+                            if (icon != null) {
+                                int lineY = sta.yForLine(line);
+                                if (lineY >= y
+                                        && lineY <= visibleRect.y
+                                                + visibleRect.height) {
                                     int y2 = lineY
                                             + (cellHeight - icon
                                                     .getIconHeight()) / 2;
-                                    ti.getIcon().paintIcon(this, g, 0, y2);
+                                    icon.paintIcon(this, g, 0, y2);
                                     lastLine = line - 1; // Paint only 1 icon per line
                                 }
                             }
                         } catch (BadLocationException ble) {
-                            ExceptionDialog.notifyException(ble); // Never happens
+                            ExceptionDialog.hideException(ble); // Never happens
                         }
                     } else if (line < topLine) {
                         break; // All other lines are above us, so quit now

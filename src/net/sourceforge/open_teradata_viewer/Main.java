@@ -21,12 +21,15 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Font;
 import java.io.File;
 
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -101,7 +104,8 @@ public class Main {
 
                 try {
                     ClassLoader cl = lafManager.getLAFClassLoader();
-                    // Must set UIManager's ClassLoader before instantiating the LAF
+                    // Must set UIManager's ClassLoader before instantiating the
+                    // LAF. Substance is so high-maintenance
                     UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
                     Class clazz = cl.loadClass(lafName);
                     LookAndFeel laf = (LookAndFeel) clazz.newInstance();
@@ -132,6 +136,28 @@ public class Main {
                     throw re;
                 } catch (Throwable t) {
                     ExceptionDialog.hideException(t);
+                }
+
+                // Allow Substance to paint window titles, etc.. We don't allow
+                // Metal (for example) to do this, because setting these
+                // properties to "true", then toggling to a LAF that doesn't
+                // support this property, such as Windows, causes the
+                // OS-supplied frame to not appear (as of JVM 6u20)
+                lafName = UIManager.getLookAndFeel().getClass()
+                        .getCanonicalName();
+                if (SubstanceUtils.isASubstanceLookAndFeel(lafName)) {
+                    JFrame.setDefaultLookAndFeelDecorated(true);
+                    JDialog.setDefaultLookAndFeelDecorated(true);
+                }
+
+                // The default speed of Substance animations is too slow
+                // (200ms), looks bad moving through JMenuItems quickly
+                if (SubstanceUtils.isSubstanceInstalled()) {
+                    try {
+                        SubstanceUtils.setAnimationSpeed(120);
+                    } catch (Exception e) {
+                        ExceptionDialog.hideException(e);
+                    }
                 }
 
                 ApplicationFrame mainWindow = new ApplicationFrame();

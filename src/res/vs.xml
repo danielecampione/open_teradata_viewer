@@ -2,7 +2,7 @@
 <!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-	Theme that mimics Visual Studio's defaults.
+    Theme that mimics Visual Studio's defaults.
 -->
 <SyntaxTheme version="1.0">
 
@@ -17,8 +17,14 @@
    <marginLine fg="b0b4b9"/>
    <markAllHighlight color="6b8189"/>
    <markOccurrencesHighlight color="d4d4d4" border="false"/>
-   <matchedBracket fg="DBE0CC" animate="false"/>
+   <matchedBracket fg="DBE0CC" highlightBoth="false" animate="false"/>
    <hyperlinks fg="0000ff"/>
+   <secondaryLanguages>
+      <language index="1" bg="fff0cc"/>
+      <language index="2" bg="dafeda"/>
+      <language index="3" bg="ffe0f0"/>
+   </secondaryLanguages>
+   
    
    <!-- Gutter styling. -->
    <gutterBorder color="808080"/>

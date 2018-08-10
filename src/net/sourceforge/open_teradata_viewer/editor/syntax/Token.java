@@ -66,6 +66,9 @@ public abstract class Token implements ITokenTypes {
     /** The next token in this linked list. */
     private Token nextToken;
 
+    /** The language this token is in, <code>&gt;= 0</code>. */
+    private int languageIndex;
+
     /** Rectangle used for filling token backgrounds. */
     private Rectangle2D.Float bgRect;
 
@@ -272,6 +275,7 @@ public abstract class Token implements ITokenTypes {
         textCount = t2.textCount;
         offset = t2.offset;
         type = t2.type;
+        languageIndex = t2.languageIndex;
         nextToken = t2.nextToken;
     }
 
@@ -348,6 +352,18 @@ public abstract class Token implements ITokenTypes {
         StringBuffer buf = new StringBuffer();
         appendHTMLRepresentation(buf, textArea, true);
         return buf.toString();
+    }
+
+    /**
+     * Returns the language index of this token.
+     *
+     * @return The language index. A value of <code>0</code> denotes the "main"
+     *         language, any positive value denotes a specific secondary
+     *         language.
+     * @see #setLanguageIndex(int)
+     */
+    public int getLanguageIndex() {
+        return languageIndex;
     }
 
     /**
@@ -758,7 +774,7 @@ public abstract class Token implements ITokenTypes {
         g.setXORMode(temp != null ? temp : Color.WHITE);
         g.setColor(color);
         bgRect.setRect(x, y - fontAscent, width, height);
-        g.fill(bgRect);
+        g.fillRect((int) x, (int) (y - fontAscent), (int) width, (int) height);
         g.setPaintMode();
     }
 
@@ -863,6 +879,23 @@ public abstract class Token implements ITokenTypes {
      */
     public void setHyperlink(boolean hyperlink) {
         this.hyperlink = hyperlink;
+    }
+
+    /**
+     * Sets the language index for this token. If this value is positive, it
+     * denotes a specific "secondary" language this token represents (such as
+     * JavaScript code or CSS embedded in an HTML file). If this value is
+     * <code>0</code>, this token is in the "main" language being edited.
+     * Negative values are invalid and treated as <code>0</code>.
+     *
+     * @param languageIndex The new language index. A value of <code>0</code>
+     *        denotes the "main" language, any positive value denotes a specific
+     *        secondary language. Negative values will be treated as
+     *        <code>0</code>.
+     * @see #getLanguageIndex()
+     */
+    public void setLanguageIndex(int languageIndex) {
+        this.languageIndex = languageIndex;
     }
 
     /**

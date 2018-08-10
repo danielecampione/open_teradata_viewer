@@ -32,6 +32,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
+import net.sourceforge.open_teradata_viewer.util.SubstanceUtils;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 import org.joda.time.DateTime;
@@ -50,9 +51,11 @@ public class Console extends JTextPane {
     File logFile;
     BufferedWriter bw;
     int fileIndex;
+    boolean curSubstance;
 
     public Console(int width, int height, int maxChars) {
         super();
+        curSubstance = SubstanceUtils.isSubstanceInstalled();
         setSize(width, height);
         maxCharacters = maxChars;
 
@@ -89,12 +92,14 @@ public class Console extends JTextPane {
 
         // StyleContext
         StyleContext sc = StyleContext.getDefaultStyleContext();
-        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-                StyleConstants.Foreground, foregroundColor);
 
         int len = getDocument().getLength(); // same value as getText().length();
         setCaretPosition(len); // place caret at the end (with no selection)
-        setCharacterAttributes(aset, false);
+        if (!curSubstance) {
+            AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
+                    StyleConstants.Foreground, foregroundColor);
+            setCharacterAttributes(aset, false);
+        }
         replaceSelection(text); // there is no selection, so inserts at caret
 
         if (logFile.exists()) {

@@ -87,7 +87,7 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
      * @param p
      * @return A tag to reference the highlight later.
      * @throws BadLocationException
-     * @see {@link #removeMarkOccurrencesHighlight(Object)}
+     * @see {@link #clearMarkOccurrencesHighlights()}
      */
     Object addMarkedOccurrenceHighlight(int start, int end,
             MarkOccurrencesHighlightPainter p) throws BadLocationException {
@@ -143,27 +143,30 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
     }
 
     /**
+     * Removes all "marked occurrences" highlights from the view.
+     *
+     * @see #addMarkedOccurrenceHighlight(int, int, MarkOccurrencesHighlightPainter)
+     */
+    void clearMarkOccurrencesHighlights() {
+        // Don't remove via the iterator; since our List is an ArrayList, this
+        // implies tons of System.arrayCopy()s 
+        for (Iterator i = markedOccurrences.iterator(); i.hasNext();) {
+            repaintListHighlight(i.next());
+        }
+        markedOccurrences.clear();
+    }
+
+    /**
      * Removes all parser highlights.
      *
      * @see #addParserHighlight(IParserNotice, javax.swing.text.Highlighter.HighlightPainter)
      */
     void clearParserHighlights() {
+        // Don't remove via an iterator; since our List is an ArrayList, this
+        // implies tons of System.arrayCopy()s 
         for (int i = 0; i < parserHighlights.size(); i++) {
-            Object tag = parserHighlights.get(i);
-
-            if (tag instanceof LayeredHighlightInfo) {
-                LayeredHighlightInfo lhi = (LayeredHighlightInfo) tag;
-                if (lhi.width > 0 && lhi.height > 0) {
-                    textArea.repaint(lhi.x, lhi.y, lhi.width, lhi.height);
-                }
-            } else {
-                HighlightInfo info = (HighlightInfo) tag;
-                TextUI ui = textArea.getUI();
-                ui.damageRange(textArea, info.getStartOffset(),
-                        info.getEndOffset());
-            }
+            repaintListHighlight(parserHighlights.get(i));
         }
-
         parserHighlights.clear();
     }
 
@@ -201,20 +204,21 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
     }
 
     /**
-     * Returns a list of "marked occurrences" in the text area. If there are no
-     * marked occurrences, this will be an empty list.
+     * Returns a list of "marked occurrences" in the text area. If there are
+     * no marked occurrences, this will be an empty list.
      *
-     * @return The list of marked occurrences.
+     * @return The list of marked occurrences, or an empty list if none. The
+     *         contents of this list will be of type {@link DocumentRange}.
      */
-    public List<IDocumentRange> getMarkedOccurrences() {
-        List<IDocumentRange> list = new ArrayList<IDocumentRange>(
+    public List<DocumentRange> getMarkedOccurrences() {
+        List<DocumentRange> list = new ArrayList<DocumentRange>(
                 markedOccurrences.size());
         for (Iterator<HighlightInfo> i = markedOccurrences.iterator(); i
                 .hasNext();) {
             HighlightInfo info = (HighlightInfo) i.next();
             int start = info.getStartOffset();
             int end = info.getEndOffset() + 1;
-            IDocumentRange range = new DocumentRangeImpl(start, end);
+            DocumentRange range = new DocumentRange(start, end);
             list.add(range);
         }
         return list;
@@ -302,7 +306,7 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
         }
     }
 
-    private void removeListHighlight(List<HighlightInfo> list, Object tag) {
+    private void repaintListHighlight(Object tag) {
         if (tag instanceof LayeredHighlightInfo) {
             LayeredHighlightInfo lhi = (LayeredHighlightInfo) tag;
             if (lhi.width > 0 && lhi.height > 0) {
@@ -313,17 +317,6 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
             TextUI ui = textArea.getUI();
             ui.damageRange(textArea, info.getStartOffset(), info.getEndOffset());
         }
-        list.remove(tag);
-    }
-
-    /**
-     * Removes a "marked occurrences" highlight from the view.
-     *
-     * @param tag The reference to the highlight.
-     * @see #addMarkedOccurrenceHighlight(int, int, MarkOccurrencesHighlightPainter)
-     */
-    void removeMarkOccurrencesHighlight(Object tag) {
-        removeListHighlight(markedOccurrences, tag);
     }
 
     /**
@@ -333,32 +326,8 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
      * @see #addParserHighlight(IParserNotice, javax.swing.text.Highlighter.HighlightPainter)
      */
     void removeParserHighlight(Object tag) {
-        removeListHighlight(parserHighlights, tag);
-    }
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     * 
-     */
-    private static class DocumentRangeImpl implements IDocumentRange {
-
-        private int startOffs;
-        private int endOffs;
-
-        public DocumentRangeImpl(int startOffs, int endOffs) {
-            this.startOffs = startOffs;
-            this.endOffs = endOffs;
-        }
-
-        public int getEndOffset() {
-            return endOffs;
-        }
-
-        public int getStartOffset() {
-            return startOffs;
-        }
+        repaintListHighlight(tag);
+        parserHighlights.remove(tag);
     }
 
     /**

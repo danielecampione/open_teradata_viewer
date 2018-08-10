@@ -322,18 +322,14 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // line
                     int match = SyntaxUtilities.getMatchingBracketPosition(sta);
                     if (match > -1) {
-                        elem = root.getElement(root.getElementIndex(match));
-                        int start2 = elem.getStartOffset();
-                        int end = elem.getEndOffset() - 1;
-                        String text = null;
                         try {
-                            text = doc.getText(start2, end - start2);
-                        } catch (BadLocationException ble) { // Never happens
-                            ExceptionDialog.notifyException(ble);
+                            String ws = SyntaxUtilities.getLeadingWhitespace(
+                                    doc, match);
+                            sta.replaceRange(ws, start, dot);
+                        } catch (BadLocationException ble) {
+                            ExceptionDialog.hideException(ble);
                             return;
                         }
-                        String ws = SyntaxUtilities.getLeadingWhitespace(text);
-                        sta.replaceRange(ws, start, dot);
                     }
                 }
             } finally {

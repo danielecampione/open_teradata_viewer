@@ -27,11 +27,10 @@ import javax.swing.Action;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
-import javax.swing.text.GapContent;
-import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.OTVDocument;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.AbstractMarkupTokenMaker;
 import net.sourceforge.open_teradata_viewer.util.DynamicIntArray;
 
@@ -59,7 +58,7 @@ import net.sourceforge.open_teradata_viewer.util.DynamicIntArray;
  * @author D. Campione
  * 
  */
-public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
+public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
 
     private static final long serialVersionUID = 6225009820554485519L;
 
@@ -79,9 +78,9 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
 
     /**
      * Array of values representing the "last token type" on each line. This is
-     * used in cases such as multiline comments: if the previous line ended with
-     * an (unclosed) multiline comment, we can use this knowledge and start the
-     * current line's syntax highlighting in multiline comment state.
+     * used in cases such as multi-line comments: if the previous line ended
+     * with an (unclosed) multi-line comment, we can use this knowledge and
+     * start the current line's syntax highlighting in multi-line comment state.
      */
     protected transient DynamicIntArray lastTokensOnLines;
 
@@ -106,24 +105,12 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
      * @param syntaxStyle The syntax highlighting scheme to use.
      */
     public SyntaxDocument(TokenMakerFactory tmf, String syntaxStyle) {
-        super(new OTVGapContent());
         putProperty(tabSizeAttribute, new Integer(5));
         lastTokensOnLines = new DynamicIntArray(400);
         lastTokensOnLines.add(Token.NULL); // Initial (empty) line
         s = new Segment();
         setTokenMakerFactory(tmf);
         setSyntaxStyle(syntaxStyle);
-    }
-
-    /**
-     * Returns the character in the document at the specified offset.
-     *
-     * @param offset The offset of the character.
-     * @return The character.
-     * @throws BadLocationException If the offset is invalid.
-     */
-    public char charAt(int offset) throws BadLocationException {
-        return ((OTVGapContent) getContent()).charAt(offset);
     }
 
     /**
@@ -561,31 +548,5 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         out.writeBoolean(isWhitespaceVisible());
-    }
-
-    /**
-     * Document content that provides fast access to individual characters.
-     *
-     * @author D. Campione
-     * 
-     */
-    private static class OTVGapContent extends GapContent {
-
-        private static final long serialVersionUID = 4293551391909667826L;
-
-        public OTVGapContent() {
-        }
-
-        public char charAt(int offset) throws BadLocationException {
-            if (offset < 0 || offset >= length()) {
-                throw new BadLocationException("Invalid offset", offset);
-            }
-            int g0 = getGapStart();
-            char[] array = (char[]) getArray();
-            if (offset < g0) { // Below gap
-                return array[offset];
-            }
-            return array[getGapEnd() + offset - g0]; // Above gap
-        }
     }
 }

@@ -215,6 +215,7 @@ public class SyntaxUtilities implements SwingConstants {
      *
      * @param text The String to check.
      * @return The leading whitespace.
+     * @see #getLeadingWhitespace(Document, int)
      */
     public static String getLeadingWhitespace(String text) {
         int count = 0;
@@ -223,6 +224,27 @@ public class SyntaxUtilities implements SwingConstants {
             count++;
         }
         return text.substring(0, count);
+    }
+
+    /**
+     * Returns the leading whitespace of a specific line in a document.
+     *
+     * @param doc The document.
+     * @param offs The offset whose line to get the leading whitespace for.
+     * @return The leading whitespace.
+     * @throws BadLocationException If <code>offs</code> is not a valid offset
+     *         in the document.
+     * @see #getLeadingWhitespace(String)
+     */
+    public static String getLeadingWhitespace(Document doc, int offs)
+            throws BadLocationException {
+        Element root = doc.getDefaultRootElement();
+        int line = root.getElementIndex(offs);
+        Element elem = root.getElement(line);
+        int startOffs = elem.getStartOffset();
+        int endOffs = elem.getEndOffset() - 1;
+        String text = doc.getText(startOffs, endOffs - startOffs);
+        return getLeadingWhitespace(text);
     }
 
     private static final Element getLineElem(Document d, int offs) {

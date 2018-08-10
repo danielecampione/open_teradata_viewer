@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.AccessControlException;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -107,6 +108,9 @@ public class IconGroup {
             String extension, String jar) {
         this.name = name;
         this.path = path;
+        if (path != null && path.length() > 0 && !path.endsWith("/")) {
+            this.path += "/";
+        }
         this.separateLargeIcons = (largeIconSubDir != null);
         this.largeIconSubDir = largeIconSubDir;
         this.extension = extension != null ? extension : DEFAULT_EXTENSION;
@@ -182,6 +186,8 @@ public class IconGroup {
                         + iconFullPath);
                 return new ImageIcon(url);
             }
+        } catch (AccessControlException ace) {
+            return null; // Likely in an applet or WebStart
         } catch (IOException ioe) {
             return null;
         }

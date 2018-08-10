@@ -19,7 +19,6 @@
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.security.AccessControlException;
-import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -42,16 +41,6 @@ public abstract class TokenMakerFactory {
 
     /** The singleton default <code>TokenMakerFactory</code> instance. */
     private static TokenMakerFactory DEFAULT_INSTANCE;
-
-    /**
-     * Creates and returns a mapping from keys to the names of {@link
-     * ITokenMaker} implementation classes. When {@link #getTokenMaker(String)}
-     * is called with a key defined in this map, a <code>ITokenMaker</code> of
-     * the corresponding type is returned.
-     *
-     * @return The map.
-     */
-    protected abstract Map<?, ?> createTokenMakerKeyToClassNameMap();
 
     /**
      * Returns the default <code>TokenMakerFactory</code> instance. This is the
@@ -113,7 +102,7 @@ public abstract class TokenMakerFactory {
     /**
      * Returns the set of keys that this factory maps to token makers.
      *
-     * return The set of keys.
+     * @return The set of keys.
      */
     public abstract Set<?> keySet();
 

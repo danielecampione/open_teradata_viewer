@@ -77,7 +77,7 @@ public class DecoratedTextNode extends GraphicViewerTextNode {
             GraphicViewerView graphicviewerview) {
         if (getDecoration() != null) {
             if (myImgName.equals("icons/star.gif"))
-                myImgName = "icons/doc.gif";
+                myImgName = "icons/document.png";
             else
                 myImgName = "icons/star.gif";
             getDecoration().loadImage(

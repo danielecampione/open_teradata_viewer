@@ -103,9 +103,13 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(cbTabLines);
         menu.add(cbAnimateBracketMatching);
         menu.addSeparator();
-        menu.add(Actions.COMMENT);
-        menu.add(Actions.UNCOMMENT);
         menu.add(Actions.DATE_TIME);
+        subMenu = new JMenu("Text");
+        menu.add(subMenu);
+        subMenu.add(Actions.COMMENT);
+        subMenu.add(Actions.UNCOMMENT);
+        subMenu.addSeparator();
+        subMenu.add(Actions.INVERT_SELECTION_CASE);
         subMenu = new JMenu("Indent");
         menu.add(subMenu);
         subMenu.add(Actions.INCREASE_INDENT);

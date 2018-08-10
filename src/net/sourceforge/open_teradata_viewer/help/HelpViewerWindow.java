@@ -382,8 +382,8 @@ public class HelpViewerWindow extends JFrame {
                         _contentsFile.getFileWriter());
                 try {
                     StringBuffer buf = new StringBuffer(50);
-                    buf.append("<HTML><BODY><H1>").append(toString())
-                            .append("</H1>");
+                    buf.append("<HTML><BODY bgcolor=\"#FFFFFF\"><H1>")
+                            .append(toString()).append("</H1>");
                     pw.println(buf.toString());
                     for (int i = 0, limit = _docTitles.size(); i < limit; ++i) {
                         final URL docUrl = _docURLs.get(i);

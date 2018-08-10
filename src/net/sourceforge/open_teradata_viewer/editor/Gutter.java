@@ -86,6 +86,15 @@ public class Gutter extends JPanel {
     /** Renders line numbers. */
     private LineNumberList lineNumberList;
 
+    /** The color used to render line numbers. */
+    private Color lineNumberColor;
+
+    /** The starting index for line numbers in the gutter. */
+    private int lineNumberingStartIndex;
+
+    /** The font used to render line numbers. */
+    private Font lineNumberFont;
+
     /** Renders bookmark icons, breakpoints, error icons, etc. */
     private IconRowHeader iconArea;
 
@@ -98,11 +107,14 @@ public class Gutter extends JPanel {
     /**
      * Ctor.
      *
-     * @param textArea The parent text area. If this is <code>null</code>, you
-     *                 must call {@link #setTextArea(TextArea)}.
+     * @param textArea The parent text area.
      */
     public Gutter(TextArea textArea) {
         listener = new TextAreaListener();
+        lineNumberColor = Color.gray;
+        lineNumberFont = TextArea.getDefaultFont();
+        lineNumberingStartIndex = 1;
+
         setTextArea(textArea);
         setLayout(new BorderLayout());
         if (this.textArea != null) {
@@ -236,7 +248,7 @@ public class Gutter extends JPanel {
      * @see #setLineNumberColor(Color)
      */
     public Color getLineNumberColor() {
-        return lineNumberList.getForeground();
+        return lineNumberColor;
     }
 
     /**
@@ -244,7 +256,7 @@ public class Gutter extends JPanel {
      * @see #setLineNumberFont(Font)
      */
     public Font getLineNumberFont() {
-        return lineNumberList.getFont();
+        return lineNumberFont;
     }
 
     /**
@@ -255,7 +267,7 @@ public class Gutter extends JPanel {
      * @see #setLineNumberingStartIndex(int)
      */
     public int getLineNumberingStartIndex() {
-        return lineNumberList.getLineNumberingStartIndex();
+        return lineNumberingStartIndex;
     }
 
     /**
@@ -508,32 +520,45 @@ public class Gutter extends JPanel {
      * @see #getLineNumberColor()
      */
     public void setLineNumberColor(Color color) {
-        lineNumberList.setForeground(color);
+        if (color != null && !color.equals(lineNumberColor)) {
+            lineNumberColor = color;
+            if (lineNumberList != null) {
+                lineNumberList.setForeground(color);
+            }
+        }
     }
 
     /**
      * Sets the font used for line numbers.
      *
-     * @param font The font to use. This cannot be <code>null</code>.
+     * @param font The font to use.  This cannot be <code>null</code>.
      * @see #getLineNumberFont()
      */
     public void setLineNumberFont(Font font) {
         if (font == null) {
             throw new IllegalArgumentException("font cannot be null");
         }
-        lineNumberList.setFont(font);
+        if (!font.equals(lineNumberFont)) {
+            lineNumberFont = font;
+            if (lineNumberList != null) {
+                lineNumberList.setFont(font);
+            }
+        }
     }
 
     /**
-     * Sets the starting line's line number. The default value is
-     * <code>1</code>. Applications can call this method to change this value if
-     * they are displaying a subset of lines in a file, for example.
+     * Sets the starting line's line number.  The default value is
+     * <code>1</code>. Applications can call this method to change this value
+     * if they are displaying a subset of lines in a file, for example.
      *
      * @param index The new index.
      * @see #getLineNumberingStartIndex()
      */
     public void setLineNumberingStartIndex(int index) {
-        lineNumberList.setLineNumberingStartIndex(index);
+        if (index != lineNumberingStartIndex) {
+            lineNumberingStartIndex = index;
+            lineNumberList.setLineNumberingStartIndex(index);
+        }
     }
 
     /**
@@ -583,6 +608,10 @@ public class Gutter extends JPanel {
 
             if (lineNumberList == null) {
                 lineNumberList = kit.createLineNumberList(textArea);
+                lineNumberList.setFont(getLineNumberFont());
+                lineNumberList.setForeground(getLineNumberColor());
+                lineNumberList
+                        .setLineNumberingStartIndex(getLineNumberingStartIndex());
             } else {
                 lineNumberList.setTextArea(textArea);
             }

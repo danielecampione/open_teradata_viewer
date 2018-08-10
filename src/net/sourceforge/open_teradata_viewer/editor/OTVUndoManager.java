@@ -199,7 +199,7 @@ public class OTVUndoManager extends UndoManager {
     }
 
     /**
-     * The action used by {@link OTVUndoManager}.
+     * The edit used by {@link OTVUndoManager}.
      *  
      * @author D. Campione
      * 

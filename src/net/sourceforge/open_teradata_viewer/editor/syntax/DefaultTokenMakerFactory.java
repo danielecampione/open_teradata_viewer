@@ -18,8 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The default implementation of <code>TokenMakerFactory</code>. This factory
@@ -33,23 +31,11 @@ class DefaultTokenMakerFactory extends AbstractTokenMakerFactory
         implements
             ISyntaxConstants {
 
-    /**
-     * Creates and returns a mapping from keys to the names of {@link
-     * ITokenMaker} implementation classes. When {@link #getTokenMaker(String)}
-     * is called with a key defined in this map, a <code>ITokenMaker</code> of
-     * the corresponding type is returned.
-     *
-     * @return The map.
-     */
-    protected Map<String, ?> createTokenMakerKeyToClassNameMap() {
-
-        HashMap map = new HashMap();
-
+    /** {@inheritDoc} */
+    protected void initTokenMakerMap() {
         String pkg = "net.sourceforge.open_teradata_viewer.editor.syntax.modes.";
 
-        map.put(SYNTAX_STYLE_NONE, pkg + "PlainTextTokenMaker");
-        map.put(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
-
-        return map;
+        putMapping(SYNTAX_STYLE_NONE, pkg + "PlainTextTokenMaker");
+        putMapping(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
     }
 }

@@ -147,33 +147,41 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * @param g The graphics context.
      */
     protected void paintMatchedBracket(Graphics g) {
-        // We must add "-1" to the height because otherwise we'll paint below
-        // the region that gets invalidated
         SyntaxTextArea sta = (SyntaxTextArea) textArea;
         if (sta.isBracketMatchingEnabled()) {
-            Rectangle match = sta.match;
+            Rectangle match = sta.getMatchRectangle();
             if (match != null) {
-                if (sta.getAnimateBracketMatching()) {
-                    Color bg = sta.getMatchedBracketBGColor();
-                    if (bg != null) {
-                        g.setColor(bg);
-                        g.fillRoundRect(match.x, match.y, match.width,
-                                match.height - 1, 5, 5);
-                    }
-                    g.setColor(sta.getMatchedBracketBorderColor());
-                    g.drawRoundRect(match.x, match.y, match.width,
-                            match.height - 1, 5, 5);
-                } else {
-                    Color bg = sta.getMatchedBracketBGColor();
-                    if (bg != null) {
-                        g.setColor(bg);
-                        g.fillRect(match.x, match.y, match.width,
-                                match.height - 1);
-                    }
-                    g.setColor(sta.getMatchedBracketBorderColor());
-                    g.drawRect(match.x, match.y, match.width, match.height - 1);
+                paintMatchedBracketImpl(g, sta, match);
+            }
+            if (sta.getPaintMatchedBracketPair()) {
+                Rectangle dotRect = sta.getDotRectangle();
+                if (dotRect != null) { // Should always be true
+                    paintMatchedBracketImpl(g, sta, dotRect);
                 }
             }
+        }
+    }
+
+    private void paintMatchedBracketImpl(Graphics g, SyntaxTextArea sta,
+            Rectangle r) {
+        // We must add "-1" to the height because otherwise we'll paint below
+        // the region that gets invalidated.
+        if (sta.getAnimateBracketMatching()) {
+            Color bg = sta.getMatchedBracketBGColor();
+            if (bg != null) {
+                g.setColor(bg);
+                g.fillRoundRect(r.x, r.y, r.width, r.height - 1, 5, 5);
+            }
+            g.setColor(sta.getMatchedBracketBorderColor());
+            g.drawRoundRect(r.x, r.y, r.width, r.height - 1, 5, 5);
+        } else {
+            Color bg = sta.getMatchedBracketBGColor();
+            if (bg != null) {
+                g.setColor(bg);
+                g.fillRect(r.x, r.y, r.width, r.height - 1);
+            }
+            g.setColor(sta.getMatchedBracketBorderColor());
+            g.drawRect(r.x, r.y, r.width, r.height - 1);
         }
     }
 

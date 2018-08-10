@@ -42,6 +42,7 @@ import javax.swing.text.Position;
 import javax.swing.text.View;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.FoldingAwareIconRowHeader;
 
 /**
  * Renders icons in the {@link Gutter}. This can be used to visually mark lines
@@ -61,6 +62,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * </pre>
  *
  * @author D. Campione
+ * @see FoldingAwareIconRowHeader
  * 
  */
 public class IconRowHeader extends AbstractGutterComponent
@@ -707,8 +709,9 @@ public class IconRowHeader extends AbstractGutterComponent
         }
 
         public int compareTo(Object o) {
-            if (o instanceof GutterIconImpl) {
-                return pos.getOffset() - ((GutterIconImpl) o).getMarkedOffset();
+            if (o instanceof IGutterIconInfo) {
+                return pos.getOffset()
+                        - ((IGutterIconInfo) o).getMarkedOffset();
             }
             return -1;
         }

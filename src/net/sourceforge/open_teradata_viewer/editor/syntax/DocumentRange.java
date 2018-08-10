@@ -24,7 +24,15 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * @author D. Campione
  * 
  */
-public interface IDocumentRange {
+public class DocumentRange {
+
+    private int startOffs;
+    private int endOffs;
+
+    public DocumentRange(int startOffs, int endOffs) {
+        this.startOffs = startOffs;
+        this.endOffs = endOffs;
+    }
 
     /**
      * Gets the end offset of the range.
@@ -32,7 +40,9 @@ public interface IDocumentRange {
      * @return The end offset.
      * @see #getStartOffset()
      */
-    public int getEndOffset();
+    public int getEndOffset() {
+        return endOffs;
+    }
 
     /**
      * Gets the starting offset of the range.
@@ -40,5 +50,12 @@ public interface IDocumentRange {
      * @return The starting offset.
      * @see #getEndOffset()
      */
-    public int getStartOffset();
+    public int getStartOffset() {
+        return startOffs;
+    }
+
+    /** @return A string representation of this object. */
+    public String toString() {
+        return "[DocumentRange: " + startOffs + "-" + endOffs + "]";
+    }
 }

@@ -1,3 +1,27 @@
+0.13a (07/09/2012)
+    - Changed default font to Consolas on Windows Vista and 7.
+    - Decreased memory usage required for regex find and replace operations.
+    - Improved performance of Mark Occurrences, especially when there are lots
+      and lots of marked occurrences.
+    - Added a property so that, when bracket matching is enabled, you can choose
+      to have both brackets highlighted instead of just the "opposite" one.
+    - Fixed misaligned icons in row header when code folding is enabled.
+    - Fixed bug: FoldManager incorrectly auto-expanded deeply-nested folds for
+      some edits that did not affect those folds.
+    - Fixed bug: wrong initial width of line number margin when calling
+      Gutter#setLineNumberingStartIndex(int).
+    - GoToMemberWindow: Fixed occasional NPE.
+    - Fixed bug in TextEditorPane: clear undo stack and dirty state when
+      "loading" a new file.
+    - TextEditorPane: Now automatically scrolls to top of file on load().
+    - Fixed bug: NPE in DumbCompleteWordAction in some circumstances (whitespace
+      at beginning of file).
+    - TokenMakerFactory now allows user-defined TokenMakers to be loaded via
+      different ClassLoaders.
+    - Added the "INVERT CASE" command to the "Edit" menu.
+    - Added the compatibility with the Substance Look And Feels (Insubstantial
+      7.1).
+
 0.12c (28/05/2012)
     - Added the "COPY AS RTF" command to the "Edit" menu.
     - Added the status text to the initial Splash Screen.

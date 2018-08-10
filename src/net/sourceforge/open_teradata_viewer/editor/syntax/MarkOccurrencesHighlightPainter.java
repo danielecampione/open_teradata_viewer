@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
@@ -100,7 +99,6 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
         }
 
         // Should only render part of View
-        Graphics2D g2d = (Graphics2D) g;
         try {
             // Determine locations
             Shape shape = view.modelToView(p0, Position.Bias.Forward, p1,
@@ -108,10 +106,10 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
             Rectangle r = (shape instanceof Rectangle)
                     ? (Rectangle) shape
                     : shape.getBounds();
-            g2d.fillRect(r.x, r.y, r.width, r.height);
+            g.fillRect(r.x, r.y, r.width, r.height);
             if (paintBorder) {
-                g2d.setColor(borderColor);
-                g2d.drawRect(r.x, r.y, r.width - 1, r.height - 1);
+                g.setColor(borderColor);
+                g.drawRect(r.x, r.y, r.width - 1, r.height - 1);
             }
             return r;
         } catch (BadLocationException ble) { // Never happens

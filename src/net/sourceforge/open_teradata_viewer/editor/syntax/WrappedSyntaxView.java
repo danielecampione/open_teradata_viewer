@@ -771,7 +771,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
     }
 
     /**
-     * Simple view of a line that wraps if it doesn't fit withing the horizontal
+     * Simple view of a line that wraps if it doesn't fit within the horizontal
      * space allocated. This class tries to be lightweight by carrying little 
      * state of it's own and sharing the state of the outer class with it's
      * siblings.

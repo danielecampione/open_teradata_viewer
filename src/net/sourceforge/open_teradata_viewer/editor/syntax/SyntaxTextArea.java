@@ -117,9 +117,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     public static final String EOL_VISIBLE_PROPERTY = "STA.eolMarkersVisible";
     public static final String FOCUSABLE_TIPS_PROPERTY = "STA.focusableTips";
     public static final String FRACTIONAL_FONTMETRICS_PROPERTY = "STA.fractionalFontMetrics";
+    public static final String HIGHLIGHT_SECONDARY_LANGUAGES_PROPERTY = "STA.highlightSecondaryLanguages";
     public static final String HYPERLINKS_ENABLED_PROPERTY = "STA.hyperlinksEnabled";
     public static final String MARK_OCCURRENCES_PROPERTY = "STA.markOccurrences";
     public static final String MARKED_OCCURRENCES_CHANGED_PROPERTY = "STA.markedOccurrencesChanged";
+    public static final String PAINT_MATCHED_BRACKET_PAIR_PROPERTY = "STA.paintMatchedBracketPair";
     public static final String PARSER_NOTICES_PROPERTY = "STA.parserNotices";
     public static final String SYNTAX_SCHEME_PROPERTY = "STA.syntaxScheme";
     public static final String SYNTAX_STYLE_PROPERTY = "STA.syntaxStyle";
@@ -150,7 +152,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * The rectangle surrounding the "matched bracket" if bracket matching is
      * enabled.
      */
-    Rectangle match;
+    private Rectangle match;
+
+    /**
+     * The rectangle surrounding the current offset if both bracket matching and
+     * "match both brackets" are enabled.
+     */
+    private Rectangle dotRect;
 
     /** Colors used for the "matched bracket" if bracket matching is enabled. */
     private Color matchedBracketBGColor;
@@ -164,6 +172,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /** Whether or not bracket matching is animated. */
     private boolean animateBracketMatching;
+
+    /** Whether <b>both</b> brackets are highlighted when bracket matching. */
+    private boolean paintMatchedBracketPair;
 
     private BracketMatchingTimer bracketRepaintTimer;
 
@@ -213,6 +224,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     private int linkScanningMask;
 
+    /** Whether secondary languages have their backgrounds colored. */
+    private boolean highlightSecondaryLanguages;
+
     /** Used during "Copy as RTF" operations. */
     private RtfGenerator rtfGenerator;
 
@@ -253,6 +267,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     private int lineHeight; // Height of a line of text; same for default, bold & italic
     private int maxAscent;
     private boolean fractionalFontMetricsEnabled;
+
+    private Color[] secondaryLanguageBackgrounds;
 
     /** Ctor. */
     public SyntaxTextArea() {
@@ -517,7 +533,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     gen.appendNewline();
                 } else {
                     Font font = getFontForTokenType(t.type);
-                    Color bg = getBackgroundForTokenType(t.type);
+                    Color bg = getBackgroundForToken(t);
                     boolean underline = getUnderlineForToken(t);
                     // Small optimization - don't print fg color if this is a
                     // whitespace color. Saves on RTF size
@@ -594,6 +610,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         // exists.
         if (match != null) {
             repaint(match);
+            if (dotRect != null) {
+                repaint(dotRect);
+            }
         }
 
         // If a matching bracket is found, get its bounds and paint it
@@ -602,10 +621,18 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             try {
                 match = modelToView(pos);
                 if (match != null) { // Happens if we're not yet visible
+                    if (getPaintMatchedBracketPair()) {
+                        dotRect = modelToView(getCaretPosition() - 1);
+                    } else {
+                        dotRect = null;
+                    }
                     if (getAnimateBracketMatching()) {
                         bracketRepaintTimer.restart();
                     }
                     repaint(match);
+                    if (dotRect != null) {
+                        repaint(dotRect);
+                    }
                 }
             } catch (BadLocationException ble) {
                 ExceptionDialog.notifyException(ble); // Shouldn't happen
@@ -613,6 +640,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         } else if (pos == -1) {
             // Set match to null so the old value isn't still repainted
             match = null;
+            dotRect = null;
             bracketRepaintTimer.stop();
         }
         lastBracketMatchPos = pos;
@@ -699,6 +727,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public void foldToggled(Fold fold) {
         match = null;
+        dotRect = null;
         possiblyUpdateCurrentLineHighlightLocation();
         revalidate();
         repaint();
@@ -762,18 +791,30 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
-     * Returns the background color for tokens of the specified type.
+     * Returns the background color for a token.
      *
-     * @param type The type of token.
-     * @return The background color to use for that token type. If this value is
-     *         <code>null</code> then this token type has no special background
+     * @param token The token.
+     * @return The background color to use for that token. If this value is
+     *         <code>null</code> then this token has no special background
      *         color.
      * @see #getForegroundForToken(Token)
      */
-    public Color getBackgroundForTokenType(int type) {
+    public Color getBackgroundForToken(Token token) {
+        Color c = null;
+        if (getHighlightSecondaryLanguages()) {
+            // 1-indexed, since 0 == main language
+            int languageIndex = token.getLanguageIndex() - 1;
+            if (languageIndex >= 0
+                    && languageIndex < secondaryLanguageBackgrounds.length) {
+                c = secondaryLanguageBackgrounds[languageIndex];
+            }
+        }
+        if (c == null) {
+            c = syntaxScheme.getStyle(token.type).background;
+        }
         // Don't default to this.getBackground(), as Tokens simply don't paint a
         // background if they get a null Color
-        return syntaxScheme.getStyle(type).background;
+        return c;
     }
 
     /**
@@ -910,7 +951,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param t The token.
      * @return The foreground color to use for that token. This value is never
      *         <code>null</code>.
-     * @see #getBackgroundForTokenType(int)
+     * @see #getBackgroundForToken(Token)
      */
     public Color getForegroundForToken(Token t) {
         if (getHyperlinksEnabled() && t.isHyperlink()
@@ -962,6 +1003,22 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         }
         return g2d;
+    }
+
+    /**
+     * Returns whether "secondary" languages should have their backgrounds
+     * colored differently to visually differentiate them. This feature imposes
+     * a fair performance penalty.
+     *
+     * @return Whether secondary languages have their backgrounds colored
+     *         differently.
+     * @see #setHighlightSecondaryLanguages(boolean)
+     * @see #getSecondaryLanguageBackground(int)
+     * @see #getSecondaryLanguageCount()
+     * @see #setSecondaryLanguageBackground(int, Color)
+     */
+    public boolean getHighlightSecondaryLanguages() {
+        return highlightSecondaryLanguages;
     }
 
     /**
@@ -1082,13 +1139,27 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
-     * Returns the matched bracket's rectangle, or <code>null</code> if there
-     * is currently no matched bracket. Note that this shouldn't ever be called
-     * by the user.
+     * Returns the caret's offset's rectangle, or <code>null</code> if there
+     * is currently no matched bracket, bracket matching is disabled, or "paint
+     * both matched brackets" is disabled.  This should never be called by the
+     * programmer directly.
      *
      * @return The rectangle surrounding the matched bracket.
+     * @see #getMatchRectangle()
      */
-    public final Rectangle getMatchRectangle() {
+    Rectangle getDotRectangle() {
+        return dotRect;
+    }
+
+    /**
+     * Returns the matched bracket's rectangle, or <code>null</code> if there
+     * is currently no matched bracket.  This should never be called by the
+     * programmer directly.
+     *
+     * @return The rectangle surrounding the matched bracket.
+     * @see #getDotRectangle()
+     */
+    Rectangle getMatchRectangle() {
         return match;
     }
 
@@ -1099,6 +1170,22 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public int getMaxAscent() {
         return maxAscent;
+    }
+
+    /**
+     * Returns whether the bracket at the caret position is painted as a
+     * "match" when a matched bracket is found. Note that this property does
+     * nothing if {@link #isBracketMatchingEnabled()} returns
+     * <code>false</code>.
+     * 
+     * @return Whether both brackets in a bracket pair are highlighted when
+     *         bracket matching is enabled.
+     * @see #setPaintMatchedBracketPair(boolean)
+     * @see #isBracketMatchingEnabled()
+     * @see #setBracketMatchingEnabled(boolean)
+     */
+    public boolean getPaintMatchedBracketPair() {
+        return paintMatchedBracketPair;
     }
 
     /**
@@ -1232,6 +1319,31 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public boolean getPaintMarkOccurrencesBorder() {
         return paintMarkOccurrencesBorder;
+    }
+
+    /**
+     * Returns the background color for the specified secondary language.
+     *
+     * @param index The language index. Note that these are 1-based, not
+     *        0-based, and should be in the range
+     *        <code>1-getSecondaryLanguageCount()</code>, inclusive.
+     * @return The color, or <code>null</code> if none.
+     * @see #getSecondaryLanguageCount()
+     * @see #setSecondaryLanguageBackground(int, Color)
+     * @see #getHighlightSecondaryLanguages()
+     */
+    public Color getSecondaryLanguageBackground(int index) {
+        return secondaryLanguageBackgrounds[index];
+    }
+
+    /**
+     * @return The number of secondary language backgrounds.
+     * @see #getSecondaryLanguageBackground(int)
+     * @see #setSecondaryLanguageBackground(int, Color)
+     * @see #getHighlightSecondaryLanguages()
+     */
+    public int getSecondaryLanguageCount() {
+        return secondaryLanguageBackgrounds.length;
     }
 
     /**
@@ -1433,6 +1545,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
         setAntiAliasingEnabled(true);
         restoreDefaultSyntaxScheme();
+
+        setHighlightSecondaryLanguages(true);
+        secondaryLanguageBackgrounds = new Color[3];
+        secondaryLanguageBackgrounds[0] = new Color(0xfff0cc);
+        secondaryLanguageBackgrounds[1] = new Color(0xdafeda);
+        secondaryLanguageBackgrounds[2] = new Color(0xffe0f0);
     }
 
     /**
@@ -1819,11 +1937,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
-     * Sets the font used by this text area. Note that this method does not
-     * alter the appearance of an <code>SyntaxTextArea</code> since it uses
-     * different fonts for each token type.
+     * Sets the font used by this text area. Note that if some token styles are
+     * using a different font, they will not be changed by calling this method.
+     * To set different fonts on individual token types, use the text area's
+     * <code>SyntaxScheme</code>.
      *
      * @param font The font.
+     * @see SyntaxScheme#getStyle(int)
      */
     public void setFont(Font font) {
         Font old = super.getFont();
@@ -1887,6 +2007,27 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     + "an SyntaxTextAreaHighlighter for its Highlighter");
         }
         super.setHighlighter(h);
+    }
+
+    /**
+     * Sets whether "secondary" languages should have their backgrounds colored
+     * differently to visually differentiate them. This feature imposes a fair
+     * performance penalty. This method fires a property change event of type
+     * {@link #HIGHLIGHT_SECONDARY_LANGUAGES_PROPERTY}.
+     *
+     * @return Whether secondary languages have their backgrounds colored
+     *         differently.
+     * @see #getHighlightSecondaryLanguages()
+     * @see #setSecondaryLanguageBackground(int, Color)
+     * @see #getSecondaryLanguageCount()
+     */
+    public void setHighlightSecondaryLanguages(boolean highlight) {
+        if (this.highlightSecondaryLanguages != highlight) {
+            highlightSecondaryLanguages = highlight;
+            repaint();
+            firePropertyChange(HIGHLIGHT_SECONDARY_LANGUAGES_PROPERTY,
+                    !highlight, highlight);
+        }
     }
 
     /**
@@ -1987,8 +2128,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public void setMatchedBracketBGColor(Color color) {
         matchedBracketBGColor = color;
-        if (match != null)
+        if (match != null) {
             repaint();
+        }
     }
 
     /**
@@ -2000,8 +2142,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public void setMatchedBracketBorderColor(Color color) {
         matchedBracketBorderColor = color;
-        if (match != null)
+        if (match != null) {
             repaint();
+        }
     }
 
     /**
@@ -2020,6 +2163,30 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Sets whether the bracket at the caret position is painted as a "match"
+     * when a matched bracket is found. Note that this property does nothing if
+     * {@link #isBracketMatchingEnabled()} returns <code>false</code>.<p>
+     *
+     * This method fires a property change event of type {@link
+     * #PAINT_MATCHED_BRACKET_PAIR_PROPERTY}.
+     * 
+     * @param paintPair Whether both brackets in a bracket pair should be
+     *        highlighted when bracket matching is enabled.
+     * @see #getPaintMatchedBracketPair()
+     * @see #isBracketMatchingEnabled()
+     * @see #setBracketMatchingEnabled(boolean)
+     */
+    public void setPaintMatchedBracketPair(boolean paintPair) {
+        if (paintPair != paintMatchedBracketPair) {
+            paintMatchedBracketPair = paintPair;
+            doBracketMatching();
+            repaint();
+            firePropertyChange(PAINT_MATCHED_BRACKET_PAIR_PROPERTY,
+                    !paintMatchedBracketPair, paintMatchedBracketPair);
+        }
+    }
+
+    /**
      * Toggles whether tab lines are painted. This method fires a property
      * change event of type {@link #TAB_LINES_PROPERTY}.
      *
@@ -2032,6 +2199,28 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             paintTabLines = paint;
             repaint();
             firePropertyChange(TAB_LINES_PROPERTY, !paint, paint);
+        }
+    }
+
+    /**
+     * Sets the background color to use for a secondary language.
+     *
+     * @param index The language index. Note that these are 1-based, not
+     *        0-based, and should be in the range
+     *        <code>1-getSecondaryLanguageCount()</code>, inclusive.
+     * @param color The new color, or <code>null</code> for none.
+     * @see #getSecondaryLanguageBackground(int)
+     * @see #getSecondaryLanguageCount()
+     */
+    public void setSecondaryLanguageBackground(int index, Color color) {
+        index--;
+        Color old = secondaryLanguageBackgrounds[index];
+        if ((color == null && old != null)
+                || (color != null && !color.equals(old))) {
+            secondaryLanguageBackgrounds[index] = color;
+            if (getHighlightSecondaryLanguages()) {
+                repaint();
+            }
         }
     }
 
@@ -2243,9 +2432,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * A timer that animates the "bracket matching" animation.
-     * 
+     *
      * @author D. Campione
-     * 
      */
     private class BracketMatchingTimer extends Timer implements ActionListener {
 
@@ -2262,38 +2450,49 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         public void actionPerformed(ActionEvent e) {
             if (isBracketMatchingEnabled()) {
                 if (match != null) {
-                    if (pulseCount < 5) {
-                        pulseCount++;
-                        match.x--;
-                        match.y--;
-                        match.width += 2;
-                        match.height += 2;
-                        repaint(match.x, match.y, match.width, match.height);
-                    } else if (pulseCount < 7) {
-                        pulseCount++;
-                        match.x++;
-                        match.y++;
-                        match.width -= 2;
-                        match.height -= 2;
-                        repaint(match.x - 2, match.y - 2, match.width + 5,
-                                match.height + 5);
-                    } else {
-                        stop();
-                        pulseCount = 0;
-                    }
+                    updateAndInvalidate(match);
+                }
+                if (dotRect != null && getPaintMatchedBracketPair()) {
+                    updateAndInvalidate(dotRect);
+                }
+                if (++pulseCount == 8) {
+                    pulseCount = 0;
+                    stop();
                 }
             }
         }
 
+        private void init(Rectangle r) {
+            r.x += 3;
+            r.y += 3;
+            r.width -= 6;
+            r.height -= 6; // So animation can "grow" match
+        }
+
         public void start() {
-            match.x += 3;
-            match.y += 3;
-            match.width -= 6;
-            match.height -= 6; // So animation can "grow" match
+            init(match);
+            if (dotRect != null && getPaintMatchedBracketPair()) {
+                init(dotRect);
+            }
             pulseCount = 0;
             super.start();
         }
 
+        private void updateAndInvalidate(Rectangle r) {
+            if (pulseCount < 5) {
+                r.x--;
+                r.y--;
+                r.width += 2;
+                r.height += 2;
+                repaint(r.x, r.y, r.width, r.height);
+            } else if (pulseCount < 7) {
+                r.x++;
+                r.y++;
+                r.width -= 2;
+                r.height -= 2;
+                repaint(r.x - 2, r.y - 2, r.width + 5, r.height + 5);
+            }
+        }
     }
 
     /**

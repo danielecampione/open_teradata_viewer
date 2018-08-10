@@ -1995,7 +1995,7 @@ public class GraphicViewer extends JFrame
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
         graphicviewerimage.loadImage(
-                (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                (GraphicViewer.class).getResource("icons/document.png"), true);
         generalnode.initialize(point, new Dimension(50, 50),
                 graphicviewerimage, "top", "general node",
                 (int) (getRandom() * 5D), (int) (getRandom() * 5D));
@@ -2532,7 +2532,7 @@ public class GraphicViewer extends JFrame
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
         graphicviewerimage.loadImage(
-                (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                (GraphicViewer.class).getResource("icons/document.png"), true);
         graphicviewericonicnode.setIcon(graphicviewerimage);
         graphicviewericonicnode.setLocation(point);
         graphicviewericonicnode.setDraggableLabel(true);
@@ -2550,7 +2550,7 @@ public class GraphicViewer extends JFrame
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 40, 40));
         graphicviewerimage.loadImage(
-                (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                (GraphicViewer.class).getResource("icons/document.png"), true);
         multiportnode.initialize(point, graphicviewerimage, "multiport node");
         int i = (int) (getRandom() * 5D) + 1;
         for (int j = 0; j < i; j++) {
@@ -2700,7 +2700,7 @@ public class GraphicViewer extends JFrame
                 "an iconic node");
         graphicviewericonicnode.getImage().setSize(50, 50);
         graphicviewericonicnode.getImage().loadImage(
-                (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                (GraphicViewer.class).getResource("icons/document.png"), true);
         graphicviewericonicnode.setLocation(point);
         myMainLayer.addObjectAtTail(graphicviewericonicnode);
         endTransaction(InsertIconicNodeAction.toString());
@@ -2716,7 +2716,7 @@ public class GraphicViewer extends JFrame
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
         graphicviewerimage.loadImage(
-                (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                (GraphicViewer.class).getResource("icons/document.png"), true);
         simplenode.initialize(point, new Dimension(50, 50), graphicviewerimage,
                 "a simple node", true, true);
         myMainLayer.addObjectAtTail(simplenode);
@@ -2975,7 +2975,8 @@ public class GraphicViewer extends JFrame
             GraphicViewerObject graphicviewerobject = makeListItem(i);
             GraphicViewerImage graphicviewerimage = new GraphicViewerImage();
             graphicviewerimage.loadImage(
-                    (GraphicViewer.class).getResource("icons/doc.gif"), true);
+                    (GraphicViewer.class).getResource("icons/document.png"),
+                    true);
             graphicviewerimage.setSelectable(false);
             if (recordnode.isVertical())
                 graphicviewerimage.setSize(10, 12);

@@ -388,7 +388,11 @@ abstract class TextAreaBase extends JTextArea {
                 }
             }
         } else {
-            font = new Font("Monospaced", Font.PLAIN, 13);
+            // Consolas added in Vista, used by VS2010+
+            font = new Font("Consolas", Font.PLAIN, 13);
+            if (!"Consolas".equals(font.getFamily())) {
+                font = new Font("Monospaced", Font.PLAIN, 13);
+            }
         }
 
         return font;

@@ -87,8 +87,10 @@ public class Theme {
     private boolean markOccurrencesBorder;
     private Color matchedBracketFG;
     private Color matchedBracketBG;
+    private boolean matchedBracketHighlightBoth;
     private boolean matchedBracketAnimate;
     private Color hyperlinkFG;
+    private Color[] secondaryLanguages;
 
     private SyntaxScheme scheme;
 
@@ -101,6 +103,7 @@ public class Theme {
 
     /** Private constructor, used when loading from a stream. */
     private Theme() {
+        secondaryLanguages = new Color[3];
     }
 
     /**
@@ -123,8 +126,16 @@ public class Theme {
         markOccurrencesBorder = textArea.getPaintMarkOccurrencesBorder();
         matchedBracketBG = textArea.getMatchedBracketBGColor();
         matchedBracketFG = textArea.getMatchedBracketBorderColor();
+        matchedBracketHighlightBoth = textArea.getPaintMatchedBracketPair();
         matchedBracketAnimate = textArea.getAnimateBracketMatching();
         hyperlinkFG = textArea.getHyperlinkForeground();
+
+        int count = textArea.getSecondaryLanguageCount();
+        secondaryLanguages = new Color[count];
+        for (int i = 0; i < count; i++) {
+            secondaryLanguages[i] = textArea
+                    .getSecondaryLanguageBackground(i + 1);
+        }
 
         scheme = textArea.getSyntaxScheme();
 
@@ -159,8 +170,15 @@ public class Theme {
         textArea.setPaintMarkOccurrencesBorder(markOccurrencesBorder);
         textArea.setMatchedBracketBGColor(matchedBracketBG);
         textArea.setMatchedBracketBorderColor(matchedBracketFG);
+        textArea.setPaintMatchedBracketPair(matchedBracketHighlightBoth);
         textArea.setAnimateBracketMatching(matchedBracketAnimate);
         textArea.setHyperlinkForeground(hyperlinkFG);
+
+        int count = secondaryLanguages.length;
+        for (int i = 0; i < count; i++) {
+            textArea.setSecondaryLanguageBackground(i + 1,
+                    secondaryLanguages[i]);
+        }
 
         textArea.setSyntaxScheme(scheme);
 
@@ -275,6 +293,8 @@ public class Theme {
             elem = doc.createElement("matchedBracket");
             elem.setAttribute("fg", colorToString(matchedBracketFG));
             elem.setAttribute("bg", colorToString(matchedBracketBG));
+            elem.setAttribute("highlightBoth",
+                    Boolean.toString(matchedBracketHighlightBoth));
             elem.setAttribute("animate",
                     Boolean.toString(matchedBracketAnimate));
             root.appendChild(elem);
@@ -282,6 +302,16 @@ public class Theme {
             elem = doc.createElement("hyperlinks");
             elem.setAttribute("fg", colorToString(hyperlinkFG));
             root.appendChild(elem);
+
+            elem = doc.createElement("secondaryLanguages");
+            for (int i = 0; i < secondaryLanguages.length; i++) {
+                Color color = secondaryLanguages[i];
+                Element elem2 = doc.createElement("language");
+                elem2.setAttribute("index", Integer.toString(i + 1));
+                elem2.setAttribute("bg", color == null
+                        ? ""
+                        : colorToString(color));
+            }
 
             elem = doc.createElement("gutterBorder");
             elem.setAttribute("color", colorToString(gutterBorderColor));
@@ -514,12 +544,22 @@ public class Theme {
                 theme.matchedBracketFG = stringToColor(fg);
                 String bg = attrs.getValue("bg");
                 theme.matchedBracketBG = stringToColor(bg);
+                String highlightBoth = attrs.getValue("highlightBoth");
+                theme.matchedBracketHighlightBoth = Boolean.valueOf(
+                        highlightBoth).booleanValue();
                 String animate = attrs.getValue("animate");
                 theme.matchedBracketAnimate = Boolean.valueOf(animate)
                         .booleanValue();
             } else if ("hyperlinks".equals(qName)) {
                 String fg = attrs.getValue("fg");
                 theme.hyperlinkFG = stringToColor(fg);
+            } else if ("language".equals(qName)) {
+                String indexStr = attrs.getValue("index");
+                int index = Integer.parseInt(indexStr) - 1;
+                if (theme.secondaryLanguages.length > index) { // Sanity
+                    Color bg = stringToColor(attrs.getValue("bg"));
+                    theme.secondaryLanguages[index] = bg;
+                }
             } else if ("selection".equals(qName)) {
                 String color = attrs.getValue("bg");
                 theme.selectionBG = stringToColor(color);

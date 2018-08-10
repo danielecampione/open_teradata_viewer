@@ -19,6 +19,7 @@
 package net.sourceforge.open_teradata_viewer.util;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Similar to a <code>java.util.ArrayList</code>, but specifically for
@@ -161,6 +162,19 @@ public class DynamicIntArray implements Serializable {
     }
 
     /**
+     * Decrements all values in the array in the specified range.
+     *
+     * @param from The range start offset (inclusive).
+     * @param to The range end offset (exclusive).
+     * @see #increment(int, int)
+     */
+    public void decrement(int from, int to) {
+        for (int i = from; i < to; i++) {
+            data[i]--;
+        }
+    }
+
+    /**
      * Makes sure that this <code>DynamicIntArray</code> instance can hold at
      * least the number of elements specified. If it can't, then the capacity is
      * increased.
@@ -179,6 +193,15 @@ public class DynamicIntArray implements Serializable {
             data = new int[newCapacity];
             System.arraycopy(oldData, 0, data, 0, size);
         }
+    }
+
+    /**
+     * Sets the value of all entries in this array to the specified value.
+     *
+     * @param value The new value for all elements in the array.
+     */
+    public void fill(int value) {
+        Arrays.fill(data, value);
     }
 
     /**
@@ -218,6 +241,31 @@ public class DynamicIntArray implements Serializable {
      */
     public int getSize() {
         return size;
+    }
+
+    /**
+     * Increments all values in the array in the specified range.
+     *
+     * @param from The range start offset (inclusive).
+     * @param to The range end offset (exclusive).
+     * @see #decrement(int, int)
+     */
+    public void increment(int from, int to) {
+        for (int i = from; i < to; i++) {
+            data[i]++;
+        }
+    }
+
+    public void insertRange(int offs, int count, int value) {
+        if (offs > size) {
+            throwException2(offs);
+        }
+        ensureCapacity(size + count);
+        System.arraycopy(data, offs, data, offs + count, size - offs);
+        if (value != 0) {
+            Arrays.fill(data, offs, offs + count, value);
+        }
+        size += count;
     }
 
     /**

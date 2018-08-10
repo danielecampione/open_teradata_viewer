@@ -22,8 +22,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
@@ -45,7 +43,6 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
     private SyntaxTextArea textArea;
     private Timer timer;
     private MarkOccurrencesHighlightPainter p;
-    private List<Object> tags;
 
     /** The default color used to mark occurrences. */
     public static final Color DEFAULT_COLOR = new Color(224, 224, 224);
@@ -83,7 +80,6 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         timer.setRepeats(false);
         p = new MarkOccurrencesHighlightPainter();
         setColor(color);
-        tags = new ArrayList<Object>();
     }
 
     /**
@@ -103,10 +99,6 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
         doc.readLock();
         try {
-
-            // Remove old highlights
-            removeHighlights();
-
             // Get the token at the caret position
             int line = textArea.getCaretLineNumber();
             Token tokenList = textArea.getTokenListForLine(line);
@@ -126,8 +118,10 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
 
             // Add new highlights if an identifier is selected
             if (t != null && isValidType(t) && !isNonWordChar(t)) {
+                removeHighlights();
                 SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                         .getHighlighter();
+
                 char[] lexeme = t.getLexeme().toCharArray();
                 int type = t.type;
                 for (int i = 0; i < textArea.getLineCount(); i++) {
@@ -136,9 +130,8 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
                         if (temp.is(type, lexeme)) {
                             try {
                                 int end = temp.offset + temp.textCount;
-                                Object tag = h.addMarkedOccurrenceHighlight(
-                                        temp.offset, end, p);
-                                tags.add(tag);
+                                h.addMarkedOccurrenceHighlight(temp.offset,
+                                        end, p);
                             } catch (BadLocationException ble) {
                                 ExceptionDialog.notifyException(ble); // Never happens
                             }
@@ -244,11 +237,8 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         if (textArea != null) {
             SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                     .getHighlighter();
-            for (int i = 0; i < tags.size(); i++) {
-                h.removeMarkOccurrencesHighlight(tags.get(i));
-            }
+            h.clearMarkOccurrencesHighlights();
         }
-        tags.clear();
     }
 
     /**

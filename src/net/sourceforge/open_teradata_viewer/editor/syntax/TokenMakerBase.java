@@ -43,6 +43,16 @@ abstract class TokenMakerBase implements ITokenMaker {
     /** The factory that gives us our tokens to use. */
     private ITokenFactory iTokenFactory;
 
+    /**
+     * "0" implies this is the "main" language being highlighted. Positive
+     * values imply various "secondary" or "embedded" languages, such as CSS or
+     * JavaScript in HTML. While this value is non-zero, tokens will be
+     * generated with this language index so they can (possibly) be painted
+     * differently, so "embedded" languages can be rendered with a special
+     * background.
+     */
+    private int languageIndex;
+
     /** Ctor. */
     public TokenMakerBase() {
         firstToken = currentToken = previousToken = null;
@@ -104,6 +114,7 @@ abstract class TokenMakerBase implements ITokenMaker {
             currentToken = currentToken.getNextToken();
         }
 
+        currentToken.setLanguageIndex(languageIndex);
         try {
             currentToken.setHyperlink(hyperlink);
         } catch (Throwable t) {
@@ -202,6 +213,20 @@ abstract class TokenMakerBase implements ITokenMaker {
     protected void resetTokenList() {
         firstToken = currentToken = previousToken = null;
         iTokenFactory.resetAllTokens();
+    }
+
+    /**
+     * Sets the language index to assign to tokens moving forward. This property
+     * is used to designate tokens as being in "secondary" languages (such as
+     * CSS or JavaScript in HTML).
+     *
+     * @param languageIndex The new language index. A value of <code>0</code>
+     *        denotes the "main" language, any positive value denotes a specific
+     *        secondary language. Negative values will be treated as
+     *        <code>0</code>.
+     */
+    public void setLanguageIndex(int languageIndex) {
+        this.languageIndex = Math.max(0, languageIndex);
     }
 
     /** {@inheritDoc} */

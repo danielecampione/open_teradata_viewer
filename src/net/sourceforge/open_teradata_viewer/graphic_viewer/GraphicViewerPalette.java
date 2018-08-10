@@ -211,9 +211,9 @@ public class GraphicViewerPalette extends GraphicViewerView {
                 "GraphicViewerIconicNode");
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
-        graphicviewerimage
-                .loadImage((GraphicViewerPalette.class)
-                        .getResource("icons/doc.gif"), true);
+        graphicviewerimage.loadImage(
+                (GraphicViewerPalette.class).getResource("icons/document.png"),
+                true);
         graphicviewericonicnode.setIcon(graphicviewerimage);
         _mthnew(graphicviewericonicnode);
         GraphicViewerTextNode graphicviewertextnode = new GraphicViewerTextNode(

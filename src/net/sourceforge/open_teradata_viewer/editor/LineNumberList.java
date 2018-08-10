@@ -59,19 +59,22 @@ public class LineNumberList extends AbstractGutterComponent
 
     private static final long serialVersionUID = -2611736346700889874L;
 
-    /** The last line the caret was on */
+    /** The last line the caret was on. */
     private int currentLine;
 
-    /** Used to check if caret changes lines when line wrap is enabled */
+    /** Used to check if caret changes lines when line wrap is enabled. */
     private int lastY = -1;
 
-    /** Height of a line number "cell" when word wrap is off */
+    /** Last line index painted. */
+    private int lastVisibleLine;
+
+    /** Height of a line number "cell" when word wrap is off. */
     private int cellHeight;
 
-    /** The width used for all line number cells */
+    /** The width used for all line number cells. */
     private int cellWidth;
 
-    /** The ascent to use when painting line numbers */
+    /** The ascent to use when painting line numbers. */
     private int ascent;
 
     private Map<?, ?> aaHints;
@@ -156,6 +159,18 @@ public class LineNumberList extends AbstractGutterComponent
     }
 
     /**
+     * @return The last calculated line number index painted in this component.
+     */
+    private int calculateLastVisibleLineNumber() {
+        int lastLine = 0;
+        if (textArea != null) {
+            lastLine = textArea.getLineCount() + getLineNumberingStartIndex()
+                    - 1;
+        }
+        return lastLine;
+    }
+
+    /**
      * Returns the starting line's line number. The default value is
      * <code>1</code>.
      *
@@ -190,14 +205,13 @@ public class LineNumberList extends AbstractGutterComponent
 
     /** {@inheritDoc} */
     void handleDocumentEvent(DocumentEvent e) {
-        int newLineCount = textArea != null ? textArea.getLineCount() : 0;
-        if (newLineCount != currentLineCount) {
-            // Adjust the amount of space the line numbers take up, if
-            // necessary
-            if (newLineCount / 10 != currentLineCount / 10) {
+        int newLastLine = calculateLastVisibleLineNumber();
+        if (newLastLine != lastVisibleLine) {
+            // Adjust the amount of space the line numbers take up, if necessary
+            if (newLastLine / 10 != lastVisibleLine / 10) {
                 updateCellWidths();
             }
-            currentLineCount = newLineCount;
+            lastVisibleLine = newLastLine;
             repaint();
         }
     }
@@ -489,7 +503,11 @@ public class LineNumberList extends AbstractGutterComponent
      * @see #getLineNumberingStartIndex()
      */
     public void setLineNumberingStartIndex(int index) {
-        lineNumberingStartIndex = index;
+        if (index != lineNumberingStartIndex) {
+            lineNumberingStartIndex = index;
+            updateCellWidths();
+            repaint();
+        }
     }
 
     /**
@@ -507,6 +525,7 @@ public class LineNumberList extends AbstractGutterComponent
         }
 
         super.setTextArea(textArea);
+        lastVisibleLine = calculateLastVisibleLineNumber();
 
         if (textArea != null) {
             l.install(textArea); // Won't double-install
@@ -545,7 +564,8 @@ public class LineNumberList extends AbstractGutterComponent
             if (font != null) {
                 FontMetrics fontMetrics = getFontMetrics(font);
                 int count = 0;
-                int lineCount = textArea.getLineCount();
+                int lineCount = textArea.getLineCount()
+                        + getLineNumberingStartIndex() - 1;
                 do {
                     lineCount = lineCount / 10;
                     count++;

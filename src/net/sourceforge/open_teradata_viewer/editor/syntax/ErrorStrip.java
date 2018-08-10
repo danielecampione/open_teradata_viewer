@@ -302,7 +302,7 @@ public class ErrorStrip extends JComponent {
         if (getShowMarkedOccurrences() && textArea.getMarkOccurrences()) {
             List<?> occurrences = textArea.getMarkedOccurrences();
             for (Iterator<?> i = occurrences.iterator(); i.hasNext();) {
-                IDocumentRange range = (IDocumentRange) i.next();
+                DocumentRange range = (DocumentRange) i.next();
                 int line = 0;
                 try {
                     line = textArea.getLineOfOffset(range.getStartOffset());
@@ -497,9 +497,9 @@ public class ErrorStrip extends JComponent {
      */
     private class MarkedOccurrenceNotice implements IParserNotice {
 
-        private IDocumentRange range;
+        private DocumentRange range;
 
-        public MarkedOccurrenceNotice(IDocumentRange range) {
+        public MarkedOccurrenceNotice(DocumentRange range) {
             this.range = range;
         }
 
