@@ -93,43 +93,27 @@ class URLFileLocation extends FileLocation {
         return TextEditorPane.LAST_MODIFIED_UNKNOWN;
     }
 
-    /**
-     * Returns the full path of the URL. This will be stripped of sensitive
-     * information such as passwords.
-     *
-     * @return The full path of the URL.
-     * @see #getFileName()
-     */
+    /** {@inheritDoc} */
     public String getFileFullPath() {
         return fileFullPath;
     }
 
     /**
-     * Returns the name of the file.
-     *
-     * @return The name of the file.
-     * @see #getFileFullPath()
+     * {@inheritDoc}
      */
     public String getFileName() {
         return fileName;
     }
 
     /**
-     * Opens an input stream for reading from this file.
-     *
-     * @return The input stream.
-     * @throws IOException If the file does not exist, or some other IO error
-     *         occurs.
+     * {@inheritDoc}
      */
     protected InputStream getInputStream() throws IOException {
         return url.openStream();
     }
 
     /**
-     * Opens an output stream for writing this file.
-     *
-     * @return An output stream.
-     * @throws IOException If an IO error occurs.
+     * {@inheritDoc}
      */
     protected OutputStream getOutputStream() throws IOException {
         return url.openConnection().getOutputStream();

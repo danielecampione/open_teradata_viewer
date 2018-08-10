@@ -100,7 +100,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  * numbers and bookmarks easily to your text area.
  *
  * @author D. Campione
- * 
+ * @see TextEditorPane
  */
 public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
@@ -1431,6 +1431,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         isScanningForLinks = false;
         setUseFocusableTips(true);
 
+        setAntiAliasingEnabled(true);
         restoreDefaultSyntaxScheme();
     }
 
@@ -2214,6 +2215,22 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Resets the editor state after the user clicks on a hyperlink or releases
+     * the hyperlink modifier.
+     */
+    private void stopScanningForLinks() {
+        if (isScanningForLinks) {
+            Cursor c = getCursor();
+            isScanningForLinks = false;
+            hoveredOverLinkOffset = -1;
+            if (c != null && c.getType() == Cursor.HAND_CURSOR) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+                repaint();
+            }
+        }
+    }
+
+    /**
      * Returns the token at the specified position in the view.
      *
      * @param p The position in the view.
@@ -2314,6 +2331,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 HyperlinkEvent he = new HyperlinkEvent(this,
                         HyperlinkEvent.EventType.ACTIVATED, url, desc);
                 fireHyperlinkUpdate(he);
+                stopScanningForLinks();
             }
         }
 
@@ -2337,14 +2355,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     }
                 } else {
                     if (isScanningForLinks) {
-                        Cursor c = getCursor();
-                        isScanningForLinks = false;
-                        hoveredOverLinkOffset = -1;
-                        if (c != null && c.getType() == Cursor.HAND_CURSOR) {
-                            setCursor(Cursor
-                                    .getPredefinedCursor(Cursor.TEXT_CURSOR));
-                            repaint();
-                        }
+                        stopScanningForLinks();
                     }
                 }
             }

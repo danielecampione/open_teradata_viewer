@@ -24,6 +24,7 @@ import java.awt.Color;
  * A notice (e.g., a warning or error) from a parser.
  *
  * @author D. Campione
+ * @see DefaultParserNotice
  * 
  */
 public interface IParserNotice extends Comparable<Object> {

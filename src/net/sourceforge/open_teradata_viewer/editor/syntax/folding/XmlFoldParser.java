@@ -28,7 +28,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
- * Fold parser for XML.
+ * Fold parser for XML. Any tags that span more than one line, as well as
+ * comment regions spanning more than one line, are identified as foldable
+ * regions.
  *
  * @author D. Campione
  * 
@@ -78,7 +80,8 @@ public class XmlFoldParser implements IFoldParser {
                             // another line
                         } else {
                             // If we're an MLC that ends on a later line..
-                            if (t.type == Token.COMMENT_MULTILINE) {
+                            if (t.type == Token.COMMENT_MULTILINE
+                                    && !t.endsWith(MLC_END)) {
                                 inMLC = true;
                                 mlcStart = t.offset;
                             }

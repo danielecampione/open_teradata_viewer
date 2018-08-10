@@ -42,6 +42,7 @@ import net.sourceforge.open_teradata_viewer.editor.RecordableTextAction;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.Fold;
+import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldCollapser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
 import net.sourceforge.open_teradata_viewer.editor.syntax.templates.ICodeTemplate;
 
@@ -79,10 +80,17 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     public static final String staCloseCurlyBraceAction = "STA.CloseCurlyBraceAction";
     public static final String staCloseMarkupTagAction = "STA.CloseMarkupTagAction";
+    public static final String staCollapseAllFoldsAction = "STA.CollapseAllFoldsAction";
+    public static final String staCollapseAllCommentFoldsAction = "STA.CollapseAllCommentFoldsAction";
+    public static final String staCollapseFoldAction = "STA.CollapseFoldAction";
     public static final String staCopyAsRtfAction = "STA.CopyAsRtfAction";
     public static final String staDecreaseIndentAction = "STA.DecreaseIndentAction";
+    public static final String staExpandAllFoldsAction = "STA.ExpandAllFoldsAction";
+    public static final String staExpandFoldAction = "STA.ExpandFoldAction";
     public static final String staGoToMatchingBracketAction = "STA.GoToMatchingBracketAction";
     public static final String staPossiblyInsertTemplateAction = "STA.TemplateAction";
+    public static final String staToggleCommentAction = "STA.ToggleCommentAction";
+    public static final String staToggleCurrentFoldAction = "STA.ToggleCurrentFoldAction";
 
     /**
      * The actions that <code>SyntaxTextAreaEditorKit</code> adds to those of
@@ -92,18 +100,21 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             new CloseCurlyBraceAction(), new CloseMarkupTagAction(),
             new BeginWordAction(beginWordAction, false),
             new BeginWordAction(selectionBeginWordAction, true),
-            new CopyAsRtfAction(), new DecreaseIndentAction(),
-            new DeletePrevWordAction(), new EndAction(endAction, false),
+            new ChangeFoldStateAction(staCollapseFoldAction, true),
+            new ChangeFoldStateAction(staExpandFoldAction, false),
+            new CollapseAllFoldsAction(), new CopyAsRtfAction(),
+            new DecreaseIndentAction(), new DeletePrevWordAction(),
+            new EndAction(endAction, false),
             new EndAction(selectionEndAction, true),
             new EndWordAction(endWordAction, false),
-            new EndWordAction(endWordAction, true),
+            new EndWordAction(endWordAction, true), new ExpandAllFoldsAction(),
             new GoToMatchingBracketAction(), new InsertBreakAction(),
             new InsertTabAction(), new NextWordAction(nextWordAction, false),
             new NextWordAction(selectionNextWordAction, true),
             new PossiblyInsertTemplateAction(),
             new PreviousWordAction(previousWordAction, false),
             new PreviousWordAction(selectionPreviousWordAction, true),
-            new SelectWordAction(),};
+            new SelectWordAction(), new ToggleCommentAction(),};
 
     /** Ctor. */
     public SyntaxTextAreaEditorKit() {
@@ -215,6 +226,41 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         }
     }
 
+    /** Expands or collapses the nearest fold. */
+    public static class ChangeFoldStateAction extends FoldRelatedAction {
+
+        private static final long serialVersionUID = 5409538978475562168L;
+
+        private boolean collapse;
+
+        public ChangeFoldStateAction(String name, boolean collapse) {
+            super(name);
+            this.collapse = collapse;
+        }
+
+        public ChangeFoldStateAction(String name, Icon icon, String desc,
+                Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            if (sta.isCodeFoldingEnabled()) {
+                Fold fold = getClosestFold(sta);
+                if (fold != null) {
+                    fold.setCollapsed(collapse);
+                }
+                possiblyRepaintGutter(textArea);
+            } else {
+                UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
+        }
+
+        public final String getMacroID() {
+            return getName();
+        }
+    }
+
     /**
      * Action that (optionally) aligns a closing curly brace with the line
      * containing its matching opening curly brace.
@@ -274,8 +320,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // Locate the matching '{' bracket, and replace the leading
                     // whitespace for the '}' to match that of the '{' char's
                     // line
-                    int match = SyntaxUtilities
-                            .getMatchingBracketPosition(sta);
+                    int match = SyntaxUtilities.getMatchingBracketPosition(sta);
                     if (match > -1) {
                         elem = root.getElement(root.getElementIndex(match));
                         int start2 = elem.getStartOffset();
@@ -421,6 +466,76 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
         public String getMacroID() {
             return getName();
+        }
+    }
+
+    /** Collapses all comment folds. */
+    public static class CollapseAllCommentFoldsAction extends FoldRelatedAction {
+
+        private static final long serialVersionUID = 5756304038608483906L;
+
+        public CollapseAllCommentFoldsAction() {
+            super(staCollapseAllCommentFoldsAction);
+            setName("Collapse All Comments");
+            setMnemonic("C".charAt(0));
+            setShortDescription("Collapses all comment folds.");
+        }
+
+        public CollapseAllCommentFoldsAction(String name, Icon icon,
+                String desc, Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            if (sta.isCodeFoldingEnabled()) {
+                FoldCollapser collapser = new FoldCollapser();
+                collapser.collapseFolds(sta.getFoldManager());
+                possiblyRepaintGutter(textArea);
+            } else {
+                UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
+        }
+
+        public final String getMacroID() {
+            return staCollapseAllCommentFoldsAction;
+        }
+    }
+
+    /** Collapses all folds. */
+    public static class CollapseAllFoldsAction extends FoldRelatedAction {
+
+        private static final long serialVersionUID = -5847113039699771731L;
+
+        public CollapseAllFoldsAction() {
+            super(staCollapseAllFoldsAction);
+            setName("Collapse All Folds");
+            setMnemonic("O".charAt(0));
+            setShortDescription("Collapses all folds.");
+        }
+
+        public CollapseAllFoldsAction(String name, Icon icon, String desc,
+                Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            if (sta.isCodeFoldingEnabled()) {
+                FoldCollapser collapser = new FoldCollapser() {
+                    public boolean getShouldCollapse(Fold fold) {
+                        return true;
+                    }
+                };
+                collapser.collapseFolds(sta.getFoldManager());
+                possiblyRepaintGutter(textArea);
+            } else {
+                UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
+        }
+
+        public final String getMacroID() {
+            return staCollapseAllFoldsAction;
         }
     }
 
@@ -819,6 +934,48 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
             offs += seg.getIndex() - seg.getBeginIndex();
             return offs;
+        }
+    }
+
+    /** Expands all folds. */
+    public static class ExpandAllFoldsAction extends FoldRelatedAction {
+
+        private static final long serialVersionUID = -2098243894401554680L;
+
+        public ExpandAllFoldsAction() {
+            super(staExpandAllFoldsAction);
+            setName("Expand All Folds");
+            setMnemonic("E".charAt(0));
+            setShortDescription("Expands all folds.");
+        }
+
+        public ExpandAllFoldsAction(String name, Icon icon, String desc,
+                Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            if (sta.isCodeFoldingEnabled()) {
+                FoldManager fm = sta.getFoldManager();
+                for (int i = 0; i < fm.getFoldCount(); i++) {
+                    expand(fm.getFold(i));
+                }
+                possiblyRepaintGutter(sta);
+            } else {
+                UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
+        }
+
+        private void expand(Fold fold) {
+            fold.setCollapsed(false);
+            for (int i = 0; i < fold.getChildCount(); i++) {
+                expand(fold.getChild(i));
+            }
+        }
+
+        public final String getMacroID() {
+            return staExpandAllFoldsAction;
         }
     }
 
@@ -1498,6 +1655,140 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         protected void createActions() {
             start = new BeginWordAction("pigdog", false);
             end = new EndWordAction("pigdog", true);
+        }
+    }
+
+    /**
+     * Action that toggles whether the currently selected lines are
+     * commented.
+     */
+    public static class ToggleCommentAction extends RecordableTextAction {
+
+        private static final long serialVersionUID = -7331129228472571101L;
+
+        public ToggleCommentAction() {
+            super(staToggleCommentAction);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            if (!textArea.isEditable() || !textArea.isEnabled()) {
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                return;
+            }
+
+            SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+            String[] startEnd = doc.getLineCommentStartAndEnd();
+
+            if (startEnd == null) {
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                return;
+            }
+
+            Element map = doc.getDefaultRootElement();
+            Caret c = textArea.getCaret();
+            int dot = c.getDot();
+            int mark = c.getMark();
+            int line1 = map.getElementIndex(dot);
+            int line2 = map.getElementIndex(mark);
+            int start = Math.min(line1, line2);
+            int end = Math.max(line1, line2);
+
+            // Don't toggle comment on last line if there is no text selected on
+            // it
+            if (start != end) {
+                Element elem = map.getElement(end);
+                if (Math.max(dot, mark) == elem.getStartOffset()) {
+                    end--;
+                }
+            }
+
+            textArea.beginAtomicEdit();
+            try {
+                boolean add = getDoAdd(doc, map, start, end, startEnd);
+                for (line1 = start; line1 <= end; line1++) {
+                    Element elem = map.getElement(line1);
+                    handleToggleComment(elem, doc, startEnd, add);
+                }
+            } catch (BadLocationException ble) {
+                ExceptionDialog.hideException(ble);
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+            } finally {
+                textArea.endAtomicEdit();
+            }
+        }
+
+        private boolean getDoAdd(Document doc, Element map, int startLine,
+                int endLine, String[] startEnd) throws BadLocationException {
+            boolean doAdd = false;
+            for (int i = startLine; i <= endLine; i++) {
+                Element elem = map.getElement(i);
+                int start = elem.getStartOffset();
+                String t = doc.getText(start, elem.getEndOffset() - start - 1);
+                if (!t.startsWith(startEnd[0])
+                        || (startEnd[1] != null && !t.endsWith(startEnd[1]))) {
+                    doAdd = true;
+                    break;
+                }
+            }
+            return doAdd;
+        }
+
+        private void handleToggleComment(Element elem, Document doc,
+                String[] startEnd, boolean add) throws BadLocationException {
+            int start = elem.getStartOffset();
+            int end = elem.getEndOffset() - 1;
+            if (add) {
+                doc.insertString(start, startEnd[0], null);
+                if (startEnd[1] != null) {
+                    doc.insertString(end + startEnd[0].length(), startEnd[1],
+                            null);
+                }
+            } else {
+                doc.remove(start, startEnd[0].length());
+                if (startEnd[1] != null) {
+                    int temp = startEnd[1].length();
+                    doc.remove(end - startEnd[0].length() - temp, temp);
+                }
+            }
+        }
+
+        public final String getMacroID() {
+            return staToggleCommentAction;
+        }
+    }
+
+    /** Toggles the fold at the current caret position or line. */
+    public static class ToggleCurrentFoldAction extends FoldRelatedAction {
+
+        private static final long serialVersionUID = -7653537898747779090L;
+
+        public ToggleCurrentFoldAction() {
+            super(staToggleCurrentFoldAction);
+            setName("Toggle Current Fold");
+            setMnemonic("F".charAt(0));
+            setShortDescription("Toggles the fold at the caret position.");
+        }
+
+        public ToggleCurrentFoldAction(String name, Icon icon, String desc,
+                Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+        }
+
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            if (sta.isCodeFoldingEnabled()) {
+                Fold fold = getClosestFold(sta);
+                if (fold != null) {
+                    fold.toggleCollapsedState();
+                }
+                possiblyRepaintGutter(textArea);
+            } else {
+                UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
+        }
+
+        public final String getMacroID() {
+            return staToggleCurrentFoldAction;
         }
     }
 }

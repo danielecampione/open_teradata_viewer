@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax )
+ * Open Teradata Viewer ( editor syntax parser )
  * Copyright (C) 2012, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,47 +16,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.editor.syntax;
+package net.sourceforge.open_teradata_viewer.editor.syntax.parser;
 
-import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.DocumentReader;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.syntax.parser.AbstractParser;
-import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParseResult;
-import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParserNotice;
-import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParseResult;
-import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * A parser for XML documents.
+ * A parser for XML documents. Adds squiggle underlines for any XML errors found
+ * (though most XML parsers don't really have error recovery and so only can
+ * find one error at a time).<p>
  *
- * @author D. Campione
+ * This class isn't actually used by SyntaxTextArea anywhere, but you can
+ * install and use it yourself. Doing so is as simple as:
  * 
+ * <pre>
+ * XmlParser xmlParser = new XmlParser();
+ * textArea.addParser(xmlParser);
+ * </pre>
+ *
+ * Also note that a single instance of this class can be installed on multiple
+ * instances of <code>SyntaxTextArea</code>.
+ * 
+ * @author D. Campione
+ *
  */
-public class XMLParser extends AbstractParser {
+public class XmlParser extends AbstractParser {
 
     private SAXParserFactory spf;
-    private SyntaxTextArea textArea;
     private DefaultParseResult result;
 
-    public XMLParser(SyntaxTextArea textArea) {
-        this.textArea = textArea;
+    public XmlParser() {
         result = new DefaultParseResult(this);
         try {
             spf = SAXParserFactory.newInstance();
         } catch (FactoryConfigurationError fce) {
-            ExceptionDialog.notifyException(fce);
+            ExceptionDialog.hideException(fce);
         }
     }
 
@@ -72,7 +77,7 @@ public class XMLParser extends AbstractParser {
 
         try {
             SAXParser sp = spf.newSAXParser();
-            Handler handler = new Handler();
+            Handler handler = new Handler(doc);
             DocumentReader r = new DocumentReader(doc);
             InputSource input = new InputSource(r);
             sp.parse(input, handler);
@@ -81,7 +86,7 @@ public class XMLParser extends AbstractParser {
             // A fatal parse error - ignore; a IParserNotice was already created
             ExceptionDialog.ignoreException(saxpe);
         } catch (Exception e) {
-            ExceptionDialog.notifyException(e);
+            ExceptionDialog.hideException(e);
             result.addNotice(new DefaultParserNotice(this,
                     "Error parsing XML: " + e.getMessage(), 0, -1, -1));
         }
@@ -90,41 +95,42 @@ public class XMLParser extends AbstractParser {
     }
 
     /**
-     * 
-     * 
-     * @author D. Campione
-     * 
+     * Callback notified when errors are found in the XML document. Adds a
+     * notice to be squiggle-underlined.
      */
     private class Handler extends DefaultHandler {
 
-        private void doError(SAXParseException saxpe) {
-            int line = saxpe.getLineNumber() - 1;
-            try {
-                int offs = textArea.getLineStartOffset(line);
-                int len = textArea.getLineEndOffset(line) - offs + 1;
-                IParserNotice pn = new DefaultParserNotice(XMLParser.this,
-                        saxpe.getMessage(), line, offs, len);
-                result.addNotice(pn);
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(">>> " + offs + "-" + len + " -> " + pn + ".",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            } catch (BadLocationException ble) {
-                ExceptionDialog.notifyException(ble);
+        private Document doc;
+
+        private Handler(Document doc) {
+            this.doc = doc;
+        }
+
+        private void doError(SAXParseException e, int level) {
+            int line = e.getLineNumber() - 1;
+            Element root = doc.getDefaultRootElement();
+            Element elem = root.getElement(line);
+            int offs = elem.getStartOffset();
+            int len = elem.getEndOffset() - offs;
+            if (line == root.getElementCount() - 1) {
+                len++;
             }
+            DefaultParserNotice pn = new DefaultParserNotice(XmlParser.this,
+                    e.getMessage(), line, offs, len);
+            pn.setLevel(level);
+            result.addNotice(pn);
         }
 
-        public void error(SAXParseException e) throws SAXException {
-            doError(e);
+        public void error(SAXParseException e) {
+            doError(e, IParserNotice.ERROR);
         }
 
-        public void fatalError(SAXParseException e) throws SAXException {
-            doError(e);
+        public void fatalError(SAXParseException e) {
+            doError(e, IParserNotice.ERROR);
         }
 
-        public void warning(SAXParseException e) throws SAXException {
-            doError(e);
+        public void warning(SAXParseException e) {
+            doError(e, IParserNotice.WARNING);
         }
     }
 }

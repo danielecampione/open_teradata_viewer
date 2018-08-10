@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.Action;
 import javax.swing.event.DocumentEvent;
@@ -69,7 +70,12 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
     private transient TokenMakerFactory tokenMakerFactory;
 
     /** Splits text into tokens for the current programming language. */
-    private ITokenMaker iTokenMaker;
+    private transient ITokenMaker iTokenMaker;
+
+    /**
+     * The current syntax style. Only cached to keep this class serializable.
+     */
+    private String syntaxStyle;
 
     /**
      * Array of values representing the "last token type" on each line. This is
@@ -77,7 +83,7 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
      * an (unclosed) multiline comment, we can use this knowledge and start the
      * current line's syntax highlighting in multiline comment state.
      */
-    protected DynamicIntArray lastTokensOnLines;
+    protected transient DynamicIntArray lastTokensOnLines;
 
     private transient Segment s;
 
@@ -364,14 +370,25 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
     /**
      * Deserializes a document.
      *
-     * @param s The stream to read from.
+     * @param in The stream to read from.
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    private void readObject(ObjectInputStream s) throws ClassNotFoundException,
-            IOException {
-        s.defaultReadObject();
+    private void readObject(ObjectInputStream in)
+            throws ClassNotFoundException, IOException {
+        in.defaultReadObject();
+
+        // Install default TokenMakerFactory. To support custom TokenMakers,
+        // both JVM's should install default TokenMakerFactories that support
+        // the language they want to use beforehand
+        setTokenMakerFactory(null);
+
+        // Handle other transient stuff
         this.s = new Segment();
+        int lineCount = getDefaultRootElement().getElementCount();
+        lastTokensOnLines = new DynamicIntArray(lineCount);
+        setSyntaxStyle(syntaxStyle); // Actually install (transient) TokenMaker
+        setWhitespaceVisible(in.readBoolean()); // Do after setSyntaxStyle()
     }
 
     /**
@@ -412,6 +429,7 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
         iTokenMaker = tokenMakerFactory.getTokenMaker(styleKey);
         iTokenMaker.setWhitespaceVisible(wsVisible);
         updateSyntaxHighlightingInformation();
+        this.syntaxStyle = styleKey;
     }
 
     /**
@@ -535,7 +553,18 @@ public class SyntaxDocument extends PlainDocument implements ISyntaxConstants {
     }
 
     /**
-     * Document content that provides access to individual characters.
+     * Overridden for custom serialization purposes.
+     *
+     * @param out The stream to write to.
+     * @throws IOException If an IO error occurs.
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeBoolean(isWhitespaceVisible());
+    }
+
+    /**
+     * Document content that provides fast access to individual characters.
      *
      * @author D. Campione
      * 

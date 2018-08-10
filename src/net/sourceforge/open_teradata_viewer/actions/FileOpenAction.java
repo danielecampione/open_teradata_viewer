@@ -50,6 +50,7 @@ public class FileOpenAction extends CustomAction implements ISyntaxConstants {
     protected void performThreaded(ActionEvent e) throws Exception {
         File file = FileIO.openFile();
         if (file != null) {
+            ApplicationFrame.getInstance().setText("");
             Context.getInstance().setOpenedFile(file);
             SyntaxTextArea textArea = ApplicationFrame.getInstance()
                     .getTextComponent();

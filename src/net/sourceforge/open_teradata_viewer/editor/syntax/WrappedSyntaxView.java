@@ -47,10 +47,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.Fold;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
 
 /**
- * The view used by {@link SyntaxTextArea} when word wrap is enabled.<p>
- *
- * This class is a work-in-progress and will eventually replace
- * {@link WrappedSyntaxView} (which works, but ignores token styles).
+ * The view used by {@link SyntaxTextArea} when word wrap is enabled.
  *
  * @author D. Campione
  * 

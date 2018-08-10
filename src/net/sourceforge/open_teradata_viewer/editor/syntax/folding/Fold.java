@@ -498,7 +498,7 @@ public class Fold implements Comparable<Object> {
 
     private void updateChildCollapsedLineCount(int count) {
         childCollapsedLineCount += count;
-        if (parent != null) {
+        if (!collapsed && parent != null) {
             parent.updateChildCollapsedLineCount(count);
         }
     }

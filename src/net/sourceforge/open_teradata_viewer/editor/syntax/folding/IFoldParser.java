@@ -31,6 +31,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  *
  * @author D. Campione
  * @see CurlyFoldParser
+ * @see XmlFoldParser
  * 
  */
 public interface IFoldParser {

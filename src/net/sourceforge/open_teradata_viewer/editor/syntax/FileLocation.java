@@ -25,7 +25,8 @@ import java.io.OutputStream;
 import java.net.URL;
 
 /**
- * Holds the location of a local or remote file.
+ * Holds the location of a local or remote file. This provides a common way to
+ * read, write, and check properties of both local and remote files.
  *
  * @author D. Campione
  * 
@@ -39,7 +40,7 @@ public abstract class FileLocation {
      * @return The file's location.
      */
     public static FileLocation create(String fileFullPath) {
-        return new LocalFileLocation(new File(fileFullPath));
+        return new FileFileLocation(new File(fileFullPath));
     }
 
     /**
@@ -49,7 +50,7 @@ public abstract class FileLocation {
      * @return The file's location.
      */
     public static FileLocation create(File file) {
-        return new LocalFileLocation(file);
+        return new FileFileLocation(file);
     }
 
     /**
@@ -60,7 +61,7 @@ public abstract class FileLocation {
      */
     public static FileLocation create(URL url) {
         if ("file".equalsIgnoreCase(url.getProtocol())) {
-            return new LocalFileLocation(new File(url.getPath()));
+            return new FileFileLocation(new File(url.getPath()));
         }
         return new URLFileLocation(url);
     }
@@ -96,7 +97,7 @@ public abstract class FileLocation {
      *
      * @return The input stream.
      * @throws IOException If the file does not exist, or some other IO error
-     *                     occurs.
+     *         occurs.
      */
     protected abstract InputStream getInputStream() throws IOException;
 
@@ -117,7 +118,8 @@ public abstract class FileLocation {
     public abstract boolean isLocal();
 
     /**
-     * Returns whether this file location is a local file that already exists.
+     * Returns whether this file location is a local file that already
+     * exists.
      *
      * @return Whether this file is local and actually exists.
      * @see #isLocal()

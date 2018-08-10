@@ -83,7 +83,7 @@ class ParserManager
      * If this system property is set to <code>true</code>, debug messages will
      * be printed to stdout to help diagnose parsing issues.
      */
-    private static final String PROPERTY_DEBUG_PARSING = "rsta.debugParsing";
+    private static final String PROPERTY_DEBUG_PARSING = "sta.debugParsing";
 
     /** Whether to print debug messages while running iParsers. */
     private static final boolean DEBUG_PARSING;
@@ -211,6 +211,12 @@ class ParserManager
      * @see #clearParserNoticeHighlights()
      */
     private void addParserNoticeHighlights(IParseResult res) {
+        // Parsers are supposed to return at least empty IParseResults, but
+        // we'll be defensive here
+        if (res == null) {
+            return;
+        }
+
         if (DEBUG_PARSING) {
             ApplicationFrame
                     .getInstance()

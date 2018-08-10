@@ -192,7 +192,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
         String encoding = System.getProperty("file.encoding");
         if (encoding == null) {
             try {
-                File f = File.createTempFile("rsta", null);
+                File f = File.createTempFile("sta", null);
                 FileWriter w = new FileWriter(f);
                 encoding = w.getEncoding();
                 w.close();
@@ -216,7 +216,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
 
     /** @return The full path to the document. */
     public String getFileFullPath() {
-        return loc.getFileFullPath();
+        return loc == null ? null : loc.getFileFullPath();
     }
 
     /** @return The file name of this document. */
@@ -358,7 +358,8 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
     }
 
     /**
-     * Loads the specified file in this editor.
+     * Loads the specified file in this editor. This method fires a property
+     * change event of type {@link #FULL_PATH_PROPERTY}.
      *
      * @param loc The location of the file to load. This cannot be
      *            <code>null</code>.
@@ -371,13 +372,12 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      * @see #saveAs(FileLocation)
      */
     public void load(FileLocation loc, String defaultEnc) throws IOException {
-        this.loc = loc;
-
         // For new local files, just go with it
         if (loc.isLocal() && !loc.isLocalAndExists()) {
             this.charSet = defaultEnc != null
                     ? defaultEnc
                     : getDefaultEncoding();
+            this.loc = loc;
             return;
         }
 
@@ -385,7 +385,6 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
         // check for BOMs and handle them correctly in all cases, then pass rest
         // of stream down to InputStreamReader
         UnicodeReader ur = new UnicodeReader(loc.getInputStream(), defaultEnc);
-        charSet = ur.getEncoding();
 
         // Remove listener so dirty flag doesn't get set when loading a file
         Document doc = getDocument();
@@ -397,6 +396,12 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
             doc.addDocumentListener(this);
             r.close();
         }
+
+        // No IOException thrown, so we can finally change the location
+        charSet = ur.getEncoding();
+        String old = getFileFullPath();
+        this.loc = loc;
+        firePropertyChange(FULL_PATH_PROPERTY, old, getFileFullPath());
     }
 
     /**
@@ -499,7 +504,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      * Sets whether or not this text in this editor has unsaved changes. This
      * fires a property change event of type {@link #DIRTY_PROPERTY}.
      *
-     * @param dirty Whether or not the text has beeen modified.
+     * @param dirty Whether or not the text has been modified.
      * @see #isDirty()
      */
     private void setDirty(boolean dirty) {

@@ -21,10 +21,12 @@ package net.sourceforge.open_teradata_viewer.editor.syntax.parser;
 import java.awt.Color;
 
 /**
- * Base implementation of a iParser notice.
+ * Base implementation of a parser notice. Most <code>IParser</code>
+ * implementations can return instances of this in their parse result.
  *
  * @author D. Campione
- * 
+ * @see IParser
+ * @see IParseResult
  */
 public class DefaultParserNotice implements IParserNotice {
 

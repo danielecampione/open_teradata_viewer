@@ -28,7 +28,10 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.Focusable
  * An interface for a parser for content in an {@link SyntaxTextArea}. A
  * <code>IParser</code> returns a list of issues it finds in the text area's
  * content, which the text area can flag (e.g. squiggle underline). It can also
- * return descriptions of the issues, to be used in tool tips.
+ * return descriptions of the issues, to be used in tool tips.<p>
+ * 
+ * To install a <code>IParser</code>, simply call {@link
+ * SyntaxTextArea#addParser(IParser)}.
  *
  * @author D. Campione
  * @see AbstractParser

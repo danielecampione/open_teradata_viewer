@@ -54,6 +54,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
  * The actual tool tip component.
@@ -82,13 +83,18 @@ class TipWindow extends JWindow implements ActionListener {
     public TipWindow(Window owner, FocusableTip ft, String msg) {
         super(owner);
         this.ft = ft;
+        // Render plain text tool tips correctly
+        if (msg != null && msg.length() >= 6
+                && !msg.substring(0, 6).toLowerCase().equals("<html>")) {
+            msg = "<html>" + SyntaxUtilities.escapeForHtml(msg, "<br>", false);
+        }
         this.text = msg;
         tipListener = new TipListener();
 
         JPanel cp = new JPanel(new BorderLayout());
         cp.setBorder(TipUtil.getToolTipBorder());
         cp.setBackground(TipUtil.getToolTipBackground());
-        textArea = new JEditorPane("text/html", msg);
+        textArea = new JEditorPane("text/html", text);
         TipUtil.tweakTipEditorPane(textArea);
         if (ft.getImageBase() != null) { // Base URL for images
             ((HTMLDocument) textArea.getDocument()).setBase(ft.getImageBase());
@@ -168,16 +174,27 @@ class TipWindow extends JWindow implements ActionListener {
         Dimension d = textArea.getPreferredSize();
         Rectangle r = null;
         try {
+            // modelToView call is required for this hack, never remove
             r = textArea.modelToView(textArea.getDocument().getLength() - 1);
-            d.height = r.y + r.height;
 
             // Ensure the text area doesn't start out too tall or wide
             d = textArea.getPreferredSize();
-            d.width = Math.min(d.width + 25, 320);
-            d.height = Math.min(d.height, 150);
+            d.width += 25; // Just a little extra space
+            final int MAX_WINDOW_W = 600;
+            d.width = Math.min(d.width, MAX_WINDOW_W);
+            d.height = Math.min(d.height, 400);
 
+            // Both needed for modelToView() calculation below..
             textArea.setPreferredSize(d);
+            textArea.setSize(d);
 
+            // If the new textArea width causes our text to wrap, we must
+            // compute a new preferred size to get all our physical lines
+            r = textArea.modelToView(textArea.getDocument().getLength() - 1);
+            if (r.y + r.height > d.height) {
+                d.height = r.y + r.height + 5;
+                textArea.setPreferredSize(d);
+            }
         } catch (BadLocationException ble) { // Never happens
             ExceptionDialog.notifyException(ble);
         }

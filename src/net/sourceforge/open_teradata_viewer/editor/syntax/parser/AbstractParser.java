@@ -23,7 +23,8 @@ import java.net.URL;
 import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.FocusableTip;
 
 /**
- * A base class for {@link IParser} implementations.
+ * A base class for {@link IParser} implementations. Most <code>IParser</code>s
+ * should be able to extend this class.
  *
  * @author D. Campione
  * 

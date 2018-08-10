@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A basic implementation of {@link IParseResult}.
+ * A basic implementation of {@link IParseResult}. Most, if not all,
+ * <code>IParser</code>s can return instances of this class.
  *
  * @author D. Campione
+ * @see IParser
  * 
  */
 public class DefaultParseResult implements IParseResult {

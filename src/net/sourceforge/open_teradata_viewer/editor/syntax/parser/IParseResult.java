@@ -25,6 +25,8 @@ import java.util.List;
  * and any notices for that section.
  *
  * @author D. Campione
+ * @see DefaultParseResult
+ * @see IParserNotice
  * 
  */
 public interface IParseResult {
@@ -59,7 +61,7 @@ public interface IParseResult {
     /**
      * Returns the notices for the parsed section.
      *
-     * @return The notices.
+     * @return A list of {@link IParserNotice}s.
      */
     public List<?> getNotices();
 

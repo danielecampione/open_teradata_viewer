@@ -1,3 +1,8 @@
+0.11b (18/05/2012)
+    - Fixed issue with TextScrollPane.
+    - Fixed bug in CurlyFoldParser.
+    - The query editor now has anti-aliasing enabled by default.
+
 0.11a (16/05/2012)
     - Added the animate bracket matching, current line highlight, bookmarks,
       word wrap, themes for the SQL editor, ...

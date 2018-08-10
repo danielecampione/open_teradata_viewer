@@ -49,11 +49,20 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.TaskTagParser.T
 /**
  * A component to sit alongside an {@link SyntaxTextArea} that displays colored
  * markers for locations of interest (parser errors, marked occurrences,
- * etc.).<p>
+ * etc..).<p>
+ *
+ * <code>ErrorStrip</code>s display <code>IParserNotice</code>s from {@link
+ * IParser}s. Currently, the only way to get lines flagged in this component is
+ * to register a <code>IParser</code> on an SyntaxTextArea and return
+ * <code>IParserNotice</code>s for each line to display an icon for. The
+ * severity of each notice must be at least the threshold set by {@link
+ * #setLevelThreshold(int)} to be displayed in this error strip. The default
+ * threshold is {@link IParserNotice#WARNING}.<p>
  *
  * An <code>ErrorStrip</code> can be added to a UI like so:
  * <pre>
  * textArea = createTextArea();
+ * textArea.addParser(new MyParser(textArea)); // Identifies lines to display
  * scrollPane = new TextScrollPane(textArea, true);
  * ErrorStrip es = new ErrorStrip(textArea);
  * JPanel temp = new JPanel(new BorderLayout());
@@ -198,7 +207,8 @@ public class ErrorStrip extends JComponent {
 
     /**
      * Returns the minimum severity a parser notice must be for it to be
-     * displayed in this error strip.
+     * displayed in this error strip. This will be one of the constants
+     * defined in the <code>IParserNotice</code> class.
      *
      * @return The minimum severity.
      * @see #setLevelThreshold(int)
@@ -364,10 +374,13 @@ public class ErrorStrip extends JComponent {
 
     /**
      * Sets the minimum severity a parser notice must be for it to be displayed
-     * in this error strip. The default value is {@link IParserNotice#WARNING}.
+     * in this error strip. This should be one of the constants defined in the
+     * <code>IParserNotice</code> class. The default value is {@link
+     * IParserNotice#WARNING}.
      *
      * @param level The new severity threshold.
      * @see #getLevelThreshold()
+     * @see IParserNotice
      */
     public void setLevelThreshold(int level) {
         levelThreshold = level;

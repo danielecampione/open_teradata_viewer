@@ -145,14 +145,10 @@ public class FoldIndicator extends AbstractGutterComponent {
             if (offs > -1) {
                 try {
                     int line = sta.getLineOfOffset(offs);
-                    int origLine = line;
                     FoldManager fm = sta.getFoldManager();
-                    do {
-                        fold = fm.getFoldForLine(line);
-                    } while (fold == null && line-- >= 0);
-                    if (fold != null && !fold.containsOrStartsOnLine(origLine)) {
-                        // Found closest fold, but doesn't actually contain line
-                        fold = null;
+                    fold = fm.getFoldForLine(line);
+                    if (fold == null) {
+                        fold = fm.getDeepestOpenFoldContaining(offs);
                     }
                 } catch (BadLocationException ble) {
                     ExceptionDialog.notifyException(ble); // Never happens

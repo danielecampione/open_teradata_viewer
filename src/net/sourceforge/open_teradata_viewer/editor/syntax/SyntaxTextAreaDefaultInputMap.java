@@ -51,8 +51,18 @@ public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
                 SyntaxTextAreaEditorKit.staCloseCurlyBraceAction);
         put(KeyStroke.getKeyStroke('/'),
                 SyntaxTextAreaEditorKit.staCloseMarkupTagAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, defaultMod),
+                SyntaxTextAreaEditorKit.staToggleCommentAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, defaultMod),
                 SyntaxTextAreaEditorKit.staGoToMatchingBracketAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, defaultMod),
+                SyntaxTextAreaEditorKit.staCollapseFoldAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_ADD, defaultMod),
+                SyntaxTextAreaEditorKit.staExpandFoldAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_DIVIDE, defaultMod),
+                SyntaxTextAreaEditorKit.staCollapseAllFoldsAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_MULTIPLY, defaultMod),
+                SyntaxTextAreaEditorKit.staExpandAllFoldsAction);
 
         // NOTE: no modifiers => mapped to keyTyped. If we had "0" as a second
         // parameter, we'd get the template action (keyPressed) AND the default

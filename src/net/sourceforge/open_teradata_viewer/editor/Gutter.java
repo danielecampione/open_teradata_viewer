@@ -98,7 +98,8 @@ public class Gutter extends JPanel {
     /**
      * Ctor.
      *
-     * @param textArea The parent text area.
+     * @param textArea The parent text area. If this is <code>null</code>, you
+     *                 must call {@link #setTextArea(TextArea)}.
      */
     public Gutter(TextArea textArea) {
         listener = new TextAreaListener();
@@ -572,29 +573,33 @@ public class Gutter extends JPanel {
      * @param textArea The text area.
      */
     void setTextArea(TextArea textArea) {
-        TextAreaEditorKit kit = (TextAreaEditorKit) textArea.getUI()
-                .getEditorKit(textArea);
         if (this.textArea != null) {
             listener.uninstall();
         }
 
-        if (lineNumberList == null) {
-            lineNumberList = kit.createLineNumberList(textArea);
-        } else {
-            lineNumberList.setTextArea(textArea);
-        }
-        if (iconArea == null) {
-            iconArea = kit.createIconRowHeader(textArea);
-        } else {
-            iconArea.setTextArea(textArea);
-        }
-        if (foldIndicator == null) {
-            foldIndicator = new FoldIndicator(textArea);
-        } else {
-            foldIndicator.setTextArea(textArea);
+        if (textArea != null) {
+            TextAreaEditorKit kit = (TextAreaEditorKit) textArea.getUI()
+                    .getEditorKit(textArea);
+
+            if (lineNumberList == null) {
+                lineNumberList = kit.createLineNumberList(textArea);
+            } else {
+                lineNumberList.setTextArea(textArea);
+            }
+            if (iconArea == null) {
+                iconArea = kit.createIconRowHeader(textArea);
+            } else {
+                iconArea.setTextArea(textArea);
+            }
+            if (foldIndicator == null) {
+                foldIndicator = new FoldIndicator(textArea);
+            } else {
+                foldIndicator.setTextArea(textArea);
+            }
+
+            listener.install(textArea);
         }
 
-        listener.install(textArea);
         this.textArea = textArea;
     }
 

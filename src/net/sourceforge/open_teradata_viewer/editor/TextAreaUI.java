@@ -73,7 +73,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
     private static final EditorKit defaultKit = new TextAreaEditorKit();
     private static final TransferHandler defaultTransferHandler = new TATextTransferHandler();
 
-    private static final String RTEXTAREA_KEYMAP_NAME = "TextAreaKeymap";
+    private static final String TEXTAREA_KEYMAP_NAME = "TextAreaKeymap";
 
     /**
      * Creates a UI for an TextArea.
@@ -208,11 +208,11 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
     protected Keymap createKeymap() {
         // Load the keymap we'll be using (it's saved by
         // JTextComponent.addKeymap)
-        Keymap map = JTextComponent.getKeymap(RTEXTAREA_KEYMAP_NAME);
+        Keymap map = JTextComponent.getKeymap(TEXTAREA_KEYMAP_NAME);
         if (map == null) {
             Keymap parent = JTextComponent
                     .getKeymap(JTextComponent.DEFAULT_KEYMAP);
-            map = JTextComponent.addKeymap(RTEXTAREA_KEYMAP_NAME, parent);
+            map = JTextComponent.addKeymap(TEXTAREA_KEYMAP_NAME, parent);
             map.setDefaultAction(new TextAreaEditorKit.DefaultKeyTypedAction());
         }
 
