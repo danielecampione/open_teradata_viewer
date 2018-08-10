@@ -9,9 +9,9 @@
 	<classpathentry kind="lib" path="lib/jsqlparser.jar"/>
 	<classpathentry kind="lib" path="lib/jsyntaxpane-0.9.5-b29.jar"/>
 	<classpathentry kind="lib" path="lib/l2fprod-common-all.jar"/>
+	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
 	<classpathentry kind="lib" path="lib/looks-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-soapui.jar"/>
 	<classpathentry kind="lib" path="lib/tdgssconfig.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

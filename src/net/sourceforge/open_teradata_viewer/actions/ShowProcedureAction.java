@@ -29,7 +29,12 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
-/** @author D. Campione */
+/**
+ *
+ * 
+ * @author D. Campione
+ * 
+ */
 public class ShowProcedureAction extends CustomAction {
 
     private static final long serialVersionUID = -603744266487784355L;

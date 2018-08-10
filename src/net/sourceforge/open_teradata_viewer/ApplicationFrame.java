@@ -64,6 +64,7 @@ import com.incors.plaf.kunststoff.KunststoffTheme;
  * The main frame.
  * 
  * @author D. Campione
+ *
  */
 public class ApplicationFrame extends JFrame {
 
@@ -73,8 +74,7 @@ public class ApplicationFrame extends JFrame {
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
     public static final int MAX_CHARACTERS_LOG = 100000;
     /**
-     * Shared variable used by ChangeLookAndFeelAction and
-     * ApplicationMenuBar
+     * Shared variable used by ChangeLookAndFeelAction and ApplicationMenuBar
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
     public Plugin PLUGIN;
@@ -113,6 +113,19 @@ public class ApplicationFrame extends JFrame {
         // this line needs to be implemented in order to make JWS work properly
         UIManager.getLookAndFeelDefaults().put("ClassLoader",
                 getClass().getClassLoader());
+
+        try {
+            UIManager.getLookAndFeelDefaults().put(
+                    "ClassLoader",
+                    Class.forName("com.birosoft.liquid.LiquidLookAndFeel")
+                            .newInstance().getClass().getClassLoader());
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void drawIt(SplashScreen splashScreen) {
@@ -335,9 +348,7 @@ public class ApplicationFrame extends JFrame {
         }
     }
 
-    /**
-     * Handles the window closing.
-     */
+    /** Handles the window closing. */
     public void handleWindowClose() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {

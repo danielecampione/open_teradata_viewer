@@ -1,3 +1,7 @@
+0.04a (05-jul-11)
+    - Added "Liquid" l&f.
+    - Removed an unused library.
+
 0.03c (01-jul-11)
     - Fixed a bug relative to the "SHOW VIEW" command. When the command was
       performed on an object that is not a view, the returned resultset was in
