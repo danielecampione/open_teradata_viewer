@@ -26,6 +26,7 @@ import java.awt.Dimension;
  * 
  */
 public interface XDialogs {
+
     void showErrorMessage(String message);
 
     void showInfoMessage(String message);

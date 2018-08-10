@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
  * 
  */
 public class Dialog extends JOptionPane {
+
     private static final long serialVersionUID = -1579318866748692286L;
 
     public Dialog(Object message, int messageType, int optionType,

@@ -69,7 +69,6 @@ import com.jgoodies.looks.Options;
 
 public class UISupport {
 
-    // This is needed in Eclipse that has strict class loader constraints.
     private static List<ClassLoader> secondaryResourceLoaders = new ArrayList<ClassLoader>();
 
     private static Component frame;

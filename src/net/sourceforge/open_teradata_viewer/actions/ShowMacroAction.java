@@ -27,35 +27,23 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.ShowMacroValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
-*
-* 
-* @author D. Campione
-* 
-*/
-public class ShowMacroAction extends CustomAction {
+ *
+ * 
+ * @author D. Campione
+ * 
+ */
+public class ShowMacroAction extends ShowObjectAction {
 
     private static final long serialVersionUID = 6799585250760196135L;
 
     protected ShowMacroAction() {
-        super("Show macro..", null, null, null);
+        super("Show macro");
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        // The "show macro" command can be performed altough other processes
-        // are running.
-        new ThreadedAction() {
-            @Override
-            protected void execute() throws Exception {
-                performThreaded(e);
-            }
-        };
     }
 
     @Override
@@ -98,10 +86,11 @@ public class ShowMacroAction extends CustomAction {
             macroName = macroName.substring(lastTokenIndex + 1,
                     macroName.length());
         }
-        String sqlQuery = "SHOW MACRO "
-                + ((databaseName != null && databaseName.trim().length() > 0)
+        String sqlQuery = getSQLQueryToShowObject(
+                new ShowMacroValidationStrategy(),
+                ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + macroName;
+                        : "") + macroName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -131,7 +120,7 @@ public class ShowMacroAction extends CustomAction {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                macroBody += obj.toString().trim();
+                macroBody += obj.toString();
             }
         }
         ApplicationFrame.getInstance().setText(macroBody);

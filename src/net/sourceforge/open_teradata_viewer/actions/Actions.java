@@ -81,10 +81,11 @@ public final class Actions
     public static final CustomAction DRIVERS = new DriversAction();
     public static final CustomAction ABOUT = new AboutAction();
     public static final CustomAction UPDATE = new UpdateAction();
+    public static final CustomAction SHOW_TABLE = new ShowTableAction();
+    public static final CustomAction SHOW_VIEW = new ShowViewAction();
     public static final CustomAction SHOW_PROCEDURE = new ShowProcedureAction();
     public static final CustomAction SHOW_MACRO = new ShowMacroAction();
-    public static final CustomAction SHOW_VIEW = new ShowViewAction();
-    public static final CustomAction SHOW_TABLE = new ShowTableAction();
+    public static final GroupAction SHOW_OBJECT_GROUP = new ShowObjectGroupAction();
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
     public static final CustomAction EXPLAIN_REQUEST = new ExplainRequestAction();
     public static final CustomAction ANIMATED_ASSISTANT = new AnimatedAssistantAction();
@@ -144,6 +145,7 @@ public final class Actions
         SHOW_MACRO.setEnabled(isConnected);
         SHOW_VIEW.setEnabled(isConnected);
         SHOW_TABLE.setEnabled(isConnected);
+        SHOW_OBJECT_GROUP.setEnabled(isConnected);
         EXPLAIN_REQUEST.setEnabled(isConnected);
 
         boolean hasResultSet = isConnected

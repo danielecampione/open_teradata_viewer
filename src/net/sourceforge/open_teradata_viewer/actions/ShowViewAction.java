@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.ShowViewValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
@@ -36,26 +36,14 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
  * @author D. Campione
  * 
  */
-public class ShowViewAction extends CustomAction {
+public class ShowViewAction extends ShowObjectAction {
 
     private static final long serialVersionUID = -8555161081550563065L;
 
     protected ShowViewAction() {
-        super("Show view..", null, null, null);
+        super("Show view");
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        // The "show view" command can be performed altough other processes
-        // are running.
-        new ThreadedAction() {
-            @Override
-            protected void execute() throws Exception {
-                performThreaded(e);
-            }
-        };
     }
 
     @Override
@@ -98,10 +86,11 @@ public class ShowViewAction extends CustomAction {
             viewName = viewName
                     .substring(lastTokenIndex + 1, viewName.length());
         }
-        String sqlQuery = "SHOW VIEW "
-                + ((databaseName != null && databaseName.trim().length() > 0)
+        String sqlQuery = getSQLQueryToShowObject(
+                new ShowViewValidationStrategy(),
+                ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + viewName;
+                        : "") + viewName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -131,7 +120,7 @@ public class ShowViewAction extends CustomAction {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                viewBody += obj.toString().trim();
+                viewBody += obj.toString();
             }
         }
         ApplicationFrame.getInstance().setText(viewBody);

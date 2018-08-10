@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.ShowProcedureValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
@@ -36,26 +36,14 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
  * @author D. Campione
  * 
  */
-public class ShowProcedureAction extends CustomAction {
+public class ShowProcedureAction extends ShowObjectAction {
 
     private static final long serialVersionUID = -603744266487784355L;
 
     protected ShowProcedureAction() {
-        super("Show procedure..", null, null, null);
+        super("Show procedure");
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        // The "show procedure" command can be performed altough other processes
-        // are running.
-        new ThreadedAction() {
-            @Override
-            protected void execute() throws Exception {
-                performThreaded(e);
-            }
-        };
     }
 
     @Override
@@ -100,10 +88,11 @@ public class ShowProcedureAction extends CustomAction {
             procedureName = procedureName.substring(lastTokenIndex + 1,
                     procedureName.length());
         }
-        String sqlQuery = "SHOW PROCEDURE "
-                + ((databaseName != null && databaseName.trim().length() > 0)
+        String sqlQuery = getSQLQueryToShowObject(
+                new ShowProcedureValidationStrategy(),
+                ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + procedureName;
+                        : "") + procedureName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -133,7 +122,7 @@ public class ShowProcedureAction extends CustomAction {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                procedureBody += obj.toString().trim();
+                procedureBody += obj.toString();
             }
         }
         ApplicationFrame.getInstance().setText(procedureBody);

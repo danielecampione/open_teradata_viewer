@@ -1,4 +1,4 @@
-Teradata JDBC Driver 14.00.00.12
+Teradata JDBC Driver 14.00.00.13
 
 Part of the Teradata Tools and Utilities 14.00 product suite
 
@@ -31,10 +31,15 @@ Release Notes
 -------------
 
 This section highlights issues that you should be aware of when upgrading to
-the 14.00.00.12 release of the Teradata JDBC Driver. Please refer to the Teradata
+the 14.00.00.13 release of the Teradata JDBC Driver. Please refer to the Teradata
 JDBC Driver User Guide for more information about the driver.
 
 This release includes changes to address the following DRs:
+
+DR 157308 URL parameters USER/PASSWORD used when DriverManager.getConnection user/password arguments omitted or null
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.12:
 
 DR 156903 Support the "gtwcontrol -u yes" option for Send Connect Response with Integrity Only
 
@@ -955,7 +960,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.00.00.12.zip and TeraJDBC__indep_indep.14.00.00.12.tar
+TeraJDBC__indep_indep.14.00.00.13.zip and TeraJDBC__indep_indep.14.00.00.13.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

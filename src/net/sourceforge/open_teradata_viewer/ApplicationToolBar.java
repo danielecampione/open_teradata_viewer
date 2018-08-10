@@ -66,6 +66,8 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.LOB_GROUP);
         addSeparator();
         add(Actions.EXPORT_GROUP);
+        addSeparator();
+        add(Actions.SHOW_OBJECT_GROUP);
         add(Box.createHorizontalGlue());
         schemaBrowserToggleButton.setAction(Actions.SCHEMA_BROWSER);
         schemaBrowserToggleButton.setText(null);

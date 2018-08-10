@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.ShowTableValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
@@ -36,26 +36,14 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
  * @author D. Campione
  * 
  */
-public class ShowTableAction extends CustomAction {
+public class ShowTableAction extends ShowObjectAction {
 
     private static final long serialVersionUID = -4577594966966231651L;
 
     protected ShowTableAction() {
-        super("Show table..", null, null, null);
+        super("Show table");
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        // The "show table" command can be performed altough other processes
-        // are running.
-        new ThreadedAction() {
-            @Override
-            protected void execute() throws Exception {
-                performThreaded(e);
-            }
-        };
     }
 
     @Override
@@ -98,10 +86,11 @@ public class ShowTableAction extends CustomAction {
             tableName = tableName.substring(lastTokenIndex + 1,
                     tableName.length());
         }
-        String sqlQuery = "SHOW TABLE "
-                + ((databaseName != null && databaseName.trim().length() > 0)
+        String sqlQuery = getSQLQueryToShowObject(
+                new ShowTableValidationStrategy(),
+                ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "."
-                        : "") + tableName;
+                        : "") + tableName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -131,7 +120,7 @@ public class ShowTableAction extends CustomAction {
                 throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
                         1048);
             } else if (obj instanceof String) {
-                tableBody += obj.toString().trim();
+                tableBody += obj.toString();
             }
         }
         ApplicationFrame.getInstance().setText(tableBody);
