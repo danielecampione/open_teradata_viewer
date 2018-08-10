@@ -79,9 +79,7 @@ public class RunAction extends CustomAction {
         int[] columnTypes;
         String[] columnTypeNames;
         PreparedStatement statement = createStatement(
-                ApplicationFrame.getInstance().connectionManager
-                        .getConnection(),
-                sql);
+                Context.getInstance().connectionData.getConnection(), sql);
         statement.setMaxRows(Context.getInstance().getFetchLimit());
 
         String[] bindVariables = handleBindVariables(statement);
@@ -93,9 +91,6 @@ public class RunAction extends CustomAction {
             public void run() {
                 try {
                     if (!executed[0]) {
-                        // Don't cancel when we're already going through the result set
-                        // There's a problem with the Oracle driver
-                        // Over some VPN's, the cancel closes the connection
                         statements[0].cancel();
                     }
                 } catch (Throwable t) {
@@ -112,7 +107,7 @@ public class RunAction extends CustomAction {
             } catch (SQLException e1) {
                 if (statement.getResultSetConcurrency() != ResultSet.CONCUR_READ_ONLY) {
                     // try read-only and without modifications
-                    statement = ApplicationFrame.getInstance().connectionManager
+                    statement = Context.getInstance().connectionData
                             .getConnection().prepareStatement(originalSql);
                     // Bind variables
                     handleBindVariables(statement, bindVariables);
@@ -217,7 +212,6 @@ public class RunAction extends CustomAction {
             if (metaData.supportsResultSetConcurrency(
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_UPDATABLE)) {
-                // Oracle, MySQL, DataDirect DB2, HSQLDB, H2, Apache Derby
                 statement = connection.prepareStatement(sql,
                         ResultSet.TYPE_SCROLL_INSENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);

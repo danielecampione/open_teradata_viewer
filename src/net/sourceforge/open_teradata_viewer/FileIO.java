@@ -54,8 +54,8 @@ public class FileIO {
         fileChooser.setSelectedFile(new File(fileName));
         if (JFileChooser.APPROVE_OPTION == fileChooser
                 .showSaveDialog(ApplicationFrame.getInstance())) {
-            Settings.write(SettingsKeys.LAST_USED_DIR_KEY, fileChooser
-                    .getCurrentDirectory().getCanonicalPath());
+            Config.saveLastUsedDir(fileChooser.getCurrentDirectory()
+                    .getCanonicalPath());
             File selectedFile = fileChooser.getSelectedFile();
             if (!selectedFile.exists()
                     || Dialog.YES_OPTION == Dialog.show("File exists",
@@ -82,8 +82,8 @@ public class FileIO {
         JFileChooser fileChooser = getFileChooser();
         if (JFileChooser.APPROVE_OPTION == fileChooser
                 .showOpenDialog(ApplicationFrame.getInstance())) {
-            Settings.write(SettingsKeys.LAST_USED_DIR_KEY, fileChooser
-                    .getCurrentDirectory().getCanonicalPath());
+            Config.saveLastUsedDir(fileChooser.getCurrentDirectory()
+                    .getCanonicalPath());
             return fileChooser.getSelectedFile();
         }
         return null;
@@ -101,8 +101,7 @@ public class FileIO {
         if (fileChooser == null) {
             fileChooser = new JFileChooser();
         }
-        String dir = Settings.load(SettingsKeys.LAST_USED_DIR_KEY,
-                SettingsKeys.LAST_USED_DIR_DEFAULT_VALUE);
+        String dir = Config.getLastUsedDir();
         if (dir != null) {
             fileChooser.setCurrentDirectory(new File(dir));
         }

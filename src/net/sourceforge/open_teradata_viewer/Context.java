@@ -30,7 +30,7 @@ import java.sql.ResultSet;
 public class Context {
     private static final Context CONTEXT = new Context();
 
-    private ConnectionData connectionData;
+    public ConnectionData connectionData;
     private ResultSet resultSet;
     private int[] columnTypes;
     private String[] columnTypeNames;

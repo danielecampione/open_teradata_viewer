@@ -18,51 +18,204 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.SQLWarning;
+import java.util.Vector;
+
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.Config;
+import net.sourceforge.open_teradata_viewer.ConnectionData;
 import net.sourceforge.open_teradata_viewer.Context;
+import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.Main;
 
-/**
- * 
- * 
- * @author D. Campione
- * 
- */
 public class ConnectAction extends CustomAction {
 
-    private static final long serialVersionUID = 604086939550655893L;
+    private static final long serialVersionUID = -1992828047874871010L;
 
     protected ConnectAction() {
         super("Connect", "connect.png", null, null);
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        setEnabled(!isConnected);
+        setEnabled(true);
     }
 
     @Override
-    protected void performThreaded(ActionEvent ae) throws Exception {
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (!isConnected) {
-            try {
-                ApplicationFrame.getInstance().initConnectionManager();
-            } catch (ClassNotFoundException e) {
-                throw e;
-            } catch (InstantiationException e) {
-                throw e;
-            } catch (IllegalAccessException e) {
-                throw e;
-            } catch (SQLException e) {
-                throw e;
+    protected void performThreaded(ActionEvent e) throws Exception {
+        ((DisconnectAction) Actions.DISCONNECT).saveDefaultOwner();
+        Vector<ConnectionData> connectionDatas = Config.getDatabases();
+        final JList list = new JList(connectionDatas);
+        list.addMouseListener(this);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        Object value = Dialog.show("Connections", new JScrollPane(list),
+                Dialog.PLAIN_MESSAGE, new Object[]{"Connect", "Cancel", "Add",
+                        "Edit", "Duplicate", "Delete"}, "Connect");
+        if ("Connect".equals(value)) {
+            if (!list.isSelectionEmpty()) {
+                Actions.DISCONNECT.performThreaded(e);
+                ConnectionData connectionData = (ConnectionData) list
+                        .getSelectedValue();
+                boolean connected = false;
+                while (!connected) {
+                    try {
+                        ApplicationFrame.getInstance().changeLog
+                                .append("connecting..\n");
+                        connectionData.connect();
+                        ApplicationFrame.getInstance().changeLog
+                                .append("connected.\n");
+
+                        SQLWarning warnings = connectionData.getConnection()
+                                .getWarnings();
+                        while (warnings != null) {
+                            Dialog.show("Warning", warnings.getMessage(),
+                                    Dialog.WARNING_MESSAGE,
+                                    Dialog.DEFAULT_OPTION);
+                            warnings = warnings.getNextWarning();
+                        }
+
+                        Context.getInstance().setConnectionData(connectionData);
+                        ApplicationFrame.getInstance().setTitle(
+                                String.format("%s - %s", Main.APPLICATION_NAME,
+                                        connectionData.getName()));
+                        Actions.getInstance().validateActions();
+                        ApplicationFrame.getInstance().initializeObjectChooser(
+                                connectionData);
+                        connected = true;
+                    } catch (Throwable t) {
+                        ExceptionDialog.showException(t);
+                        if (editConnection(connectionData)) {
+                            Config.saveDatabases(connectionDatas);
+                        } else {
+                            performThreaded(e);
+                            return;
+                        }
+                    }
+                }
             }
-            if (ApplicationFrame.getInstance().connectionManager
-                    .checkConnection()) {
-                ApplicationFrame.getInstance().changeLog.append("connected.\n");
-            } else {
-                Context.getInstance().setConnectionData(null);
+        } else if ("Add".equals(value)) {
+            ConnectionData connectionData = newConnectionWizard();
+            if (editConnection(connectionData)) {
+                connectionDatas.add(connectionData);
+                Config.saveDatabases(connectionDatas);
             }
-            Actions.getInstance().validateActions();
-            ApplicationFrame.getInstance().updateTitle();
+            performThreaded(e);
+        } else if ("Edit".equals(value)) {
+            if (!list.isSelectionEmpty()) {
+                ConnectionData connectionData = (ConnectionData) list
+                        .getSelectedValue();
+                if (editConnection(connectionData)) {
+                    Config.saveDatabases(connectionDatas);
+                }
+            }
+            performThreaded(e);
+        } else if ("Duplicate".equals(value)) {
+            if (!list.isSelectionEmpty()) {
+                ConnectionData connectionData = (ConnectionData) list
+                        .getSelectedValue();
+                connectionData = (ConnectionData) connectionData.clone();
+                if (editConnection(connectionData)) {
+                    connectionDatas.add(connectionData);
+                    Config.saveDatabases(connectionDatas);
+                }
+            }
+            performThreaded(e);
+        } else if ("Delete".equals(value)) {
+            if (!list.isSelectionEmpty()) {
+                if (Dialog.YES_OPTION == Dialog.show("Delete connection",
+                        "Are you sure?", Dialog.WARNING_MESSAGE,
+                        Dialog.YES_NO_OPTION)) {
+                    ConnectionData connectionData = (ConnectionData) list
+                            .getSelectedValue();
+                    connectionDatas.remove(connectionData);
+                    Config.saveDatabases(connectionDatas);
+                }
+            }
+            performThreaded(e);
+        }
+    }
+
+    private ConnectionData newConnectionWizard() throws IOException {
+        ConnectionData connectionData = new ConnectionData();
+        Object db = Dialog.show("New Connection", "Choose database",
+                Dialog.PLAIN_MESSAGE, new Object[]{"Teradata"}, null);
+        if ("Teradata".equals(db)) {
+            String serverName = checkString(JOptionPane
+                    .showInputDialog("Server name"));
+            String databaseName = checkString(JOptionPane
+                    .showInputDialog("Database name"));
+            connectionData.setName(databaseName);
+            connectionData
+                    .setUrl(String
+                            .format("jdbc:teradata://%s/database=%s,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
+                                    serverName, databaseName));
+        }
+        return connectionData;
+    }
+    private String checkString(String s) {
+        return s == null ? "" : s;
+    }
+
+    private boolean editConnection(ConnectionData connectionData)
+            throws Exception {
+        return editConnection(connectionData, false);
+    }
+
+    private boolean editConnection(ConnectionData connectionData, boolean nested)
+            throws Exception {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(2, 2, 2, 2);
+        c.gridy++;
+        panel.add(new JLabel("Name"), c);
+        JTextField name = new JTextField(connectionData.getName(), 50);
+        panel.add(name, c);
+        c.gridy++;
+        panel.add(new JLabel("URL"), c);
+        final JTextField url = new JTextField(connectionData.getUrl());
+        panel.add(url, c);
+        c.gridy++;
+        int i = Dialog.show("Connection", panel, Dialog.PLAIN_MESSAGE,
+                Dialog.OK_CANCEL_OPTION);
+        connectionData.setName(name.getText());
+        connectionData.setUrl(url.getText());
+        if (Dialog.OK_OPTION == i && connectionData.getName().trim().isEmpty()) {
+            Dialog.show("Empty name", "Why would you want an empty name?",
+                    Dialog.ERROR_MESSAGE,
+                    new Object[]{"OK, I'm sorry, I will give it a name."}, null);
+            boolean okay = editConnection(connectionData, true);
+            if (!nested) {
+                if (okay) {
+                    Dialog.show(
+                            null,
+                            "That's more like it!",
+                            Dialog.INFORMATION_MESSAGE,
+                            new Object[]{"You were right, it's better to give it a name."},
+                            null);
+                } else {
+                    Dialog.show(
+                            null,
+                            "So you won't give it a name, won't you?",
+                            Dialog.QUESTION_MESSAGE,
+                            new Object[]{"No, If I can't have a nameless connection, I rather have no connection at all!"},
+                            null);
+                }
+            }
+            return okay;
+        } else {
+            return Dialog.OK_OPTION == i;
         }
     }
 }

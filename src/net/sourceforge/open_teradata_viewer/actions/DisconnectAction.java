@@ -20,10 +20,19 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.Config;
+import net.sourceforge.open_teradata_viewer.ConnectionData;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.Main;
 
 /**
  * 
@@ -31,41 +40,85 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  * 
  */
-public class DisconnectAction extends CustomAction {
+public class DisconnectAction extends CustomAction implements AncestorListener {
 
-    private static final long serialVersionUID = 1837760644323823359L;
+    private static final long serialVersionUID = 7202373336183800439L;
 
     protected DisconnectAction() {
         super("Disconnect", "disconnect.png", null, null);
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        setEnabled(isConnected);
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (isConnected) {
+        if (Context.getInstance().getConnectionData() != null) {
+            saveDefaultOwner();
             ApplicationFrame.getInstance().destroyObjectChooser();
             try {
-                if (ApplicationFrame.getInstance().connectionManager != null) {
-                    Connection connection = ApplicationFrame.getInstance().connectionManager
-                            .getConnection();
-                    if (connection != null) {
-                        if (!connection.isClosed()) {
-                            connection.rollback();
-                            connection.close();
-                        }
-                    }
+                Connection connection = Context.getInstance()
+                        .getConnectionData().getConnection();
+                if (!connection.isClosed()) {
+                    connection.rollback();
+                    connection.close();
                 }
             } catch (Throwable t) {
                 ExceptionDialog.hideException(t);
             }
             Context.getInstance().setConnectionData(null);
             Context.getInstance().setResultSet(null);
+            ApplicationFrame.getInstance().setTitle(Main.APPLICATION_NAME);
             Actions.getInstance().validateActions();
-            ApplicationFrame.getInstance().updateTitle();
-
             ApplicationFrame.getInstance().changeLog.append("disconnected.\n");
         }
+    }
+
+    /**
+     * Remember last selected schema
+     */
+    public void saveDefaultOwner() throws Exception {
+        ConnectionData thisConnectionData = Context.getInstance()
+                .getConnectionData();
+        if (thisConnectionData != null
+                && ApplicationFrame.getInstance().getObjectChooser() != null) {
+            String selectedOwner = ApplicationFrame.getInstance()
+                    .getObjectChooser().getSelectedOwner();
+            if (selectedOwner != null
+                    && !selectedOwner.equals(thisConnectionData
+                            .getDefaultOwner())) {
+                thisConnectionData.setDefaultOwner(selectedOwner);
+                Vector<ConnectionData> connectionDatas = Config.getDatabases();
+                for (ConnectionData connectionData : connectionDatas) {
+                    if (connectionData.getName().equals(
+                            thisConnectionData.getName())) {
+                        connectionData.setDefaultOwner(selectedOwner);
+                    }
+                }
+                Config.saveDatabases(connectionDatas);
+            }
+        }
+    }
+
+    @Override
+    public void ancestorRemoved(AncestorEvent event) {
+        // Kills the application in 10 seconds in case disconnecting will hang
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.exit(0);
+            }
+        }, 10000);
+        try {
+            performThreaded(null);
+        } catch (Throwable t) {
+            ExceptionDialog.hideException(t);
+        }
+        System.exit(0);
+    }
+
+    @Override
+    public void ancestorAdded(AncestorEvent event) {
+    }
+
+    @Override
+    public void ancestorMoved(AncestorEvent event) {
     }
 }

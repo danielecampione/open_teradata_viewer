@@ -13,6 +13,5 @@
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/swingx-soapui.jar"/>
 	<classpathentry kind="lib" path="lib/tdgssconfig.jar"/>
-	<classpathentry kind="lib" path="lib/terajdbc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

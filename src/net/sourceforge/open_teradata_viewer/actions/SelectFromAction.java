@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
@@ -95,7 +94,7 @@ public class SelectFromAction extends CustomAction {
         relationName = relationName.toUpperCase();
         String querySQL = "HELP TABLE " + relationName;
         ResultSet resultSet = null;
-        Connection connection = ApplicationFrame.getInstance().connectionManager
+        Connection connection = Context.getInstance().connectionData
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);

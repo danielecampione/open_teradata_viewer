@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,7 +89,7 @@ public class ShowProcedureAction extends CustomAction {
         procedureName = procedureName.trim().toUpperCase();
         String querySQL = "SHOW PROCEDURE " + procedureName;
         ResultSet resultSet = null;
-        Connection connection = ApplicationFrame.getInstance().connectionManager
+        Connection connection = Context.getInstance().connectionData
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);

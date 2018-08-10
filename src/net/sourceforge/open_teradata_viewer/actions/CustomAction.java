@@ -20,43 +20,21 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.Container;
 import java.awt.Desktop;
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.Settings;
-import net.sourceforge.open_teradata_viewer.SettingsException;
-import net.sourceforge.open_teradata_viewer.SettingsKeys;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.Tools;
-
-import org.xml.sax.SAXException;
 
 /**
  * 
@@ -69,10 +47,6 @@ public abstract class CustomAction extends AbstractAction
             MouseListener {
 
     private static final long serialVersionUID = 1753928583474033071L;
-
-    private static JFileChooser fileChooser;
-
-    private static byte[][] savedLobs;
 
     public static boolean inProgress;
 
@@ -210,7 +184,7 @@ public abstract class CustomAction extends AbstractAction
         if (shortDescription != null) {
             putValue(SHORT_DESCRIPTION, shortDescription);
         }
-        setEnabled(true);
+        setEnabled(false);
     }
 
     public void actionPerformed(final ActionEvent e) {
@@ -231,110 +205,8 @@ public abstract class CustomAction extends AbstractAction
 
     protected abstract void performThreaded(ActionEvent e) throws Exception;
 
-    public void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
-        File file = saveFile(fileName, bytes);
-        if (file != null
-                && Dialog.YES_OPTION == Dialog.show("Open file",
-                        "Open the file with the associated application?",
-                        Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-            openFile(file);
-        }
-    }
-
-    public File saveFile(String fileName, byte[] bytes) throws Exception {
-        JFileChooser fileChooser = getFileChooser();
-        fileChooser.setSelectedFile(new File(fileName));
-        if (JFileChooser.APPROVE_OPTION == fileChooser
-                .showSaveDialog(ApplicationFrame.getInstance())) {
-            try {
-                Settings.write(SettingsKeys.LAST_USED_DIR_KEY, fileChooser
-                        .getCurrentDirectory().getCanonicalPath());
-            } catch (SettingsException e1) {
-                // ignore
-            }
-            File selectedFile = fileChooser.getSelectedFile();
-            if (!selectedFile.exists()
-                    || Dialog.YES_OPTION == Dialog.show("File exists",
-                            "Overwrite existing file?",
-                            Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-                FileOutputStream out = new FileOutputStream(selectedFile);
-                out.write(bytes);
-                out.close();
-                return selectedFile;
-            }
-        }
-        return null;
-    }
-
-    private void openFile(File file) throws IOException {
-        Desktop.getDesktop().open(file);
-    }
-
-    protected static JFileChooser getFileChooser() throws IOException,
-            SAXException, ParserConfigurationException {
-        if (fileChooser == null) {
-            fileChooser = new JFileChooser();
-        }
-        String dir = Settings.load(SettingsKeys.LAST_USED_DIR_KEY,
-                SettingsKeys.LAST_USED_DIR_DEFAULT_VALUE);
-        if (dir != null) {
-            fileChooser.setCurrentDirectory(new File(dir));
-        }
-        return fileChooser;
-    }
-
-    public void showFile(String text, byte[] bytes) throws Exception {
-        JTextArea textArea = new JTextArea(text);
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        boolean isXml = text.startsWith("<?xml");
-        Object[] options = isXml ? new Object[]{"Save to file",
-                "Save to file and open", "Copy to clipboard",
-                "Pretty print XML", "Cancel"} : new Object[]{"Save to file",
-                "Save to file and open", "Copy to clipboard", "Cancel"};
-        Object value = Dialog.show("Preview", scrollPane, Dialog.PLAIN_MESSAGE,
-                options, "Save to file");
-        if ("Save to file".equals(value)) {
-            String fileName = isXml ? "export.xml" : "export.txt";
-            saveFile(fileName, bytes != null ? bytes : text.getBytes());
-        } else if ("Save to file and open".equals(value)) {
-            String fileName = isXml ? "export.xml" : "export.txt";
-            File file = saveFile(fileName,
-                    bytes != null ? bytes : text.getBytes());
-            if (file != null) {
-                openFile(file);
-            }
-        } else if ("Copy to clipboard".equals(value)) {
-            try {
-                Toolkit.getDefaultToolkit().getSystemClipboard()
-                        .setContents(new StringSelection(text), null);
-            } catch (Throwable t2) {
-                ExceptionDialog.hideException(t2);
-            }
-        } else if ("Pretty print XML".equals(value)) {
-            try {
-                Transformer transformer = TransformerFactory.newInstance()
-                        .newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty(
-                        "{http://xml.apache.org/xslt}indent-amount", "4");
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                transformer.transform(new StreamSource(new StringReader(text)),
-                        new StreamResult(outputStream));
-                text = outputStream.toString();
-            } catch (Throwable t) {
-                ExceptionDialog.showException(t);
-            }
-            showFile(text, bytes);
-        }
-    }
-
-    protected static byte[][] getSavedLobs() {
-        return savedLobs;
-    }
-
-    protected static void setSavedLobs(byte[][] newSavedLobs) {
-        savedLobs = newSavedLobs;
+    public void openURL(String uri) throws Exception {
+        Desktop.getDesktop().browse(new URI(uri));
     }
 
     @Override

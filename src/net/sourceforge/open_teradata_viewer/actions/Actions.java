@@ -40,9 +40,10 @@ public final class Actions
 
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
+    public static final CustomAction FAVORITES = new FavoritesAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction ABOUT = new AboutAction();
-    public static final CustomAction EDIT_CONNECTION_DATA = new EditConnectionDataAction();
+    public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction EXPORT_EXCEL = new ExportExcelAction();
     public static final CustomAction HELP = new HelpAction();
     public static final CustomAction FORMAT_SQL = new FormatSQLAction();
@@ -57,7 +58,6 @@ public final class Actions
     public static final CustomAction LOB_PASTE = new LobPasteAction();
     public static final CustomAction LOB_EXPORT = new LobExportAction();
     public static final CustomAction LOB_IMPORT = new LobImportAction();
-    public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SHOW_PROCEDURE = new ShowProcedureAction();
@@ -80,7 +80,6 @@ public final class Actions
 
     protected void validateActions() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        CONNECT.setEnabled(!isConnected);
         DISCONNECT.setEnabled(isConnected);
         RUN.setEnabled(isConnected);
         RUN_SCRIPT.setEnabled(isConnected);

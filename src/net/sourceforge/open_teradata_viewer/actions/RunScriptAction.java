@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -74,7 +73,7 @@ public class RunScriptAction extends CustomAction {
         @SuppressWarnings("rawtypes")
         final Vector<Vector> dataVector = new Vector<Vector>();
         int count = 0;
-        final Statement statement = ApplicationFrame.getInstance().connectionManager
+        final Statement statement = Context.getInstance().connectionData
                 .getConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
         Runnable onCancel = new Runnable() {

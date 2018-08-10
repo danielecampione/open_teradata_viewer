@@ -306,6 +306,7 @@ public class Tools {
                 }
             } catch (Exception e) {
                 ApplicationFrame.getInstance().printStackTraceOnGUI(e);
+                ExceptionDialog.showException(e);
             }
         }
     }

@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -155,7 +154,7 @@ public class AboutAction extends CustomAction implements MouseListener {
                                     + " %s</font></html>", Config.getVersion())),
                     c);
         } catch (IOException ioe) {
-            ApplicationFrame.getInstance().printStackTraceOnGUI(ioe);
+            throw ioe;
         }
         c.gridy++;
         panel.add(
@@ -181,7 +180,7 @@ public class AboutAction extends CustomAction implements MouseListener {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {
             try {
-                DatabaseMetaData metaData = ApplicationFrame.getInstance().connectionManager
+                DatabaseMetaData metaData = Context.getInstance().connectionData
                         .getConnection().getMetaData();
                 c.gridy++;
                 panel.add(new JLabel("Database: "), c);

@@ -51,7 +51,7 @@ public final class ExceptionDialog {
         }
         if ("Details"
                 .equals(Dialog.show(t.getClass().getName(),
-                        t.getMessage() != null ? t.toString() : "Error",
+                        t.getMessage() != null ? t.getMessage() : "Error",
                         Dialog.ERROR_MESSAGE, new Object[]{"Close", "Details"},
                         "Close"))) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -76,7 +76,16 @@ public final class ExceptionDialog {
             textArea.append(System.getProperty("java.runtime.name"));
             textArea.append(" ");
             textArea.append(System.getProperty("java.runtime.version"));
-            textArea.append("\n" + text);
+            ConnectionData connectionData = Context.getInstance()
+                    .getConnectionData();
+            if (connectionData != null) {
+                textArea.append("\n");
+                textArea.append(connectionData.getUrl());
+                textArea.append("\n");
+                textArea.append(connectionData.getDriver().getClass().getName());
+            }
+            textArea.append("\n");
+            textArea.append(text);
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
             if ("Copy to clipboard".equals(Dialog.show(t.getClass().getName(),
@@ -93,8 +102,10 @@ public final class ExceptionDialog {
                 }
             }
         }
+        showTip(t, text);
+    }
 
-        //some tips
+    private static void showTip(Throwable t, String text) {
         StringBuilder msg = new StringBuilder();
         if (t instanceof SQLException) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -112,10 +123,16 @@ public final class ExceptionDialog {
                     msg.append("Updating a resultset mostly fails when the ORDER BY clause is used.\n");
                     msg.append("Try the select without ORDER BY and sort the column afterwards.");
                 }
+            } else if (t instanceof OutOfMemoryError) {
+                msg.append(Main.APPLICATION_NAME
+                        + " has a memory limit of 512 MB.\n");
             }
         }
+        if (msg.length() > 0) {
+            Dialog.show("Tip", msg, Dialog.INFORMATION_MESSAGE,
+                    Dialog.DEFAULT_OPTION);
+        }
     }
-
     public static void hideException(Throwable t) {
         t.printStackTrace();
     }

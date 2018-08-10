@@ -22,14 +22,13 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
-
-import com.teradata.jdbc.jdbc_4.util.JDBCException;
 
 /**
  * 
@@ -106,7 +105,7 @@ public class ShowViewAction extends CustomAction {
                         ? " AND DatabaseName='" + databaseName + "'"
                         : "");
         ResultSet resultSet = null;
-        Connection connection = ApplicationFrame.getInstance().connectionManager
+        Connection connection = Context.getInstance().connectionData
                 .getConnection();
         final PreparedStatement statement = connection
                 .prepareStatement(querySQL);
@@ -131,7 +130,7 @@ public class ShowViewAction extends CustomAction {
             String viewBody = resultSet.getString(1).trim();
             ApplicationFrame.getInstance().setText(viewBody);
         } else {
-            throw new JDBCException(
+            throw new SQLException(
                     "Object '"
                             + ((databaseName != null && databaseName.trim()
                                     .length() > 0) ? databaseName + "." : "")

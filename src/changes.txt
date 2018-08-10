@@ -1,3 +1,9 @@
+0.02a (20-jun-11)
+    - The driver is dynamically installed.
+    - The connection details are shown when an exception occurs.
+    - Added the functionality to store multiple connections.
+    - Added the capability to store bookmarks.
+
 0.01c (17-jun-11)
     - Added the "Run Script", "Open File" and "Save File" command buttons to the
       application toolbar.

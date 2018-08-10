@@ -57,7 +57,9 @@ public class SplashScreen extends JWindow {
                     + Main.APPLICATION_NAME
                     + " "
                     + Config.getVersion()
-                    + "</td><td align='right'>http://www.gnu.org/licenses/</td></tr><tr><td>Copyright &copy 2011, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
+                    + "</td><td align='right'>"
+                    + Config.HOME_PAGE
+                    + "</td></tr><tr><td>Copyright &copy 2011, D. Campione </td><td>A sourceforge.net project</td></tr></table></html>";
         } catch (IOException e) {
         }
     }

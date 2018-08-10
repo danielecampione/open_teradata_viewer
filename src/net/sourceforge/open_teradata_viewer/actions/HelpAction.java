@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( help )
+ * Open Teradata Viewer ( kernel )
  * Copyright (C) 2011, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.SwingUtil;
 import net.sourceforge.open_teradata_viewer.Tools;
 import net.sourceforge.open_teradata_viewer.UISupport;
@@ -45,6 +46,7 @@ public class HelpAction extends CustomAction {
     public HelpAction() {
         super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
                 "Shows the user manual.");
+        setEnabled(true);
     }
 
     public void actionPerformed(final ActionEvent e) {
@@ -55,6 +57,7 @@ public class HelpAction extends CustomAction {
             performThreaded(e);
         } catch (Throwable t) {
             ApplicationFrame.getInstance().printStackTraceOnGUI(t);
+            ExceptionDialog.showException(t);
         }
     }
 

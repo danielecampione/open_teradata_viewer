@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.StringReader;
@@ -50,6 +49,7 @@ public class AnalyzeQueryAction extends CustomAction {
     public AnalyzeQueryAction() {
         super("Analyze query..", null, null,
                 "Show table list of the SQL query in a graphic viewer.");
+        setEnabled(true);
     }
 
     public void actionPerformed(final ActionEvent e) {
@@ -60,6 +60,7 @@ public class AnalyzeQueryAction extends CustomAction {
             performThreaded(e);
         } catch (Throwable t) {
             ApplicationFrame.getInstance().printStackTraceOnGUI(t);
+            ExceptionDialog.showException(t);
         }
     }
 

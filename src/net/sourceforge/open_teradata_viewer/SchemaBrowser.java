@@ -39,9 +39,8 @@ public class SchemaBrowser extends JTree {
 
     private static final long serialVersionUID = -6971889243415387652L;
 
-    public SchemaBrowser(ConnectionManager connectionManager,
-            ConnectionData connectionData) {
-        super(new ObjectNode(connectionManager, connectionData));
+    public SchemaBrowser(ConnectionData connectionData) {
+        super(new ObjectNode(connectionData));
         ((DefaultTreeCellRenderer) getCellRenderer()).setLeafIcon(null);
         ((DefaultTreeCellRenderer) getCellRenderer()).setOpenIcon(null);
         ((DefaultTreeCellRenderer) getCellRenderer()).setClosedIcon(null);
@@ -57,19 +56,15 @@ public class SchemaBrowser extends JTree {
 
         private static final long serialVersionUID = -7209470034361905060L;
         private ConnectionData connectionData;
-        private ConnectionManager connectionManager;
 
-        public ObjectNode(ConnectionManager newConnectionManager,
-                ConnectionData newConnectionData) {
-            this(newConnectionManager, newConnectionData.getName(),
-                    new Object[0], newConnectionData);
+        public ObjectNode(ConnectionData newConnectionData) {
+            this(newConnectionData.getName(), new Object[0], newConnectionData);
         }
 
-        public ObjectNode(ConnectionManager newConnectionManager, Object value,
-                Object children, ConnectionData newConnectionData) {
+        public ObjectNode(Object value, Object children,
+                ConnectionData newConnectionData) {
             super(value, children);
             this.connectionData = newConnectionData;
-            this.connectionManager = newConnectionManager;
         }
 
         @Override
@@ -85,7 +80,7 @@ public class SchemaBrowser extends JTree {
                 String relationName = toString().toUpperCase();
                 String querySQL = "HELP TABLE " + relationName;
                 ResultSet resultSet = null;
-                Connection connection = connectionManager.getConnection();
+                Connection connection = connectionData.getConnection();
                 try {
                     final PreparedStatement statement = connection
                             .prepareStatement(querySQL);
@@ -127,14 +122,14 @@ public class SchemaBrowser extends JTree {
         private void addChildren() throws SQLException {
             switch (getLevel()) {
                 case 0 :
-                    if (connectionManager.getConnection().getMetaData()
+                    if (connectionData.getConnection().getMetaData()
                             .supportsSchemasInTableDefinitions()) {
-                        addQuery(connectionManager.getConnection()
-                                .getMetaData().getSchemas(), true, 1);
-                    } else if (connectionManager.getConnection().getMetaData()
+                        addQuery(connectionData.getConnection().getMetaData()
+                                .getSchemas(), true, 1);
+                    } else if (connectionData.getConnection().getMetaData()
                             .supportsCatalogsInTableDefinitions()) {
-                        addQuery(connectionManager.getConnection()
-                                .getMetaData().getCatalogs(), true, 1);
+                        addQuery(connectionData.getConnection().getMetaData()
+                                .getCatalogs(), true, 1);
                     } else {
                         add("Schema", true);
                     }
@@ -148,10 +143,10 @@ public class SchemaBrowser extends JTree {
                     String owner = getParent().toString();
                     String type = toString();
                     if ("TABLES".equals(type)) {
-                        if (connectionManager.getConnection().getMetaData()
+                        if (connectionData.getConnection().getMetaData()
                                 .supportsCatalogsInTableDefinitions()) {
                             addQuery(
-                                    connectionManager
+                                    connectionData
                                             .getConnection()
                                             .getMetaData()
                                             .getTables(
@@ -163,7 +158,7 @@ public class SchemaBrowser extends JTree {
                                     true, 3);
                         } else {
                             addQuery(
-                                    connectionManager
+                                    connectionData
                                             .getConnection()
                                             .getMetaData()
                                             .getTables(
@@ -175,10 +170,10 @@ public class SchemaBrowser extends JTree {
                                     true, 3);
                         }
                     } else if ("VIEWS".equals(type)) {
-                        if (connectionManager.getConnection().getMetaData()
+                        if (connectionData.getConnection().getMetaData()
                                 .supportsCatalogsInTableDefinitions()) {
                             addQuery(
-                                    connectionManager
+                                    connectionData
                                             .getConnection()
                                             .getMetaData()
                                             .getTables(owner, null, null,
@@ -186,7 +181,7 @@ public class SchemaBrowser extends JTree {
                                     true, 3);
                         } else {
                             addQuery(
-                                    connectionManager
+                                    connectionData
                                             .getConnection()
                                             .getMetaData()
                                             .getTables(null, owner, null,
@@ -194,16 +189,16 @@ public class SchemaBrowser extends JTree {
                                     true, 3);
                         }
                     } else if ("PROCEDURES".equals(type)) {
-                        if (connectionManager.getConnection().getMetaData()
+                        if (connectionData.getConnection().getMetaData()
                                 .supportsCatalogsInTableDefinitions()) {
                             addQuery(
-                                    connectionManager.getConnection()
+                                    connectionData.getConnection()
                                             .getMetaData()
                                             .getProcedures(owner, null, null),
                                     true, 3);
                         } else {
                             addQuery(
-                                    connectionManager.getConnection()
+                                    connectionData.getConnection()
                                             .getMetaData()
                                             .getProcedures(null, owner, null),
                                     true, 3);
@@ -212,10 +207,10 @@ public class SchemaBrowser extends JTree {
                     break;
                 case 3 :
                     String table = toString();
-                    if (connectionManager.getConnection().getMetaData()
+                    if (connectionData.getConnection().getMetaData()
                             .supportsCatalogsInTableDefinitions()) {
                         addQuery(
-                                connectionManager
+                                connectionData
                                         .getConnection()
                                         .getMetaData()
                                         .getColumns(
@@ -224,7 +219,7 @@ public class SchemaBrowser extends JTree {
                                                 table, null), false, 4);
                     } else {
                         addQuery(
-                                connectionManager
+                                connectionData
                                         .getConnection()
                                         .getMetaData()
                                         .getColumns(
@@ -238,14 +233,6 @@ public class SchemaBrowser extends JTree {
             }
         }
 
-        @SuppressWarnings("unused")
-        private void addQuery(String query, boolean children)
-                throws SQLException {
-            ResultSet resultSet = connectionManager.getConnection()
-                    .createStatement().executeQuery(query);
-            addQuery(resultSet, children, 1);
-        }
-
         private void addQuery(ResultSet resultSet, boolean children,
                 int columnIndex) throws SQLException {
             while (resultSet.next()) {
@@ -254,9 +241,8 @@ public class SchemaBrowser extends JTree {
         }
 
         private void add(String s, boolean children) {
-            add(new ObjectNode(connectionManager, s, children
-                    ? new Object[0]
-                    : null, connectionData));
+            add(new ObjectNode(s, children ? new Object[0] : null,
+                    connectionData));
         }
     }
 
@@ -278,6 +264,21 @@ public class SchemaBrowser extends JTree {
             selectedItems[i] = s;
         }
         return selectedItems;
+    }
+
+    public String getSelectedOwner() {
+        TreePath selectionPath = getSelectionPath();
+        if (selectionPath != null) {
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath
+                    .getLastPathComponent();
+            if (treeNode.getLevel() > 1) {
+                while (treeNode.getLevel() > 1) {
+                    treeNode = (DefaultMutableTreeNode) treeNode.getParent();
+                }
+                return treeNode.toString();
+            }
+        }
+        return null;
     }
 
     public void expand(String[] path) {

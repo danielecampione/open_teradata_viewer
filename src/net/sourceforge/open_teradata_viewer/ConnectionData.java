@@ -18,7 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.sql.ResultSet;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * 
@@ -26,37 +30,25 @@ import java.sql.ResultSet;
  * @author D. Campione
  *
  */
-public class ConnectionData {
-
-    private ResultSet resultSet;
+@SuppressWarnings("rawtypes")
+public class ConnectionData implements Comparable, Cloneable {
 
     private String name;
     private String url;
-    private String user;
-    private String password;
-    private String driver;
+
+    private Driver driver;
+    private Connection connection;
+
+    private String defaultOwner;
 
     private String identifierQuoteString;
 
     public ConnectionData() {
     }
 
-    public ConnectionData(String newName, String newUrl, String newUser,
-            String newPassword, String newDriver) {
+    public ConnectionData(String newName, String newUrl) {
         this.name = newName;
         this.url = newUrl;
-        this.user = newUser;
-        this.password = newPassword;
-        this.driver = newDriver;
-        setMixedCaseQuotedIdentifiers();
-    }
-
-    public ResultSet getResultSet() {
-        return resultSet;
-    }
-
-    public void setResultSet(ResultSet newResultSet) {
-        this.resultSet = newResultSet;
     }
 
     public String getName() {
@@ -75,40 +67,61 @@ public class ConnectionData {
         this.url = newUrl;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String newUser) {
-        this.user = newUser;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    public String getDriver() {
+    public Driver getDriver() {
         return driver;
     }
 
-    public void setDriver(String newDriver) {
-        this.driver = newDriver;
+    public Connection getConnection() {
+        return connection;
     }
 
-    protected void setMixedCaseQuotedIdentifiers() {
+    public String getDefaultOwner() {
+        return defaultOwner;
+    }
+
+    public void setDefaultOwner(String newDefaultOwner) {
+        this.defaultOwner = newDefaultOwner;
+    }
+
+    public void connect() throws Exception {
+        Drivers.initialize();
+
         try {
-            if (!ApplicationFrame.getInstance().connectionManager
-                    .getConnection().getMetaData()
-                    .supportsMixedCaseIdentifiers()
-                    && ApplicationFrame.getInstance().connectionManager
-                            .getConnection().getMetaData()
+            driver = DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            ExceptionDialog.showException(new Exception(String.format(
+                    "No suitable driver for URL \"%s\"", url), e));
+            Drivers.editDrivers();
+            try {
+                driver = DriverManager.getDriver(url);
+            } catch (SQLException e1) {
+                throw new Exception(String.format(
+                        "No suitable driver for URL \"%s\"", url), e1);
+            }
+        }
+        Properties properties = new Properties();
+        addExtraProperties(properties);
+        connection = driver.connect(url, properties);
+        if (connection == null) {
+            throw new Exception(String.format(
+                    "Unable to connect.\nURL = %s\nDriver = %s", url, driver
+                            .getClass().getName()));
+        }
+        connection.setAutoCommit(false);
+        setMixedCaseQuotedIdentifiers();
+    }
+
+    private void addExtraProperties(Properties properties) {
+        // No extra property is available for the installed version of the
+        // Teradata driver.
+    }
+
+    private void setMixedCaseQuotedIdentifiers() {
+        try {
+            if (!connection.getMetaData().supportsMixedCaseIdentifiers()
+                    && connection.getMetaData()
                             .supportsMixedCaseQuotedIdentifiers()) {
-                identifierQuoteString = ApplicationFrame.getInstance().connectionManager
-                        .getConnection().getMetaData()
+                identifierQuoteString = connection.getMetaData()
                         .getIdentifierQuoteString();
             } else {
                 identifierQuoteString = "";
@@ -126,5 +139,21 @@ public class ConnectionData {
                     identifierQuoteString);
         }
         return s;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        ConnectionData connectionData = (ConnectionData) o;
+        return name.compareTo(connectionData.name);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

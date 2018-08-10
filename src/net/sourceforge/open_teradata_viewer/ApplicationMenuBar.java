@@ -54,7 +54,6 @@ public class ApplicationMenuBar extends JMenuBar {
         menu = new JMenu("Connection");
         add(menu);
         menu.add(Actions.CONNECT);
-        menu.add(Actions.EDIT_CONNECTION_DATA);
         menu.addSeparator();
         menu.add(Actions.DISCONNECT);
 
@@ -62,6 +61,8 @@ public class ApplicationMenuBar extends JMenuBar {
         add(menu);
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
+        menu.addSeparator();
+        menu.add(Actions.FAVORITES);
 
         menu = new JMenu("Edit");
         add(menu);

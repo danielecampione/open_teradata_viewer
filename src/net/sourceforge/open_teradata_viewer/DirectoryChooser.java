@@ -46,8 +46,7 @@ public class DirectoryChooser extends JTree {
     public static File chooseDirectory() throws Exception {
         DirectoryChooser directoryChooser = new DirectoryChooser();
 
-        String lastUsedDir = Settings.load(SettingsKeys.LAST_USED_DIR_KEY,
-                SettingsKeys.LAST_USED_DIR_DEFAULT_VALUE);
+        String lastUsedDir = Config.getLastUsedDir();
         if (lastUsedDir != null) {
             directoryChooser.setSelectedDirectory(new File(lastUsedDir));
         }
@@ -56,12 +55,7 @@ public class DirectoryChooser extends JTree {
                 Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
             File selectedDir = directoryChooser.getSelectedDirectory();
 
-            try {
-                Settings.write(SettingsKeys.LAST_USED_DIR_KEY,
-                        selectedDir.getCanonicalPath());
-            } catch (SettingsException e1) {
-                // ignore
-            }
+            Config.saveLastUsedDir(selectedDir.getCanonicalPath());
 
             return selectedDir;
         } else {

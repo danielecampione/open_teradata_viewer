@@ -31,7 +31,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.SQLException;
 
 import javax.swing.Action;
 import javax.swing.InputMap;
@@ -68,8 +67,6 @@ import com.incors.plaf.kunststoff.KunststoffTheme;
 public class ApplicationFrame extends JFrame {
 
     private static final long serialVersionUID = -8572855678886323789L;
-    public static final boolean IS_OS_WINDOWS = System.getProperty("os.name")
-            .toLowerCase(java.util.Locale.ENGLISH).startsWith("windows");
     private static ApplicationFrame APPLICATION_FRAME;
     public static final String SECTION_SEPARATOR = "----------------------------------------------------------------------------------------------------\n\n";
     public static final Color DEFAULT_FOREGROUND_COLOR_LOG = Color.DARK_GRAY;
@@ -82,7 +79,6 @@ public class ApplicationFrame extends JFrame {
      */
     public static final String LAF_MENU_LABEL = "Look & Feel";
 
-    public ConnectionManager connectionManager;
     public ChangeLog changeLog;
     private JEditorPane text;
     public JEditorPane results;
@@ -142,31 +138,7 @@ public class ApplicationFrame extends JFrame {
                 handleWindowClose();
             }
         });
-        splashScreen.progress(10);
-
-        File settingsFile = new File(Tools.conformizePath(System
-                .getProperty("user.home")) + ".OpenTeradataViewer");
-        if (!settingsFile.exists()) {
-            try {
-                Settings.write(SettingsKeys.JDBC_DRIVER_KEY,
-                        SettingsKeys.JDBC_DRIVER_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.SERVER_NAME_KEY,
-                        SettingsKeys.SERVER_NAME_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.DATABASE_PORT_KEY,
-                        SettingsKeys.DATABASE_PORT_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.CHARSET_ENCODING_KEY,
-                        SettingsKeys.CHARSET_ENCODING_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.LOGMECH_KEY,
-                        SettingsKeys.LOGMECH_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.ACTUAL_USERID_KEY,
-                        SettingsKeys.ACTUAL_USERID_DEFAULT_VALUE);
-                Settings.write(SettingsKeys.ACTUAL_PASSWORD_KEY,
-                        SettingsKeys.ACTUAL_PASSWORD_DEFAULT_VALUE, true);
-            } catch (SettingsException e1) {
-                // ignore
-            }
-        }
-        splashScreen.progress(10);
+        splashScreen.progress(20);
 
         // Create the text area for the status log and configure it.
         changeLog = new ChangeLog(5, 30, MAX_CHARACTERS_LOG);
@@ -196,9 +168,14 @@ public class ApplicationFrame extends JFrame {
         graphicViewerDocument.addDocumentListener(graphicViewer);
         graphicViewerDocument.setUndoManager(new UndoMgr());
         getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
+
+        try {
+            Config.saveDrivers("com.teradata.jdbc.TeraDriver");
+        } catch (Exception e) {
+        }
+
         splashScreen.progress(10);
     }
-
     public void setLookAndFeel(String className) {
         try {
             UIManager.setLookAndFeel(className);
@@ -220,49 +197,6 @@ public class ApplicationFrame extends JFrame {
         }
     }
 
-    public void initConnectionManager() throws ClassNotFoundException,
-            InstantiationException, IllegalAccessException, SQLException {
-        changeLog.append("connecting..\n");
-        String driverClass = Settings.load(SettingsKeys.JDBC_DRIVER_KEY,
-                SettingsKeys.JDBC_DRIVER_DEFAULT_VALUE);
-        try {
-            // Use "com.teradata.jdbc.TeraDriver" class name
-            Class.forName(driverClass).newInstance();
-        } catch (ClassNotFoundException e) {
-            Context.getInstance().setConnectionData(null);
-            String errorMsg = "Error: Teradata driver NOT available.\n";
-            changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            UISupport.getDialogs().showErrorMessage(errorMsg);
-            throw e;
-        } catch (InstantiationException e) {
-            Context.getInstance().setConnectionData(null);
-            String errorMsg = "Error: Teradata driver NOT available.\n";
-            changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            UISupport.getDialogs().showErrorMessage(errorMsg);
-            throw e;
-        } catch (IllegalAccessException e) {
-            Context.getInstance().setConnectionData(null);
-            String errorMsg = "Error: Teradata driver NOT available.\n";
-            changeLog.append(errorMsg,
-                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            UISupport.getDialogs().showErrorMessage(errorMsg);
-            throw e;
-        }
-        String connectionURL = initConnectionURL();
-        String username = null;
-        String password = null;
-
-        connectionManager = new ConnectionManager(driverClass, connectionURL,
-                username, password);
-        try {
-            connectionManager.connect();
-        } catch (SQLException e) {
-            Context.getInstance().setConnectionData(null);
-            throw e;
-        }
-    }
     private JSplitPane createWorkArea() {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 createQueryEditor(), createQueryTable());
@@ -434,60 +368,6 @@ public class ApplicationFrame extends JFrame {
         return APPLICATION_FRAME;
     }
 
-    public String initConnectionURL() {
-        String serverName = Settings.load(SettingsKeys.SERVER_NAME_KEY,
-                SettingsKeys.SERVER_NAME_DEFAULT_VALUE);
-        String connectionURL = "jdbc:teradata://" + serverName;
-        String databasePort = Settings.load(SettingsKeys.DATABASE_PORT_KEY,
-                SettingsKeys.DATABASE_PORT_DEFAULT_VALUE);
-        String database = Settings.load(SettingsKeys.DATABASE_KEY,
-                SettingsKeys.DATABASE_DEFAULT_VALUE);
-        String charsetEncoding = Settings.load(
-                SettingsKeys.CHARSET_ENCODING_KEY,
-                SettingsKeys.CHARSET_ENCODING_DEFAULT_VALUE);
-        String logMechanism = Settings.load(SettingsKeys.LOGMECH_KEY,
-                SettingsKeys.LOGMECH_DEFAULT_VALUE);
-        String actualUserID = Settings.load(SettingsKeys.ACTUAL_USERID_KEY,
-                SettingsKeys.ACTUAL_USERID_DEFAULT_VALUE);
-        String actualPassword = Settings.load(SettingsKeys.ACTUAL_PASSWORD_KEY,
-                SettingsKeys.ACTUAL_PASSWORD_DEFAULT_VALUE, true);
-        if ((database != null && database.length() > 0)
-                || (databasePort != null && databasePort.length() > 0)
-                || (charsetEncoding != null && charsetEncoding.length() > 0)
-                || (logMechanism != null && logMechanism.length() > 0)
-                || (actualUserID != null && actualUserID.length() > 0)
-                || (actualPassword != null && actualPassword.length() > 0)) {
-            connectionURL += "/";
-        }
-        if (database != null && database.length() > 0) {
-            connectionURL += "database=" + database + ",";
-        }
-        if (databasePort != null && databasePort.length() > 0) {
-            connectionURL += "DBS_PORT=" + databasePort + ",";
-        }
-        if (charsetEncoding != null && charsetEncoding.length() > 0) {
-            connectionURL += "CHARSET=" + charsetEncoding + ",";
-        }
-        if (logMechanism != null && logMechanism.length() > 0) {
-            connectionURL += "LOGMECH=" + logMechanism + ",";
-        }
-        if (actualUserID != null && actualUserID.length() > 0) {
-            connectionURL += "LOGDATA=" + actualUserID;
-            if (actualPassword != null && actualPassword.length() > 0) {
-                connectionURL += "@@" + actualPassword;
-            }
-        }
-
-        ConnectionData connectionData = new ConnectionData();
-        connectionData.setName(actualUserID + "@" + database);
-        connectionData.setUrl(connectionURL);
-        connectionData.setUser(actualUserID);
-        connectionData.setPassword(actualPassword);
-        Context.getInstance().setConnectionData(connectionData);
-
-        return connectionURL;
-    }
-
     public String getText() {
         return text.getSelectedText() != null ? text.getSelectedText() : text
                 .getText();
@@ -550,8 +430,7 @@ public class ApplicationFrame extends JFrame {
         }
     }
 
-    public void initializeObjectChooser(
-            final ConnectionManager connectionManager) {
+    public void initializeObjectChooser(final ConnectionData connectionData) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -559,7 +438,7 @@ public class ApplicationFrame extends JFrame {
                     ConnectionData connectionData = Context.getInstance()
                             .getConnectionData();
                     final SchemaBrowser schemaBrowser = new SchemaBrowser(
-                            connectionManager, connectionData);
+                            connectionData);
                     if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
                         SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
                         schemaBrowser.addKeyListener(schemaBrowserAction);
@@ -567,7 +446,7 @@ public class ApplicationFrame extends JFrame {
                     }
                     rightComponent = new JScrollPane(schemaBrowser);
                     schemaBrowser.expand(new String[]{connectionData.getName(),
-                            connectionData.getUser(), "TABLES"});
+                            "username", "TABLES"});
                     Actions.SCHEMA_BROWSER.setEnabled(true);
                 } catch (IllegalStateException e) {
                     // ignore: connection has been closed
