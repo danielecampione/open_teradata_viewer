@@ -63,6 +63,8 @@ public class ApplicationMenuBar extends JMenuBar {
     JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
     JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(
             Actions.ANIMATE_BRACKET_MATCHING);
+    JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(
+            Actions.PAINT_MATCHED_BRACKET_PAIR);
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -102,6 +104,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(cbRightToLeft);
         menu.add(cbTabLines);
         menu.add(cbAnimateBracketMatching);
+        menu.add(cbPaintMatchedBracketPair);
         menu.addSeparator();
         menu.add(Actions.DATE_TIME);
         subMenu = new JMenu("Text");
@@ -110,6 +113,8 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu.add(Actions.UNCOMMENT);
         subMenu.addSeparator();
         subMenu.add(Actions.INVERT_SELECTION_CASE);
+        subMenu.add(Actions.UPPER_SELECTION_CASE);
+        subMenu.add(Actions.LOWER_SELECTION_CASE);
         subMenu = new JMenu("Indent");
         menu.add(subMenu);
         subMenu.add(Actions.INCREASE_INDENT);
@@ -208,7 +213,7 @@ public class ApplicationMenuBar extends JMenuBar {
             }
         }
 
-        // Add any 3rd party Look and Feels in the lookandfeels subdirectory
+        // Add any 3rd party Look and Feels in the installation directory
         ExtendedLookAndFeelInfo[] info = ApplicationFrame.getInstance()
                 .get3rdPartyLookAndFeelInfo();
         if (info != null) {
@@ -303,5 +308,7 @@ public class ApplicationMenuBar extends JMenuBar {
                 .getTextComponent().getPaintTabLines());
         cbAnimateBracketMatching.setSelected(ApplicationFrame.getInstance()
                 .getTextComponent().getAnimateBracketMatching());
+        cbPaintMatchedBracketPair.setSelected(ApplicationFrame.getInstance()
+                .getTextComponent().getPaintMatchedBracketPair());
     }
 }

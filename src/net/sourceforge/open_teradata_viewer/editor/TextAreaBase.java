@@ -37,6 +37,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.TextUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.StyleContext;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
@@ -369,29 +370,28 @@ abstract class TextAreaBase extends JTextArea {
         return DEFAULT_CURRENT_LINE_HIGHLIGHT_COLOR;
     }
 
-    /**
-     * Returns the default font for text areas.
-     *
-     * @return The default font.
-     */
+    /** @return The default font for text areas. */
     public static final Font getDefaultFont() {
+        // Use StyleContext to get a composite font for better Asian language
+        // support; see Sun bug S282887
+        StyleContext sc = StyleContext.getDefaultStyleContext();
         Font font = null;
 
         if (UISupport.isOSX()) {
             // Snow Leopard (1.6) uses Menlo as default monospaced font,
             // pre-Snow Leopard used Monaco
-            font = new Font("Menlo", Font.PLAIN, 12);
+            font = sc.getFont("Menlo", Font.PLAIN, 12);
             if (!"Menlo".equals(font.getFamily())) {
-                font = new Font("Monaco", Font.PLAIN, 12);
+                font = sc.getFont("Monaco", Font.PLAIN, 12);
                 if (!"Monaco".equals(font.getFamily())) { // Shouldn't happen
-                    font = new Font("Monospaced", Font.PLAIN, 13);
+                    font = sc.getFont("Monospaced", Font.PLAIN, 13);
                 }
             }
         } else {
             // Consolas added in Vista, used by VS2010+
-            font = new Font("Consolas", Font.PLAIN, 13);
+            font = sc.getFont("Consolas", Font.PLAIN, 13);
             if (!"Consolas".equals(font.getFamily())) {
-                font = new Font("Monospaced", Font.PLAIN, 13);
+                font = sc.getFont("Monospaced", Font.PLAIN, 13);
             }
         }
 

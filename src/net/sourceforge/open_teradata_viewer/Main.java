@@ -87,20 +87,9 @@ public class Main {
                     ExceptionDialog.hideException(e);
                 }
 
-                String rootDir = null;
-                String javaClassPath = System.getProperty("java.class.path");
-                String pathSeparator = System.getProperty("path.separator");
-                if (javaClassPath.contains(pathSeparator)) {
-                    rootDir = System.getProperty("user.dir");
-                } else {
-                    File executableFile = new File(javaClassPath);
-                    rootDir = ApplicationFrame.getLocationOfJar(executableFile
-                            .getName());
-                }
-
+                String rootDir = Utilities.getRootDir();
                 ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(
-                        Utilities.conformizePath(rootDir) + "lookandfeels"
-                                + System.getProperty("file.separator"));
+                        rootDir + File.separator);
 
                 try {
                     ClassLoader cl = lafManager.getLAFClassLoader();

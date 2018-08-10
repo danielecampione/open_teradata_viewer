@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 
+import javax.swing.text.StyleContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
@@ -193,7 +194,7 @@ public class Theme {
             int fontSize = lineNumberFontSize > 0
                     ? lineNumberFontSize
                     : baseFont.getSize();
-            Font font = new Font(fontName, Font.PLAIN, fontSize);
+            Font font = getFont(fontName, Font.PLAIN, fontSize);
             gutter.setLineNumberFont(font);
             gutter.setFoldIndicatorForeground(foldIndicatorFG);
             gutter.setFoldBackground(foldBG);
@@ -207,6 +208,20 @@ public class Theme {
             str = "0" + str;
         }
         return str;
+    }
+
+    /**
+     * Returns the specified font.
+     *
+     * @param family The font family.
+     * @param style The style of font.
+     * @param size The size of the font.
+     * @return The font.
+     */
+    private static Font getFont(String family, int style, int size) {
+        // Use StyleContext to get a composite font for Asian glyphs
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        return sc.getFont(family, style, size);
     }
 
     /**
@@ -500,7 +515,7 @@ public class Theme {
                 String family = attrs.getValue("family");
                 int size = Integer.parseInt(attrs.getValue("size"));
                 if (family != null) {
-                    theme.baseFont = new Font(family, Font.PLAIN, size);
+                    theme.baseFont = getFont(family, Font.PLAIN, size);
                 } else {
                     theme.baseFont = SyntaxTextArea.getDefaultFont();
                     theme.baseFont = theme.baseFont.deriveFont(size * 1f);
@@ -608,7 +623,7 @@ public class Theme {
                     Font font = theme.baseFont;
                     String familyName = attrs.getValue("fontFamily");
                     if (familyName != null) {
-                        font = new Font(familyName, font.getStyle(),
+                        font = getFont(familyName, font.getStyle(),
                                 font.getSize());
                     }
                     String sizeStr = attrs.getValue("fontSize");

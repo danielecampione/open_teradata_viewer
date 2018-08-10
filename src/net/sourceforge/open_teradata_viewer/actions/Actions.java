@@ -60,6 +60,7 @@ public final class Actions
     public static final CustomAction RIGHT_TO_LEFT = new RightToLeftAction();
     public static final CustomAction TAB_LINES = new TabLinesAction();
     public static final CustomAction ANIMATE_BRACKET_MATCHING = new AnimateBracketMatchingAction();
+    public static final CustomAction PAINT_MATCHED_BRACKET_PAIR = new PaintMatchedBracketPairAction();
     public static final CustomAction COMMENT = new CommentAction();
     public static final CustomAction UNCOMMENT = new UncommentAction();
     public static final CustomAction DATE_TIME = new DateTimeAction();
@@ -68,6 +69,8 @@ public final class Actions
     public static final CustomAction INCREASE_FONT_SIZES = new IncreaseFontSizesAction();
     public static final CustomAction DECREASE_FONT_SIZES = new DecreaseFontSizesAction();
     public static final CustomAction INVERT_SELECTION_CASE = new InvertSelectionCaseAction();
+    public static final CustomAction UPPER_SELECTION_CASE = new UpperSelectionCaseAction();
+    public static final CustomAction LOWER_SELECTION_CASE = new LowerSelectionCaseAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction FIND = new FindAction();
     public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",

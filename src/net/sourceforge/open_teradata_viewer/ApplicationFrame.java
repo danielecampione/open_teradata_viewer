@@ -723,40 +723,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     }
 
     /**
-     * Returns the location of the specified jar file in the currently-running
-     * application's classpath. This can be useful if you wish to know the
-     * location of the installation of the currently-running application.<p> For
-     * example, a Java program running from the executable jar
-     * <code>Foo.jar</code> can call this method with <code>Foo.jar</code> as
-     * the parameter, and the location of the jar file would be returned. With
-     * this knowledge, along with knowledge of the directory layout of the
-     * application, the programmer can access other files in the installation.
-     *
-     * @param jarFileName The name of the jar file for which to search.
-     * @return The directory in which the jar file resides.
-     */
-    public static String getLocationOfJar(String jarFileName) {
-        String classPath = System.getProperty("java.class.path");
-        int index = classPath.indexOf(jarFileName);
-
-        // A jar file on a classpath must be explicitly given; a jar file in a
-        // directory, for example, will not be picked up by specifying
-        // "-classpath /my/directory/". So, we can simply search for the jar
-        // name in the classpath string, and if it isn't there, it must be in
-        // the current directory
-        if (index > -1) {
-            int pathBeginning = classPath.lastIndexOf(File.pathSeparator,
-                    index - 1) + 1;
-            String loc = classPath.substring(pathBeginning, index);
-            File file = new File(loc);
-            return file.getAbsolutePath();
-        }
-
-        // Otherwise, it must be in the current directory
-        return System.getProperty("user.dir");
-    }
-
-    /**
      * Actually creates the GUI. This is called after the splash screen is
      * displayed via <code>SwingUtilities#invokeLater()</code>.
      *

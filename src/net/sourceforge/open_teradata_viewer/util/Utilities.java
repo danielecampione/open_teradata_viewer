@@ -863,4 +863,17 @@ public class Utilities {
         }
         return false;
     }
+
+    public static String getRootDir() {
+        String rootDir = null;
+        String javaClassPath = System.getProperty("java.class.path");
+        String pathSeparator = System.getProperty("path.separator");
+        if (javaClassPath.contains(pathSeparator)) {
+            rootDir = System.getProperty("user.dir");
+        } else {
+            File executableFile = new File(javaClassPath);
+            rootDir = getLocationOfJar(executableFile.getName());
+        }
+        return conformizePath(rootDir);
+    }
 }
