@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import javax.swing.JFileChooser;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
  * 
@@ -167,7 +167,7 @@ public class FileIO {
                     }
                     Color c = textArea.getForegroundForToken(token);
                     temp.append("color: ")
-                            .append(Utilities.getHTMLFormatForColor(c))
+                            .append(UIUtil.getHTMLFormatForColor(c))
                             .append(";\n");
                     temp.append("}");
                     styles[token.type] = temp.toString();

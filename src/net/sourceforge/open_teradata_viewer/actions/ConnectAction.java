@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ public class ConnectAction extends CustomAction {
             connectionData.setName(databaseName);
             connectionData
                     .setUrl(String
-                            .format("jdbc:teradata://%s/database=%s,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
+                            .format("jdbc:teradata://%s/database=%s,TMODE=ANSI,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
                                     serverName, databaseName));
         }
         return connectionData;

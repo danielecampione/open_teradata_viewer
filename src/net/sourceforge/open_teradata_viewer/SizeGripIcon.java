@@ -1,6 +1,6 @@
 /*
- * Open Teradata Viewer ( editor )
- * Copyright (C) 2012, D. Campione
+ * Open Teradata Viewer ( kernel )
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.editor;
+package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -28,47 +28,78 @@ import javax.swing.Icon;
 import javax.swing.UIManager;
 
 /**
- * 
- * 
+ * An icon that looks like a Windows 98/XP-style size grip.
+ *
  * @author D. Campione
  * 
  */
 public class SizeGripIcon implements Icon {
 
+    private static final int SIZE = 20;
+
     private int style;
 
+    /** Ctor. */
     public SizeGripIcon() {
-        this(-1);
+        this(-1); // Important for ApplicationStatusBarPanel
     }
 
+    /**
+     * Ctor.
+     *
+     * @param style The style of the size grip.
+     */
     public SizeGripIcon(int style) {
         setStyle(style);
     }
 
+    /**
+     * Returns the height of this icon.
+     *
+     * @return This icon's height.
+     */
     public int getIconHeight() {
-        return 20;
+        return SIZE;
     }
 
+    /**
+     * Returns the width of this icon.
+     *
+     * @return This icon's width.
+     */
     public int getIconWidth() {
-        return 20;
+        return SIZE;
     }
 
+    /**
+     * Returns the current style of this icon.
+     *
+     * @return The icon's style.
+     * @see #setStyle(int)
+     */
     public int getStyle() {
-        return this.style;
+        return style;
     }
 
+    /**
+     * Paints this icon.
+     *
+     * @param c The component to paint on.
+     * @param g The graphics context.
+     * @param x The x-coordinate at which to paint.
+     * @param y The y-coordinate at which to paint.
+     */
     public void paintIcon(Component c, Graphics g, int x, int y) {
         Dimension dim = c.getSize();
         Color c1 = UIManager.getColor("Label.disabledShadow");
         Color c2 = UIManager.getColor("Label.disabledForeground");
 
         ComponentOrientation orientation = c.getComponentOrientation();
-        int width;
-        int height;
-        switch (this.style) {
-            case 0 :
-                width = dim.width;
-                height = dim.height;
+
+        switch (style) {
+            case StatusBar.WINDOWS_98_STYLE :
+                int width = dim.width;
+                int height = dim.height;
                 g.setColor(c1.brighter());
                 g.drawLine(7, height, width, 7);
                 g.drawLine(11, height, width, 11);
@@ -78,7 +109,8 @@ public class SizeGripIcon implements Icon {
                 g.drawLine(12, height, width, 12);
                 g.drawLine(16, height, width, 16);
                 break;
-            default :
+
+            default :// StatusBar.WINDOWS_XP_STYLE:
                 if (orientation.isLeftToRight()) {
                     width = dim.width -= 3;
                     height = dim.height -= 3;
@@ -113,9 +145,16 @@ public class SizeGripIcon implements Icon {
                     g.fillRect(2, height - 5, 2, 2);
                     g.fillRect(2, height - 9, 2, 2);
                 }
+                break;
         }
     }
 
+    /**
+     * Sets the style of this icon.
+     *
+     * @param style This icon's style.
+     * @see #getStyle()
+     */
     public void setStyle(int style) {
         this.style = style;
     }

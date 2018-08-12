@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax focusabletip )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.MouseInputAdapter;
 
 import net.sourceforge.open_teradata_viewer.editor.syntax.PopupWindowDecorator;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * A focusable tool tip, similar to those found in Eclipse. The user can click
@@ -129,7 +130,7 @@ public class FocusableTip {
                 // description window, if applicable) both fit in the same
                 // window in a multi-monitor environment. To do this, we decide
                 // which monitor the rectangle "p" is in, and use that one
-                Rectangle sb = TipUtil.getScreenBoundsForPoint(p.x, p.y);
+                Rectangle sb = Utilities.getScreenBoundsForPoint(p.x, p.y);
 
                 // Try putting our stuff "below" the mouse first
                 int y = p.y + Y_MARGIN;

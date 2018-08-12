@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,17 +35,19 @@ import java.util.logging.Logger;
  */
 public class AWTExceptionHandler {
 
-    private Logger logger;
+    private static Logger logger;
     private FileHandler fileHandler;
 
     public AWTExceptionHandler() {
-        logger = Logger.getLogger("net.sourceforge.open_teradata_viewer");
-        try {
-            fileHandler = new FileHandler(
-                    "%h/uncaughtOpenTeradataViewerAwtExceptions.log", true);
-            logger.addHandler(fileHandler);
-        } catch (IOException ioe) {
-            ExceptionDialog.hideException(ioe);
+        if (logger != null) {
+            logger = Logger.getLogger("net.sourceforge.open_teradata_viewer");
+            try {
+                fileHandler = new FileHandler(
+                        "%h/uncaughtOpenTeradataViewerAwtExceptions.log", true);
+                logger.addHandler(fileHandler);
+            } catch (IOException ioe) {
+                ExceptionDialog.hideException(ioe);
+            }
         }
     }
 
@@ -56,7 +59,9 @@ public class AWTExceptionHandler {
     public void handle(Throwable t) {
         try {
             ExceptionDialog.hideException(t);
-            logger.log(Level.SEVERE, "Uncaught exception in EDT", t);
+            if (logger != null) {
+                logger.log(Level.SEVERE, "Uncaught exception in EDT", t);
+            }
         } catch (Throwable t2) {
             // Don't let the exception get thrown out, will cause infinite
             // looping
@@ -67,5 +72,20 @@ public class AWTExceptionHandler {
     public static void register() {
         System.setProperty("sun.awt.exception.handler",
                 AWTExceptionHandler.class.getName());
+    }
+
+    /**
+     * Cleans up this exception handler. This should be called when the
+     * application shuts down.
+     */
+    public static void shutdown() {
+        if (logger != null) {
+            // Manually close FileHandlers to remove .lck files
+            Handler[] handlers = logger.getHandlers();
+            for (int i = 0; i < handlers.length; i++) {
+                handlers[i].close();
+            }
+            logger = null;
+        }
     }
 }

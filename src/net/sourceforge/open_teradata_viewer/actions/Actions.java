@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,13 +74,13 @@ public final class Actions
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction FIND = new FindAction();
     public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",
-            "/res/default.xml");
+            "/res/themes/default.xml");
     public static final CustomAction DARK_THEME = new ThemeAction("Dark",
-            "/res/dark.xml");
+            "/res/themes/dark.xml");
     public static final CustomAction ECLIPSE_THEME = new ThemeAction("Eclipse",
-            "/res/eclipse.xml");
+            "/res/themes/eclipse.xml");
     public static final CustomAction VISUAL_STUDIO_THEME = new ThemeAction(
-            "Visual Studio", "/res/vs.xml");
+            "Visual Studio", "/res/themes/vs.xml");
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
@@ -118,6 +118,9 @@ public final class Actions
     public static final GroupAction SHOW_OBJECT_GROUP = new ShowObjectGroupAction();
     public static final CustomAction ANALYZE_QUERY = new AnalyzeQueryAction();
     public static final CustomAction EXPLAIN_REQUEST = new ExplainRequestAction();
+    public static final CustomAction FANCY_CELL_RENDERING = new FancyCellRenderingAction();
+    public static final CustomAction SHOW_DESCRIPTION_WINDOW = new ShowDescriptionWindowAction();
+    public static final CustomAction PARAMETER_ASSISTANCE = new ParameterAssistanceAction();
     public static final CustomAction ANIMATED_ASSISTANT = new AnimatedAssistantAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
 

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
-import java.util.ResourceBundle;
 
 import javax.swing.BoundedRangeModel;
 import javax.swing.JMenuItem;
@@ -246,15 +245,13 @@ public class ScrollPane extends JScrollPane
     /**
      * Adds a menu item to a menu.
      *
-     * @param key A key into this scroll pane's resource bundle for the menu
-     *        item's value.
      * @param actionCommand The command sent to the listener (the scroll pane).
      * @param menu The popup menu to which to add the item.
-     * @param msg The resource bundle containing text, etc.
+     * @param text The text of the menu item.
      */
-    private final void addMenuItem(String key, String actionCommand,
-            JPopupMenu menu, ResourceBundle msg) {
-        JMenuItem item = new JMenuItem(msg.getString(key));
+    private final void addMenuItem(String actionCommand, JPopupMenu menu,
+            String text) {
+        JMenuItem item = new JMenuItem(text);
         item.setActionCommand(actionCommand);
         item.addActionListener(this);
         menu.add(item);
@@ -263,19 +260,17 @@ public class ScrollPane extends JScrollPane
     /** Sets up horizontal scrollbar's popup menu. */
     private void createHorizontalScrollBarMenu() {
         horizSBMenu = new JPopupMenu();
-        ResourceBundle msg = ResourceBundle.getBundle(ScrollPane.class
-                .getName());
 
-        addMenuItem("ScrollHere", "ScrollHereHorizontal", horizSBMenu, msg);
+        addMenuItem("ScrollHereHorizontal", horizSBMenu, "Scroll Here");
         horizSBMenu.addSeparator();
-        addMenuItem("LeftEdge", "LeftEdge", horizSBMenu, msg);
-        addMenuItem("RightEdge", "RightEdge", horizSBMenu, msg);
+        addMenuItem("LeftEdge", horizSBMenu, "Left Edge");
+        addMenuItem("RightEdge", horizSBMenu, "Right Edge");
         horizSBMenu.addSeparator();
-        addMenuItem("PageLeft", "PageLeft", horizSBMenu, msg);
-        addMenuItem("PageRight", "PageRight", horizSBMenu, msg);
+        addMenuItem("PageLeft", horizSBMenu, "Page Left");
+        addMenuItem("PageRight", horizSBMenu, "Page Right");
         horizSBMenu.addSeparator();
-        addMenuItem("ScrollLeft", "ScrollLeft", horizSBMenu, msg);
-        addMenuItem("ScrollRight", "ScrollRight", horizSBMenu, msg);
+        addMenuItem("ScrollLeft", horizSBMenu, "Scroll Left");
+        addMenuItem("ScrollRight", horizSBMenu, "Scroll Right");
 
         horizSBMenu.applyComponentOrientation(getComponentOrientation());
     }
@@ -283,23 +278,20 @@ public class ScrollPane extends JScrollPane
     /** Sets up vertical scrollbar's popup menu. */
     private void createVerticalScrollBarMenu() {
         vertSBMenu = new JPopupMenu();
-        ResourceBundle msg = ResourceBundle.getBundle(ScrollPane.class
-                .getName());
 
-        addMenuItem("ScrollHere", "ScrollHereVertical", vertSBMenu, msg);
+        addMenuItem("ScrollHereVertical", vertSBMenu, "Scroll Here");
         vertSBMenu.addSeparator();
-        addMenuItem("Top", "Top", vertSBMenu, msg);
-        addMenuItem("Bottom", "Bottom", vertSBMenu, msg);
+        addMenuItem("Top", vertSBMenu, "Top");
+        addMenuItem("Bottom", vertSBMenu, "Bottom");
         vertSBMenu.addSeparator();
-        addMenuItem("PageUp", "PageUp", vertSBMenu, msg);
-        addMenuItem("PageDown", "PageDown", vertSBMenu, msg);
+        addMenuItem("PageUp", vertSBMenu, "Page Up");
+        addMenuItem("PageDown", vertSBMenu, "Page Down");
         vertSBMenu.addSeparator();
-        addMenuItem("ScrollUp", "ScrollUp", vertSBMenu, msg);
-        addMenuItem("ScrollDown", "ScrollDown", vertSBMenu, msg);
+        addMenuItem("ScrollUp", vertSBMenu, "Scroll Up");
+        addMenuItem("ScrollDown", vertSBMenu, "Scroll Down");
 
         vertSBMenu.applyComponentOrientation(getComponentOrientation());
     }
-
     private void initialize() {
         // Create scrollbars' popup menus
         MouseListener popupListener = new PopupListener();

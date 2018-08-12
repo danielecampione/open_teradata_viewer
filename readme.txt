@@ -1,4 +1,4 @@
-Teradata JDBC Driver 14.00.00.21
+Teradata JDBC Driver 14.00.00.30
 
 Part of the Teradata Tools and Utilities 14.00 product suite
 
@@ -33,6 +33,53 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs:
+
+DR 162982 Support LDAP password containing space character
+DR 163164 Correct DatabaseMetaData getNumericFunctions getStringFunctions getSystemFunctions getTimeDateFunctions
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.29:
+
+DR 160209 Support the SHOW IN XML command
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.28:
+
+DR 99266 implement ResultSet holdability CLOSE_CURSORS_AT_COMMIT
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.27:
+
+DR 162129 Support JDK 7
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.26:
+
+DR 156715 Support UTF8 session character set with Console partition
+DR 159277 Provide DBS RFC 159237 DBC.IndicesV[X].IndexDatabaseName as getIndexInfo INDEX_QUALIFIER
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.25:
+
+DR 68722 Accommodate 64-bit Activity Count
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.24:
+
+DR 100184 DatabaseMetaData.getIndexInfo should support arguments containing double quotes
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.23:
+
+DR 160380 Support new JDBC 4.0 API methods for non-SQL connections
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.22:
+
+DR 127422 support sending fixed-width BYTE data values to the database
+DR 160029 Provide PreparedStatement setObject method with scaleOrLength argument for Raw connections
 
 This release includes changes to address the following DRs, originally included
 in release 14.00.00.18:
@@ -992,7 +1039,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.00.00.21.zip and TeraJDBC__indep_indep.14.00.00.21.tar
+TeraJDBC__indep_indep.14.00.00.30.zip and TeraJDBC__indep_indep.14.00.00.30.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

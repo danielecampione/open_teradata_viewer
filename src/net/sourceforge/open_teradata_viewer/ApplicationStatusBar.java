@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ import net.sourceforge.open_teradata_viewer.util.StringUtil;
  * @author D. Campione
  *
  */
-public class SystemStatusBar extends StatusBar {
+public class ApplicationStatusBar extends ApplicationStatusBarPanel {
 
     private static final long serialVersionUID = -5478767078830027062L;
 
@@ -59,7 +59,7 @@ public class SystemStatusBar extends StatusBar {
     private boolean runTimeStatus = true;
     private boolean dateTimeFormat = false;
 
-    public SystemStatusBar() {
+    public ApplicationStatusBar() {
         super();
         timer = new Timer();
         initStatusBarMemmory();
@@ -220,5 +220,4 @@ public class SystemStatusBar extends StatusBar {
     public boolean isRunTimeStatus() {
         return runTimeStatus;
     }
-
 }

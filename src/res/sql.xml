@@ -1,0 +1,1511 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE api SYSTEM "CompletionXml.dtd">
+
+<!--
+   sql.xml - API specification for the SQL Standard Library.
+           Used by OTVSyntaxTextArea to provide code completion.
+
+   Author:         D. Campione
+
+-->
+<api language="SQL">
+    <environment paramStartChar="(" paramEndChar=")" paramSeparator=", " terminal=";"/>
+    <keywords>
+        <keyword name="NULL" type="constant" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <desc><![CDATA[null pointer constant]]>
+            </desc>
+        </keyword>
+        <keyword name="CASE" type="constant" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <desc>
+                <![CDATA[Specifies alternate values for a conditional expression
+or expressions based on various equality and TRUTH conditions.<br/><br/>
+CASE provides an efficient and powerful method for application developers to
+change the representation of data, permitting conversion without requiring host
+program intervention.<br/><br/>
+For example, you could code employee status as 1 or 2, meaning full-time or
+part-time, respectively.<br/><br/>
+For efficiency, the system stores the numeric code but prints or displays the
+appropriate textual description in reports. This storage and conversion is
+managed by the Teradata RDBMS.<br/><br/>
+In addition, CASE permits applications to generate nulls based on information
+derived from the database, again without host program intervention.<br/>
+Conversely, CASE can be used to convert a <a href="NULL">NULL</a> into a
+value.<p/>
+<h4>
+    Example
+</h4>
+The following example uses a Valued CASE expression to calculate the fraction of
+cost in the total cost of inventory represented by parts of type '1':<br/><br/>
+<pre>SELECT
+    SUM (
+        CASE part
+            WHEN '1' THEN cost
+            ELSE 0  
+        END
+    ) / SUM( cost )
+FROM
+    t;</pre>]]>
+            </desc>
+        </keyword>
+        <keyword name="COALESCE" type="constant" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <desc>
+                <![CDATA[COALESCE returns <a href="NULL">NULL</a> if all its
+arguments evaluate to <a href="NULL">NULL</a>. Otherwise, it returns the value
+of the first non-null argument in the scalar_expression list.<br/>
+COALESCE is a shorthand expression for the following full <a
+href="CASE">CASE</a> expression:<br/><br/>
+<pre>CASE
+WHEN scalar_expression_1 IS NOT NULL
+THEN scalar_expression_1
+…
+WHEN scalar_expression_n IS NOT NULL
+THEN scalar_expression_n
+ELSE NULL
+END</pre><p/>
+<h4>
+    Example
+</h4>
+The following example returns the home phone number of the named individual (if
+present), or office phone if HomePhone is <a href="NULL">NULL</a>, or
+MessageService if present and both home and office phone values are <a
+href="NULL">NULL</a>. Returns <a href="NULL">NULL</a> if all three values are <a
+href="NULL">NULL</a>.<br/><br/>
+<pre>SELECT
+    Name,
+    COALESCE (HomePhone, OfficePhone, MessageService)
+FROM
+    PhoneDir;
+</pre>]]>
+            </desc>
+        </keyword>
+        <keyword name="NULLIF" type="constant" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <desc>
+                <![CDATA[NULLIF returns <a href="NULL">NULL</a> if its arguments
+are equal. Otherwise, it returns its first argument, scalar_expression_1. NULLIF
+is a shorthand expression for the following full <a href="CASE">CASE</a>
+expression:<br/><br/>
+<pre>CASE
+WHEN scalar_expression_1=scalar_expression_2
+THEN NULL
+ELSE scalar_expression_1
+END</pre><p/>
+<h4>
+    Example
+</h4>
+Column Age has type SMALLINT.<br/><br/>
+<pre>NULLIF (Age,0)</pre><br/>
+This is the ANSI-compliant form of the Teradata function NULLIFZERO(Age), and is
+more versatile.]]>
+            </desc>
+        </keyword>
+        <keyword name="ABS" type="function" returnType="integer" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="numeric" name="arg">
+                    <desc>
+                        <![CDATA[The number to get the absolute value
+of.<br/><br/>
+If the argument is not numeric, it is converted to a numeric value, based on
+implicit type conversion rules. If arg is a character string, it is converted to
+a numeric value of the FLOAT data type. If the argument cannot be converted, an
+error is reported.<br/>
+ABS cannot be applied to an argument of type BYTE, VARBYTE, CHARACTER or VARCHAR
+if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Computes the absolute value of an argument.<p/>
+<h4>
+    Examples
+</h4>
+<pre>ABS(-12)</pre>Result is 12.<p/>
+<pre>ABS('23')</pre>Result is 2.30000000000000E+001.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[The absolute value of <em>arg</em>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="CASE_N" type="function" returnType="integer" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="conditonal_expr" name="test_expression">
+                    <desc>A conditional expression or comma-separated list of
+condition expressions to evaluate.</desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Evaluates a list of conditions and returns the position
+of the first condition that evaluates to TRUE, provided that no prior condition
+in the list evaluates to UNKNOWN.<br/><br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Syntax element
+            </b>
+        </td>
+        <td>
+            <b>
+                Specifies..
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>test_expression</em>
+        </td>
+        <td>
+            a conditional expression or comma-separated list of condition
+            expressions to evaluate.<br/><br/>
+            A conditional expression must evaluate to TRUE, FALSE, or UNKNOWN. A
+            conditional expression that evaluates to <a href="NULL">NULL</a> is
+            considered to be UNKNOWN.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>NO CASE</em>
+        </td>
+        <td>
+            an optional condition that evaluates to TRUE if every
+            <em>test_expression</em> in the list evaluates to FALSE.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>OR UNKNOWN</em>
+        </td>
+        <td>
+            an optional condition to use with NO CASE.<br/><br/>
+            The NO CASE OR UNKNOWN condition evaluates to TRUE if every
+            <em>test_expression</em> in the list evaluates to FALSE, or if a
+            <em>test_expression</em> evaluates to UNKNOWN and all prior
+            conditions
+            in the list evaluate to FALSE.
+        </td>
+    </tr>
+        <td>
+            <em>UNKNOWN</em>
+        </td>
+        <td>
+            an optional condition that evaluates to TRUE if a
+            <em>test_expression</em> evaluates to UNKNOWN and all prior conditions
+            in the list evaluate to FALSE.
+        </td>
+    </tr>
+</table><p/>
+<h4>
+    Example
+</h4>
+Here is an example that uses CASE_N and the value of the totalorders column to
+define the partition to which a row is assigned:<br/><br/>
+<pre>CREATE TABLE orders (
+    storeid INTEGER NOT NULL,
+    productid INTEGER NOT NULL,
+    orderdate DATE FORMAT 'yyyy-mm-dd' NOT NULL,
+    totalorders INTEGER
+) PRIMARY INDEX (storeid, productid) PARTITION BY CASE_N ( totalorders  100, totalorders  1000, NO CASE, UNKNOWN );</pre><br/><br/>
+In the example, CASE_N specifies four partitions to which a row can be assigned,
+based on the value of the totalorders column:<br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Partition Number
+            </b>
+        </td>
+        <td>
+            <b>
+                Condition
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            the value of the totalorders column is less than 100.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            the value of the totalorders column is less than 1000, but greater
+            than or equal to 100.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            the value of the totalorders column is greater than or equal to
+            1000.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            the totalorders column is <a href="NULL">NULL</a>.
+        </td>
+    </tr>
+</table>]]>
+            </desc>
+            <returnValDesc>
+                    <![CDATA[Returns the position (starting at 1) of
+the first <em>test_expression</em> that is true with all preceding conditions,
+if any, false.<br/>
+NO CASE is when all the conditional expressions are false.<br/>
+UNKNOWN is when there is a conditional expression that evaluates to unknown with
+all preceding conditions, if any, false.<br/>
+<a href="NULL">NULL</a> is returned if none of the above cases apply.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="EXP" type="function" returnType="float" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="float" name="arg">
+                    <desc>
+                        <![CDATA[If the argument is not FLOAT, it is converted
+to FLOAT, based on implicit type conversion rules. If the argument cannot be
+converted, an error is reported.<br/>
+EXP cannot be applied to an argument of type BYTE, VARBYTE, or CHARACTER or
+VARCHAR if the server character set is GRAPHIC.<br/>
+Executing EXP may sometimes result in a numeric overflow error.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Raises e (the base of natural logarithms) to the power
+of the argument, where e = 2.71828182845905.<p/>
+<h4>
+    Examples
+</h4>
+<pre>EXP(1)</pre>Result is 2.71828182845905E+000.<p/>
+<pre>EXP(0)</pre>Result is 1.00000000000000E+000.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Exponential of <em>arg</em>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="LN" type="function" returnType="float" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="float" name="arg">
+                    <desc>
+                        <![CDATA[If the argument is not FLOAT, it is converted
+to FLOAT based on implicit type conversion rules. If the argument cannot be
+converted, an error is reported.<br/>
+LN cannot be applied to an argument of type BYTE, VARBYTE, CHARACTER or VARCHAR
+if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Computes the natural logarithm of the argument.<p/>
+<h4>
+    Examples
+</h4>
+<pre>LN(2.71828182845905)</pre>Result is 1.00000000000000E+000.<p/>
+<pre>LN(0)</pre>Result is an error.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Natural logarithm of <em>arg</em>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="LOG" type="function" returnType="float" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="float" name="arg">
+                    <desc>
+                        <![CDATA[If the argument is not FLOAT, it is converted
+to FLOAT based on implicit type conversion rules. If the argument cannot be
+converted, an error is reported.<br/>
+LOG cannot be applied to an argument of type BYTE, VARBYTE, CHARACTER or VARCHAR
+if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Computes the base 10 logarithm of an argument.<p/>
+<h4>
+    Examples
+</h4>
+<pre>LOG(50)</pre>Result is 1.69897000433602E+000.<p/>
+<pre>LOG(100)</pre>Result is 2.00000000000000E+000.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Base-10 logarithm of <em>arg</em>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="NULLIFZERO" type="function" returnType="numeric" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="numeric" name="arg">
+                    <desc>
+                        <![CDATA[A numeric argument.<br/><br/>
+If the argument is not numeric, it is converted to a numeric value, based on
+implicit type conversion rules. If arg is a character string, it is converted to
+a numeric value of FLOAT data type. If the argument cannot be converted, an
+error is reported.<br/>
+NULLIFZERO cannot be applied to an argument of type BYTE, VARBYTE, or CHARACTER
+or VARCHAR if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Converts data from zero to <a href="NULL">NULL</a> to
+avoid problems with division by zero.<p/>
+<h4>
+    Example
+</h4>
+The following expressions return an error if the value of <em>x</em> or
+<em>expression</em> is zero:<br/><br/>
+<pre>6 / x</pre>
+<pre>6 / expression</pre><br/>
+On the other hand, the following expressions return <a href="NULL">NULL</a>,
+which is not an error because there is no violation of the divide by zero
+rule:<br/><br/>
+<pre>6 / NULLIFZERO(x)</pre>
+<pre>6 / NULLIFZERO(expression)</pre>]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[If the value of <em>arg</em> is nonzero, then
+NULLIFZERO returns the value of the numeric argument, otherwise, if the value of
+<em>arg</em> is <a href="NULL">NULL</a> or zero, the function returns <a
+href="NULL">NULL</a>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="RANDOM" type="function" returnType="integer" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="integer" name="lower_bound">
+                    <desc>
+                        <![CDATA[An integer constant to define the lower bound
+on the closed interval over which a random number is to be selected.<br/>
+The limits for lower_bound range from -2147483648 to 2147483647, inclusive.<br/>
+lower_bound must be less than or equal to <em>upper_bound</em>.]]>
+                    </desc>
+                </param>
+                <param type="integer" name="upper_bound">
+                    <desc>
+                        <![CDATA[An integer constant to define the upper bound
+on the closed interval over which a random number is to be selected.<br/>
+The limits for upper_bound range from -2147483648 to 2147483647, inclusive.<br/>
+upper_bound must be greater than or equal to <em>lower_bound</em>.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Returns a random integer number for each row of the
+results table.<br/><br/>
+The following rules and restrictions apply to the use of the RANDOM
+function:
+<ul>
+    <li>
+        RANDOM can only be called in one of the following SELECT query clauses:
+        <ul>
+            <li>
+                WHERE
+            </li>
+            <li>
+                GROUP BY
+            </li>
+            <li>
+                ORDER BY
+            </li>
+            <li>
+                HAVING/QUALIFY
+            </li>
+        </ul>
+    </li>
+    <li>
+        RANDOM cannot be referenced by position in a GROUP BY or ORDER BY
+clause.
+    </li>
+    <li>
+        RANDOM cannot be used in the expression list of an INSERT statement to
+        create a primary index column value, for example:<br/>
+        <pre>INSERT t1 (RANDOM(1,10),...)</pre>
+        RANDOM produces inconsistent results in this case.
+    </li>
+    <li>
+        RANDOM cannot be nested inside aggregate or ordered analytical
+        functions.
+    </li>
+</ul>
+You can call RANDOM any number of times in the SELECT list, for example:
+<pre>SELECT RANDOM(1,100), RANDOM(1,100);</pre>
+Each call defines a new random value.<br/>
+RANDOM uses the linear congruential algorithm and 48-bit integer arithmetic.<p/>
+<h4>
+    Example
+</h4>
+Suppose you have a table named sales_table with the following subset of
+columns:<br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Store_ID
+            </b>
+        </td>
+        <td>
+            <b>
+                Product_ID
+            </b>
+        </td>
+        <td>
+            <b>
+                Sales
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1003
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            20000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            35000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            60000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            50000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1003
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            50000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            35000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            A
+        </td>
+        <td>
+            100000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            A
+        </td>
+        <td>
+            40000
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            E
+        </td>
+        <td>
+            30000
+        </td>
+    </tr>
+</table><br/>
+The following SELECT statement returns a random number between 1 and 3,
+inclusive, for each row in the results table:
+<pre>SELECT
+    store_id,
+    product_id,
+    sales,
+    RANDOM(1, 3) 
+FROM
+    sales_table;</pre><br/>
+The results table might look like this:<br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Store_ID
+            </b>
+        </td>
+        <td>
+            <b>
+                Product_ID
+            </b>
+        </td>
+        <td>
+            <b>
+                Sales
+            </b>
+        </td>
+        <td>
+            <b>
+                RANDOM(1,3)
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1003
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            20000
+        </td>
+        <td>
+            1
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            35000
+        </td>
+        <td>
+            2
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            C
+        </td>
+        <td>
+            60000
+        </td>
+        <td>
+            2
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            50000
+        </td>
+        <td>
+            3
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1003
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            50000
+        </td>
+        <td>
+            2
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            D
+        </td>
+        <td>
+            35000
+        </td>
+        <td>
+            3
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            A
+        </td>
+        <td>
+            100000
+        </td>
+        <td>
+            2
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1002
+        </td>
+        <td>
+            A
+        </td>
+        <td>
+            40000
+        </td>
+        <td>
+            1
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1001
+        </td>
+        <td>
+            E
+        </td>
+        <td>
+            30000
+        </td>
+        <td>
+            2
+        </td>
+    </tr>
+</table>]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Random(x,y) returns a pseudo-random integer in range
+<em>lower_bound</em> to <em>upper_bound</em> for each row of the result
+table.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="RANGE_N" type="function" returnType="integer" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="conditional_expr" name="test_expression">
+                    <desc>
+                        <![CDATA[The format of the conditional expression is the
+following:
+<pre>RANGE_N(test_expression                                                                                                                                      
+              BETWEEN range [, range]...                                                                                                                        
+              [, NO RANGE [OR UNKNOWN]] [, UNKNOWN])</pre>
+where <em>test_expression</em> is an expression that results in a BYTEINT, SMALLINT,
+INTEGER, or DATE data type.<br/><br/>
+The start_expression consists of a constant or constant expression that defines
+the starting boundary of a range.<br/>
+The data type of start_expression must be the same as the data type of
+<em>test_expression</em>, or must be such that it can be implicitly cast to the
+same data type as <em>test_expression</em>.<br/>
+If an ending boundary is not specified, the range is defined by its starting
+boundary, inclusively, up to but not including the starting boundary of the next
+range.<br/>
+Use an asterisk ( * ) for the starting boundary of the first range in the list
+to indicate the lowest possible value (all values and <a href="NULL">NULL</a>
+are greater than a starting boundary specified as an asterisk). An asterisk is
+compatible with any data type.<br/><br/>
+The end_expression is a constant or constant expression that defines the ending
+boundary of a range.<br/>
+The data type of end_expression must be the same as the data type of
+<em>test_expression</em>, or must be such that it can be implicitly cast to the
+same data type as <em>test_expression</em>.<br/>
+The last range in the list must specify an ending boundary. For all other
+ranges, if an ending boundary is not specified, the range is defined by its
+starting boundary, inclusively, up to but not including the starting boundary of
+the next range.<br/>
+Use an asterisk ( * ) for the ending boundary of the last range in the list to
+indicate the highest possible value (all values and <a href="NULL">NULL</a> are
+less than an ending boundary specified as an asterisk).<br/><br/>
+EACH range_size consists of a constant or constant expression.<br/>
+A range that specifies an EACH phrase is equivalent to a series of ranges, where
+the first range in the series starts at start_expression, and subsequent ranges
+start at start_expression + (range_size * n), where n starts at one and
+increments by one while start_expression + (range_size * n) is less than or
+equal to end_expression, or less than the next start_expression in the list of
+ranges.<br/>
+The value of range_size must be greater than zero.<br/>
+The data type of range_size must be compatible for adding to
+<em>test_expression</em>.<br/><br/>
+NO RANGE is an optional range to handle a <em>test_expression</em> that does not
+map into any of the specified ranges.<br/><br/>
+OR UNKNOWN represents an option to use with NO RANGE.<br/>
+The NO RANGE OR UNKNOWN option handles a <em>test_expression</em> that does not
+map into any of the specified ranges, or a <em>test_expression</em> that
+evaluates to <a href="NULL">NULL</a> when RANGE_N does not specify the range
+BETWEEN * AND *.<br/><br/>
+UNKNOWN represents an option to handle a <em>test_expression</em> that evaluates
+to <a href="NULL">NULL</a> when RANGE_N does not specify the range BETWEEN * AND
+*.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Evaluates an expression and maps the result into one of
+a list of specified ranges and returns the position of the range in the
+list.<br/><br/>
+A range is defined by a starting boundary and an optional ending boundary. If an
+ending boundary is not specified, the range is defined by its starting boundary,
+inclusively, up to but not including the starting boundary of the next
+range.<br/>
+The list of ranges must specify ranges in increasing order, where the ending
+boundary of a range is less than the starting boundary of the next
+range.<br/><br/>
+RANGE_N evaluates <em>test_expression</em> and determines whether the result is
+within a range in the list of ranges. The position of the first range is one and
+the positions of subsequent ranges increment by one up to n, where n is the
+total number of ranges.<br/><br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                IF..
+            </b>
+        </td>
+        <td>
+            <b>
+                THEN..
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            the result of <em>test_expression</em> is within a range 
+        </td>
+        <td>
+            RANGE_N returns the position of the range.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>test_expression</em> is outside all the ranges in the list
+        </td>
+        <td>
+            <table border="1">
+                <tr>
+                    <td>
+                        <b>
+                            IF..
+                        </b>
+                    </td>
+                    <td>
+                        <b>
+                            THEN RANGE_N returns..
+                        </b>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        NO RANGE or NO RANGE OR UNKNOWN is specified
+                    </td>
+                    <td>
+                        <em>n</em> + 1.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        neither NO RANGE nor NO RANGE OR UNKNOWN is specified
+                    </td>
+                    <td>
+                        <a href="NULL">NULL</a>.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            the result of <em>test_expression</em> is <a href="NULL">NULL</a>
+        </td>
+        <td>
+            <table border="1">
+                <tr>
+                    <td>
+                        <b>
+                            IF RANGE_N..
+                        </b>
+                    </td>
+                    <td>
+                        <b>
+                            THEN..
+                        </b>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        does not specify one of the following:
+                        <ul>
+                            <li>
+                                BETWEEN * AND *
+                            </li>
+                            <li>
+                                UNKNOWN
+                            </li>
+                            <li>
+                                NO RANGE OR UNKNOWN
+                            </li>
+                        </ul>
+                    </td>
+                    <td>
+                        RANGE_N returns <a href="NULL">NULL</a>.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        specifies the range BETWEEN * AND *
+                    </td>
+                    <td>
+                        RANGE_N returns 1, regardless of whether NO RANGE, NO
+                        RANGE OR UNKNOWN, or UNKNOWN is specified.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        does not specify the range BETWEEN * AND *
+                    </td>
+                    <td>
+                        <table border="1">
+                            <tr>
+                                <td>
+                                    <b>
+                                        IF..
+                                    </b>
+                                </td>
+                                <td>
+                                    <b>
+                                        THEN RANGE_N returns..
+                                    </b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    NO RANGE OR UNKNOWN is specified
+                                </td>
+                                <td>
+                                    <em>n</em> + 1.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    UNKNOWN is specified and NO RANGE is not
+                                    specified
+                                </td>
+                                <td>
+                                    <em>n</em> + 1.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    NO RANGE and UNKNOWN are specified
+                                </td>
+                                <td>
+                                    <em>n</em> + 2.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table><br/>
+The primary index for a table controls the distribution of the data for that
+table across the AMPs, as well as its retrieval. If the primary index is a
+partitioned primary index (PPI), the data can be assigned to user-defined
+partitions on the AMPs.<br/>
+To define a primary index for a table, you specify the PRIMARY INDEX phrase in
+the CREATE TABLE data definition statement. To define a partitioned primary
+index, you include the PARTITION BY phrase when you define the primary
+index.<br/>
+The PARTITION BY phrase requires a partitioning expression that determines the
+partition assignment of a row. You can use RANGE_N to construct a partitioning
+expression such that a row with any value or <a href="NULL">NULL</a> for the
+partitioning columns is assigned to some partition.<br/>
+You can also use <a href="CASE_N">CASE_N</a> to construct a partitioning
+expression.<br/><br/>
+If RANGE_N is used in a partitioning expression in a CREATE TABLE or ALTER TABLE
+statement, it:
+<ul>
+    <li>
+        Must not use character or graphic comparisons.
+    </li>
+    <li>
+        Can specify a maximum of 65533 ranges.
+    </li>
+</ul><p/>
+<h4>
+    Examples
+</h4>
+Here is an example that uses RANGE_N and the value of the totalorders column to
+define the partition to which a row is assigned:
+<pre>
+CREATE TABLE orders (
+    storeid INTEGER NOT NULL
+   ,productid INTEGER NOT NULL
+   ,orderdate DATE FORMAT 'yyyy-mm-dd' NOT NULL
+   ,totalorders INTEGER
+) PRIMARY INDEX ( storeid, productid )
+PARTITION BY RANGE_N ( totalorders BETWEEN *, 100, 1000 AND *, UNKNOWN );</pre>
+<p/><br/><br/>
+In the example, RANGE_N specifies four partitions to which a row can be
+assigned, based on the value of the totalorders column:
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Partition Number
+            </b>
+        </td>
+        <td>
+            <b>
+                Condition
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            the value of the totalorders column is less than 100.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            the value of the totalorders column is less than 1000, but greater
+            than or equal to 100.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            the value of the totalorders column is greater than or equal to
+            1000.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            the totalorders column is <a href="NULL">NULL</a>, so the range is
+            UNKNOWN.
+        </td>
+    </tr>
+</table><p/><br/><br/>
+Here is an example that defines a partitioned primary index that specifies one
+partition to which rows are assigned, for any value of the totalorders column,
+including <a href="NULL">NULL</a>:
+<pre>CREATE TABLE orders (
+    storeid INTEGER NOT NULL
+   ,productid INTEGER NOT NULL
+   ,orderdate DATE FORMAT 'yyyy-mm-dd' NOT NULL
+   ,totalorders INTEGER
+) PRIMARY INDEX ( storeid, productid )
+PARTITION BY RANGE_N ( totalorders BETWEEN * AND * );</pre><p/>
+The following example shows the count of rows in each partition if the table
+were to be partitioned using the RANGE_N expression.
+<pre>CREATE TABLE orders (
+    orderkey INTEGER NOT NULL
+   ,custkey INTEGER
+   ,orderdate DATE FORMAT 'yyyy-mm-dd'
+) PRIMARY INDEX ( orderkey );
+
+INSERT INTO orders (1, 100, '1998-01-01');
+INSERT INTO orders (2, 100, '1998-04-01');
+INSERT INTO orders (3, 109, '1998-04-01');
+INSERT INTO orders (4, 101, '1998-04-10');
+INSERT INTO orders (5, 100, '1998-07-01');
+INSERT INTO orders (6, 109, '1998-07-10');
+INSERT INTO orders (7, 101, '1998-08-01');
+INSERT INTO orders (8, 101, '1998-12-01');
+INSERT INTO orders (9, 111, '1999-01-01');
+INSERT INTO orders (10, 111, NULL);
+</pre><p/>
+The RANGE_N expression in the following SELECT statement uses the EACH phrase to
+define a series of twelve ranges, where the first range starts at '1998-01-01'
+and the ranges that follow have starting boundaries that increment sequentially
+by one month intervals.
+<pre>
+SELECT
+    COUNT(*),
+    RANGE_N(orderdate BETWEEN DATE '1998-01-01' AND DATE '1998-12-31' EACH INTERVAL '1' MONTH ) AS Partition_Number 
+FROM
+    orders 
+GROUP BY
+    Partition_Number 
+ORDER BY
+    Partition_Number;</pre>
+The results look like this:
+<pre>
+   Count(*) Partition_Number
+----------- ----------------
+          2                ?
+          1                1
+          3                4
+          2                7
+          1                8
+          1               12
+</pre>]]>
+            </desc>
+            <returnValDesc>
+                The position of the range in the list.
+            </returnValDesc>
+        </keyword>
+        <keyword name="SQRT" type="function" returnType="float" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="numeric" name="arg">
+                    <desc>
+                        <![CDATA[A positive, numeric argument.<br/><br/>
+If the argument is not FLOAT, it is converted to FLOAT based on implicit type
+conversion rules. If the argument cannot be converted, an error is
+reported.<br/>
+SQRT cannot be applied to an argument of type BYTE, VARBYTE, or CHARACTER or
+VARCHAR if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Computes the square root of an argument.<p/>
+<h4>
+    Examples
+</h4>
+<pre>SQRT(2)</pre>Result is 1.41421356237309E+000.<p/>
+<pre>SQRT(-2)</pre>Result is an error.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Square root of <em>arg</em>.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="WIDTH_BUCKET" type="function" returnType="integer" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="value_expr" name="value_expression">
+                    <desc>
+                        The value for which a partition number is to be
+returned.
+                    </desc>
+                </param>
+                <param type="integer" name="lower_bound">
+                    <desc>
+                        Lower boundary for the range of values to be partitioned
+equally.
+                    </desc>
+                </param>
+                <param type="integer" name="upper_bound">
+                    <desc>
+                        Upper boundary for the range of values to be partitioned
+equally.
+                    </desc>
+                </param>
+                <param type="integer" name="partition_count">
+                    <desc>
+                        <![CDATA[Number of partitions to be created.<br/>
+This value also specifies the width of the partitions by default.<br/>
+The number of partitions created is <em>partition_count</em> + 2. Partition 0
+and partition <em>partition_count</em> + 1 account for values of
+<em>value_expression</em> that are outside the lower and upper boundaries.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Returns the number of the partition to which
+<em>value_expression</em> is assigned.<br/><br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Syntax element
+            </b>
+        </td>
+        <td>
+            <b>
+                Specifies..
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>value_expression</em>
+        </td>
+        <td>
+            value for which a partition number is to be returned.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>lower_bound</em>
+        </td>
+        <td>
+            lower boundary for the range of values to be partitioned equally.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <em>upper_bound</em>
+        </td>
+        <td>
+            upper boundary for the range of values to be partitioned equally.
+        </td>
+    </tr>
+        <td>
+            <em>partition_count</em>
+        </td>
+        <td>
+            number of partitions to be created.<br/>
+            This value also specifies the width of the partitions by
+            default.<br/>
+            The number of partitions created is <em>partition_count</em> + 2.
+            Partition 0 and partition <em>partition_count</em> + 1 account for
+            values of <em>value_expression</em> that are outside the lower and
+            upper boundaries.
+        </td>
+    </tr>
+</table><br/>
+WIDTH_BUCKET accepts all numeric data types as arguments. The arguments
+<em>value_expression</em>, <em>lower_bound</em>, and <em>upper_bound</em> are
+converted to REAL before processing. The <em>partition_count</em> argument is
+converted to INTEGER before processing. WIDTH_BUCKET also accepts character
+strings that represent numeric values, and converts them to the appropriate
+numeric type. If an argument cannot be converted, an error is
+reported.<br/><br/>
+WIDTH_BUCKET cannot be applied to arguments of type TIME, TIMESTAMP, INTERVAL,
+BYTE, VARBYTE, or CHARACTER or VARCHAR if the server character set is
+GRAPHIC.<br/><br/>
+The following rules apply to WIDTH_BUCKET:
+<ul>
+    <li>
+        If any argument is <a href="NULL">NULL</a>, then the result is also <a
+href="NULL">NULL</a>.
+    </li>
+    <li>
+        If <em>partition_count</em> &lt;= 0 or if <em>partition_count</em> &gt;
+2147483646, an error is returned to the requestor.
+    </li>
+    <li>
+        If <em>lower_bound</em> = <em>upper_bound</em>, an error is returned to
+the requestor.
+    </li>
+    <li>
+        If <em>lower_bound</em> &lt; <em>upper_bound</em>, then the rules in the
+following table apply:<br/>
+        <table border="1">
+            <tr>
+                <td>
+                    <b>
+                        IF..
+                    </b>
+                </td>
+                <td>
+                    <b>
+                        THEN the result is..
+                    </b>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <em>value_expression</em> &lt; <em>lower_bound</em>
+                </td>
+                <td>
+                    0.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <em>value_expression</em> &gt;= <em>upper_bound</em>
+                </td>
+                <td>
+                    <em>partition_count</em> + 1.<br/><br/>
+                    If the result cannot be represented by the data type
+                    specified for the result, then an error is returned.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    anything else
+                </td>
+                <td>
+                    the greatest exact numeric value with scale 0 that is less
+                    than or equal to the following expression:
+                    (((partition_count) * (value_expression – lower_bound)) /
+                    (upper_bound – lower_bound)) + 1
+                </td>
+            </tr>
+        </table>
+    </li>
+    <li>
+        If <em>lower_bound</em> &gt; <em>upper_bound</em>, then the rules in the
+following table apply:
+        <table border="1">
+            <tr>
+                <td>
+                    <b>
+                        IF..
+                    </b>
+                </td>
+                <td>
+                    <b>
+                        THEN the result is..
+                    </b>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <em>value_expression</em> &gt; <em>lower_bound</em>
+                </td>
+                <td>
+                    0.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <em>value_expression</em> &lt;= <em>upper_bound</em>
+                </td>
+                <td>
+                    <em>partition_count</em> + 1.<br/><br/>
+                    If the result cannot be represented by the data type
+                    specified for the result, then an error is returned.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    anything else
+                </td>
+                <td>
+                    the least exact numeric value with scale 0 that is less than
+                    or equal to the following expression: (((partition_count) *
+                    (lower_bound – value_expression)) / (lower_bound –
+                    upper_bound)) + 1
+                </td>
+            </tr>
+        </table>
+    </li>
+</ul><p/>
+<h4>
+    Example
+</h4>
+You want to create a histogram for the salaries of all employees whose salary
+amount ranges between $70000 and $200000. The width of each partition, or
+bucket, within the specified range is to be $32500.<br/><br/>
+The employee salary table contains eight employees:<br/>
+<pre>salary                                first_name                            last_name
+------------------------------------- ------------------------------------- -------------------------------------
+50000                                 William                               Crawford
+150000                                Todd                                  Crawford
+220000                                Bob                                   Stone
+199999                                Donald                                Stone
+70000                                 Betty                                 Crawford
+70000                                 James                                 Crawford
+70000                                 Mary                                  Lee
+120000                                Mary                                  Stone
+</pre><br/>
+You perform the following SELECT statement:<br/>
+<pre>SELECT
+    salary,
+    WIDTH_BUCKET(salary, 70000, 200000, 4),
+    COUNT(salary) 
+FROM
+    emp_salary 
+GROUP BY
+    1 
+ORDER BY
+    1;
+</pre><br/>
+The report produced by this statement looks like this:<br/>
+<pre>salary                    Width_bucket(salary,70000,200000,4)              Count(salary)
+------------------------- ------------------------------------------------ -------------------
+50000                     0                                                1
+70000                     1                                                3
+120000                    2                                                1
+150000                    3                                                1
+199999                    4                                                1
+220000                    5                                                1
+</pre>]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Returns an integer from 0 to <em>partition_count</em>+1
+which represents the partition number to which <em>value_expression</em> was
+assigned. <em>partition_count</em> &lt;= 0 or <em>partition_count</em> &gt;
+2147483646 or <em>lower_bound</em> = <em>upper_bound</em> will result in
+error.]]>
+            </returnValDesc>
+        </keyword>
+        <keyword name="ZEROIFNULL" type="function" returnType="numeric" definedIn="SYSLIB.SQLRESTRICTEDWORDS">
+            <params>
+                <param type="numeric" name="arg">
+                    <desc>
+                        <![CDATA[A numeric argument.<br/><br/>
+If the argument is not numeric, it is converted to a numeric value according to
+implicit type conversion rules. If <em>arg</em> is a character string, it is
+converted to a numeric value of FLOAT data type. If the argument cannot be
+converted, an error is reported.<br/>
+ZEROIFNULL cannot be applied to an argument of type BYTE, VARBYTE, or CHARACTER
+or VARCHAR if the server character set is GRAPHIC.]]>
+                    </desc>
+                </param>
+            </params>
+            <desc>
+                <![CDATA[Converts data from <a href="NULL">NULL</a> to 0 to
+avoid cases where a <a href="NULL">NULL</a> result creates an error.<p/>
+Here are the default attributes for the result of
+ZEROIFNULL(<em>arg</em>):
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                Data Type
+            </b>
+        </td>
+        <td>
+            <b>
+                Format
+            </b>
+        </td>
+        <td>
+            <b>
+                Title
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Same data type as <em>arg</em>*
+        </td>
+        <td>
+            <table border="1">
+                <tr>
+                    <td>
+                        <b>
+                            IF the operand is..
+                        </b>
+                    </td>
+                    <td>
+                        <b>
+                            THEN the format is the..
+                        </b>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        numeric
+                    </td>
+                    <td>
+                        same format as <em>arg</em>.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        character
+                    </td>
+                    <td>
+                        default format for FLOAT.
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            ZEROIFNULL(<em>arg</em>)
+        </td>
+    </tr>
+</table>
+* Note that the <a href="NULL">NULL</a> keyword has a data type of
+INTEGER.<br/><br/>
+<table border="1">
+    <tr>
+        <td>
+            <b>
+                IF the value of arg is..
+            </b>
+        </td>
+        <td>
+            <b>
+                THEN ZEROIFNULL returns..
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            not <a href="NULL">NULL</a>
+        </td>
+        <td>
+            the value of the numeric argument
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="NULL">NULL</a> or zero
+        </td>
+        <td>
+            zero
+        </td>
+    </tr>
+</table><p/>
+<h4>
+    Example
+</h4>
+In this example, you can test the Salary column for <a href="NULL">NULL</a>:
+<pre>SELECT
+    empno,
+    ZEROIFNULL(salary)
+FROM
+    employee;
+</pre>
+A non-zero value is returned for each employee number, indicating that no <a
+href="NULL">NULL</a>s exist in the Salary column.]]>
+            </desc>
+            <returnValDesc>
+                <![CDATA[Returns 0 if <em>arg</em> is <a
+href="NULL">NULL</a>.]]>
+            </returnValDesc>
+        </keyword>
+    </keywords>
+</api>

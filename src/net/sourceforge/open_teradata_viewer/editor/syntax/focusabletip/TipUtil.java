@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax focusabletip )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@ package net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
@@ -32,6 +32,8 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.html.HTMLDocument;
+
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * Static utility methods for focusable tips.
@@ -42,63 +44,6 @@ import javax.swing.text.html.HTMLDocument;
 public class TipUtil {
 
     private TipUtil() {
-    }
-
-    /**
-     * Returns a hex string for the specified color, suitable for HTML.
-     *
-     * @param c The color.
-     * @return The string representation, in the form "<code>#rrggbb</code>",
-     *         or <code>null</code> if <code>c</code> is <code>null</code>.
-     */
-    private static final String getHexString(Color c) {
-        if (c == null) {
-            return null;
-        }
-
-        StringBuffer sb = new StringBuffer("#");
-        int r = c.getRed();
-        if (r < 16) {
-            sb.append('0');
-        }
-        sb.append(Integer.toHexString(r));
-        int g = c.getGreen();
-        if (g < 16) {
-            sb.append('0');
-        }
-        sb.append(Integer.toHexString(g));
-        int b = c.getBlue();
-        if (b < 16) {
-            sb.append('0');
-        }
-        sb.append(Integer.toHexString(b));
-
-        return sb.toString();
-    }
-
-    /**
-     * Returns the screen coordinates for the monitor that contains the
-     * specified point. This is useful for setups with multiple monitors, to
-     * ensure that popup windows are positioned properly.
-     *
-     * @param x The x-coordinate, in screen coordinates.
-     * @param y The y-coordinate, in screen coordinates.
-     * @return The bounds of the monitor that contains the specified point.
-     */
-    public static Rectangle getScreenBoundsForPoint(int x, int y) {
-        GraphicsEnvironment env = GraphicsEnvironment
-                .getLocalGraphicsEnvironment();
-        GraphicsDevice[] devices = env.getScreenDevices();
-        for (int i = 0; i < devices.length; i++) {
-            GraphicsConfiguration[] configs = devices[i].getConfigurations();
-            for (int j = 0; j < configs.length; j++) {
-                Rectangle gcBounds = configs[j].getBounds();
-                if (gcBounds.contains(x, y)) {
-                    return gcBounds;
-                }
-            }
-        }
-        return env.getMaximumWindowBounds();
     }
 
     /**
@@ -210,6 +155,30 @@ public class TipUtil {
         doc.getStyleSheet().addRule(
                 "body { font-family: " + font.getFamily() + "; font-size: "
                         + font.getSize() + "pt" + "; color: "
-                        + getHexString(fg) + "; }");
+                        + Utilities.getHexString(fg) + "; }");
+
+        // Always add link foreground rule. Unfortunately these CSS rules stack
+        // each time the LaF is changed
+        Color linkFG = Utilities.getHyperlinkForeground();
+        doc.getStyleSheet().addRule(
+                "a { color: " + Utilities.getHexString(linkFG) + "; }");
+
+        URL url;
+        String sURL = "/icons/bullet_black.png";
+        Class<?> rootClass = Toolkit.getDefaultToolkit().getClass();
+        File file = new File(sURL);
+        try {
+            if (file.exists()) {
+                url = file.toURI().toURL();
+            } else {
+                url = rootClass.getResource(sURL);
+            }
+        } catch (MalformedURLException murle) {
+            url = null;
+        }
+        if (url != null) {
+            doc.getStyleSheet().addRule(
+                    "ul { list-style-image: '" + url.toString() + "'; }");
+        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax focusabletip )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,27 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip;
 
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Window;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.MouseInputAdapter;
 
-import net.sourceforge.open_teradata_viewer.GenericStatusBarPanel;
-import net.sourceforge.open_teradata_viewer.editor.SizeGripIcon;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 /**
  * A component that allows its parent window to be resizable, similar to the
@@ -42,66 +47,18 @@ import net.sourceforge.open_teradata_viewer.editor.SizeGripIcon;
  * @author D. Campione
  * 
  */
-public class SizeGrip extends GenericStatusBarPanel {
+public class SizeGrip extends JPanel {
 
     private static final long serialVersionUID = 5871803464041965865L;
 
-    private Window window;
-    private ComponentAdapter maximizeWindow;
-    private SizeGripIcon sizeGripIcon;
+    /** The size grip to use if we're on OS X. */
+    private Image osxSizeGrip;
 
-    /**
-     * Whether or not to paint the grip. This is set to <code>false</code> when
-     * the parent window is maximized.
-     */
-    private boolean paintGrip;
-
-    /** Ctor. */
     public SizeGrip() {
         MouseHandler adapter = new MouseHandler();
         addMouseListener(adapter);
         addMouseMotionListener(adapter);
-        possiblyFixCursor(ComponentOrientation.getOrientation(getLocale()));
-
-        sizeGripIcon = new SizeGripIcon();
-
-        // Listens for the parent window being maximized. When it is, the size
-        // grip doesn't paint itself to visually show that the window cannot be
-        // stretched anymore
-        maximizeWindow = new ComponentAdapter() {
-            long prevTime;
-            boolean isLastResize;
-            public void componentResized(ComponentEvent e) {
-                checkMaximize(true);
-            }
-            public void componentMoved(ComponentEvent e) {
-                checkMaximize(false);
-            }
-            public void componentShown(ComponentEvent e) {
-                // Must do this to display size grip on first display
-                checkMaximize(!isLastResize);
-            }
-            public void checkMaximize(boolean resize) {
-                long currTime = System.currentTimeMillis();
-                if ((isLastResize != resize) && (prevTime + 100 > currTime)) {
-                    paintGrip = getShouldPaintGrip();
-                    repaint();
-                }
-                isLastResize = resize;
-                prevTime = currTime;
-            }
-        };
-    }
-
-    /**
-     * Called when this component receives a parent. This method is overridden
-     * so we can add a component listener to the parent window to know when it
-     * is maximized/de-maximized.
-     */
-    public void addNotify() {
-        super.addNotify();
-        window = (Window) SwingUtilities.getRoot(this);
-        window.addComponentListener(maximizeWindow);
+        setPreferredSize(new Dimension(16, 16));
     }
 
     /**
@@ -111,31 +68,41 @@ public class SizeGrip extends GenericStatusBarPanel {
      * @param o The new orientation.
      */
     public void applyComponentOrientation(ComponentOrientation o) {
-        possiblyFixCursor(o);
+        possiblyFixCursor(o.isLeftToRight());
         super.applyComponentOrientation(o);
     }
 
-    public Dimension getMinimumSize() {
-        return new Dimension(20, 20);
-    }
-
-    public Dimension getPreferredSize() {
-        return getMinimumSize();
-    }
-
-    private boolean getShouldPaintGrip() {
-        Rectangle rect = window.getBounds();
-        Dimension dim = getToolkit().getScreenSize();
-        if ((rect.x == rect.y) && (rect.x <= 0) && (rect.x > -20)
-                && (dim.width - 20 < rect.width)
-                && (dim.width + 20 > rect.width)) {
-            return false;
+    /**
+     * Creates and returns the OS X size grip image.
+     *
+     * @return The OS X size grip.
+     */
+    private Image createOSXSizeGrip() {
+        ClassLoader cl = getClass().getClassLoader();
+        URL url = cl.getResource("icons/osx_sizegrip.png");
+        if (url == null) {
+            // We're not running in a jar - we may be debugging in Eclipse, for
+            // example
+            File f = new File(
+                    "../open_teradata_viewer/src/icons/osx_sizegrip.png");
+            if (f.isFile()) {
+                try {
+                    url = f.toURI().toURL();
+                } catch (MalformedURLException mue) { // Never happens
+                    ExceptionDialog.hideException(mue);
+                    return null;
+                }
+            } else {
+                return null; // Can't find resource or image file
+            }
         }
-        return true;
-    }
-
-    public SizeGripIcon getSizeGripIcon() {
-        return sizeGripIcon;
+        Image image = null;
+        try {
+            image = ImageIO.read(url);
+        } catch (IOException ioe) { // Never happens
+            ExceptionDialog.hideException(ioe);
+        }
+        return image;
     }
 
     /**
@@ -145,9 +112,51 @@ public class SizeGrip extends GenericStatusBarPanel {
      */
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // If the window isn't maximized, paint the grip part
-        if (paintGrip) {
-            sizeGripIcon.paintIcon(this, g, 0, 0);
+
+        Dimension dim = getSize();
+
+        if (osxSizeGrip != null) {
+            g.drawImage(osxSizeGrip, dim.width - 16, dim.height - 16, null);
+            return;
+        }
+
+        Color c1 = UIManager.getColor("Label.disabledShadow");
+        Color c2 = UIManager.getColor("Label.disabledForeground");
+        ComponentOrientation orientation = getComponentOrientation();
+
+        if (orientation.isLeftToRight()) {
+            int width = dim.width -= 3;
+            int height = dim.height -= 3;
+            g.setColor(c1);
+            g.fillRect(width - 9, height - 1, 3, 3);
+            g.fillRect(width - 5, height - 1, 3, 3);
+            g.fillRect(width - 1, height - 1, 3, 3);
+            g.fillRect(width - 5, height - 5, 3, 3);
+            g.fillRect(width - 1, height - 5, 3, 3);
+            g.fillRect(width - 1, height - 9, 3, 3);
+            g.setColor(c2);
+            g.fillRect(width - 9, height - 1, 2, 2);
+            g.fillRect(width - 5, height - 1, 2, 2);
+            g.fillRect(width - 1, height - 1, 2, 2);
+            g.fillRect(width - 5, height - 5, 2, 2);
+            g.fillRect(width - 1, height - 5, 2, 2);
+            g.fillRect(width - 1, height - 9, 2, 2);
+        } else {
+            int height = dim.height -= 3;
+            g.setColor(c1);
+            g.fillRect(10, height - 1, 3, 3);
+            g.fillRect(6, height - 1, 3, 3);
+            g.fillRect(2, height - 1, 3, 3);
+            g.fillRect(6, height - 5, 3, 3);
+            g.fillRect(2, height - 5, 3, 3);
+            g.fillRect(2, height - 9, 3, 3);
+            g.setColor(c2);
+            g.fillRect(10, height - 1, 2, 2);
+            g.fillRect(6, height - 1, 2, 2);
+            g.fillRect(2, height - 1, 2, 2);
+            g.fillRect(6, height - 5, 2, 2);
+            g.fillRect(2, height - 5, 2, 2);
+            g.fillRect(2, height - 9, 2, 2);
         }
     }
 
@@ -155,11 +164,11 @@ public class SizeGrip extends GenericStatusBarPanel {
      * Ensures that the cursor for this component is appropriate for the
      * orientation.
      *
-     * @param o The new orientation.
+     * @param ltr Whether the current component orientation is LTR.
      */
-    protected void possiblyFixCursor(ComponentOrientation o) {
+    protected void possiblyFixCursor(boolean ltr) {
         int cursor = Cursor.NE_RESIZE_CURSOR;
-        if (o.isLeftToRight()) {
+        if (ltr) {
             cursor = Cursor.NW_RESIZE_CURSOR;
         }
         if (cursor != getCursor().getType()) {
@@ -167,19 +176,21 @@ public class SizeGrip extends GenericStatusBarPanel {
         }
     }
 
-    /**
-     * Called when this component loses its parent. This method is overridden so
-     * we can remove the component listener we added to the parent.
-     */
-    public void removeNotify() {
-        super.removeNotify();
-        window.removeComponentListener(maximizeWindow);
+    public void updateUI() {
+        super.updateUI();
+        if (System.getProperty("os.name").indexOf("OS X") > -1) {
+            if (osxSizeGrip == null) {
+                osxSizeGrip = createOSXSizeGrip();
+            }
+        } else { // Clear memory in case of runtime LaF change
+            osxSizeGrip = null;
+        }
     }
 
     /**
      * Listens for mouse events on this panel and resizes the parent window
      * appropriately.
-     *
+     * 
      * @author D. Campione
      * 
      */
@@ -187,49 +198,37 @@ public class SizeGrip extends GenericStatusBarPanel {
      * NOTE: We use SwingUtilities.convertPointToScreen() instead of just using
      * the locations relative to the corner component because the latter proved
      * buggy - stretch the window too wide and some kind of arithmetic error
-     * started happening somewhere - our window would grow way too large
+     * started happening somewhere - our window would grow way too large.
      */
     private class MouseHandler extends MouseInputAdapter {
 
         private Point origPos;
 
         public void mouseDragged(MouseEvent e) {
-            if (origPos == null) {
-                // Happens, for example, when a menu is open, and the user then
-                // clicks on and drags the size grip. Swing doesn't send a
-                // mousePressed event to the grip, but does send the drag events
-                // (on Windows and OS X, at least)
-                mousePressed(e);
-            }
             Point newPos = e.getPoint();
             SwingUtilities.convertPointToScreen(newPos, SizeGrip.this);
             int xDelta = newPos.x - origPos.x;
             int yDelta = newPos.y - origPos.y;
-            if (getComponentOrientation().isLeftToRight()) {
-                int w = window.getWidth();
-                if (newPos.x >= window.getX()) {
-                    w += xDelta;
+            Window wind = SwingUtilities.getWindowAncestor(SizeGrip.this);
+            if (wind != null) { // Should always be true
+                if (getComponentOrientation().isLeftToRight()) {
+                    int w = wind.getWidth();
+                    if (newPos.x >= wind.getX()) {
+                        w += xDelta;
+                    }
+                    int h = wind.getHeight();
+                    if (newPos.y >= wind.getY()) {
+                        h += yDelta;
+                    }
+                    wind.setSize(w, h);
+                } else { // RTL
+                    int newW = Math.max(1, wind.getWidth() - xDelta);
+                    int newH = Math.max(1, wind.getHeight() + yDelta);
+                    wind.setBounds(newPos.x, wind.getY(), newW, newH);
                 }
-                int h = window.getHeight();
-                if (newPos.y >= window.getY()) {
-                    h += yDelta;
-                }
-                window.setSize(w, h);
-            } else { // RTL
-                Rectangle newBounds = window.getBounds();
-                if (newPos.x <= window.getX() + window.getWidth()) {
-                    newBounds.width -= xDelta;
-                    newBounds.x += xDelta;
-                }
-                if (newPos.y >= window.getY()) {
-                    newBounds.height += yDelta;
-                }
-                window.setBounds(newBounds.x, newBounds.y, newBounds.width,
-                        newBounds.height);
+                wind.invalidate();
+                wind.validate();
             }
-            // invalidate()/revalidate() needed pre-1.6
-            window.invalidate();
-            window.validate();
             origPos.setLocation(newPos);
         }
 

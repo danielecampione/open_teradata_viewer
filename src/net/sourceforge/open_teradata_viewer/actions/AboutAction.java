@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ public class AboutAction extends CustomAction implements MouseListener {
         c.gridy++;
         panel.add(
                 new JLabel(
-                        "<html><font style=\"color:gray\">Copyright &copy 2012 D. Campione</font></html>"),
+                        "<html><font style=\"color:gray\">Copyright &copy 2013 D. Campione</font></html>"),
                 c);
         c.gridy++;
         JLabel link = new JLabel("GNU General Public License");

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * A panel used internally by <code>StatusBar</code>; it can have a "shadow"
+ * A panel used internally by <code>ApplicationStatusBarPanel</code>; it can have a "shadow"
  * effect displayed at its top and bottom. This shadow can be toggled on and
  * off. This class is used to mimic the status bar look found in Microsoft
  * Windows XP-style status bars.
@@ -36,7 +36,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  * 
  */
-public class GenericStatusBarPanel extends JPanel {
+public class StatusBarPanel extends JPanel {
 
     private static final long serialVersionUID = -4044684910342685600L;
 
@@ -44,7 +44,7 @@ public class GenericStatusBarPanel extends JPanel {
     private boolean shadowEnabled;
 
     /** Ctor. */
-    public GenericStatusBarPanel() {
+    public StatusBarPanel() {
         shadowEnabled = true;
     }
 
@@ -53,7 +53,7 @@ public class GenericStatusBarPanel extends JPanel {
      *
      * @param layout The layout for the panel.
      */
-    public GenericStatusBarPanel(LayoutManager layout) {
+    public StatusBarPanel(LayoutManager layout) {
         super(layout);
         shadowEnabled = true;
     }
@@ -66,7 +66,7 @@ public class GenericStatusBarPanel extends JPanel {
      * @param layout The layout to use for the panel.
      * @param label The label this panels hould contain.
      */
-    public GenericStatusBarPanel(LayoutManager layout, JLabel label) {
+    public StatusBarPanel(LayoutManager layout, JLabel label) {
         super(layout);
         add(label);
         shadowEnabled = true;

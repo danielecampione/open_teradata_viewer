@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import javax.swing.filechooser.FileFilter;
  *
  */
 public class ExtensionFileFilter extends FileFilter {
+
     private final String extension;
     private final String description;
 
@@ -47,5 +48,15 @@ public class ExtensionFileFilter extends FileFilter {
 
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * Overridden to return the description of this file filter, that way we
+     * render nicely in combo boxes.
+     *
+     * @return A string representation of this filter.
+     */
+    public String toString() {
+        return getDescription();
     }
 }

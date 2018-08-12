@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,10 @@ package net.sourceforge.open_teradata_viewer.util;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,6 +39,7 @@ import java.io.ObjectStreamClass;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.AccessControlException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -43,9 +48,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -88,6 +96,28 @@ public class Utilities {
     /** <p>The maximum size to which the padding constant(s) can expand.</p> */
     private static final int PAD_LIMIT = 8192;
 
+    /**
+     * If a system property is defined with this name and set, ignoring case, to
+     * <code>true</code>, this library will not attempt to use Substance
+     * renderers. Otherwise, if a Substance Look and Feel is installed, we will
+     * attempt to use Substance cell renderers in all of our dropdowns.<p>
+     * 
+     * Note that we do not have a build dependency on Substance, so all access
+     * to Substance stuff is done via reflection. We will fall back onto default
+     * renderers if something goes wrong.
+     */
+    public static final String PROPERTY_DONT_USE_SUBSTANCE_RENDERERS = "net.sourceforge.open_teradata_viewer.editor.autocomplete.DontUseSubstanceRenderers";
+
+    /**
+     * Used for the color of hyperlinks when a LookAndFeel uses light text
+     * against a dark background.
+     */
+    private static final Color LIGHT_HYPERLINK_FG = new Color(0xd8ffff);
+
+    private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]*>");
+
+    private static final boolean useSubstanceRenderers;
+
     static {
         try {
             teradataReservedWords
@@ -104,6 +134,14 @@ public class Utilities {
 
         // Space padding is most common, start with 64 chars
         PADDING[32] = " ";
+
+        boolean use = true;
+        try {
+            use = !Boolean.getBoolean(PROPERTY_DONT_USE_SUBSTANCE_RENDERERS);
+        } catch (AccessControlException ace) { // We're in an applet
+            use = true;
+        }
+        useSubstanceRenderers = use;
     }
 
     /** Ctor. <TT>private</TT> as all methods are static. */
@@ -931,33 +969,6 @@ public class Utilities {
     }
 
     /**
-     * Returns a <code>String</code> of the form "#xxxxxx" good for use in HTML,
-     * representing the given color.
-     *
-     * @param color The color to get a string for.
-     * @return The HTML form of the color. If <code>color</code> is
-     *         <code>null</code>, <code>#000000</code> is returned.
-     */
-    public static final String getHTMLFormatForColor(Color color) {
-        if (color == null) {
-            return "#000000";
-        }
-        String hexRed = Integer.toHexString(color.getRed());
-        if (hexRed.length() == 1) {
-            hexRed = "0" + hexRed;
-        }
-        String hexGreen = Integer.toHexString(color.getGreen());
-        if (hexGreen.length() == 1) {
-            hexGreen = "0" + hexGreen;
-        }
-        String hexBlue = Integer.toHexString(color.getBlue());
-        if (hexBlue.length() == 1) {
-            hexBlue = "0" + hexBlue;
-        }
-        return "#" + hexRed + hexGreen + hexBlue;
-    }
-
-    /**
      * Returns the extension of a file name.
      *
      * @param fileName The file name.
@@ -967,5 +978,108 @@ public class Utilities {
     public static final String getExtension(String fileName) {
         int lastDot = fileName.lastIndexOf('.');
         return lastDot > -1 ? fileName.substring(lastDot + 1) : null;
+    }
+
+    /**
+     * Returns a hex string for the specified color, suitable for HTML.
+     *
+     * @param c The color.
+     * @return The string representation, in the form "<code>#rrggbb</code>", or
+     *         <code>null</code> if <code>c</code> is <code>null</code>.
+     */
+    public static String getHexString(Color c) {
+        if (c == null) {
+            return null;
+        }
+
+        // Don't assume 0xff alpha
+        //return "#" + Integer.toHexString(c.getRGB()&0xffffff).substring(2);
+
+        StringBuffer sb = new StringBuffer("#");
+        int r = c.getRed();
+        if (r < 16) {
+            sb.append('0');
+        }
+        sb.append(Integer.toHexString(r));
+        int g = c.getGreen();
+        if (g < 16) {
+            sb.append('0');
+        }
+        sb.append(Integer.toHexString(g));
+        int b = c.getBlue();
+        if (b < 16) {
+            sb.append('0');
+        }
+        sb.append(Integer.toHexString(b));
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns the screen coordinates for the monitor that contains the
+     * specified point. This is useful for setups with multiple monitors, to
+     * ensure that popup windows are positioned properly.
+     *
+     * @param x The x-coordinate, in screen coordinates.
+     * @param y The y-coordinate, in screen coordinates.
+     * @return The bounds of the monitor that contains the specified point.
+     */
+    public static Rectangle getScreenBoundsForPoint(int x, int y) {
+        GraphicsEnvironment env = GraphicsEnvironment
+                .getLocalGraphicsEnvironment();
+        GraphicsDevice[] devices = env.getScreenDevices();
+        for (int i = 0; i < devices.length; i++) {
+            GraphicsConfiguration config = devices[i].getDefaultConfiguration();
+            Rectangle gcBounds = config.getBounds();
+            if (gcBounds.contains(x, y)) {
+                return gcBounds;
+            }
+        }
+        // If point is outside all monitors, default to default monitor
+        return env.getMaximumWindowBounds();
+    }
+
+    /**
+     * Returns the color to use for hyperlink-style components. This method will
+     * return <code>Color.blue</code> unless it appears that the current
+     * LookAndFeel uses light text on a dark background, in which case a
+     * brighter alternative is returned.
+     *
+     * @return The color to use for hyperlinks.
+     */
+    public static final Color getHyperlinkForeground() {
+        // This property is defined by all standard LaFs, even Nimbus
+        Color fg = UIManager.getColor("Label.foreground");
+        if (fg == null) {
+            fg = new JLabel().getForeground();
+        }
+
+        return UIUtil.isLightForeground(fg) ? LIGHT_HYPERLINK_FG : Color.blue;
+    }
+
+    /**
+     * Returns whether we should attempt to use Substance cell renderers and
+     * styles for things such as completion choices, if a Substance Look and
+     * Feel is installed. If this is <code>false</code>, we'll use our standard
+     * rendering for completions, even when Substance is being used.
+     *
+     * @return Whether to use Substance renderers if Substance is installed.
+     */
+    public static boolean getUseSubstanceRenderers() {
+        return useSubstanceRenderers;
+    }
+
+    /**
+     * Strips any HTML from a string. The string must start with
+     * "<code>&lt;html&gt;</code>" for markup tags to be stripped.
+     *
+     * @param text The string.
+     * @return The string, with any HTML stripped.
+     */
+    public static String stripHtml(String text) {
+        if (text == null || !text.startsWith("<html>")) {
+            return text;
+        }
+        return TAG_PATTERN.matcher(text).replaceAll("");
     }
 }

@@ -1,3 +1,26 @@
+0.16c (04/02/2013)
+    - Fixed an issue with SQLTokenMaker: the ZEROIFNULL keyword has been
+      categorized as a function.
+    - Upgraded Teradata JDBC driver 14.00.00.21 -> 14.00.00.30
+
+0.16b (23/01/2013)
+    - Make auto-complete related windows use Substance rendering when a
+      Substance Look and Feel is installed.
+    - The default transaction mode for new database connections is set to ANSI,
+      in order to avoid inadvertent data truncations.
+
+0.16a (10/01/2013)
+    - Added the "BIGINT", "CONTAINS", "LDIFF", "MEETS", "PERIOD", "PRECEDES",
+      "P_INTERSECT", "P_NORMALIZE", "RDIFF", "SUCCEEDS" and "UDT" keywords to
+      the Teradata reserved words.
+    - Fixed an issue with SQLTokenMaker.
+
+0.15c (31/12/2012)
+    - Added the auto-completion functionality.
+    - Added the "FANCY CELL RENDERING" command to the "View" menu.
+    - Added the "SHOW DESCRIPTION WINDOW" command to the "View" menu.
+    - Added the "FUNCTION PARAMETER ASSISTANCE" command to the "View" menu.
+
 0.15b (18/12/2012)
     - Fixed an issue with CloseMarkupTagAction on non-QWERTY keyboards.
 

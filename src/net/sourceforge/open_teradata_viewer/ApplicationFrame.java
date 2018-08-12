@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -41,6 +42,7 @@ import javax.swing.JToggleButton;
 import javax.swing.LookAndFeel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;
 
@@ -49,8 +51,15 @@ import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
+import net.sourceforge.open_teradata_viewer.editor.IToolTipSupplier;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.AutoCompletion;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.BasicCompletion;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletionProvider;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCompletionProvider;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVFindDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
@@ -91,6 +100,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     private Console console;
 
     private OTVSyntaxTextArea textArea;
+    private AutoCompletion autoCompletion;
     private HelpViewerWindow helpFrame;
     private GraphicViewer graphicViewer;
     private ApplicationMenuBar menubar;
@@ -419,6 +429,17 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         //        Looks great, let's use it!
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
         textArea.setCodeFoldingEnabled(true);
+
+        ICompletionProvider provider = createCompletionProvider();
+        // Install auto-completion onto our text area
+        autoCompletion = new AutoCompletion(provider);
+        autoCompletion.setListCellRenderer(new SQLCellRenderer());
+        autoCompletion.setShowDescWindow(true);
+        autoCompletion.setParameterAssistanceEnabled(true);
+        autoCompletion.install(textArea);
+
+        textArea.setToolTipSupplier((IToolTipSupplier) provider);
+        ToolTipManager.sharedInstance().registerComponent(textArea);
     }
 
     private JScrollPane createQueryTable() {
@@ -467,16 +488,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         }
 
         dispose();
-    }
-
-    public static ApplicationFrame getInstance() {
-        return APPLICATION_FRAME;
-    }
-
-    public String getText() {
-        return textArea.getSelectedText() != null
-                ? textArea.getSelectedText()
-                : textArea.getText();
+        AWTExceptionHandler.shutdown();
     }
 
     private void deleteHelpFiles() {
@@ -642,6 +654,113 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             w.addWindowFocusListener(findWindowOpacityListener);
             w.addComponentListener(findWindowOpacityListener);
         }
+    }
+
+    /**
+     * Creates the completion provider for a SQL editor. This provider can be
+     * shared among multiple editors.
+     *
+     * @return The provider.
+     */
+    private ICompletionProvider createCompletionProvider() {
+        // Create the provider used when typing code
+        ICompletionProvider codeCP = createCodeCompletionProvider();
+
+        // The provider used when typing a string
+        ICompletionProvider stringCP = createStringCompletionProvider();
+
+        // The provider used when typing a comment
+        ICompletionProvider commentCP = createCommentCompletionProvider();
+
+        // Create the "parent" completion provider
+        LanguageAwareCompletionProvider provider = new LanguageAwareCompletionProvider(
+                codeCP);
+        provider.setStringCompletionProvider(stringCP);
+        provider.setCommentCompletionProvider(commentCP);
+
+        return provider;
+    }
+
+    /**
+     * Returns the provider to use when editing code.
+     *
+     * @return The provider.
+     * @see #createCommentCompletionProvider()
+     * @see #createStringCompletionProvider()
+     */
+    private ICompletionProvider createCodeCompletionProvider() {
+        // Add completions for the SQL standard library
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+
+        // First try loading resource (running from demo jar), then try
+        // accessing file (debugging in Eclipse)
+        ClassLoader cl = getClass().getClassLoader();
+        InputStream in = cl.getResourceAsStream("res/sql.xml");
+        try {
+            if (in != null) {
+                cp.loadFromXML(in);
+                in.close();
+            } else {
+                cp.loadFromXML(new File("res/sql.xml"));
+            }
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
+
+        return cp;
+    }
+
+    /**
+     * Returns the completion provider to use when the caret is in a string.
+     *
+     * @return The provider.
+     * @see #createCodeCompletionProvider()
+     * @see #createCommentCompletionProvider()
+     */
+    private ICompletionProvider createStringCompletionProvider() {
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.addCompletion(new BasicCompletion(cp, "%c", "char",
+                "Prints a character"));
+        cp.addCompletion(new BasicCompletion(cp, "%i", "signed int",
+                "Prints a signed integer"));
+        cp.addCompletion(new BasicCompletion(cp, "%f", "float",
+                "Prints a float"));
+        cp.addCompletion(new BasicCompletion(cp, "%s", "string",
+                "Prints a string"));
+        cp.addCompletion(new BasicCompletion(cp, "%u", "unsigned int",
+                "Prints an unsigned integer"));
+        cp.addCompletion(new BasicCompletion(cp, "\\n", "Newline",
+                "Prints a newline"));
+        return cp;
+    }
+
+    /**
+     * Returns the provider to use when in a comment.
+     *
+     * @return The provider.
+     * @see #createCodeCompletionProvider()
+     * @see #createStringCompletionProvider()
+     */
+    private ICompletionProvider createCommentCompletionProvider() {
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.addCompletion(new BasicCompletion(cp, "TODO:", "A to-do reminder"));
+        cp.addCompletion(new BasicCompletion(cp, "FIXME:",
+                "A bug that needs to be fixed"));
+        return cp;
+    }
+
+    public static ApplicationFrame getInstance() {
+        return APPLICATION_FRAME;
+    }
+
+    public String getText() {
+        return textArea.getSelectedText() != null
+                ? textArea.getSelectedText()
+                : textArea.getText();
+    }
+
+    public AutoCompletion getAutoCompletion() {
+        return autoCompletion;
     }
 
     /**
@@ -935,7 +1054,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             graphicViewerDocument.setUndoManager(new UndoMgr());
 
             splashScreen.updateStatus("Initializing the status bar..", 70);
-            getContentPane().add(new SystemStatusBar(), BorderLayout.PAGE_END);
+            getContentPane().add(new ApplicationStatusBar(),
+                    BorderLayout.PAGE_END);
 
             try {
                 if (StringUtil.isEmpty(Config.getDrivers())) {

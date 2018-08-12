@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -311,22 +311,36 @@ public class ThirdPartyLookAndFeelManager {
                                     + "attribute: '" + attr + "'.");
                         }
                     }
-                    if (name == null || className == null || minVersion <= 0) {
+                    if (name == null) {
                         throw new IOException(
-                                "XML error: LookAndFeel "
-                                        + "must have attributes 'name', 'class' and 'minJavaVersion'.");
+                                "open_teradata_viewer_lookandfeels.xml: At least one "
+                                        + "LookAndFeel had no '" + NAME
+                                        + "' attribute.");
+                    }
+                    if (className == null) {
+                        throw new IOException(
+                                "open_teradata_viewer_lookandfeels.xml: LookAndFeel "
+                                        + name + " is missing required '"
+                                        + CLASS + "' attribute.");
+                    }
+                    if (minVersion <= 0) {
+                        throw new IOException(
+                                "open_teradata_viewer_lookandfeels.xml: LookAndFeel "
+                                        + name
+                                        + " is missing required '"
+                                        + MIN_JAVA_VERSION
+                                        + "' attribute or the value of this "
+                                        + "property isn't strictly greater than 0.");
                     }
                     boolean add = true;
-                    if (minVersion > 0) {
-                        String javaSpecVersion = System
-                                .getProperty("java.specification.version");
-                        try {
-                            double javaSpecVersionVal = Double
-                                    .parseDouble(javaSpecVersion);
-                            add = javaSpecVersionVal >= minVersion;
-                        } catch (NumberFormatException nfe) {
-                            ExceptionDialog.hideException(nfe);
-                        }
+                    String javaSpecVersion = System
+                            .getProperty("java.specification.version");
+                    try {
+                        double javaSpecVersionVal = Double
+                                .parseDouble(javaSpecVersion);
+                        add = javaSpecVersionVal >= minVersion;
+                    } catch (NumberFormatException nfe) {
+                        ExceptionDialog.hideException(nfe);
                     }
                     if (add) {
                         lafInfo.add(new ExtendedLookAndFeelInfo(name, className));

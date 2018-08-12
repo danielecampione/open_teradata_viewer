@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,10 @@ import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
+import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
+import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
+import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
@@ -66,6 +69,12 @@ public class ApplicationMenuBar extends JMenuBar {
             Actions.ANIMATE_BRACKET_MATCHING);
     JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(
             Actions.PAINT_MATCHED_BRACKET_PAIR);
+    private JCheckBoxMenuItem cbCellRendering = new JCheckBoxMenuItem(
+            Actions.FANCY_CELL_RENDERING);
+    private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(
+            Actions.SHOW_DESCRIPTION_WINDOW);
+    private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(
+            Actions.PARAMETER_ASSISTANCE);
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -95,6 +104,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.COPY_AS_RTF);
         menu.add(Actions.PASTE);
         menu.addSeparator();
+        menu.add(Actions.DATE_TIME);
+        menu.addSeparator();
         subMenu = new JMenu("Folding");
         menu.add(subMenu);
         subMenu.add(new SyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
@@ -116,7 +127,6 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(cbAnimateBracketMatching);
         menu.add(cbPaintMatchedBracketPair);
         menu.addSeparator();
-        menu.add(Actions.DATE_TIME);
         subMenu = new JMenu("Text");
         menu.add(subMenu);
         subMenu.add(Actions.COMMENT);
@@ -257,13 +267,25 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu("View");
         add(menu);
+        cbCellRendering
+                .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
+                        .isFancyCellRenderingActived());
+        menu.add(cbCellRendering);
+        cbShowDescriptionWindow
+                .setSelected(((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW)
+                        .isVisible());
+        menu.add(cbShowDescriptionWindow);
+        cbParamAssistanceItem
+                .setSelected(((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE)
+                        .isParameterAssistanceEnabled());
+        menu.add(cbParamAssistanceItem);
+        menu.addSeparator();
         JCheckBoxMenuItem mniAnimatedAssistant = new JCheckBoxMenuItem(
                 Actions.ANIMATED_ASSISTANT);
         mniAnimatedAssistant
                 .setSelected(((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
                         .isAnimatedAssistantActived());
         menu.add(mniAnimatedAssistant);
-        menu.addSeparator();
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
                 Actions.FULL_SCREEN);
         menu.add(fullScreenMenuItem);
@@ -278,7 +300,6 @@ public class ApplicationMenuBar extends JMenuBar {
 
         setMnemonics(this);
     }
-
     private void setMnemonics(MenuElement menuElement) {
         Set<Character> used = new HashSet<Character>();
         MenuElement[] subElements = menuElement.getSubElements();

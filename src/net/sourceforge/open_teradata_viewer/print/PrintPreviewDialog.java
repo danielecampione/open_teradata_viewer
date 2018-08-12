@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( print )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,10 +67,9 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 
-import net.sourceforge.open_teradata_viewer.Button;
 import net.sourceforge.open_teradata_viewer.EscapableDialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.GenericStatusBar;
+import net.sourceforge.open_teradata_viewer.StatusBar;
 import net.sourceforge.open_teradata_viewer.ScrollPane;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
@@ -145,22 +144,22 @@ public class PrintPreviewDialog extends EscapableDialog
         JPanel contentPane = new JPanel(new BorderLayout());
         setContentPane(contentPane);
         contentPane.add(topPanel, BorderLayout.NORTH);
-        contentPane.add(new GenericStatusBar(""), BorderLayout.SOUTH);
-        printButton = new Button("Print");
+        contentPane.add(new StatusBar(""), BorderLayout.SOUTH);
+        printButton = new JButton("Print");
         printButton.setActionCommand("Print");
         printButton.addActionListener(this);
         toolBarPanel.add(printButton);
-        prevPageButton = new Button("Previous Page");
+        prevPageButton = new JButton("Previous Page");
         prevPageButton.setEnabled(false);
         prevPageButton.setActionCommand("PrevPage");
         prevPageButton.addActionListener(this);
         toolBarPanel.add(prevPageButton);
-        nextPageButton = new Button("Next Page");
+        nextPageButton = new JButton("Next Page");
         nextPageButton.setActionCommand("NextPage");
         nextPageButton.addActionListener(this);
         toolBarPanel.add(nextPageButton);
 
-        closeButton = new Button("Close");
+        closeButton = new JButton("Close");
         closeButton.setActionCommand("Close");
         closeButton.addActionListener(this);
         toolBarPanel.add(closeButton);

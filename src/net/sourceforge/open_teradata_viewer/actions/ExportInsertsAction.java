@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ public class ExportInsertsAction extends CustomAction {
                 break;
             }
         }
+        scanner.close();
         StringBuilder prefix = new StringBuilder();
         prefix.append("insert into ");
         prefix.append(tableName);

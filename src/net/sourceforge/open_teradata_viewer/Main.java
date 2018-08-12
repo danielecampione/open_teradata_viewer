@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2012, D. Campione
+ * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,20 +93,7 @@ public class Main {
                         rootDir + File.separator);
 
                 try {
-                    ClassLoader cl = lafManager.getLAFClassLoader();
-                    // Must set UIManager's ClassLoader before instantiating the
-                    // LAF. Substance is so high-maintenance
-                    UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-                    Class clazz = cl.loadClass(lafName);
-                    LookAndFeel laf = (LookAndFeel) clazz.newInstance();
-                    UIManager.setLookAndFeel(laf);
-                    UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-                    UIUtil.installOsSpecificLafTweaks();
-
-                    UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
-                            Font.PLAIN, 12));
-                    // Turn off metal's use of bold fonts
-                    // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                    installACompatibleLaf(lafManager, lafName);
                 } catch (ClassNotFoundException cnfe) {
                     ExceptionDialog.hideException(cnfe);
                     ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
@@ -127,6 +114,10 @@ public class Main {
                 } catch (Throwable t) {
                     ExceptionDialog.hideException(t);
                 }
+                UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
+                        Font.PLAIN, 12));
+                // Turn off metal's use of bold fonts
+                // UIManager.put("swing.boldMetal", Boolean.FALSE);
 
                 // Allow Substance to paint window titles, etc.. We don't allow
                 // Metal (for example) to do this, because setting these
@@ -144,16 +135,67 @@ public class Main {
                 // (200ms), looks bad moving through JMenuItems quickly
                 if (SubstanceUtil.isSubstanceInstalled()) {
                     try {
-                        SubstanceUtil.setAnimationSpeed(120);
+                        SubstanceUtil.setAnimationSpeed(100);
                     } catch (Exception e) {
                         ExceptionDialog.hideException(e);
                     }
                 }
 
-                ApplicationFrame mainWindow = new ApplicationFrame();
-                mainWindow.initLookAndFeelManager(lafManager);
-                mainWindow.drawIt();
+                ApplicationFrame applicationFrame = new ApplicationFrame();
+                applicationFrame.initLookAndFeelManager(lafManager);
+                applicationFrame.drawIt();
             }
         });
+    }
+
+    /**
+     * The method checks if the minimum Java version required for the selected
+     * LAF is still compatible (the installed JVM can be changed or the minimum
+     * Java version specified for the current LAF can be downgraded from the
+     * last startup) and, if not, it temporary installs the default LAF.
+     */
+    private static void installACompatibleLaf(
+            ThirdPartyLookAndFeelManager lafManager, String lafName)
+            throws Throwable {
+        boolean systemLaf = false;
+        boolean compatibleThirdPartyLaf = false;
+        UIManager.LookAndFeelInfo[] lafsInfo = UIManager
+                .getInstalledLookAndFeels();
+        for (UIManager.LookAndFeelInfo lafInfo : lafsInfo) {
+            if (lafName.trim().equals(lafInfo.getClassName().trim())) {
+                systemLaf = true;
+                break;
+            }
+        }
+        if (!systemLaf) {
+            ExtendedLookAndFeelInfo[] extendedLookAndFeelsInfo = lafManager
+                    .get3rdPartyLookAndFeelInfo();
+            for (ExtendedLookAndFeelInfo extendedLookAndFeelInfo : extendedLookAndFeelsInfo) {
+                if (lafName.trim().equals(
+                        extendedLookAndFeelInfo.getClassName().trim())) {
+                    compatibleThirdPartyLaf = true;
+                    break;
+                }
+            }
+        }
+        if (systemLaf || compatibleThirdPartyLaf) {
+            ClassLoader cl = lafManager.getLAFClassLoader();
+            // Must set UIManager's ClassLoader before instantiating
+            // the LAF. Substance is so high-maintenance
+            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+            Class clazz = null;
+            try {
+                clazz = cl.loadClass(lafName);
+            } catch (UnsupportedClassVersionError ucve) {
+                // Previously opened with e.g. Java 7/Substance, now
+                // restarting with a previous Java version
+                lafName = UIManager.getSystemLookAndFeelClassName();
+                clazz = cl.loadClass(lafName);
+            }
+            LookAndFeel laf = (LookAndFeel) clazz.newInstance();
+            UIManager.setLookAndFeel(laf);
+            UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+            UIUtil.installOsSpecificLafTweaks();
+        }
     }
 }
