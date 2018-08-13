@@ -21,29 +21,30 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import java.util.List;
 
 /**
- * A DISTINCT [ON (expression, ...)] clause
+ * A DISTINCT [ON (expression, ...)] clause.
  * 
  * @author D. Campione
  * 
  */
 public class Distinct {
 
-    private List<?> onSelectItems;
+    private List<ISelectItem> onSelectItems;
 
     /**
      * A list of {@link ISelectItem}s expressions, as in "select DISTINCT ON
      * (a,b,c) a,b FROM...".
-     * 
+     *
      * @return a list of {@link ISelectItem}s expressions.
      */
-    public List<?> getOnSelectItems() {
+    public List<ISelectItem> getOnSelectItems() {
         return onSelectItems;
     }
 
-    public void setOnSelectItems(List<?> list) {
+    public void setOnSelectItems(List<ISelectItem> list) {
         onSelectItems = list;
     }
 
+    @Override
     public String toString() {
         String sql = "DISTINCT";
 

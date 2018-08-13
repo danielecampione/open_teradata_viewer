@@ -18,18 +18,19 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.update;
 
+import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
+
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.update.Update;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
  * 
@@ -39,12 +40,13 @@ import net.sf.jsqlparser.statement.update.Update;
  */
 public class UpdateTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public UpdateTest(String arg0) {
         super(arg0);
     }
-    public void testUpdate() throws JSQLParserException {
+
+    public void testUpdate() throws SQLParserException {
         String statement = "UPDATE mytable set col1='as', col2=?, col3=565 Where o >= 3";
         Update update = (Update) parserManager
                 .parse(new StringReader(statement));
@@ -65,13 +67,17 @@ public class UpdateTest extends TestCase {
         assertTrue(update.getWhere() instanceof GreaterThanEquals);
     }
 
-    public void testUpdateWAlias() throws JSQLParserException {
+    public void testUpdateWAlias() throws SQLParserException {
         String statement = "UPDATE table1 A SET A.column = 'XXX' WHERE A.cod_table = 'YYY'";
         Update update = (Update) parserManager
                 .parse(new StringReader(statement));
     }
 
-    public static void main(String[] args) {
-        TestRunner.run(UpdateTest.class);
+    public void testUpdateWithDeparser() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("UPDATE table1 AS A SET A.column = 'XXX' WHERE A.cod_table = 'YYY'");
+    }
+
+    public void testUpdateWithFrom() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("UPDATE table1 SET column = 5 FROM table1 LEFT JOIN table2 ON col1 = col2");
     }
 }

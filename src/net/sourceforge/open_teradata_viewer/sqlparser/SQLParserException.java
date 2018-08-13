@@ -29,8 +29,8 @@ import java.io.PrintWriter;
  */
 public class SQLParserException extends Exception {
 
+    /* The serial class version */
     private static final long serialVersionUID = 3622093774920279664L;
-
     private Throwable cause = null;
 
     public SQLParserException() {
@@ -50,14 +50,17 @@ public class SQLParserException extends Exception {
         this.cause = arg1;
     }
 
+    @Override
     public Throwable getCause() {
         return cause;
     }
 
+    @Override
     public void printStackTrace() {
         printStackTrace(System.err);
     }
 
+    @Override
     public void printStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
         if (cause != null) {
@@ -66,6 +69,7 @@ public class SQLParserException extends Exception {
         }
     }
 
+    @Override
     public void printStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
         if (cause != null) {

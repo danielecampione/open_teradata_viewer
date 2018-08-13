@@ -19,8 +19,7 @@
 package test.net.sourceforge.open_teradata_viewer.sqlparser.select;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -28,14 +27,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 import test.net.sourceforge.open_teradata_viewer.sqlparser.TestException;
-import test.net.sourceforge.open_teradata_viewer.sqlparser.simpleparsing.CCJSqlParserManagerTest;
-import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNamesFinder;
+import test.net.sourceforge.open_teradata_viewer.sqlparser.simpleparsing.CCSqlParserManagerTest;
 
 /**
  * 
@@ -46,81 +44,86 @@ import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNa
 public class SpeedTest extends TestCase {
 
     private final static int NUM_REPS = 500;
-    private CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    private CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public SpeedTest(String arg0) {
         super(arg0);
     }
 
     public void testSpeed() throws Exception {
-        // All the statements in testfiles/simple_parsing.txt
-        BufferedReader in = new BufferedReader(new FileReader("testfiles"
-                + File.separator + "simple_parsing.txt"));
-        CCJSqlParserManagerTest d;
-        ArrayList<String> statementsList = new ArrayList<String>();
+        // all the statements in testfiles/simple_parsing.txt
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(
+                        SpeedTest.class
+                                .getResourceAsStream("/res/testfiles/sqlparser/simple_parsing.txt")));
+        CCSqlParserManagerTest d;
+        ArrayList statementsList = new ArrayList();
 
         while (true) {
-            String statement = CCJSqlParserManagerTest.getStatement(in);
-            if (statement == null)
+            String statement = CCSqlParserManagerTest.getStatement(in);
+            if (statement == null) {
                 break;
+            }
             statementsList.add(statement);
         }
         in.close();
-        in = new BufferedReader(new FileReader("testfiles" + File.separator
-                + "RUBiS-select-requests.txt"));
+        in = new BufferedReader(
+                new InputStreamReader(
+                        SpeedTest.class
+                                .getResourceAsStream("/res/testfiles/sqlparser/RUBiS-select-requests.txt")));
 
-        // All the statements in testfiles/RUBiS-select-requests.txt
+        // all the statements in testfiles/RUBiS-select-requests.txt
         while (true) {
-            String line = CCJSqlParserManagerTest.getLine(in);
+            String line = CCSqlParserManagerTest.getLine(in);
             if (line == null) {
                 break;
             }
-            if (line.length() == 0)
+            if (line.length() == 0) {
                 continue;
+            }
 
-            if (!line.equals("#begin"))
+            if (!line.equals("#begin")) {
                 break;
-            line = CCJSqlParserManagerTest.getLine(in);
-            StringBuffer buf = new StringBuffer(line);
+            }
+            line = CCSqlParserManagerTest.getLine(in);
+            StringBuilder buf = new StringBuilder(line);
             while (true) {
-                line = CCJSqlParserManagerTest.getLine(in);
+                line = CCSqlParserManagerTest.getLine(in);
                 if (line.equals("#end")) {
                     break;
                 }
                 buf.append("\n");
                 buf.append(line);
             }
-            if (!CCJSqlParserManagerTest.getLine(in).equals("true")) {
+            if (!CCSqlParserManagerTest.getLine(in).equals("true")) {
                 continue;
             }
 
             statementsList.add(buf.toString());
 
-            String cols = CCJSqlParserManagerTest.getLine(in);
-            String tables = CCJSqlParserManagerTest.getLine(in);
-            String whereCols = CCJSqlParserManagerTest.getLine(in);
-            String type = CCJSqlParserManagerTest.getLine(in);
+            String cols = CCSqlParserManagerTest.getLine(in);
+            String tables = CCSqlParserManagerTest.getLine(in);
+            String whereCols = CCSqlParserManagerTest.getLine(in);
+            String type = CCSqlParserManagerTest.getLine(in);
 
         }
         in.close();
 
         String statement = "";
         int numTests = 0;
-        // It seems that the very first parsing takes a while, so I put it aside
-        Statement parsedStm = parserManager.parse(new StringReader(
+        // it seems that the very first parsing takes a while, so I put it aside
+        IStatement parsedStm = parserManager.parse(new StringReader(
                 statement = (String) statementsList.get(0)));
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-        ArrayList<Statement> parsedSelects = new ArrayList<Statement>(NUM_REPS
+        ArrayList parsedSelects = new ArrayList(NUM_REPS
                 * statementsList.size());
         long time = System.currentTimeMillis();
 
-        // Measure the time to parse NUM_REPS times all statements in the 2
-        // files
+        // measure the time to parse NUM_REPS times all statements in the 2 files
         for (int i = 0; i < NUM_REPS; i++) {
             try {
                 int j = 0;
-                for (Iterator<String> iter = statementsList.iterator(); iter
-                        .hasNext(); j++) {
+                for (Iterator iter = statementsList.iterator(); iter.hasNext(); j++) {
                     statement = (String) iter.next();
                     parsedStm = parserManager
                             .parse(new StringReader(statement));
@@ -130,9 +133,9 @@ public class SpeedTest extends TestCase {
                     }
 
                 }
-            } catch (JSQLParserException jsqlpe) {
+            } catch (SQLParserException e) {
                 throw new TestException("impossible to parse statement: "
-                        + statement, jsqlpe);
+                        + statement, e);
             }
         }
         long elapsedTime = System.currentTimeMillis() - time;
@@ -149,15 +152,12 @@ public class SpeedTest extends TestCase {
 
         numTests = 0;
         time = System.currentTimeMillis();
-        // Measure the time to get the tables names from all the SELECTs parsed
-        // before
-        for (Iterator<Statement> iter = parsedSelects.iterator(); iter
-                .hasNext();) {
+        // measure the time to get the tables names from all the SELECTs parsed before
+        for (Iterator iter = parsedSelects.iterator(); iter.hasNext();) {
             Select select = (Select) iter.next();
             if (select != null) {
                 numTests++;
-                List<String> tableListRetr = tablesNamesFinder
-                        .getTableList(select);
+                List tableListRetr = tablesNamesFinder.getTableList(select);
             }
         }
         elapsedTime = System.currentTimeMillis() - time;
@@ -169,10 +169,5 @@ public class SpeedTest extends TestCase {
                 + " select scans for table name per second,  "
                 + df.format(1.0 / statementsPerSecond)
                 + " seconds per select scans for table name)");
-
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(SpeedTest.class);
     }
 }

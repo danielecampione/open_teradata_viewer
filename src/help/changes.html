@@ -5,7 +5,27 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.17c (22/07/2013)
+<PRE>0.18a (06/09/2013)
+    - Added regexp (REGEXP) operator to the SQL parser.
+    - Added support for SELECT without FROM (e.g. "SELECT 1+2") to the SQL
+      parser.
+    - Moved parser from using StringBuffer to using StringBuilder.
+    - Added support for CAST expression to the SQL parser.
+    - Added support for modulo (a % b) to the SQL parser.
+    - Added support for brackets quotation to the SQL parser.
+    - Added support for NOT expr IS (expr IS NOT was already supported) to the
+      SQL parser.
+    - Added support for Teradata (+) Join Syntax to the SQL parser.
+    - Added alias visitor to the SQL parser.
+    - Added connect visitor to the SQL parser.
+    - TableNamesFinder included in source of SQL parser.
+    - Added proper support for sets (union, intersect) to the SQL parser.
+    - Added support for extract(year from datetime-expr) to the SQL parser.
+    - Start implementation of analytical expressions in the SQL parser.
+    - Expansionpoint for additional letters included in the SQL parser.
+    - The user manual has been updated with the added capabilities.
+
+0.17c (22/07/2013)
     - Added the Sankey nodes to the tool palette of the Graphic Viewer.
     - The inspector of the Graphic Viewer is automatically displayed by
       selecting a component.

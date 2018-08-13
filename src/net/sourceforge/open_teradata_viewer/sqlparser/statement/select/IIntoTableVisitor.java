@@ -28,6 +28,6 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
  */
 public interface IIntoTableVisitor {
 
-    public void visit(Table tableName);
+    void visit(Table tableName);
 
 }

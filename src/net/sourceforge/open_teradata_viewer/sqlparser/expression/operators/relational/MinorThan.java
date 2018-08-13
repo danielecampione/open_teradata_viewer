@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
@@ -27,12 +26,14 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * @author D. Campione
  *
  */
-public class MinorThan extends BinaryExpression {
+public class MinorThan extends OldTeradataJoinBinaryExpression {
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String getStringExpression() {
         return "<";
     }

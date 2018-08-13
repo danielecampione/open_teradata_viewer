@@ -31,39 +31,55 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
  */
 public class SubSelect implements IFromItem, IExpression, IItemsList {
 
-    private ISelectBody iSelectBody;
+    private ISelectBody selectBody;
     private String alias;
 
-    public void accept(IFromItemVisitor iFromItemVisitor) {
-        iFromItemVisitor.visit(this);
+    private Pivot pivot;
+
+    @Override
+    public void accept(IFromItemVisitor fromItemVisitor) {
+        fromItemVisitor.visit(this);
     }
 
     public ISelectBody getSelectBody() {
-        return iSelectBody;
+        return selectBody;
     }
 
     public void setSelectBody(ISelectBody body) {
-        iSelectBody = body;
+        selectBody = body;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String getAlias() {
         return alias;
     }
 
+    @Override
     public void setAlias(String string) {
         alias = string;
     }
 
+    public Pivot getPivot() {
+        return pivot;
+    }
+
+    public void setPivot(Pivot pivot) {
+        this.pivot = pivot;
+    }
+
+    @Override
     public void accept(IItemsListVisitor iItemsListVisitor) {
         iItemsListVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
-        return "(" + iSelectBody + ")"
+        return "(" + selectBody + ")"
                 + ((alias != null) ? " AS " + alias : "");
     }
 }

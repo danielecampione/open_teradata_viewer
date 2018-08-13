@@ -20,56 +20,55 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import java.util.Iterator;
 
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.ItemsListVisitor;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsListVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
- * string) an {@link net.sf.jsqlparser.statement.insert.Insert}.
+ * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert}.
  * 
  * @author D. Campione
  * 
  */
-public class InsertDeParser implements ItemsListVisitor {
+public class InsertDeParser implements IItemsListVisitor {
 
-    protected StringBuffer buffer;
-    protected ExpressionVisitor expressionVisitor;
-    protected SelectVisitor selectVisitor;
+    private StringBuilder buffer;
+    private IExpressionVisitor expressionVisitor;
+    private ISelectVisitor selectVisitor;
 
     public InsertDeParser() {
     }
 
     /**
-     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse {@link
-     *                          net.sf.jsqlparser.expression.Expression}s. It
-     *                          has to share the same<br> StringBuffer (buffer
-     *                          parameter) as this object in order to work.
-     * @param selectVisitor a {@link ISelectVisitor} to de-parse {@link
-     *                      net.sf.jsqlparser.statement.select.Select}s. It has
-     *                      to share the same<br> StringBuffer (buffer
-     *                      parameter) as this object in order to work.
+     * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
+     * {@link net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression}s.
+     * It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
+     * @param selectVisitor a {@link ISelectVisitor} to de-parse
+     * {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select}s.
+     * It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
      * @param buffer the buffer that will be filled with the insert.
      */
-    public InsertDeParser(ExpressionVisitor expressionVisitor,
-            SelectVisitor selectVisitor, StringBuffer buffer) {
+    public InsertDeParser(IExpressionVisitor expressionVisitor,
+            ISelectVisitor selectVisitor, StringBuilder buffer) {
         this.buffer = buffer;
         this.expressionVisitor = expressionVisitor;
         this.selectVisitor = selectVisitor;
     }
 
-    public StringBuffer getBuffer() {
+    public StringBuilder getBuffer() {
         return buffer;
     }
 
-    public void setBuffer(StringBuffer buffer) {
+    public void setBuffer(StringBuilder buffer) {
         this.buffer = buffer;
     }
 
@@ -77,10 +76,10 @@ public class InsertDeParser implements ItemsListVisitor {
         buffer.append("INSERT INTO ");
         buffer.append(insert.getTable().getWholeTableName());
         if (insert.getColumns() != null) {
-            buffer.append("(");
-            for (Iterator<?> iter = insert.getColumns().iterator(); iter
+            buffer.append(" (");
+            for (Iterator<Column> iter = insert.getColumns().iterator(); iter
                     .hasNext();) {
-                Column column = (Column) iter.next();
+                Column column = iter.next();
                 buffer.append(column.getColumnName());
                 if (iter.hasNext()) {
                     buffer.append(", ");
@@ -92,35 +91,59 @@ public class InsertDeParser implements ItemsListVisitor {
         insert.getItemsList().accept(this);
     }
 
+    @Override
     public void visit(ExpressionList expressionList) {
         buffer.append(" VALUES (");
-        for (Iterator<?> iter = expressionList.getExpressions().iterator(); iter
-                .hasNext();) {
-            Expression expression = (Expression) iter.next();
+        for (Iterator<IExpression> iter = expressionList.getExpressions()
+                .iterator(); iter.hasNext();) {
+            IExpression expression = iter.next();
             expression.accept(expressionVisitor);
-            if (iter.hasNext())
+            if (iter.hasNext()) {
                 buffer.append(", ");
+            }
         }
         buffer.append(")");
     }
 
+    @Override
+    public void visit(MultiExpressionList multiExprList) {
+        buffer.append(" VALUES ");
+        for (Iterator<ExpressionList> it = multiExprList.getExprList()
+                .iterator(); it.hasNext();) {
+            buffer.append("(");
+            for (Iterator<IExpression> iter = it.next().getExpressions()
+                    .iterator(); iter.hasNext();) {
+                IExpression expression = iter.next();
+                expression.accept(expressionVisitor);
+                if (iter.hasNext()) {
+                    buffer.append(", ");
+                }
+            }
+            buffer.append(")");
+            if (it.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+    }
+
+    @Override
     public void visit(SubSelect subSelect) {
         subSelect.getSelectBody().accept(selectVisitor);
     }
 
-    public ExpressionVisitor getExpressionVisitor() {
+    public IExpressionVisitor getExpressionVisitor() {
         return expressionVisitor;
     }
 
-    public SelectVisitor getSelectVisitor() {
+    public ISelectVisitor getSelectVisitor() {
         return selectVisitor;
     }
 
-    public void setExpressionVisitor(ExpressionVisitor visitor) {
+    public void setExpressionVisitor(IExpressionVisitor visitor) {
         expressionVisitor = visitor;
     }
 
-    public void setSelectVisitor(SelectVisitor visitor) {
+    public void setSelectVisitor(ISelectVisitor visitor) {
         selectVisitor = visitor;
     }
 }

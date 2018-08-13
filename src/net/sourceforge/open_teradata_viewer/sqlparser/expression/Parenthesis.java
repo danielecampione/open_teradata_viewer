@@ -19,33 +19,34 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * It represents an iExpression like "(" iExpression ")"
+ * It represents an expression like "(" expression ")".
  * 
  * @author D. Campione
  * 
  */
 public class Parenthesis implements IExpression {
 
-    private IExpression iExpression;
+    private IExpression expression;
     private boolean not = false;
 
     public Parenthesis() {
     }
 
-    public Parenthesis(IExpression iExpression) {
-        setExpression(iExpression);
+    public Parenthesis(IExpression expression) {
+        setExpression(expression);
     }
 
     public IExpression getExpression() {
-        return iExpression;
+        return expression;
     }
 
-    public void setExpression(IExpression iExpression) {
-        this.iExpression = iExpression;
+    public final void setExpression(IExpression expression) {
+        this.expression = expression;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public void setNot() {
@@ -56,7 +57,8 @@ public class Parenthesis implements IExpression {
         return not;
     }
 
+    @Override
     public String toString() {
-        return (not ? "NOT " : "") + "(" + iExpression + ")";
+        return (not ? "NOT " : "") + "(" + expression + ")";
     }
 }

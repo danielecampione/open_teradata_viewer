@@ -27,34 +27,53 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * @author D. Campione
  *
  */
-public class InExpression implements IExpression {
+public class InExpression
+        implements
+            IExpression,
+            ISupportsOldTeradataJoinSyntax {
 
     private IExpression leftExpression;
-    private IItemsList iItemsList;
+    private IItemsList leftItemsList;
+    private IItemsList rightItemsList;
     private boolean not = false;
+
+    private int oldTeradataJoinSyntax = NO_TERADATA_JOIN;
 
     public InExpression() {
     }
 
     public InExpression(IExpression leftExpression, IItemsList iItemsList) {
         setLeftExpression(leftExpression);
-        setItemsList(iItemsList);
+        setRightItemsList(iItemsList);
     }
 
-    public IItemsList getItemsList() {
-        return iItemsList;
+    public void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax) {
+        this.oldTeradataJoinSyntax = oldTeradataJoinSyntax;
+        if (oldTeradataJoinSyntax < 0 || oldTeradataJoinSyntax > 1) {
+            throw new IllegalArgumentException(
+                    "unexpected join type for Teradata found with IN (type="
+                            + oldTeradataJoinSyntax + ")");
+        }
+    }
+
+    public int getOldTeradataJoinSyntax() {
+        return oldTeradataJoinSyntax;
+    }
+
+    public IItemsList getRightItemsList() {
+        return rightItemsList;
     }
 
     public IExpression getLeftExpression() {
         return leftExpression;
     }
 
-    public void setItemsList(IItemsList list) {
-        iItemsList = list;
+    public final void setRightItemsList(IItemsList list) {
+        rightItemsList = list;
     }
 
-    public void setLeftExpression(IExpression iExpression) {
-        leftExpression = iExpression;
+    public final void setLeftExpression(IExpression expression) {
+        leftExpression = expression;
     }
 
     public boolean isNot() {
@@ -65,12 +84,31 @@ public class InExpression implements IExpression {
         not = b;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    public IItemsList getLeftItemsList() {
+        return leftItemsList;
     }
 
+    public void setLeftItemsList(IItemsList leftItemsList) {
+        this.leftItemsList = leftItemsList;
+    }
+
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
+    }
+
+    private String getLeftExpressionString() {
+        return leftExpression
+                + (oldTeradataJoinSyntax == TERADATA_JOIN_RIGHT ? "(+)" : "");
+    }
+
+    @Override
     public String toString() {
-        return leftExpression + " " + ((not) ? "NOT " : "") + "IN "
-                + iItemsList + "";
+        return (leftExpression == null
+                ? leftItemsList
+                : getLeftExpressionString())
+                + " "
+                + ((not) ? "NOT " : "")
+                + "IN " + rightItemsList + "";
     }
 }

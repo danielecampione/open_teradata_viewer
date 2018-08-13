@@ -19,17 +19,19 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * A '?' in a statement
+ * A '?' in a statement.
  * 
  * @author D. Campione
- *
+ * 
  */
 public class JdbcParameter implements IExpression {
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return "?";
     }

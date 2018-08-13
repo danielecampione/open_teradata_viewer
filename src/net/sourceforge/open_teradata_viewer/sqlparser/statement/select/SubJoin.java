@@ -29,9 +29,11 @@ public class SubJoin implements IFromItem {
     private IFromItem left;
     private Join join;
     private String alias;
+    private Pivot pivot;
 
-    public void accept(IFromItemVisitor iFromItemVisitor) {
-        iFromItemVisitor.visit(this);
+    @Override
+    public void accept(IFromItemVisitor fromItemVisitor) {
+        fromItemVisitor.visit(this);
     }
 
     public IFromItem getLeft() {
@@ -50,16 +52,28 @@ public class SubJoin implements IFromItem {
         join = j;
     }
 
+    public Pivot getPivot() {
+        return pivot;
+    }
+
+    public void setPivot(Pivot pivot) {
+        this.pivot = pivot;
+    }
+
+    @Override
     public String getAlias() {
         return alias;
     }
 
+    @Override
     public void setAlias(String string) {
         alias = string;
     }
 
+    @Override
     public String toString() {
         return "(" + left + " " + join + ")"
+                + ((pivot != null) ? " " + pivot : "")
                 + ((alias != null) ? " AS " + alias : "");
     }
 }

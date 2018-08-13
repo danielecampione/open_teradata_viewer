@@ -31,10 +31,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class ColDataType {
 
     private String dataType;
+    private List<String> argumentsStringList;
 
-    private List<?> argumentsStringList;
-
-    public List<?> getArgumentsStringList() {
+    public List<String> getArgumentsStringList() {
         return argumentsStringList;
     }
 
@@ -42,7 +41,7 @@ public class ColDataType {
         return dataType;
     }
 
-    public void setArgumentsStringList(List<?> list) {
+    public void setArgumentsStringList(List<String> list) {
         argumentsStringList = list;
     }
 
@@ -50,6 +49,7 @@ public class ColDataType {
         dataType = string;
     }
 
+    @Override
     public String toString() {
         return dataType
                 + (argumentsStringList != null ? " "

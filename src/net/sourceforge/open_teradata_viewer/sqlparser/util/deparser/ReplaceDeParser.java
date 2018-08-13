@@ -20,66 +20,65 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import java.util.Iterator;
 
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.ItemsListVisitor;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsListVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
- * string) a {@link net.sf.jsqlparser.statement.replace.Replace}.
+ * string) a {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace}.
  * 
  * @author D. Campione
  * 
  */
-public class ReplaceDeParser implements ItemsListVisitor {
+public class ReplaceDeParser implements IItemsListVisitor {
 
-    protected StringBuffer buffer;
-    protected ExpressionVisitor expressionVisitor;
-    protected SelectVisitor selectVisitor;
+    private StringBuilder buffer;
+    private IExpressionVisitor expressionVisitor;
+    private ISelectVisitor selectVisitor;
 
     public ReplaceDeParser() {
     }
 
     /**
      * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
-     *                          expressions. It has to share the same<br>
-     *                          StringBuffer (buffer parameter) as this object
-     *                          in order to work.
-     * @param selectVisitor a {@link ISelectVisitor} to de-parse {@link
-     *                      net.sf.jsqlparser.statement.select.Select}s. It has
-     *                      to share the same<br> StringBuffer (buffer
-     *                      parameter) as this object in order to work.
-     * @param buffer the buffer that will be filled with the select
+     * expressions. It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
+     * @param selectVisitor a {@link ISelectVisitor} to de-parse
+     * {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select}s.
+     * It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
+     * @param buffer the buffer that will be filled with the select.
      */
-    public ReplaceDeParser(ExpressionVisitor expressionVisitor,
-            SelectVisitor selectVisitor, StringBuffer buffer) {
+    public ReplaceDeParser(IExpressionVisitor expressionVisitor,
+            ISelectVisitor selectVisitor, StringBuilder buffer) {
         this.buffer = buffer;
         this.expressionVisitor = expressionVisitor;
         this.selectVisitor = selectVisitor;
     }
 
-    public StringBuffer getBuffer() {
+    public StringBuilder getBuffer() {
         return buffer;
     }
 
-    public void setBuffer(StringBuffer buffer) {
+    public void setBuffer(StringBuilder buffer) {
         this.buffer = buffer;
     }
 
     public void deParse(Replace replace) {
-        buffer.append("REPLACE " + replace.getTable().getWholeTableName());
+        buffer.append("REPLACE ")
+                .append(replace.getTable().getWholeTableName());
         if (replace.getItemsList() != null) {
             if (replace.getColumns() != null) {
                 buffer.append(" (");
                 for (int i = 0; i < replace.getColumns().size(); i++) {
-                    Column column = (Column) replace.getColumns().get(i);
+                    Column column = replace.getColumns().get(i);
                     buffer.append(column.getWholeColumnName());
                     if (i < replace.getColumns().size() - 1) {
                         buffer.append(", ");
@@ -92,11 +91,10 @@ public class ReplaceDeParser implements ItemsListVisitor {
         } else {
             buffer.append(" SET ");
             for (int i = 0; i < replace.getColumns().size(); i++) {
-                Column column = (Column) replace.getColumns().get(i);
-                buffer.append(column.getWholeColumnName() + "=");
+                Column column = replace.getColumns().get(i);
+                buffer.append(column.getWholeColumnName()).append("=");
 
-                Expression expression = (Expression) replace.getExpressions()
-                        .get(i);
+                IExpression expression = replace.getExpressions().get(i);
                 expression.accept(expressionVisitor);
                 if (i < replace.getColumns().size() - 1) {
                     buffer.append(", ");
@@ -105,35 +103,43 @@ public class ReplaceDeParser implements ItemsListVisitor {
         }
     }
 
+    @Override
     public void visit(ExpressionList expressionList) {
         buffer.append(" VALUES (");
-        for (Iterator<?> iter = expressionList.getExpressions().iterator(); iter
-                .hasNext();) {
-            Expression expression = (Expression) iter.next();
+        for (Iterator<IExpression> iter = expressionList.getExpressions()
+                .iterator(); iter.hasNext();) {
+            IExpression expression = iter.next();
             expression.accept(expressionVisitor);
-            if (iter.hasNext())
+            if (iter.hasNext()) {
                 buffer.append(", ");
+            }
         }
         buffer.append(")");
     }
 
+    @Override
     public void visit(SubSelect subSelect) {
         subSelect.getSelectBody().accept(selectVisitor);
     }
 
-    public ExpressionVisitor getExpressionVisitor() {
+    public IExpressionVisitor getExpressionVisitor() {
         return expressionVisitor;
     }
 
-    public SelectVisitor getSelectVisitor() {
+    public ISelectVisitor getSelectVisitor() {
         return selectVisitor;
     }
 
-    public void setExpressionVisitor(ExpressionVisitor visitor) {
+    public void setExpressionVisitor(IExpressionVisitor visitor) {
         expressionVisitor = visitor;
     }
 
-    public void setSelectVisitor(SelectVisitor visitor) {
+    public void setSelectVisitor(ISelectVisitor visitor) {
         selectVisitor = visitor;
+    }
+
+    @Override
+    public void visit(MultiExpressionList multiExprList) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

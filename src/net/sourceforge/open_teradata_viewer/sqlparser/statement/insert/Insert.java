@@ -21,14 +21,16 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.insert;
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsList;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * The insert statement.
- * Every column name in <code>columnNames</code> matches an item in <code>iItemsList</code>
+ * The insert statement. Every column name in
+ * <code>columnNames</code> matches an item in
+ * <code>iItemsList</code>.
  * 
  * @author D. Campione
  * 
@@ -36,12 +38,13 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class Insert implements IStatement {
 
     private Table table;
-    private List<?> columns;
+    private List<Column> columns;
     private IItemsList iItemsList;
     private boolean useValues = true;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     public Table getTable() {
@@ -54,22 +57,21 @@ public class Insert implements IStatement {
 
     /**
      * Get the columns (found in "INSERT INTO (col1,col2..) [...]" ).
-     * 
-     * @return a list of {@link net.sf.jsqlparser.schema.Column}
+     *
+     * @return a list of {@link net.sourceforge.open_teradata_viewer.sqlparser.schema.Column}.
      */
-
-    public List<?> getColumns() {
+    public List<Column> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<?> list) {
+    public void setColumns(List<Column> list) {
         columns = list;
     }
 
     /**
      * Get the values (as VALUES (...) or SELECT).
-     *  
-     * @return the values of the insert
+     *
+     * @return the values of the insert.
      */
     public IItemsList getItemsList() {
         return iItemsList;
@@ -87,6 +89,7 @@ public class Insert implements IStatement {
         this.useValues = useValues;
     }
 
+    @Override
     public String toString() {
         String sql = "";
 

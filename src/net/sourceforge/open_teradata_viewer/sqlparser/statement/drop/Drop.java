@@ -34,17 +34,18 @@ public class Drop implements IStatement {
 
     private String type;
     private String name;
-    private List<?> parameters;
+    private List<String> parameters;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     public String getName() {
         return name;
     }
 
-    public List<?> getParameters() {
+    public List<String> getParameters() {
         return parameters;
     }
 
@@ -56,7 +57,7 @@ public class Drop implements IStatement {
         name = string;
     }
 
-    public void setParameters(List<?> list) {
+    public void setParameters(List<String> list) {
         parameters = list;
     }
 
@@ -64,6 +65,7 @@ public class Drop implements IStatement {
         type = string;
     }
 
+    @Override
     public String toString() {
         String sql = "DROP " + type + " " + name;
 

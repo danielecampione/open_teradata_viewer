@@ -29,16 +29,18 @@ public class DoubleValue implements IExpression {
     private double value;
     private String stringValue;
 
-    public DoubleValue(String value) {
-        if (value.charAt(0) == '+') {
-            value = value.substring(1);
+    public DoubleValue(final String value) {
+        String val = value;
+        if (val.charAt(0) == '+') {
+            val = val.substring(1);
         }
-        this.value = Double.parseDouble(value);
-        this.stringValue = value;
+        this.value = Double.parseDouble(val);
+        this.stringValue = val;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public double getValue() {
@@ -49,6 +51,7 @@ public class DoubleValue implements IExpression {
         value = d;
     }
 
+    @Override
     public String toString() {
         return stringValue;
     }

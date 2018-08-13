@@ -21,14 +21,14 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 
 /**
- * An iExpression as in "SELECT expr1 AS EXPR".
+ * An expression as in "SELECT expr1 AS EXPR".
  * 
  * @author D. Campione
  * 
  */
 public class SelectExpressionItem implements ISelectItem {
 
-    private IExpression iExpression;
+    private IExpression expression;
     private String alias;
 
     public String getAlias() {
@@ -36,22 +36,24 @@ public class SelectExpressionItem implements ISelectItem {
     }
 
     public IExpression getExpression() {
-        return iExpression;
+        return expression;
     }
 
     public void setAlias(String string) {
         alias = string;
     }
 
-    public void setExpression(IExpression iExpression) {
-        this.iExpression = iExpression;
+    public void setExpression(IExpression expression) {
+        this.expression = expression;
     }
 
-    public void accept(ISelectItemVisitor iSelectItemVisitor) {
-        iSelectItemVisitor.visit(this);
+    @Override
+    public void accept(ISelectItemVisitor selectItemVisitor) {
+        selectItemVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
-        return iExpression + ((alias != null) ? " AS " + alias : "");
+        return expression + ((alias != null) ? " AS " + alias : "");
     }
 }

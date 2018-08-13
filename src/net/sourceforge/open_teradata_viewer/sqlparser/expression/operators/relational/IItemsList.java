@@ -20,13 +20,13 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.rela
 
 /**
  * Values of an "INSERT" statement (for example a SELECT or a list of
- * expressions)
+ * expressions).
  * 
  * @author D. Campione
  * 
  */
 public interface IItemsList {
 
-    public void accept(IItemsListVisitor iItemsListVisitor);
+    void accept(IItemsListVisitor iItemsListVisitor);
 
 }

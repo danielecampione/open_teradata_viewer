@@ -19,13 +19,13 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.statement;
 
 /**
- * An operation on the db (SELECT, UPDATE ecc.)
+ * An operation on the db (SELECT, UPDATE ecc..).
  * 
  * @author D. Campione
  * 
  */
 public interface IStatement {
 
-    public void accept(IStatementVisitor iStatementVisitor);
+    void accept(IStatementVisitor statementVisitor);
 
 }

@@ -21,7 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
 
 /**
- * A function as MAX,COUNT...
+ * A function as MAX,COUNT..
  * 
  * @author D. Campione
  * 
@@ -34,14 +34,12 @@ public class Function implements IExpression {
     private boolean distinct = false;
     private boolean isEscaped = false;
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
-    /**
-     * The name of he function, i.e. "MAX"
-     * @return the name of he function
-     */
+    /** @return the name of the function, i.e. "MAX". */
     public String getName() {
         return name;
     }
@@ -50,10 +48,7 @@ public class Function implements IExpression {
         name = string;
     }
 
-    /**
-     * true if the parameter to the function is "*"
-     * @return true if the parameter to the function is "*"
-     */
+    /** @return true if the parameter to the function is "*". */
     public boolean isAllColumns() {
         return allColumns;
     }
@@ -62,10 +57,7 @@ public class Function implements IExpression {
         allColumns = b;
     }
 
-    /**
-     * true if the function is "distinct"
-     * @return true if the function is "distinct"
-     */
+    /** @return true if the function is "distinct". */
     public boolean isDistinct() {
         return distinct;
     }
@@ -75,9 +67,10 @@ public class Function implements IExpression {
     }
 
     /**
-     * The list of parameters of the function (if any, else null)
-     * If the parameter is "*", allColumns is set to true
-     * @return the list of parameters of the function (if any, else null)
+     * The list of parameters of the function (if any, else null). If the
+     * parameter is "*", allColumns is set to true.
+     *
+     * @return the list of parameters of the function (if any, else null).
      */
     public ExpressionList getParameters() {
         return parameters;
@@ -88,8 +81,9 @@ public class Function implements IExpression {
     }
 
     /**
-     * Return true if it's in the form "{fn function_body() }" 
-     * @return true if it's java-escaped
+     * Return true if it's in the form "{fn function_body() }".
+     *
+     * @return true if it's java-escaped.
      */
     public boolean isEscaped() {
         return isEscaped;
@@ -99,8 +93,9 @@ public class Function implements IExpression {
         this.isEscaped = isEscaped;
     }
 
+    @Override
     public String toString() {
-        String params = "";
+        String params;
 
         if (allColumns) {
             params = "(*)";
@@ -109,6 +104,8 @@ public class Function implements IExpression {
             if (isDistinct()) {
                 params = params.replaceFirst("\\(", "(DISTINCT ");
             }
+        } else {
+            params = "()";
         }
 
         String ans = name + "" + params + "";

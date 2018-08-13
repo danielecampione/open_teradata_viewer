@@ -36,8 +36,8 @@ public class ExistsExpression implements IExpression {
         return rightExpression;
     }
 
-    public void setRightExpression(IExpression iExpression) {
-        rightExpression = iExpression;
+    public void setRightExpression(IExpression expression) {
+        rightExpression = expression;
     }
 
     public boolean isNot() {
@@ -48,14 +48,16 @@ public class ExistsExpression implements IExpression {
         not = b;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public String getStringExpression() {
         return ((not) ? "NOT " : "") + "EXISTS";
     }
 
+    @Override
     public String toString() {
         return getStringExpression() + " " + rightExpression.toString();
     }

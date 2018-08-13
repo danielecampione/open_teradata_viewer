@@ -34,12 +34,13 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class CreateTable implements IStatement {
 
     private Table table;
-    private List<?> tableOptionsStrings;
-    private List<?> columnDefinitions;
-    private List<?> indexes;
+    private List<String> tableOptionsStrings;
+    private List<ColumnDefinition> columnDefinitions;
+    private List<Index> indexes;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     /** The name of the table to be created. */
@@ -52,39 +53,40 @@ public class CreateTable implements IStatement {
     }
 
     /** A list of {@link ColumnDefinition}s of this table. */
-    public List<?> getColumnDefinitions() {
+    public List<ColumnDefinition> getColumnDefinitions() {
         return columnDefinitions;
     }
 
-    public void setColumnDefinitions(List<?> list) {
+    public void setColumnDefinitions(List<ColumnDefinition> list) {
         columnDefinitions = list;
     }
 
     /**
      * A list of options (as simple strings) of this table definition, as
-     * ("TYPE", "=", "MYISAM"). 
+     * ("TYPE", "=", "MYISAM").
      */
     public List<?> getTableOptionsStrings() {
         return tableOptionsStrings;
     }
 
-    public void setTableOptionsStrings(List<?> list) {
+    public void setTableOptionsStrings(List<String> list) {
         tableOptionsStrings = list;
     }
 
     /**
      * A list of {@link Index}es (for example "PRIMARY KEY") of this table.<br>
      * Indexes created with column definitions (as in mycol INT PRIMARY KEY) are
-     * not inserted into this list.  
+     * not inserted into this list.
      */
-    public List<?> getIndexes() {
+    public List<Index> getIndexes() {
         return indexes;
     }
 
-    public void setIndexes(List<?> list) {
+    public void setIndexes(List<Index> list) {
         indexes = list;
     }
 
+    @Override
     public String toString() {
         String sql = "";
 
@@ -95,8 +97,12 @@ public class CreateTable implements IStatement {
             sql += ", ";
             sql += PlainSelect.getStringList(indexes);
         }
-        sql += ") ";
-        sql += PlainSelect.getStringList(tableOptionsStrings, false, false);
+        sql += ")";
+        String options = PlainSelect.getStringList(tableOptionsStrings, false,
+                false);
+        if (options != null && options.length() > 0) {
+            sql += " " + options;
+        }
 
         return sql;
     }

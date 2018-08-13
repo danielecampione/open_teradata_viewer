@@ -18,13 +18,14 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.delete;
 
+import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
+
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.delete.Delete;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 
 /**
  * 
@@ -34,13 +35,13 @@ import net.sf.jsqlparser.statement.delete.Delete;
  */
 public class DeleteTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public DeleteTest(String arg0) {
         super(arg0);
     }
 
-    public void testDelete() throws JSQLParserException {
+    public void testDelete() throws SQLParserException {
         String statement = "DELETE FROM mytable WHERE mytable.col = 9";
 
         Delete delete = (Delete) parserManager
@@ -49,7 +50,8 @@ public class DeleteTest extends TestCase {
         assertEquals(statement, "" + delete);
     }
 
-    public static void main(String[] args) {
-        TestRunner.run(DeleteTest.class);
+    public void testDeleteWhereProblem1() throws SQLParserException {
+        String stmt = "DELETE FROM tablename WHERE a = 1 AND b = 1";
+        assertSqlCanBeParsedAndDeparsed(stmt);
     }
 }

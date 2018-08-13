@@ -86,8 +86,7 @@ public class HelpAction extends CustomAction {
             }
             try {
                 Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                        + File.separator + "manual_file" + File.separator
-                        + (String) sl.get(i));
+                        + File.separator + (String) sl.get(i));
             } catch (Throwable ex) {
                 ApplicationFrame
                         .getInstance()

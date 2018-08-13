@@ -28,7 +28,13 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
  */
 public interface IFromItemVisitor {
 
-    public void visit(Table tableName);
-    public void visit(SubSelect subSelect);
-    public void visit(SubJoin subjoin);
+    void visit(Table tableName);
+
+    void visit(SubSelect subSelect);
+
+    void visit(SubJoin subjoin);
+
+    void visit(LateralSubSelect lateralSubSelect);
+
+    void visit(ValuesList valuesList);
 }

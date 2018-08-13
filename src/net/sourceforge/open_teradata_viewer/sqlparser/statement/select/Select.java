@@ -32,42 +32,46 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisito
  */
 public class Select implements IStatement {
 
-    private ISelectBody iSelectBody;
-    private List<?> withItemsList;
+    private ISelectBody selectBody;
+    private List<WithItem> withItemsList;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     public ISelectBody getSelectBody() {
-        return iSelectBody;
+        return selectBody;
     }
 
     public void setSelectBody(ISelectBody body) {
-        iSelectBody = body;
+        selectBody = body;
     }
 
+    @Override
     public String toString() {
-        StringBuffer retval = new StringBuffer();
+        StringBuilder retval = new StringBuilder();
         if (withItemsList != null && !withItemsList.isEmpty()) {
             retval.append("WITH ");
-            for (Iterator<?> iter = withItemsList.iterator(); iter.hasNext();) {
+            for (Iterator<WithItem> iter = withItemsList.iterator(); iter
+                    .hasNext();) {
                 WithItem withItem = (WithItem) iter.next();
                 retval.append(withItem);
-                if (iter.hasNext())
+                if (iter.hasNext()) {
                     retval.append(",");
+                }
                 retval.append(" ");
             }
         }
-        retval.append(iSelectBody);
+        retval.append(selectBody);
         return retval.toString();
     }
 
-    public List<?> getWithItemsList() {
+    public List<WithItem> getWithItemsList() {
         return withItemsList;
     }
 
-    public void setWithItemsList(List<?> withItemsList) {
+    public void setWithItemsList(List<WithItem> withItemsList) {
         this.withItemsList = withItemsList;
     }
 }

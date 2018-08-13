@@ -20,8 +20,8 @@ package net.sourceforge.open_teradata_viewer.sqlparser.parser;
 
 import java.io.Reader;
 
-import net.sf.jsqlparser.statement.Statement;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 
 /**
  * Every parser must implements this interface
@@ -31,6 +31,6 @@ import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
  */
 public interface ISqlParser {
 
-    public Statement parse(Reader statementReader) throws SQLParserException;
+    IStatement parse(Reader statementReader) throws SQLParserException;
 
 }

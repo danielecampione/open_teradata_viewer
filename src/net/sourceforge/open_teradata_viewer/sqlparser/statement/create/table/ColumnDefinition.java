@@ -24,8 +24,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 
 /**
  * A column definition in a CREATE TABLE statement.<br>
- * Example: mycol VARCHAR(30) NOT NULL
- *
+ * Example: mycol VARCHAR(30) NOT NULL.
+ * 
  * @author D. Campione
  * 
  */
@@ -33,24 +33,21 @@ public class ColumnDefinition {
 
     private String columnName;
     private ColDataType colDataType;
-    private List<?> columnSpecStrings;
+    private List<String> columnSpecStrings;
 
     /**
      * A list of strings of every word after the datatype of the column.<br>
-     * Example ("NOT", "NULL")
+     * Example ("NOT", "NULL").
      */
-
-    public List<?> getColumnSpecStrings() {
+    public List<String> getColumnSpecStrings() {
         return columnSpecStrings;
     }
 
-    public void setColumnSpecStrings(List<?> list) {
+    public void setColumnSpecStrings(List<String> list) {
         columnSpecStrings = list;
     }
 
-    /**
-     * The {@link ColDataType} of this column definition 
-     */
+    /** The {@link ColDataType} of this column definition. */
     public ColDataType getColDataType() {
         return colDataType;
     }
@@ -67,8 +64,13 @@ public class ColumnDefinition {
         columnName = string;
     }
 
+    @Override
     public String toString() {
-        return columnName + " " + colDataType + " "
-                + PlainSelect.getStringList(columnSpecStrings, false, false);
+        return columnName
+                + " "
+                + colDataType
+                + (columnSpecStrings != null ? " "
+                        + PlainSelect.getStringList(columnSpecStrings, false,
+                                false) : "");
     }
 }

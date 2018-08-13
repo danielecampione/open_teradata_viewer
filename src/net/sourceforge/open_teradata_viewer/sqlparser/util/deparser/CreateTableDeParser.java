@@ -20,87 +20,67 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import java.util.Iterator;
 
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.create.table.Index;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ColumnDefinition;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Index;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
- * string) a {@link net.sf.jsqlparser.statement.create.table.CreateTable}.
+ * string) a {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable}.
  * 
  * @author D. Campione
  * 
  */
 public class CreateTableDeParser {
 
-    protected StringBuffer buffer;
+    private StringBuilder buffer;
 
     /** @param buffer the buffer that will be filled with the select. */
-    public CreateTableDeParser(StringBuffer buffer) {
+    public CreateTableDeParser(StringBuilder buffer) {
         this.buffer = buffer;
     }
 
     public void deParse(CreateTable createTable) {
-        buffer.append("CREATE TABLE "
-                + createTable.getTable().getWholeTableName());
+        buffer.append("CREATE TABLE ").append(
+                createTable.getTable().getWholeTableName());
         if (createTable.getColumnDefinitions() != null) {
-            buffer.append(" { ");
-            for (Iterator<?> iter = createTable.getColumnDefinitions()
-                    .iterator(); iter.hasNext();) {
-                ColumnDefinition columnDefinition = (ColumnDefinition) iter
-                        .next();
+            buffer.append(" (");
+            for (Iterator<ColumnDefinition> iter = createTable
+                    .getColumnDefinitions().iterator(); iter.hasNext();) {
+                ColumnDefinition columnDefinition = iter.next();
                 buffer.append(columnDefinition.getColumnName());
                 buffer.append(" ");
-                buffer.append(columnDefinition.getColDataType().getDataType());
-                if (columnDefinition.getColDataType().getArgumentsStringList() != null) {
-                    for (Iterator<?> iterator = columnDefinition
-                            .getColDataType().getArgumentsStringList()
-                            .iterator(); iterator.hasNext();) {
-                        buffer.append(" ");
-                        buffer.append((String) iterator.next());
-                    }
-                }
+                buffer.append(columnDefinition.getColDataType().toString());
                 if (columnDefinition.getColumnSpecStrings() != null) {
-                    for (Iterator<?> iterator = columnDefinition
-                            .getColumnSpecStrings().iterator(); iterator
-                            .hasNext();) {
+                    for (String s : columnDefinition.getColumnSpecStrings()) {
                         buffer.append(" ");
-                        buffer.append((String) iterator.next());
+                        buffer.append(s);
                     }
                 }
 
-                if (iter.hasNext())
-                    buffer.append(",\n");
+                if (iter.hasNext()) {
+                    buffer.append(", ");
+                }
             }
 
-            for (Iterator<?> iter = createTable.getIndexes().iterator(); iter
-                    .hasNext();) {
-                buffer.append(",\n");
-                Index index = (Index) iter.next();
-                buffer.append(index.getType() + " " + index.getName());
-                buffer.append("(");
-                for (Iterator<?> iterator = index.getColumnsNames().iterator(); iterator
+            if (createTable.getIndexes() != null) {
+                for (Iterator<Index> iter = createTable.getIndexes().iterator(); iter
                         .hasNext();) {
-                    buffer.append((String) iterator.next());
-                    if (iterator.hasNext()) {
-                        buffer.append(", ");
-                    }
+                    buffer.append(", ");
+                    Index index = iter.next();
+                    buffer.append(index.toString());
                 }
-                buffer.append(")");
-
-                if (iter.hasNext())
-                    buffer.append(",\n");
             }
 
-            buffer.append(" \n} ");
+            buffer.append(")");
         }
     }
 
-    public StringBuffer getBuffer() {
+    public StringBuilder getBuffer() {
         return buffer;
     }
 
-    public void setBuffer(StringBuffer buffer) {
+    public void setBuffer(StringBuilder buffer) {
         this.buffer = buffer;
     }
 }

@@ -18,59 +18,67 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.update.Update;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
- * string) an {@link net.sf.jsqlparser.statement.update.Update}.
+ * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update}.
  * 
  * @author D. Campione
  * 
  */
 public class UpdateDeParser {
 
-    protected StringBuffer buffer;
-    protected ExpressionVisitor expressionVisitor;
-
-    public UpdateDeParser() {
-    }
+    private StringBuilder buffer;
+    private IExpressionVisitor expressionVisitor;
 
     /**
      * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
-     *                          expressions. It has to share the same<br>
-     *                          StringBuffer (buffer parameter) as this object
-     *                          in order to work.
+     * expressions. It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
      * @param buffer the buffer that will be filled with the select.
      */
-    public UpdateDeParser(ExpressionVisitor expressionVisitor,
-            StringBuffer buffer) {
+    public UpdateDeParser(IExpressionVisitor expressionVisitor,
+            StringBuilder buffer) {
         this.buffer = buffer;
         this.expressionVisitor = expressionVisitor;
     }
 
-    public StringBuffer getBuffer() {
+    public StringBuilder getBuffer() {
         return buffer;
     }
 
-    public void setBuffer(StringBuffer buffer) {
+    public void setBuffer(StringBuilder buffer) {
         this.buffer = buffer;
     }
 
     public void deParse(Update update) {
-        buffer.append("UPDATE " + update.getTable().getWholeTableName()
-                + " SET ");
+        buffer.append("UPDATE ").append(update.getTable()).append(" SET ");
         for (int i = 0; i < update.getColumns().size(); i++) {
-            Column column = (Column) update.getColumns().get(i);
-            buffer.append(column.getWholeColumnName() + "=");
+            Column column = update.getColumns().get(i);
+            buffer.append(column.getWholeColumnName()).append(" = ");
 
-            Expression expression = (Expression) update.getExpressions().get(i);
+            IExpression expression = update.getExpressions().get(i);
             expression.accept(expressionVisitor);
             if (i < update.getColumns().size() - 1) {
                 buffer.append(", ");
+            }
+        }
+
+        if (update.getFromItem() != null) {
+            buffer.append(" FROM ").append(update.getFromItem());
+            if (update.getJoins() != null) {
+                for (Join join : update.getJoins()) {
+                    if (join.isSimple()) {
+                        buffer.append(", ").append(join);
+                    } else {
+                        buffer.append(" ").append(join);
+                    }
+                }
             }
         }
 
@@ -80,11 +88,11 @@ public class UpdateDeParser {
         }
     }
 
-    public ExpressionVisitor getExpressionVisitor() {
+    public IExpressionVisitor getExpressionVisitor() {
         return expressionVisitor;
     }
 
-    public void setExpressionVisitor(ExpressionVisitor visitor) {
+    public void setExpressionVisitor(IExpressionVisitor visitor) {
         expressionVisitor = visitor;
     }
 }

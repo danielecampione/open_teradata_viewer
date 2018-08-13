@@ -28,7 +28,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
  */
 public class OrderByElement {
 
-    private IExpression iExpression;
+    private IExpression expression;
     private boolean asc = true;
 
     public boolean isAsc() {
@@ -44,14 +44,15 @@ public class OrderByElement {
     }
 
     public IExpression getExpression() {
-        return iExpression;
+        return expression;
     }
 
-    public void setExpression(IExpression iExpression) {
-        this.iExpression = iExpression;
+    public void setExpression(IExpression expression) {
+        this.expression = expression;
     }
 
+    @Override
     public String toString() {
-        return "" + iExpression + ((asc) ? "" : " DESC");
+        return "" + expression + ((asc) ? "" : " DESC");
     }
 }

@@ -18,9 +18,10 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.create;
 
+import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
+
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,14 +29,13 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.create.table.Index;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ColumnDefinition;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Index;
+import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 import test.net.sourceforge.open_teradata_viewer.sqlparser.TestException;
-import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNamesFinder;
 
 /**
  * 
@@ -45,13 +45,23 @@ import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNa
  */
 public class CreateTableTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public CreateTableTest(String arg0) {
         super(arg0);
     }
 
-    public void testCreateTable() throws JSQLParserException {
+    public void testCreateTable2() throws SQLParserException {
+        String statement = "CREATE TABLE testtab (\"test\" varchar (255))";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testCreateTable3() throws SQLParserException {
+        String statement = "CREATE TABLE testtab (\"test\" varchar (255), \"test2\" varchar (255))";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testCreateTable() throws SQLParserException {
         String statement = "CREATE TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
                 + "PRIMARY KEY (mycol2, mycol)) type = myisam";
         CreateTable createTable = (CreateTable) parserManager
@@ -68,10 +78,21 @@ public class CreateTableTest extends TestCase {
         assertEquals(statement, "" + createTable);
     }
 
-    public void testRUBiSCreateList() throws Exception {
-        BufferedReader in = new BufferedReader(new FileReader("testfiles"
-                + File.separator + "RUBiS-create-requests.txt"));
+    public void testCreateTableForeignKey() throws SQLParserException {
+        String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED, PRIMARY KEY (id), FOREIGN KEY (user_id) REFERENCES ra_user(id))";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
 
+    public void testCreateTableForeignKey2() throws SQLParserException {
+        String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED, PRIMARY KEY (id), CONSTRAINT fkIdx FOREIGN KEY (user_id) REFERENCES ra_user(id))";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testRUBiSCreateList() throws Exception {
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(
+                        CreateTableTest.class
+                                .getResourceAsStream("/res/testfiles/sqlparser/RUBiS-create-requests.txt")));
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 
         try {
@@ -82,10 +103,11 @@ public class CreateTableTest extends TestCase {
                     break;
                 }
 
-                if (!line.equals("#begin"))
+                if (!line.equals("#begin")) {
                     break;
+                }
                 line = getLine(in);
-                StringBuffer buf = new StringBuffer(line);
+                StringBuilder buf = new StringBuilder(line);
                 while (true) {
                     line = getLine(in);
                     if (line.equals("#end")) {
@@ -112,7 +134,7 @@ public class CreateTableTest extends TestCase {
                         StringTokenizer tokenizer = new StringTokenizer(cols,
                                 " ");
 
-                        List<String> colsListList = new ArrayList<String>();
+                        List colsListList = new ArrayList();
                         while (tokenizer.hasMoreTokens()) {
                             colsListList.add(tokenizer.nextToken());
                         }
@@ -121,17 +143,16 @@ public class CreateTableTest extends TestCase {
                                 .toArray(new String[colsListList.size()]);
 
                     }
-                    List<String> colsFound = new ArrayList<String>();
+                    List colsFound = new ArrayList();
                     if (createTable.getColumnDefinitions() != null) {
-                        for (Iterator<?> iter = createTable
-                                .getColumnDefinitions().iterator(); iter
-                                .hasNext();) {
+                        for (Iterator iter = createTable.getColumnDefinitions()
+                                .iterator(); iter.hasNext();) {
                             ColumnDefinition columnDefinition = (ColumnDefinition) iter
                                     .next();
                             String colName = columnDefinition.getColumnName();
                             boolean unique = false;
                             if (createTable.getIndexes() != null) {
-                                for (Iterator<?> iterator = createTable
+                                for (Iterator iterator = createTable
                                         .getIndexes().iterator(); iterator
                                         .hasNext();) {
                                     Index index = (Index) iterator.next();
@@ -147,7 +168,7 @@ public class CreateTableTest extends TestCase {
 
                             if (!unique) {
                                 if (columnDefinition.getColumnSpecStrings() != null) {
-                                    for (Iterator<?> iterator = columnDefinition
+                                    for (Iterator iterator = columnDefinition
                                             .getColumnSpecStrings().iterator(); iterator
                                             .hasNext();) {
                                         String par = (String) iterator.next();
@@ -184,8 +205,9 @@ public class CreateTableTest extends TestCase {
 
             }
         } finally {
-            if (in != null)
+            if (in != null) {
                 in.close();
+            }
         }
     }
 
@@ -197,8 +219,9 @@ public class CreateTableTest extends TestCase {
                 line.trim();
                 if ((line.length() != 0)
                         && ((line.length() < 2) || (line.length() >= 2)
-                                && !(line.charAt(0) == '/' && line.charAt(1) == '/')))
+                                && !(line.charAt(0) == '/' && line.charAt(1) == '/'))) {
                     break;
+                }
             } else {
                 break;
             }
@@ -206,9 +229,5 @@ public class CreateTableTest extends TestCase {
         }
 
         return line;
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(CreateTableTest.class);
     }
 }

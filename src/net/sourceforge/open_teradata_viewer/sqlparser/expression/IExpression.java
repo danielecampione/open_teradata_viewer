@@ -26,6 +26,6 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  */
 public interface IExpression {
 
-    public void accept(IExpressionVisitor iExpressionVisitor);
+    void accept(IExpressionVisitor expressionVisitor);
 
 }

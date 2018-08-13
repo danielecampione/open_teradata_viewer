@@ -21,7 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import java.sql.Time;
 
 /**
- * A Time in the form {t 'hh:mm:ss'}
+ * A Time in the form {t 'hh:mm:ss'}.
  * 
  * @author D. Campione
  * 
@@ -34,8 +34,9 @@ public class TimeValue implements IExpression {
         this.value = Time.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public Time getValue() {
@@ -46,6 +47,7 @@ public class TimeValue implements IExpression {
         value = d;
     }
 
+    @Override
     public String toString() {
         return "{t '" + value + "'}";
     }

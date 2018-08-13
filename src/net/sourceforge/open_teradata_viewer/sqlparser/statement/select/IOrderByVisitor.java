@@ -26,6 +26,6 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  */
 public interface IOrderByVisitor {
 
-    public void visit(OrderByElement orderBy);
+    void visit(OrderByElement orderBy);
 
 }

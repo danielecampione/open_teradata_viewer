@@ -34,8 +34,9 @@ public class Delete implements IStatement {
     private Table table;
     private IExpression where;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     public Table getTable() {
@@ -50,10 +51,11 @@ public class Delete implements IStatement {
         table = name;
     }
 
-    public void setWhere(IExpression iExpression) {
-        where = iExpression;
+    public void setWhere(IExpression expression) {
+        where = expression;
     }
 
+    @Override
     public String toString() {
         return "DELETE FROM " + table
                 + ((where != null) ? " WHERE " + where : "");

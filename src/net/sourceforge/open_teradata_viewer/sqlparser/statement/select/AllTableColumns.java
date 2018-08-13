@@ -21,7 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 
 /**
- * All the columns of a table (as in "SELECT TableName.* FROM ...")
+ * All the columns of a table (as in "SELECT TableName.* FROM ...").
  * 
  * @author D. Campione
  * 
@@ -45,10 +45,12 @@ public class AllTableColumns implements ISelectItem {
         this.table = table;
     }
 
-    public void accept(ISelectItemVisitor iSelectItemVisitor) {
-        iSelectItemVisitor.visit(this);
+    @Override
+    public void accept(ISelectItemVisitor selectItemVisitor) {
+        selectItemVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return table + ".*";
     }

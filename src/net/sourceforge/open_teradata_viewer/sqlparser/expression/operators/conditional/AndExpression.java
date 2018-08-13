@@ -26,7 +26,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * 
  * 
  * @author D. Campione
- *
+ * 
  */
 public class AndExpression extends BinaryExpression {
 
@@ -35,10 +35,12 @@ public class AndExpression extends BinaryExpression {
         setRightExpression(rightExpression);
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String getStringExpression() {
         return "AND";
     }

@@ -19,17 +19,19 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * A "NULL" in a sql statement
- *  
+ * A "NULL" in a sql statement.
+ * 
  * @author D. Campione
  * 
  */
 public class NullValue implements IExpression {
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return "NULL";
     }

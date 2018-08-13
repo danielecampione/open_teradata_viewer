@@ -34,11 +34,12 @@ public class AnyComparisonExpression implements IExpression {
         this.subSelect = subSelect;
     }
 
-    public SubSelect GetSubSelect() {
+    public SubSelect getSubSelect() {
         return subSelect;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 }

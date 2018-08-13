@@ -20,37 +20,41 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.rela
 
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * A list of expressions, as in SELECT A FROM TAB WHERE B IN (expr1,expr2,expr3)
+ * A list of expressions, as in SELECT A FROM TAB WHERE B IN
+ * (expr1,expr2,expr3).
  * 
  * @author D. Campione
  * 
  */
 public class ExpressionList implements IItemsList {
 
-    private List<?> expressions;
+    private List<IExpression> expressions;
 
     public ExpressionList() {
     }
 
-    public ExpressionList(List<?> expressions) {
+    public ExpressionList(List<IExpression> expressions) {
         this.expressions = expressions;
     }
 
-    public List<?> getExpressions() {
+    public List<IExpression> getExpressions() {
         return expressions;
     }
 
-    public void setExpressions(List<?> list) {
+    public void setExpressions(List<IExpression> list) {
         expressions = list;
     }
 
+    @Override
     public void accept(IItemsListVisitor iItemsListVisitor) {
         iItemsListVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return PlainSelect.getStringList(expressions, true, true);
     }

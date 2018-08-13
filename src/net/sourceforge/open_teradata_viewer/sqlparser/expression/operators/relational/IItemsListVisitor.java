@@ -28,7 +28,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  */
 public interface IItemsListVisitor {
 
-    public void visit(SubSelect subSelect);
+    void visit(SubSelect subSelect);
 
-    public void visit(ExpressionList expressionList);
+    void visit(ExpressionList expressionList);
+
+    void visit(MultiExpressionList multiExprList);
 }

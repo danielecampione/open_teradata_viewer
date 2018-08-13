@@ -21,16 +21,15 @@ package test.net.sourceforge.open_teradata_viewer.sqlparser.replace;
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
  * 
@@ -40,13 +39,13 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  */
 public class ReplaceTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public ReplaceTest(String arg0) {
         super(arg0);
     }
 
-    public void testReplaceSyntax1() throws JSQLParserException {
+    public void testReplaceSyntax1() throws SQLParserException {
         String statement = "REPLACE mytable SET col1='as', col2=?, col3=565";
         Replace replace = (Replace) parserManager.parse(new StringReader(
                 statement));
@@ -67,7 +66,7 @@ public class ReplaceTest extends TestCase {
 
     }
 
-    public void testReplaceSyntax2() throws JSQLParserException {
+    public void testReplaceSyntax2() throws SQLParserException {
         String statement = "REPLACE mytable (col1, col2, col3) VALUES ('as', ?, 565)";
         Replace replace = (Replace) parserManager.parse(new StringReader(
                 statement));
@@ -90,7 +89,7 @@ public class ReplaceTest extends TestCase {
         assertEquals(statement, "" + replace);
     }
 
-    public void testReplaceSyntax3() throws JSQLParserException {
+    public void testReplaceSyntax3() throws SQLParserException {
         String statement = "REPLACE mytable (col1, col2, col3) SELECT * FROM mytable3";
         Replace replace = (Replace) parserManager.parse(new StringReader(
                 statement));
@@ -103,9 +102,5 @@ public class ReplaceTest extends TestCase {
         assertEquals("col3",
                 ((Column) replace.getColumns().get(2)).getColumnName());
         assertTrue(replace.getItemsList() instanceof SubSelect);
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(ReplaceTest.class);
     }
 }

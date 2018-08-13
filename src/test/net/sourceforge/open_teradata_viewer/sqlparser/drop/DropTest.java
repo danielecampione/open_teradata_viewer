@@ -21,10 +21,9 @@ package test.net.sourceforge.open_teradata_viewer.sqlparser.drop;
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.drop.Drop;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
 
 /**
  * 
@@ -34,13 +33,13 @@ import net.sf.jsqlparser.statement.drop.Drop;
  */
 public class DropTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public DropTest(String arg0) {
         super(arg0);
     }
 
-    public void testDrop() throws JSQLParserException {
+    public void testDrop() throws SQLParserException {
         String statement = "DROP TABLE mytab";
         Drop drop = (Drop) parserManager.parse(new StringReader(statement));
         assertEquals("TABLE", drop.getType());
@@ -53,9 +52,5 @@ public class DropTest extends TestCase {
         assertEquals("myindex", drop.getName());
         assertEquals("CASCADE", drop.getParameters().get(0));
         assertEquals(statement, "" + drop);
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(DropTest.class);
     }
 }

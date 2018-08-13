@@ -23,7 +23,7 @@ import java.util.List;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * An index (unique, primary etc.) in a CREATE TABLE statement
+ * An index (unique, primary etc..) in a CREATE TABLE statement.
  * 
  * @author D. Campione
  * 
@@ -31,15 +31,11 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 public class Index {
 
     private String type;
-
-    private List<?> columnsNames;
+    private List<String> columnsNames;
     private String name;
 
-    /**
-     * A list of strings of all the columns regarding this index  
-     */
-
-    public List<?> getColumnsNames() {
+    /** A list of strings of all the columns regarding this index. */
+    public List<String> getColumnsNames() {
         return columnsNames;
     }
 
@@ -47,14 +43,12 @@ public class Index {
         return name;
     }
 
-    /**
-     * The type of this index: "PRIMARY KEY", "UNIQUE", "INDEX"
-     */
+    /** The type of this index: "PRIMARY KEY", "UNIQUE", "INDEX". */
     public String getType() {
         return type;
     }
 
-    public void setColumnsNames(List<?> list) {
+    public void setColumnsNames(List<String> list) {
         columnsNames = list;
     }
 
@@ -66,6 +60,7 @@ public class Index {
         type = string;
     }
 
+    @Override
     public String toString() {
         return type + " " + PlainSelect.getStringList(columnsNames, true, true)
                 + (name != null ? " " + name : "");

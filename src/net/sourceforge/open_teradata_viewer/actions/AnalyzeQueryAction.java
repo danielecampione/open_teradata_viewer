@@ -25,16 +25,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.AnimatedLink;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
-import test.net.sourceforge.open_teradata_viewer.sqlparser.tablesfinder.TablesNamesFinder;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 
 /**
  * 
@@ -66,14 +66,14 @@ public class AnalyzeQueryAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         try {
-            CCJSqlParserManager pm = new CCJSqlParserManager();
+            CCSqlParserManager pm = new CCSqlParserManager();
             String sql = ApplicationFrame.getInstance().getText();
             if (sql.trim().length() > 0) {
-                Statement statement = pm.parse(new StringReader(sql));
+                IStatement statement = pm.parse(new StringReader(sql));
 
                 // Now you should use a class that implements IStatementVisitor
                 // to decide what to do based on the kind of the statement, that
-                // is SELECT or INSERT etc. but here we are only interested in
+                // is SELECT or INSERT etc.. but here we are only interested in
                 // SELECTS
                 if (statement instanceof Select) {
                     Select selectStatement = (Select) statement;
@@ -111,10 +111,11 @@ public class AnalyzeQueryAction extends CustomAction {
                 ApplicationFrame.getInstance().getGraphicViewer().LayeredDigraphAutoLayoutAction
                         .actionPerformed(new ActionEvent(this, 0, null));
             }
-            ApplicationFrame.getInstance().getGraphicViewer().setVisible(true);
-            GraphicViewer.updateActions();
         } catch (Throwable t) {
             ExceptionDialog.showException(t);
+        } finally {
+            ApplicationFrame.getInstance().getGraphicViewer().setVisible(true);
+            GraphicViewer.updateActions();
         }
     }
 }

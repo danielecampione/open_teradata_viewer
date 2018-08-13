@@ -32,8 +32,9 @@ public class Truncate implements IStatement {
 
     private Table table;
 
-    public void accept(IStatementVisitor iStatementVisitor) {
-        iStatementVisitor.visit(this);
+    @Override
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     public Table getTable() {
@@ -44,6 +45,7 @@ public class Truncate implements IStatement {
         this.table = table;
     }
 
+    @Override
     public String toString() {
         return "TRUNCATE TABLE " + table;
     }

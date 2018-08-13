@@ -26,6 +26,6 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  */
 public interface ISelectBody {
 
-    public void accept(ISelectVisitor iSelectVisitor);
+    void accept(ISelectVisitor selectVisitor);
 
 }

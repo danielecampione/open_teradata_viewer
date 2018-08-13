@@ -19,7 +19,7 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * A string as in 'example_string'
+ * A string as in 'example_string'.
  * 
  * @author D. Campione
  * 
@@ -29,7 +29,7 @@ public class StringValue implements IExpression {
     private String value = "";
 
     public StringValue(String escapedValue) {
-        // Removing "'" at the start and at the end 
+        // Removing "'" at the start and at the end.
         value = escapedValue.substring(1, escapedValue.length() - 1);
     }
 
@@ -38,7 +38,7 @@ public class StringValue implements IExpression {
     }
 
     public String getNotExcapedValue() {
-        StringBuffer buffer = new StringBuffer(value);
+        StringBuilder buffer = new StringBuilder(value);
         int index = 0;
         int deletesNum = 0;
         while ((index = value.indexOf("''", index)) != -1) {
@@ -53,10 +53,12 @@ public class StringValue implements IExpression {
         value = string;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return "'" + value + "'";
     }

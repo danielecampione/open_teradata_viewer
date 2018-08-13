@@ -81,7 +81,8 @@ public class SearchEngineTest extends TestCase {
 
         if (text == null || text.length() <= 0) {
             StringBuffer sb = new StringBuffer();
-            InputStream in = getClass().getResourceAsStream("text.txt");
+            InputStream in = getClass().getResourceAsStream(
+                    "/res/testfiles/editor/text.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String s = null;
             try {

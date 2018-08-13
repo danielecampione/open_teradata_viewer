@@ -18,22 +18,23 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.insert;
 
+import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
+
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
  * 
@@ -43,13 +44,13 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  */
 public class InsertTest extends TestCase {
 
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public InsertTest(String arg0) {
         super(arg0);
     }
 
-    public void testRegularInsert() throws JSQLParserException {
+    public void testRegularInsert() throws SQLParserException {
         String statement = "INSERT INTO mytable (col1, col2, col3) VALUES (?, 'sadfsd', 234)";
         Insert insert = (Insert) parserManager
                 .parse(new StringReader(statement));
@@ -86,7 +87,22 @@ public class InsertTest extends TestCase {
 
     }
 
-    public void testInsertFromSelect() throws JSQLParserException {
+    public void testInsertWithKeywordValue() throws SQLParserException {
+        String statement = "INSERT INTO mytable (col1) VALUE ('val1')";
+        Insert insert = (Insert) parserManager
+                .parse(new StringReader(statement));
+        assertEquals("mytable", insert.getTable().getName());
+        assertEquals(1, insert.getColumns().size());
+        assertEquals("col1",
+                ((Column) insert.getColumns().get(0)).getColumnName());
+        assertEquals("val1",
+                ((StringValue) ((ExpressionList) insert.getItemsList())
+                        .getExpressions().get(0)).getValue());
+        assertEquals("INSERT INTO mytable (col1) VALUES ('val1')",
+                insert.toString());
+    }
+
+    public void testInsertFromSelect() throws SQLParserException {
         String statement = "INSERT INTO mytable (col1, col2, col3) SELECT * FROM mytable2";
         Insert insert = (Insert) parserManager
                 .parse(new StringReader(statement));
@@ -108,7 +124,17 @@ public class InsertTest extends TestCase {
         assertEquals(statementToString, "" + insert);
     }
 
-    public static void main(String[] args) {
-        TestRunner.run(InsertTest.class);
+    public void testInsertMultiRowValue() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e)");
+    }
+
+    public void testInsertMultiRowValueDifferent() throws SQLParserException {
+        try {
+            assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
+        } catch (Exception e) {
+            return;
+        }
+
+        fail("should not work");
     }
 }

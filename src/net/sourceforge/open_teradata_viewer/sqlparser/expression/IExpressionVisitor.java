@@ -18,13 +18,13 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
-import net.sf.jsqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Addition;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseOr;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseXor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Concat;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Division;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Modulo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Multiplication;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Subtraction;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.conditional.AndExpression;
@@ -41,6 +41,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThan;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThanEquals;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
@@ -51,43 +52,93 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  */
 public interface IExpressionVisitor {
 
-    public void visit(NullValue nullValue);
-    public void visit(Function function);
-    public void visit(InverseExpression inverseExpression);
-    public void visit(JdbcParameter jdbcParameter);
-    public void visit(DoubleValue doubleValue);
-    public void visit(LongValue longValue);
-    public void visit(DateValue dateValue);
-    public void visit(TimeValue timeValue);
-    public void visit(TimestampValue timestampValue);
-    public void visit(Parenthesis parenthesis);
-    public void visit(StringValue stringValue);
-    public void visit(Addition addition);
-    public void visit(Division division);
-    public void visit(Multiplication multiplication);
-    public void visit(Subtraction subtraction);
-    public void visit(AndExpression andExpression);
-    public void visit(OrExpression orExpression);
-    public void visit(Between between);
-    public void visit(EqualsTo equalsTo);
-    public void visit(GreaterThan greaterThan);
-    public void visit(GreaterThanEquals greaterThanEquals);
-    public void visit(InExpression inExpression);
-    public void visit(IsNullExpression isNullExpression);
-    public void visit(LikeExpression likeExpression);
-    public void visit(MinorThan minorThan);
-    public void visit(MinorThanEquals minorThanEquals);
-    public void visit(NotEqualsTo notEqualsTo);
-    public void visit(Column tableColumn);
-    public void visit(SubSelect subSelect);
-    public void visit(CaseExpression caseExpression);
-    public void visit(WhenClause whenClause);
-    public void visit(ExistsExpression existsExpression);
-    public void visit(AllComparisonExpression allComparisonExpression);
-    public void visit(AnyComparisonExpression anyComparisonExpression);
-    public void visit(Concat concat);
-    public void visit(Matches matches);
-    public void visit(BitwiseAnd bitwiseAnd);
-    public void visit(BitwiseOr bitwiseOr);
-    public void visit(BitwiseXor bitwiseXor);
+    void visit(NullValue nullValue);
+
+    void visit(Function function);
+
+    void visit(InverseExpression inverseExpression);
+
+    void visit(JdbcParameter jdbcParameter);
+
+    void visit(JdbcNamedParameter jdbcNamedParameter);
+
+    void visit(DoubleValue doubleValue);
+
+    void visit(LongValue longValue);
+
+    void visit(DateValue dateValue);
+
+    void visit(TimeValue timeValue);
+
+    void visit(TimestampValue timestampValue);
+
+    void visit(Parenthesis parenthesis);
+
+    void visit(StringValue stringValue);
+
+    void visit(Addition addition);
+
+    void visit(Division division);
+
+    void visit(Multiplication multiplication);
+
+    void visit(Subtraction subtraction);
+
+    void visit(AndExpression andExpression);
+
+    void visit(OrExpression orExpression);
+
+    void visit(Between between);
+
+    void visit(EqualsTo equalsTo);
+
+    void visit(GreaterThan greaterThan);
+
+    void visit(GreaterThanEquals greaterThanEquals);
+
+    void visit(InExpression inExpression);
+
+    void visit(IsNullExpression isNullExpression);
+
+    void visit(LikeExpression likeExpression);
+
+    void visit(MinorThan minorThan);
+
+    void visit(MinorThanEquals minorThanEquals);
+
+    void visit(NotEqualsTo notEqualsTo);
+
+    void visit(Column tableColumn);
+
+    void visit(SubSelect subSelect);
+
+    void visit(CaseExpression caseExpression);
+
+    void visit(WhenClause whenClause);
+
+    void visit(ExistsExpression existsExpression);
+
+    void visit(AllComparisonExpression allComparisonExpression);
+
+    void visit(AnyComparisonExpression anyComparisonExpression);
+
+    void visit(Concat concat);
+
+    void visit(Matches matches);
+
+    void visit(BitwiseAnd bitwiseAnd);
+
+    void visit(BitwiseOr bitwiseOr);
+
+    void visit(BitwiseXor bitwiseXor);
+
+    void visit(CastExpression cast);
+
+    void visit(Modulo modulo);
+
+    void visit(AnalyticExpression aexpr);
+
+    void visit(ExtractExpression eexpr);
+
+    void visit(IntervalExpression iexpr);
 }

@@ -19,15 +19,21 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
 /**
- * An item in a "SELECT [...] FROM item1" statement.
- * (for example a table or a sub-select) 
+ * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
+ * sub-select).
  * 
  * @author D. Campione
  * 
  */
 public interface IFromItem {
 
-    public void accept(IFromItemVisitor iFromItemVisitor);
-    public String getAlias();
-    public void setAlias(String alias);
+    void accept(IFromItemVisitor fromItemVisitor);
+
+    String getAlias();
+
+    void setAlias(String alias);
+
+    Pivot getPivot();
+
+    void setPivot(Pivot pivot);
 }

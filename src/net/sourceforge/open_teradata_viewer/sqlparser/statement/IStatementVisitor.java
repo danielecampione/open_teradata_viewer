@@ -18,7 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
@@ -35,12 +37,23 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
  */
 public interface IStatementVisitor {
 
-    public void visit(Select select);
-    public void visit(Delete delete);
-    public void visit(Update update);
-    public void visit(Insert insert);
-    public void visit(Replace replace);
-    public void visit(Drop drop);
-    public void visit(Truncate truncate);
-    public void visit(CreateTable createTable);
+    void visit(Select select);
+
+    void visit(Delete delete);
+
+    void visit(Update update);
+
+    void visit(Insert insert);
+
+    void visit(Replace replace);
+
+    void visit(Drop drop);
+
+    void visit(Truncate truncate);
+
+    void visit(CreateIndex createIndex);
+
+    void visit(CreateTable createTable);
+
+    void visit(CreateView createView);
 }

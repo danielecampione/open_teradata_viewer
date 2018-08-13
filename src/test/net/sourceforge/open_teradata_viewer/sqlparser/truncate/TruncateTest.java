@@ -21,9 +21,8 @@ package test.net.sourceforge.open_teradata_viewer.sqlparser.truncate;
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import junit.textui.TestRunner;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.statement.truncate.Truncate;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.Truncate;
 
 /**
  * 
@@ -33,7 +32,7 @@ import net.sf.jsqlparser.statement.truncate.Truncate;
  */
 public class TruncateTest extends TestCase {
 
-    private CCJSqlParserManager parserManager = new CCJSqlParserManager();
+    private CCSqlParserManager parserManager = new CCSqlParserManager();
 
     public TruncateTest(String arg0) {
         super(arg0);
@@ -53,9 +52,5 @@ public class TruncateTest extends TestCase {
         assertEquals("mytab", truncate.getTable().getName());
         assertEquals(toStringStatement.toUpperCase(), truncate.toString()
                 .toUpperCase());
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(TruncateTest.class);
     }
 }

@@ -123,8 +123,8 @@ public class UpdateChecker implements Runnable {
             String latestVersion = null;
             try {
                 latestVersion = new BufferedReader(new InputStreamReader(
-                        new URL(Config.JAVANET_MIRROR + "changes.txt")
-                                .openStream())).readLine();
+                        new URL(Config.HOME_PAGE + "changes.txt").openStream()))
+                        .readLine();
             } catch (ProtocolException pe) { // The exception is caught if the Server has redirected too many times
                 ExceptionDialog.ignoreException(pe);
             } catch (IOException ioe) { // The authentication is required if the HTTP status is 407

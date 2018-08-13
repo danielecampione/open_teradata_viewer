@@ -34,8 +34,9 @@ public class DateValue implements IExpression {
         this.value = Date.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public Date getValue() {

@@ -26,16 +26,16 @@ import java.util.List;
  * @author D. Campione
  * 
  */
-public class WithItem {
+public class WithItem implements ISelectBody {
 
     private String name;
-    private List<?> withItemList;
-    private ISelectBody iSelectBody;
+    private List<ISelectItem> withItemList;
+    private ISelectBody selectBody;
 
     /**
      * The name of this WITH item (for example, "myWITH" in "WITH myWITH AS
      * (SELECT A,B,C))".
-     * 
+     *
      * @return the name of this WITH.
      */
     public String getName() {
@@ -49,37 +49,42 @@ public class WithItem {
     /**
      * The {@link ISelectBody} of this WITH item is the part after the "AS"
      * keyword.
-     * 
+     *
      * @return {@link ISelectBody} of this WITH item.
      */
     public ISelectBody getSelectBody() {
-        return iSelectBody;
+        return selectBody;
     }
 
-    public void setSelectBody(ISelectBody iSelectBody) {
-        this.iSelectBody = iSelectBody;
+    public void setSelectBody(ISelectBody selectBody) {
+        this.selectBody = selectBody;
     }
 
     /**
      * The {@link ISelectItem}s in this WITH (for example the A,B,C in "WITH
      * mywith (A,B,C) AS ...").
-     * 
+     *
      * @return a list of {@link ISelectItem}s.
      */
-    public List<?> getWithItemList() {
+    public List<ISelectItem> getWithItemList() {
         return withItemList;
     }
 
-    public void setWithItemList(List<?> withItemList) {
+    public void setWithItemList(List<ISelectItem> withItemList) {
         this.withItemList = withItemList;
     }
 
+    @Override
     public String toString() {
         return name
                 + ((withItemList != null)
                         ? " "
                                 + PlainSelect.getStringList(withItemList, true,
                                         true)
-                        : "") + " AS (" + iSelectBody + ")";
+                        : "") + " AS (" + selectBody + ")";
+    }
+
+    public void accept(ISelectVisitor visitor) {
+        visitor.visit(this);
     }
 }

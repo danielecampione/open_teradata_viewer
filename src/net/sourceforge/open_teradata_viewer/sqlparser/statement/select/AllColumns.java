@@ -19,17 +19,19 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
 /**
- * All the columns (as in "SELECT * FROM ...")
+ * All the columns (as in "SELECT * FROM ...").
  * 
  * @author D. Campione
  * 
  */
 public class AllColumns implements ISelectItem {
 
-    public void accept(ISelectItemVisitor iSelectItemVisitor) {
-        iSelectItemVisitor.visit(this);
+    @Override
+    public void accept(ISelectItemVisitor selectItemVisitor) {
+        selectItemVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return "*";
     }

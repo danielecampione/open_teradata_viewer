@@ -19,7 +19,7 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * Every number without a point or an exponential format is a LongValue
+ * Every number without a point or an exponential format is a LongValue.
  * 
  * @author D. Campione
  * 
@@ -29,16 +29,18 @@ public class LongValue implements IExpression {
     private long value;
     private String stringValue;
 
-    public LongValue(String value) {
-        if (value.charAt(0) == '+') {
-            value = value.substring(1);
+    public LongValue(final String value) {
+        String val = value;
+        if (val.charAt(0) == '+') {
+            val = val.substring(1);
         }
-        this.value = Long.parseLong(value);
-        setStringValue(value);
+        this.value = Long.parseLong(val);
+        this.stringValue = val;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public long getValue() {
@@ -57,6 +59,7 @@ public class LongValue implements IExpression {
         stringValue = string;
     }
 
+    @Override
     public String toString() {
         return getStringValue();
     }

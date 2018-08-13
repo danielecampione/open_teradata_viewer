@@ -19,8 +19,8 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * A basic class for binary expressions, that is expressions having a left member and a right member
- * which are in turn expressions. 
+ * A basic class for binary expressions, that is expressions having a left
+ * member and a right member which are in turn expressions.
  * 
  * @author D. Campione
  * 
@@ -42,12 +42,12 @@ public abstract class BinaryExpression implements IExpression {
         return rightExpression;
     }
 
-    public void setLeftExpression(IExpression iExpression) {
-        leftExpression = iExpression;
+    public void setLeftExpression(IExpression expression) {
+        leftExpression = expression;
     }
 
-    public void setRightExpression(IExpression iExpression) {
-        rightExpression = iExpression;
+    public void setRightExpression(IExpression expression) {
+        rightExpression = expression;
     }
 
     public void setNot() {
@@ -58,6 +58,7 @@ public abstract class BinaryExpression implements IExpression {
         return not;
     }
 
+    @Override
     public String toString() {
         return (not ? "NOT " : "") + getLeftExpression() + " "
                 + getStringExpression() + " " + getRightExpression();

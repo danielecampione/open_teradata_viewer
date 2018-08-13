@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 
 /**
  * A join clause.
@@ -37,13 +38,14 @@ public class Join {
     private boolean full = false;
     private boolean inner = false;
     private boolean simple = false;
+    private boolean cross = false;
     private IFromItem rightItem;
     private IExpression onExpression;
-    private List<?> usingColumns;
+    private List<Column> usingColumns;
 
     /**
      * Whether is a tab1,tab2 join.
-     * 
+     *
      * @return true if is a "tab1,tab2" join.
      */
     public boolean isSimple() {
@@ -56,7 +58,7 @@ public class Join {
 
     /**
      * Whether is a "INNER" join.
-     * 
+     *
      * @return true if is a "INNER" join.
      */
     public boolean isInner() {
@@ -69,7 +71,7 @@ public class Join {
 
     /**
      * Whether is a "OUTER" join.
-     * 
+     *
      * @return true if is a "OUTER" join.
      */
     public boolean isOuter() {
@@ -82,7 +84,7 @@ public class Join {
 
     /**
      * Whether is a "LEFT" join.
-     * 
+     *
      * @return true if is a "LEFT" join.
      */
     public boolean isLeft() {
@@ -95,7 +97,7 @@ public class Join {
 
     /**
      * Whether is a "RIGHT" join.
-     * 
+     *
      * @return true if is a "RIGHT" join.
      */
     public boolean isRight() {
@@ -108,7 +110,7 @@ public class Join {
 
     /**
      * Whether is a "NATURAL" join.
-     * 
+     *
      * @return true if is a "NATURAL" join.
      */
     public boolean isNatural() {
@@ -121,7 +123,7 @@ public class Join {
 
     /**
      * Whether is a "FULL" join.
-     * 
+     *
      * @return true if is a "FULL" join.
      */
     public boolean isFull() {
@@ -130,6 +132,14 @@ public class Join {
 
     public void setFull(boolean b) {
         full = b;
+    }
+
+    public boolean isCross() {
+        return cross;
+    }
+
+    public void setCross(boolean cross) {
+        this.cross = cross;
     }
 
     /** Returns the right item of the join. */
@@ -146,41 +156,46 @@ public class Join {
         return onExpression;
     }
 
-    public void setOnExpression(IExpression iExpression) {
-        onExpression = iExpression;
+    public void setOnExpression(IExpression expression) {
+        onExpression = expression;
     }
 
     /**
-     * Returns the "USING" list of {@link net.sf.jsqlparser.schema.Column}s (if
-     * any).
+     * Returns the "USING" list of {@link net.sourceforge.open_teradata_viewer.sqlparser.schema.Column}s
+     * (if any).
      */
-    public List<?> getUsingColumns() {
+    public List<Column> getUsingColumns() {
         return usingColumns;
     }
 
-    public void setUsingColumns(List<?> list) {
+    public void setUsingColumns(List<Column> list) {
         usingColumns = list;
     }
 
+    @Override
     public String toString() {
-        if (isSimple())
+        if (isSimple()) {
             return "" + rightItem;
-        else {
+        } else {
             String type = "";
 
-            if (isRight())
+            if (isRight()) {
                 type += "RIGHT ";
-            else if (isNatural())
+            } else if (isNatural()) {
                 type += "NATURAL ";
-            else if (isFull())
+            } else if (isFull()) {
                 type += "FULL ";
-            else if (isLeft())
+            } else if (isLeft()) {
                 type += "LEFT ";
+            } else if (isCross()) {
+                type += "CROSS ";
+            }
 
-            if (isOuter())
+            if (isOuter()) {
                 type += "OUTER ";
-            else if (isInner())
+            } else if (isInner()) {
                 type += "INNER ";
+            }
 
             return type
                     + "JOIN "

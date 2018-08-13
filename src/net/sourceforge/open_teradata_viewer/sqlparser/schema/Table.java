@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.schema;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IIntoTableVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
 
 /**
  * A table. It can have an alias and the schema name it belongs to.
@@ -33,6 +34,7 @@ public class Table implements IFromItem {
     private String schemaName;
     private String name;
     private String alias;
+    private Pivot pivot;
 
     public Table() {
     }
@@ -58,10 +60,12 @@ public class Table implements IFromItem {
         schemaName = string;
     }
 
+    @Override
     public String getAlias() {
         return alias;
     }
 
+    @Override
     public void setAlias(String string) {
         alias = string;
     }
@@ -82,15 +86,26 @@ public class Table implements IFromItem {
 
     }
 
-    public void accept(IFromItemVisitor iFromItemVisitor) {
-        iFromItemVisitor.visit(this);
+    @Override
+    public void accept(IFromItemVisitor fromItemVisitor) {
+        fromItemVisitor.visit(this);
     }
 
     public void accept(IIntoTableVisitor iIntoTableVisitor) {
         iIntoTableVisitor.visit(this);
     }
 
+    public Pivot getPivot() {
+        return pivot;
+    }
+
+    public void setPivot(Pivot pivot) {
+        this.pivot = pivot;
+    }
+
+    @Override
     public String toString() {
-        return getWholeTableName() + ((alias != null) ? " AS " + alias : "");
+        return getWholeTableName() + ((pivot != null) ? " " + pivot : "")
+                + ((alias != null) ? " AS " + alias : "");
     }
 }

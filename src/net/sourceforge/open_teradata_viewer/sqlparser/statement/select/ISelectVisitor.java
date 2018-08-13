@@ -26,6 +26,9 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  */
 public interface ISelectVisitor {
 
-    public void visit(PlainSelect plainSelect);
-    public void visit(Union union);
+    void visit(PlainSelect plainSelect);
+
+    void visit(SetOperationList setOpList);
+
+    void visit(WithItem withItem);
 }

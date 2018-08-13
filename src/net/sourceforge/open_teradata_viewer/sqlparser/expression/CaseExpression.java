@@ -24,48 +24,51 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 
 /**
  * CASE/WHEN expression.
- * 
+ *
  * Syntax:
  * <code><pre>
- * CASE 
+ * CASE
  * WHEN condition THEN expression
  * [WHEN condition THEN expression]...
  * [ELSE expression]
  * END
  * </pre></code>
- * 
+ *
  * <br/>
  * or <br/>
  * <br/>
- * 
+ *
  * <code><pre>
- * CASE expression 
+ * CASE expression
  * WHEN condition THEN expression
  * [WHEN condition THEN expression]...
  * [ELSE expression]
  * END
  * </pre></code>
- *  
- * See also:
- * https://aurora.vcu.edu/db2help/db2s0/frame3.htm#casexp
- * http://sybooks.sybase.com/onlinebooks/group-as/asg1251e/commands/@ebt-link;pt=5954?target=%25N%15_52628_START_RESTART_N%25
- *  
+ *
+ * See also: https://aurora.vcu.edu/db2help/db2s0/frame3.htm#casexp
+ * http://sybooks.sybase.com/onlinebooks/group-as/asg1251e /commands/
+ *
+ * @ebt-link;pt=5954?target=%25N%15_52628_START_RESTART_N%25
+ *
+ *
  * @author D. Campione
  * 
  */
 public class CaseExpression implements IExpression {
 
     private IExpression switchExpression;
-
-    private List<?> whenClauses;
-
+    private List<IExpression> whenClauses;
     private IExpression elseExpression;
 
-    /* (non-Javadoc)
-     * @see net.sf.jsqlparser.expression.Expression#accept(net.sf.jsqlparser.expression.ExpressionVisitor)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression#accept(net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor)
      */
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     /** @return Returns the switchExpression. */
@@ -89,15 +92,16 @@ public class CaseExpression implements IExpression {
     }
 
     /** @return Returns the whenClauses. */
-    public List<?> getWhenClauses() {
+    public List<IExpression> getWhenClauses() {
         return whenClauses;
     }
 
     /** @param whenClauses The whenClauses to set. */
-    public void setWhenClauses(List<?> whenClauses) {
+    public void setWhenClauses(List<IExpression> whenClauses) {
         this.whenClauses = whenClauses;
     }
 
+    @Override
     public String toString() {
         return "CASE "
                 + ((switchExpression != null) ? switchExpression + " " : "")

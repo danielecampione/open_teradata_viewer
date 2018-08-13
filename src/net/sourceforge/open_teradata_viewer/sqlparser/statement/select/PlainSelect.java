@@ -28,28 +28,29 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
  * The core of a "SELECT" statement (no UNION, no ORDER BY).
  * 
  * @author D. Campione
+ * 
  */
 public class PlainSelect implements ISelectBody {
 
     private Distinct distinct = null;
-    private List<?> selectItems;
+    private List<ISelectItem> selectItems;
     private Table into;
-    private IFromItem iFromItem;
-    private List<?> joins;
+    private IFromItem fromItem;
+    private List<Join> joins;
     private IExpression where;
-    private List<?> groupByColumnReferences;
-    private List<?> orderByElements;
+    private List<IExpression> groupByColumnReferences;
+    private List<OrderByElement> orderByElements;
     private IExpression having;
     private Limit limit;
     private Top top;
 
     /**
      * The {@link IFromItem} in this query.
-     * 
+     *
      * @return the {@link IFromItem}.
      */
     public IFromItem getFromItem() {
-        return iFromItem;
+        return fromItem;
     }
 
     public Table getInto() {
@@ -59,10 +60,10 @@ public class PlainSelect implements ISelectBody {
     /**
      * The {@link ISelectItem}s in this query (for example the A,B,C in "SELECT
      * A,B,C").
-     * 
+     *
      * @return a list of {@link ISelectItem}s.
      */
-    public List<?> getSelectItems() {
+    public List<ISelectItem> getSelectItems() {
         return selectItems;
     }
 
@@ -71,14 +72,14 @@ public class PlainSelect implements ISelectBody {
     }
 
     public void setFromItem(IFromItem item) {
-        iFromItem = item;
+        fromItem = item;
     }
 
     public void setInto(Table table) {
         into = table;
     }
 
-    public void setSelectItems(List<?> list) {
+    public void setSelectItems(List<ISelectItem> list) {
         selectItems = list;
     }
 
@@ -87,23 +88,24 @@ public class PlainSelect implements ISelectBody {
     }
 
     /** @return the list of {@link Join}s. */
-    public List<?> getJoins() {
+    public List<Join> getJoins() {
         return joins;
     }
 
-    public void setJoins(List<?> list) {
+    public void setJoins(List<Join> list) {
         joins = list;
     }
 
-    public void accept(ISelectVisitor iSelectVisitor) {
-        iSelectVisitor.visit(this);
+    @Override
+    public void accept(ISelectVisitor selectVisitor) {
+        selectVisitor.visit(this);
     }
 
-    public List<?> getOrderByElements() {
+    public List<OrderByElement> getOrderByElements() {
         return orderByElements;
     }
 
-    public void setOrderByElements(List<?> orderByElements) {
+    public void setOrderByElements(List<OrderByElement> orderByElements) {
         this.orderByElements = orderByElements;
     }
 
@@ -135,53 +137,63 @@ public class PlainSelect implements ISelectBody {
         return having;
     }
 
-    public void setHaving(IExpression iExpression) {
-        having = iExpression;
+    public void setHaving(IExpression expression) {
+        having = expression;
     }
 
     /**
      * A list of {@link IExpression}s of the GROUP BY clause. It is null in case
      * there is no GROUP BY clause.
-     * 
-     * @return a list of {@link IExpression}s. 
+     *
+     * @return a list of {@link IExpression}s.
      */
-    public List<?> getGroupByColumnReferences() {
+    public List<IExpression> getGroupByColumnReferences() {
         return groupByColumnReferences;
     }
 
-    public void setGroupByColumnReferences(List<?> list) {
+    public void setGroupByColumnReferences(List<IExpression> list) {
         groupByColumnReferences = list;
     }
 
+    @Override
     public String toString() {
-        String sql = "";
-
-        sql = "SELECT ";
-        sql += ((distinct != null) ? "" + distinct + " " : "");
-        sql += ((top != null) ? "" + top + " " : "");
-        sql += getStringList(selectItems);
-        sql += " FROM " + iFromItem;
-        if (joins != null) {
-            Iterator<?> it = joins.iterator();
-            while (it.hasNext()) {
-                Join join = (Join) it.next();
-                if (join.isSimple()) {
-                    sql += ", " + join;
-                } else {
-                    sql += " " + join;
+        StringBuilder sql = new StringBuilder("SELECT ");
+        if (distinct != null) {
+            sql.append(distinct).append(" ");
+        }
+        if (top != null) {
+            sql.append(top).append(" ");
+        }
+        sql.append(getStringList(selectItems));
+        if (fromItem != null) {
+            sql.append(" FROM ").append(fromItem);
+            if (joins != null) {
+                Iterator<Join> it = joins.iterator();
+                while (it.hasNext()) {
+                    Join join = it.next();
+                    if (join.isSimple()) {
+                        sql.append(", ").append(join);
+                    } else {
+                        sql.append(" ").append(join);
+                    }
                 }
             }
+            if (where != null) {
+                sql.append(" WHERE ").append(where);
+            }
+            sql.append(getFormatedList(groupByColumnReferences, "GROUP BY"));
+            if (having != null) {
+                sql.append(" HAVING ").append(having);
+            }
+            sql.append(orderByToString(orderByElements));
+            if (limit != null) {
+                sql.append(limit);
+            }
         }
-        sql += ((where != null) ? " WHERE " + where : "");
-        sql += getFormatedList(groupByColumnReferences, "GROUP BY");
-        sql += ((having != null) ? " HAVING " + having : "");
-        sql += orderByToString(orderByElements);
-        sql += ((limit != null) ? limit + "" : "");
-
-        return sql;
+        return sql.toString();
     }
 
-    public static String orderByToString(List<?> orderByElements) {
+    public static String orderByToString(List<OrderByElement> orderByElements) {
         return getFormatedList(orderByElements, "ORDER BY");
     }
 
@@ -207,12 +219,12 @@ public class PlainSelect implements ISelectBody {
     /**
      * List the toString out put of the objects in the List comma separated. If
      * the List is null or empty an empty string is returned.
-     * 
+     *
      * The same as getStringList(list, true, false).
-     * 
+     *
      * @see #getStringList(List, boolean, boolean)
-     * @param list List of objects with toString methods.
-     * @return comma separated list of the elements in the list.
+     * @param list list of objects with toString methods
+     * @return comma separated list of the elements in the list
      */
     public static String getStringList(List<?> list) {
         return getStringList(list, true, false);
@@ -221,7 +233,7 @@ public class PlainSelect implements ISelectBody {
     /**
      * List the toString out put of the objects in the List that can be comma
      * separated. If the List is null or empty an empty string is returned.
-     * 
+     *
      * @param list list of objects with toString methods.
      * @param useComma true if the list has to be comma separated.
      * @param useBrackets true if the list has to be enclosed in brackets.

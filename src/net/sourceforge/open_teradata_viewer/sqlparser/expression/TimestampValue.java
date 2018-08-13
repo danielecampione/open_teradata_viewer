@@ -21,7 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import java.sql.Timestamp;
 
 /**
- * A Timestamp in the form {ts 'yyyy-mm-dd hh:mm:ss.f . . .'}
+ * A Timestamp in the form {ts 'yyyy-mm-dd hh:mm:ss.f . . .'}.
  * 
  * @author D. Campione
  * 
@@ -34,8 +34,9 @@ public class TimestampValue implements IExpression {
         this.value = Timestamp.valueOf(value.substring(1, value.length() - 1));
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
     public Timestamp getValue() {
@@ -46,6 +47,7 @@ public class TimestampValue implements IExpression {
         value = d;
     }
 
+    @Override
     public String toString() {
         return "{ts '" + value + "'}";
     }

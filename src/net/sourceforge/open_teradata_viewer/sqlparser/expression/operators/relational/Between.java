@@ -22,9 +22,10 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * A "BETWEEN" expr1 expr2 statement
+ * A "BETWEEN" expr1 expr2 statement.
  * 
  * @author D. Campione
+ * 
  */
 public class Between implements IExpression {
 
@@ -49,26 +50,28 @@ public class Between implements IExpression {
         return not;
     }
 
-    public void setBetweenExpressionEnd(IExpression iExpression) {
-        betweenExpressionEnd = iExpression;
+    public void setBetweenExpressionEnd(IExpression expression) {
+        betweenExpressionEnd = expression;
     }
 
-    public void setBetweenExpressionStart(IExpression iExpression) {
-        betweenExpressionStart = iExpression;
+    public void setBetweenExpressionStart(IExpression expression) {
+        betweenExpressionStart = expression;
     }
 
-    public void setLeftExpression(IExpression iExpression) {
-        leftExpression = iExpression;
+    public void setLeftExpression(IExpression expression) {
+        leftExpression = expression;
     }
 
     public void setNot(boolean b) {
         not = b;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return leftExpression + " " + (not ? "NOT " : "") + "BETWEEN "
                 + betweenExpressionStart + " AND " + betweenExpressionEnd;

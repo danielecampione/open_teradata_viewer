@@ -40,18 +40,20 @@ public class IsNullExpression implements IExpression {
         return not;
     }
 
-    public void setLeftExpression(IExpression iExpression) {
-        leftExpression = iExpression;
+    public void setLeftExpression(IExpression expression) {
+        leftExpression = expression;
     }
 
     public void setNot(boolean b) {
         not = b;
     }
 
-    public void accept(IExpressionVisitor iExpressionVisitor) {
-        iExpressionVisitor.visit(this);
+    @Override
+    public void accept(IExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return leftExpression + " IS " + ((not) ? "NOT " : "") + "NULL";
     }
