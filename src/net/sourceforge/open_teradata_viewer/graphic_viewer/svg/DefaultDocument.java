@@ -68,11 +68,24 @@ import org.xml.sax.InputSource;
  */
 public class DefaultDocument implements IDomDoc {
 
+    private Document myDoc;
+    private GraphicViewerLayer myCurrentLayer;
+    private double myGraphicViewerSVGVersion;
+    private boolean myDisabledDrawing;
+    private boolean myGenerateGraphicViewerXML = true;
+    private boolean myGenerateSVG = true;
+    private boolean myReadSVG = false;
+    private boolean mySVGTooltips = true;
+    private HashMap myGraphicViewerObjectToSVGNodeMap;
+    private Vector myReferencingNode;
+    private Vector myReferenceName;
+    private Vector myReferencedObj;
+    private HashMap myTagToGraphicViewerObjectMap;
+    private Vector myReferencingObject;
+    private Vector myReferencingAttr;
+    private Vector myReferencedTag;
+
     public DefaultDocument() {
-        _fldnull = true;
-        _fldvoid = true;
-        b = true;
-        _fldint = false;
         resetDocument();
     }
 
@@ -82,43 +95,43 @@ public class DefaultDocument implements IDomDoc {
                     .newInstance();
             DocumentBuilder documentbuilder = documentbuilderfactory
                     .newDocumentBuilder();
-            _fldgoto = documentbuilder.newDocument();
-            _fldbyte = new HashMap<Object, IDomElement>();
-            _fldlong = new Vector<IDomElement>();
-            _fldchar = new Vector<String>();
-            _fldcase = new Vector<Object>();
-            _fldif = new Vector<String>();
-            _flddo = new Vector<String>();
-            _fldtry = new Vector<Object>();
-            _fldelse = new HashMap<String, Object>();
-            _fldfor = 3D;
-            a = false;
+            myDoc = documentbuilder.newDocument();
+            myGraphicViewerObjectToSVGNodeMap = new HashMap();
+            myReferencingNode = new Vector();
+            myReferenceName = new Vector();
+            myReferencedObj = new Vector();
+            myReferencedTag = new Vector();
+            myReferencingAttr = new Vector();
+            myReferencingObject = new Vector();
+            myTagToGraphicViewerObjectMap = new HashMap();
+            myGraphicViewerSVGVersion = 3D;
+            myDisabledDrawing = false;
         } catch (Exception e) {
             ExceptionDialog.ignoreException(e);
         }
     }
 
     public IDomElement createElement(String s) {
-        return new DefaultElement(_fldgoto.createElement(s));
+        return new DefaultElement(myDoc.createElement(s));
     }
 
     public IDomText createText(String s) {
-        return new DefaultText(_fldgoto.createTextNode(s));
+        return new DefaultText(myDoc.createTextNode(s));
     }
 
     public IDomCDATASection createCDATASection(String s) {
-        return new a(_fldgoto.createCDATASection(s));
+        return new DefaultCDATASection(myDoc.createCDATASection(s));
     }
 
-    private IDomElement a(IDomElement domelement) {
+    private IDomElement appendChild(IDomElement domelement) {
         DefaultElement defaultelement = (DefaultElement) domelement;
-        Node node = _fldgoto.appendChild(defaultelement.getElement());
+        Node node = myDoc.appendChild(defaultelement.getElement());
         Element element = (Element) node;
         DefaultElement defaultelement1 = new DefaultElement(element);
         return defaultelement1;
     }
 
-    private void a(Writer writer) {
+    private void writeFile(Writer writer) {
         try {
             TransformerFactory transformerfactory = TransformerFactory
                     .newInstance();
@@ -126,103 +139,106 @@ public class DefaultDocument implements IDomDoc {
             transformer.setOutputProperty("method", "xml");
             transformer.setOutputProperty("indent", "yes");
             transformer.setOutputProperty("omit-xml-declaration", "no");
-            transformer.transform(new DOMSource(_fldgoto), new StreamResult(
-                    writer));
+            transformer.transform(new DOMSource(myDoc),
+                    new StreamResult(writer));
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
         }
     }
 
-    private void a(Reader reader) {
+    private void readFile(Reader reader) {
         try {
             DocumentBuilderFactory documentbuilderfactory = DocumentBuilderFactory
                     .newInstance();
             documentbuilderfactory.setNamespaceAware(true);
             DocumentBuilder documentbuilder = documentbuilderfactory
                     .newDocumentBuilder();
-            _fldgoto = documentbuilder.parse(new InputSource(reader));
+            myDoc = documentbuilder.parse(new InputSource(reader));
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
         }
     }
 
     public IDomElement getDocumentElement() {
-        Element element = _fldgoto.getDocumentElement();
+        Element element = myDoc.getDocumentElement();
         return new DefaultElement(element);
     }
 
     public void registerObject(Object obj, IDomElement domelement) {
-        _fldbyte.put(obj, domelement);
+        myGraphicViewerObjectToSVGNodeMap.put(obj, domelement);
     }
 
-    private IDomElement a(Object obj) {
-        return (IDomElement) _fldbyte.get(obj);
+    private IDomElement getNode(Object obj) {
+        return (IDomElement) myGraphicViewerObjectToSVGNodeMap.get(obj);
     }
 
     public void registerReferencingNode(IDomElement domelement, String s,
             Object obj) {
-        _fldlong.addElement(domelement);
-        _fldchar.addElement(s);
-        _fldcase.addElement(obj);
+        myReferencingNode.addElement(domelement);
+        myReferenceName.addElement(s);
+        myReferencedObj.addElement(obj);
     }
 
     public boolean isRegisteredReference(Object obj) {
-        for (int i = 0; i < _fldcase.size(); i++) {
-            Object obj1 = _fldcase.elementAt(i);
-            if (obj1 == obj)
+        for (int i = 0; i < myReferencedObj.size(); i++) {
+            Object obj1 = myReferencedObj.elementAt(i);
+            if (obj1 == obj) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    private IDomElement _mthnew(int i) {
-        if (i >= _fldlong.size())
+    private IDomElement getReferencingNode(int i) {
+        if (i >= myReferencingNode.size()) {
             return null;
-        else
-            return (IDomElement) _fldlong.get(i);
+        } else {
+            return (IDomElement) myReferencingNode.get(i);
+        }
     }
 
-    private String _mthfor(int i) {
-        return (String) _fldchar.get(i);
+    private String getReferenceName(int i) {
+        return (String) myReferenceName.get(i);
     }
 
-    private Object _mthif(int i) {
-        return _fldcase.get(i);
+    private Object getReferencedObject(int i) {
+        return myReferencedObj.get(i);
     }
 
     public void registerTag(String s, Object obj) {
-        _fldelse.put(s, obj);
+        myTagToGraphicViewerObjectMap.put(s, obj);
     }
 
-    private Object a(String s) {
-        return _fldelse.get(s);
+    private Object getRegisteredTagObj(String s) {
+        return myTagToGraphicViewerObjectMap.get(s);
     }
 
     public void registerReferencingObject(Object obj, String s, String s1) {
         if (s1.length() <= 0) {
             return;
         } else {
-            _fldtry.addElement(obj);
-            _flddo.addElement(s);
-            _fldif.addElement(s1);
+            myReferencingObject.addElement(obj);
+            myReferencingAttr.addElement(s);
+            myReferencedTag.addElement(s1);
             return;
         }
     }
 
-    private Object _mthdo(int i) {
-        if (i >= _fldtry.size())
+    private Object getReferencingObject(int i) {
+        if (i >= myReferencingObject.size()) {
             return null;
-        else
-            return _fldtry.get(i);
+        } else {
+            return myReferencingObject.get(i);
+        }
     }
 
-    private String _mthint(int i) {
-        return (String) _flddo.get(i);
+    private String getReferencingAttr(int i) {
+        return (String) myReferencingAttr.get(i);
     }
 
-    private String a(int i) {
-        return (String) _fldif.get(i);
+    private String getReferencedTag(int i) {
+        return (String) myReferencedTag.get(i);
     }
 
     public void SVGWriteDoc(OutputStream outputstream,
@@ -236,7 +252,7 @@ public class DefaultDocument implements IDomDoc {
             GraphicViewerDocument graphicViewerDocument) {
         resetDocument();
         buildSVGDoc(graphicViewerDocument);
-        a(writer);
+        writeFile(writer);
     }
 
     public void SVGReadDoc(InputStream inputstream,
@@ -249,7 +265,7 @@ public class DefaultDocument implements IDomDoc {
     public void SVGReadDoc(Reader reader,
             GraphicViewerDocument graphicViewerDocument) throws Exception {
         graphicViewerDocument.deleteContents();
-        a(reader);
+        readFile(reader);
         buildGraphicViewerDoc(graphicViewerDocument);
         graphicViewerDocument
                 .removeLayer(graphicViewerDocument.getFirstLayer());
@@ -267,10 +283,10 @@ public class DefaultDocument implements IDomDoc {
             domelement.setAttribute("xmlns:graphicviewerxml",
                     "http://sourceforge.net/graphicviewerxml");
             domelement.setAttribute("graphicviewersvgversion",
-                    Double.toString(_fldfor));
+                    Double.toString(myGraphicViewerSVGVersion));
         }
         domelement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-        a(domelement);
+        appendChild(domelement);
         if (isGenerateGraphicViewerXML()) {
             IDomElement domelement1 = createElement("g");
             domelement.appendChild(domelement1);
@@ -291,11 +307,11 @@ public class DefaultDocument implements IDomDoc {
         int i = 1;
         int j = 0;
         do {
-            IDomElement domelement3 = _mthnew(j);
+            IDomElement domelement3 = getReferencingNode(j);
             if (domelement3 != null) {
-                String s = _mthfor(j);
-                Object obj = _mthif(j);
-                IDomElement domelement4 = a(obj);
+                String s = getReferenceName(j);
+                Object obj = getReferencedObject(j);
+                IDomElement domelement4 = getNode(obj);
                 String s1 = "null";
                 if (domelement4 != null) {
                     s1 = domelement4.getAttribute("id");
@@ -305,10 +321,11 @@ public class DefaultDocument implements IDomDoc {
                     }
                 }
                 String s2 = domelement3.getAttribute(s);
-                if (s2.length() == 0)
+                if (s2.length() == 0) {
                     domelement3.setAttribute(s, s1);
-                else
+                } else {
                     domelement3.setAttribute(s, s2 + " " + s1);
+                }
                 j++;
             } else {
                 GenerateTooltipInitialization(domelement);
@@ -324,9 +341,9 @@ public class DefaultDocument implements IDomDoc {
         IDomElement domelement = getDocumentElement();
         String s = domelement.getAttribute("graphicviewersvgversion");
         if (s.length() > 0) {
-            _fldfor = Double.parseDouble(domelement
+            myGraphicViewerSVGVersion = Double.parseDouble(domelement
                     .getAttribute("graphicviewersvgversion"));
-            if (_fldfor > 3D) {
+            if (myGraphicViewerSVGVersion > 3D) {
                 ApplicationFrame
                         .getInstance()
                         .getConsole()
@@ -342,11 +359,11 @@ public class DefaultDocument implements IDomDoc {
         SVGTraverseChildren(graphicViewerDocument, domelement, null, true);
         int i = 0;
         do {
-            Object obj = _mthdo(i);
+            Object obj = getReferencingObject(i);
             if (obj != null) {
-                String s1 = _mthint(i);
-                String s2 = a(i);
-                a(s1, s2, obj);
+                String s1 = getReferencingAttr(i);
+                String s2 = getReferencedTag(i);
+                SVGUpdateReferences(s1, s2, obj);
                 i++;
             } else {
                 return;
@@ -354,28 +371,28 @@ public class DefaultDocument implements IDomDoc {
         } while (true);
     }
 
-    private void a(String s, String s1, Object obj) {
+    private void SVGUpdateReferences(String s, String s1, Object obj) {
         if (obj instanceof GraphicViewerObject) {
             GraphicViewerObject graphicViewerObject = (GraphicViewerObject) obj;
-            graphicViewerObject.SVGUpdateReference(s, a(s1));
+            graphicViewerObject.SVGUpdateReference(s, getRegisteredTagObj(s1));
         }
     }
 
     public void SVGTraverseChildren(
             GraphicViewerDocument graphicViewerDocument, IDomNode domnode,
             GraphicViewerArea graphicViewerArea, boolean flag) {
-        for (IDomNode domnode1 = domnode.getFirstChild(); domnode1 != null;)
+        for (IDomNode domnode1 = domnode.getFirstChild(); domnode1 != null;) {
             try {
-                domnode1 = a(graphicViewerDocument, domnode1,
+                domnode1 = SVGVisitNode(graphicViewerDocument, domnode1,
                         graphicViewerArea, flag);
             } catch (Exception e) {
                 ExceptionDialog.hideException(e);
                 domnode1 = domnode.getNextSibling();
             }
-
+        }
     }
 
-    private IDomNode a(GraphicViewerDocument graphicViewerDocument,
+    private IDomNode SVGVisitNode(GraphicViewerDocument graphicViewerDocument,
             IDomNode domnode, GraphicViewerArea graphicViewerArea, boolean flag) {
         if (domnode.isElement()) {
             IDomElement domelement = domnode.elementCast();
@@ -409,35 +426,41 @@ public class DefaultDocument implements IDomDoc {
             String str = paramDomElement2.getAttribute("class");
             try {
                 if (getGraphicViewerSVGVersion() < 2.0D) {
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.TextNode"))
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.TextNode")) {
                         str = "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerTextNode";
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.BasicNode"))
+                    }
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.BasicNode")) {
                         str = "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode";
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.IconicNode"))
+                    }
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.IconicNode")) {
                         str = "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerIconicNode";
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.IconicNodePort"))
+                    }
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.IconicNodePort")) {
                         return SVGReadElement(paramGraphicViewerDocument,
                                 paramString1, paramDomElement1,
                                 paramDomElement2.getNextSiblingElement()
                                         .getLocalName(),
                                 paramDomElement2.getNextSiblingElement(),
                                 paramGraphicViewerArea, paramBoolean);
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.BasicNodePort"))
+                    }
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.BasicNodePort")) {
                         return SVGReadElement(paramGraphicViewerDocument,
                                 paramString1, paramDomElement1,
                                 paramDomElement2.getNextSiblingElement()
                                         .getLocalName(),
                                 paramDomElement2.getNextSiblingElement(),
                                 paramGraphicViewerArea, paramBoolean);
-                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.SubGraph"))
+                    }
+                    if (str.equals("net.sourceforge.open_teradata_viewer.graphic_viewer.SubGraph")) {
                         str = "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerSubGraph";
+                    }
                 }
-                Class<?> localClass = Class.forName(str);
+                Class localClass = Class.forName(str);
                 localObject2 = localClass.newInstance();
             } catch (Exception e) {
                 ExceptionDialog.hideException(e);
             }
-            if (localObject2 != null)
+            if (localObject2 != null) {
                 if (localObject2 instanceof GraphicViewerObject) {
                     localObject1 = (GraphicViewerObject) localObject2;
                     localDomNode1 = ((GraphicViewerObject) localObject1)
@@ -447,14 +470,17 @@ public class DefaultDocument implements IDomDoc {
                     IDomNode localDomNode2 = initializeObjectFromXML(
                             paramGraphicViewerDocument, paramDomElement1,
                             paramDomElement2, localObject2);
-                    if (localDomNode2 != null)
+                    if (localDomNode2 != null) {
                         return localDomNode2;
+                    }
                 }
+            }
         } else {
-            if (paramString1.equalsIgnoreCase("g"))
+            if (paramString1.equalsIgnoreCase("g")) {
                 SVGTraverseChildren(paramGraphicViewerDocument,
                         paramDomElement1, null, true);
-            if (isReadSVG())
+            }
+            if (isReadSVG()) {
                 if (paramString1.equalsIgnoreCase("rect")) {
                     localObject1 = new GraphicViewerRectangle();
                     localDomNode1 = ((GraphicViewerObject) localObject1)
@@ -486,18 +512,21 @@ public class DefaultDocument implements IDomDoc {
                             .SVGReadObject(this, paramGraphicViewerDocument,
                                     paramDomElement1, null);
                 }
+            }
         }
         if (localObject1 != null) {
-            if (paramGraphicViewerArea != null)
+            if (paramGraphicViewerArea != null) {
                 paramGraphicViewerArea
                         .addObjectAtTail((GraphicViewerObject) localObject1);
-            else if (paramBoolean)
-                if (this._fldnew != null)
-                    this._fldnew
+            } else if (paramBoolean) {
+                if (this.myCurrentLayer != null) {
+                    this.myCurrentLayer
                             .addObjectAtTail((GraphicViewerObject) localObject1);
-                else
+                } else {
                     paramGraphicViewerDocument
                             .addObjectAtTail((GraphicViewerObject) localObject1);
+                }
+            }
             return localDomNode1;
         }
         return ((IDomNode) paramDomElement1.getNextSibling());
@@ -507,9 +536,9 @@ public class DefaultDocument implements IDomDoc {
             GraphicViewerDocument graphicViewerDocument,
             IDomElement domelement, IDomElement domelement1, Object obj) {
         if (obj instanceof GraphicViewerLayer) {
-            _fldnew = graphicViewerDocument.addLayerAfter(null);
+            myCurrentLayer = graphicViewerDocument.addLayerAfter(null);
             graphicViewerDocument.SVGReadLayer(this, graphicViewerDocument,
-                    domelement, domelement1, _fldnew);
+                    domelement, domelement1, myCurrentLayer);
             return domelement.getNextSiblingElement();
         }
         if (obj instanceof IGraphicViewerXMLSaveRestore) {
@@ -531,47 +560,47 @@ public class DefaultDocument implements IDomDoc {
     }
 
     public void setDisabledDrawing(boolean flag) {
-        a = flag;
+        myDisabledDrawing = flag;
     }
 
     public boolean isDisabledDrawing() {
-        return a;
+        return myDisabledDrawing;
     }
 
     public double getGraphicViewerSVGVersion() {
-        return _fldfor;
+        return myGraphicViewerSVGVersion;
     }
 
     public void setGenerateGraphicViewerXML(boolean flag) {
-        _fldnull = flag;
+        myGenerateGraphicViewerXML = flag;
     }
 
     public boolean isGenerateGraphicViewerXML() {
-        return _fldnull;
+        return myGenerateGraphicViewerXML;
     }
 
     public void setGenerateSVG(boolean flag) {
-        _fldvoid = flag;
+        myGenerateSVG = flag;
     }
 
     public boolean isGenerateSVG() {
-        return _fldvoid;
+        return myGenerateSVG;
     }
 
     public void setReadSVG(boolean flag) {
-        _fldint = flag;
+        myReadSVG = flag;
     }
 
     public boolean isReadSVG() {
-        return _fldint;
+        return myReadSVG;
     }
 
     public void setSVGTooltips(boolean flag) {
-        b = flag;
+        mySVGTooltips = flag;
     }
 
     public boolean isSVGTooltips() {
-        return b;
+        return mySVGTooltips;
     }
 
     public boolean SVGOutputEnabled() {
@@ -583,11 +612,11 @@ public class DefaultDocument implements IDomDoc {
     }
 
     public Node importNode(Node node, boolean flag) throws DOMException {
-        return _fldgoto.importNode(node, flag);
+        return myDoc.importNode(node, flag);
     }
 
     public Document getDocument() {
-        return _fldgoto;
+        return myDoc;
     }
 
     protected void GenerateTooltipInitialization(IDomElement domelement) {
@@ -711,21 +740,4 @@ public class DefaultDocument implements IDomDoc {
             return;
         }
     }
-
-    private Document _fldgoto;
-    private GraphicViewerLayer _fldnew;
-    private double _fldfor;
-    private boolean a;
-    private boolean _fldnull;
-    private boolean _fldvoid;
-    private boolean _fldint;
-    private boolean b;
-    private HashMap<Object, IDomElement> _fldbyte;
-    private Vector<IDomElement> _fldlong;
-    private Vector<String> _fldchar;
-    private Vector<Object> _fldcase;
-    private HashMap<String, Object> _fldelse;
-    private Vector<Object> _fldtry;
-    private Vector<String> _flddo;
-    private Vector<String> _fldif;
 }

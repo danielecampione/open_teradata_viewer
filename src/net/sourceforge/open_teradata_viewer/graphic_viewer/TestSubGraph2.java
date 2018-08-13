@@ -31,6 +31,7 @@ public class TestSubGraph2 extends GraphicViewerSubGraph {
 
     private static final long serialVersionUID = 336815877409875261L;
 
+    /** Default constructor, just for copying. */
     public TestSubGraph2() {
         init();
     }
@@ -41,36 +42,50 @@ public class TestSubGraph2 extends GraphicViewerSubGraph {
     }
 
     public void init() {
-        setCollapsedLabelSpot(6);
+        setCollapsedLabelSpot(GraphicViewerObject.BottomCenter);
         setInsets(new Insets(10, 10, 10, 10));
         setCollapsedInsets(new Insets(10, 10, 10, 10));
         setBorderPen(GraphicViewerPen.black);
     }
 
+    // Position the Handle at the top-left corner of the border, not just inside
+    // the margins
     protected void layoutHandle() {
-        if (!isExpanded())
+        if (!isExpanded()) {
             return;
-        GraphicViewerSubGraphHandle graphicviewersubgraphhandle = getHandle();
-        if (graphicviewersubgraphhandle != null) {
-            Rectangle rectangle = computeBorder();
-            graphicviewersubgraphhandle.setTopLeft(rectangle.x, rectangle.y);
+        }
+        GraphicViewerSubGraphHandle h = getHandle();
+        if (h != null) {
+            Rectangle r = computeBorder();
+            h.setTopLeft(r.x, r.y);
         }
     }
 
+    /**
+     * This subgraph has a "hollow" port representing the whole subgraph.
+     * <p>
+     * Users will be able to starting dragging a new link along the margins of
+     * the subgraph.
+     */
     protected GraphicViewerPort createPort() {
         return new TestSubGraph2Port();
     }
 
+    /**
+     * When the subgraph is collapsed and there is a collapsed object, the port
+     * has the same bounds as the collapsed object; otherwise, the port has the
+     * same bounds as the whole subgraph.
+     */
     public void layoutPort() {
-        GraphicViewerPort graphicviewerport = getPort();
-        if (graphicviewerport != null && graphicviewerport.isVisible())
+        GraphicViewerPort p = getPort();
+        if (p != null && p.isVisible()) {
             if (!isExpanded() && getCollapsedObject() != null
                     && getCollapsedObject().isVisible()) {
-                graphicviewerport.setBoundingRect(getCollapsedObject()
-                        .getBoundingRect());
+                p.setBoundingRect(getCollapsedObject().getBoundingRect());
             } else {
-                Rectangle rectangle = computeBorder();
-                graphicviewerport.setBoundingRect(rectangle);
+                Rectangle b = computeBorder();
+                p.setBoundingRect(b);
             }
+        }
     }
 }

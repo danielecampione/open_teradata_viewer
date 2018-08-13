@@ -35,21 +35,18 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
 
     private static final long serialVersionUID = 5440647169946678126L;
 
+    private GraphicViewerPen myCurrentPen = GraphicViewerPen.black;
+    private GraphicViewerBrush myCurrentBrush = null;
+
     public GraphicViewerDrawable() {
-        b9 = GraphicViewerPen.black;
-        ca = null;
     }
 
     public GraphicViewerDrawable(Rectangle rectangle) {
         super(rectangle);
-        b9 = GraphicViewerPen.black;
-        ca = null;
     }
 
     public GraphicViewerDrawable(Point point, Dimension dimension) {
         super(point, dimension);
-        b9 = GraphicViewerPen.black;
-        ca = null;
     }
 
     public GraphicViewerObject copyObject(
@@ -57,35 +54,35 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
         GraphicViewerDrawable graphicviewerdrawable = (GraphicViewerDrawable) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerdrawable != null) {
-            graphicviewerdrawable.b9 = b9;
-            graphicviewerdrawable.ca = ca;
+            graphicviewerdrawable.myCurrentPen = myCurrentPen;
+            graphicviewerdrawable.myCurrentBrush = myCurrentBrush;
         }
         return graphicviewerdrawable;
     }
 
     public void setPen(GraphicViewerPen graphicviewerpen) {
-        GraphicViewerPen graphicviewerpen1 = b9;
+        GraphicViewerPen graphicviewerpen1 = myCurrentPen;
         if (graphicviewerpen1 != graphicviewerpen) {
             update();
-            b9 = graphicviewerpen;
+            myCurrentPen = graphicviewerpen;
             update(11, 0, graphicviewerpen1);
         }
     }
 
     public GraphicViewerPen getPen() {
-        return b9;
+        return myCurrentPen;
     }
 
     public void setBrush(GraphicViewerBrush graphicviewerbrush) {
-        GraphicViewerBrush graphicviewerbrush1 = ca;
+        GraphicViewerBrush graphicviewerbrush1 = myCurrentBrush;
         if (graphicviewerbrush1 != graphicviewerbrush) {
-            ca = graphicviewerbrush;
+            myCurrentBrush = graphicviewerbrush;
             update(12, 0, graphicviewerbrush1);
         }
     }
 
     public GraphicViewerBrush getBrush() {
-        return ca;
+        return myCurrentBrush;
     }
 
     public void copyNewValueForRedo(
@@ -133,8 +130,9 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
             Point point) {
         Rectangle rectangle = getBoundingRect();
         int i1 = 1;
-        if (getPen() != null)
+        if (getPen() != null) {
             i1 = getPen().getWidth();
+        }
         return GraphicViewerRectangle.getNearestIntersectionPoint(rectangle.x
                 - i1, rectangle.y - i1, rectangle.width + 2 * i1,
                 rectangle.height + 2 * i1, i, j, k, l, point);
@@ -171,19 +169,21 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            if (domelement1.getAttribute("embeddedpenbrush").equals("true"))
+            if (domelement1.getAttribute("embeddedpenbrush").equals("true")) {
                 domdoc.SVGTraverseChildren(graphicviewerdocument, domelement1,
                         null, false);
+            }
             String s = domelement1.getAttribute("drawablepen");
             domdoc.registerReferencingObject(this, "drawablepen", s);
             String s1 = domelement1.getAttribute("drawablebrush");
-            if (s1.length() > 0)
+            if (s1.length() > 0) {
                 domdoc.registerReferencingObject(this, "drawablebrush", s1);
-            else
+            } else {
                 setBrush(null);
+            }
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
         }
@@ -192,8 +192,9 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
 
     public void SVGWriteAttributes(IDomElement domelement) {
         GraphicViewerPen graphicviewerpen = getPen();
-        if (graphicviewerpen != null)
+        if (graphicviewerpen != null) {
             graphicviewerpen.SVGWriteAttributes(domelement);
+        }
         GraphicViewerBrush graphicviewerbrush = getBrush();
         if (graphicviewerbrush != null) {
             graphicviewerbrush.SVGWriteAttributes(domelement);
@@ -213,18 +214,20 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("drawablepen"))
+        if (s.equals("drawablepen")) {
             setPen((GraphicViewerPen) obj);
-        else if (s.equals("drawablebrush"))
+        } else if (s.equals("drawablebrush")) {
             setBrush((GraphicViewerBrush) obj);
+        }
     }
 
     public static void drawLine(Graphics2D graphics2d,
             GraphicViewerPen graphicviewerpen, int i, int j, int k, int l) {
         if (graphicviewerpen != null && graphicviewerpen.getStyle() != 0) {
             java.awt.Stroke stroke = graphicviewerpen.getStroke();
-            if (stroke == null)
+            if (stroke == null) {
                 return;
+            }
             graphics2d.setStroke(stroke);
             graphics2d.setColor(graphicviewerpen.getColor());
             graphics2d.drawLine(i, j, k, l);
@@ -437,7 +440,4 @@ public abstract class GraphicViewerDrawable extends GraphicViewerObject {
         }
 
     }
-
-    private GraphicViewerPen b9;
-    private GraphicViewerBrush ca;
 }

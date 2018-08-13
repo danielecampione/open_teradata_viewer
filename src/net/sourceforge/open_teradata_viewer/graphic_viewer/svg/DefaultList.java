@@ -18,10 +18,10 @@
 
 package net.sourceforge.open_teradata_viewer.graphic_viewer.svg;
 
-
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomList;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomNode;
 
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -32,22 +32,22 @@ import org.w3c.dom.NodeList;
  */
 public class DefaultList implements IDomList {
 
+    private NodeList myNodeList;
+
     public DefaultList(NodeList nodelist) {
-        a = nodelist;
+        myNodeList = nodelist;
     }
 
     public NodeList getNodeList() {
-        return a;
+        return myNodeList;
     }
 
     public int getLength() {
-        return a.getLength();
+        return myNodeList.getLength();
     }
 
     public IDomNode item(int i) {
-        org.w3c.dom.Node node = a.item(i);
+        Node node = myNodeList.item(i);
         return new AbstractNode(node);
     }
-
-    private NodeList a;
 }

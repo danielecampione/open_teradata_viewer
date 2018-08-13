@@ -31,45 +31,41 @@ public class AnimatedLink extends GraphicViewerLink {
 
     private static final long serialVersionUID = 3430579971715994686L;
 
-    private transient int mySeg = 0;
-    private transient float myDist = 0.0F;
+    transient private int mySeg = 0;
+    transient private float myDist = 0;
 
     public AnimatedLink() {
     }
 
-    public AnimatedLink(GraphicViewerPort paramGraphicViewerPort1,
-            GraphicViewerPort paramGraphicViewerPort2) {
-        super(paramGraphicViewerPort1, paramGraphicViewerPort2);
+    public AnimatedLink(GraphicViewerPort from, GraphicViewerPort to) {
+        super(from, to);
     }
-    public void paint(Graphics2D paramGraphics2D,
-            GraphicViewerView paramGraphicViewerView) {
-        super.paint(paramGraphics2D, paramGraphicViewerView);
-        AnimatedLink localAnimatedLink = this;
-        if (this.mySeg >= localAnimatedLink.getNumPoints() - 1)
-            this.mySeg = 0;
-        Point localPoint1 = localAnimatedLink.getPoint(this.mySeg);
-        Point localPoint2 = localAnimatedLink.getPoint(this.mySeg + 1);
-        double d = Math.sqrt((localPoint2.x - localPoint1.x)
-                * (localPoint2.x - localPoint1.x)
-                + (localPoint2.y - localPoint1.y)
-                * (localPoint2.y - localPoint1.y));
-        int i = localPoint2.x;
-        int j = localPoint2.y;
-        if (this.myDist >= d) {
-            this.mySeg += 1;
-            this.myDist = 0.0F;
-        } else if (d >= 1.0D) {
-            i = (int) (localPoint1.x + (localPoint2.x - localPoint1.x)
-                    * this.myDist / d);
-            j = (int) (localPoint1.y + (localPoint2.y - localPoint1.y)
-                    * this.myDist / d);
+
+    public void paint(Graphics2D g, GraphicViewerView view) {
+        super.paint(g, view);
+        GraphicViewerStroke s = this;
+        if (mySeg >= s.getNumPoints() - 1) {
+            mySeg = 0;
         }
-        GraphicViewerDrawable.drawEllipse(paramGraphics2D, null,
-                GraphicViewerBrush.red, i - 3, j - 3, 7, 7);
+        Point a = s.getPoint(mySeg);
+        Point b = s.getPoint(mySeg + 1);
+        double len = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y)
+                * (b.y - a.y));
+        int x = b.x;
+        int y = b.y;
+        if (myDist >= len) {
+            mySeg++;
+            myDist = 0;
+        } else if (len >= 1) {
+            x = (int) (a.x + (b.x - a.x) * myDist / len);
+            y = (int) (a.y + (b.y - a.y) * myDist / len);
+        }
+        GraphicViewerDrawable.drawEllipse(g, null, GraphicViewerBrush.red,
+                x - 3, y - 3, 7, 7);
     }
 
     public void step() {
-        this.myDist += 3.0F;
+        myDist += 3;
         update();
     }
 }

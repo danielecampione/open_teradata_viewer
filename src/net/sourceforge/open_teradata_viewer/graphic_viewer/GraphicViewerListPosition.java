@@ -30,15 +30,15 @@ public class GraphicViewerListPosition implements Serializable {
 
     private static final long serialVersionUID = 2652042136068981624L;
 
+    GraphicViewerObject obj;
+    GraphicViewerListPosition next;
+    GraphicViewerListPosition prev;
+
     GraphicViewerListPosition(GraphicViewerObject graphicviewerobject,
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerListPosition graphicviewerlistposition1) {
-        _flddo = graphicviewerobject;
-        a = graphicviewerlistposition1;
-        _fldif = graphicviewerlistposition;
+        obj = graphicviewerobject;
+        next = graphicviewerlistposition1;
+        prev = graphicviewerlistposition;
     }
-
-    GraphicViewerObject _flddo;
-    GraphicViewerListPosition a;
-    GraphicViewerListPosition _fldif;
 }

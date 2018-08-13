@@ -38,18 +38,17 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
 
     private static final long serialVersionUID = -4367533898300911419L;
 
+    private transient HashMap myMap = null;
+
     public GraphicViewerControl() {
-        dT = null;
     }
 
     public GraphicViewerControl(Rectangle rectangle) {
         super(rectangle);
-        dT = null;
     }
 
     public GraphicViewerControl(Point point, Dimension dimension) {
         super(point, dimension);
-        dT = null;
     }
 
     protected void ownerChange(
@@ -61,18 +60,20 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
         if (graphicviewerobjectcollection != null
                 && graphicviewerobjectcollection1 == null
                 && (graphicviewerobjectcollection instanceof GraphicViewerDocument)) {
-            Iterator<?> iterator = getIterator();
+            Iterator iterator = getIterator();
             do {
-                if (!iterator.hasNext())
+                if (!iterator.hasNext()) {
                     break;
-                Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+                }
+                Entry entry = (Entry) iterator.next();
                 GraphicViewerView graphicviewerview2 = (GraphicViewerView) entry
                         .getKey();
                 JComponent jcomponent2 = (JComponent) entry.getValue();
-                if (graphicviewerview2 != null && jcomponent2 != null)
-                    graphicviewerview2._mthif(this, jcomponent2);
+                if (graphicviewerview2 != null && jcomponent2 != null) {
+                    graphicviewerview2.removeControl(this, jcomponent2);
+                }
             } while (true);
-            x().clear();
+            getMap().clear();
         } else if (graphicviewerobjectcollection == null
                 && graphicviewerobjectcollection1 != null
                 && (graphicviewerobjectcollection1 instanceof GraphicViewerDocument)
@@ -94,11 +95,12 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
                 && graphicviewerobjectcollection1 == null
                 && (graphicviewerobjectcollection instanceof GraphicViewerView)) {
             GraphicViewerView graphicviewerview = (GraphicViewerView) graphicviewerobjectcollection;
-            if (x().get(graphicviewerview) != null) {
-                JComponent jcomponent = (JComponent) x().remove(
+            if (getMap().get(graphicviewerview) != null) {
+                JComponent jcomponent = (JComponent) getMap().remove(
                         graphicviewerview);
-                if (jcomponent != null)
-                    graphicviewerview._mthif(this, jcomponent);
+                if (jcomponent != null) {
+                    graphicviewerview.removeControl(this, jcomponent);
+                }
             }
         } else if (graphicviewerobjectcollection == null
                 && graphicviewerobjectcollection1 != null
@@ -110,12 +112,12 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
     }
 
     public JComponent getComponent(GraphicViewerView graphicviewerview) {
-        JComponent jcomponent = (JComponent) x().get(graphicviewerview);
+        JComponent jcomponent = (JComponent) getMap().get(graphicviewerview);
         if (jcomponent == null) {
             jcomponent = createComponent(graphicviewerview);
             if (jcomponent != null) {
-                x().put(graphicviewerview, jcomponent);
-                graphicviewerview.a(this, jcomponent);
+                getMap().put(graphicviewerview, jcomponent);
+                graphicviewerview.addControl(this, jcomponent);
                 jcomponent.setVisible(true);
                 jcomponent.repaint();
                 graphicviewerview.getCanvas().validate();
@@ -129,21 +131,23 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
 
     public void setVisible(boolean flag) {
         if (flag != isVisible()) {
-            Iterator<?> iterator = getIterator();
+            Iterator iterator = getIterator();
             do {
-                if (!iterator.hasNext())
+                if (!iterator.hasNext()) {
                     break;
-                Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+                }
+                Entry entry = (Entry) iterator.next();
                 GraphicViewerView graphicviewerview = (GraphicViewerView) entry
                         .getKey();
                 JComponent jcomponent = (JComponent) entry.getValue();
-                if (graphicviewerview != null)
-                    if (flag && jcomponent == null)
+                if (graphicviewerview != null) {
+                    if (flag && jcomponent == null) {
                         getComponent(graphicviewerview);
-                    else if (!flag && jcomponent != null) {
-                        graphicviewerview._mthif(this, jcomponent);
-                        x().put(graphicviewerview, null);
+                    } else if (!flag && jcomponent != null) {
+                        graphicviewerview.removeControl(this, jcomponent);
+                        getMap().put(graphicviewerview, null);
                     }
+                }
             } while (true);
         }
         super.setVisible(flag);
@@ -152,11 +156,12 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
     protected void geometryChange(Rectangle rectangle) {
         super.geometryChange(rectangle);
         Rectangle rectangle1 = new Rectangle(0, 0, 0, 0);
-        Iterator<?> iterator = getIterator();
+        Iterator iterator = getIterator();
         do {
-            if (!iterator.hasNext())
+            if (!iterator.hasNext()) {
                 break;
-            Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+            }
+            Entry entry = (Entry) iterator.next();
             GraphicViewerView graphicviewerview = (GraphicViewerView) entry
                     .getKey();
             JComponent jcomponent = (JComponent) entry.getValue();
@@ -177,7 +182,7 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         JComponent jcomponent = getComponent(graphicviewerview);
         if (jcomponent != null) {
-            Rectangle rectangle = graphicviewerview.c();
+            Rectangle rectangle = graphicviewerview.getTempRectangle();
             Rectangle rectangle1 = getBoundingRect();
             rectangle.x = rectangle1.x;
             rectangle.y = rectangle1.y;
@@ -192,15 +197,14 @@ public abstract class GraphicViewerControl extends GraphicViewerObject {
         }
     }
 
-    public Iterator<?> getIterator() {
-        return x().entrySet().iterator();
+    public Iterator getIterator() {
+        return getMap().entrySet().iterator();
     }
 
-    HashMap<GraphicViewerView, JComponent> x() {
-        if (dT == null)
-            dT = new HashMap<GraphicViewerView, JComponent>();
-        return dT;
+    HashMap getMap() {
+        if (myMap == null) {
+            myMap = new HashMap();
+        }
+        return myMap;
     }
-
-    private transient HashMap<GraphicViewerView, JComponent> dT;
 }

@@ -25,10 +25,7 @@ import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +38,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.graphic_viewer.svg.DefaultDocument;
 
 /**
  * 
@@ -58,217 +54,81 @@ public class GraphicViewerDocument
 
     private static final long serialVersionUID = -3038095570271130435L;
 
-    private transient boolean myIsLocationModifiable = true;
-    private transient boolean myIsModified = false;
-
-    private String myName = "";
-
-    private String myLocation = "";
-
-    // Event hints
-    public static final int LOCATION_CHANGED = GraphicViewerDocumentEvent.LAST + 2;
-    public static final int NAME_CHANGED = GraphicViewerDocumentEvent.LAST + 1;
-
-    public void setModified(boolean b) {
-        if (myIsModified != b) {
-            myIsModified = b;
-            // don't need to notify document listeners
-        }
-    }
-
-    // read-only property--can the file be written?
-    public boolean isLocationModifiable() {
-        return myIsLocationModifiable; // just return cached value
-    }
-
-    public void setLocation(String newloc) {
-        String oldLocation = myLocation;
-        if (!oldLocation.equals(newloc)) {
-            myLocation = newloc;
-            fireUpdate(LOCATION_CHANGED, 0, null, 0, oldLocation);
-
-            updateLocationModifiable();
-        }
-    }
-
-    // There's no setLocationModifiable, because that's controlled externally
-    // in the file system.  But because we're caching the writableness,
-    // we need a method to update the cache.
-
-    public void updateLocationModifiable() {
-        boolean canwrite = true;
-        if (!getLocation().equals("")) {
-            File file = new File(getLocation());
-            if (file.exists() && !file.canWrite())
-                canwrite = false;
-        }
-        if (isLocationModifiable() != canwrite) {
-            boolean oldIsModifiable = isModifiable();
-            myIsLocationModifiable = canwrite;
-            if (oldIsModifiable != isModifiable())
-                fireUpdate(GraphicViewerDocumentEvent.MODIFIABLE_CHANGED, 0,
-                        null, (oldIsModifiable ? 1 : 0), null);
-        }
-    }
-
-    public String getLocation() {
-        return myLocation;
-    }
-
-    public void storeSVG1(OutputStream outs, boolean genXMLExtensions,
-            boolean genSVG) {
-        DefaultDocument svgDomDoc = new DefaultDocument();
-        svgDomDoc.setGenerateGraphicViewerXML(genXMLExtensions);
-        svgDomDoc.setGenerateSVG(genSVG);
-        svgDomDoc.SVGWriteDoc(outs, this);
-    }
-
-    public void updatePaperColor() {
-        if (isModifiable())
-            setPaperColor(new Color(255, 255, 221));
-        else
-            setPaperColor(new Color(0xDD, 0xDD, 0xDD));
-    }
-
-    public String getName() {
-        return myName;
-    }
-
-    public void setName(String newname) {
-        String oldName = myName;
-        if (!oldName.equals(newname)) {
-            myName = newname;
-            fireUpdate(NAME_CHANGED, 0, null, 0, oldName);
-        }
-    }
-
-    public GraphicViewerDocument loadSVG1(InputStream ins) {
-        GraphicViewerDocument doc = new GraphicViewerDocument();
-        try {
-            DefaultDocument svgDomDoc = new DefaultDocument();
-            svgDomDoc.SVGReadDoc(ins, doc);
-        } catch (Exception e) {
-            ExceptionDialog.hideException(e);
-        }
-        return doc;
-    }
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    static class a implements Comparator<Object> {
-
-        public int compare(Object obj, Object obj1) {
-            GraphicViewerObject graphicviewerobject = (GraphicViewerObject) obj;
-            GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) obj1;
-            if (graphicviewerobject == null || graphicviewerobject1 == null
-                    || graphicviewerobject == graphicviewerobject1)
-                return 0;
-            int i = a.a(graphicviewerobject.getLayer());
-            int j = a.a(graphicviewerobject1.getLayer());
-            if (i < j)
-                return -1;
-            if (i > j)
-                return 1;
-            GraphicViewerLayer graphicviewerlayer = graphicviewerobject
-                    .getLayer();
-            if (graphicviewerlayer == null)
-                return -1;
-            int k = graphicviewerlayer._mthfor(graphicviewerobject
-                    .getTopLevelObject());
-            int l = graphicviewerlayer._mthfor(graphicviewerobject1
-                    .getTopLevelObject());
-            if (k < l)
-                return -1;
-            if (k > l)
-                return 1;
-            else
-                return a20091104(graphicviewerobject.getTopLevelObject(),
-                        graphicviewerobject, graphicviewerobject1);
-        }
-
-        private int a20091104(GraphicViewerObject graphicviewerobject,
-                GraphicViewerObject graphicviewerobject1,
-                GraphicViewerObject graphicviewerobject2) {
-            label0 : {
-                if (graphicviewerobject == graphicviewerobject1)
-                    return -1;
-                if (graphicviewerobject == graphicviewerobject2)
-                    return 1;
-                if (!(graphicviewerobject instanceof GraphicViewerArea))
-                    break label0;
-                GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
-                GraphicViewerListPosition graphicviewerlistposition = graphicviewerarea
-                        .getFirstObjectPos();
-                int i;
-                do {
-                    if (graphicviewerlistposition == null)
-                        break label0;
-                    GraphicViewerObject graphicviewerobject3 = graphicviewerarea
-                            .getObjectAtPos(graphicviewerlistposition);
-                    graphicviewerlistposition = graphicviewerarea
-                            .getNextObjectPos(graphicviewerlistposition);
-                    i = a20091104(graphicviewerobject3, graphicviewerobject1,
-                            graphicviewerobject2);
-                } while (i == 0);
-                return i;
-            }
-            return 0;
-        }
-
-        private GraphicViewerDocument a;
-
-        public a(GraphicViewerDocument graphicviewerdocument) {
-            a = graphicviewerdocument;
-        }
-    }
+    public static final int CyclesAllowAll = 0;
+    public static final int CyclesNotDirected = 1;
+    public static final int CyclesNotDirectedFast = 2;
+    public static final int CyclesNotUndirected = 3;
+    public static final int CyclesDestinationTree = 4;
+    public static final int CyclesSourceTree = 5;
+    static boolean myCaching = false;
+    private GraphicViewerLayer myDefaultLayer;
+    private GraphicViewerLayer myLinksLayer;
+    private GraphicViewerLayer myFirstLayer;
+    private GraphicViewerLayer myLastLayer;
+    private Dimension myDocumentSize;
+    private Point myDocumentTopLeft;
+    private Color myPaperColor;
+    private boolean myModifiable;
+    private transient boolean mySuspendUpdates;
+    private transient boolean mySkipsUndoManager;
+    private static transient DataFlavor myStandardFlavor = null;
+    private static transient DataFlavor myFlavors[] = null;
+    private transient ArrayList myDocumentListeners;
+    private transient GraphicViewerDocumentEvent myDocumentEvent;
+    private transient GraphicViewerUndoManager myUndoManager;
+    private transient GraphicViewerPositionArray myPositions;
+    private transient GraphicViewerObject mySkippedAvoidable;
+    private boolean myMaintainsPartID;
+    private int myLastPartID;
+    private transient HashMap myParts;
+    private int myValidCycle;
+    private static HashMap myCycleMap = null;
 
     public GraphicViewerDocument() {
-        fa = null;
-        eV = null;
-        fc = null;
-        e1 = null;
-        fb = new Dimension(0, 0);
-        eZ = new Point(0, 0);
-        e3 = null;
-        eY = true;
-        e6 = false;
-        e7 = false;
-        eX = null;
-        e5 = null;
-        eR = null;
-        eW = null;
-        e8 = null;
-        fd = false;
-        e2 = -1;
-        eS = null;
-        e9 = 0;
-        fa = new GraphicViewerLayer();
-        fa.a(this);
-        eV = fa;
-        fc = fa;
-        e1 = fa;
-        e0 = new HashMap<GraphicViewerNode, Object>();
+        myDefaultLayer = null;
+        myLinksLayer = null;
+        myFirstLayer = null;
+        myLastLayer = null;
+        myDocumentSize = new Dimension(0, 0);
+        myDocumentTopLeft = new Point(0, 0);
+        myPaperColor = null;
+        myModifiable = true;
+        mySuspendUpdates = false;
+        mySkipsUndoManager = false;
+        myDocumentListeners = null;
+        myDocumentEvent = null;
+        myUndoManager = null;
+        myPositions = null;
+        mySkippedAvoidable = null;
+        myMaintainsPartID = false;
+        myLastPartID = -1;
+        myParts = null;
+        myValidCycle = 0;
+        myDefaultLayer = new GraphicViewerLayer();
+        myDefaultLayer.init(this);
+        myLinksLayer = myDefaultLayer;
+        myFirstLayer = myDefaultLayer;
+        myLastLayer = myDefaultLayer;
+        myCycleMap = new HashMap();
     }
 
     public Dimension getDocumentSize() {
-        return fb;
+        return myDocumentSize;
     }
 
     public void setDocumentSize(int i, int j) {
-        if (i == -23)
-            if (j == -23)
-                eU = true;
-            else if (j == -24)
-                eU = false;
-        Dimension dimension = fb;
+        if (i == -23) {
+            if (j == -23) {
+                myCaching = true;
+            } else if (j == -24) {
+                myCaching = false;
+            }
+        }
+        Dimension dimension = myDocumentSize;
         if (i >= 0 && j >= 0 && (dimension.width != i || dimension.height != j)) {
             Dimension dimension1 = new Dimension(dimension);
-            fb.width = i;
-            fb.height = j;
+            myDocumentSize.width = i;
+            myDocumentSize.height = j;
             fireUpdate(205, 0, null, 0, dimension1);
         }
     }
@@ -289,22 +149,24 @@ public class GraphicViewerDocument
                 + rectangle.height);
         int i1 = k - i;
         int j1 = l - j;
-        if (i < point.x || j < point.y)
+        if (i < point.x || j < point.y) {
             setDocumentTopLeft(i, j);
-        if (i1 > dimension.width || j1 > dimension.height)
+        }
+        if (i1 > dimension.width || j1 > dimension.height) {
             setDocumentSize(i1, j1);
+        }
     }
 
     public Point getDocumentTopLeft() {
-        return eZ;
+        return myDocumentTopLeft;
     }
 
     public void setDocumentTopLeft(int i, int j) {
-        Point point = eZ;
+        Point point = myDocumentTopLeft;
         if (point.x != i || point.y != j) {
             Point point1 = new Point(point.x, point.y);
-            eZ.x = i;
-            eZ.y = j;
+            myDocumentTopLeft.x = i;
+            myDocumentTopLeft.y = j;
             fireUpdate(209, 0, null, 0, point1);
         }
     }
@@ -324,8 +186,9 @@ public class GraphicViewerDocument
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerobjectsimplecollection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerobjectsimplecollection
@@ -363,25 +226,25 @@ public class GraphicViewerDocument
     }
 
     public Color getPaperColor() {
-        return e3;
+        return myPaperColor;
     }
 
     public void setPaperColor(Color color) {
-        Color color1 = e3;
+        Color color1 = myPaperColor;
         if (color != color1 && (color == null || !color.equals(color1))) {
-            e3 = color;
+            myPaperColor = color;
             fireUpdate(206, 0, null, 0, color1);
         }
     }
 
     public boolean isModifiable() {
-        return eY && isLocationModifiable();
+        return myModifiable;
     }
 
     public void setModifiable(boolean flag) {
-        boolean flag1 = eY;
+        boolean flag1 = myModifiable;
         if (flag1 != flag) {
-            eY = flag;
+            myModifiable = flag;
             fireUpdate(208, 0, null, flag1 ? 1 : 0, null);
         }
     }
@@ -389,8 +252,9 @@ public class GraphicViewerDocument
     public int getNumObjects() {
         int i = 0;
         for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
-                .getNextLayer())
+                .getNextLayer()) {
             i += graphicviewerlayer.getNumObjects();
+        }
 
         return i;
     }
@@ -400,12 +264,14 @@ public class GraphicViewerDocument
     }
 
     public void add(GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
-        if (graphicviewerobject instanceof GraphicViewerLink)
+        }
+        if (graphicviewerobject instanceof GraphicViewerLink) {
             getLinksLayer().addObjectAtTail(graphicviewerobject);
-        else
+        } else {
             getDefaultLayer().addObjectAtTail(graphicviewerobject);
+        }
     }
 
     public GraphicViewerListPosition addObjectAtHead(
@@ -451,11 +317,13 @@ public class GraphicViewerDocument
     }
 
     public void removeObject(GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         GraphicViewerLayer graphicviewerlayer = graphicviewerobject.getLayer();
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             return;
+        }
         if (graphicviewerlayer.getDocument() != this) {
             return;
         } else {
@@ -473,13 +341,15 @@ public class GraphicViewerDocument
 
     public void removeAll() {
         for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
-                .getNextLayer())
+                .getNextLayer()) {
             graphicviewerlayer.removeAll();
-
+        }
     }
 
     public void deleteContents() {
-        for (; getLastLayer() != getFirstLayer(); removeLayer(getLastLayer()));
+        for (; getLastLayer() != getFirstLayer(); removeLayer(getLastLayer())) {
+            ;
+        }
         getFirstLayer().removeAll();
         setDocumentSize(0, 0);
     }
@@ -489,21 +359,24 @@ public class GraphicViewerDocument
                 .getPrevLayer()) {
             GraphicViewerObject graphicviewerobject = graphicviewerlayer
                     .pickObject(point, flag);
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 return graphicviewerobject;
+            }
         }
 
         return null;
     }
 
-    public ArrayList<?> pickObjects(Point point, boolean flag,
-            ArrayList<?> arraylist, int i) {
-        if (arraylist == null)
-            arraylist = new ArrayList<Object>();
+    public ArrayList pickObjects(Point point, boolean flag,
+            ArrayList arraylist, int i) {
+        if (arraylist == null) {
+            arraylist = new ArrayList();
+        }
         for (GraphicViewerLayer graphicviewerlayer = getLastLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
                 .getPrevLayer()) {
-            if (arraylist.size() >= i)
+            if (arraylist.size() >= i) {
                 return arraylist;
+            }
             graphicviewerlayer.pickObjects(point, flag, arraylist, i);
         }
 
@@ -515,8 +388,9 @@ public class GraphicViewerDocument
                 .getNextLayer()) {
             GraphicViewerListPosition graphicviewerlistposition = graphicviewerlayer
                     .getFirstObjectPos();
-            if (graphicviewerlistposition != null)
+            if (graphicviewerlistposition != null) {
                 return graphicviewerlistposition;
+            }
         }
 
         return null;
@@ -527,8 +401,9 @@ public class GraphicViewerDocument
                 .getPrevLayer()) {
             GraphicViewerListPosition graphicviewerlistposition = graphicviewerlayer
                     .getLastObjectPos();
-            if (graphicviewerlistposition != null)
+            if (graphicviewerlistposition != null) {
                 return graphicviewerlistposition;
+            }
         }
 
         return null;
@@ -536,16 +411,18 @@ public class GraphicViewerDocument
 
     public GraphicViewerListPosition getNextObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        Object obj = graphicviewerlistposition._flddo;
+        }
+        Object obj = graphicviewerlistposition.obj;
         if (obj instanceof IGraphicViewerObjectCollection) {
             IGraphicViewerObjectCollection graphicviewerobjectcollection = (IGraphicViewerObjectCollection) obj;
-            if (!graphicviewerobjectcollection.isEmpty())
+            if (!graphicviewerobjectcollection.isEmpty()) {
                 return graphicviewerobjectcollection.getFirstObjectPos();
+            }
         }
         GraphicViewerListPosition graphicviewerlistposition1;
-        for (graphicviewerlistposition = graphicviewerlistposition.a; graphicviewerlistposition == null; graphicviewerlistposition = graphicviewerlistposition1.a) {
+        for (graphicviewerlistposition = graphicviewerlistposition.next; graphicviewerlistposition == null; graphicviewerlistposition = graphicviewerlistposition1.next) {
             GraphicViewerArea graphicviewerarea = ((GraphicViewerObject) (obj))
                     .getParent();
             if (graphicviewerarea == null) {
@@ -555,13 +432,15 @@ public class GraphicViewerDocument
                         .getNextLayer()) {
                     GraphicViewerListPosition graphicviewerlistposition2 = graphicviewerlayer
                             .getFirstObjectPos();
-                    if (graphicviewerlistposition2 != null)
+                    if (graphicviewerlistposition2 != null) {
                         return graphicviewerlistposition2;
+                    }
                 }
 
                 return null;
             }
-            graphicviewerlistposition1 = graphicviewerarea.i();
+            graphicviewerlistposition1 = graphicviewerarea
+                    .getCurrentListPosition();
             obj = graphicviewerarea;
         }
 
@@ -570,16 +449,18 @@ public class GraphicViewerDocument
 
     public GraphicViewerListPosition getNextObjectPosAtTop(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
+        }
         Object obj;
-        for (obj = graphicviewerlistposition._flddo; ((GraphicViewerObject) (obj))
+        for (obj = graphicviewerlistposition.obj; ((GraphicViewerObject) (obj))
                 .getParent() != null; obj = ((GraphicViewerObject) (obj))
-                .getParent())
+                .getParent()) {
             graphicviewerlistposition = ((GraphicViewerObject) (obj))
-                    .getParent().i();
+                    .getParent().getCurrentListPosition();
+        }
 
-        graphicviewerlistposition = graphicviewerlistposition.a;
+        graphicviewerlistposition = graphicviewerlistposition.next;
         if (graphicviewerlistposition == null) {
             GraphicViewerLayer graphicviewerlayer = ((GraphicViewerObject) (obj))
                     .getLayer();
@@ -587,8 +468,9 @@ public class GraphicViewerDocument
                     .getNextLayer()) {
                 GraphicViewerListPosition graphicviewerlistposition1 = graphicviewerlayer
                         .getFirstObjectPos();
-                if (graphicviewerlistposition1 != null)
+                if (graphicviewerlistposition1 != null) {
                     return graphicviewerlistposition1;
+                }
             }
 
         }
@@ -597,18 +479,20 @@ public class GraphicViewerDocument
 
     public GraphicViewerListPosition getPrevObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        else
-            return graphicviewerlistposition._fldif;
+        } else {
+            return graphicviewerlistposition.prev;
+        }
     }
 
     public GraphicViewerObject getObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        else
-            return graphicviewerlistposition._flddo;
+        } else {
+            return graphicviewerlistposition.obj;
+        }
     }
 
     public GraphicViewerListPosition findObject(
@@ -617,8 +501,9 @@ public class GraphicViewerDocument
                 .getNextLayer()) {
             GraphicViewerListPosition graphicviewerlistposition = graphicviewerlayer
                     .findObject(graphicviewerobject);
-            if (graphicviewerlistposition != null)
+            if (graphicviewerlistposition != null) {
                 return graphicviewerlistposition;
+            }
         }
 
         return null;
@@ -626,73 +511,85 @@ public class GraphicViewerDocument
 
     public void addDocumentListener(
             IGraphicViewerDocumentListener graphicviewerdocumentlistener) {
-        if (eX == null)
-            eX = new ArrayList<IGraphicViewerDocumentListener>();
-        if (!eX.contains(graphicviewerdocumentlistener))
-            eX.add(graphicviewerdocumentlistener);
+        if (myDocumentListeners == null) {
+            myDocumentListeners = new ArrayList();
+        }
+        if (!myDocumentListeners.contains(graphicviewerdocumentlistener)) {
+            myDocumentListeners.add(graphicviewerdocumentlistener);
+        }
     }
 
     public void removeDocumentListener(
             IGraphicViewerDocumentListener graphicviewerdocumentlistener) {
-        if (eX == null)
+        if (myDocumentListeners == null) {
             return;
-        int i = eX.indexOf(graphicviewerdocumentlistener);
-        if (i >= 0)
-            eX.remove(i);
+        }
+        int i = myDocumentListeners.indexOf(graphicviewerdocumentlistener);
+        if (i >= 0) {
+            myDocumentListeners.remove(i);
+        }
     }
 
     public IGraphicViewerDocumentListener[] getDocumentListeners() {
-        if (eX == null)
+        if (myDocumentListeners == null) {
             return new IGraphicViewerDocumentListener[0];
-        Object aobj[] = eX.toArray();
+        }
+        Object aobj[] = myDocumentListeners.toArray();
         IGraphicViewerDocumentListener agraphicviewerdocumentlistener[] = new IGraphicViewerDocumentListener[aobj.length];
-        for (int i = 0; i < aobj.length; i++)
+        for (int i = 0; i < aobj.length; i++) {
             agraphicviewerdocumentlistener[i] = (IGraphicViewerDocumentListener) aobj[i];
+        }
 
         return agraphicviewerdocumentlistener;
     }
 
     public void fireUpdate(int i, int j, Object obj, int k, Object obj1) {
-        a(i, j, obj, k, obj1);
+        invokeListeners(i, j, obj, k, obj1);
     }
 
-    void a(int i, int j, Object obj, int k, Object obj1) {
+    void invokeListeners(int i, int j, Object obj, int k, Object obj1) {
         if (i == 203 && j == 1) {
             GraphicViewerObject graphicviewerobject = (GraphicViewerObject) obj;
-            _mthchar(graphicviewerobject);
+            invalidatePositionArray(graphicviewerobject);
             if (graphicviewerobject.isTopLevel()) {
                 GraphicViewerLayer graphicviewerlayer = graphicviewerobject
                         .getLayer();
-                if (graphicviewerlayer != null)
-                    graphicviewerlayer.a(graphicviewerobject, (Rectangle) obj1);
+                if (graphicviewerlayer != null) {
+                    graphicviewerlayer.updateCache(graphicviewerobject,
+                            (Rectangle) obj1);
+                }
             }
         } else if (i == 202) {
             GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) obj;
-            if (isMaintainsPartID())
-                _mthcase(graphicviewerobject1);
-            _mthchar(graphicviewerobject1);
+            if (isMaintainsPartID()) {
+                addAllParts(graphicviewerobject1);
+            }
+            invalidatePositionArray(graphicviewerobject1);
         } else if (i == 204) {
             GraphicViewerObject graphicviewerobject2 = (GraphicViewerObject) obj;
-            _mthelse(graphicviewerobject2);
-            _mthchar(graphicviewerobject2);
-        } else if (i == 210)
-            _mthchar(null);
-        else if (i == 211)
-            _mthchar(null);
-        if (isSuspendUpdates())
-            return;
-        if (e5 == null) {
-            e5 = new GraphicViewerDocumentEvent(this, i, j, obj, k, obj1);
-        } else {
-            e5._mthif(i);
-            e5.a(j);
-            e5.a(obj);
-            e5._mthdo(k);
-            e5._mthif(obj1);
+            removeAllParts(graphicviewerobject2);
+            invalidatePositionArray(graphicviewerobject2);
+        } else if (i == 210) {
+            invalidatePositionArray(null);
+        } else if (i == 211) {
+            invalidatePositionArray(null);
         }
-        GraphicViewerDocumentEvent graphicviewerdocumentevent = e5;
-        e5 = null;
-        ArrayList<IGraphicViewerDocumentListener> arraylist = eX;
+        if (isSuspendUpdates()) {
+            return;
+        }
+        if (myDocumentEvent == null) {
+            myDocumentEvent = new GraphicViewerDocumentEvent(this, i, j, obj,
+                    k, obj1);
+        } else {
+            myDocumentEvent.setHint(i);
+            myDocumentEvent.setFlags(j);
+            myDocumentEvent.setObject(obj);
+            myDocumentEvent.setPreviousValueInt(k);
+            myDocumentEvent.setPreviousValue(obj1);
+        }
+        GraphicViewerDocumentEvent graphicviewerdocumentevent = myDocumentEvent;
+        myDocumentEvent = null;
+        ArrayList arraylist = myDocumentListeners;
         if (arraylist != null) {
             int l = arraylist.size();
             for (int i1 = 0; i1 < l; i1++) {
@@ -703,13 +600,13 @@ public class GraphicViewerDocument
             }
 
         }
-        e5 = graphicviewerdocumentevent;
-        e5.a(null);
+        myDocumentEvent = graphicviewerdocumentevent;
+        myDocumentEvent.setObject(null);
     }
 
     public void fireForedate(int i, int j, Object obj) {
         i |= 0x8000;
-        a(i, j, obj, 0, null);
+        invokeListeners(i, j, obj, 0, null);
     }
 
     public final void update() {
@@ -717,83 +614,92 @@ public class GraphicViewerDocument
     }
 
     public boolean isSuspendUpdates() {
-        return e6;
+        return mySuspendUpdates;
     }
 
     public void setSuspendUpdates(boolean flag) {
-        e6 = flag;
+        mySuspendUpdates = flag;
         if (!flag) {
-            _mthchar(null);
+            invalidatePositionArray(null);
             for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
-                    .getNextLayer())
-                graphicviewerlayer._mthfor();
+                    .getNextLayer()) {
+                graphicviewerlayer.resetCache();
+            }
 
             update();
         }
     }
 
     public boolean isSkipsUndoManager() {
-        return e7;
+        return mySkipsUndoManager;
     }
 
     public void setSkipsUndoManager(boolean flag) {
-        e7 = flag;
+        mySkipsUndoManager = flag;
     }
 
     public boolean isMaintainsPartID() {
-        return fd;
+        return myMaintainsPartID;
     }
 
     public void setMaintainsPartID(boolean flag) {
-        _mthint(flag, false);
+        internalSetMaintainsPartID(flag, false);
     }
 
-    private void _mthint(boolean flag, boolean flag1) {
-        boolean flag2 = fd;
+    private void internalSetMaintainsPartID(boolean flag, boolean flag1) {
+        boolean flag2 = myMaintainsPartID;
         if (flag2 != flag) {
-            fd = flag;
+            myMaintainsPartID = flag;
             fireUpdate(219, 0, null, flag2 ? 1 : 0, null);
-            if (!flag1)
-                if (flag)
+            if (!flag1) {
+                if (flag) {
                     ensureUniquePartID();
-                else
-                    eS = null;
+                } else {
+                    myParts = null;
+                }
+            }
         }
     }
 
     public IGraphicViewerIdentifiablePart findPart(int i) {
-        if (eS != null)
-            return (IGraphicViewerIdentifiablePart) eS.get(new Integer(i));
-        else
+        if (myParts != null) {
+            return (IGraphicViewerIdentifiablePart) myParts.get(new Integer(i));
+        } else {
             return null;
+        }
     }
 
-    void a(IGraphicViewerIdentifiablePart graphicvieweridentifiablepart) {
-        if (eS == null)
-            eS = new HashMap<Integer, IGraphicViewerIdentifiablePart>(1000);
+    void addPart(IGraphicViewerIdentifiablePart graphicvieweridentifiablepart) {
+        if (myParts == null) {
+            myParts = new HashMap(1000);
+        }
         int i = graphicvieweridentifiablepart.getPartID();
         Integer integer = null;
         if (i != -1) {
             integer = new Integer(i);
-            if (eS.get(integer) == graphicvieweridentifiablepart)
+            if (myParts.get(integer) == graphicvieweridentifiablepart) {
                 return;
-            if (eS.get(integer) == null) {
-                eS.put(integer, graphicvieweridentifiablepart);
+            }
+            if (myParts.get(integer) == null) {
+                myParts.put(integer, graphicvieweridentifiablepart);
                 return;
             }
         }
-        i = ++e2;
-        for (integer = new Integer(i); eS.get(integer) != null; integer = new Integer(
-                i))
-            i = ++e2;
+        i = ++myLastPartID;
+        for (integer = new Integer(i); myParts.get(integer) != null; integer = new Integer(
+                i)) {
+            i = ++myLastPartID;
+        }
 
-        eS.put(integer, graphicvieweridentifiablepart);
+        myParts.put(integer, graphicvieweridentifiablepart);
         graphicvieweridentifiablepart.setPartID(i);
     }
 
-    void _mthif(IGraphicViewerIdentifiablePart graphicvieweridentifiablepart) {
-        if (eS != null)
-            eS.remove(new Integer(graphicvieweridentifiablepart.getPartID()));
+    void removePart(IGraphicViewerIdentifiablePart graphicvieweridentifiablepart) {
+        if (myParts != null) {
+            myParts.remove(new Integer(graphicvieweridentifiablepart
+                    .getPartID()));
+        }
     }
 
     public void ensureUniquePartID() {
@@ -801,16 +707,15 @@ public class GraphicViewerDocument
             for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
                 GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
-                _mthcase(graphicviewerobject);
+                addAllParts(graphicviewerobject);
             }
-
         }
     }
 
-    void _mthcase(GraphicViewerObject graphicviewerobject) {
+    void addAllParts(GraphicViewerObject graphicviewerobject) {
         if (graphicviewerobject instanceof IGraphicViewerIdentifiablePart) {
             IGraphicViewerIdentifiablePart graphicvieweridentifiablepart = (IGraphicViewerIdentifiablePart) graphicviewerobject;
-            a(graphicvieweridentifiablepart);
+            addPart(graphicvieweridentifiablepart);
         }
         if (graphicviewerobject instanceof GraphicViewerArea) {
             GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
@@ -820,17 +725,16 @@ public class GraphicViewerDocument
                         .getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewerarea
                         .getNextObjectPosAtTop(graphicviewerlistposition);
-                _mthcase(graphicviewerobject1);
+                addAllParts(graphicviewerobject1);
             }
-
         }
     }
 
-    void _mthelse(GraphicViewerObject graphicviewerobject) {
-        if (eS != null) {
+    void removeAllParts(GraphicViewerObject graphicviewerobject) {
+        if (myParts != null) {
             if (graphicviewerobject instanceof IGraphicViewerIdentifiablePart) {
                 IGraphicViewerIdentifiablePart graphicvieweridentifiablepart = (IGraphicViewerIdentifiablePart) graphicviewerobject;
-                _mthif(graphicvieweridentifiablepart);
+                removePart(graphicvieweridentifiablepart);
             }
             if (graphicviewerobject instanceof GraphicViewerArea) {
                 GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
@@ -840,9 +744,8 @@ public class GraphicViewerDocument
                             .getObjectAtPos(graphicviewerlistposition);
                     graphicviewerlistposition = graphicviewerarea
                             .getNextObjectPosAtTop(graphicviewerlistposition);
-                    _mthelse(graphicviewerobject1);
+                    removeAllParts(graphicviewerobject1);
                 }
-
             }
         }
     }
@@ -902,10 +805,11 @@ public class GraphicViewerDocument
                 if (!graphicviewerdocumentchangededit.isBeforeChanging()) {
                     GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit1 = graphicviewerdocumentchangededit
                             .findBeforeChangingEdit();
-                    if (graphicviewerdocumentchangededit1 != null)
+                    if (graphicviewerdocumentchangededit1 != null) {
                         graphicviewerdocumentchangededit
                                 .setOldValue(graphicviewerdocumentchangededit1
                                         .getNewValue());
+                    }
                 }
                 return;
 
@@ -994,7 +898,7 @@ public class GraphicViewerDocument
                 return;
 
             case 218 :
-                ArrayList<Serializable> arraylist = new ArrayList<Serializable>();
+                ArrayList arraylist = new ArrayList();
                 int i = 0;
                 for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
                     GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
@@ -1002,7 +906,7 @@ public class GraphicViewerDocument
                     arraylist.add(i++, graphicviewerobject1);
                     if (graphicviewerobject1 instanceof GraphicViewerLink) {
                         GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject1;
-                        Vector<?> vector = graphicviewerlink.copyPoints();
+                        Vector vector = graphicviewerlink.copyPoints();
                         arraylist.add(i++, vector);
                     } else {
                         Rectangle rectangle = graphicviewerobject1
@@ -1032,13 +936,14 @@ public class GraphicViewerDocument
         }
         if (graphicviewerdocumentchangededit.getHint() >= 65535
                 && graphicviewerdocumentchangededit.getHint() != 65537
-                && graphicviewerdocumentchangededit.getHint() != 65536)
+                && graphicviewerdocumentchangededit.getHint() != 65536) {
             throw new IllegalArgumentException(
                     "unknown GraphicViewerDocumentEvent hint: "
                             + Integer.toString(graphicviewerdocumentchangededit
                                     .getHint()));
-        else
+        } else {
             return;
+        }
     }
 
     public void changeValue(
@@ -1051,7 +956,7 @@ public class GraphicViewerDocument
                             .getObject();
                     removeObject(graphicviewerobject);
                 } else {
-                    a(graphicviewerdocumentchangededit);
+                    reinsertObject(graphicviewerdocumentchangededit);
                 }
                 return;
 
@@ -1064,7 +969,7 @@ public class GraphicViewerDocument
 
             case 204 :
                 if (flag) {
-                    a(graphicviewerdocumentchangededit);
+                    reinsertObject(graphicviewerdocumentchangededit);
                 } else {
                     GraphicViewerObject graphicviewerobject2 = (GraphicViewerObject) graphicviewerdocumentchangededit
                             .getObject();
@@ -1102,11 +1007,12 @@ public class GraphicViewerDocument
                             .getOldValue();
                     switch (graphicviewerdocumentchangededit.getOldValueInt()) {
                         case 8 : // '\b'
-                            _mthdo(graphicviewerlayer7, graphicviewerlayer);
+                            insertBefore(graphicviewerlayer7,
+                                    graphicviewerlayer);
                             break;
 
                         case 4 : // '\004'
-                            _mthif(graphicviewerlayer7, graphicviewerlayer);
+                            insertAfter(graphicviewerlayer7, graphicviewerlayer);
                             break;
                     }
                 }
@@ -1118,10 +1024,11 @@ public class GraphicViewerDocument
                 if (flag) {
                     GraphicViewerLayer graphicviewerlayer8 = (GraphicViewerLayer) graphicviewerdocumentchangededit
                             .getOldValue();
-                    if (graphicviewerlayer8 != null)
-                        _mthdo(graphicviewerlayer8, graphicviewerlayer1);
-                    else
+                    if (graphicviewerlayer8 != null) {
+                        insertBefore(graphicviewerlayer8, graphicviewerlayer1);
+                    } else {
                         insertLayerAfter(getLastLayer(), graphicviewerlayer1);
+                    }
                 } else {
                     removeLayer(graphicviewerlayer1);
                 }
@@ -1132,10 +1039,11 @@ public class GraphicViewerDocument
                         .getObject();
                 GraphicViewerLayer graphicviewerlayer9 = (GraphicViewerLayer) graphicviewerdocumentchangededit
                         .getValue(flag);
-                if (graphicviewerlayer9 != null)
+                if (graphicviewerlayer9 != null) {
                     insertLayerBefore(graphicviewerlayer9, graphicviewerlayer2);
-                else
+                } else {
                     insertLayerAfter(getLastLayer(), graphicviewerlayer2);
+                }
                 return;
 
             case 213 :
@@ -1170,13 +1078,13 @@ public class GraphicViewerDocument
                 return;
 
             case 218 :
-                ArrayList<?> arraylist = (ArrayList<?>) graphicviewerdocumentchangededit
+                ArrayList arraylist = (ArrayList) graphicviewerdocumentchangededit
                         .getValue(flag);
                 for (int i = 0; i < arraylist.size(); i += 2) {
                     GraphicViewerObject graphicviewerobject3 = (GraphicViewerObject) arraylist
                             .get(i);
                     if (graphicviewerobject3 instanceof GraphicViewerLink) {
-                        Vector<?> vector = (Vector<?>) arraylist.get(i + 1);
+                        Vector vector = (Vector) arraylist.get(i + 1);
                         GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject3;
                         graphicviewerlink.setPoints(vector);
                     } else {
@@ -1189,7 +1097,8 @@ public class GraphicViewerDocument
                 return;
 
             case 219 :
-                _mthint(graphicviewerdocumentchangededit.getValueBoolean(flag),
+                internalSetMaintainsPartID(
+                        graphicviewerdocumentchangededit.getValueBoolean(flag),
                         true);
                 return;
 
@@ -1199,7 +1108,7 @@ public class GraphicViewerDocument
                 return;
 
             case 1902 :
-                ArrayList<?> arraylist1 = (ArrayList<?>) graphicviewerdocumentchangededit
+                ArrayList arraylist1 = (ArrayList) graphicviewerdocumentchangededit
                         .getOldValue();
                 boolean flag1 = flag
                         ? graphicviewerdocumentchangededit.getOldValueInt() == 1
@@ -1207,21 +1116,24 @@ public class GraphicViewerDocument
                 for (int j = 0; j < arraylist1.size(); j++) {
                     GraphicViewerObject graphicviewerobject4 = (GraphicViewerObject) arraylist1
                             .get(j);
-                    GraphicViewerArea._mthif(graphicviewerobject4, flag1);
+                    GraphicViewerArea
+                            .setAllNoClear(graphicviewerobject4, flag1);
                 }
 
                 return;
         }
-        if (graphicviewerdocumentchangededit.getHint() >= 65535)
+        if (graphicviewerdocumentchangededit.getHint() >= 65535) {
             throw new IllegalArgumentException(
                     "unknown GraphicViewerDocumentEvent hint: "
                             + Integer.toString(graphicviewerdocumentchangededit
                                     .getHint()));
-        else
+        } else {
             return;
+        }
     }
 
-    void a(GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
+    void reinsertObject(
+            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
         GraphicViewerObject graphicviewerobject = (GraphicViewerObject) graphicviewerdocumentchangededit
                 .getObject();
         switch (graphicviewerdocumentchangededit.getOldValueInt()) {
@@ -1235,80 +1147,91 @@ public class GraphicViewerDocument
             case 2 : // '\002'
                 IGraphicViewerObjectCollection graphicviewerobjectcollection = (IGraphicViewerObjectCollection) graphicviewerdocumentchangededit
                         .getOldValue();
-                if (graphicviewerobjectcollection instanceof GraphicViewerArea)
-                    ((GraphicViewerArea) graphicviewerobjectcollection)._mthdo(
-                            graphicviewerobject, true);
-                else
+                if (graphicviewerobjectcollection instanceof GraphicViewerArea) {
+                    ((GraphicViewerArea) graphicviewerobjectcollection)
+                            .addObjectAtTailInternal(graphicviewerobject, true);
+                } else {
                     graphicviewerobjectcollection
                             .addObjectAtTail(graphicviewerobject);
+                }
                 break;
 
             case 6 : // '\006'
                 IGraphicViewerObjectCollection graphicviewerobjectcollection1 = (IGraphicViewerObjectCollection) graphicviewerdocumentchangededit
                         .getOldValue();
-                if (graphicviewerobjectcollection1 instanceof GraphicViewerArea)
-                    ((GraphicViewerArea) graphicviewerobjectcollection1).a(
-                            graphicviewerobject, true);
-                else
+                if (graphicviewerobjectcollection1 instanceof GraphicViewerArea) {
+                    ((GraphicViewerArea) graphicviewerobjectcollection1)
+                            .addObjectAtHeadInternal(graphicviewerobject, true);
+                } else {
                     graphicviewerobjectcollection1
                             .addObjectAtHead(graphicviewerobject);
+                }
                 break;
 
             case 8 : // '\b'
                 GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) graphicviewerdocumentchangededit
                         .getOldValue();
                 Object obj = graphicviewerobject1.getParent();
-                if (obj == null)
+                if (obj == null) {
                     obj = graphicviewerobject1.getLayer();
-                if (obj == null)
+                }
+                if (obj == null) {
                     break;
+                }
                 GraphicViewerListPosition graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                         .findObject(graphicviewerobject1);
                 if (graphicviewerlistposition != null) {
-                    if (obj instanceof GraphicViewerArea)
-                        ((GraphicViewerArea) obj)._mthif(
+                    if (obj instanceof GraphicViewerArea) {
+                        ((GraphicViewerArea) obj).insertObjectBeforeInternal(
                                 graphicviewerlistposition, graphicviewerobject,
                                 true);
-                    else
+                    } else {
                         ((IGraphicViewerObjectCollection) (obj))
                                 .insertObjectBefore(graphicviewerlistposition,
                                         graphicviewerobject);
+                    }
                     break;
                 }
-                if (obj instanceof GraphicViewerArea)
-                    ((GraphicViewerArea) obj)._mthdo(graphicviewerobject, true);
-                else
+                if (obj instanceof GraphicViewerArea) {
+                    ((GraphicViewerArea) obj).addObjectAtTailInternal(
+                            graphicviewerobject, true);
+                } else {
                     ((IGraphicViewerObjectCollection) (obj))
                             .addObjectAtTail(graphicviewerobject);
+                }
                 break;
 
             case 4 : // '\004'
                 GraphicViewerObject graphicviewerobject2 = (GraphicViewerObject) graphicviewerdocumentchangededit
                         .getOldValue();
                 Object obj1 = graphicviewerobject2.getParent();
-                if (obj1 == null)
+                if (obj1 == null) {
                     obj1 = graphicviewerobject2.getLayer();
-                if (obj1 == null)
+                }
+                if (obj1 == null) {
                     break;
+                }
                 GraphicViewerListPosition graphicviewerlistposition1 = ((IGraphicViewerObjectCollection) (obj1))
                         .findObject(graphicviewerobject2);
                 if (graphicviewerlistposition1 != null) {
-                    if (obj1 instanceof GraphicViewerArea)
-                        ((GraphicViewerArea) obj1).a(
+                    if (obj1 instanceof GraphicViewerArea) {
+                        ((GraphicViewerArea) obj1).insertObjectAfterInternal(
                                 graphicviewerlistposition1,
                                 graphicviewerobject, true);
-                    else
+                    } else {
                         ((IGraphicViewerObjectCollection) (obj1))
                                 .insertObjectAfter(graphicviewerlistposition1,
                                         graphicviewerobject);
+                    }
                     break;
                 }
-                if (obj1 instanceof GraphicViewerArea)
-                    ((GraphicViewerArea) obj1)
-                            ._mthdo(graphicviewerobject, true);
-                else
+                if (obj1 instanceof GraphicViewerArea) {
+                    ((GraphicViewerArea) obj1).addObjectAtTailInternal(
+                            graphicviewerobject, true);
+                } else {
                     ((IGraphicViewerObjectCollection) (obj1))
                             .addObjectAtTail(graphicviewerobject);
+                }
                 break;
 
             case 0 : // '\0'
@@ -1320,14 +1243,16 @@ public class GraphicViewerDocument
                     GraphicViewerListPosition graphicviewerlistposition2 = graphicviewerobjectcollection2
                             .findObject(graphicviewerobject3);
                     if (graphicviewerlistposition2 != null) {
-                        if (graphicviewerobjectcollection2 instanceof GraphicViewerArea)
+                        if (graphicviewerobjectcollection2 instanceof GraphicViewerArea) {
                             ((GraphicViewerArea) graphicviewerobjectcollection2)
-                                    .a(graphicviewerlistposition2,
+                                    .insertObjectAfterInternal(
+                                            graphicviewerlistposition2,
                                             graphicviewerobject, true);
-                        else
+                        } else {
                             graphicviewerobjectcollection2.insertObjectAfter(
                                     graphicviewerlistposition2,
                                     graphicviewerobject);
+                        }
                         return;
                     }
                 }
@@ -1336,44 +1261,43 @@ public class GraphicViewerDocument
                     GraphicViewerListPosition graphicviewerlistposition3 = graphicviewerobjectcollection2
                             .findObject(graphicviewerobject4);
                     if (graphicviewerlistposition3 != null) {
-                        if (graphicviewerobjectcollection2 instanceof GraphicViewerArea)
+                        if (graphicviewerobjectcollection2 instanceof GraphicViewerArea) {
                             ((GraphicViewerArea) graphicviewerobjectcollection2)
-                                    ._mthif(graphicviewerlistposition3,
+                                    .insertObjectBeforeInternal(
+                                            graphicviewerlistposition3,
                                             graphicviewerobject, true);
-                        else
+                        } else {
                             graphicviewerobjectcollection2.insertObjectBefore(
                                     graphicviewerlistposition3,
                                     graphicviewerobject);
+                        }
                         return;
                     }
                 }
-                if (graphicviewerobjectcollection2 instanceof GraphicViewerArea)
+                if (graphicviewerobjectcollection2 instanceof GraphicViewerArea) {
                     ((GraphicViewerArea) graphicviewerobjectcollection2)
-                            ._mthdo(graphicviewerobject, true);
-                else
+                            .addObjectAtTailInternal(graphicviewerobject, true);
+                } else {
                     graphicviewerobjectcollection2
                             .addObjectAtTail(graphicviewerobject);
+                }
                 break;
         }
     }
 
     public static DataFlavor getStandardDataFlavor() {
-        if (e4 == null)
+        if (myStandardFlavor == null) {
             try {
-                e4 = new DataFlavor(
+                myStandardFlavor = new DataFlavor(
                         Class.forName("net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerSelection"),
                         "GraphicViewer Selection");
-                DataFlavor adataflavor[] = {e4};
-                eT = adataflavor;
+                DataFlavor adataflavor[] = {myStandardFlavor};
+                myFlavors = adataflavor;
             } catch (Exception e) {
                 ExceptionDialog.hideException(e);
             }
-        return e4;
-    }
-
-    public DataFlavor[] getTransferDataFlavors() {
-        getStandardDataFlavor();
-        return eT;
+        }
+        return myStandardFlavor;
     }
 
     public boolean isDataFlavorSupported(DataFlavor dataflavor) {
@@ -1382,10 +1306,16 @@ public class GraphicViewerDocument
 
     public synchronized Object getTransferData(DataFlavor dataflavor)
             throws UnsupportedFlavorException, IOException {
-        if (dataflavor.equals(getStandardDataFlavor()))
+        if (dataflavor.equals(getStandardDataFlavor())) {
             return this;
-        else
+        } else {
             throw new UnsupportedFlavorException(dataflavor);
+        }
+    }
+
+    public DataFlavor[] getTransferDataFlavors() {
+        getStandardDataFlavor();
+        return myFlavors;
     }
 
     public IGraphicViewerCopyEnvironment createDefaultCopyEnvironment() {
@@ -1416,14 +1346,16 @@ public class GraphicViewerDocument
             IGraphicViewerObjectSimpleCollection graphicviewerobjectsimplecollection,
             Point point,
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
-        if (graphicviewercopyenvironment == null)
+        if (graphicviewercopyenvironment == null) {
             graphicviewercopyenvironment = createDefaultCopyEnvironment();
+        }
         Point point1 = new Point(0, 0);
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerobjectsimplecollection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerobjectsimplecollection
@@ -1440,14 +1372,17 @@ public class GraphicViewerDocument
                 GraphicViewerLayer graphicviewerlayer = graphicviewerobject
                         .getLayer();
                 GraphicViewerLayer graphicviewerlayer1 = null;
-                if (graphicviewerlayer != null)
-                    if (graphicviewerlayer.getDocument() == this)
+                if (graphicviewerlayer != null) {
+                    if (graphicviewerlayer.getDocument() == this) {
                         graphicviewerlayer1 = graphicviewerlayer;
-                    else
+                    } else {
                         graphicviewerlayer1 = findLayer(graphicviewerlayer
                                 .getIdentifier());
-                if (graphicviewerlayer1 == null)
+                    }
+                }
+                if (graphicviewerlayer1 == null) {
                     graphicviewerlayer1 = getDefaultLayer();
+                }
                 graphicviewerlayer1.addObjectAtTail(graphicviewerobject1);
             }
         } while (true);
@@ -1458,126 +1393,141 @@ public class GraphicViewerDocument
     public int getNumLayers() {
         int i = 0;
         for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
-                .getNextLayer())
+                .getNextLayer()) {
             i++;
+        }
 
         return i;
     }
 
     public GraphicViewerLayer getFirstLayer() {
-        return fc;
+        return myFirstLayer;
     }
 
     public GraphicViewerLayer getLastLayer() {
-        return e1;
+        return myLastLayer;
     }
 
     public GraphicViewerLayer getNextLayer(GraphicViewerLayer graphicviewerlayer) {
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             return null;
-        else
+        } else {
             return graphicviewerlayer.getNextLayer();
+        }
     }
 
     public GraphicViewerLayer getPrevLayer(GraphicViewerLayer graphicviewerlayer) {
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             return null;
-        else
+        } else {
             return graphicviewerlayer.getPrevLayer();
+        }
     }
 
     public GraphicViewerLayer getDefaultLayer() {
-        return fa;
+        return myDefaultLayer;
     }
 
     public void setDefaultLayer(GraphicViewerLayer graphicviewerlayer) {
         if (graphicviewerlayer.getDocument() != this) {
             return;
         } else {
-            fa = graphicviewerlayer;
+            myDefaultLayer = graphicviewerlayer;
             return;
         }
     }
 
     public GraphicViewerLayer getLinksLayer() {
-        return eV;
+        return myLinksLayer;
     }
 
     public void setLinksLayer(GraphicViewerLayer graphicviewerlayer) {
         if (graphicviewerlayer.getDocument() != this) {
             return;
         } else {
-            eV = graphicviewerlayer;
+            myLinksLayer = graphicviewerlayer;
             return;
         }
     }
 
     public GraphicViewerLayer addLayerAfter(
             GraphicViewerLayer graphicviewerlayer) {
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             graphicviewerlayer = getLastLayer();
+        }
         GraphicViewerLayer graphicviewerlayer1 = new GraphicViewerLayer();
-        graphicviewerlayer1.a(this);
-        return _mthif(graphicviewerlayer, graphicviewerlayer1);
+        graphicviewerlayer1.init(this);
+        return insertAfter(graphicviewerlayer, graphicviewerlayer1);
     }
 
-    GraphicViewerLayer _mthif(GraphicViewerLayer graphicviewerlayer,
+    GraphicViewerLayer insertAfter(GraphicViewerLayer graphicviewerlayer,
             GraphicViewerLayer graphicviewerlayer1) {
-        graphicviewerlayer1.a(graphicviewerlayer.getNextLayer(),
+        graphicviewerlayer1.insert(graphicviewerlayer.getNextLayer(),
                 graphicviewerlayer);
-        if (graphicviewerlayer1.getNextLayer() == null)
-            e1 = graphicviewerlayer1;
+        if (graphicviewerlayer1.getNextLayer() == null) {
+            myLastLayer = graphicviewerlayer1;
+        }
         fireUpdate(210, 0, graphicviewerlayer1, 4, graphicviewerlayer);
         return graphicviewerlayer1;
     }
 
     public GraphicViewerLayer addLayerBefore(
             GraphicViewerLayer graphicviewerlayer) {
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             graphicviewerlayer = getFirstLayer();
+        }
         GraphicViewerLayer graphicviewerlayer1 = new GraphicViewerLayer();
-        graphicviewerlayer1.a(this);
-        return _mthdo(graphicviewerlayer, graphicviewerlayer1);
+        graphicviewerlayer1.init(this);
+        return insertBefore(graphicviewerlayer, graphicviewerlayer1);
     }
 
-    GraphicViewerLayer _mthdo(GraphicViewerLayer graphicviewerlayer,
+    GraphicViewerLayer insertBefore(GraphicViewerLayer graphicviewerlayer,
             GraphicViewerLayer graphicviewerlayer1) {
-        graphicviewerlayer1.a(graphicviewerlayer,
+        graphicviewerlayer1.insert(graphicviewerlayer,
                 graphicviewerlayer.getPrevLayer());
-        if (graphicviewerlayer1.getPrevLayer() == null)
-            fc = graphicviewerlayer1;
+        if (graphicviewerlayer1.getPrevLayer() == null) {
+            myFirstLayer = graphicviewerlayer1;
+        }
         fireUpdate(210, 0, graphicviewerlayer1, 8, graphicviewerlayer);
         return graphicviewerlayer1;
     }
 
     public void removeLayer(GraphicViewerLayer graphicviewerlayer) {
-        if (graphicviewerlayer.getDocument() != this)
+        if (graphicviewerlayer.getDocument() != this) {
             return;
+        }
         if (graphicviewerlayer == getFirstLayer()
-                && graphicviewerlayer == getLastLayer())
+                && graphicviewerlayer == getLastLayer()) {
             return;
+        }
         GraphicViewerLayer graphicviewerlayer1 = graphicviewerlayer
                 .getNextLayer();
         graphicviewerlayer.removeAll();
-        if (graphicviewerlayer.getPrevLayer() == null)
-            fc = graphicviewerlayer1;
-        if (graphicviewerlayer1 == null)
-            e1 = graphicviewerlayer.getPrevLayer();
-        graphicviewerlayer._mthif();
-        if (graphicviewerlayer == getLinksLayer())
-            if (graphicviewerlayer.getNextLayer() != null)
+        if (graphicviewerlayer.getPrevLayer() == null) {
+            myFirstLayer = graphicviewerlayer1;
+        }
+        if (graphicviewerlayer1 == null) {
+            myLastLayer = graphicviewerlayer.getPrevLayer();
+        }
+        graphicviewerlayer.extract();
+        if (graphicviewerlayer == getLinksLayer()) {
+            if (graphicviewerlayer.getNextLayer() != null) {
                 setLinksLayer(graphicviewerlayer.getNextLayer());
-            else if (graphicviewerlayer.getPrevLayer() != null)
+            } else if (graphicviewerlayer.getPrevLayer() != null) {
                 setLinksLayer(graphicviewerlayer.getPrevLayer());
-            else
+            } else {
                 setLinksLayer(getLastLayer());
-        if (graphicviewerlayer == getDefaultLayer())
-            if (graphicviewerlayer.getNextLayer() != null)
+            }
+        }
+        if (graphicviewerlayer == getDefaultLayer()) {
+            if (graphicviewerlayer.getNextLayer() != null) {
                 setDefaultLayer(graphicviewerlayer.getNextLayer());
-            else if (graphicviewerlayer.getPrevLayer() != null)
+            } else if (graphicviewerlayer.getPrevLayer() != null) {
                 setDefaultLayer(graphicviewerlayer.getPrevLayer());
-            else
+            } else {
                 setDefaultLayer(getLastLayer());
+            }
+        }
         fireUpdate(211, 0, graphicviewerlayer, 0, graphicviewerlayer1);
     }
 
@@ -1586,17 +1536,20 @@ public class GraphicViewerDocument
         if (graphicviewerlayer.getDocument() != this
                 || graphicviewerlayer1.getDocument() != this
                 || graphicviewerlayer == graphicviewerlayer1
-                || graphicviewerlayer1.getPrevLayer() == graphicviewerlayer)
+                || graphicviewerlayer1.getPrevLayer() == graphicviewerlayer) {
             return;
+        }
         GraphicViewerLayer graphicviewerlayer2 = graphicviewerlayer1
                 .getNextLayer();
-        if (fc == graphicviewerlayer1)
-            fc = graphicviewerlayer2;
-        graphicviewerlayer1._mthif();
-        graphicviewerlayer1.a(graphicviewerlayer.getNextLayer(),
+        if (myFirstLayer == graphicviewerlayer1) {
+            myFirstLayer = graphicviewerlayer2;
+        }
+        graphicviewerlayer1.extract();
+        graphicviewerlayer1.insert(graphicviewerlayer.getNextLayer(),
                 graphicviewerlayer);
-        if (e1 == graphicviewerlayer)
-            e1 = graphicviewerlayer1;
+        if (myLastLayer == graphicviewerlayer) {
+            myLastLayer = graphicviewerlayer1;
+        }
         fireUpdate(212, 0, graphicviewerlayer1, 0, graphicviewerlayer2);
     }
 
@@ -1605,17 +1558,20 @@ public class GraphicViewerDocument
         if (graphicviewerlayer.getDocument() != this
                 || graphicviewerlayer1.getDocument() != this
                 || graphicviewerlayer == graphicviewerlayer1
-                || graphicviewerlayer1.getNextLayer() == graphicviewerlayer)
+                || graphicviewerlayer1.getNextLayer() == graphicviewerlayer) {
             return;
+        }
         GraphicViewerLayer graphicviewerlayer2 = graphicviewerlayer1
                 .getNextLayer();
-        if (e1 == graphicviewerlayer1)
-            e1 = graphicviewerlayer1.getPrevLayer();
-        graphicviewerlayer1._mthif();
-        graphicviewerlayer1.a(graphicviewerlayer,
+        if (myLastLayer == graphicviewerlayer1) {
+            myLastLayer = graphicviewerlayer1.getPrevLayer();
+        }
+        graphicviewerlayer1.extract();
+        graphicviewerlayer1.insert(graphicviewerlayer,
                 graphicviewerlayer.getPrevLayer());
-        if (fc == graphicviewerlayer)
-            fc = graphicviewerlayer1;
+        if (myFirstLayer == graphicviewerlayer) {
+            myFirstLayer = graphicviewerlayer1;
+        }
         fireUpdate(212, 0, graphicviewerlayer1, 0, graphicviewerlayer2);
     }
 
@@ -1628,19 +1584,21 @@ public class GraphicViewerDocument
     }
 
     public GraphicViewerLayer findLayer(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return null;
+        }
         for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
                 .getNextLayer()) {
             Object obj1 = graphicviewerlayer.getIdentifier();
-            if (obj1 != null && obj1.equals(obj))
+            if (obj1 != null && obj1.equals(obj)) {
                 return graphicviewerlayer;
+            }
         }
 
         return null;
     }
 
-    void _mthdo(GraphicViewerDocument graphicviewerdocument) {
+    void copyLayersFrom(GraphicViewerDocument graphicviewerdocument) {
         for (GraphicViewerLayer graphicviewerlayer = graphicviewerdocument
                 .getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerdocument
                 .getNextLayer(graphicviewerlayer)) {
@@ -1653,102 +1611,111 @@ public class GraphicViewerDocument
 
         Object obj1 = graphicviewerdocument.getDefaultLayer().getIdentifier();
         GraphicViewerLayer graphicviewerlayer2 = findLayer(obj1);
-        if (graphicviewerlayer2 != null)
+        if (graphicviewerlayer2 != null) {
             setDefaultLayer(graphicviewerlayer2);
+        }
         Object obj2 = graphicviewerdocument.getLinksLayer().getIdentifier();
         GraphicViewerLayer graphicviewerlayer3 = findLayer(obj2);
-        if (graphicviewerlayer3 != null)
+        if (graphicviewerlayer3 != null) {
             setLinksLayer(graphicviewerlayer3);
+        }
     }
 
     public void sortByZOrder(GraphicViewerObject agraphicviewerobject[]) {
         if (agraphicviewerobject.length <= 1) {
             return;
         } else {
-            F();
-            a a1 = new a(this);
-            Arrays.sort(agraphicviewerobject, a1);
+            initLayerIndices();
+            ZOrderComparer localZOrderComparer = new ZOrderComparer(this);
+            Arrays.sort(agraphicviewerobject, localZOrderComparer);
             return;
         }
     }
 
-    void F() {
+    void initLayerIndices() {
         int i = 0;
         for (GraphicViewerLayer graphicviewerlayer = getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerlayer
-                .getNextLayer())
-            graphicviewerlayer.f = i++;
-
+                .getNextLayer()) {
+            graphicviewerlayer.myLayerIndex = i++;
+        }
     }
 
-    int a(GraphicViewerLayer graphicviewerlayer) {
-        return graphicviewerlayer.f;
+    int getLayerIndexOf(GraphicViewerLayer graphicviewerlayer) {
+        return graphicviewerlayer.myLayerIndex;
     }
 
     public GraphicViewerUndoManager getUndoManager() {
-        return eR;
+        return myUndoManager;
     }
 
     public void setUndoManager(GraphicViewerUndoManager graphicviewerundomanager) {
-        GraphicViewerUndoManager graphicviewerundomanager1 = eR;
+        GraphicViewerUndoManager graphicviewerundomanager1 = myUndoManager;
         if (graphicviewerundomanager1 != graphicviewerundomanager) {
-            if (graphicviewerundomanager1 != null)
+            if (graphicviewerundomanager1 != null) {
                 removeDocumentListener(graphicviewerundomanager1);
-            eR = graphicviewerundomanager;
-            if (graphicviewerundomanager != null)
+            }
+            myUndoManager = graphicviewerundomanager;
+            if (graphicviewerundomanager != null) {
                 addDocumentListener(graphicviewerundomanager);
+            }
         }
     }
 
     public boolean canUndo() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
-        if (graphicviewerundomanager != null)
+        if (graphicviewerundomanager != null) {
             return graphicviewerundomanager.canUndo();
-        else
+        } else {
             return false;
+        }
     }
 
     public void undo() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
-        if (graphicviewerundomanager != null)
+        if (graphicviewerundomanager != null) {
             try {
                 javax.swing.undo.UndoableEdit undoableedit = graphicviewerundomanager
-                        ._mthnew();
+                        .getEditToUndo();
                 fireUpdate(107, 0, undoableedit, 0, null);
                 graphicviewerundomanager.undo();
                 fireUpdate(108, 0, undoableedit, 0, null);
             } catch (CannotUndoException cue) {
                 ExceptionDialog.ignoreException(cue);
             }
+        }
     }
 
     public boolean canRedo() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
-        if (graphicviewerundomanager != null)
+        if (graphicviewerundomanager != null) {
             return graphicviewerundomanager.canRedo();
-        else
+        } else {
             return false;
+        }
     }
 
     public void redo() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
-        if (graphicviewerundomanager != null)
+        if (graphicviewerundomanager != null) {
             try {
                 javax.swing.undo.UndoableEdit undoableedit = graphicviewerundomanager
-                        ._mthint();
+                        .getEditToRedo();
                 fireUpdate(109, 0, undoableedit, 0, null);
                 graphicviewerundomanager.redo();
                 fireUpdate(110, 0, undoableedit, 0, null);
             } catch (CannotRedoException cre) {
                 ExceptionDialog.ignoreException(cre);
             }
+        }
     }
 
     public void startTransaction() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
         if (graphicviewerundomanager != null) {
             graphicviewerundomanager.startTransaction();
-            if (graphicviewerundomanager.getTransactionLevel() == 1)
+            if (graphicviewerundomanager.getTransactionLevel() == 1) {
                 fireUpdate(104, 0, null, 0, null);
+            }
         }
     }
 
@@ -1759,11 +1726,13 @@ public class GraphicViewerDocument
                     .getCurrentEdit();
             graphicviewerundomanager.endTransaction(flag);
             if (graphicviewerundomanager.getTransactionLevel() == 0
-                    && graphicviewercompoundedit != null)
-                if (flag)
+                    && graphicviewercompoundedit != null) {
+                if (flag) {
                     fireUpdate(105, 0, graphicviewercompoundedit, 0, null);
-                else
+                } else {
                     fireUpdate(106, 0, null, 0, null);
+                }
+            }
         }
     }
 
@@ -1774,28 +1743,32 @@ public class GraphicViewerDocument
                     .getCurrentEdit();
             graphicviewerundomanager.endTransaction(s);
             if (graphicviewerundomanager.getTransactionLevel() == 0
-                    && graphicviewercompoundedit != null)
+                    && graphicviewercompoundedit != null) {
                 fireUpdate(105, 0, graphicviewercompoundedit, 0, s);
+            }
         }
     }
 
     public void discardAllEdits() {
         GraphicViewerUndoManager graphicviewerundomanager = getUndoManager();
-        if (graphicviewerundomanager != null)
+        if (graphicviewerundomanager != null) {
             graphicviewerundomanager.discardAllEdits();
+        }
     }
 
     public boolean isAvoidable(GraphicViewerObject graphicviewerobject) {
-        if (!graphicviewerobject.isVisible())
+        if (!graphicviewerobject.isVisible()) {
             return false;
-        else
+        } else {
             return graphicviewerobject instanceof GraphicViewerNode;
+        }
     }
 
     public Rectangle getAvoidableRectangle(
             GraphicViewerObject graphicviewerobject, Rectangle rectangle) {
-        if (rectangle == null)
+        if (rectangle == null) {
             rectangle = new Rectangle(0, 0, 0, 0);
+        }
         Rectangle rectangle1 = graphicviewerobject.getBoundingRect();
         rectangle.x = rectangle1.x;
         rectangle.y = rectangle1.y;
@@ -1807,48 +1780,51 @@ public class GraphicViewerDocument
 
     public boolean isUnoccupied(Rectangle rectangle,
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject != e8) {
-            _mthchar(null);
-            e8 = graphicviewerobject;
+        if (graphicviewerobject != mySkippedAvoidable) {
+            invalidatePositionArray(null);
+            mySkippedAvoidable = graphicviewerobject;
         }
-        GraphicViewerPositionArray graphicviewerpositionarray = a(false,
-                graphicviewerobject);
+        GraphicViewerPositionArray graphicviewerpositionarray = getPositions(
+                false, graphicviewerobject);
         return graphicviewerpositionarray.isUnoccupied(rectangle.x,
                 rectangle.y, rectangle.width, rectangle.height);
     }
 
-    GraphicViewerPositionArray E() {
-        return a(true, null);
+    GraphicViewerPositionArray getPositions() {
+        return getPositions(true, null);
     }
 
-    GraphicViewerPositionArray a(boolean flag,
+    GraphicViewerPositionArray getPositions(boolean flag,
             GraphicViewerObject graphicviewerobject) {
-        if (eW == null)
-            eW = new GraphicViewerPositionArray();
-        if (eW.isInvalid()) {
+        if (myPositions == null) {
+            myPositions = new GraphicViewerPositionArray();
+        }
+        if (myPositions.isInvalid()) {
             Rectangle rectangle = computeBounds();
             rectangle.x -= 100;
             rectangle.y -= 100;
             rectangle.width += 200;
             rectangle.height += 200;
-            eW.initialize(rectangle);
+            myPositions.initialize(rectangle);
             for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
                 GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
-                a(graphicviewerobject1, rectangle, graphicviewerobject);
+                getPositions1(graphicviewerobject1, rectangle,
+                        graphicviewerobject);
             }
 
-            eW.setInvalid(false);
+            myPositions.setInvalid(false);
         } else if (flag) {
-            eW.setAllUnoccupied(0x7fffffff);
+            myPositions.setAllUnoccupied(0x7fffffff);
         }
-        return eW;
+        return myPositions;
     }
 
-    private void a(GraphicViewerObject graphicviewerobject,
+    private void getPositions1(GraphicViewerObject graphicviewerobject,
             Rectangle rectangle, GraphicViewerObject graphicviewerobject1) {
-        if (graphicviewerobject == graphicviewerobject1)
+        if (graphicviewerobject == graphicviewerobject1) {
             return;
+        }
         if (graphicviewerobject instanceof GraphicViewerSubGraphBase) {
             GraphicViewerSubGraphBase graphicviewersubgraphbase = (GraphicViewerSubGraphBase) graphicviewerobject;
             for (GraphicViewerListPosition graphicviewerlistposition = graphicviewersubgraphbase
@@ -1857,54 +1833,58 @@ public class GraphicViewerDocument
                         .getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewersubgraphbase
                         .getNextObjectPosAtTop(graphicviewerlistposition);
-                a(graphicviewerobject2, rectangle, graphicviewerobject1);
+                getPositions1(graphicviewerobject2, rectangle,
+                        graphicviewerobject1);
             }
 
         } else if (isAvoidable(graphicviewerobject)) {
             rectangle = getAvoidableRectangle(graphicviewerobject, rectangle);
-            int i = eW.getCellSize().width;
-            int j = eW.getCellSize().height;
+            int i = myPositions.getCellSize().width;
+            int j = myPositions.getCellSize().height;
             for (int k = rectangle.x; k <= rectangle.x + rectangle.width; k += i) {
-                for (int l = rectangle.y; l <= rectangle.y + rectangle.height; l += j)
-                    eW.setDist(k, l, 0);
-
+                for (int l = rectangle.y; l <= rectangle.y + rectangle.height; l += j) {
+                    myPositions.setDist(k, l, 0);
+                }
             }
         }
     }
 
-    private void _mthchar(GraphicViewerObject graphicviewerobject) {
-        e8 = null;
-        if (eW != null
-                && !eW.isInvalid()
-                && (graphicviewerobject == null || isAvoidable(graphicviewerobject)))
-            eW.setInvalid(true);
+    private void invalidatePositionArray(GraphicViewerObject graphicviewerobject) {
+        mySkippedAvoidable = null;
+        if (myPositions != null
+                && !myPositions.isInvalid()
+                && (graphicviewerobject == null || isAvoidable(graphicviewerobject))) {
+            myPositions.setInvalid(true);
+        }
     }
 
     public void setValidCycle(int i) {
-        int j = e9;
+        int j = myValidCycle;
         if (j != i) {
-            e9 = i;
+            myValidCycle = i;
             fireUpdate(220, 0, null, j, null);
         }
     }
 
     public int getValidCycle() {
-        return e9;
+        return myValidCycle;
     }
 
     public static boolean makesDirectedCycleFast(
             GraphicViewerNode graphicviewernode,
             GraphicViewerNode graphicviewernode1) {
-        if (graphicviewernode == graphicviewernode1)
+        if (graphicviewernode == graphicviewernode1) {
             return true;
-        ArrayList<?> arraylist = graphicviewernode1.findAll(16, null);
-        for (Iterator<?> iterator = arraylist.iterator(); iterator.hasNext();) {
+        }
+        ArrayList arraylist = graphicviewernode1.findAll(16, null);
+        for (Iterator iterator = arraylist.iterator(); iterator.hasNext();) {
             GraphicViewerNode graphicviewernode2 = (GraphicViewerNode) iterator
                     .next();
             if (graphicviewernode2 != graphicviewernode1
                     && makesDirectedCycleFast(graphicviewernode,
-                            graphicviewernode2))
+                            graphicviewernode2)) {
                 return true;
+            }
         }
 
         return false;
@@ -1916,29 +1896,34 @@ public class GraphicViewerDocument
         if (graphicviewernode == graphicviewernode1) {
             return true;
         } else {
-            e0.clear();
-            e0.put(graphicviewernode, null);
-            boolean flag = _mthif(graphicviewernode, graphicviewernode1, e0);
-            e0.clear();
+            myCycleMap.clear();
+            myCycleMap.put(graphicviewernode, null);
+            boolean flag = makesDirectedCycle1(graphicviewernode,
+                    graphicviewernode1, myCycleMap);
+            myCycleMap.clear();
             return flag;
         }
     }
 
-    private static boolean _mthif(GraphicViewerNode graphicviewernode,
-            GraphicViewerNode graphicviewernode1,
-            HashMap<GraphicViewerNode, ?> hashmap) {
-        if (graphicviewernode == graphicviewernode1)
+    private static boolean makesDirectedCycle1(
+            GraphicViewerNode graphicviewernode,
+            GraphicViewerNode graphicviewernode1, HashMap hashmap) {
+        if (graphicviewernode == graphicviewernode1) {
             return true;
-        if (hashmap.containsKey(graphicviewernode1))
+        }
+        if (hashmap.containsKey(graphicviewernode1)) {
             return false;
+        }
         hashmap.put(graphicviewernode1, null);
-        ArrayList<?> arraylist = graphicviewernode1.findAll(16, null);
-        for (Iterator<?> iterator = arraylist.iterator(); iterator.hasNext();) {
+        ArrayList arraylist = graphicviewernode1.findAll(16, null);
+        for (Iterator iterator = arraylist.iterator(); iterator.hasNext();) {
             GraphicViewerNode graphicviewernode2 = (GraphicViewerNode) iterator
                     .next();
             if (graphicviewernode2 != graphicviewernode1
-                    && _mthif(graphicviewernode, graphicviewernode2, hashmap))
+                    && makesDirectedCycle1(graphicviewernode,
+                            graphicviewernode2, hashmap)) {
                 return true;
+            }
         }
 
         return false;
@@ -1950,29 +1935,34 @@ public class GraphicViewerDocument
         if (graphicviewernode == graphicviewernode1) {
             return true;
         } else {
-            e0.clear();
-            e0.put(graphicviewernode, null);
-            boolean flag = a(graphicviewernode, graphicviewernode1, e0);
-            e0.clear();
+            myCycleMap.clear();
+            myCycleMap.put(graphicviewernode, null);
+            boolean flag = makesUndirectedCycle1(graphicviewernode,
+                    graphicviewernode1, myCycleMap);
+            myCycleMap.clear();
             return flag;
         }
     }
 
-    private static boolean a(GraphicViewerNode graphicviewernode,
-            GraphicViewerNode graphicviewernode1,
-            HashMap<GraphicViewerNode, ?> hashmap) {
-        if (graphicviewernode == graphicviewernode1)
+    private static boolean makesUndirectedCycle1(
+            GraphicViewerNode graphicviewernode,
+            GraphicViewerNode graphicviewernode1, HashMap hashmap) {
+        if (graphicviewernode == graphicviewernode1) {
             return true;
-        if (hashmap.containsKey(graphicviewernode1))
+        }
+        if (hashmap.containsKey(graphicviewernode1)) {
             return false;
+        }
         hashmap.put(graphicviewernode1, null);
-        ArrayList<?> arraylist = graphicviewernode1.findAll(24, null);
-        for (Iterator<?> iterator = arraylist.iterator(); iterator.hasNext();) {
+        ArrayList arraylist = graphicviewernode1.findAll(24, null);
+        for (Iterator iterator = arraylist.iterator(); iterator.hasNext();) {
             GraphicViewerNode graphicviewernode2 = (GraphicViewerNode) iterator
                     .next();
             if (graphicviewernode2 != graphicviewernode1
-                    && a(graphicviewernode, graphicviewernode2, hashmap))
+                    && makesUndirectedCycle1(graphicviewernode,
+                            graphicviewernode2, hashmap)) {
                 return true;
+            }
         }
 
         return false;
@@ -1984,21 +1974,27 @@ public class GraphicViewerDocument
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument",
                             domelement);
-            domelement1.setAttribute("docwidth", Integer.toString(fb.width));
-            domelement1.setAttribute("docheight", Integer.toString(fb.height));
-            domelement1.setAttribute("docleft", Integer.toString(eZ.x));
-            domelement1.setAttribute("doctop", Integer.toString(eZ.y));
-            if (e3 != null) {
-                int i = e3.getRed();
-                int j = e3.getGreen();
-                int k = e3.getBlue();
-                int l = e3.getAlpha();
+            domelement1.setAttribute("docwidth",
+                    Integer.toString(myDocumentSize.width));
+            domelement1.setAttribute("docheight",
+                    Integer.toString(myDocumentSize.height));
+            domelement1.setAttribute("docleft",
+                    Integer.toString(myDocumentTopLeft.x));
+            domelement1.setAttribute("doctop",
+                    Integer.toString(myDocumentTopLeft.y));
+            if (myPaperColor != null) {
+                int i = myPaperColor.getRed();
+                int j = myPaperColor.getGreen();
+                int k = myPaperColor.getBlue();
+                int l = myPaperColor.getAlpha();
                 String s = "rgbalpha(" + Integer.toString(i) + ","
                         + Integer.toString(j) + "," + Integer.toString(k) + ","
                         + Integer.toString(l) + ")";
                 domelement1.setAttribute("papercolor", s);
             }
-            domelement1.setAttribute("modifiable", eY ? "true" : "false");
+            domelement1.setAttribute("modifiable", myModifiable
+                    ? "true"
+                    : "false");
             domdoc.registerReferencingNode(domelement1, "defaultlayer",
                     getDefaultLayer());
         }
@@ -2008,10 +2004,14 @@ public class GraphicViewerDocument
             GraphicViewerDocument graphicviewerdocument,
             IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            fb.width = Integer.parseInt(domelement1.getAttribute("docwidth"));
-            fb.height = Integer.parseInt(domelement1.getAttribute("docheight"));
-            eZ.x = Integer.parseInt(domelement1.getAttribute("docleft"));
-            eZ.y = Integer.parseInt(domelement1.getAttribute("doctop"));
+            myDocumentSize.width = Integer.parseInt(domelement1
+                    .getAttribute("docwidth"));
+            myDocumentSize.height = Integer.parseInt(domelement1
+                    .getAttribute("docheight"));
+            myDocumentTopLeft.x = Integer.parseInt(domelement1
+                    .getAttribute("docleft"));
+            myDocumentTopLeft.y = Integer.parseInt(domelement1
+                    .getAttribute("doctop"));
             String s = domelement1.getAttribute("papercolor");
             if (s.length() > 0 && s.startsWith("rgbalpha")) {
                 int i = s.indexOf("(") + 1;
@@ -2030,7 +2030,8 @@ public class GraphicViewerDocument
                         .parseInt(s2), Integer.parseInt(s3), Integer
                         .parseInt(s4), Integer.parseInt(s5)));
             }
-            eY = domelement1.getAttribute("modifiable").equals("true");
+            myModifiable = domelement1.getAttribute("modifiable")
+                    .equals("true");
             String s1 = domelement1.getAttribute("defaultlayer");
             domdoc.registerReferencingObject(this, "defaultlayer", s1);
         }
@@ -2038,8 +2039,9 @@ public class GraphicViewerDocument
     }
 
     public void SVGUpdateReference(String s, Object obj) {
-        if (s.equals("defaultlayer"))
+        if (s.equals("defaultlayer")) {
             setDefaultLayer((GraphicViewerLayer) obj);
+        }
     }
 
     public void SVGWriteLayer(IDomDoc domdoc, IDomElement domelement,
@@ -2049,22 +2051,21 @@ public class GraphicViewerDocument
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerLayer",
                             domelement);
-            domelement1.setAttribute("visible", graphicviewerlayer.c
+            domelement1.setAttribute("visible", graphicviewerlayer.myVisible
                     ? "true"
                     : "false");
             domelement1.setAttribute("transparency", (new Float(
-                    graphicviewerlayer.k)).toString());
-            domelement1.setAttribute("modifiable", graphicviewerlayer.h
-                    ? "true"
-                    : "false");
-            if (graphicviewerlayer.b instanceof String) {
+                    graphicviewerlayer.myTransparency)).toString());
+            domelement1.setAttribute("modifiable",
+                    graphicviewerlayer.myModifiable ? "true" : "false");
+            if (graphicviewerlayer.myIdentifier instanceof String) {
                 domelement1.setAttribute("idtype", "string");
                 domelement1.setAttribute("identifier",
-                        (String) graphicviewerlayer.b);
-            } else if (graphicviewerlayer.b instanceof Integer) {
+                        (String) graphicviewerlayer.myIdentifier);
+            } else if (graphicviewerlayer.myIdentifier instanceof Integer) {
                 domelement1.setAttribute("idtype", "integer");
                 domelement1.setAttribute("identifier",
-                        ((Integer) graphicviewerlayer.b).toString());
+                        ((Integer) graphicviewerlayer.myIdentifier).toString());
             }
             domdoc.registerObject(this, domelement1);
         }
@@ -2094,17 +2095,19 @@ public class GraphicViewerDocument
             IDomElement domelement, IDomElement domelement1,
             GraphicViewerLayer graphicviewerlayer) {
         if (domelement1 != null) {
-            graphicviewerlayer.c = domelement1.getAttribute("visible").equals(
-                    "true");
-            graphicviewerlayer.k = (new Float(
-                    domelement1.getAttribute("transparency"))).floatValue();
-            graphicviewerlayer.h = domelement1.getAttribute("modifiable")
+            graphicviewerlayer.myVisible = domelement1.getAttribute("visible")
                     .equals("true");
-            if (domelement1.getAttribute("idtype").equals("string"))
-                graphicviewerlayer.b = domelement1.getAttribute("identifier");
-            else if (domelement1.getAttribute("idtype").equals("integer"))
-                graphicviewerlayer.b = new Integer(
+            graphicviewerlayer.myTransparency = (new Float(
+                    domelement1.getAttribute("transparency"))).floatValue();
+            graphicviewerlayer.myModifiable = domelement1.getAttribute(
+                    "modifiable").equals("true");
+            if (domelement1.getAttribute("idtype").equals("string")) {
+                graphicviewerlayer.myIdentifier = domelement1
+                        .getAttribute("identifier");
+            } else if (domelement1.getAttribute("idtype").equals("integer")) {
+                graphicviewerlayer.myIdentifier = new Integer(
                         domelement1.getAttribute("identifier"));
+            }
             domdoc.SVGTraverseChildren(graphicviewerdocument, domelement, null,
                     true);
             return domelement.getNextSibling();
@@ -2113,33 +2116,86 @@ public class GraphicViewerDocument
         }
     }
 
-    public static final int CyclesAllowAll = 0;
-    public static final int CyclesNotDirected = 1;
-    public static final int CyclesNotDirectedFast = 2;
-    public static final int CyclesNotUndirected = 3;
-    public static final int CyclesDestinationTree = 4;
-    public static final int CyclesSourceTree = 5;
-    static boolean eU = false;
-    private GraphicViewerLayer fa;
-    private GraphicViewerLayer eV;
-    private GraphicViewerLayer fc;
-    private GraphicViewerLayer e1;
-    private Dimension fb;
-    private Point eZ;
-    private Color e3;
-    private boolean eY;
-    private transient boolean e6;
-    private transient boolean e7;
-    private static transient DataFlavor e4 = null;
-    private static transient DataFlavor eT[] = null;
-    private transient ArrayList<IGraphicViewerDocumentListener> eX;
-    private transient GraphicViewerDocumentEvent e5;
-    private transient GraphicViewerUndoManager eR;
-    private transient GraphicViewerPositionArray eW;
-    private transient GraphicViewerObject e8;
-    private boolean fd;
-    private int e2;
-    private transient HashMap<Integer, IGraphicViewerIdentifiablePart> eS;
-    private int e9;
-    private static HashMap<GraphicViewerNode, ?> e0 = null;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    static class ZOrderComparer implements Comparator {
+
+        private GraphicViewerDocument myDocument;
+
+        public ZOrderComparer(GraphicViewerDocument graphicviewerdocument) {
+            myDocument = graphicviewerdocument;
+        }
+
+        public int compare(Object obj, Object obj1) {
+            GraphicViewerObject graphicviewerobject = (GraphicViewerObject) obj;
+            GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) obj1;
+            if (graphicviewerobject == null || graphicviewerobject1 == null
+                    || graphicviewerobject == graphicviewerobject1) {
+                return 0;
+            }
+            int i = myDocument.getLayerIndexOf(graphicviewerobject.getLayer());
+            int j = myDocument.getLayerIndexOf(graphicviewerobject1.getLayer());
+            if (i < j) {
+                return -1;
+            }
+            if (i > j) {
+                return 1;
+            }
+            GraphicViewerLayer graphicviewerlayer = graphicviewerobject
+                    .getLayer();
+            if (graphicviewerlayer == null) {
+                return -1;
+            }
+            int k = graphicviewerlayer.getIndexOf(graphicviewerobject
+                    .getTopLevelObject());
+            int l = graphicviewerlayer.getIndexOf(graphicviewerobject1
+                    .getTopLevelObject());
+            if (k < l) {
+                return -1;
+            }
+            if (k > l) {
+                return 1;
+            } else {
+                return AFirst(graphicviewerobject.getTopLevelObject(),
+                        graphicviewerobject, graphicviewerobject1);
+            }
+        }
+
+        private int AFirst(GraphicViewerObject graphicviewerobject,
+                GraphicViewerObject graphicviewerobject1,
+                GraphicViewerObject graphicviewerobject2) {
+            label0 : {
+                if (graphicviewerobject == graphicviewerobject1) {
+                    return -1;
+                }
+                if (graphicviewerobject == graphicviewerobject2) {
+                    return 1;
+                }
+                if (!(graphicviewerobject instanceof GraphicViewerArea)) {
+                    break label0;
+                }
+                GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
+                GraphicViewerListPosition graphicviewerlistposition = graphicviewerarea
+                        .getFirstObjectPos();
+                int i;
+                do {
+                    if (graphicviewerlistposition == null) {
+                        break label0;
+                    }
+                    GraphicViewerObject graphicviewerobject3 = graphicviewerarea
+                            .getObjectAtPos(graphicviewerlistposition);
+                    graphicviewerlistposition = graphicviewerarea
+                            .getNextObjectPos(graphicviewerlistposition);
+                    i = AFirst(graphicviewerobject3, graphicviewerobject1,
+                            graphicviewerobject2);
+                } while (i == 0);
+                return i;
+            }
+            return 0;
+        }
+    }
 }

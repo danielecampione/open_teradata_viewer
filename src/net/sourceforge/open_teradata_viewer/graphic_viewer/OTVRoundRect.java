@@ -35,73 +35,87 @@ public class OTVRoundRect extends GraphicViewerRoundRect {
 
     private static final long serialVersionUID = 8212713660721103524L;
 
-    public OTVRoundRect(Point point, Dimension dimension,
-            Dimension dimension1) {
-        super(point, dimension, dimension1);
+    public OTVRoundRect(Point loc, Dimension size, Dimension arc) {
+        super(loc, size, arc);
         updateFill();
     }
 
     public OTVRoundRect() {
+        super();
         updateFill();
     }
 
-    public void geometryChange(Rectangle rectangle) {
-        super.geometryChange(rectangle);
+    // Make sure there's a color gradient going from the top-left to the bottom
+    // right of the rectangle, no matter where the rectangle is or how big it is
+    public void geometryChange(Rectangle prevRect) {
+        super.geometryChange(prevRect);
         updateFill();
     }
 
-    public Rectangle handleResize(Graphics2D graphics2d,
-            GraphicViewerView graphicviewerview, Rectangle rectangle,
-            Point point, int i, int j, int k, int l) {
-        Rectangle rectangle1 = super.handleResize(graphics2d,
-                graphicviewerview, rectangle, point, i, j, k, l);
-        if (j == 2)
-            setBoundingRect(rectangle1);
+    // Do resizing continuously instead of having the user manipulate an XOR'd
+    // bounding rectangle
+    public Rectangle handleResize(Graphics2D g, GraphicViewerView view,
+            Rectangle prevRect, Point newPoint, int whichHandle, int event,
+            int minWidth, int minHeight) {
+        Rectangle newRect = super.handleResize(g, view, prevRect, newPoint,
+                whichHandle, event, minWidth, minHeight);
+        // Resize continuously (default only does setBoundingRect on MouseUp)
+        if (event == GraphicViewerView.EventMouseMove) {
+            setBoundingRect(newRect);
+        }
+        // Don't draw XOR resize rectangle
         return null;
     }
 
     public void updateFill() {
-        Rectangle rectangle = getBoundingRect();
-        if (getBrush() != null && getBrush().getStyle() == 65535) {
+        Rectangle rect = getBoundingRect();
+        if (getBrush() != null
+                && getBrush().getStyle() == GraphicViewerBrush.SOLID) {
             setBrush(new GraphicViewerBrush(getBrush().getPaint()));
             return;
-        } else {
-            setBrush(new GraphicViewerBrush(new GradientPaint(rectangle.x,
-                    rectangle.y, Color.magenta, rectangle.x + rectangle.width,
-                    rectangle.y + rectangle.height, Color.blue)));
-            return;
         }
+        setBrush(new GraphicViewerBrush(new GradientPaint(rect.x, rect.y,
+                Color.magenta, rect.x + rect.width, rect.y + rect.height,
+                Color.blue)));
     }
 
     public String getToolTipText() {
-        if (getBrush() == null)
+        if (getBrush() == null) {
             return "this doesn't have any brush filling in the inside";
-        if (getBrush().getPaint() instanceof GradientPaint)
+        } else if (getBrush().getPaint() instanceof GradientPaint) {
             return "this is filled with a color gradient";
-        else
+        } else {
             return "this is filled with a solid color";
+        }
     }
 
-    public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
-        domdoc.createGraphicViewerClassElement(
-                "net.sourceforge.open_teradata_viewer.graphic_viewer.OTVRoundRect",
-                domelement);
-        super.SVGWriteObject(domdoc, domelement);
+    public void SVGWriteObject(IDomDoc svgDoc,
+            IDomElement graphicViewerElementGroup) {
+        // Add OTVRoundRect element
+        IDomElement graphicViewerSampleNode = svgDoc
+                .createGraphicViewerClassElement(
+                        "net.sourceforge.open_teradata_viewer.graphic_viewer.OTVRoundRect",
+                        graphicViewerElementGroup);
+        // Have superclass add to the GraphicViewerObject group
+        super.SVGWriteObject(svgDoc, graphicViewerElementGroup);
     }
 
-    public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
-        if (domelement1 != null) {
-            super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
-                    domelement1.getNextSiblingGraphicViewerClassElement());
+    public IDomNode SVGReadObject(IDomDoc svgDoc,
+            GraphicViewerDocument graphicViewerDoc, IDomElement svgElement,
+            IDomElement graphicViewerChildElement) {
+        if (graphicViewerChildElement != null) {
+            // This is a OTVRoundRect element
+            super.SVGReadObject(svgDoc, graphicViewerDoc, svgElement,
+                    graphicViewerChildElement
+                            .getNextSiblingGraphicViewerClassElement());
             updateFill();
         }
-        return domelement.getNextSibling();
+        return svgElement.getNextSibling();
     }
 
-    public void SVGUpdateReference(String s, Object obj) {
-        if (!s.equals("drawablebrush"))
-            super.SVGUpdateReference(s, obj);
+    public void SVGUpdateReference(String attr, Object referencedObject) {
+        if (!attr.equals("drawablebrush")) {
+            super.SVGUpdateReference(attr, referencedObject);
+        }
     }
 }

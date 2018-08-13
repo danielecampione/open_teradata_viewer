@@ -35,41 +35,37 @@ public class AnimatedView extends OTVView {
 
     public AnimatedView() {
         new Timer(50, new ActionListener() {
-            public void actionPerformed(ActionEvent paramActionEvent) {
-                GraphicViewerDocument localGraphicViewerDocument = AnimatedView.this
-                        .getDocument();
-                localGraphicViewerDocument.setSkipsUndoManager(true);
-                GraphicViewerListPosition localGraphicViewerListPosition = localGraphicViewerDocument
-                        .getFirstObjectPos();
-                while (localGraphicViewerListPosition != null) {
-                    GraphicViewerObject localGraphicViewerObject = localGraphicViewerDocument
-                            .getObjectAtPos(localGraphicViewerListPosition);
-                    localGraphicViewerListPosition = localGraphicViewerDocument
-                            .getNextObjectPosAtTop(localGraphicViewerListPosition);
-                    if ((localGraphicViewerObject instanceof AnimatedLink)) {
-                        AnimatedLink localAnimatedLink = (AnimatedLink) localGraphicViewerObject;
-                        localAnimatedLink.step();
+            public void actionPerformed(ActionEvent evt) {
+                GraphicViewerDocument doc = getDocument();
+                doc.setSkipsUndoManager(true);
+                GraphicViewerListPosition pos = doc.getFirstObjectPos();
+                while (pos != null) {
+                    GraphicViewerObject obj = doc.getObjectAtPos(pos);
+                    pos = doc.getNextObjectPosAtTop(pos);
+                    if (obj instanceof AnimatedLink) {
+                        AnimatedLink link = (AnimatedLink) obj;
+                        link.step();
                     }
                 }
-                localGraphicViewerDocument.setSkipsUndoManager(false);
+                doc.setSkipsUndoManager(false);
             }
         }).start();
     }
 
-    public void newLink(GraphicViewerPort paramGraphicViewerPort1,
-            GraphicViewerPort paramGraphicViewerPort2) {
-        GraphicViewerDocument localGraphicViewerDocument = getDocument();
-        if (localGraphicViewerDocument == null)
+    public void newLink(GraphicViewerPort from, GraphicViewerPort to) {
+        GraphicViewerDocument doc = getDocument();
+        if (doc == null) {
             return;
+        }
 
-        AnimatedLink localAnimatedLink = new AnimatedLink(
-                paramGraphicViewerPort1, paramGraphicViewerPort2);
+        GraphicViewerLink link = new AnimatedLink(from, to);
 
-        GraphicViewerSubGraphBase.reparentToCommonSubGraph(localAnimatedLink,
-                paramGraphicViewerPort1, paramGraphicViewerPort2, true,
-                localGraphicViewerDocument.getLinksLayer());
+        // Now smarter about automatically adding links to subgraphs
+        //  [instead of doc.getLinksLayer().addObjectAtTail(link);]
+        GraphicViewerSubGraphBase.reparentToCommonSubGraph(link, from, to,
+                true, doc.getLinksLayer());
 
-        fireUpdate(31, 0, localAnimatedLink);
-        localGraphicViewerDocument.endTransaction(getEditPresentationName(4));
+        fireUpdate(GraphicViewerViewEvent.LINK_CREATED, 0, link);
+        doc.endTransaction(getEditPresentationName(4));
     }
 }

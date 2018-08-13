@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.graphic_viewer;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -29,8 +30,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
@@ -56,55 +55,60 @@ public class DrawablePropsDialog extends JDialog {
 
     private static final long serialVersionUID = 2951514599149081635L;
 
-    public DrawablePropsDialog(Frame frame, String s, boolean flag,
-            GraphicViewerDrawable graphicviewerdrawable) {
-        super(frame, s, flag);
-        panel1 = new JPanel();
-        OKButton = new JButton();
-        CancelButton = new JButton();
-        label1 = new JLabel();
-        heightField = new JTextField();
-        xField = new JTextField();
-        label2 = new JLabel();
-        yField = new JTextField();
-        label3 = new JLabel();
-        visibleBox = new JCheckBox();
-        selectableBox = new JCheckBox();
-        resizableBox = new JCheckBox();
-        draggableBox = new JCheckBox();
-        label4 = new JLabel();
-        widthField = new JTextField();
-        brushColorButton = new JButton();
-        solidBrushBox = new JCheckBox();
-        penColorButton = new JButton();
-        classNameLabel = new JLabel();
-        penGroup = new ButtonGroup();
-        solidPenButton = new JRadioButton();
-        dashedPenButton = new JRadioButton();
-        dottedPenButton = new JRadioButton();
-        dashdotPenButton = new JRadioButton();
-        dashdotdotPenButton = new JRadioButton();
-        customPenButton = new JRadioButton();
-        noPenButton = new JRadioButton();
-        JPanel1 = new JPanel();
-        label5 = new JLabel();
-        label6 = new JLabel();
-        penWidth = new JTextField();
-        JPanel2 = new JPanel();
-        label8 = new JLabel();
-        label9 = new JLabel();
-        label10 = new JLabel();
-        shadowWidth = new JTextField();
-        flapWidth = new JTextField();
-        raised = new JCheckBox();
-        fComponentsAdjusted = false;
+    JPanel panel1 = new JPanel();
+    JButton OKButton = new JButton();
+    JButton CancelButton = new JButton();
+    JLabel label1 = new JLabel();
+    JTextField heightField = new JTextField();
+    JTextField xField = new JTextField();
+    JLabel label2 = new JLabel();
+    JTextField yField = new JTextField();
+    JLabel label3 = new JLabel();
+    JCheckBox visibleBox = new JCheckBox();
+    JCheckBox selectableBox = new JCheckBox();
+    JCheckBox resizableBox = new JCheckBox();
+    JCheckBox draggableBox = new JCheckBox();
+    JLabel label4 = new JLabel();
+    JTextField widthField = new JTextField();
+    JButton brushColorButton = new JButton();
+    JCheckBox solidBrushBox = new JCheckBox();
+    JButton penColorButton = new JButton();
+    JLabel classNameLabel = new JLabel();
+    ButtonGroup penGroup = new ButtonGroup();
+    JRadioButton solidPenButton = new JRadioButton();
+    JRadioButton dashedPenButton = new JRadioButton();
+    JRadioButton dottedPenButton = new JRadioButton();
+    JRadioButton dashdotPenButton = new JRadioButton();
+    JRadioButton dashdotdotPenButton = new JRadioButton();
+    JRadioButton customPenButton = new JRadioButton();
+    JRadioButton noPenButton = new JRadioButton();
+    JPanel JPanel1 = new JPanel();
+    JLabel label5 = new JLabel();
+    JLabel label6 = new JLabel();
+    JTextField penWidth = new JTextField();
+    JPanel JPanel2 = new JPanel();
+    JLabel label8 = new JLabel();
+    JLabel label9 = new JLabel();
+    JLabel label10 = new JLabel();
+    JTextField shadowWidth = new JTextField();
+    JTextField flapWidth = new JTextField();
+    JCheckBox raised = new JCheckBox();
+
+    Color myBrushColor;
+    Color myPenColor;
+
+    public GraphicViewerDrawable myObject;
+
+    public DrawablePropsDialog(Frame frame, String title, boolean modal,
+            GraphicViewerDrawable obj) {
+        super(frame, title, modal);
         try {
-            myObject = graphicviewerdrawable;
+            myObject = obj;
             jbInit();
             pack();
             UpdateDialog();
-        } catch (Exception e) {
-            ExceptionDialog.hideException(e);
+        } catch (Exception ex) {
+            ExceptionDialog.hideException(ex);
         }
     }
 
@@ -116,62 +120,57 @@ public class DrawablePropsDialog extends JDialog {
         panel1.setLayout(null);
         panel1.setMinimumSize(new Dimension(416, 329));
         panel1.setPreferredSize(new Dimension(416, 329));
-        OKButton.addActionListener(new ActionListener() {
+        OKButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                OKButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                OKButton_actionPerformed(e);
             }
-
         });
-        CancelButton.addActionListener(new ActionListener() {
+        CancelButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                CancelButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                CancelButton_actionPerformed(e);
             }
-
         });
-        penColorButton.addActionListener(new ActionListener() {
+        penColorButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                penColorButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                penColorButton_actionPerformed(e);
             }
-
         });
-        brushColorButton.addActionListener(new ActionListener() {
+        brushColorButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                brushColorButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                brushColorButton_actionPerformed(e);
             }
-
         });
-        OKButton.addKeyListener(new KeyAdapter() {
+        OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
-            public void keyPressed(KeyEvent keyevent) {
-                OKButton_keyPressed(keyevent);
+            public void keyPressed(KeyEvent e) {
+                OKButton_keyPressed(e);
             }
-
         });
-        CancelButton.addKeyListener(new KeyAdapter() {
+        CancelButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
-            public void keyPressed(KeyEvent keyevent) {
-                CancelButton_keyPressed(keyevent);
+            public void keyPressed(KeyEvent e) {
+                CancelButton_keyPressed(e);
             }
-
         });
+
         OKButton.setText("OK");
-        OKButton.setFont(new Font("Dialog", 0, 12));
+        OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(106, 293, 79, 22));
         CancelButton.setText("Cancel");
-        CancelButton.setFont(new Font("Dialog", 0, 12));
+        CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(214, 293, 79, 22));
         label1.setText("Height:");
-        label1.setHorizontalAlignment(4);
+        label1.setHorizontalAlignment(JLabel.RIGHT);
         label1.setBounds(new Rectangle(132, 60, 48, 24));
-        setModal(false);
-        setResizable(false);
+        this.setModal(false);
+        this.setResizable(false);
         JPanel1.setBorder(BorderFactory.createRaisedBevelBorder());
         JPanel2.setBackground(Color.lightGray);
-        JPanel2.setAlignmentY(0.5F);
+        JPanel2.setAlignmentY((float) 0.5);
         JPanel2.setBorder(BorderFactory.createRaisedBevelBorder());
         panel1.add(label1);
         panel1.add(heightField);
@@ -207,11 +206,11 @@ public class DrawablePropsDialog extends JDialog {
         heightField.setBounds(new Rectangle(192, 60, 36, 24));
         xField.setBounds(new Rectangle(84, 36, 36, 24));
         label2.setText("x:");
-        label2.setHorizontalAlignment(4);
+        label2.setHorizontalAlignment(JLabel.RIGHT);
         label2.setBounds(new Rectangle(24, 36, 48, 24));
         yField.setBounds(new Rectangle(84, 60, 36, 24));
         label3.setText("y:");
-        label3.setHorizontalAlignment(4);
+        label3.setHorizontalAlignment(JLabel.RIGHT);
         label3.setBounds(new Rectangle(24, 60, 48, 24));
         visibleBox.setText("Visible");
         visibleBox.setBounds(new Rectangle(24, 96, 72, 24));
@@ -222,63 +221,63 @@ public class DrawablePropsDialog extends JDialog {
         draggableBox.setText("Draggable");
         draggableBox.setBounds(new Rectangle(24, 168, 84, 24));
         label4.setText("Width:");
-        label4.setHorizontalAlignment(4);
+        label4.setHorizontalAlignment(JLabel.RIGHT);
         label4.setBounds(new Rectangle(132, 36, 48, 24));
         widthField.setBounds(new Rectangle(192, 36, 36, 24));
         brushColorButton.setText("Fill Color...");
-        brushColorButton.setBackground(Color.lightGray);
+        brushColorButton.setBackground(java.awt.Color.lightGray);
         brushColorButton.setBounds(new Rectangle(283, 258, 108, 24));
         solidBrushBox.setText("Solid Brush");
-        solidBrushBox.setBackground(Color.lightGray);
+        solidBrushBox.setBackground(java.awt.Color.lightGray);
         solidBrushBox.setBounds(new Rectangle(288, 126, 108, 24));
         penColorButton.setText("Pen Color...");
-        penColorButton.setBackground(Color.lightGray);
+        penColorButton.setBackground(java.awt.Color.lightGray);
         penColorButton.setBounds(new Rectangle(127, 258, 108, 24));
         classNameLabel.setText("class name");
         classNameLabel.setBounds(new Rectangle(26, 4, 364, 24));
         solidPenButton.setText("Solid Line Pen");
-        solidPenButton.setBackground(Color.lightGray);
+        solidPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(solidPenButton);
         solidPenButton.setBounds(new Rectangle(120, 147, 120, 12));
         dashedPenButton.setText("Dashed Line Pen");
-        dashedPenButton.setBackground(Color.lightGray);
+        dashedPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashedPenButton);
         dashedPenButton.setBounds(new Rectangle(120, 163, 120, 12));
         dottedPenButton.setText("Dotted Line Pen");
-        dottedPenButton.setBackground(Color.lightGray);
+        dottedPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dottedPenButton);
         dottedPenButton.setBounds(new Rectangle(120, 178, 120, 12));
         dashdotPenButton.setText("Dash Dot Pen");
-        dashdotPenButton.setBackground(Color.lightGray);
+        dashdotPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashdotPenButton);
         dashdotPenButton.setBounds(new Rectangle(120, 193, 120, 12));
         dashdotdotPenButton.setText("Dash Dot Dot Pen");
-        dashdotdotPenButton.setBackground(Color.lightGray);
+        dashdotdotPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashdotdotPenButton);
         dashdotdotPenButton.setBounds(new Rectangle(120, 209, 120, 12));
         customPenButton.setText("Custom Pen");
-        customPenButton.setBackground(Color.lightGray);
+        customPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(customPenButton);
         customPenButton.setBounds(new Rectangle(120, 224, 120, 12));
         noPenButton.setText("No Pen");
-        noPenButton.setBackground(Color.lightGray);
+        noPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(noPenButton);
         noPenButton.setBounds(new Rectangle(120, 132, 120, 12));
         JPanel1.setLayout(null);
-        JPanel1.setBackground(Color.lightGray);
+        JPanel1.setBackground(java.awt.Color.lightGray);
         JPanel1.setBounds(new Rectangle(108, 96, 156, 156));
         label5.setText("Pen Properties");
-        label5.setFont(new Font("Dialog", 2, 12));
+        label5.setFont(new Font("Dialog", Font.ITALIC, 12));
         label5.setBounds(new Rectangle(35, 3, 95, 23));
         label6.setText("Pen Width:");
         label6.setBounds(new Rectangle(25, 217, 67, 27));
         penWidth.setText("1");
         penWidth.setBounds(new Rectangle(28, 240, 48, 24));
-        JPanel2.setLayout(new FlowLayout(1, 5, 5));
-        getContentPane().add(panel1, "South");
+        JPanel2.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        this.getContentPane().add(panel1, BorderLayout.SOUTH);
         JPanel2.setBounds(new Rectangle(276, 96, 132, 156));
         label8.setText("Brush Properties");
-        label8.setFont(new Font("Dialog", 2, 12));
+        label8.setFont(new Font("Dialog", Font.ITALIC, 12));
         if (myObject instanceof GraphicViewer3DNoteRect) {
             label9.setText("Shadow width:");
             label10.setText("Flap width:");
@@ -299,35 +298,44 @@ public class DrawablePropsDialog extends JDialog {
     }
 
     void UpdateDialog() {
-        if (myObject == null)
+        if (myObject == null) {
             return;
+        }
+
         classNameLabel.setText(myObject.getClass().getName());
-        Rectangle rectangle = myObject.getBoundingRect();
-        xField.setText(String.valueOf(rectangle.x));
-        yField.setText(String.valueOf(rectangle.y));
-        heightField.setText(String.valueOf(rectangle.height));
-        widthField.setText(String.valueOf(rectangle.width));
+        Rectangle rect = myObject.getBoundingRect();
+        xField.setText(String.valueOf(rect.x));
+        yField.setText(String.valueOf(rect.y));
+        heightField.setText(String.valueOf(rect.height));
+        widthField.setText(String.valueOf(rect.width));
         visibleBox.setSelected(myObject.isVisible());
         selectableBox.setSelected(myObject.isSelectable());
         resizableBox.setSelected(myObject.isResizable());
         draggableBox.setSelected(myObject.isDraggable());
-        noPenButton.setSelected(myObject.getPen().getStyle() == 0);
-        solidPenButton.setSelected(myObject.getPen().getStyle() == 65535);
-        dashedPenButton.setSelected(myObject.getPen().getStyle() == 1);
-        dottedPenButton.setSelected(myObject.getPen().getStyle() == 2);
-        dashdotPenButton.setSelected(myObject.getPen().getStyle() == 3);
-        dashdotdotPenButton.setSelected(myObject.getPen().getStyle() == 4);
-        customPenButton.setSelected(myObject.getPen().getStyle() == 65534);
+        noPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.NONE);
+        solidPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.SOLID);
+        dashedPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.DASHED);
+        dottedPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.DOTTED);
+        dashdotPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.DASHDOT);
+        dashdotdotPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.DASHDOTDOT);
+        customPenButton
+                .setSelected(myObject.getPen().getStyle() == GraphicViewerPen.CUSTOM);
         penWidth.setText(String.valueOf(myObject.getPen().getWidth()));
         myPenColor = myObject.getPen().getColor();
-        GraphicViewerBrush graphicviewerbrush = myObject.getBrush();
-        if (graphicviewerbrush != null
-                && !(graphicviewerbrush.getPaint() instanceof GradientPaint)) {
+        GraphicViewerBrush brush = myObject.getBrush();
+        if ((brush != null) && !(brush.getPaint() instanceof GradientPaint)) {
             solidBrushBox.setSelected(true);
-            if (myObject.getBrush().getPaint() instanceof Color)
+            if (myObject.getBrush().getPaint() instanceof Color) {
                 myBrushColor = (Color) myObject.getBrush().getPaint();
-            else
+            } else {
                 myBrushColor = Color.black;
+            }
         } else {
             solidBrushBox.setSelected(false);
             myBrushColor = Color.black;
@@ -341,177 +349,165 @@ public class DrawablePropsDialog extends JDialog {
                             .valueOf(((GraphicViewer3DNoteRect) myObject)
                                     .getFlapSize()));
         }
-        if (myObject instanceof GraphicViewer3DRect)
-            raised.setSelected(((GraphicViewer3DRect) myObject).getState() == 0);
+        if (myObject instanceof GraphicViewer3DRect) {
+            raised.setSelected(((GraphicViewer3DRect) myObject).getState() == GraphicViewer3DRect.StateUp);
+        }
     }
 
     void UpdateControl() {
-        if (myObject == null)
+        if (myObject == null) {
             return;
-        Rectangle rectangle = new Rectangle(Integer.parseInt(xField.getText()),
+        }
+
+        Rectangle rect = new Rectangle(Integer.parseInt(xField.getText()),
                 Integer.parseInt(yField.getText()), Integer.parseInt(widthField
                         .getText()), Integer.parseInt(heightField.getText()));
-        myObject.setBoundingRect(rectangle);
+        myObject.setBoundingRect(rect);
         myObject.setVisible(visibleBox.isSelected());
         myObject.setSelectable(selectableBox.isSelected());
         myObject.setResizable(resizableBox.isSelected());
         myObject.setDraggable(draggableBox.isSelected());
-        int i;
-        if (solidPenButton.isSelected())
-            i = 65535;
-        else if (dashedPenButton.isSelected())
-            i = 1;
-        else if (dottedPenButton.isSelected())
-            i = 2;
-        else if (dashdotPenButton.isSelected())
-            i = 3;
-        else if (dashdotdotPenButton.isSelected())
-            i = 4;
-        else if (customPenButton.isSelected())
-            i = 65534;
-        else
-            i = 0;
-        int j = Integer.parseInt(penWidth.getText());
+        int style;
+        if (solidPenButton.isSelected()) {
+            style = GraphicViewerPen.SOLID;
+        } else if (dashedPenButton.isSelected()) {
+            style = GraphicViewerPen.DASHED;
+        } else if (dottedPenButton.isSelected()) {
+            style = GraphicViewerPen.DOTTED;
+        } else if (dashdotPenButton.isSelected()) {
+            style = GraphicViewerPen.DASHDOT;
+        } else if (dashdotdotPenButton.isSelected()) {
+            style = GraphicViewerPen.DASHDOTDOT;
+        } else if (customPenButton.isSelected()) {
+            style = GraphicViewerPen.CUSTOM;
+        } else {
+            style = GraphicViewerPen.NONE;
+        }
+        int width = Integer.parseInt(penWidth.getText());
         Color color = myPenColor;
-        myObject.setPen(GraphicViewerPen.make(i, j, color));
-        if (solidBrushBox.isSelected())
-            myObject.setBrush(GraphicViewerBrush.make(65535, myBrushColor));
-        else if (myObject.getBrush() != null
-                && !(myObject.getBrush().getPaint() instanceof GradientPaint))
-            myObject.setBrush(null);
+        myObject.setPen(GraphicViewerPen.make(style, width, color));
+        if (solidBrushBox.isSelected()) {
+            myObject.setBrush(GraphicViewerBrush.make(GraphicViewerBrush.SOLID,
+                    myBrushColor));
+        } else {
+            if (myObject.getBrush() != null) {
+                if (!(myObject.getBrush().getPaint() instanceof GradientPaint)) {
+                    myObject.setBrush(null);
+                }
+            }
+        }
         if (myObject instanceof GraphicViewer3DNoteRect) {
             ((GraphicViewer3DNoteRect) myObject).setShadowSize(Integer
                     .parseInt(shadowWidth.getText()));
             ((GraphicViewer3DNoteRect) myObject).setFlapSize(Integer
                     .parseInt(flapWidth.getText()));
         }
-        if (myObject instanceof GraphicViewer3DRect)
-            if (raised.isSelected())
-                ((GraphicViewer3DRect) myObject).setState(0);
-            else
-                ((GraphicViewer3DRect) myObject).setState(1);
+        if (myObject instanceof GraphicViewer3DRect) {
+            if (raised.isSelected()) {
+                ((GraphicViewer3DRect) myObject)
+                        .setState(GraphicViewer3DRect.StateUp);
+            } else {
+                ((GraphicViewer3DRect) myObject)
+                        .setState(GraphicViewer3DRect.StateDown);
+            }
+        }
     }
 
     public void addNotify() {
-        Dimension dimension = getSize();
+        // Record the size of the window prior to calling parents addNotify
+        Dimension d = getSize();
+
         super.addNotify();
-        if (fComponentsAdjusted)
+
+        if (fComponentsAdjusted) {
             return;
-        Insets insets = getInsets();
-        setSize(insets.left + insets.right + dimension.width, insets.top
-                + insets.bottom + dimension.height);
-        Component acomponent[] = getComponents();
-        for (int i = 0; i < acomponent.length; i++) {
-            Point point = acomponent[i].getLocation();
-            point.translate(insets.left, insets.top);
-            acomponent[i].setLocation(point);
         }
 
+        // Adjust components according to the insets
+        Insets insets = getInsets();
+        setSize(insets.left + insets.right + d.width, insets.top
+                + insets.bottom + d.height);
+        Component components[] = getComponents();
+        for (int i = 0; i < components.length; i++) {
+            Point p = components[i].getLocation();
+            p.translate(insets.left, insets.top);
+            components[i].setLocation(p);
+        }
         fComponentsAdjusted = true;
     }
 
-    public void setVisible(boolean flag) {
-        if (flag) {
-            Rectangle rectangle = getParent().getBounds();
-            Rectangle rectangle1 = getBounds();
-            setLocation(rectangle.x + (rectangle.width - rectangle1.width) / 2,
-                    rectangle.y + (rectangle.height - rectangle1.height) / 2);
+    // Used for addNotify check
+    boolean fComponentsAdjusted = false;
+
+    /**
+     * Shows or hides the component depending on the boolean flag b.
+     * 
+     * @param b  if true, show the component; otherwise, hide the component.
+     * @see javax.swing.JComponent#isVisible
+     */
+    public void setVisible(boolean b) {
+        if (b) {
+            Rectangle bounds = getParent().getBounds();
+            Rectangle abounds = getBounds();
+
+            setLocation(bounds.x + (bounds.width - abounds.width) / 2, bounds.y
+                    + (bounds.height - abounds.height) / 2);
         }
-        super.setVisible(flag);
+        super.setVisible(b);
     }
 
-    void OKButton_actionPerformed(ActionEvent actionevent) {
+    void OKButton_actionPerformed(ActionEvent e) {
         OnOK();
     }
 
     void OnOK() {
         try {
             UpdateControl();
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
 
-    void CancelButton_actionPerformed(ActionEvent actionevent) {
+    void CancelButton_actionPerformed(ActionEvent e) {
         OnCancel();
     }
 
     void OnCancel() {
         try {
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
 
-    void penColorButton_actionPerformed(ActionEvent actionevent) {
-        Color color = JColorChooser.showDialog(this, "Pen Color", myPenColor);
-        if (color != null)
-            myPenColor = color;
+    void penColorButton_actionPerformed(ActionEvent e) {
+        Color newcolor = JColorChooser
+                .showDialog(this, "Pen Color", myPenColor);
+        if (newcolor != null) {
+            myPenColor = newcolor;
+        }
     }
 
-    void brushColorButton_actionPerformed(ActionEvent actionevent) {
-        Color color = JColorChooser.showDialog(this, "Brush Color",
+    void brushColorButton_actionPerformed(ActionEvent e) {
+        Color newcolor = JColorChooser.showDialog(this, "Brush Color",
                 myBrushColor);
-        if (color != null)
-            myBrushColor = color;
+        if (newcolor != null) {
+            myBrushColor = newcolor;
+        }
     }
 
-    void OKButton_keyPressed(KeyEvent keyevent) {
-        if (keyevent.getKeyCode() == 10)
+    void OKButton_keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             OnOK();
-        else if (keyevent.getKeyCode() == 27)
+        } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
             OnCancel();
+        }
     }
 
-    void CancelButton_keyPressed(KeyEvent keyevent) {
-        if (keyevent.getKeyCode() == 10)
+    void CancelButton_keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             OnCancel();
-        else if (keyevent.getKeyCode() == 27)
+        } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
             OnCancel();
+        }
     }
-
-    JPanel panel1;
-    JButton OKButton;
-    JButton CancelButton;
-    JLabel label1;
-    JTextField heightField;
-    JTextField xField;
-    JLabel label2;
-    JTextField yField;
-    JLabel label3;
-    JCheckBox visibleBox;
-    JCheckBox selectableBox;
-    JCheckBox resizableBox;
-    JCheckBox draggableBox;
-    JLabel label4;
-    JTextField widthField;
-    JButton brushColorButton;
-    JCheckBox solidBrushBox;
-    JButton penColorButton;
-    JLabel classNameLabel;
-    ButtonGroup penGroup;
-    JRadioButton solidPenButton;
-    JRadioButton dashedPenButton;
-    JRadioButton dottedPenButton;
-    JRadioButton dashdotPenButton;
-    JRadioButton dashdotdotPenButton;
-    JRadioButton customPenButton;
-    JRadioButton noPenButton;
-    JPanel JPanel1;
-    JLabel label5;
-    JLabel label6;
-    JTextField penWidth;
-    JPanel JPanel2;
-    JLabel label8;
-    JLabel label9;
-    JLabel label10;
-    JTextField shadowWidth;
-    JTextField flapWidth;
-    JCheckBox raised;
-    Color myBrushColor;
-    Color myPenColor;
-    public GraphicViewerDrawable myObject;
-    boolean fComponentsAdjusted;
 }

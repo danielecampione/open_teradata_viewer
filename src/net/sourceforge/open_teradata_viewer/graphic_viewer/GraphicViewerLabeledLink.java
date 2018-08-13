@@ -30,24 +30,26 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
 
     private static final long serialVersionUID = 5721221043857929353L;
 
+    public static final int ChangedFromLabel = 251;
+    public static final int ChangedMidLabel = 252;
+    public static final int ChangedToLabel = 253;
+    public static final int ChangedGrabChildSelection = 254;
+    private GraphicViewerObject myFromLabel = null;
+    private GraphicViewerObject myMidLabel = null;
+    private GraphicViewerObject myToLabel = null;
+
     public GraphicViewerLabeledLink() {
-        cB = null;
-        cD = null;
-        cC = null;
-        m();
+        init();
     }
 
     public GraphicViewerLabeledLink(GraphicViewerPort graphicviewerport,
             GraphicViewerPort graphicviewerport1) {
         super(graphicviewerport, graphicviewerport1);
-        cB = null;
-        cD = null;
-        cC = null;
-        m();
+        init();
     }
 
-    private final void m() {
-        _mthfor(g() | 0x200);
+    private final void init() {
+        setInternalFlags(getInternalFlags() | 0x200);
     }
 
     public GraphicViewerObject copyObject(
@@ -56,28 +58,29 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerlabeledlink != null) {
             graphicviewerlabeledlink.setFromLabel(graphicviewercopyenvironment
-                    .copy(cB));
+                    .copy(myFromLabel));
             graphicviewerlabeledlink.setMidLabel(graphicviewercopyenvironment
-                    .copy(cD));
+                    .copy(myMidLabel));
             graphicviewerlabeledlink.setToLabel(graphicviewercopyenvironment
-                    .copy(cC));
+                    .copy(myToLabel));
         }
         return graphicviewerlabeledlink;
     }
 
     public void setGrabChildSelection(boolean flag) {
-        boolean flag1 = (g() & 0x200) != 0;
+        boolean flag1 = (getInternalFlags() & 0x200) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x200);
-            else
-                _mthfor(g() & 0xfffffdff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x200);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffffdff);
+            }
             update(254, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isGrabChildSelection() {
-        return (g() & 0x200) != 0;
+        return (getInternalFlags() & 0x200) != 0;
     }
 
     protected void ownerChange(
@@ -89,8 +92,9 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
         if (graphicviewerobjectcollection == null
                 && graphicviewerobjectcollection1 != null) {
             Object obj = graphicviewerobjectcollection1;
-            if (getParent() != null)
+            if (getParent() != null) {
                 obj = getParent();
+            }
             GraphicViewerListPosition graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                     .findObject(this);
             if (graphicviewerlistposition != null) {
@@ -98,9 +102,10 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 if (graphicviewerobject1 != null
                         && ((IGraphicViewerObjectCollection) (obj))
                                 .findObject(graphicviewerobject1) == null) {
-                    if (graphicviewerobject1.getParent() != null)
+                    if (graphicviewerobject1.getParent() != null) {
                         graphicviewerobject1.getParent().removeObject(
                                 graphicviewerobject1);
+                    }
                     graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                             .insertObjectAfter(graphicviewerlistposition,
                                     graphicviewerobject1);
@@ -109,9 +114,10 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 if (graphicviewerobject2 != null
                         && ((IGraphicViewerObjectCollection) (obj))
                                 .findObject(graphicviewerobject2) == null) {
-                    if (graphicviewerobject2.getParent() != null)
+                    if (graphicviewerobject2.getParent() != null) {
                         graphicviewerobject2.getParent().removeObject(
                                 graphicviewerobject2);
+                    }
                     graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                             .insertObjectAfter(graphicviewerlistposition,
                                     graphicviewerobject2);
@@ -120,16 +126,17 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 if (graphicviewerobject3 != null
                         && ((IGraphicViewerObjectCollection) (obj))
                                 .findObject(graphicviewerobject3) == null) {
-                    if (graphicviewerobject3.getParent() != null)
+                    if (graphicviewerobject3.getParent() != null) {
                         graphicviewerobject3.getParent().removeObject(
                                 graphicviewerobject3);
+                    }
                     graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                             .insertObjectAfter(graphicviewerlistposition,
                                     graphicviewerobject3);
                 }
             }
         } else if (graphicviewerobjectcollection != null
-                && graphicviewerobjectcollection1 == null && !k()
+                && graphicviewerobjectcollection1 == null && !isNoClearPorts()
                 && !isChildOf(graphicviewerobject)) {
             graphicviewerobjectcollection.removeObject(getFromLabel());
             graphicviewerobjectcollection.removeObject(getMidLabel());
@@ -151,11 +158,12 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 int l = getPointY(0);
                 int j1 = getPointX(1);
                 int l1 = getPointY(1);
-                if (i == 2)
+                if (i == 2) {
                     positionEndLabel(graphicviewerobject, j, l, j, l, j1, l1);
-                else
+                } else {
                     positionEndLabel(graphicviewerobject, j, l, j1, l1,
                             getPointX(2), getPointY(2));
+                }
             }
             layoutMidLabel();
             graphicviewerobject = getToLabel();
@@ -164,11 +172,12 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 int i1 = getPointY(i - 1);
                 int k1 = getPointX(i - 2);
                 int i2 = getPointY(i - 2);
-                if (i == 2)
+                if (i == 2) {
                     positionEndLabel(graphicviewerobject, k, i1, k, i1, k1, i2);
-                else
+                } else {
                     positionEndLabel(graphicviewerobject, k, i1, k1, i2,
                             getPointX(i - 3), getPointY(i - 3));
+                }
             }
         }
     }
@@ -177,45 +186,53 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
             int i, int j, int k, int l, int i1, int j1) {
         byte byte0 = 0;
         if (i < k) {
-            if (l <= j1)
+            if (l <= j1) {
                 byte0 = 7;
-            else
+            } else {
                 byte0 = 1;
+            }
         } else if (i > k) {
-            if (l <= j1)
+            if (l <= j1) {
                 byte0 = 5;
-            else
+            } else {
                 byte0 = 3;
+            }
         } else if (j < l) {
-            if (k <= i1)
+            if (k <= i1) {
                 byte0 = 3;
-            else
+            } else {
                 byte0 = 1;
+            }
         } else if (j > l) {
-            if (k <= i1)
+            if (k <= i1) {
                 byte0 = 5;
-            else
+            } else {
                 byte0 = 7;
+            }
         } else if (k <= i1) {
-            if (l <= j1)
+            if (l <= j1) {
                 byte0 = 3;
-            else
+            } else {
                 byte0 = 5;
-        } else if (l <= j1)
+            }
+        } else if (l <= j1) {
             byte0 = 1;
-        else
+        } else {
             byte0 = 7;
+        }
         graphicviewerobject.setSpotLocation(byte0, i, j);
     }
 
     public void layoutMidLabel() {
-        if (isInitializing())
+        if (isInitializing()) {
             return;
+        }
         GraphicViewerObject graphicviewerobject = getMidLabel();
         if (graphicviewerobject != null) {
             int i = getNumPoints();
-            if (i < 2)
+            if (i < 2) {
                 return;
+            }
             if (isCubic() && i >= 4 && i < 7) {
                 Point point = getPoint(0);
                 Point point1 = getPoint(1);
@@ -223,8 +240,9 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 Point point3 = getPoint(i - 1);
                 Point point4 = new Point(0, 0);
                 Point point5 = new Point(0, 0);
-                GraphicViewerStroke.a(point.x, point.y, point1.x, point1.y,
-                        point2.x, point2.y, point3.x, point3.y, point4, point5);
+                GraphicViewerStroke.BezierMidPoint(point.x, point.y, point1.x,
+                        point1.y, point2.x, point2.y, point3.x, point3.y,
+                        point4, point5);
                 positionMidLabel(graphicviewerobject, point4.x, point4.y,
                         point5.x, point5.y);
                 return;
@@ -247,10 +265,11 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
                 float f1 = j2 - j1;
                 float f2 = k2 - l1;
                 float f3 = l2 - j2;
-                if (f * f + f1 * f1 >= f2 * f2 + f3 * f3)
+                if (f * f + f1 * f1 >= f2 * f2 + f3 * f3) {
                     positionMidLabel(graphicviewerobject, l, j1, l1, j2);
-                else
+                } else {
                     positionMidLabel(graphicviewerobject, l1, j2, k2, l2);
+                }
             }
         }
     }
@@ -258,10 +277,11 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
     protected void positionMidLabel(GraphicViewerObject graphicviewerobject,
             int i, int j, int k, int l) {
         if ((graphicviewerobject instanceof GraphicViewerText)
-                && Math.abs(j - l) < 2 && !isCubic())
+                && Math.abs(j - l) < 2 && !isCubic()) {
             graphicviewerobject.setSpotLocation(6, (i + k) / 2, (j + l) / 2);
-        else
+        } else {
             graphicviewerobject.setSpotLocation(0, (i + k) / 2, (j + l) / 2);
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -280,8 +300,8 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             String s = domelement1.getAttribute("fromlabel");
             String s1 = domelement1.getAttribute("midlabel");
@@ -299,167 +319,192 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("fromlabel"))
+        if (s.equals("fromlabel")) {
             setFromLabel((GraphicViewerObject) obj);
-        else if (s.equals("midlabel"))
+        } else if (s.equals("midlabel")) {
             setMidLabel((GraphicViewerObject) obj);
-        else if (s.equals("tolabel"))
+        } else if (s.equals("tolabel")) {
             setToLabel((GraphicViewerObject) obj);
+        }
     }
 
     public GraphicViewerObject getFromLabel() {
-        return cB;
+        return myFromLabel;
     }
 
     public void setFromLabel(GraphicViewerObject graphicviewerobject) {
-        GraphicViewerObject graphicviewerobject1 = cB;
+        GraphicViewerObject graphicviewerobject1 = myFromLabel;
         if (graphicviewerobject1 != graphicviewerobject) {
             Object obj = getParent();
-            if (obj == null)
+            if (obj == null) {
                 obj = getLayer();
-            if (obj == null)
+            }
+            if (obj == null) {
                 obj = getView();
+            }
             if (graphicviewerobject1 != null) {
-                if (obj != null)
+                if (obj != null) {
                     ((IGraphicViewerObjectCollection) (obj))
                             .removeObject(graphicviewerobject1);
+                }
                 graphicviewerobject1.setPartner(null);
             }
-            cB = graphicviewerobject;
+            myFromLabel = graphicviewerobject;
             update(251, 0, graphicviewerobject1);
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 if (graphicviewerobject == getMidLabel()) {
-                    cD = null;
+                    myMidLabel = null;
                     update(252, 0, graphicviewerobject);
                 } else if (graphicviewerobject == getToLabel()) {
-                    cC = null;
+                    myToLabel = null;
                     update(253, 0, graphicviewerobject);
                 } else {
                     graphicviewerobject.setPartner(this);
-                    if (obj != null)
+                    if (obj != null) {
                         ((IGraphicViewerObjectCollection) (obj))
                                 .insertObjectAfter(
                                         ((IGraphicViewerObjectCollection) (obj))
                                                 .findObject(this),
                                         graphicviewerobject);
+                    }
                 }
+            }
             positionLabels();
         }
     }
 
     public GraphicViewerObject getMidLabel() {
-        return cD;
+        return myMidLabel;
     }
 
     public void setMidLabel(GraphicViewerObject graphicviewerobject) {
-        GraphicViewerObject graphicviewerobject1 = cD;
+        GraphicViewerObject graphicviewerobject1 = myMidLabel;
         if (graphicviewerobject1 != graphicviewerobject) {
             Object obj = getParent();
-            if (obj == null)
+            if (obj == null) {
                 obj = getLayer();
-            if (obj == null)
+            }
+            if (obj == null) {
                 obj = getView();
+            }
             if (graphicviewerobject1 != null) {
-                if (obj != null)
+                if (obj != null) {
                     ((IGraphicViewerObjectCollection) (obj))
                             .removeObject(graphicviewerobject1);
+                }
                 graphicviewerobject1.setPartner(null);
             }
-            cD = graphicviewerobject;
+            myMidLabel = graphicviewerobject;
             update(252, 0, graphicviewerobject1);
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 if (graphicviewerobject == getFromLabel()) {
-                    cB = null;
+                    myFromLabel = null;
                     update(251, 0, graphicviewerobject);
                 } else if (graphicviewerobject == getToLabel()) {
-                    cC = null;
+                    myToLabel = null;
                     update(253, 0, graphicviewerobject);
                 } else {
                     graphicviewerobject.setPartner(this);
-                    if (obj != null)
+                    if (obj != null) {
                         ((IGraphicViewerObjectCollection) (obj))
                                 .insertObjectAfter(
                                         ((IGraphicViewerObjectCollection) (obj))
                                                 .findObject(this),
                                         graphicviewerobject);
+                    }
                 }
+            }
             positionLabels();
         }
     }
 
     public GraphicViewerObject getToLabel() {
-        return cC;
+        return myToLabel;
     }
 
     public void setToLabel(GraphicViewerObject graphicviewerobject) {
-        GraphicViewerObject graphicviewerobject1 = cC;
+        GraphicViewerObject graphicviewerobject1 = myToLabel;
         if (graphicviewerobject1 != graphicviewerobject) {
             Object obj = getParent();
-            if (obj == null)
+            if (obj == null) {
                 obj = getLayer();
-            if (obj == null)
+            }
+            if (obj == null) {
                 obj = getView();
+            }
             if (graphicviewerobject1 != null) {
-                if (obj != null)
+                if (obj != null) {
                     ((IGraphicViewerObjectCollection) (obj))
                             .removeObject(graphicviewerobject1);
+                }
                 graphicviewerobject1.setPartner(null);
             }
-            cC = graphicviewerobject;
+            myToLabel = graphicviewerobject;
             update(253, 0, graphicviewerobject1);
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 if (graphicviewerobject == getMidLabel()) {
-                    cD = null;
+                    myMidLabel = null;
                     update(252, 0, graphicviewerobject);
                 } else if (graphicviewerobject == getFromLabel()) {
-                    cB = null;
+                    myFromLabel = null;
                     update(251, 0, graphicviewerobject);
                 } else {
                     graphicviewerobject.setPartner(this);
-                    if (obj != null)
+                    if (obj != null) {
                         ((IGraphicViewerObjectCollection) (obj))
                                 .insertObjectAfter(
                                         ((IGraphicViewerObjectCollection) (obj))
                                                 .findObject(this),
                                         graphicviewerobject);
+                    }
                 }
+            }
             positionLabels();
         }
     }
 
     public void update(int i, int j, Object obj) {
-        if (isSuspendUpdates())
+        if (isSuspendUpdates()) {
             return;
+        }
         if (i == 10) {
             Object obj1 = getParent();
-            if (obj1 == null)
+            if (obj1 == null) {
                 obj1 = getLayer();
-            if (obj1 == null)
+            }
+            if (obj1 == null) {
                 obj1 = getView();
-            if (obj1 == null)
+            }
+            if (obj1 == null) {
                 return;
+            }
             GraphicViewerListPosition graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj1))
                     .findObject(this);
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 return;
+            }
             GraphicViewerObject graphicviewerobject = getFromLabel();
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj1))
                         .insertObjectAfter(graphicviewerlistposition,
                                 graphicviewerobject);
+            }
             graphicviewerobject = getMidLabel();
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj1))
                         .insertObjectAfter(graphicviewerlistposition,
                                 graphicviewerobject);
+            }
             graphicviewerobject = getToLabel();
-            if (graphicviewerobject != null)
+            if (graphicviewerobject != null) {
                 graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj1))
                         .insertObjectAfter(graphicviewerlistposition,
                                 graphicviewerobject);
+            }
         } else if (i == 110 || i == 103 || i == 101 || i == 102 || i == 109
-                || i == 203 || i == 206)
+                || i == 203 || i == 206) {
             positionLabels();
+        }
         super.update(i, j, obj);
     }
 
@@ -512,12 +557,4 @@ public class GraphicViewerLabeledLink extends GraphicViewerLink {
         }
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
-
-    public static final int ChangedFromLabel = 251;
-    public static final int ChangedMidLabel = 252;
-    public static final int ChangedToLabel = 253;
-    public static final int ChangedGrabChildSelection = 254;
-    private GraphicViewerObject cB;
-    private GraphicViewerObject cD;
-    private GraphicViewerObject cC;
 }

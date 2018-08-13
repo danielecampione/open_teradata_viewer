@@ -32,70 +32,130 @@ public class GraphicViewerBrush
         implements
             Serializable,
             IGraphicViewerXMLSaveRestore {
+
     private static final long serialVersionUID = 3806827378087242926L;
 
+    public static final Color ColorBlack = Color.black;
+    public static final Color ColorDarkGray = Color.darkGray;
+    public static final Color ColorGray = Color.gray;
+    public static final Color ColorLightGray = Color.lightGray;
+    public static final Color ColorWhite = Color.white;
+    public static final Color ColorRed = Color.red;
+    public static final Color ColorMagenta = Color.magenta;
+    public static final Color ColorYellow = Color.yellow;
+    public static final Color ColorGreen = Color.green;
+    public static final Color ColorCyan = Color.cyan;
+    public static final Color ColorBlue = Color.blue;
+    public static final Color ColorOrange = Color.orange;
+    public static final Color ColorPink = Color.pink;
+    public static final int NONE = 0;
+    public static final int SOLID = 65535;
+    public static final int CUSTOM = 65534;
+    public static final GraphicViewerBrush black = new GraphicViewerBrush(
+            65535, ColorBlack);
+    public static final GraphicViewerBrush darkGray = new GraphicViewerBrush(
+            65535, ColorDarkGray);
+    public static final GraphicViewerBrush gray = new GraphicViewerBrush(65535,
+            ColorGray);
+    public static final GraphicViewerBrush lightGray = new GraphicViewerBrush(
+            65535, ColorLightGray);
+    public static final GraphicViewerBrush white = new GraphicViewerBrush(
+            65535, ColorWhite);
+    public static final GraphicViewerBrush red = new GraphicViewerBrush(65535,
+            ColorRed);
+    public static final GraphicViewerBrush magenta = new GraphicViewerBrush(
+            65535, ColorMagenta);
+    public static final GraphicViewerBrush yellow = new GraphicViewerBrush(
+            65535, ColorYellow);
+    public static final GraphicViewerBrush green = new GraphicViewerBrush(
+            65535, ColorGreen);
+    public static final GraphicViewerBrush cyan = new GraphicViewerBrush(65535,
+            ColorCyan);
+    public static final GraphicViewerBrush blue = new GraphicViewerBrush(65535,
+            ColorBlue);
+    public static final GraphicViewerBrush orange = new GraphicViewerBrush(
+            65535, ColorOrange);
+    public static final GraphicViewerBrush pink = new GraphicViewerBrush(65535,
+            ColorPink);
+    public static final GraphicViewerBrush Null = new GraphicViewerBrush(0,
+            null);
+    private int myStyle;
+    private Color myColor;
+    private transient Paint myPaint = null;
+
     public GraphicViewerBrush() {
-        a = null;
-        _flddo = 0;
-        _fldif = null;
-        a = null;
+        myStyle = 0;
+        myColor = null;
+        myPaint = null;
     }
 
     public GraphicViewerBrush(int i, Color color) {
-        a = null;
-        _flddo = i;
-        _fldif = color;
-        a = color;
+        myStyle = i;
+        myColor = color;
+        myPaint = color;
     }
 
     public GraphicViewerBrush(Paint paint) {
-        a = null;
-        a = paint;
+        myPaint = paint;
         if (paint instanceof Color) {
-            _flddo = 65535;
-            _fldif = (Color) paint;
+            myStyle = 65535;
+            myColor = (Color) paint;
         } else {
-            _flddo = 65534;
-            _fldif = null;
+            myStyle = 65534;
+            myColor = null;
         }
     }
 
     public static GraphicViewerBrush makeStockBrush(Color color) {
-        if (color.equals(ColorBlack))
+        if (color.equals(ColorBlack)) {
             return black;
-        if (color.equals(ColorDarkGray))
+        }
+        if (color.equals(ColorDarkGray)) {
             return darkGray;
-        if (color.equals(ColorGray))
+        }
+        if (color.equals(ColorGray)) {
             return gray;
-        if (color.equals(ColorLightGray))
+        }
+        if (color.equals(ColorLightGray)) {
             return lightGray;
-        if (color.equals(ColorWhite))
+        }
+        if (color.equals(ColorWhite)) {
             return white;
-        if (color.equals(ColorRed))
+        }
+        if (color.equals(ColorRed)) {
             return red;
-        if (color.equals(ColorMagenta))
+        }
+        if (color.equals(ColorMagenta)) {
             return magenta;
-        if (color.equals(ColorYellow))
+        }
+        if (color.equals(ColorYellow)) {
             return yellow;
-        if (color.equals(ColorGreen))
+        }
+        if (color.equals(ColorGreen)) {
             return green;
-        if (color.equals(ColorCyan))
+        }
+        if (color.equals(ColorCyan)) {
             return cyan;
-        if (color.equals(ColorBlue))
+        }
+        if (color.equals(ColorBlue)) {
             return blue;
-        if (color.equals(ColorOrange))
+        }
+        if (color.equals(ColorOrange)) {
             return orange;
-        if (color.equals(ColorPink))
+        }
+        if (color.equals(ColorPink)) {
             return pink;
-        else
+        } else {
             return new GraphicViewerBrush(65535, color);
+        }
     }
 
     public static GraphicViewerBrush make(int i, Color color) {
-        if (i == 65535)
+        if (i == 65535) {
             return makeStockBrush(color);
-        else
+        } else {
             return Null;
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -104,28 +164,29 @@ public class GraphicViewerBrush
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBrush",
                             domelement);
-            a(domelement1);
+            SVGWriteGraphicViewerElementAttributes(domelement1);
             domdoc.registerObject(this, domelement1);
         }
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            _mthif(domelement1);
+            SVGReadGraphicViewerElementAttributes(domelement1);
             String s = domelement1.getAttribute("id");
-            if (s.length() > 0)
+            if (s.length() > 0) {
                 domdoc.registerTag(s, this);
+            }
         }
         return domelement.getNextSibling();
     }
 
     public void SVGWriteAttributes(IDomElement domelement) {
         String s = "fill:none;";
-        if (getStyle() == 0)
+        if (getStyle() == 0) {
             s = "fill:none;";
-        else if (getStyle() == 65535) {
+        } else if (getStyle() == 65535) {
             Color color = getColor();
             int i = color.getRed();
             int j = color.getGreen();
@@ -143,43 +204,45 @@ public class GraphicViewerBrush
         String s1 = domelement.getSubAttribute(s, "fill");
         for (IDomNode domnode = domelement.getParentNode(); domnode != null; domnode = domnode
                 .getParentNode()) {
-            if (!domnode.isElement())
+            if (!domnode.isElement()) {
                 continue;
+            }
             IDomElement domelement1 = domnode.elementCast();
             String s2 = domelement1.getAttribute("style");
-            if (s1.length() == 0)
+            if (s1.length() == 0) {
                 s1 = domelement1.getSubAttribute(s2, "fill");
+            }
         }
 
         Color color = null;
         if (s1.length() > 0) {
-            if (s1.equalsIgnoreCase("black"))
+            if (s1.equalsIgnoreCase("black")) {
                 color = ColorBlack;
-            else if (s1.equalsIgnoreCase("darkGray"))
+            } else if (s1.equalsIgnoreCase("darkGray")) {
                 color = ColorDarkGray;
-            else if (s1.equalsIgnoreCase("gray"))
+            } else if (s1.equalsIgnoreCase("gray")) {
                 color = ColorGray;
-            else if (s1.equalsIgnoreCase("lightGray"))
+            } else if (s1.equalsIgnoreCase("lightGray")) {
                 color = ColorLightGray;
-            else if (s1.equalsIgnoreCase("white"))
+            } else if (s1.equalsIgnoreCase("white")) {
                 color = ColorWhite;
-            else if (s1.equalsIgnoreCase("red"))
+            } else if (s1.equalsIgnoreCase("red")) {
                 color = ColorRed;
-            else if (s1.equalsIgnoreCase("magenta"))
+            } else if (s1.equalsIgnoreCase("magenta")) {
                 color = ColorMagenta;
-            else if (s1.equalsIgnoreCase("yellow"))
+            } else if (s1.equalsIgnoreCase("yellow")) {
                 color = ColorYellow;
-            else if (s1.equalsIgnoreCase("green"))
+            } else if (s1.equalsIgnoreCase("green")) {
                 color = ColorGreen;
-            else if (s1.equalsIgnoreCase("cyan"))
+            } else if (s1.equalsIgnoreCase("cyan")) {
                 color = ColorCyan;
-            else if (s1.equalsIgnoreCase("blue"))
+            } else if (s1.equalsIgnoreCase("blue")) {
                 color = ColorBlue;
-            else if (s1.equalsIgnoreCase("orange"))
+            } else if (s1.equalsIgnoreCase("orange")) {
                 color = ColorOrange;
-            else if (s1.equalsIgnoreCase("pink"))
+            } else if (s1.equalsIgnoreCase("pink")) {
                 color = ColorPink;
-            else if (s1.startsWith("rgb")) {
+            } else if (s1.startsWith("rgb")) {
                 int i = s1.indexOf("(") + 1;
                 int j = s1.indexOf(",", i);
                 String s3 = s1.substring(i, j);
@@ -193,47 +256,47 @@ public class GraphicViewerBrush
                         Integer.parseInt(s5));
             }
             if (color != null) {
-                _flddo = 65535;
-                _fldif = color;
+                myStyle = 65535;
+                myColor = color;
             }
         }
     }
 
-    private void a(IDomElement domelement) {
-        domelement.setAttribute("brushstyle", Integer.toString(_flddo));
-        if (_fldif != null) {
+    private void SVGWriteGraphicViewerElementAttributes(IDomElement domelement) {
+        domelement.setAttribute("brushstyle", Integer.toString(myStyle));
+        if (myColor != null) {
             String s = "black";
-            if (_fldif == ColorBlack)
+            if (myColor == ColorBlack) {
                 s = "black";
-            else if (_fldif == ColorDarkGray)
+            } else if (myColor == ColorDarkGray) {
                 s = "darkGray";
-            else if (_fldif == ColorGray)
+            } else if (myColor == ColorGray) {
                 s = "gray";
-            else if (_fldif == ColorLightGray)
+            } else if (myColor == ColorLightGray) {
                 s = "lightGray";
-            else if (_fldif == ColorWhite)
+            } else if (myColor == ColorWhite) {
                 s = "white";
-            else if (_fldif == ColorRed)
+            } else if (myColor == ColorRed) {
                 s = "red";
-            else if (_fldif == ColorMagenta)
+            } else if (myColor == ColorMagenta) {
                 s = "magenta";
-            else if (_fldif == ColorYellow)
+            } else if (myColor == ColorYellow) {
                 s = "yellow";
-            else if (_fldif == ColorGreen)
+            } else if (myColor == ColorGreen) {
                 s = "green";
-            else if (_fldif == ColorCyan)
+            } else if (myColor == ColorCyan) {
                 s = "cyan";
-            else if (_fldif == ColorBlue)
+            } else if (myColor == ColorBlue) {
                 s = "blue";
-            else if (_fldif == ColorOrange)
+            } else if (myColor == ColorOrange) {
                 s = "orange";
-            else if (_fldif == ColorPink) {
+            } else if (myColor == ColorPink) {
                 s = "pink";
             } else {
-                int i = _fldif.getRed();
-                int j = _fldif.getGreen();
-                int k = _fldif.getBlue();
-                int l = _fldif.getAlpha();
+                int i = myColor.getRed();
+                int j = myColor.getGreen();
+                int k = myColor.getBlue();
+                int l = myColor.getAlpha();
                 s = "rgbalpha(" + Integer.toString(i) + ","
                         + Integer.toString(j) + "," + Integer.toString(k) + ","
                         + Integer.toString(l) + ")";
@@ -242,38 +305,38 @@ public class GraphicViewerBrush
         }
     }
 
-    private void _mthif(IDomElement domelement) {
+    private void SVGReadGraphicViewerElementAttributes(IDomElement domelement) {
         String s = domelement.getAttribute("brushstyle");
-        _flddo = Integer.parseInt(s);
+        myStyle = Integer.parseInt(s);
         String s1 = domelement.getAttribute("brushcolor");
-        if (s1.length() > 0)
-            if (s1.equals("black"))
-                _fldif = ColorBlack;
-            else if (s1.equals("darkGray"))
-                _fldif = ColorDarkGray;
-            else if (s1.equals("gray"))
-                _fldif = ColorGray;
-            else if (s1.equals("lightGray"))
-                _fldif = ColorLightGray;
-            else if (s1.equals("white"))
-                _fldif = ColorWhite;
-            else if (s1.equals("red"))
-                _fldif = ColorRed;
-            else if (s1.equals("magenta"))
-                _fldif = ColorMagenta;
-            else if (s1.equals("yellow"))
-                _fldif = ColorYellow;
-            else if (s1.equals("green"))
-                _fldif = ColorGreen;
-            else if (s1.equals("cyan"))
-                _fldif = ColorCyan;
-            else if (s1.equals("blue"))
-                _fldif = ColorBlue;
-            else if (s1.equals("orange"))
-                _fldif = ColorOrange;
-            else if (s1.equals("pink"))
-                _fldif = ColorPink;
-            else if (s1.startsWith("rgbalpha")) {
+        if (s1.length() > 0) {
+            if (s1.equals("black")) {
+                myColor = ColorBlack;
+            } else if (s1.equals("darkGray")) {
+                myColor = ColorDarkGray;
+            } else if (s1.equals("gray")) {
+                myColor = ColorGray;
+            } else if (s1.equals("lightGray")) {
+                myColor = ColorLightGray;
+            } else if (s1.equals("white")) {
+                myColor = ColorWhite;
+            } else if (s1.equals("red")) {
+                myColor = ColorRed;
+            } else if (s1.equals("magenta")) {
+                myColor = ColorMagenta;
+            } else if (s1.equals("yellow")) {
+                myColor = ColorYellow;
+            } else if (s1.equals("green")) {
+                myColor = ColorGreen;
+            } else if (s1.equals("cyan")) {
+                myColor = ColorCyan;
+            } else if (s1.equals("blue")) {
+                myColor = ColorBlue;
+            } else if (s1.equals("orange")) {
+                myColor = ColorOrange;
+            } else if (s1.equals("pink")) {
+                myColor = ColorPink;
+            } else if (s1.startsWith("rgbalpha")) {
                 int i = s1.indexOf("(") + 1;
                 int j = s1.indexOf(",", i);
                 String s2 = s1.substring(i, j);
@@ -286,95 +349,33 @@ public class GraphicViewerBrush
                 i = j + 1;
                 j = s1.indexOf(")", i);
                 String s5 = s1.substring(i, j);
-                _fldif = new Color(Integer.parseInt(s2), Integer.parseInt(s3),
+                myColor = new Color(Integer.parseInt(s2), Integer.parseInt(s3),
                         Integer.parseInt(s4), Integer.parseInt(s5));
             }
+        }
     }
 
     public int getStyle() {
-        return _flddo;
+        return myStyle;
     }
 
     public Paint getPaint() {
-        if (a == null)
+        if (myPaint == null) {
             switch (getStyle()) {
                 case 0 : // '\0'
                 default :
-                    a = null;
+                    myPaint = null;
                     break;
 
                 case 65535 :
-                    a = _fldif;
+                    myPaint = myColor;
                     break;
             }
-        return a;
+        }
+        return myPaint;
     }
 
     public Color getColor() {
-        return _fldif;
-    }
-
-    public static final Color ColorBlack;
-    public static final Color ColorDarkGray;
-    public static final Color ColorGray;
-    public static final Color ColorLightGray;
-    public static final Color ColorWhite;
-    public static final Color ColorRed;
-    public static final Color ColorMagenta;
-    public static final Color ColorYellow;
-    public static final Color ColorGreen;
-    public static final Color ColorCyan;
-    public static final Color ColorBlue;
-    public static final Color ColorOrange;
-    public static final Color ColorPink;
-    public static final int NONE = 0;
-    public static final int SOLID = 65535;
-    public static final int CUSTOM = 65534;
-    public static final GraphicViewerBrush black;
-    public static final GraphicViewerBrush darkGray;
-    public static final GraphicViewerBrush gray;
-    public static final GraphicViewerBrush lightGray;
-    public static final GraphicViewerBrush white;
-    public static final GraphicViewerBrush red;
-    public static final GraphicViewerBrush magenta;
-    public static final GraphicViewerBrush yellow;
-    public static final GraphicViewerBrush green;
-    public static final GraphicViewerBrush cyan;
-    public static final GraphicViewerBrush blue;
-    public static final GraphicViewerBrush orange;
-    public static final GraphicViewerBrush pink;
-    public static final GraphicViewerBrush Null = new GraphicViewerBrush(0,
-            null);
-    private int _flddo;
-    private Color _fldif;
-    private transient Paint a;
-
-    static {
-        ColorBlack = Color.black;
-        ColorDarkGray = Color.darkGray;
-        ColorGray = Color.gray;
-        ColorLightGray = Color.lightGray;
-        ColorWhite = Color.white;
-        ColorRed = Color.red;
-        ColorMagenta = Color.magenta;
-        ColorYellow = Color.yellow;
-        ColorGreen = Color.green;
-        ColorCyan = Color.cyan;
-        ColorBlue = Color.blue;
-        ColorOrange = Color.orange;
-        ColorPink = Color.pink;
-        black = new GraphicViewerBrush(65535, ColorBlack);
-        darkGray = new GraphicViewerBrush(65535, ColorDarkGray);
-        gray = new GraphicViewerBrush(65535, ColorGray);
-        lightGray = new GraphicViewerBrush(65535, ColorLightGray);
-        white = new GraphicViewerBrush(65535, ColorWhite);
-        red = new GraphicViewerBrush(65535, ColorRed);
-        magenta = new GraphicViewerBrush(65535, ColorMagenta);
-        yellow = new GraphicViewerBrush(65535, ColorYellow);
-        green = new GraphicViewerBrush(65535, ColorGreen);
-        cyan = new GraphicViewerBrush(65535, ColorCyan);
-        blue = new GraphicViewerBrush(65535, ColorBlue);
-        orange = new GraphicViewerBrush(65535, ColorOrange);
-        pink = new GraphicViewerBrush(65535, ColorPink);
+        return myColor;
     }
 }

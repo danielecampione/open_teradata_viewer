@@ -45,154 +45,31 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
 
     private static final long serialVersionUID = -8723751771146279882L;
 
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    class GraphicViewerJTextArea extends JTextArea {
-        private static final long serialVersionUID = -2021395713134577406L;
-
-        protected void processKeyEvent(KeyEvent keyevent) {
-            GraphicViewerTextEdit graphicviewertextedit = _fldif;
-            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 10
-                    && graphicviewertextedit != null && getLineWrap()) {
-                _fldif = null;
-                if (graphicviewertextedit.setEditedText(getText(), a))
-                    graphicviewertextedit.doEndEdit();
-                else
-                    _fldif = graphicviewertextedit;
-                return;
-            }
-            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 27
-                    && graphicviewertextedit != null) {
-                _fldif = null;
-                graphicviewertextedit.doEndEdit();
-                return;
-            } else {
-                super.processKeyEvent(keyevent);
-                return;
-            }
-        }
-
-        protected void processFocusEvent(FocusEvent focusevent) {
-            GraphicViewerTextEdit graphicviewertextedit = _fldif;
-            if (focusevent.getID() == 1005 && graphicviewertextedit != null) {
-                _fldif = null;
-                if (graphicviewertextedit.setEditedText(getText(), a))
-                    graphicviewertextedit.doEndEdit();
-                else
-                    _fldif = graphicviewertextedit;
-            }
-            super.processFocusEvent(focusevent);
-        }
-
-        GraphicViewerTextEdit _fldif;
-        GraphicViewerView a;
-
-        GraphicViewerJTextArea(String s,
-                GraphicViewerTextEdit graphicviewertextedit1,
-                GraphicViewerView graphicviewerview) {
-            super(s);
-            _fldif = graphicviewertextedit1;
-            a = graphicviewerview;
-            setBorder(new CompoundBorder(new EtchedBorder(1),
-                    new BevelBorder(1)));
-            enableEvents(12L);
-            setLineWrap(_fldif.getTextObject().isWrapping());
-        }
-    }
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    class GraphicViewerJTextField extends JTextField {
-        private static final long serialVersionUID = -838000637426911997L;
-
-        protected void processKeyEvent(KeyEvent keyevent) {
-            GraphicViewerTextEdit graphicviewertextedit = _fldif;
-            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 10
-                    && graphicviewertextedit != null) {
-                _fldif = null;
-                if (graphicviewertextedit.setEditedText(getText(), a))
-                    graphicviewertextedit.doEndEdit();
-                else
-                    _fldif = graphicviewertextedit;
-                return;
-            }
-            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 27
-                    && graphicviewertextedit != null) {
-                _fldif = null;
-                graphicviewertextedit.doEndEdit();
-                return;
-            } else {
-                super.processKeyEvent(keyevent);
-                return;
-            }
-        }
-
-        protected void processFocusEvent(FocusEvent focusevent) {
-            GraphicViewerTextEdit graphicviewertextedit = _fldif;
-            if (focusevent.getID() == 1005 && graphicviewertextedit != null) {
-                _fldif = null;
-                if (graphicviewertextedit.setEditedText(getText(), a))
-                    graphicviewertextedit.doEndEdit();
-                else
-                    _fldif = graphicviewertextedit;
-            }
-            super.processFocusEvent(focusevent);
-        }
-
-        GraphicViewerTextEdit _fldif;
-        GraphicViewerView a;
-
-        GraphicViewerJTextField(String s,
-                GraphicViewerTextEdit graphicviewertextedit1,
-                GraphicViewerView graphicviewerview) {
-            super(s);
-            _fldif = graphicviewertextedit1;
-            a = graphicviewerview;
-            enableEvents(12L);
-            switch (graphicviewertextedit1.getTextObject().getAlignment()) {
-                case 1 : // '\001'
-                    setHorizontalAlignment(2);
-                    break;
-
-                case 2 : // '\002'
-                    setHorizontalAlignment(0);
-                    break;
-
-                case 3 : // '\003'
-                    setHorizontalAlignment(4);
-                    break;
-            }
-        }
-    }
+    private boolean myMultiline;
+    private String myOriginalText;
+    private int myStyle;
+    private GraphicViewerText myTextObject;
 
     public GraphicViewerTextEdit() {
-        dY = "";
-        dW = false;
-        dZ = null;
+        myOriginalText = "";
+        myMultiline = false;
+        myTextObject = null;
     }
 
     public GraphicViewerTextEdit(Point point, Dimension dimension, String s,
             boolean flag, GraphicViewerText graphicviewertext) {
         super(point, dimension);
-        dY = s;
-        dZ = graphicviewertext;
-        dW = flag;
+        myOriginalText = s;
+        myTextObject = graphicviewertext;
+        myMultiline = flag;
     }
 
     public GraphicViewerTextEdit(Rectangle rectangle, String s, boolean flag,
             GraphicViewerText graphicviewertext) {
         super(rectangle);
-        dY = s;
-        dZ = graphicviewertext;
-        dW = flag;
+        myOriginalText = s;
+        myTextObject = graphicviewertext;
+        myMultiline = flag;
     }
 
     public GraphicViewerObject copyObject(
@@ -200,31 +77,31 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
         GraphicViewerTextEdit graphicviewertextedit = (GraphicViewerTextEdit) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewertextedit != null) {
-            graphicviewertextedit.dW = dW;
-            graphicviewertextedit.dY = dY;
-            graphicviewertextedit.dZ = (GraphicViewerText) graphicviewercopyenvironment
-                    .get(dZ);
-            graphicviewertextedit.dX = dX;
+            graphicviewertextedit.myMultiline = myMultiline;
+            graphicviewertextedit.myOriginalText = myOriginalText;
+            graphicviewertextedit.myTextObject = (GraphicViewerText) graphicviewercopyenvironment
+                    .get(myTextObject);
+            graphicviewertextedit.myStyle = myStyle;
         }
         return graphicviewertextedit;
     }
 
     public GraphicViewerText getTextObject() {
-        return dZ;
+        return myTextObject;
     }
 
     public void setTextObject(GraphicViewerText graphicviewertext) {
-        dZ = graphicviewertext;
+        myTextObject = graphicviewertext;
     }
 
     public JComponent createComponent(GraphicViewerView graphicviewerview) {
-        if (dW) {
+        if (myMultiline) {
             GraphicViewerJTextArea graphicviewerjtextarea = new GraphicViewerJTextArea(
-                    dY, this, graphicviewerview);
+                    myOriginalText, this, graphicviewerview);
             return new JScrollPane(graphicviewerjtextarea);
         } else {
             GraphicViewerJTextField graphicviewerjtextfield = new GraphicViewerJTextField(
-                    dY, this, graphicviewerview);
+                    myOriginalText, this, graphicviewerview);
             return graphicviewerjtextfield;
         }
     }
@@ -244,7 +121,7 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
                 }
                 jtextcomponent.setFont(font);
             }
-            Rectangle rectangle = graphicviewerview.c();
+            Rectangle rectangle = graphicviewerview.getTempRectangle();
             Rectangle rectangle1 = getBoundingRect();
             rectangle.x = rectangle1.x - 4;
             rectangle.y = rectangle1.y - 1;
@@ -264,13 +141,14 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
     public JTextComponent getTextComponent(GraphicViewerView graphicviewerview) {
         JComponent jcomponent = getComponent(graphicviewerview);
         JTextComponent jtextcomponent = null;
-        if (jcomponent instanceof JTextComponent)
+        if (jcomponent instanceof JTextComponent) {
             jtextcomponent = (JTextComponent) jcomponent;
-        else if (jcomponent instanceof JScrollPane) {
+        } else if (jcomponent instanceof JScrollPane) {
             JScrollPane jscrollpane = (JScrollPane) jcomponent;
-            if (jscrollpane.getViewport().getView() instanceof JTextComponent)
+            if (jscrollpane.getViewport().getView() instanceof JTextComponent) {
                 jtextcomponent = (JTextComponent) jscrollpane.getViewport()
                         .getView();
+            }
         }
         return jtextcomponent;
     }
@@ -284,8 +162,137 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
         getTextObject().doEndEdit();
     }
 
-    private boolean dW;
-    private String dY;
-    private int dX;
-    private GraphicViewerText dZ;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    class GraphicViewerJTextArea extends JTextArea {
+
+        private static final long serialVersionUID = -2021395713134577406L;
+
+        GraphicViewerTextEdit myTextEdit;
+        GraphicViewerView myView;
+
+        GraphicViewerJTextArea(String s,
+                GraphicViewerTextEdit graphicviewertextedit1,
+                GraphicViewerView graphicviewerview) {
+            super(s);
+            myTextEdit = graphicviewertextedit1;
+            myView = graphicviewerview;
+            setBorder(new CompoundBorder(new EtchedBorder(1),
+                    new BevelBorder(1)));
+            enableEvents(12L);
+            setLineWrap(myTextEdit.getTextObject().isWrapping());
+        }
+
+        protected void processKeyEvent(KeyEvent keyevent) {
+            GraphicViewerTextEdit graphicviewertextedit = myTextEdit;
+            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 10
+                    && graphicviewertextedit != null && getLineWrap()) {
+                myTextEdit = null;
+                if (graphicviewertextedit.setEditedText(getText(), myView)) {
+                    graphicviewertextedit.doEndEdit();
+                } else {
+                    myTextEdit = graphicviewertextedit;
+                }
+                return;
+            }
+            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 27
+                    && graphicviewertextedit != null) {
+                myTextEdit = null;
+                graphicviewertextedit.doEndEdit();
+                return;
+            } else {
+                super.processKeyEvent(keyevent);
+                return;
+            }
+        }
+
+        protected void processFocusEvent(FocusEvent focusevent) {
+            GraphicViewerTextEdit graphicviewertextedit = myTextEdit;
+            if (focusevent.getID() == 1005 && graphicviewertextedit != null) {
+                myTextEdit = null;
+                if (graphicviewertextedit.setEditedText(getText(), myView)) {
+                    graphicviewertextedit.doEndEdit();
+                } else {
+                    myTextEdit = graphicviewertextedit;
+                }
+            }
+            super.processFocusEvent(focusevent);
+        }
+    }
+
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    class GraphicViewerJTextField extends JTextField {
+
+        private static final long serialVersionUID = -838000637426911997L;
+
+        GraphicViewerTextEdit myTextEdit;
+        GraphicViewerView myView;
+
+        GraphicViewerJTextField(String s,
+                GraphicViewerTextEdit graphicviewertextedit1,
+                GraphicViewerView graphicviewerview) {
+            super(s);
+            myTextEdit = graphicviewertextedit1;
+            myView = graphicviewerview;
+            enableEvents(12L);
+            switch (graphicviewertextedit1.getTextObject().getAlignment()) {
+                case 1 : // '\001'
+                    setHorizontalAlignment(2);
+                    break;
+
+                case 2 : // '\002'
+                    setHorizontalAlignment(0);
+                    break;
+
+                case 3 : // '\003'
+                    setHorizontalAlignment(4);
+                    break;
+            }
+        }
+
+        protected void processKeyEvent(KeyEvent keyevent) {
+            GraphicViewerTextEdit graphicviewertextedit = myTextEdit;
+            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 10
+                    && graphicviewertextedit != null) {
+                myTextEdit = null;
+                if (graphicviewertextedit.setEditedText(getText(), myView)) {
+                    graphicviewertextedit.doEndEdit();
+                } else {
+                    myTextEdit = graphicviewertextedit;
+                }
+                return;
+            }
+            if (keyevent.getID() == 401 && keyevent.getKeyCode() == 27
+                    && graphicviewertextedit != null) {
+                myTextEdit = null;
+                graphicviewertextedit.doEndEdit();
+                return;
+            } else {
+                super.processKeyEvent(keyevent);
+                return;
+            }
+        }
+
+        protected void processFocusEvent(FocusEvent focusevent) {
+            GraphicViewerTextEdit graphicviewertextedit = myTextEdit;
+            if (focusevent.getID() == 1005 && graphicviewertextedit != null) {
+                myTextEdit = null;
+                if (graphicviewertextedit.setEditedText(getText(), myView)) {
+                    graphicviewertextedit.doEndEdit();
+                } else {
+                    myTextEdit = graphicviewertextedit;
+                }
+            }
+            super.processFocusEvent(focusevent);
+        }
+    }
 }

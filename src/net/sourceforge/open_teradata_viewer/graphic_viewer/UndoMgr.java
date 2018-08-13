@@ -80,21 +80,23 @@ public class UndoMgr extends GraphicViewerUndoManager {
         myLogPrefix = s;
     }
 
-    public void logChanges(UndoableEdit undoable, boolean forwards) {
-        if (undoable instanceof GraphicViewerCompoundEdit) {
-            GraphicViewerCompoundEdit compound = (GraphicViewerCompoundEdit) undoable;
-            Vector<UndoableEdit> edits = compound.getAllEdits();
-            if (forwards) {
-                for (int i = 0; i < edits.size(); i++) {
-                    GraphicViewerDocumentChangedEdit edit = (GraphicViewerDocumentChangedEdit) edits
+    public void logChanges(UndoableEdit paramUndoableEdit, boolean paramBoolean) {
+        if ((paramUndoableEdit instanceof GraphicViewerUndoManager.GraphicViewerCompoundEdit)) {
+            GraphicViewerUndoManager.GraphicViewerCompoundEdit localGraphicViewerCompoundEdit = (GraphicViewerUndoManager.GraphicViewerCompoundEdit) paramUndoableEdit;
+            Vector localVector = localGraphicViewerCompoundEdit.getAllEdits();
+            int i;
+            GraphicViewerDocumentChangedEdit localGraphicViewerDocumentChangedEdit;
+            if (paramBoolean) {
+                for (i = 0; i < localVector.size(); i++) {
+                    localGraphicViewerDocumentChangedEdit = (GraphicViewerDocumentChangedEdit) localVector
                             .get(i);
-                    logChange(edit);
+                    logChange(localGraphicViewerDocumentChangedEdit);
                 }
             } else {
-                for (int i = edits.size() - 1; i >= 0; i--) {
-                    GraphicViewerDocumentChangedEdit edit = (GraphicViewerDocumentChangedEdit) edits
+                for (i = localVector.size() - 1; i >= 0; i--) {
+                    localGraphicViewerDocumentChangedEdit = (GraphicViewerDocumentChangedEdit) localVector
                             .get(i);
-                    logChange(edit);
+                    logChange(localGraphicViewerDocumentChangedEdit);
                 }
             }
         }
@@ -152,10 +154,11 @@ public class UndoMgr extends GraphicViewerUndoManager {
             return "(null)";
         } else if (obj instanceof GraphicViewerPort) {
             GraphicViewerPort port = (GraphicViewerPort) obj;
-            if (port.getParentNode() != port)
+            if (port.getParentNode() != port) {
                 return ID(port.getParentNode());
-            else
+            } else {
                 return port.toString();
+            }
         } else if (obj instanceof IGraphicViewerLabeledPart) {
             IGraphicViewerLabeledPart part = (IGraphicViewerLabeledPart) obj;
             return part.getText();

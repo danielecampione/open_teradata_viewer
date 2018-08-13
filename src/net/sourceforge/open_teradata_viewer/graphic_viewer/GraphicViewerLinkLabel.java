@@ -31,26 +31,25 @@ public class GraphicViewerLinkLabel extends GraphicViewerText {
 
     private static final long serialVersionUID = -2997165139972895214L;
 
+    private GraphicViewerObject myLabeledLink = null;
+
     public GraphicViewerLinkLabel() {
-        eQ = null;
-        D();
+        init();
     }
 
     public GraphicViewerLinkLabel(String s) {
         super(s);
-        eQ = null;
-        D();
+        init();
     }
 
     public GraphicViewerLinkLabel(Point point, int i, String s, String s1,
             boolean flag, boolean flag1, boolean flag2, int j, boolean flag3,
             boolean flag4) {
         super(point, i, s, s1, flag, flag1, flag2, j, flag3, flag4);
-        eQ = null;
-        D();
+        init();
     }
 
-    private final void D() {
+    private final void init() {
         setTransparent(true);
         setDraggable(false);
         setResizable(false);
@@ -59,24 +58,27 @@ public class GraphicViewerLinkLabel extends GraphicViewerText {
     public GraphicViewerObject redirectSelection() {
         GraphicViewerLabeledLink graphicviewerlabeledlink = getLabeledLink();
         if (graphicviewerlabeledlink != null
-                && graphicviewerlabeledlink.isGrabChildSelection())
+                && graphicviewerlabeledlink.isGrabChildSelection()) {
             return graphicviewerlabeledlink;
-        else
+        } else {
             return this;
+        }
     }
 
     protected void geometryChange(Rectangle rectangle) {
         super.geometryChange(rectangle);
         GraphicViewerLabeledLink graphicviewerlabeledlink = getLabeledLink();
-        if (graphicviewerlabeledlink != null)
+        if (graphicviewerlabeledlink != null) {
             graphicviewerlabeledlink.geometryChangeChild(this, rectangle);
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         if (domdoc.GraphicViewerXMLOutputEnabled()) {
-            IDomElement domelement1 = domdoc.createGraphicViewerClassElement(
-                    "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerLinkLabel",
-                    domelement);
+            IDomElement domelement1 = domdoc
+                    .createGraphicViewerClassElement(
+                            "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerLinkLabel",
+                            domelement);
             domdoc.registerReferencingNode(domelement1, "labeledlink",
                     getLabeledLink());
         }
@@ -84,8 +86,8 @@ public class GraphicViewerLinkLabel extends GraphicViewerText {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             String s = domelement1.getAttribute("labeledlink");
             domdoc.registerReferencingObject(this, "labeledlink", s);
@@ -99,25 +101,25 @@ public class GraphicViewerLinkLabel extends GraphicViewerText {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("labeledlink"))
+        if (s.equals("labeledlink")) {
             setPartner((GraphicViewerObject) obj);
+        }
     }
 
     public GraphicViewerLabeledLink getLabeledLink() {
         GraphicViewerObject graphicviewerobject = getPartner();
-        if (graphicviewerobject instanceof GraphicViewerLabeledLink)
+        if (graphicviewerobject instanceof GraphicViewerLabeledLink) {
             return (GraphicViewerLabeledLink) graphicviewerobject;
-        else
+        } else {
             return null;
+        }
     }
 
     public GraphicViewerObject getPartner() {
-        return eQ;
+        return myLabeledLink;
     }
 
     public void setPartner(GraphicViewerObject graphicviewerobject) {
-        eQ = graphicviewerobject;
+        myLabeledLink = graphicviewerobject;
     }
-
-    private GraphicViewerObject eQ;
 }

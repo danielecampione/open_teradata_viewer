@@ -36,22 +36,37 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
  */
 public class GraphicViewerGlobal {
 
-    private GraphicViewerGlobal() {
-    }
+    private static double myJavaVersion = -1.0D;
+    private static Component myComponent = null;
+    private static Graphics2D myGraphics2D = null;
 
     public static void TRACE(String s) {
         ApplicationFrame.getInstance().getConsole()
                 .print(s, ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
     }
 
+    public static double getGraphicViewerVersion() {
+        return 5.4D;
+    }
+
+    public static boolean isGraphicViewerVersion(double paramDouble) {
+        return getGraphicViewerVersion() == paramDouble;
+    }
+
+    public static boolean isAtLeastGraphicViewerVersion(double paramDouble) {
+        return getGraphicViewerVersion() >= paramDouble;
+    }
+
     public static double getJavaVersion() {
-        if (_flddo == -1D)
+        if (myJavaVersion == -1D) {
             try {
-                _flddo = a(System.getProperty("java.version", "1.0"));
+                myJavaVersion = convertToDouble(System.getProperty(
+                        "java.version", "1.0"));
             } catch (SecurityException se) {
-                _flddo = 1.0D;
+                myJavaVersion = 1.0D;
             }
-        return _flddo;
+        }
+        return myJavaVersion;
     }
 
     public static boolean isJavaVersion(double d) {
@@ -62,16 +77,18 @@ public class GraphicViewerGlobal {
         return getJavaVersion() >= d;
     }
 
-    private static double a(String s) {
+    private static double convertToDouble(String s) {
         int i = s.length();
         String s1 = "";
         boolean flag = false;
         for (int j = 0; j < i; j++) {
             char c = s.charAt(j);
-            if (Character.isDigit(c) || c == '.' && !flag)
+            if (Character.isDigit(c) || c == '.' && !flag) {
                 s1 = s1 + c;
-            if (c == '.')
+            }
+            if (c == '.') {
                 flag = true;
+            }
         }
 
         Double double1;
@@ -84,31 +101,34 @@ public class GraphicViewerGlobal {
     }
 
     public static Component getComponent() {
-        return _fldif;
+        return myComponent;
     }
 
     public static void setComponent(Component component) {
-        if (_fldif == null || !_fldif.isDisplayable())
-            _fldif = component;
+        if (myComponent == null || !myComponent.isDisplayable()) {
+            myComponent = component;
+        }
     }
 
     public static Graphics2D getGraphics2D() {
-        if (a == null) {
+        if (myGraphics2D == null) {
             BufferedImage bufferedimage = new BufferedImage(1, 1, 1);
-            a = bufferedimage.createGraphics();
-            a.setRenderingHint(RenderingHints.KEY_RENDERING,
+            myGraphics2D = bufferedimage.createGraphics();
+            myGraphics2D.setRenderingHint(RenderingHints.KEY_RENDERING,
                     RenderingHints.VALUE_RENDER_QUALITY);
-            a.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+            myGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            a.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            myGraphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                     RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            a.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+            myGraphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                     RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-            if (isAtLeastJavaVersion(1.3999999999999999D))
-                a.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+            if (isAtLeastJavaVersion(1.3999999999999999D)) {
+                myGraphics2D.setRenderingHint(
+                        RenderingHints.KEY_FRACTIONALMETRICS,
                         RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            }
         }
-        return a;
+        return myGraphics2D;
     }
 
     public static void setup() {
@@ -119,13 +139,10 @@ public class GraphicViewerGlobal {
     }
 
     public static Toolkit getToolkit() {
-        if (getComponent() != null)
+        if (getComponent() != null) {
             return getComponent().getToolkit();
-        else
+        } else {
             return Toolkit.getDefaultToolkit();
+        }
     }
-
-    private static double _flddo = -1D;
-    private static Component _fldif = null;
-    private static Graphics2D a = null;
 }

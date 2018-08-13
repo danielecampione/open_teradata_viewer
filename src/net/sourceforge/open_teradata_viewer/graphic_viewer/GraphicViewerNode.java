@@ -33,11 +33,23 @@ public class GraphicViewerNode extends GraphicViewerArea
 
     private static final long serialVersionUID = -8398199369467123389L;
 
+    public static final int ChangedPartID = 2001;
+    public static final int ChangedUserObject = 2002;
+    public static final int ChangedToolTipText = 2003;
+    public static final int PartsPorts = 1;
+    public static final int PartsLinksIn = 2;
+    public static final int PartsLinksOut = 4;
+    public static final int PartsNodesIn = 8;
+    public static final int PartsNodesOut = 16;
+    public static final int PartsNotSelf = 32;
+    public static final int PartsNodes = 24;
+    public static final int PartsLinks = 6;
+    private int myPartID = -1;
+    private Object myUserObject = null;
+    private String myToolTipText = null;
+
     public GraphicViewerNode() {
-        cI = -1;
-        cJ = null;
-        cK = null;
-        _mthfor(g() & 0xfffffbff);
+        setInternalFlags(getInternalFlags() & 0xfffffbff);
     }
 
     public GraphicViewerObject copyObject(
@@ -45,9 +57,9 @@ public class GraphicViewerNode extends GraphicViewerArea
         GraphicViewerNode graphicviewernode = (GraphicViewerNode) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewernode != null) {
-            graphicviewernode.cI = cI;
-            graphicviewernode.cJ = cJ;
-            graphicviewernode.cK = cK;
+            graphicviewernode.myPartID = myPartID;
+            graphicviewernode.myUserObject = myUserObject;
+            graphicviewernode.myToolTipText = myToolTipText;
         }
         return graphicviewernode;
     }
@@ -58,9 +70,9 @@ public class GraphicViewerNode extends GraphicViewerArea
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerNode",
                             domelement);
-            domelement1.setAttribute("partid", Integer.toString(cI));
-            if (cK != null) {
-                domelement1.setAttribute("tooltiptext", cK);
+            domelement1.setAttribute("partid", Integer.toString(myPartID));
+            if (myToolTipText != null) {
+                domelement1.setAttribute("tooltiptext", myToolTipText);
             }
         }
         super.SVGWriteObject(domdoc, domelement);
@@ -71,14 +83,16 @@ public class GraphicViewerNode extends GraphicViewerArea
             IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             if (domdoc.getGraphicViewerSVGVersion() < 2D
-                    && !domelement1.getLocalName().equals("GraphicViewerNode"))
+                    && !domelement1.getLocalName().equals("GraphicViewerNode")) {
                 return super.SVGReadObject(domdoc, graphicviewerdocument,
                         domelement, domelement1);
+            }
             String s = domelement1.getAttribute("partid");
-            if (s.length() > 0)
-                cI = Integer.parseInt(s);
+            if (s.length() > 0) {
+                myPartID = Integer.parseInt(s);
+            }
             String s1 = domelement1.getAttribute("tooltiptext");
-            cK = s1;
+            myToolTipText = s1;
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
             return domelement.getNextSibling();
@@ -108,13 +122,13 @@ public class GraphicViewerNode extends GraphicViewerArea
     }
 
     public GraphicViewerText getLabel() {
-        return _mthtry(this);
+        return findLabel(this);
     }
 
     public void setLabel(GraphicViewerText graphicviewertext) {
     }
 
-    static GraphicViewerText _mthtry(GraphicViewerObject graphicviewerobject) {
+    static GraphicViewerText findLabel(GraphicViewerObject graphicviewerobject) {
         label0 : {
             if (graphicviewerobject instanceof GraphicViewerText) {
                 return (GraphicViewerText) graphicviewerobject;
@@ -134,7 +148,7 @@ public class GraphicViewerNode extends GraphicViewerArea
                         .getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewerarea
                         .getNextObjectPos(graphicviewerlistposition);
-                graphicviewertext = _mthtry(graphicviewerobject1);
+                graphicviewertext = findLabel(graphicviewerobject1);
             } while (graphicviewertext == null);
             return graphicviewertext;
         }
@@ -142,42 +156,42 @@ public class GraphicViewerNode extends GraphicViewerArea
     }
 
     public int getPartID() {
-        return cI;
+        return myPartID;
     }
 
     public void setPartID(int i) {
-        int j = cI;
+        int j = myPartID;
         if (j != i) {
-            cI = i;
+            myPartID = i;
             update(2001, j, null);
         }
     }
 
     public Object getUserObject() {
-        return cJ;
+        return myUserObject;
     }
 
     public void setUserObject(Object obj) {
-        Object obj1 = cJ;
+        Object obj1 = myUserObject;
         if (obj1 != obj) {
-            cJ = obj;
+            myUserObject = obj;
             update(2002, 0, obj1);
         }
     }
 
     public String getToolTipText() {
-        return cK;
+        return myToolTipText;
     }
 
     public void setToolTipText(String s) {
-        String s1 = cK;
+        String s1 = myToolTipText;
         if (s1 != s || s1 != null && !s1.equals(s)) {
-            cK = s;
+            myToolTipText = s;
             update(2003, 0, s1);
         }
     }
 
-    static void a(GraphicViewerObject graphicviewerobject,
+    static void copyProperties(GraphicViewerObject graphicviewerobject,
             GraphicViewerObject graphicviewerobject1) {
         if (graphicviewerobject != null && graphicviewerobject1 != null) {
             graphicviewerobject1.setSpotLocation(0,
@@ -227,23 +241,22 @@ public class GraphicViewerNode extends GraphicViewerArea
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
 
-    public ArrayList<GraphicViewerObject> findAll(int i,
-            ArrayList<GraphicViewerObject> arraylist) {
+    public ArrayList findAll(int i, ArrayList arraylist) {
         if (arraylist == null) {
-            arraylist = new ArrayList<GraphicViewerObject>();
+            arraylist = new ArrayList();
         } else {
             arraylist.clear();
         }
-        a(this, i, arraylist);
+        findAllAux(this, i, arraylist);
         return arraylist;
     }
 
-    private void a(GraphicViewerObject graphicviewerobject, int i,
-            ArrayList<GraphicViewerObject> arraylist) {
+    private void findAllAux(GraphicViewerObject graphicviewerobject, int i,
+            ArrayList arraylist) {
         if (graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerPort)) {
             if ((i & 1) != 0) {
-                a(arraylist, graphicviewerobject);
+                addItem(arraylist, graphicviewerobject);
             }
             GraphicViewerPort graphicviewerport = (GraphicViewerPort) graphicviewerobject;
             for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerport
@@ -252,7 +265,7 @@ public class GraphicViewerNode extends GraphicViewerArea
                         .getLinkAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewerport
                         .getNextLinkPos(graphicviewerlistposition);
-                a(graphicviewerlink, graphicviewerport, i, arraylist);
+                considerLink(graphicviewerlink, graphicviewerport, i, arraylist);
             }
 
         }
@@ -265,13 +278,13 @@ public class GraphicViewerNode extends GraphicViewerArea
                         .getObjectAtPos(graphicviewerlistposition1);
                 graphicviewerlistposition1 = graphicviewerarea
                         .getNextObjectPos(graphicviewerlistposition1);
-                a(graphicviewerobject1, i, arraylist);
+                findAllAux(graphicviewerobject1, i, arraylist);
             }
 
         }
     }
 
-    private void a(ArrayList<GraphicViewerObject> arraylist,
+    private void addItem(ArrayList arraylist,
             GraphicViewerObject graphicviewerobject) {
         if (graphicviewerobject != null
                 && !arraylist.contains(graphicviewerobject)) {
@@ -279,18 +292,17 @@ public class GraphicViewerNode extends GraphicViewerArea
         }
     }
 
-    private void a(GraphicViewerLink graphicviewerlink,
-            GraphicViewerPort graphicviewerport, int i,
-            ArrayList<GraphicViewerObject> arraylist) {
+    private void considerLink(GraphicViewerLink graphicviewerlink,
+            GraphicViewerPort graphicviewerport, int i, ArrayList arraylist) {
         boolean flag = (i & 0x20) == 0;
         if (graphicviewerlink.getFromPort() == graphicviewerport
                 && (flag || graphicviewerlink.getToPort() == null || !graphicviewerlink
                         .getToPort().getPortObject().isChildOf(this))) {
             if ((i & 4) != 0) {
-                a(arraylist, ((GraphicViewerObject) (graphicviewerlink)));
+                addItem(arraylist, ((GraphicViewerObject) (graphicviewerlink)));
             }
             if ((i & 0x10) != 0) {
-                a(arraylist,
+                addItem(arraylist,
                         ((GraphicViewerObject) (graphicviewerlink.getToPort()
                                 .getParentGraphicViewerNode())));
             }
@@ -299,28 +311,13 @@ public class GraphicViewerNode extends GraphicViewerArea
                 && (flag || graphicviewerlink.getFromPort() == null || !graphicviewerlink
                         .getFromPort().getPortObject().isChildOf(this))) {
             if ((i & 2) != 0) {
-                a(arraylist, ((GraphicViewerObject) (graphicviewerlink)));
+                addItem(arraylist, ((GraphicViewerObject) (graphicviewerlink)));
             }
             if ((i & 8) != 0) {
-                a(arraylist,
+                addItem(arraylist,
                         ((GraphicViewerObject) (graphicviewerlink.getFromPort()
                                 .getParentGraphicViewerNode())));
             }
         }
     }
-
-    public static final int ChangedPartID = 2001;
-    public static final int ChangedUserObject = 2002;
-    public static final int ChangedToolTipText = 2003;
-    public static final int PartsPorts = 1;
-    public static final int PartsLinksIn = 2;
-    public static final int PartsLinksOut = 4;
-    public static final int PartsNodesIn = 8;
-    public static final int PartsNodesOut = 16;
-    public static final int PartsNotSelf = 32;
-    public static final int PartsNodes = 24;
-    public static final int PartsLinks = 6;
-    private int cI;
-    private Object cJ;
-    private String cK;
 }

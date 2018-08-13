@@ -36,67 +36,78 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     private static final long serialVersionUID = -6212048868696697211L;
 
+    public static final int StyleHidden = 0;
+    public static final int StyleObject = 1;
+    public static final int StyleEllipse = 2;
+    public static final int StyleTriangle = 3;
+    public static final int StyleRectangle = 4;
+    public static final int StyleDiamond = 5;
+    public static final int ChangedStyle = 301;
+    public static final int ChangedObject = 302;
+    public static final int ChangedValidSource = 303;
+    public static final int ChangedValidDestination = 304;
+    public static final int ChangedFromSpot = 305;
+    public static final int ChangedToSpot = 306;
+    public static final int ChangedAddedLink = 307;
+    public static final int ChangedRemovedLink = 308;
+    public static final int ChangedEndSegmentLength = 309;
+    public static final int ChangedValidSelfNode = 310;
+    public static final int ChangedValidDuplicateLinks = 311;
+    public static final int ChangedPartID = 312;
+    static final int ChangedClearsLinksWhenRemoved = 313;
+    private static final int flagValidLink = 32768;
+    private static final int flagValidSource = 16384;
+    private static final int flagValidDestination = 8192;
+    private static final int flagValidSelfNode = 4096;
+    private static final int flagValidDuplicateLinks = 65536;
+    private static final int flagRecursive = 131072;
+    private static final int flagClearsLinksWhenRemoved = 262144;
+    private static final int flagNoClearLinks = 524288;
+    private static double myDefaultPaintNothingScale = 0.15D;
+    private static double myDefaultPaintGreekScale = 0.25D;
+    private int myPartID = -1;
+    private int myStyle = 2;
+    private GraphicViewerObject myObject = null;
+    private int myFromLinkSpot = 4;
+    private int myToLinkSpot = 8;
+    private GraphicViewerObjList myLinks = new GraphicViewerObjList();
+    private int myEndSegmentLength = 10;
+
     public GraphicViewerPort() {
-        dx = -1;
-        dw = 2;
-        dr = null;
-        dB = 4;
-        dA = 8;
-        ds = new GraphicViewerObjList();
-        dz = 10;
-        _mthint(2);
+        init(2);
     }
 
     public GraphicViewerPort(Rectangle rectangle) {
         super(rectangle);
-        dx = -1;
-        dw = 2;
-        dr = null;
-        dB = 4;
-        dA = 8;
-        ds = new GraphicViewerObjList();
-        dz = 10;
-        _mthint(2);
+        init(2);
     }
 
     public GraphicViewerPort(Point point, Dimension dimension) {
         super(point, dimension);
-        dx = -1;
-        dw = 2;
-        dr = null;
-        dB = 4;
-        dA = 8;
-        ds = new GraphicViewerObjList();
-        dz = 10;
-        _mthint(2);
+        init(2);
     }
 
-    public GraphicViewerPort(Rectangle rectangle,
-            GraphicViewerObject graphicviewerobject) {
-        super(rectangle);
-        dx = -1;
-        dw = 2;
-        dr = null;
-        dB = 4;
-        dA = 8;
-        ds = new GraphicViewerObjList();
-        dz = 10;
-        _mthint(1);
-        if (graphicviewerobject.getLayer() != null)
-            graphicviewerobject.getLayer().removeObject(
-                    graphicviewerobject.getTopLevelObject());
-        else if (graphicviewerobject.getView() != null)
-            graphicviewerobject.getView().removeObject(
-                    graphicviewerobject.getTopLevelObject());
-        graphicviewerobject.setSelectable(false);
-        graphicviewerobject.setDraggable(false);
-        graphicviewerobject.setResizable(false);
-        dr = graphicviewerobject;
+    public GraphicViewerPort(Rectangle paramRectangle,
+            GraphicViewerObject paramGraphicViewerObject) {
+        super(paramRectangle);
+        init(1);
+        if (paramGraphicViewerObject.getLayer() != null) {
+            paramGraphicViewerObject.getLayer().removeObject(
+                    paramGraphicViewerObject.getTopLevelObject());
+        } else if (paramGraphicViewerObject.getView() != null) {
+            paramGraphicViewerObject.getView().removeObject(
+                    paramGraphicViewerObject.getTopLevelObject());
+        }
+        paramGraphicViewerObject.setSelectable(false);
+        paramGraphicViewerObject.setDraggable(false);
+        paramGraphicViewerObject.setResizable(false);
+        myObject = paramGraphicViewerObject;
     }
 
-    private final void _mthint(int i) {
-        dw = i;
-        _mthfor(g() & -5 & 0xffffffef | 0x4000 | 0x2000 | 0x40000);
+    private final void init(int i) {
+        myStyle = i;
+        setInternalFlags(getInternalFlags() & -5 & 0xffffffef | 0x4000 | 0x2000
+                | 0x40000);
         setBrush(GraphicViewerBrush.black);
     }
 
@@ -105,15 +116,17 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         GraphicViewerPort graphicviewerport = (GraphicViewerPort) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerport != null) {
-            graphicviewerport.dx = dx;
-            graphicviewerport._mthfor(graphicviewerport.g() & 0xffff7fff);
-            graphicviewerport.dw = dw;
-            graphicviewerport.dB = dB;
-            graphicviewerport.dA = dA;
-            graphicviewerport.dz = dz;
-            graphicviewerport.dr = dr;
-            if (dr != null)
+            graphicviewerport.myPartID = myPartID;
+            graphicviewerport.setInternalFlags(graphicviewerport
+                    .getInternalFlags() & 0xffff7fff);
+            graphicviewerport.myStyle = myStyle;
+            graphicviewerport.myFromLinkSpot = myFromLinkSpot;
+            graphicviewerport.myToLinkSpot = myToLinkSpot;
+            graphicviewerport.myEndSegmentLength = myEndSegmentLength;
+            graphicviewerport.myObject = myObject;
+            if (myObject != null) {
                 graphicviewercopyenvironment.delay(this);
+            }
         }
         return graphicviewerport;
     }
@@ -125,9 +138,10 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 graphicviewerobject);
         GraphicViewerPort graphicviewerport = (GraphicViewerPort) graphicviewerobject;
         GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) graphicviewercopyenvironment
-                .get(dr);
-        if (graphicviewerobject1 != null)
-            graphicviewerport.dr = graphicviewerobject1;
+                .get(myObject);
+        if (graphicviewerobject1 != null) {
+            graphicviewerport.myObject = graphicviewerobject1;
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -136,26 +150,30 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerPort",
                             domelement);
-            domelement1.setAttribute("partid", Integer.toString(dx));
-            domelement1.setAttribute("portstyle", Integer.toString(dw));
-            domelement1.setAttribute("fromlinkspot", Integer.toString(dB));
-            domelement1.setAttribute("tolinkspot", Integer.toString(dA));
-            domelement1.setAttribute("endsegmentlength", Integer.toString(dz));
-            if (dr != null) {
-                if (!domdoc.isRegisteredReference(dr)) {
+            domelement1.setAttribute("partid", Integer.toString(myPartID));
+            domelement1.setAttribute("portstyle", Integer.toString(myStyle));
+            domelement1.setAttribute("fromlinkspot",
+                    Integer.toString(myFromLinkSpot));
+            domelement1.setAttribute("tolinkspot",
+                    Integer.toString(myToLinkSpot));
+            domelement1.setAttribute("endsegmentlength",
+                    Integer.toString(myEndSegmentLength));
+            if (myObject != null) {
+                if (!domdoc.isRegisteredReference(myObject)) {
                     domelement1.setAttribute("embeddedportobject", "true");
                     IDomElement domelement2 = domdoc.createElement("g");
                     domelement1.appendChild(domelement2);
-                    dr.SVGWriteObject(domdoc, domelement2);
+                    myObject.SVGWriteObject(domdoc, domelement2);
                 }
-                domdoc.registerReferencingNode(domelement1, "portobject", dr);
+                domdoc.registerReferencingNode(domelement1, "portobject",
+                        myObject);
             }
         }
         if (domdoc.SVGOutputEnabled()) {
             Rectangle rectangle = getBoundingRect();
             int ai[] = new int[4];
             int ai1[] = new int[4];
-            switch (dw) {
+            switch (myStyle) {
                 case 0 : // '\0'
                     break;
 
@@ -311,25 +329,31 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             String s = domelement1.getAttribute("partid");
-            if (s.length() > 0)
-                dx = Integer.parseInt(s);
+            if (s.length() > 0) {
+                myPartID = Integer.parseInt(s);
+            }
             String s1 = domelement1.getAttribute("portstyle");
-            if (s1.length() > 0)
+            if (s1.length() > 0) {
                 setStyle(Integer.parseInt(s1));
-            if (domelement1.getAttribute("embeddedportobject").equals("true"))
+            }
+            if (domelement1.getAttribute("embeddedportobject").equals("true")) {
                 domdoc.SVGTraverseChildren(graphicviewerdocument, domelement1,
                         null, false);
+            }
             String s2 = domelement1.getAttribute("portobject");
             domdoc.registerReferencingObject(this, "portobject", s2);
             String s3 = domelement1.getAttribute("fromlinkspot");
-            if (s3.length() > 0)
-                dB = Integer.parseInt(s3);
+            if (s3.length() > 0) {
+                myFromLinkSpot = Integer.parseInt(s3);
+            }
             String s4 = domelement1.getAttribute("tolinkspot");
-            if (s4.length() > 0)
-                dA = Integer.parseInt(s4);
+            if (s4.length() > 0) {
+                myToLinkSpot = Integer.parseInt(s4);
+            }
             String s5 = domelement1.getAttribute("endsegmentlength");
-            if (s5.length() > 0)
-                dz = Integer.parseInt(s5);
+            if (s5.length() > 0) {
+                myEndSegmentLength = Integer.parseInt(s5);
+            }
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
             return domelement.getNextSibling();
@@ -340,13 +364,15 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("portobject"))
+        if (s.equals("portobject")) {
             setPortObject((GraphicViewerObject) obj);
+        }
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
-        if (paintGreek(graphics2d, graphicviewerview))
+        if (paintGreek(graphics2d, graphicviewerview)) {
             return;
+        }
         Rectangle rectangle = getBoundingRect();
         switch (getStyle()) {
             case 0 : // '\0'
@@ -363,8 +389,8 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 break;
 
             case 3 : // '\003'
-                int ai[] = graphicviewerview._mthdo(3);
-                int ai2[] = graphicviewerview._mthif(3);
+                int ai[] = graphicviewerview.getTempXs(3);
+                int ai2[] = graphicviewerview.getTempYs(3);
                 switch (getToSpot()) {
                     case 1 : // '\001'
                         ai[0] = rectangle.x + rectangle.width / 2;
@@ -449,8 +475,8 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 break;
 
             case 5 : // '\005'
-                int ai1[] = graphicviewerview._mthdo(4);
-                int ai3[] = graphicviewerview._mthif(4);
+                int ai1[] = graphicviewerview.getTempXs(4);
+                int ai3[] = graphicviewerview.getTempYs(4);
                 ai1[0] = rectangle.x + rectangle.width / 2;
                 ai3[0] = rectangle.y;
                 ai1[1] = rectangle.x + rectangle.width;
@@ -479,8 +505,9 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             d1 /= 3D;
             d2 /= 3D;
         }
-        if (d <= d1)
+        if (d <= d1) {
             return true;
+        }
         if (d <= d2) {
             if (getStyle() != 0) {
                 Rectangle rectangle = getBoundingRect();
@@ -494,16 +521,17 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public void expandRectByPenWidth(Rectangle rectangle) {
-        if (getStyle() == 0)
+        if (getStyle() == 0) {
             return;
+        }
         GraphicViewerObject graphicviewerobject = getPortObject();
         if (graphicviewerobject != null && graphicviewerobject != this
                 && getStyle() == 1 && graphicviewerobject.getLayer() == null
                 && graphicviewerobject.getView() == null
-                && (g() & 0x20000) == 0) {
-            _mthfor(g() | 0x20000);
+                && (getInternalFlags() & 0x20000) == 0) {
+            setInternalFlags(getInternalFlags() | 0x20000);
             graphicviewerobject.expandRectByPenWidth(rectangle);
-            _mthfor(g() & 0xfffdffff);
+            setInternalFlags(getInternalFlags() & 0xfffdffff);
         } else {
             super.expandRectByPenWidth(rectangle);
         }
@@ -515,14 +543,14 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         if (graphicviewerobject != null
                 && graphicviewerobject != this
                 && getStyle() != 1
-                && (g() & 0x20000) == 0
+                && (getInternalFlags() & 0x20000) == 0
                 && (graphicviewerobject.getLayer() != null
                         || graphicviewerobject.getView() != null || GraphicViewerObject
                         .findCommonParent(this, graphicviewerobject) != null)) {
-            _mthfor(g() | 0x20000);
+            setInternalFlags(getInternalFlags() | 0x20000);
             boolean flag = graphicviewerobject.getNearestIntersectionPoint(i,
                     j, k, l, point);
-            _mthfor(g() & 0xfffdffff);
+            setInternalFlags(getInternalFlags() & 0xfffdffff);
             return flag;
         } else {
             return super.getNearestIntersectionPoint(i, j, k, l, point);
@@ -530,68 +558,73 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public int getPartID() {
-        return dx;
+        return myPartID;
     }
 
     public void setPartID(int i) {
-        int j = dx;
+        int j = myPartID;
         if (j != i) {
-            dx = i;
+            myPartID = i;
             update(312, j, null);
         }
     }
 
     public int getStyle() {
-        return dw;
+        return myStyle;
     }
 
     public void setStyle(int i) {
-        _mthbyte(i, false);
+        internalSetStyle(i, false);
     }
 
-    private void _mthbyte(int i, boolean flag) {
-        int j = dw;
+    private void internalSetStyle(int i, boolean flag) {
+        int j = myStyle;
         if (j != i) {
-            dw = i;
+            myStyle = i;
             update(301, j, null);
-            if (!flag)
+            if (!flag) {
                 portChange(301, j, null);
+            }
         }
     }
 
     public GraphicViewerObject getPortObject() {
-        return dr;
+        return myObject;
     }
 
     public void setPortObject(GraphicViewerObject graphicviewerobject) {
-        _mthfor(graphicviewerobject, false);
+        internalSetPortObject(graphicviewerobject, false);
     }
 
-    private void _mthfor(GraphicViewerObject graphicviewerobject, boolean flag) {
-        GraphicViewerObject graphicviewerobject1 = dr;
+    private void internalSetPortObject(GraphicViewerObject graphicviewerobject,
+            boolean flag) {
+        GraphicViewerObject graphicviewerobject1 = myObject;
         if (graphicviewerobject1 != graphicviewerobject) {
-            dr = graphicviewerobject;
+            myObject = graphicviewerobject;
             update(302, 0, graphicviewerobject1);
-            if (!flag)
+            if (!flag) {
                 portChange(302, 0, graphicviewerobject1);
+            }
         }
     }
 
     public int getNumLinks() {
-        return ds.getNumObjects();
+        return myLinks.getNumObjects();
     }
 
     public int getNumFromLinks() {
         int i = 0;
         GraphicViewerListPosition graphicviewerlistposition = getFirstLinkPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerLink graphicviewerlink = getLinkAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextLinkPos(graphicviewerlistposition);
             if (graphicviewerlink.getFromPort() == this
-                    && graphicviewerlink.getToPort().getDocument() != null)
+                    && graphicviewerlink.getToPort().getDocument() != null) {
                 i++;
+            }
         } while (true);
         return i;
     }
@@ -600,50 +633,55 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         int i = 0;
         GraphicViewerListPosition graphicviewerlistposition = getFirstLinkPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerLink graphicviewerlink = getLinkAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextLinkPos(graphicviewerlistposition);
-            if (graphicviewerlink.getToPort() == this)
+            if (graphicviewerlink.getToPort() == this) {
                 i++;
+            }
         } while (true);
         return i;
     }
 
     public boolean hasNoLinks() {
-        return ds.isEmpty();
+        return myLinks.isEmpty();
     }
 
     public GraphicViewerListPosition getFirstLinkPos() {
-        return ds.getFirstObjectPos();
+        return myLinks.getFirstObjectPos();
     }
 
     public GraphicViewerLink getLinkAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return (GraphicViewerLink) ds.getObjectAtPos(graphicviewerlistposition);
+        return (GraphicViewerLink) myLinks
+                .getObjectAtPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getNextLinkPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return ds.getNextObjectPos(graphicviewerlistposition);
+        return myLinks.getNextObjectPos(graphicviewerlistposition);
     }
 
     public void removeAllLinks() {
-        _mthbyte(((GraphicViewerObject) (null)));
+        clearLinks(((GraphicViewerObject) (null)));
     }
 
-    private void _mthbyte(GraphicViewerObject graphicviewerobject) {
-        ArrayList<GraphicViewerLink> arraylist = null;
+    private void clearLinks(GraphicViewerObject graphicviewerobject) {
+        ArrayList arraylist = null;
         GraphicViewerListPosition graphicviewerlistposition = getFirstLinkPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerLink graphicviewerlink = getLinkAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextLinkPos(graphicviewerlistposition);
             if (graphicviewerobject == null
                     || !graphicviewerlink.isChildOf(graphicviewerobject)) {
-                if (arraylist == null)
-                    arraylist = new ArrayList<GraphicViewerLink>();
+                if (arraylist == null) {
+                    arraylist = new ArrayList();
+                }
                 arraylist.add(graphicviewerlink);
             }
         } while (true);
@@ -659,8 +697,9 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     public Point getLinkPoint(int i, Point point) {
         Rectangle rectangle = getBoundingRect();
-        if (point == null)
+        if (point == null) {
             point = new Point(0, 0);
+        }
         int j = rectangle.x;
         int k = rectangle.x + rectangle.width / 2;
         int l = rectangle.x + rectangle.width;
@@ -722,15 +761,17 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public Point getLinkPointFromPoint(int i, int j, Point point) {
-        if (point == null)
+        if (point == null) {
             point = new Point(0, 0);
+        }
         Object obj = getPortObject();
         if (obj == null
                 || ((GraphicViewerObject) (obj)).getLayer() == null
                 && ((GraphicViewerObject) (obj)).getView() == null
                 && GraphicViewerObject.findCommonParent(this,
-                        ((GraphicViewerObject) (obj))) == null)
+                        ((GraphicViewerObject) (obj))) == null) {
             obj = this;
+        }
         point.x = i;
         point.y = j;
         if (((GraphicViewerObject) (obj)).isPointInObj(point)) {
@@ -755,10 +796,12 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     public Point getFromLinkPoint(GraphicViewerLink graphicviewerlink,
             Point point) {
-        if (getFromSpot() != -1)
+        if (getFromSpot() != -1) {
             return getLinkPoint(getFromSpot(), point);
-        if (point == null)
+        }
+        if (point == null) {
             point = new Point(0, 0);
+        }
         if (graphicviewerlink == null || graphicviewerlink.getToPort() == null) {
             point.x = getLeft() + getWidth() / 2;
             point.y = getTop() + getHeight() / 2;
@@ -769,34 +812,38 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             Point point1 = graphicviewerlink.getPoint(1);
             point.x = point1.x;
             point.y = point1.y;
-            if (graphicviewerlink.isOrthogonal())
-                point = _mthif(point);
+            if (graphicviewerlink.isOrthogonal()) {
+                point = orthoPointToward(point);
+            }
         } else {
             GraphicViewerPort graphicviewerport = graphicviewerlink.getToPort();
             point.x = graphicviewerport.getLeft()
                     + graphicviewerport.getWidth() / 2;
             point.y = graphicviewerport.getTop()
                     + graphicviewerport.getHeight() / 2;
-            if (graphicviewerlink.isOrthogonal())
-                point = _mthif(point);
+            if (graphicviewerlink.isOrthogonal()) {
+                point = orthoPointToward(point);
+            }
         }
         return getLinkPointFromPoint(point.x, point.y, point);
     }
 
-    private Point _mthif(Point point) {
+    private Point orthoPointToward(Point point) {
         int i = getLeft() + getWidth() / 2;
         int j = getTop() + getHeight() / 2;
         if (Math.abs(point.x - i) >= Math.abs(point.y - j)) {
-            if (point.x >= i)
+            if (point.x >= i) {
                 point.x += 0x1869f;
-            else
+            } else {
                 point.x -= 0x1869f;
+            }
             point.y = j;
         } else {
-            if (point.y >= j)
+            if (point.y >= j) {
                 point.y += 0x1869f;
-            else
+            } else {
                 point.y -= 0x1869f;
+            }
             point.x = i;
         }
         return point;
@@ -811,10 +858,12 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public Point getToLinkPoint(GraphicViewerLink graphicviewerlink, Point point) {
-        if (getToSpot() != -1)
+        if (getToSpot() != -1) {
             return getLinkPoint(getToSpot(), point);
-        if (point == null)
+        }
+        if (point == null) {
             point = new Point(0, 0);
+        }
         if (graphicviewerlink == null
                 || graphicviewerlink.getFromPort() == null) {
             point.x = getLeft() + getWidth() / 2;
@@ -827,8 +876,9 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                     .getNumPoints() - 2);
             point.x = point1.x;
             point.y = point1.y;
-            if (graphicviewerlink.isOrthogonal())
-                point = _mthif(point);
+            if (graphicviewerlink.isOrthogonal()) {
+                point = orthoPointToward(point);
+            }
         } else {
             GraphicViewerPort graphicviewerport = graphicviewerlink
                     .getFromPort();
@@ -836,8 +886,9 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                     + graphicviewerport.getWidth() / 2;
             point.y = graphicviewerport.getTop()
                     + graphicviewerport.getHeight() / 2;
-            if (graphicviewerlink.isOrthogonal())
-                point = _mthif(point);
+            if (graphicviewerlink.isOrthogonal()) {
+                point = orthoPointToward(point);
+            }
         }
         return getLinkPointFromPoint(point.x, point.y, point);
     }
@@ -851,38 +902,40 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public int getFromSpot() {
-        return dB;
+        return myFromLinkSpot;
     }
 
     public void setFromSpot(int i) {
-        _mthtry(i, false);
+        internalSetFromSpot(i, false);
     }
 
-    private void _mthtry(int i, boolean flag) {
-        int j = dB;
+    private void internalSetFromSpot(int i, boolean flag) {
+        int j = myFromLinkSpot;
         if (j != i) {
-            dB = i;
+            myFromLinkSpot = i;
             update(305, j, null);
-            if (!flag)
+            if (!flag) {
                 portChange(305, j, null);
+            }
         }
     }
 
     public int getToSpot() {
-        return dA;
+        return myToLinkSpot;
     }
 
     public void setToSpot(int i) {
-        _mthint(i, false);
+        internalSetToSpot(i, false);
     }
 
-    private void _mthint(int i, boolean flag) {
-        int j = dA;
+    private void internalSetToSpot(int i, boolean flag) {
+        int j = myToLinkSpot;
         if (j != i) {
-            dA = i;
+            myToLinkSpot = i;
             update(306, j, null);
-            if (!flag)
+            if (!flag) {
                 portChange(306, j, null);
+            }
         }
     }
 
@@ -928,34 +981,40 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     public double getFromLinkDir(GraphicViewerLink graphicviewerlink) {
         int i = getFromSpot();
-        if (i != -1 && i != 0)
+        if (i != -1 && i != 0) {
             return getFromLinkDir();
-        if (graphicviewerlink == null || graphicviewerlink.getToPort() == null)
+        }
+        if (graphicviewerlink == null || graphicviewerlink.getToPort() == null) {
             return 0.0D;
+        }
         GraphicViewerPort graphicviewerport = graphicviewerlink.getToPort();
         int j = graphicviewerport.getLeft() + graphicviewerport.getWidth() / 2;
         int k = graphicviewerport.getTop() + graphicviewerport.getHeight() / 2;
         int l = getLeft() + getWidth() / 2;
         int i1 = getTop() + getHeight() / 2;
-        if (Math.abs(j - l) > Math.abs(k - i1))
+        if (Math.abs(j - l) > Math.abs(k - i1)) {
             return j < l ? 3.1415926535897931D : 0.0D;
+        }
         return k < i1 ? 4.7123889803846897D : 1.5707963267948966D;
     }
 
     public double getToLinkDir(GraphicViewerLink graphicviewerlink) {
         int i = getToSpot();
-        if (i != -1 && i != 0)
+        if (i != -1 && i != 0) {
             return getToLinkDir();
+        }
         if (graphicviewerlink == null
-                || graphicviewerlink.getFromPort() == null)
+                || graphicviewerlink.getFromPort() == null) {
             return 0.0D;
+        }
         GraphicViewerPort graphicviewerport = graphicviewerlink.getFromPort();
         int j = graphicviewerport.getLeft() + graphicviewerport.getWidth() / 2;
         int k = graphicviewerport.getTop() + graphicviewerport.getHeight() / 2;
         int l = getLeft() + getWidth() / 2;
         int i1 = getTop() + getHeight() / 2;
-        if (Math.abs(j - l) > Math.abs(k - i1))
+        if (Math.abs(j - l) > Math.abs(k - i1)) {
             return j < l ? 3.1415926535897931D : 0.0D;
+        }
         return k < i1 ? 4.7123889803846897D : 1.5707963267948966D;
     }
 
@@ -966,17 +1025,18 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 && (isValidSelfNode() && graphicviewerport.isValidSelfNode() || !isInSameNode(graphicviewerport))
                 && (isValidDuplicateLinks()
                         && graphicviewerport.isValidDuplicateLinks() || !isLinked(graphicviewerport))
-                && _mthdo(graphicviewerport);
+                && cycleOK(graphicviewerport);
     }
 
     public boolean isValidLink() {
-        return (g() & 0x8000) != 0;
+        return (getInternalFlags() & 0x8000) != 0;
     }
 
-    private boolean _mthdo(GraphicViewerPort graphicviewerport) {
+    private boolean cycleOK(GraphicViewerPort graphicviewerport) {
         GraphicViewerDocument graphicviewerdocument = getDocument();
-        if (graphicviewerdocument == null)
+        if (graphicviewerdocument == null) {
             return true;
+        }
         int i = graphicviewerdocument.getValidCycle();
         switch (i) {
             case 0 : // '\0'
@@ -1013,66 +1073,72 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public boolean canLinkFrom() {
-        if (!isValidSource())
+        if (!isValidSource()) {
             return false;
+        }
         return canView();
     }
 
     public boolean canLinkTo() {
-        if (!isValidDestination())
+        if (!isValidDestination()) {
             return false;
+        }
         return canView();
     }
 
     public boolean isValidSource() {
-        return (g() & 0x4000) != 0;
+        return (getInternalFlags() & 0x4000) != 0;
     }
 
     public void setValidSource(boolean flag) {
-        boolean flag1 = (g() & 0x4000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x4000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x4000);
-            else
-                _mthfor(g() & 0xffffbfff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x4000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xffffbfff);
+            }
             update(303, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isValidDestination() {
-        return (g() & 0x2000) != 0;
+        return (getInternalFlags() & 0x2000) != 0;
     }
 
     public void setValidDestination(boolean flag) {
-        boolean flag1 = (g() & 0x2000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x2000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x2000);
-            else
-                _mthfor(g() & 0xffffdfff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x2000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xffffdfff);
+            }
             update(304, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isValidSelfNode() {
-        return (g() & 0x1000) != 0;
+        return (getInternalFlags() & 0x1000) != 0;
     }
 
     public void setValidSelfNode(boolean flag) {
-        boolean flag1 = (g() & 0x1000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x1000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x1000);
-            else
-                _mthfor(g() & 0xffffefff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x1000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xffffefff);
+            }
             update(310, flag1 ? 1 : 0, null);
         }
     }
 
     public static boolean isInSameNode(GraphicViewerPort graphicviewerport,
             GraphicViewerPort graphicviewerport1) {
-        if (graphicviewerport == null || graphicviewerport1 == null)
+        if (graphicviewerport == null || graphicviewerport1 == null) {
             return false;
+        }
         if (graphicviewerport == graphicviewerport1) {
             return true;
         } else {
@@ -1090,24 +1156,26 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public boolean isValidDuplicateLinks() {
-        return (g() & 0x10000) != 0;
+        return (getInternalFlags() & 0x10000) != 0;
     }
 
     public void setValidDuplicateLinks(boolean flag) {
-        boolean flag1 = (g() & 0x10000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x10000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x10000);
-            else
-                _mthfor(g() & 0xfffeffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x10000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffeffff);
+            }
             update(311, flag1 ? 1 : 0, null);
         }
     }
 
     public static boolean isLinked(GraphicViewerPort graphicviewerport,
             GraphicViewerPort graphicviewerport1) {
-        if (graphicviewerport == null || graphicviewerport1 == null)
+        if (graphicviewerport == null || graphicviewerport1 == null) {
             return false;
+        }
         for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerport
                 .getFirstLinkPos(); graphicviewerlistposition != null;) {
             GraphicViewerLink graphicviewerlink = graphicviewerport
@@ -1115,8 +1183,9 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             graphicviewerlistposition = graphicviewerport
                     .getNextLinkPos(graphicviewerlistposition);
             if (graphicviewerlink.getFromPort() == graphicviewerport
-                    && graphicviewerlink.getToPort() == graphicviewerport1)
+                    && graphicviewerlink.getToPort() == graphicviewerport1) {
                 return true;
+            }
         }
 
         return false;
@@ -1126,24 +1195,25 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         return isLinked(this, graphicviewerport);
     }
 
-    void _mthbyte(boolean flag) {
-        if (flag)
-            _mthfor(g() | 0x8000);
-        else
-            _mthfor(g() & 0xffff7fff);
+    void setValidLink(boolean flag) {
+        if (flag) {
+            setInternalFlags(getInternalFlags() | 0x8000);
+        } else {
+            setInternalFlags(getInternalFlags() & 0xffff7fff);
+        }
     }
 
-    void a(GraphicViewerLink graphicviewerlink) {
-        ds.addObjectAtTail(graphicviewerlink);
+    void addLink(GraphicViewerLink graphicviewerlink) {
+        myLinks.addObjectAtTail(graphicviewerlink);
         update(307, 0, graphicviewerlink);
         linkChange();
     }
 
-    void _mthif(GraphicViewerLink graphicviewerlink) {
-        GraphicViewerListPosition graphicviewerlistposition = ds
+    void removeLink(GraphicViewerLink graphicviewerlink) {
+        GraphicViewerListPosition graphicviewerlistposition = myLinks
                 .findObject(graphicviewerlink);
         if (graphicviewerlistposition != null) {
-            ds.removeObjectAtPos(graphicviewerlistposition);
+            myLinks.removeObjectAtPos(graphicviewerlistposition);
             update(308, 0, graphicviewerlink);
             linkChange();
         }
@@ -1172,65 +1242,71 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             GraphicViewerObject graphicviewerobject) {
         super.ownerChange(graphicviewerobjectcollection,
                 graphicviewerobjectcollection1, graphicviewerobject);
-        if (graphicviewerobjectcollection1 == null && u() && !t())
-            _mthbyte(graphicviewerobject);
+        if (graphicviewerobjectcollection1 == null
+                && isClearsLinksWhenRemoved() && !isNoClearLinks()) {
+            clearLinks(graphicviewerobject);
+        }
     }
 
-    void _mthcase(boolean flag) {
-        int i = g();
-        if (flag)
-            i |= 0x80000;
-        else
-            i &= 0xfff7ffff;
-        _mthfor(i);
+    void setNoClearLinks(boolean paramBoolean) {
+        int i = getInternalFlags();
+        if (paramBoolean) {
+            i |= 524288;
+        } else {
+            i &= -524289;
+        }
+        setInternalFlags(i);
     }
 
-    boolean t() {
-        return (g() & 0x80000) != 0;
+    boolean isNoClearLinks() {
+        return (getInternalFlags() & 0x80000) != 0;
     }
 
-    boolean u() {
-        return (g() & 0x40000) != 0;
+    boolean isClearsLinksWhenRemoved() {
+        return (getInternalFlags() & 0x40000) != 0;
     }
 
-    void _mthtry(boolean flag) {
-        boolean flag1 = (g() & 0x40000) != 0;
+    void setClearsLinksWhenRemoved(boolean flag) {
+        boolean flag1 = (getInternalFlags() & 0x40000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x40000);
-            else
-                _mthfor(g() & 0xfffbffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x40000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffbffff);
+            }
             update(313, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean doUncapturedMouseMove(int i, Point point, Point point1,
             GraphicViewerView graphicviewerview) {
-        if (getLayer() != null && !getLayer().isModifiable())
+        if (getLayer() != null && !getLayer().isModifiable()) {
             return false;
+        }
         if (!isValidSource() && !isValidDestination()) {
             return false;
         } else {
-            graphicviewerview.a(12);
+            graphicviewerview.setCursorType(12);
             return true;
         }
     }
 
     public int getEndSegmentLength() {
-        return dz;
+        return myEndSegmentLength;
     }
 
     public void setEndSegmentLength(int i) {
-        _mthnew(i, false);
+        internalSetEndSegmentLength(i, false);
     }
 
-    private void _mthnew(int i, boolean flag) {
-        int j = dz;
+    private void internalSetEndSegmentLength(int i, boolean flag) {
+        int j = myEndSegmentLength;
         if (j != i) {
-            dz = i;
+            myEndSegmentLength = i;
             update(309, j, null);
-            if (!flag)
+            if (!flag) {
                 portChange(309, j, null);
+            }
         }
     }
 
@@ -1279,7 +1355,8 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 return;
 
             case 313 :
-                graphicviewerdocumentchangededit.setNewValueBoolean(u());
+                graphicviewerdocumentchangededit
+                        .setNewValueBoolean(isClearsLinksWhenRemoved());
                 return;
 
             case 310 :
@@ -1295,13 +1372,15 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             boolean flag) {
         switch (graphicviewerdocumentchangededit.getFlags()) {
             case 301 :
-                _mthbyte(graphicviewerdocumentchangededit.getValueInt(flag),
+                internalSetStyle(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
                         true);
                 return;
 
             case 302 :
-                _mthfor((GraphicViewerObject) graphicviewerdocumentchangededit
-                        .getValue(flag),
+                internalSetPortObject(
+                        (GraphicViewerObject) graphicviewerdocumentchangededit
+                                .getValue(flag),
                         true);
                 return;
 
@@ -1316,35 +1395,40 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 return;
 
             case 305 :
-                _mthtry(graphicviewerdocumentchangededit.getValueInt(flag),
+                internalSetFromSpot(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
                         true);
                 return;
 
             case 306 :
-                _mthint(graphicviewerdocumentchangededit.getValueInt(flag),
+                internalSetToSpot(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
                         true);
                 return;
 
             case 307 :
                 GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerdocumentchangededit
                         .getOldValue();
-                if (flag)
-                    _mthif(graphicviewerlink);
-                else
-                    a(graphicviewerlink);
+                if (flag) {
+                    removeLink(graphicviewerlink);
+                } else {
+                    addLink(graphicviewerlink);
+                }
                 return;
 
             case 308 :
                 GraphicViewerLink graphicviewerlink1 = (GraphicViewerLink) graphicviewerdocumentchangededit
                         .getOldValue();
-                if (flag)
-                    a(graphicviewerlink1);
-                else
-                    _mthif(graphicviewerlink1);
+                if (flag) {
+                    addLink(graphicviewerlink1);
+                } else {
+                    removeLink(graphicviewerlink1);
+                }
                 return;
 
             case 309 :
-                _mthnew(graphicviewerdocumentchangededit.getValueInt(flag),
+                internalSetEndSegmentLength(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
                         true);
                 return;
 
@@ -1353,7 +1437,8 @@ public class GraphicViewerPort extends GraphicViewerDrawable
                 return;
 
             case 313 :
-                _mthtry(graphicviewerdocumentchangededit.getValueBoolean(flag));
+                setClearsLinksWhenRemoved(graphicviewerdocumentchangededit
+                        .getValueBoolean(flag));
                 return;
 
             case 310 :
@@ -1365,47 +1450,18 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public static double getDefaultPaintNothingScale() {
-        return dG;
+        return flagValidLink;
     }
 
-    public static void setDefaultPaintNothingScale(double d) {
-        dG = d;
+    public static void setDefaultPaintNothingScale(double paramDouble) {
+        myDefaultPaintNothingScale = paramDouble;
     }
 
     public static double getDefaultPaintGreekScale() {
-        return dI;
+        return flagValidSource;
     }
 
-    public static void setDefaultPaintGreekScale(double d) {
-        dI = d;
+    public static void setDefaultPaintGreekScale(double paramDouble) {
+        myDefaultPaintGreekScale = paramDouble;
     }
-
-    public static final int StyleHidden = 0;
-    public static final int StyleObject = 1;
-    public static final int StyleEllipse = 2;
-    public static final int StyleTriangle = 3;
-    public static final int StyleRectangle = 4;
-    public static final int StyleDiamond = 5;
-    public static final int ChangedStyle = 301;
-    public static final int ChangedObject = 302;
-    public static final int ChangedValidSource = 303;
-    public static final int ChangedValidDestination = 304;
-    public static final int ChangedFromSpot = 305;
-    public static final int ChangedToSpot = 306;
-    public static final int ChangedAddedLink = 307;
-    public static final int ChangedRemovedLink = 308;
-    public static final int ChangedEndSegmentLength = 309;
-    public static final int ChangedValidSelfNode = 310;
-    public static final int ChangedValidDuplicateLinks = 311;
-    public static final int ChangedPartID = 312;
-    static final int dv = 313;
-    private static double dG = 0.14999999999999999D;
-    private static double dI = 0.25D;
-    private int dx;
-    private int dw;
-    private GraphicViewerObject dr;
-    private int dB;
-    private int dA;
-    private GraphicViewerObjList ds;
-    private int dz;
 }

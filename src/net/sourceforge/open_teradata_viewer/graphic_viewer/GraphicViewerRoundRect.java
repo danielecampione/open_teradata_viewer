@@ -33,153 +33,159 @@ public class GraphicViewerRoundRect extends GraphicViewerDrawable {
 
     private static final long serialVersionUID = 3411129146763651958L;
 
+    public static final int ChangedArcDimension = 404;
+    private Dimension myArcDimension = new Dimension();
+
     public GraphicViewerRoundRect() {
-        dS = new Dimension();
-        _mthif(5, 5);
+        init(5, 5);
     }
 
-    public GraphicViewerRoundRect(Dimension dimension) {
-        dS = new Dimension();
-        _mthif(dimension.width, dimension.height);
+    public GraphicViewerRoundRect(Dimension paramDimension) {
+        init(paramDimension.width, paramDimension.height);
     }
 
-    public GraphicViewerRoundRect(Rectangle rectangle, Dimension dimension) {
-        super(rectangle);
-        dS = new Dimension();
-        _mthif(dimension.width, dimension.height);
+    public GraphicViewerRoundRect(Rectangle paramRectangle,
+            Dimension paramDimension) {
+        super(paramRectangle);
+        init(paramDimension.width, paramDimension.height);
     }
 
-    public GraphicViewerRoundRect(Point point, Dimension dimension,
-            Dimension dimension1) {
-        super(point, dimension);
-        dS = new Dimension();
-        _mthif(dimension1.width, dimension1.height);
+    public GraphicViewerRoundRect(Point paramPoint, Dimension paramDimension1,
+            Dimension paramDimension2) {
+        super(paramPoint, paramDimension1);
+        init(paramDimension2.width, paramDimension2.height);
     }
 
-    private final void _mthif(int i, int j) {
-        dS.width = i;
-        dS.height = j;
+    private final void init(int paramInt1, int paramInt2) {
+        myArcDimension.width = paramInt1;
+        myArcDimension.height = paramInt2;
     }
 
     public GraphicViewerObject copyObject(
-            IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
-        GraphicViewerRoundRect graphicviewerroundrect = (GraphicViewerRoundRect) super
-                .copyObject(graphicviewercopyenvironment);
-        if (graphicviewerroundrect != null) {
-            graphicviewerroundrect.dS.width = dS.width;
-            graphicviewerroundrect.dS.height = dS.height;
+            IGraphicViewerCopyEnvironment paramGraphicViewerCopyEnvironment) {
+        GraphicViewerRoundRect localGraphicViewerRoundRect = (GraphicViewerRoundRect) super
+                .copyObject(paramGraphicViewerCopyEnvironment);
+        if (localGraphicViewerRoundRect != null) {
+            localGraphicViewerRoundRect.myArcDimension.width = myArcDimension.width;
+            localGraphicViewerRoundRect.myArcDimension.height = myArcDimension.height;
         }
-        return graphicviewerroundrect;
+        return localGraphicViewerRoundRect;
     }
 
     public Dimension getArcDimension() {
-        return dS;
+        return myArcDimension;
     }
 
-    public void setArcDimension(Dimension dimension) {
-        Dimension dimension1 = dS;
-        if (dimension1.width != dimension.width
-                || dimension1.height != dimension.height) {
-            Dimension dimension2 = new Dimension(dimension1);
-            dS.width = dimension.width;
-            dS.height = dimension.height;
-            update(404, 0, dimension2);
+    public void setArcDimension(Dimension paramDimension) {
+        Dimension localDimension1 = myArcDimension;
+        if ((localDimension1.width != paramDimension.width)
+                || (localDimension1.height != paramDimension.height)) {
+            Dimension localDimension2 = new Dimension(localDimension1);
+            myArcDimension.width = paramDimension.width;
+            myArcDimension.height = paramDimension.height;
+            update(404, 0, localDimension2);
         }
     }
 
     public void copyOldValueForUndo(
-            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
-        switch (graphicviewerdocumentchangededit.getFlags()) {
+            GraphicViewerDocumentChangedEdit paramGraphicViewerDocumentChangedEdit) {
+        switch (paramGraphicViewerDocumentChangedEdit.getFlags()) {
             case 404 :
-                graphicviewerdocumentchangededit.setOldValue(new Dimension(
-                        (Dimension) graphicviewerdocumentchangededit
-                                .getOldValue()));
+                paramGraphicViewerDocumentChangedEdit
+                        .setOldValue(new Dimension(
+                                (Dimension) paramGraphicViewerDocumentChangedEdit
+                                        .getOldValue()));
                 return;
         }
-        super.copyOldValueForUndo(graphicviewerdocumentchangededit);
+        super.copyOldValueForUndo(paramGraphicViewerDocumentChangedEdit);
     }
 
     public void copyNewValueForRedo(
-            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
-        switch (graphicviewerdocumentchangededit.getFlags()) {
+            GraphicViewerDocumentChangedEdit paramGraphicViewerDocumentChangedEdit) {
+        switch (paramGraphicViewerDocumentChangedEdit.getFlags()) {
             case 404 :
-                graphicviewerdocumentchangededit.setNewValue(new Dimension(
-                        getArcDimension()));
+                paramGraphicViewerDocumentChangedEdit
+                        .setNewValue(new Dimension(getArcDimension()));
                 return;
         }
-        super.copyNewValueForRedo(graphicviewerdocumentchangededit);
+        super.copyNewValueForRedo(paramGraphicViewerDocumentChangedEdit);
     }
 
     public void changeValue(
-            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit,
-            boolean flag) {
-        switch (graphicviewerdocumentchangededit.getFlags()) {
+            GraphicViewerDocumentChangedEdit paramGraphicViewerDocumentChangedEdit,
+            boolean paramBoolean) {
+        switch (paramGraphicViewerDocumentChangedEdit.getFlags()) {
             case 404 :
-                setArcDimension((Dimension) graphicviewerdocumentchangededit
-                        .getValue(flag));
+                setArcDimension((Dimension) paramGraphicViewerDocumentChangedEdit
+                        .getValue(paramBoolean));
                 return;
         }
-        super.changeValue(graphicviewerdocumentchangededit, flag);
+        super.changeValue(paramGraphicViewerDocumentChangedEdit, paramBoolean);
     }
 
-    public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
-        if (domdoc.GraphicViewerXMLOutputEnabled()) {
-            IDomElement domelement1 = domdoc.createGraphicViewerClassElement(
-                    "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerRoundRect",
-                    domelement);
-            domelement1.setAttribute("arcwidth", Integer.toString(dS.width));
-            domelement1.setAttribute("archeight", Integer.toString(dS.height));
+    public void SVGWriteObject(IDomDoc paramDomDoc, IDomElement paramDomElement) {
+        IDomElement localDomElement;
+        if (paramDomDoc.GraphicViewerXMLOutputEnabled()) {
+            localDomElement = paramDomDoc
+                    .createGraphicViewerClassElement(
+                            "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerRoundRect",
+                            paramDomElement);
+            localDomElement.setAttribute("arcwidth",
+                    Integer.toString(myArcDimension.width));
+            localDomElement.setAttribute("archeight",
+                    Integer.toString(myArcDimension.height));
         }
-        if (domdoc.SVGOutputEnabled()) {
-            IDomElement domelement2 = domdoc.createElement("rect");
-            SVGWriteAttributes(domelement2);
-            domelement.appendChild(domelement2);
+        if (paramDomDoc.SVGOutputEnabled()) {
+            localDomElement = paramDomDoc.createElement("rect");
+            SVGWriteAttributes(localDomElement);
+            paramDomElement.appendChild(localDomElement);
         }
-        super.SVGWriteObject(domdoc, domelement);
+        super.SVGWriteObject(paramDomDoc, paramDomElement);
     }
 
-    public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
-        if (domelement1 != null) {
-            int i = Integer.parseInt(domelement1.getAttribute("arcwidth"));
-            int j = Integer.parseInt(domelement1.getAttribute("archeight"));
+    public IDomNode SVGReadObject(IDomDoc paramDomDoc,
+            GraphicViewerDocument paramGraphicViewerDocument,
+            IDomElement paramDomElement1, IDomElement paramDomElement2) {
+        if (paramDomElement2 != null) {
+            int i = Integer.parseInt(paramDomElement2.getAttribute("arcwidth"));
+            int j = Integer
+                    .parseInt(paramDomElement2.getAttribute("archeight"));
             setArcDimension(new Dimension(i, j));
-            super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
-                    domelement1.getNextSiblingGraphicViewerClassElement());
+            super.SVGReadObject(paramDomDoc, paramGraphicViewerDocument,
+                    paramDomElement1,
+                    paramDomElement2.getNextSiblingGraphicViewerClassElement());
         }
-        return domelement.getNextSibling();
+        return paramDomElement1.getNextSibling();
     }
 
-    public void SVGWriteAttributes(IDomElement domelement) {
-        super.SVGWriteAttributes(domelement);
-        domelement.setAttribute("x", Integer.toString(getTopLeft().x));
-        domelement.setAttribute("y", Integer.toString(getTopLeft().y));
-        domelement.setAttribute("width", Integer.toString(getWidth()));
-        domelement.setAttribute("height", Integer.toString(getHeight()));
-        domelement.setAttribute("rx",
+    public void SVGWriteAttributes(IDomElement paramDomElement) {
+        super.SVGWriteAttributes(paramDomElement);
+        paramDomElement.setAttribute("x", Integer.toString(getTopLeft().x));
+        paramDomElement.setAttribute("y", Integer.toString(getTopLeft().y));
+        paramDomElement.setAttribute("width", Integer.toString(getWidth()));
+        paramDomElement.setAttribute("height", Integer.toString(getHeight()));
+        paramDomElement.setAttribute("rx",
                 Double.toString(getArcDimension().width / 2));
-        domelement.setAttribute("ry",
+        paramDomElement.setAttribute("ry",
                 Double.toString(getArcDimension().height / 2));
     }
 
-    public void SVGReadAttributes(IDomElement domelement) {
-        super.SVGReadAttributes(domelement);
-        String s = domelement.getAttribute("x");
-        String s1 = domelement.getAttribute("y");
-        setTopLeft(new Point(Integer.parseInt(s), Integer.parseInt(s1)));
-        String s2 = domelement.getAttribute("width");
-        String s3 = domelement.getAttribute("height");
-        setWidth(Integer.parseInt(s2));
-        setHeight(Integer.parseInt(s3));
+    public void SVGReadAttributes(IDomElement paramDomElement) {
+        super.SVGReadAttributes(paramDomElement);
+        String str1 = paramDomElement.getAttribute("x");
+        String str2 = paramDomElement.getAttribute("y");
+        setTopLeft(new Point(Integer.parseInt(str1), Integer.parseInt(str2)));
+        String str3 = paramDomElement.getAttribute("width");
+        String str4 = paramDomElement.getAttribute("height");
+        setWidth(Integer.parseInt(str3));
+        setHeight(Integer.parseInt(str4));
     }
 
-    public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
-        Rectangle rectangle = getBoundingRect();
-        drawRoundRect(graphics2d, rectangle.x, rectangle.y, rectangle.width,
-                rectangle.height, dS.width, dS.height);
+    public void paint(Graphics2D paramGraphics2D,
+            GraphicViewerView paramGraphicViewerView) {
+        Rectangle localRectangle = getBoundingRect();
+        drawRoundRect(paramGraphics2D, localRectangle.x, localRectangle.y,
+                localRectangle.width, localRectangle.height,
+                myArcDimension.width, myArcDimension.height);
     }
-
-    public static final int ChangedArcDimension = 404;
-    private Dimension dS;
 }

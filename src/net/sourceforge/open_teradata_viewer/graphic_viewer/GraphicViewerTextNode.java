@@ -30,47 +30,50 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
 
     private static final long serialVersionUID = -329622213870441858L;
 
+    public static final int ChangedLabel = 2301;
+    public static final int ChangedBackground = 2302;
+    public static final int ChangedTopPort = 2303;
+    public static final int ChangedRightPort = 2304;
+    public static final int ChangedBottomPort = 2305;
+    public static final int ChangedLeftPort = 2306;
+    public static final int ChangedInsets = 2307;
+    public static final int ChangedAutoResize = 2308;
+    private static final int flagAutoResize = 65536;
+    private GraphicViewerText myLabel = null;
+    private GraphicViewerObject myBack = null;
+    private GraphicViewerPort myTopPort = null;
+    private GraphicViewerPort myRightPort = null;
+    private GraphicViewerPort myBottomPort = null;
+    private GraphicViewerPort myLeftPort = null;
+    private Insets myInsets = new Insets(3, 3, 2, 2);
+
     public GraphicViewerTextNode() {
-        dn = null;
-        dm = null;
-        dp = null;
-        dq = null;
-        dj = null;
-        di = null;
-        dl = new Insets(3, 3, 2, 2);
-        s();
+        initCommon();
     }
 
     public GraphicViewerTextNode(String s1) {
-        dn = null;
-        dm = null;
-        dp = null;
-        dq = null;
-        dj = null;
-        di = null;
-        dl = new Insets(3, 3, 2, 2);
-        s();
-        _mthfor(s1);
+        initCommon();
+        init(s1);
     }
 
-    private void s() {
-        _mthfor(g() & 0xffffffef | 0x10000);
+    private void initCommon() {
+        setInternalFlags(getInternalFlags() & 0xffffffef | 0x10000);
     }
 
-    private void _mthfor(String s1) {
+    private void init(String s1) {
         setInitializing(true);
-        dm = createBackground();
-        dn = createLabel(s1);
-        dp = createPort(2);
-        dq = createPort(4);
-        dj = createPort(6);
-        di = createPort(8);
-        addObjectAtHead(dm);
-        addObjectAtTail(dn);
-        addObjectAtTail(dp);
-        addObjectAtTail(dq);
-        addObjectAtTail(dj);
-        addObjectAtTail(di);
+        myBack = createBackground();
+        myLabel = createLabel(s1);
+        myTopPort = createPort(2);
+        myRightPort = createPort(4);
+        myBottomPort = createPort(6);
+        myLeftPort = createPort(8);
+        addObjectAtHead(myBack);
+        addObjectAtTail(myLabel);
+        addObjectAtTail(myTopPort);
+        addObjectAtTail(myRightPort);
+        addObjectAtTail(myBottomPort);
+        addObjectAtTail(myLeftPort);
         setInitializing(false);
         layoutChildren(null);
     }
@@ -107,50 +110,53 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
     protected void copyChildren(GraphicViewerArea graphicviewerarea,
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerTextNode graphicviewertextnode = (GraphicViewerTextNode) graphicviewerarea;
-        graphicviewertextnode.dl.top = dl.top;
-        graphicviewertextnode.dl.left = dl.left;
-        graphicviewertextnode.dl.bottom = dl.bottom;
-        graphicviewertextnode.dl.right = dl.right;
+        graphicviewertextnode.myInsets.top = myInsets.top;
+        graphicviewertextnode.myInsets.left = myInsets.left;
+        graphicviewertextnode.myInsets.bottom = myInsets.bottom;
+        graphicviewertextnode.myInsets.right = myInsets.right;
         super.copyChildren(graphicviewerarea, graphicviewercopyenvironment);
-        graphicviewertextnode.dm = (GraphicViewerObject) graphicviewercopyenvironment
-                .get(dm);
-        graphicviewertextnode.dn = (GraphicViewerText) graphicviewercopyenvironment
-                .get(dn);
-        graphicviewertextnode.dp = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(dp);
-        graphicviewertextnode.dq = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(dq);
-        graphicviewertextnode.dj = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(dj);
-        graphicviewertextnode.di = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(di);
+        graphicviewertextnode.myBack = (GraphicViewerObject) graphicviewercopyenvironment
+                .get(myBack);
+        graphicviewertextnode.myLabel = (GraphicViewerText) graphicviewercopyenvironment
+                .get(myLabel);
+        graphicviewertextnode.myTopPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myTopPort);
+        graphicviewertextnode.myRightPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myRightPort);
+        graphicviewertextnode.myBottomPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myBottomPort);
+        graphicviewertextnode.myLeftPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myLeftPort);
     }
 
     public GraphicViewerObject removeObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
         GraphicViewerObject graphicviewerobject = super
                 .removeObjectAtPos(graphicviewerlistposition);
-        if (graphicviewerobject == dm)
-            dm = null;
-        else if (graphicviewerobject == dn)
-            dn = null;
-        else if (graphicviewerobject == dp)
-            dp = null;
-        else if (graphicviewerobject == dq)
-            dq = null;
-        else if (graphicviewerobject == dj)
-            dj = null;
-        else if (graphicviewerobject == di)
-            di = null;
+        if (graphicviewerobject == myBack) {
+            myBack = null;
+        } else if (graphicviewerobject == myLabel) {
+            myLabel = null;
+        } else if (graphicviewerobject == myTopPort) {
+            myTopPort = null;
+        } else if (graphicviewerobject == myRightPort) {
+            myRightPort = null;
+        } else if (graphicviewerobject == myBottomPort) {
+            myBottomPort = null;
+        } else if (graphicviewerobject == myLeftPort) {
+            myLeftPort = null;
+        }
         return graphicviewerobject;
     }
 
     public void layoutChildren(GraphicViewerObject graphicviewerobject) {
-        if (isInitializing())
+        if (isInitializing()) {
             return;
+        }
         GraphicViewerText graphicviewertext = getLabel();
-        if (graphicviewertext == null)
+        if (graphicviewertext == null) {
             return;
+        }
         GraphicViewerObject graphicviewerobject1 = getBackground();
         if (graphicviewerobject1 != null) {
             Insets insets = getInsets();
@@ -168,163 +174,182 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
                         - (insets.top + insets.bottom), 0);
                 graphicviewertext.setWidth(i);
                 graphicviewertext.setWrappingWidth(i);
-                graphicviewertext.C();
+                graphicviewertext.recalcBoundingRect();
                 int k = Math.min(graphicviewertext.getHeight(), j);
                 int l = graphicviewerobject1.getLeft() + insets.left;
                 int i1 = graphicviewerobject1.getTop() + insets.top + (j - k)
                         / 2;
                 graphicviewertext.setBoundingRect(l, i1, i, k);
             }
-            if (getTopPort() != null)
+            if (getTopPort() != null) {
                 getTopPort().setSpotLocation(6, graphicviewerobject1, 2);
-            if (getRightPort() != null)
+            }
+            if (getRightPort() != null) {
                 getRightPort().setSpotLocation(8, graphicviewerobject1, 4);
-            if (getBottomPort() != null)
+            }
+            if (getBottomPort() != null) {
                 getBottomPort().setSpotLocation(2, graphicviewerobject1, 6);
-            if (getLeftPort() != null)
+            }
+            if (getLeftPort() != null) {
                 getLeftPort().setSpotLocation(4, graphicviewerobject1, 8);
+            }
         }
     }
 
     public GraphicViewerText getLabel() {
-        return dn;
+        return myLabel;
     }
 
     public void setLabel(GraphicViewerText graphicviewertext) {
-        GraphicViewerText graphicviewertext1 = dn;
+        GraphicViewerText graphicviewertext1 = myLabel;
         if (graphicviewertext1 != graphicviewertext) {
-            a(graphicviewertext1, graphicviewertext);
-            if (graphicviewertext1 != null)
+            copyProperties(graphicviewertext1, graphicviewertext);
+            if (graphicviewertext1 != null) {
                 removeObject(graphicviewertext1);
-            dn = graphicviewertext;
-            if (graphicviewertext != null)
+            }
+            myLabel = graphicviewertext;
+            if (graphicviewertext != null) {
                 addObjectAtTail(graphicviewertext);
+            }
             update(2301, 0, graphicviewertext1);
         }
     }
 
     public GraphicViewerObject getBackground() {
-        return dm;
+        return myBack;
     }
 
     public void setBackground(GraphicViewerObject graphicviewerobject) {
-        GraphicViewerObject graphicviewerobject1 = dm;
+        GraphicViewerObject graphicviewerobject1 = myBack;
         if (graphicviewerobject1 != graphicviewerobject) {
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 removeObject(graphicviewerobject1);
-            dm = graphicviewerobject;
-            if (graphicviewerobject != null)
+            }
+            myBack = graphicviewerobject;
+            if (graphicviewerobject != null) {
                 addObjectAtHead(graphicviewerobject);
+            }
             update(2302, 0, graphicviewerobject1);
         }
     }
 
     public GraphicViewerPort getTopPort() {
-        return dp;
+        return myTopPort;
     }
 
     public void setTopPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = dp;
+        GraphicViewerPort graphicviewerport1 = myTopPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            dp = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myTopPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtTail(graphicviewerport);
+            }
             update(2303, 0, graphicviewerport1);
         }
     }
 
     public GraphicViewerPort getRightPort() {
-        return dq;
+        return myRightPort;
     }
 
     public void setRightPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = dq;
+        GraphicViewerPort graphicviewerport1 = myRightPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            dq = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myRightPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtTail(graphicviewerport);
+            }
             update(2304, 0, graphicviewerport1);
         }
     }
 
     public GraphicViewerPort getBottomPort() {
-        return dj;
+        return myBottomPort;
     }
 
     public void setBottomPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = dj;
+        GraphicViewerPort graphicviewerport1 = myBottomPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            dj = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myBottomPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtTail(graphicviewerport);
+            }
             update(2305, 0, graphicviewerport1);
         }
     }
 
     public GraphicViewerPort getLeftPort() {
-        return di;
+        return myLeftPort;
     }
 
     public void setLeftPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = di;
+        GraphicViewerPort graphicviewerport1 = myLeftPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            di = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myLeftPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtTail(graphicviewerport);
+            }
             update(2306, 0, graphicviewerport1);
         }
     }
 
     public Insets getInsets() {
-        return dl;
+        return myInsets;
     }
 
     public void setInsets(Insets insets) {
-        _mthif(insets, false);
+        internalSetInsets(insets, false);
     }
 
-    private void _mthif(Insets insets, boolean flag) {
-        Insets insets1 = dl;
+    private void internalSetInsets(Insets insets, boolean flag) {
+        Insets insets1 = myInsets;
         if (!insets1.equals(insets)) {
             Insets insets2 = new Insets(insets1.top, insets1.left,
                     insets1.bottom, insets1.right);
-            dl.top = insets.top;
-            dl.left = insets.left;
-            dl.bottom = insets.bottom;
-            dl.right = insets.right;
+            myInsets.top = insets.top;
+            myInsets.left = insets.left;
+            myInsets.bottom = insets.bottom;
+            myInsets.right = insets.right;
             update(2307, 0, insets2);
-            if (!flag)
+            if (!flag) {
                 layoutChildren(null);
+            }
         }
     }
 
     public void setAutoResize(boolean flag) {
-        _mthfor(flag, false);
+        internalSetAutoResize(flag, false);
     }
 
-    private void _mthfor(boolean flag, boolean flag1) {
-        boolean flag2 = (g() & 0x10000) != 0;
+    private void internalSetAutoResize(boolean flag, boolean flag1) {
+        boolean flag2 = (getInternalFlags() & 0x10000) != 0;
         if (flag2 != flag) {
-            if (flag)
-                _mthfor(g() | 0x10000);
-            else
-                _mthfor(g() & 0xfffeffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x10000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffeffff);
+            }
             update(2308, flag2 ? 1 : 0, null);
-            if (!flag1)
+            if (!flag1) {
                 onAutoResizeChanged(flag2);
+            }
         }
     }
 
     public boolean isAutoResize() {
-        return (g() & 0x10000) != 0;
+        return (getInternalFlags() & 0x10000) != 0;
     }
 
     public void onAutoResizeChanged(boolean flag) {
@@ -339,51 +364,57 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
     public GraphicViewerPen getPen() {
         GraphicViewerObject graphicviewerobject = getBackground();
         if (graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerDrawable))
+                && (graphicviewerobject instanceof GraphicViewerDrawable)) {
             return ((GraphicViewerDrawable) graphicviewerobject).getPen();
-        else
+        } else {
             return null;
+        }
     }
 
     public void setPen(GraphicViewerPen graphicviewerpen) {
         GraphicViewerObject graphicviewerobject = getBackground();
         if (graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerDrawable))
+                && (graphicviewerobject instanceof GraphicViewerDrawable)) {
             ((GraphicViewerDrawable) graphicviewerobject)
                     .setPen(graphicviewerpen);
+        }
     }
 
     public GraphicViewerBrush getBrush() {
         GraphicViewerObject graphicviewerobject = getBackground();
         if (graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerDrawable))
+                && (graphicviewerobject instanceof GraphicViewerDrawable)) {
             return ((GraphicViewerDrawable) graphicviewerobject).getBrush();
-        else
+        } else {
             return null;
+        }
     }
 
     public void setBrush(GraphicViewerBrush graphicviewerbrush) {
         GraphicViewerObject graphicviewerobject = getBackground();
         if (graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerDrawable))
+                && (graphicviewerobject instanceof GraphicViewerDrawable)) {
             ((GraphicViewerDrawable) graphicviewerobject)
                     .setBrush(graphicviewerbrush);
+        }
     }
 
     public String getText() {
-        if (dn != null)
-            return dn.getText();
-        else
+        if (myLabel != null) {
+            return myLabel.getText();
+        } else {
             return "";
+        }
     }
 
     public void setText(String s1) {
-        if (s1 == null)
+        if (s1 == null) {
             return;
+        }
         GraphicViewerText graphicviewertext = getLabel();
         if (graphicviewertext == null) {
-            dn = createLabel(s1);
-            addObjectAtTail(dn);
+            myLabel = createLabel(s1);
+            addObjectAtTail(myLabel);
         } else {
             graphicviewertext.setText(s1);
         }
@@ -465,12 +496,15 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
                 return;
 
             case 2307 :
-                _mthif((Insets) graphicviewerdocumentchangededit.getValue(flag),
+                internalSetInsets(
+                        (Insets) graphicviewerdocumentchangededit
+                                .getValue(flag),
                         true);
                 return;
 
             case 2308 :
-                _mthfor(graphicviewerdocumentchangededit.getValueBoolean(flag),
+                internalSetAutoResize(
+                        graphicviewerdocumentchangededit.getValueBoolean(flag),
                         true);
                 return;
         }
@@ -479,18 +513,19 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
 
     public void SVGUpdateReference(String s1, Object obj) {
         super.SVGUpdateReference(s1, obj);
-        if (s1.equals("textlabel"))
-            dn = (GraphicViewerText) obj;
-        else if (s1.equals("backdraw"))
-            dm = (GraphicViewerObject) obj;
-        else if (s1.equals("topport"))
-            dp = (GraphicViewerPort) obj;
-        else if (s1.equals("rightport"))
-            dq = (GraphicViewerPort) obj;
-        else if (s1.equals("bottomport"))
-            dj = (GraphicViewerPort) obj;
-        else if (s1.equals("leftport"))
-            di = (GraphicViewerPort) obj;
+        if (s1.equals("textlabel")) {
+            myLabel = (GraphicViewerText) obj;
+        } else if (s1.equals("backdraw")) {
+            myBack = (GraphicViewerObject) obj;
+        } else if (s1.equals("topport")) {
+            myTopPort = (GraphicViewerPort) obj;
+        } else if (s1.equals("rightport")) {
+            myRightPort = (GraphicViewerPort) obj;
+        } else if (s1.equals("bottomport")) {
+            myBottomPort = (GraphicViewerPort) obj;
+        } else if (s1.equals("leftport")) {
+            myLeftPort = (GraphicViewerPort) obj;
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -499,35 +534,52 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerTextNode",
                             domelement);
-            domelement1.setAttribute("insetleft", Integer.toString(dl.left));
-            domelement1.setAttribute("insetright", Integer.toString(dl.right));
-            domelement1.setAttribute("insettop", Integer.toString(dl.top));
+            domelement1.setAttribute("insetleft",
+                    Integer.toString(myInsets.left));
+            domelement1.setAttribute("insetright",
+                    Integer.toString(myInsets.right));
             domelement1
-                    .setAttribute("insetbottom", Integer.toString(dl.bottom));
-            if (dn != null)
-                domdoc.registerReferencingNode(domelement1, "textlabel", dn);
-            if (dm != null)
-                domdoc.registerReferencingNode(domelement1, "backdraw", dm);
-            if (dp != null)
-                domdoc.registerReferencingNode(domelement1, "topport", dp);
-            if (dq != null)
-                domdoc.registerReferencingNode(domelement1, "rightport", dq);
-            if (dj != null)
-                domdoc.registerReferencingNode(domelement1, "bottomport", dj);
-            if (di != null)
-                domdoc.registerReferencingNode(domelement1, "leftport", di);
+                    .setAttribute("insettop", Integer.toString(myInsets.top));
+            domelement1.setAttribute("insetbottom",
+                    Integer.toString(myInsets.bottom));
+            if (myLabel != null) {
+                domdoc.registerReferencingNode(domelement1, "textlabel",
+                        myLabel);
+            }
+            if (myBack != null) {
+                domdoc.registerReferencingNode(domelement1, "backdraw", myBack);
+            }
+            if (myTopPort != null) {
+                domdoc.registerReferencingNode(domelement1, "topport",
+                        myTopPort);
+            }
+            if (myRightPort != null) {
+                domdoc.registerReferencingNode(domelement1, "rightport",
+                        myRightPort);
+            }
+            if (myBottomPort != null) {
+                domdoc.registerReferencingNode(domelement1, "bottomport",
+                        myBottomPort);
+            }
+            if (myLeftPort != null) {
+                domdoc.registerReferencingNode(domelement1, "leftport",
+                        myLeftPort);
+            }
         }
         super.SVGWriteObject(domdoc, domelement);
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            dl.left = Integer.parseInt(domelement1.getAttribute("insetleft"));
-            dl.right = Integer.parseInt(domelement1.getAttribute("insetright"));
-            dl.top = Integer.parseInt(domelement1.getAttribute("insettop"));
-            dl.bottom = Integer.parseInt(domelement1
+            myInsets.left = Integer.parseInt(domelement1
+                    .getAttribute("insetleft"));
+            myInsets.right = Integer.parseInt(domelement1
+                    .getAttribute("insetright"));
+            myInsets.top = Integer.parseInt(domelement1
+                    .getAttribute("insettop"));
+            myInsets.bottom = Integer.parseInt(domelement1
                     .getAttribute("insetbottom"));
             String s1 = domelement1.getAttribute("textlabel");
             domdoc.registerReferencingObject(this, "textlabel", s1);
@@ -546,20 +598,4 @@ public class GraphicViewerTextNode extends GraphicViewerNode {
         }
         return domelement.getNextSibling();
     }
-
-    public static final int ChangedLabel = 2301;
-    public static final int ChangedBackground = 2302;
-    public static final int ChangedTopPort = 2303;
-    public static final int ChangedRightPort = 2304;
-    public static final int ChangedBottomPort = 2305;
-    public static final int ChangedLeftPort = 2306;
-    public static final int ChangedInsets = 2307;
-    public static final int ChangedAutoResize = 2308;
-    private GraphicViewerText dn;
-    private GraphicViewerObject dm;
-    private GraphicViewerPort dp;
-    private GraphicViewerPort dq;
-    private GraphicViewerPort dj;
-    private GraphicViewerPort di;
-    private Insets dl;
 }

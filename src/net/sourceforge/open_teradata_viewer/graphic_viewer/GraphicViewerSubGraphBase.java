@@ -32,18 +32,21 @@ public class GraphicViewerSubGraphBase extends GraphicViewerNode {
     private static final long serialVersionUID = 305229284334723726L;
 
     public GraphicViewerSubGraphBase() {
-        _mthfor(g() & 0xfffffbff);
+        setInternalFlags(getInternalFlags() & 0xfffffbff);
     }
 
     public static GraphicViewerSubGraphBase findParentSubGraph(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return null;
+        }
         for (GraphicViewerArea graphicviewerarea = graphicviewerobject
                 .getParent(); graphicviewerarea != null; graphicviewerarea = graphicviewerarea
-                .getParent())
-            if (graphicviewerarea instanceof GraphicViewerSubGraphBase)
+                .getParent()) {
+            if (graphicviewerarea instanceof GraphicViewerSubGraphBase) {
                 return (GraphicViewerSubGraphBase) graphicviewerarea;
+            }
+        }
 
         return null;
     }
@@ -59,39 +62,45 @@ public class GraphicViewerSubGraphBase extends GraphicViewerNode {
         for (obj = GraphicViewerObject.findCommonParent(
                 graphicviewersubgraphbase, graphicviewersubgraphbase1); obj != null
                 && !(obj instanceof GraphicViewerSubGraphBase); obj = ((GraphicViewerObject) (obj))
-                .getParent());
+                .getParent()) {
+            ;
+        }
         GraphicViewerSubGraphBase graphicviewersubgraphbase2 = null;
-        if (obj instanceof GraphicViewerSubGraphBase)
+        if (obj instanceof GraphicViewerSubGraphBase) {
             graphicviewersubgraphbase2 = (GraphicViewerSubGraphBase) obj;
+        }
         if (graphicviewerobject.getParent() != graphicviewersubgraphbase2
-                || graphicviewerobject.getLayer() == null)
+                || graphicviewerobject.getLayer() == null) {
             if (graphicviewerobject.getParent() == null
                     && graphicviewerobject.getLayer() == null) {
                 if (graphicviewersubgraphbase2 != null) {
-                    if (flag)
+                    if (flag) {
                         graphicviewersubgraphbase2
                                 .addObjectAtHead(graphicviewerobject);
-                    else
+                    } else {
                         graphicviewersubgraphbase2
                                 .addObjectAtTail(graphicviewerobject);
+                    }
                 } else {
                     graphicviewerlayer.addObjectAtTail(graphicviewerobject);
                 }
             } else {
-                ArrayList<GraphicViewerObject> arraylist = new ArrayList<GraphicViewerObject>();
+                ArrayList arraylist = new ArrayList();
                 arraylist.add(graphicviewerobject);
-                if (graphicviewersubgraphbase2 != null)
+                if (graphicviewersubgraphbase2 != null) {
                     graphicviewersubgraphbase2.addCollection(arraylist, false,
                             null);
-                else
+                } else {
                     graphicviewerlayer.addCollection(arraylist, false, null);
+                }
             }
+        }
     }
 
     public static void reparentAllLinksToSubGraphs(
             IGraphicViewerObjectSimpleCollection graphicviewerobjectsimplecollection,
             boolean flag, GraphicViewerLayer graphicviewerlayer) {
-        ArrayList<GraphicViewerObject> arraylist = new ArrayList<GraphicViewerObject>();
+        ArrayList arraylist = new ArrayList();
         for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject = graphicviewerobjectsimplecollection
@@ -104,85 +113,85 @@ public class GraphicViewerSubGraphBase extends GraphicViewerNode {
         reparentAllLinksToSubGraphs(arraylist, flag, graphicviewerlayer);
     }
 
-    public static void reparentAllLinksToSubGraphs(
-            ArrayList<GraphicViewerObject> arraylist, boolean flag,
-            GraphicViewerLayer graphicviewerlayer) {
-        ArrayList<GraphicViewerObject> arraylist1 = new ArrayList<GraphicViewerObject>();
-        label0 : for (int i = 0; i < arraylist.size(); i++) {
-            GraphicViewerObject graphicviewerobject = (GraphicViewerObject) arraylist
+    public static void reparentAllLinksToSubGraphs(ArrayList paramArrayList,
+            boolean paramBoolean, GraphicViewerLayer paramGraphicViewerLayer) {
+        ArrayList localArrayList = new ArrayList();
+        for (int i = 0; i < paramArrayList.size(); i++) {
+            GraphicViewerObject localGraphicViewerObject = (GraphicViewerObject) paramArrayList
                     .get(i);
-            if (graphicviewerobject instanceof GraphicViewerNode) {
-                GraphicViewerNode graphicviewernode = (GraphicViewerNode) graphicviewerobject;
-                arraylist1.clear();
-                ArrayList<?> arraylist2 = graphicviewernode.findAll(6,
-                        arraylist1);
-                int j = 0;
-                do {
-                    if (j >= arraylist2.size())
-                        continue label0;
-                    GraphicViewerLink graphicviewerlink2 = (GraphicViewerLink) arraylist2
+            Object localObject1;
+            Object localObject2;
+            GraphicViewerLink localGraphicViewerLink2;
+            if ((localGraphicViewerObject instanceof GraphicViewerNode)) {
+                localObject1 = (GraphicViewerNode) localGraphicViewerObject;
+                localArrayList.clear();
+                localObject2 = ((GraphicViewerNode) localObject1).findAll(6,
+                        localArrayList);
+                for (int j = 0; j < ((ArrayList) localObject2).size(); j++) {
+                    localGraphicViewerLink2 = (GraphicViewerLink) ((ArrayList) localObject2)
                             .get(j);
-                    if (graphicviewerlink2 != null
-                            && graphicviewerlink2.getFromPort() != null
-                            && graphicviewerlink2.getToPort() != null)
-                        reparentToCommonSubGraph(graphicviewerlink2,
-                                graphicviewerlink2.getFromPort(),
-                                graphicviewerlink2.getToPort(), flag,
-                                graphicviewerlayer);
-                    j++;
-                } while (true);
-            }
-            if (graphicviewerobject instanceof GraphicViewerPort) {
-                GraphicViewerPort graphicviewerport = (GraphicViewerPort) graphicviewerobject;
-                arraylist1.clear();
-                for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerport
-                        .getFirstLinkPos(); graphicviewerlistposition != null;) {
-                    GraphicViewerLink graphicviewerlink1 = graphicviewerport
-                            .getLinkAtPos(graphicviewerlistposition);
-                    graphicviewerlistposition = graphicviewerport
-                            .getNextLinkPos(graphicviewerlistposition);
-                    arraylist1.add(graphicviewerlink1);
+                    if ((localGraphicViewerLink2 != null)
+                            && (localGraphicViewerLink2.getFromPort() != null)
+                            && (localGraphicViewerLink2.getToPort() != null)) {
+                        reparentToCommonSubGraph(localGraphicViewerLink2,
+                                localGraphicViewerLink2.getFromPort(),
+                                localGraphicViewerLink2.getToPort(),
+                                paramBoolean, paramGraphicViewerLayer);
+                    }
                 }
-
-                int k = 0;
-                do {
-                    if (k >= arraylist1.size())
-                        continue label0;
-                    GraphicViewerLink graphicviewerlink3 = (GraphicViewerLink) arraylist1
+            } else if ((localGraphicViewerObject instanceof GraphicViewerPort)) {
+                localObject1 = (GraphicViewerPort) localGraphicViewerObject;
+                localArrayList.clear();
+                localObject2 = ((GraphicViewerPort) localObject1)
+                        .getFirstLinkPos();
+                while (localObject2 != null) {
+                    GraphicViewerLink localGraphicViewerLink1 = ((GraphicViewerPort) localObject1)
+                            .getLinkAtPos((GraphicViewerListPosition) localObject2);
+                    localObject2 = ((GraphicViewerPort) localObject1)
+                            .getNextLinkPos((GraphicViewerListPosition) localObject2);
+                    localArrayList.add(localGraphicViewerLink1);
+                }
+                for (int k = 0; k < localArrayList.size(); k++) {
+                    localGraphicViewerLink2 = (GraphicViewerLink) localArrayList
                             .get(k);
-                    if (graphicviewerlink3 != null
-                            && graphicviewerlink3.getFromPort() != null
-                            && graphicviewerlink3.getToPort() != null)
-                        reparentToCommonSubGraph(graphicviewerlink3,
-                                graphicviewerlink3.getFromPort(),
-                                graphicviewerlink3.getToPort(), flag,
-                                graphicviewerlayer);
-                    k++;
-                } while (true);
+                    if ((localGraphicViewerLink2 != null)
+                            && (localGraphicViewerLink2.getFromPort() != null)
+                            && (localGraphicViewerLink2.getToPort() != null)) {
+                        reparentToCommonSubGraph(localGraphicViewerLink2,
+                                localGraphicViewerLink2.getFromPort(),
+                                localGraphicViewerLink2.getToPort(),
+                                paramBoolean, paramGraphicViewerLayer);
+                    }
+                }
+            } else if ((localGraphicViewerObject instanceof GraphicViewerLink)) {
+                localObject1 = (GraphicViewerLink) localGraphicViewerObject;
+                if ((localObject1 != null)
+                        && (((GraphicViewerLink) localObject1).getFromPort() != null)
+                        && (((GraphicViewerLink) localObject1).getToPort() != null)) {
+                    reparentToCommonSubGraph(
+                            (GraphicViewerObject) localObject1,
+                            ((GraphicViewerLink) localObject1).getFromPort(),
+                            ((GraphicViewerLink) localObject1).getToPort(),
+                            paramBoolean, paramGraphicViewerLayer);
+                }
             }
-            if (!(graphicviewerobject instanceof GraphicViewerLink))
-                continue;
-            GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject;
-            if (graphicviewerlink != null
-                    && graphicviewerlink.getFromPort() != null
-                    && graphicviewerlink.getToPort() != null)
-                reparentToCommonSubGraph(graphicviewerlink,
-                        graphicviewerlink.getFromPort(),
-                        graphicviewerlink.getToPort(), flag, graphicviewerlayer);
         }
-
     }
 
     public ArrayList pickObjects(Point point, boolean flag,
-            ArrayList<GraphicViewerObject> arraylist, int i) {
-        if (arraylist == null)
-            arraylist = new ArrayList<GraphicViewerObject>();
-        if (arraylist.size() >= i)
+            ArrayList arraylist, int i) {
+        if (arraylist == null) {
+            arraylist = new ArrayList();
+        }
+        if (arraylist.size() >= i) {
             return arraylist;
-        if (!getBoundingRect().contains(point.x, point.y))
+        }
+        if (!getBoundingRect().contains(point.x, point.y)) {
             return arraylist;
-        if (!isVisible())
+        }
+        if (!isVisible()) {
             return arraylist;
+        }
         for (GraphicViewerListPosition graphicviewerlistposition = getLastObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getPrevObjectPos(graphicviewerlistposition);
@@ -194,17 +203,20 @@ public class GraphicViewerSubGraphBase extends GraphicViewerNode {
                 GraphicViewerObject graphicviewerobject1 = graphicviewerobject
                         .pick(point, flag);
                 if (graphicviewerobject1 != null) {
-                    if (!arraylist.contains(graphicviewerobject1))
+                    if (!arraylist.contains(graphicviewerobject1)) {
                         arraylist.add(graphicviewerobject1);
-                    if (arraylist.size() >= i)
+                    }
+                    if (arraylist.size() >= i) {
                         return arraylist;
+                    }
                 }
             }
         }
 
         if (isPickableBackground() && (!flag || isSelectable())
-                && !arraylist.contains(this))
+                && !arraylist.contains(this)) {
             arraylist.add(this);
+        }
         return arraylist;
     }
 
@@ -218,11 +230,12 @@ public class GraphicViewerSubGraphBase extends GraphicViewerNode {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
-        if (domelement1 != null)
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
+        if (domelement1 != null) {
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
+        }
         return domelement.getNextSibling();
     }
 }

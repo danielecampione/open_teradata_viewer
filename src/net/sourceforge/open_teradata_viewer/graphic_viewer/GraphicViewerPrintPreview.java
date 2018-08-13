@@ -56,6 +56,154 @@ public class GraphicViewerPrintPreview extends JDialog {
 
     private static final long serialVersionUID = -6423601874747942546L;
 
+    protected int m_wPage;
+    protected int m_hPage;
+    protected int m_orientation;
+    protected Printable m_target;
+    protected JComboBox m_cbScale;
+    protected PreviewContainer m_preview;
+    protected PageFormat m_pageFormat;
+    protected int m_pageCount;
+
+    public GraphicViewerPrintPreview(Dialog dialog, Printable printable,
+            String s, PageFormat pageformat, int i) {
+        super(dialog, s, true);
+        initCommon(printable, pageformat, i);
+    }
+
+    public GraphicViewerPrintPreview(Frame frame, Printable printable,
+            String s, PageFormat pageformat, int i) {
+        super(frame, s, true);
+        initCommon(printable, pageformat, i);
+    }
+
+    private void initCommon(Printable paramPrintable,
+            PageFormat paramPageFormat, int paramInt) {
+        m_pageFormat = paramPageFormat;
+        m_pageCount = paramInt;
+        setSize(600, 400);
+        getContentPane().setLayout(new BorderLayout());
+        m_target = paramPrintable;
+        JToolBar localJToolBar = new JToolBar();
+        JButton localJButton = new JButton("Print");
+        Object localObject = new ActionListener() {
+            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
+                Thread local1 = new Thread() {
+                    public void run() {
+                        try {
+                            PrinterJob localPrinterJob = PrinterJob
+                                    .getPrinterJob();
+                            Book localBook = new Book();
+                            localBook
+                                    .append(GraphicViewerPrintPreview.this.m_target,
+                                            GraphicViewerPrintPreview.this.m_pageFormat,
+                                            GraphicViewerPrintPreview.this.m_pageCount);
+                            localPrinterJob.setPageable(localBook);
+                            if (!localPrinterJob.printDialog()) {
+                                return;
+                            }
+                            GraphicViewerPrintPreview.this.setCursor(Cursor
+                                    .getPredefinedCursor(3));
+                            localPrinterJob.print();
+                            GraphicViewerPrintPreview.this.setCursor(Cursor
+                                    .getPredefinedCursor(0));
+                            GraphicViewerPrintPreview.this.dispose();
+                        } catch (PrinterException localPrinterException) {
+                            localPrinterException.printStackTrace();
+                            System.err.println("Printing error: "
+                                    + localPrinterException.toString());
+                        }
+                    }
+                };
+                local1.start();
+            }
+        };
+        localJButton.addActionListener((ActionListener) localObject);
+        localJButton.setAlignmentY(0.5F);
+        localJButton.setMargin(new Insets(4, 6, 4, 6));
+        localJToolBar.add(localJButton);
+        localJButton = new JButton("Close");
+        localObject = new ActionListener() {
+            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
+                try {
+                    GraphicViewerPrintPreview.this.dispose();
+                } catch (Exception localException) {
+                }
+            }
+        };
+        localJButton.addActionListener((ActionListener) localObject);
+        localJButton.setAlignmentY(0.5F);
+        localJButton.setMargin(new Insets(4, 6, 4, 6));
+        localJToolBar.add(localJButton);
+        String[] arrayOfString = {"10 %", "25 %", "50 %", "100 %"};
+        m_cbScale = new JComboBox(arrayOfString);
+        m_cbScale.setSelectedIndex(1);
+        localObject = new ActionListener() {
+            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
+                Thread local1 = new Thread() {
+                    public void run() {
+                        String str = GraphicViewerPrintPreview.this.m_cbScale
+                                .getSelectedItem().toString();
+                        if (str.endsWith("%")) {
+                            str = str.substring(0, str.length() - 1);
+                        }
+                        str = str.trim();
+                        int i = 0;
+                        try {
+                            i = Integer.parseInt(str);
+                        } catch (NumberFormatException localNumberFormatException) {
+                            return;
+                        }
+                        int j = GraphicViewerPrintPreview.this.m_wPage * i
+                                / 100;
+                        int k = GraphicViewerPrintPreview.this.m_hPage * i
+                                / 100;
+                        Component[] arrayOfComponent = GraphicViewerPrintPreview.this.m_preview
+                                .getComponents();
+                        for (int m = 0; m < arrayOfComponent.length; m++) {
+                            if ((arrayOfComponent[m] instanceof GraphicViewerPrintPreview.PagePreview)) {
+                                GraphicViewerPrintPreview.PagePreview localPagePreview = (GraphicViewerPrintPreview.PagePreview) arrayOfComponent[m];
+                                localPagePreview
+                                        .setScaledSize(j, k, i / 100.0D);
+                            }
+                        }
+                        GraphicViewerPrintPreview.this.m_preview.doLayout();
+                        GraphicViewerPrintPreview.this.m_preview.getParent()
+                                .getParent().validate();
+                    }
+                };
+                local1.start();
+            }
+        };
+        m_cbScale.addActionListener((ActionListener) localObject);
+        m_cbScale.setMaximumSize(m_cbScale.getPreferredSize());
+        m_cbScale.setEditable(true);
+        localJToolBar.addSeparator();
+        localJToolBar.add(m_cbScale);
+        getContentPane().add(localJToolBar, "North");
+        m_preview = new PreviewContainer();
+        PrinterJob localPrinterJob = PrinterJob.getPrinterJob();
+        if ((m_pageFormat.getHeight() == 0.0D)
+                || (m_pageFormat.getWidth() == 0.0D)) {
+            System.err.println("Unable to determine default page size");
+            return;
+        }
+        m_wPage = ((int) m_pageFormat.getWidth());
+        m_hPage = ((int) m_pageFormat.getHeight());
+        int i = 25;
+        int j = m_wPage * i / 100;
+        int k = m_hPage * i / 100;
+        double d = i / 100.0D;
+        for (int m = 0; m < m_pageCount; m++) {
+            PagePreview localPagePreview = new PagePreview(j, k, m_target, d,
+                    m_pageFormat, m);
+            m_preview.add(localPagePreview);
+        }
+        JScrollPane localJScrollPane = new JScrollPane(m_preview);
+        getContentPane().add(localJScrollPane, "Center");
+        setDefaultCloseOperation(2);
+    }
+
     /**
      * 
      * 
@@ -66,16 +214,35 @@ public class GraphicViewerPrintPreview extends JDialog {
 
         private static final long serialVersionUID = -4818801328635261857L;
 
+        private int m_w;
+        private int m_h;
+        private Printable m_target;
+        private double m_scale;
+        private PageFormat m_format;
+        private int m_pagenum;
+
+        public PagePreview(int i, int j, Printable printable, double d,
+                PageFormat pageformat, int k) {
+            m_w = i;
+            m_h = j;
+            m_target = printable;
+            m_scale = d;
+            m_format = pageformat;
+            m_pagenum = k;
+            setBackground(Color.white);
+            setBorder(new MatteBorder(1, 1, 2, 2, Color.black));
+        }
+
         public void setScaledSize(int i, int j, double d) {
-            _fldint = i;
-            a = j;
-            _fldif = d;
+            m_w = i;
+            m_h = j;
+            m_scale = d;
             repaint();
         }
 
         public Dimension getPreferredSize() {
             Insets insets = getInsets();
-            return new Dimension(_fldint + insets.left + insets.right, a
+            return new Dimension(m_w + insets.left + insets.right, m_h
                     + insets.top + insets.bottom);
         }
 
@@ -93,39 +260,22 @@ public class GraphicViewerPrintPreview extends JDialog {
                 Graphics2D graphics2d = (Graphics2D) g1;
                 try {
                     graphics2d.setColor(Color.white);
-                    graphics2d.fillRect(0, 0, _fldint, a);
+                    graphics2d.fillRect(0, 0, m_w, m_h);
                     GraphicViewerView graphicviewerview = null;
-                    if (_fldfor instanceof GraphicViewerView)
-                        graphicviewerview = (GraphicViewerView) _fldfor;
-                    if (graphicviewerview != null)
+                    if (m_target instanceof GraphicViewerView) {
+                        graphicviewerview = (GraphicViewerView) m_target;
+                    }
+                    if (graphicviewerview != null) {
                         graphicviewerview.applyRenderingHints(graphics2d);
-                    graphics2d.scale(_fldif, _fldif);
-                    _fldfor.print(graphics2d, _flddo, _fldnew);
+                    }
+                    graphics2d.scale(m_scale, m_scale);
+                    m_target.print(graphics2d, m_format, m_pagenum);
                 } catch (PrinterException pe) {
                     ExceptionDialog.hideException(pe);
                 }
             }
             g1.dispose();
             paintBorder(g);
-        }
-
-        private int _fldint;
-        private int a;
-        private Printable _fldfor;
-        private double _fldif;
-        private PageFormat _flddo;
-        private int _fldnew;
-
-        public PagePreview(int i, int j, Printable printable, double d,
-                PageFormat pageformat, int k) {
-            _fldint = i;
-            a = j;
-            _fldfor = printable;
-            _fldif = d;
-            _flddo = pageformat;
-            _fldnew = k;
-            setBackground(Color.white);
-            setBorder(new MatteBorder(1, 1, 2, 2, Color.black));
         }
     }
 
@@ -136,12 +286,22 @@ public class GraphicViewerPrintPreview extends JDialog {
      *
      */
     class PreviewContainer extends JPanel {
+
         private static final long serialVersionUID = 1854715000318478261L;
+
+        protected int H_GAP;
+        protected int V_GAP;
+
+        PreviewContainer() {
+            H_GAP = 16;
+            V_GAP = 10;
+        }
 
         public Dimension getPreferredSize() {
             int i = getComponentCount();
-            if (i == 0)
+            if (i == 0) {
                 return new Dimension(H_GAP, V_GAP);
+            }
             Component component = getComponent(0);
             Dimension dimension = component.getPreferredSize();
             int j = dimension.width;
@@ -149,8 +309,9 @@ public class GraphicViewerPrintPreview extends JDialog {
             Dimension dimension1 = getParent().getSize();
             int l = Math.max((dimension1.width - H_GAP) / (j + H_GAP), 1);
             int i1 = i / l;
-            if (i1 * l < i)
+            if (i1 * l < i) {
                 i1++;
+            }
             int j1 = l * (j + H_GAP) + H_GAP;
             int k1 = i1 * (k + V_GAP) + V_GAP;
             Insets insets = getInsets();
@@ -171,8 +332,9 @@ public class GraphicViewerPrintPreview extends JDialog {
             int i = insets.left + H_GAP;
             int j = insets.top + V_GAP;
             int k = getComponentCount();
-            if (k == 0)
+            if (k == 0) {
                 return;
+            }
             Component component = getComponent(0);
             Dimension dimension = component.getPreferredSize();
             int l = dimension.width;
@@ -180,13 +342,15 @@ public class GraphicViewerPrintPreview extends JDialog {
             Dimension dimension1 = getParent().getSize();
             int j1 = Math.max((dimension1.width - H_GAP) / (l + H_GAP), 1);
             int k1 = k / j1;
-            if (k1 * j1 < k)
+            if (k1 * j1 < k) {
                 k1++;
+            }
             int l1 = 0;
             for (int i2 = 0; i2 < k1; i2++) {
                 for (int j2 = 0; j2 < j1; j2++) {
-                    if (l1 >= k)
+                    if (l1 >= k) {
                         return;
+                    }
                     Component component1 = getComponent(l1++);
                     component1.setBounds(i, j, l, i1);
                     i += l + H_GAP;
@@ -195,160 +359,6 @@ public class GraphicViewerPrintPreview extends JDialog {
                 j += i1 + V_GAP;
                 i = insets.left + H_GAP;
             }
-
-        }
-
-        protected int H_GAP;
-        protected int V_GAP;
-
-        PreviewContainer() {
-            H_GAP = 16;
-            V_GAP = 10;
         }
     }
-
-    public GraphicViewerPrintPreview(Dialog dialog, Printable printable,
-            String s, PageFormat pageformat, int i) {
-        super(dialog, s, true);
-        a(printable, pageformat, i);
-    }
-
-    public GraphicViewerPrintPreview(Frame frame, Printable printable,
-            String s, PageFormat pageformat, int i) {
-        super(frame, s, true);
-        a(printable, pageformat, i);
-    }
-
-    private void a(Printable printable, PageFormat pageformat, int i) {
-        m_pageFormat = pageformat;
-        m_pageCount = i;
-        setSize(600, 400);
-        getContentPane().setLayout(new BorderLayout());
-        m_target = printable;
-        JToolBar jtoolbar = new JToolBar();
-        JButton jbutton = new JButton("Print");
-        ActionListener actionlistener = new ActionListener() {
-
-            public void actionPerformed(ActionEvent actionevent) {
-                Thread thread = new Thread() {
-
-                    public void run() {
-                        PrinterJob printerjob1;
-                        printerjob1 = PrinterJob.getPrinterJob();
-                        Book book = new Book();
-                        book.append(m_target, m_pageFormat, m_pageCount);
-                        printerjob1.setPageable(book);
-                        if (!printerjob1.printDialog())
-                            return;
-                        try {
-                            setCursor(Cursor.getPredefinedCursor(3));
-                            printerjob1.print();
-                            setCursor(Cursor.getPredefinedCursor(0));
-                            dispose();
-                        } catch (PrinterException pe) {
-                            ExceptionDialog.hideException(pe);
-                            System.err.println("Printing error: "
-                                    + pe.toString());
-                        }
-                        return;
-                    }
-                };
-                thread.start();
-            }
-        };
-        jbutton.addActionListener(actionlistener);
-        jbutton.setAlignmentY(0.5F);
-        jbutton.setMargin(new Insets(4, 6, 4, 6));
-        jtoolbar.add(jbutton);
-        jbutton = new JButton("Close");
-        actionlistener = new ActionListener() {
-
-            public void actionPerformed(ActionEvent actionevent) {
-                try {
-                    dispose();
-                } catch (Exception e) {
-                    ExceptionDialog.ignoreException(e);
-                }
-            }
-
-        };
-        jbutton.addActionListener(actionlistener);
-        jbutton.setAlignmentY(0.5F);
-        jbutton.setMargin(new Insets(4, 6, 4, 6));
-        jtoolbar.add(jbutton);
-        String as[] = {"10 %", "25 %", "50 %", "100 %"};
-        m_cbScale = new JComboBox<Object>(as);
-        m_cbScale.setSelectedIndex(1);
-        actionlistener = new ActionListener() {
-
-            public void actionPerformed(ActionEvent actionevent) {
-                Thread thread = new Thread() {
-
-                    public void run() {
-                        String s = m_cbScale.getSelectedItem().toString();
-                        if (s.endsWith("%"))
-                            s = s.substring(0, s.length() - 1);
-                        s = s.trim();
-                        int j1 = 0;
-                        try {
-                            j1 = Integer.parseInt(s);
-                        } catch (NumberFormatException nfe) {
-                            return;
-                        }
-                        int k1 = (m_wPage * j1) / 100;
-                        int l1 = (m_hPage * j1) / 100;
-                        Component acomponent[] = m_preview.getComponents();
-                        for (int i2 = 0; i2 < acomponent.length; i2++)
-                            if (acomponent[i2] instanceof PagePreview) {
-                                PagePreview pagepreview1 = (PagePreview) acomponent[i2];
-                                pagepreview1.setScaledSize(k1, l1,
-                                        (double) j1 / 100D);
-                            }
-
-                        m_preview.doLayout();
-                        m_preview.getParent().getParent().validate();
-                    }
-
-                };
-                thread.start();
-            }
-
-        };
-        m_cbScale.addActionListener(actionlistener);
-        m_cbScale.setMaximumSize(m_cbScale.getPreferredSize());
-        m_cbScale.setEditable(true);
-        jtoolbar.addSeparator();
-        jtoolbar.add(m_cbScale);
-        getContentPane().add(jtoolbar, "North");
-        m_preview = new PreviewContainer();
-        PrinterJob.getPrinterJob();
-        if (m_pageFormat.getHeight() == 0.0D || m_pageFormat.getWidth() == 0.0D) {
-            System.err.println("Unable to determine default page size");
-            return;
-        }
-        m_wPage = (int) m_pageFormat.getWidth();
-        m_hPage = (int) m_pageFormat.getHeight();
-        int j = 25;
-        int k = (m_wPage * j) / 100;
-        int l = (m_hPage * j) / 100;
-        double d = (double) j / 100D;
-        for (int i1 = 0; i1 < m_pageCount; i1++) {
-            PagePreview pagepreview = new PagePreview(k, l, m_target, d,
-                    m_pageFormat, i1);
-            m_preview.add(pagepreview);
-        }
-
-        JScrollPane jscrollpane = new JScrollPane(m_preview);
-        getContentPane().add(jscrollpane, "Center");
-        setDefaultCloseOperation(2);
-    }
-
-    protected int m_wPage;
-    protected int m_hPage;
-    protected int m_orientation;
-    protected Printable m_target;
-    protected JComboBox<?> m_cbScale;
-    protected PreviewContainer m_preview;
-    protected PageFormat m_pageFormat;
-    protected int m_pageCount;
 }

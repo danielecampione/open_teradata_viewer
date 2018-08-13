@@ -44,126 +44,29 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
 
     private static final long serialVersionUID = -8230008936429961796L;
 
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    static class JSBDTListener implements DropTargetListener {
-
-        public void dragEnter(DropTargetDragEvent droptargetdragevent) {
-            a.onDragEnter(a(droptargetdragevent));
-        }
-
-        public void dragOver(DropTargetDragEvent droptargetdragevent) {
-            a.onDragOver(a(droptargetdragevent));
-        }
-
-        public void dropActionChanged(DropTargetDragEvent droptargetdragevent) {
-            a.onDropActionChanged(a(droptargetdragevent));
-        }
-
-        public void dragExit(DropTargetEvent droptargetevent) {
-            a.onDragExit(droptargetevent);
-        }
-
-        public void drop(DropTargetDropEvent droptargetdropevent) {
-            a.onDrop(a(droptargetdropevent));
-        }
-
-        DropTargetDragEvent a(DropTargetDragEvent droptargetdragevent) {
-            return new DropTargetDragEvent(
-                    droptargetdragevent.getDropTargetContext(),
-                    a(droptargetdragevent.getLocation()),
-                    droptargetdragevent.getDropAction(),
-                    droptargetdragevent.getSourceActions());
-        }
-
-        DropTargetDropEvent a(DropTargetDropEvent droptargetdropevent) {
-            return new DropTargetDropEvent(
-                    droptargetdropevent.getDropTargetContext(),
-                    a(droptargetdropevent.getLocation()),
-                    droptargetdropevent.getDropAction(),
-                    droptargetdropevent.getSourceActions());
-        }
-
-        Point a(Point point) {
-            Point point1 = _fldif.getLocationOnScreen();
-            Point point2 = a.getCanvas().getLocationOnScreen();
-            return new Point((point1.x - point2.x) + point.x,
-                    (point1.y - point2.y) + point.y);
-        }
-
-        JComponent _fldif;
-        GraphicViewerView a;
-
-        JSBDTListener(JComponent jcomponent, GraphicViewerView graphicviewerview) {
-            _fldif = jcomponent;
-            a = graphicviewerview;
-        }
-    }
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    static class JSBListener implements AdjustmentListener {
-
-        public void adjustmentValueChanged(AdjustmentEvent adjustmentevent) {
-            if (!_fldif.d3 && adjustmentevent.getAdjustmentType() == 5) {
-                int i = adjustmentevent.getValue();
-                _fldif.valueChanged(i, a);
-            }
-        }
-
-        GraphicViewerScrollBar _fldif;
-        GraphicViewerView a;
-
-        JSBListener(GraphicViewerScrollBar graphicviewerscrollbar,
-                GraphicViewerView graphicviewerview) {
-            _fldif = graphicviewerscrollbar;
-            a = graphicviewerview;
-        }
-    }
+    public static final int ChangedScrollBar = 1002;
+    public static final int ChangedScrollBarValue = 1003;
+    public static final int ChangedScrollBarVertical = 1004;
+    private boolean myVertical = true;
+    private int myValue = 0;
+    private int myExtent = 10;
+    private int myMinimum = 0;
+    private int myMaximum = 100;
+    private int myUnitIncrement = 1;
+    private int myBlockIncrement = 9;
+    private transient boolean myValueChanging = false;
 
     public GraphicViewerScrollBar() {
-        d0 = true;
-        d7 = 0;
-        d1 = 10;
-        d6 = 0;
-        d4 = 100;
-        d2 = 1;
-        d5 = 9;
-        d3 = false;
     }
 
     public GraphicViewerScrollBar(Rectangle rectangle, boolean flag) {
         super(rectangle);
-        d0 = true;
-        d7 = 0;
-        d1 = 10;
-        d6 = 0;
-        d4 = 100;
-        d2 = 1;
-        d5 = 9;
-        d3 = false;
-        d0 = flag;
+        myVertical = flag;
     }
 
     public GraphicViewerScrollBar(Point point, Dimension dimension, boolean flag) {
         super(point, dimension);
-        d0 = true;
-        d7 = 0;
-        d1 = 10;
-        d6 = 0;
-        d4 = 100;
-        d2 = 1;
-        d5 = 9;
-        d3 = false;
-        d0 = flag;
+        myVertical = flag;
     }
 
     public GraphicViewerObject copyObject(
@@ -171,13 +74,13 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
         GraphicViewerScrollBar graphicviewerscrollbar = (GraphicViewerScrollBar) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerscrollbar != null) {
-            graphicviewerscrollbar.d0 = d0;
-            graphicviewerscrollbar.d7 = d7;
-            graphicviewerscrollbar.d1 = d1;
-            graphicviewerscrollbar.d6 = d6;
-            graphicviewerscrollbar.d4 = d4;
-            graphicviewerscrollbar.d2 = d2;
-            graphicviewerscrollbar.d5 = d5;
+            graphicviewerscrollbar.myVertical = myVertical;
+            graphicviewerscrollbar.myValue = myValue;
+            graphicviewerscrollbar.myExtent = myExtent;
+            graphicviewerscrollbar.myMinimum = myMinimum;
+            graphicviewerscrollbar.myMaximum = myMaximum;
+            graphicviewerscrollbar.myUnitIncrement = myUnitIncrement;
+            graphicviewerscrollbar.myBlockIncrement = myBlockIncrement;
         }
         return graphicviewerscrollbar;
     }
@@ -194,14 +97,14 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
     }
 
     public boolean isVertical() {
-        return d0;
+        return myVertical;
     }
 
     public void setVertical(boolean flag) {
-        boolean flag1 = d0;
+        boolean flag1 = myVertical;
         if (flag1 != flag) {
-            d0 = flag;
-            d3 = true;
+            myVertical = flag;
+            myValueChanging = true;
             GraphicViewerView graphicviewerview;
             for (Iterator<?> iterator = getIterator(); iterator.hasNext(); graphicviewerview
                     .getCanvas().validate()) {
@@ -211,7 +114,7 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
                 jscrollbar.setOrientation(isVertical() ? 1 : 0);
             }
 
-            d3 = false;
+            myValueChanging = false;
             update(1004, flag1 ? 1 : 0, null);
         }
     }
@@ -228,20 +131,21 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
             ai[3] = getMaximum();
             ai[4] = getUnitIncrement();
             ai[5] = getBlockIncrement();
-            a(i, j, k, l, i1, j1);
+            setValuesInternal(i, j, k, l, i1, j1);
             update(1002, 0, ai);
             GraphicViewerArea graphicviewerarea = getParent();
-            if (graphicviewerarea != null)
+            if (graphicviewerarea != null) {
                 graphicviewerarea.update(1003, k1, null);
+            }
         }
     }
 
-    private void a(int i, int j, int k, int l, int i1, int j1) {
-        d7 = i;
-        d1 = j;
-        d6 = k;
-        d4 = l;
-        d3 = true;
+    private void setValuesInternal(int i, int j, int k, int l, int i1, int j1) {
+        myValue = i;
+        myExtent = j;
+        myMinimum = k;
+        myMaximum = l;
+        myValueChanging = true;
         GraphicViewerView graphicviewerview;
         for (Iterator<?> iterator = getIterator(); iterator.hasNext(); graphicviewerview
                 .getCanvas().validate()) {
@@ -253,31 +157,33 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
             jscrollbar.setBlockIncrement(j1);
         }
 
-        d3 = false;
+        myValueChanging = false;
     }
 
     public int getValue() {
-        return d7;
+        return myValue;
     }
 
     public void setValue(int i) {
         int j = getValue();
         if (j != i) {
-            d7 = i;
-            _mthnew(i);
+            myValue = i;
+            setValueInternal(i);
             update(1003, j, null);
             GraphicViewerArea graphicviewerarea = getParent();
-            if (graphicviewerarea != null)
+            if (graphicviewerarea != null) {
                 graphicviewerarea.update(1003, j, null);
+            }
         }
     }
 
-    private void _mthnew(int i) {
-        d3 = true;
+    private void setValueInternal(int i) {
+        myValueChanging = true;
         Iterator<?> iterator = getIterator();
         do {
-            if (!iterator.hasNext())
+            if (!iterator.hasNext()) {
                 break;
+            }
             Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
             GraphicViewerView graphicviewerview = (GraphicViewerView) entry
                     .getKey();
@@ -287,37 +193,39 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
                 graphicviewerview.getCanvas().validate();
             }
         } while (true);
-        d3 = false;
+        myValueChanging = false;
     }
 
     public int getExtent() {
-        return d1;
+        return myExtent;
     }
 
     public int getMinimum() {
-        return d6;
+        return myMinimum;
     }
 
     public int getMaximum() {
-        return d4;
+        return myMaximum;
     }
 
     public int getUnitIncrement() {
-        return d2;
+        return myUnitIncrement;
     }
 
     public int getBlockIncrement() {
-        return d5;
+        return myBlockIncrement;
     }
 
     public void valueChanged(int i, GraphicViewerView graphicviewerview) {
         GraphicViewerDocument graphicviewerdocument = getDocument();
-        if (graphicviewerdocument != null)
+        if (graphicviewerdocument != null) {
             graphicviewerdocument.startTransaction();
+        }
         setValue(i);
-        if (graphicviewerdocument != null)
+        if (graphicviewerdocument != null) {
             graphicviewerdocument.endTransaction(graphicviewerview
                     .getEditPresentationName(12));
+        }
     }
 
     public void copyNewValueForRedo(
@@ -356,11 +264,12 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
                                 .getOldValue()
                         : (int[]) graphicviewerdocumentchangededit
                                 .getNewValue();
-                a(ai[0], ai[1], ai[2], ai[3], ai[4], ai[5]);
+                setValuesInternal(ai[0], ai[1], ai[2], ai[3], ai[4], ai[5]);
                 return;
 
             case 1003 :
-                _mthnew(graphicviewerdocumentchangededit.getValueInt(flag));
+                setValueInternal(graphicviewerdocumentchangededit
+                        .getValueInt(flag));
                 return;
 
             case 1004 :
@@ -377,13 +286,15 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerScrollBar",
                             domelement);
-            domelement1.setAttribute("vertical", d0 ? "true" : "false");
-            domelement1.setAttribute("value", Integer.toString(d7));
-            domelement1.setAttribute("extent", Integer.toString(d1));
-            domelement1.setAttribute("minimum", Integer.toString(d6));
-            domelement1.setAttribute("maximum", Integer.toString(d4));
-            domelement1.setAttribute("unitincrement", Integer.toString(d2));
-            domelement1.setAttribute("blockincrement", Integer.toString(d5));
+            domelement1.setAttribute("vertical", myVertical ? "true" : "false");
+            domelement1.setAttribute("value", Integer.toString(myValue));
+            domelement1.setAttribute("extent", Integer.toString(myExtent));
+            domelement1.setAttribute("minimum", Integer.toString(myMinimum));
+            domelement1.setAttribute("maximum", Integer.toString(myMaximum));
+            domelement1.setAttribute("unitincrement",
+                    Integer.toString(myUnitIncrement));
+            domelement1.setAttribute("blockincrement",
+                    Integer.toString(myBlockIncrement));
         }
         IDomElement domelement2 = domdoc.createElement("rect");
         SVGWriteAttributes(domelement2);
@@ -397,13 +308,15 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
         if (domelement1 != null) {
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
-            d0 = domelement1.getAttribute("vertical").equals("true");
-            d7 = Integer.parseInt(domelement1.getAttribute("value"));
-            d1 = Integer.parseInt(domelement1.getAttribute("extent"));
-            d6 = Integer.parseInt(domelement1.getAttribute("minimum"));
-            d4 = Integer.parseInt(domelement1.getAttribute("maximum"));
-            d2 = Integer.parseInt(domelement1.getAttribute("unitincrement"));
-            d5 = Integer.parseInt(domelement1.getAttribute("blockincrement"));
+            myVertical = domelement1.getAttribute("vertical").equals("true");
+            myValue = Integer.parseInt(domelement1.getAttribute("value"));
+            myExtent = Integer.parseInt(domelement1.getAttribute("extent"));
+            myMinimum = Integer.parseInt(domelement1.getAttribute("minimum"));
+            myMaximum = Integer.parseInt(domelement1.getAttribute("maximum"));
+            myUnitIncrement = Integer.parseInt(domelement1
+                    .getAttribute("unitincrement"));
+            myBlockIncrement = Integer.parseInt(domelement1
+                    .getAttribute("blockincrement"));
         }
         return domelement.getNextSibling();
     }
@@ -429,15 +342,91 @@ public class GraphicViewerScrollBar extends GraphicViewerControl {
         setHeight(Integer.parseInt(s3));
     }
 
-    public static final int ChangedScrollBar = 1002;
-    public static final int ChangedScrollBarValue = 1003;
-    public static final int ChangedScrollBarVertical = 1004;
-    private boolean d0;
-    private int d7;
-    private int d1;
-    private int d6;
-    private int d4;
-    private int d2;
-    private int d5;
-    private transient boolean d3;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    static class JSBDTListener implements DropTargetListener {
+
+        JComponent comp;
+        GraphicViewerView view;
+
+        JSBDTListener(JComponent jcomponent, GraphicViewerView graphicviewerview) {
+            comp = jcomponent;
+            view = graphicviewerview;
+        }
+
+        public void dragEnter(DropTargetDragEvent droptargetdragevent) {
+            view.onDragEnter(makeDragEvent(droptargetdragevent));
+        }
+
+        public void dragOver(DropTargetDragEvent droptargetdragevent) {
+            view.onDragOver(makeDragEvent(droptargetdragevent));
+        }
+
+        public void dropActionChanged(DropTargetDragEvent droptargetdragevent) {
+            view.onDropActionChanged(makeDragEvent(droptargetdragevent));
+        }
+
+        public void dragExit(DropTargetEvent droptargetevent) {
+            view.onDragExit(droptargetevent);
+        }
+
+        public void drop(DropTargetDropEvent droptargetdropevent) {
+            view.onDrop(makeDropEvent(droptargetdropevent));
+        }
+
+        DropTargetDragEvent makeDragEvent(
+                DropTargetDragEvent droptargetdragevent) {
+            return new DropTargetDragEvent(
+                    droptargetdragevent.getDropTargetContext(),
+                    a(droptargetdragevent.getLocation()),
+                    droptargetdragevent.getDropAction(),
+                    droptargetdragevent.getSourceActions());
+        }
+
+        DropTargetDropEvent makeDropEvent(
+                DropTargetDropEvent droptargetdropevent) {
+            return new DropTargetDropEvent(
+                    droptargetdropevent.getDropTargetContext(),
+                    a(droptargetdropevent.getLocation()),
+                    droptargetdropevent.getDropAction(),
+                    droptargetdropevent.getSourceActions());
+        }
+
+        Point a(Point point) {
+            Point point1 = comp.getLocationOnScreen();
+            Point point2 = view.getCanvas().getLocationOnScreen();
+            return new Point((point1.x - point2.x) + point.x,
+                    (point1.y - point2.y) + point.y);
+        }
+    }
+
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    static class JSBListener implements AdjustmentListener {
+
+        GraphicViewerScrollBar bar;
+        GraphicViewerView view;
+
+        JSBListener(GraphicViewerScrollBar graphicviewerscrollbar,
+                GraphicViewerView graphicviewerview) {
+            bar = graphicviewerscrollbar;
+            view = graphicviewerview;
+        }
+
+        public void adjustmentValueChanged(AdjustmentEvent adjustmentevent) {
+            if (!bar.myValueChanging
+                    && adjustmentevent.getAdjustmentType() == 5) {
+                int i = adjustmentevent.getValue();
+                bar.valueChanged(i, view);
+            }
+        }
+    }
 }

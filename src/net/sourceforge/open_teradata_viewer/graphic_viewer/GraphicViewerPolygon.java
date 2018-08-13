@@ -40,8 +40,9 @@ public class GraphicViewerPolygon extends GraphicViewerStroke {
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerPolygon graphicviewerpolygon = (GraphicViewerPolygon) super
                 .copyObject(graphicviewercopyenvironment);
-        if (graphicviewerpolygon == null)
+        if (graphicviewerpolygon == null) {
             ;
+        }
         return graphicviewerpolygon;
     }
 
@@ -77,22 +78,25 @@ public class GraphicViewerPolygon extends GraphicViewerStroke {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
-        if (domelement1 != null)
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
+        if (domelement1 != null) {
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
+        }
         return domelement.getNextSibling();
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         int i = getNumPoints();
-        if (i <= 1)
+        if (i <= 1) {
             return;
-        GeneralPath generalpath = _mthdo(graphicviewerview);
+        }
+        GeneralPath generalpath = getPath(graphicviewerview);
         GraphicViewerPen graphicviewerpen = getHighlight();
-        if (graphicviewerpen != null)
+        if (graphicviewerpen != null) {
             drawPath(graphics2d, graphicviewerpen, null, generalpath);
+        }
         drawPath(graphics2d, getPen(), getBrush(), generalpath);
     }
 
@@ -102,19 +106,20 @@ public class GraphicViewerPolygon extends GraphicViewerStroke {
         if (point.x < rectangle.x - i
                 || point.x > rectangle.x + rectangle.width + i
                 || point.y < rectangle.y - i
-                || point.y > rectangle.y + rectangle.height + i)
+                || point.y > rectangle.y + rectangle.height + i) {
             return false;
+        }
         int j = getNumPoints();
         if (j <= 1) {
             return false;
         } else {
-            GeneralPath generalpath = _mthdo(null);
+            GeneralPath generalpath = getPath(null);
             return generalpath.contains(point.x, point.y);
         }
     }
 
-    void a(GeneralPath generalpath, GraphicViewerView graphicviewerview) {
-        super.a(generalpath, graphicviewerview);
+    void makePath(GeneralPath generalpath, GraphicViewerView graphicviewerview) {
+        super.makePath(generalpath, graphicviewerview);
         generalpath.closePath();
     }
 }

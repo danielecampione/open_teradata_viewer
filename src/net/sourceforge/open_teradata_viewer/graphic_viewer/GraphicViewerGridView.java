@@ -22,6 +22,7 @@ package net.sourceforge.open_teradata_viewer.graphic_viewer;
  * 
  * 
  * @author D. Campione
+ * @deprecated
  *
  */
 public class GraphicViewerGridView extends GraphicViewerView {
@@ -31,7 +32,7 @@ public class GraphicViewerGridView extends GraphicViewerView {
     public GraphicViewerGridView() {
     }
 
-    public GraphicViewerGridView(GraphicViewerDocument graphicviewerdocument) {
+    public GraphicViewerGridView(OTVDocument graphicviewerdocument) {
         super(graphicviewerdocument);
     }
 }

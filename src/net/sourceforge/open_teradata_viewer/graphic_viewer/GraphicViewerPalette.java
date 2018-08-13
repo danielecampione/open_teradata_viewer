@@ -36,10 +36,13 @@ public class GraphicViewerPalette extends GraphicViewerView {
 
     private static final long serialVersionUID = -4083183720807413194L;
 
+    public static final int OrientationVertical = 1;
+    public static final int OrientationHorizontal = 0;
+    private int myOrientation = -1;
+    private boolean mySingleRowCol = true;
+    private ArrayList mySampleItems = new ArrayList();
+
     public GraphicViewerPalette() {
-        bu = -1;
-        bv = true;
-        bt = new ArrayList<GraphicViewerObject>();
         setOrientation(1);
         setHidingDisabledScrollbars(true);
         getDocument().setModifiable(false);
@@ -47,15 +50,15 @@ public class GraphicViewerPalette extends GraphicViewerView {
     }
 
     public int getOrientation() {
-        return bu;
+        return myOrientation;
     }
 
     public void setOrientation(int i) {
-        int j = bu;
+        int j = myOrientation;
         if (j != i && (i == 1 || i == 0)) {
-            bu = i;
+            myOrientation = i;
             firePropertyChange("orientation", j, i);
-            if (bu == 1) {
+            if (myOrientation == 1) {
                 if (getVerticalScrollBar() == null) {
                     JScrollBar jscrollbar = new JScrollBar(1);
                     jscrollbar.setSize(jscrollbar.getPreferredSize());
@@ -78,34 +81,36 @@ public class GraphicViewerPalette extends GraphicViewerView {
     }
 
     public void setSingleRowCol(boolean flag) {
-        boolean flag1 = bv;
+        boolean flag1 = mySingleRowCol;
         if (flag1 != flag) {
-            bv = flag;
+            mySingleRowCol = flag;
             firePropertyChange("singleRowCol", flag1, flag);
             layoutItems();
         }
     }
 
     public boolean getSingleRowCol() {
-        return bv;
+        return mySingleRowCol;
     }
 
     public void setShowSampleItems(boolean flag) {
         if (flag) {
-            if (flag & (bt.size() == 0))
-                d();
+            if (flag & (mySampleItems.size() == 0)) {
+                showSampleItems();
+            }
         } else {
             GraphicViewerObject graphicviewerobject;
-            for (Iterator<GraphicViewerObject> iterator = bt.iterator(); iterator
-                    .hasNext(); getDocument().removeObject(graphicviewerobject))
+            for (Iterator iterator = mySampleItems.iterator(); iterator
+                    .hasNext(); getDocument().removeObject(graphicviewerobject)) {
                 graphicviewerobject = (GraphicViewerObject) iterator.next();
+            }
 
-            bt.clear();
+            mySampleItems.clear();
         }
     }
 
     public boolean isShowSampleItems() {
-        return bt.size() > 0;
+        return mySampleItems.size() > 0;
     }
 
     public void layoutItems() {
@@ -124,8 +129,9 @@ public class GraphicViewerPalette extends GraphicViewerView {
         GraphicViewerListPosition graphicviewerlistposition = getDocument()
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getDocument()
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getDocument().getNextObjectPosAtTop(
@@ -171,11 +177,13 @@ public class GraphicViewerPalette extends GraphicViewerView {
     public void documentChanged(
             GraphicViewerDocumentEvent graphicviewerdocumentevent) {
         super.documentChanged(graphicviewerdocumentevent);
-        if (graphicviewerdocumentevent.isBeforeChanging())
+        if (graphicviewerdocumentevent.isBeforeChanging()) {
             return;
+        }
         if (graphicviewerdocumentevent.getHint() == 202
-                || graphicviewerdocumentevent.getHint() == 204)
+                || graphicviewerdocumentevent.getHint() == 204) {
             layoutItems();
+        }
     }
 
     public Dimension getPreferredSize() {
@@ -197,16 +205,16 @@ public class GraphicViewerPalette extends GraphicViewerView {
         layoutItems();
     }
 
-    private void _mthnew(GraphicViewerObject graphicviewerobject) {
+    private void addSampleItem(GraphicViewerObject graphicviewerobject) {
         getDocument().addObjectAtTail(graphicviewerobject);
-        bt.add(graphicviewerobject);
+        mySampleItems.add(graphicviewerobject);
     }
 
-    private void d() {
+    private void showSampleItems() {
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 "GraphicViewerBasicNode");
         graphicviewerbasicnode.setBrush(GraphicViewerBrush.orange);
-        _mthnew(graphicviewerbasicnode);
+        addSampleItem(graphicviewerbasicnode);
         GraphicViewerIconicNode graphicviewericonicnode = new GraphicViewerIconicNode(
                 "GraphicViewerIconicNode");
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
@@ -214,17 +222,18 @@ public class GraphicViewerPalette extends GraphicViewerView {
         graphicviewerimage.loadImage(
                 (GraphicViewerPalette.class).getResource("document.png"), true);
         graphicviewericonicnode.setIcon(graphicviewerimage);
-        _mthnew(graphicviewericonicnode);
+        addSampleItem(graphicviewericonicnode);
         GraphicViewerTextNode graphicviewertextnode = new GraphicViewerTextNode(
                 "GraphicViewerTextNode");
-        _mthnew(graphicviewertextnode);
+        addSampleItem(graphicviewertextnode);
         layoutItems();
     }
 
     public void onGridChange(int i) {
         super.onGridChange(i);
-        if (i == 0 || i == 6)
+        if (i == 0 || i == 6) {
             layoutItems();
+        }
     }
 
     public GraphicViewerObject pickObject(Point point, boolean flag) {
@@ -233,11 +242,4 @@ public class GraphicViewerPalette extends GraphicViewerView {
 
     public void autoscroll(Point point) {
     }
-
-    public static final int OrientationVertical = 1;
-    public static final int OrientationHorizontal = 0;
-    private int bu;
-    private boolean bv;
-
-    private ArrayList<GraphicViewerObject> bt;
 }

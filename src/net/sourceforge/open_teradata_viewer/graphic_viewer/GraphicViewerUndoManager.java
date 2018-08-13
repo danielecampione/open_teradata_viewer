@@ -40,85 +40,49 @@ public class GraphicViewerUndoManager extends UndoManager
 
     private static final long serialVersionUID = 794457760759349097L;
 
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    public class GraphicViewerCompoundEdit extends CompoundEdit {
-
-        private static final long serialVersionUID = -897048645868128627L;
-
-        public Vector<UndoableEdit> getAllEdits() {
-            return edits;
-        }
-
-        public String getPresentationName() {
-            return a;
-        }
-
-        public void setPresentationName(String s) {
-            a = s;
-        }
-
-        public String getUndoPresentationName() {
-            return getViewEditPresentationName(14) + " "
-                    + getPresentationName();
-        }
-
-        public String getRedoPresentationName() {
-            return getViewEditPresentationName(15) + " "
-                    + getPresentationName();
-        }
-
-        private String a;
-
-        public GraphicViewerCompoundEdit() {
-            a = "";
-        }
-    }
-
-    public GraphicViewerUndoManager() {
-        q = false;
-        p = false;
-        n = null;
-        o = 0;
-    }
+    public String[] myViewEditPresentationNames = {"", "Move Selection",
+            "Copy Selection", "Resize", "New Link", "ReLink", "Drop",
+            "Edit Text", "Copy", "Cut", "Paste", "Delete Selection",
+            "Scrollbar", "No ReLink", "Undo", "Redo"};
+    private boolean myUndoing = false;
+    private boolean myRedoing = false;
+    private GraphicViewerCompoundEdit myCompoundEdit = null;
+    private int myLevel = 0;
 
     public void undo() throws CannotUndoException {
         try {
-            q = true;
-            a(true, null);
+            myUndoing = true;
+            endTransaction(true, null);
             super.undo();
-            q = false;
+            myUndoing = false;
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
-            q = false;
+            myUndoing = false;
         }
     }
 
     public void redo() throws CannotRedoException {
         try {
-            p = true;
-            a(false, null);
+            myRedoing = true;
+            endTransaction(false, null);
             super.redo();
-            p = false;
+            myRedoing = false;
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
-            p = false;
+            myRedoing = false;
         }
     }
 
     public void discardAllEdits() {
-        a(false, null);
+        endTransaction(false, null);
         super.discardAllEdits();
     }
 
     public void documentChanged(
             GraphicViewerDocumentEvent graphicviewerdocumentevent) {
-        if (isUndoing() || isRedoing())
+        if (isUndoing() || isRedoing()) {
             return;
+        }
         if (!skipEvent(graphicviewerdocumentevent)) {
             GraphicViewerCompoundEdit graphicviewercompoundedit = getCurrentEdit();
             if (graphicviewercompoundedit == null) {
@@ -134,109 +98,147 @@ public class GraphicViewerUndoManager extends UndoManager
 
     public boolean skipEvent(
             GraphicViewerDocumentEvent graphicviewerdocumentevent) {
-        if (graphicviewerdocumentevent.getHint() < 200)
+        if (graphicviewerdocumentevent.getHint() < 200) {
             return true;
+        }
         Object obj = graphicviewerdocumentevent.getSource();
-        if (obj == null || !(obj instanceof GraphicViewerDocument))
+        if (obj == null || !(obj instanceof GraphicViewerDocument)) {
             return true;
+        }
         GraphicViewerDocument graphicviewerdocument = (GraphicViewerDocument) obj;
-        if (graphicviewerdocument.isSkipsUndoManager())
+        if (graphicviewerdocument.isSkipsUndoManager()) {
             return true;
+        }
         if (graphicviewerdocumentevent.getHint() == 203) {
-            if (graphicviewerdocumentevent.getFlags() == 0)
+            if (graphicviewerdocumentevent.getFlags() == 0) {
                 return true;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerdocumentevent
                     .getGraphicViewerObject();
             if (graphicviewerobject == null
-                    || graphicviewerobject.isSkipsUndoManager())
+                    || graphicviewerobject.isSkipsUndoManager()) {
                 return true;
+            }
         }
         return false;
     }
 
     public int getTransactionLevel() {
-        return o;
+        return myLevel;
     }
 
     public void startTransaction() {
-        o++;
+        myLevel++;
     }
 
     public void endTransaction(boolean flag) {
-        a(flag, null);
+        endTransaction(flag, null);
     }
 
     public void endTransaction(String s) {
-        a(true, s);
+        endTransaction(true, s);
     }
 
-    void a(boolean flag, String s) {
-        if (o > 0)
-            o--;
-        if (o == 0 && n != null) {
+    void endTransaction(boolean flag, String s) {
+        if (myLevel > 0) {
+            myLevel--;
+        }
+        if (myLevel == 0 && myCompoundEdit != null) {
             if (flag) {
-                n.end();
-                if (n.getAllEdits().size() > 0) {
-                    if (s != null)
-                        n.setPresentationName(s);
-                    addEdit(n);
+                myCompoundEdit.end();
+                if (myCompoundEdit.getAllEdits().size() > 0) {
+                    if (s != null) {
+                        myCompoundEdit.setPresentationName(s);
+                    }
+                    addEdit(myCompoundEdit);
                 }
             } else {
-                n.die();
+                myCompoundEdit.die();
             }
-            n = null;
+            myCompoundEdit = null;
         }
     }
 
-    public Vector<UndoableEdit> getAllEdits() {
+    public Vector getAllEdits() {
         return edits;
     }
 
-    public Vector<UndoableEdit> getCurrentEditVector() {
-        if (getCurrentEdit() != null)
+    public Vector getCurrentEditVector() {
+        if (getCurrentEdit() != null) {
             return getCurrentEdit().getAllEdits();
-        else
+        } else {
             return null;
+        }
     }
 
     public GraphicViewerCompoundEdit getCurrentEdit() {
-        return n;
+        return myCompoundEdit;
     }
 
     public void setCurrentEdit(
             GraphicViewerCompoundEdit graphicviewercompoundedit) {
-        n = graphicviewercompoundedit;
+        myCompoundEdit = graphicviewercompoundedit;
     }
 
-    UndoableEdit _mthnew() {
+    UndoableEdit getEditToUndo() {
         return editToBeUndone();
     }
 
-    UndoableEdit _mthint() {
+    UndoableEdit getEditToRedo() {
         return editToBeRedone();
     }
 
     public boolean isUndoing() {
-        return q;
+        return myUndoing;
     }
 
     public boolean isRedoing() {
-        return p;
+        return myRedoing;
     }
 
     public String getViewEditPresentationName(int i) {
-        if (i >= 0 && i < myViewEditPresentationNames.length)
+        if (i >= 0 && i < myViewEditPresentationNames.length) {
             return myViewEditPresentationNames[i];
-        else
+        } else {
             return null;
+        }
     }
 
-    public String myViewEditPresentationNames[] = {"", "Move Selection",
-            "Copy Selection", "Resize", "New Link", "ReLink", "Drop",
-            "Edit Text", "Copy", "Cut", "Paste", "Delete Selection",
-            "Scrollbar", "No ReLink", "Undo", "Redo"};
-    private boolean q;
-    private boolean p;
-    private GraphicViewerCompoundEdit n;
-    private int o;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    public class GraphicViewerCompoundEdit extends CompoundEdit {
+
+        private static final long serialVersionUID = -897048645868128627L;
+
+        private String myName = "";
+
+        public GraphicViewerCompoundEdit() {
+        }
+
+        public Vector getAllEdits() {
+            return edits;
+        }
+
+        public String getPresentationName() {
+            return myName;
+        }
+
+        public void setPresentationName(String s) {
+            myName = s;
+        }
+
+        public String getUndoPresentationName() {
+            return getViewEditPresentationName(14) + " "
+                    + getPresentationName();
+        }
+
+        public String getRedoPresentationName() {
+            return getViewEditPresentationName(15) + " "
+                    + getPresentationName();
+        }
+    }
 }

@@ -31,84 +31,6 @@ public class GraphicViewerViewEvent extends EventObject {
 
     private static final long serialVersionUID = 5363609477078330074L;
 
-    public GraphicViewerViewEvent(GraphicViewerView graphicviewerview, int i,
-            int j, Object obj, Point point, Point point1, int k) {
-        super(graphicviewerview);
-        _flddo = obj;
-        _fldif = i;
-        _fldnew = j;
-        _fldtry = point;
-        _fldint = point1;
-        _fldfor = k;
-    }
-
-    public int getHint() {
-        return _fldif;
-    }
-
-    void _mthdo(int i) {
-        _fldif = i;
-    }
-
-    public int getFlags() {
-        return _fldnew;
-    }
-
-    void _mthif(int i) {
-        _fldnew = i;
-    }
-
-    public boolean isConsumed() {
-        return a;
-    }
-
-    void a(boolean flag) {
-        a = flag;
-    }
-
-    public void consume() {
-        a(true);
-    }
-
-    public GraphicViewerObject getGraphicViewerObject() {
-        if (_flddo instanceof GraphicViewerObject)
-            return (GraphicViewerObject) _flddo;
-        else
-            return null;
-    }
-
-    public Object getObject() {
-        return _flddo;
-    }
-
-    void a(Object obj) {
-        _flddo = obj;
-    }
-
-    public Point getPointViewCoords() {
-        return _fldtry;
-    }
-
-    void a(Point point) {
-        _fldtry = point;
-    }
-
-    public Point getPointDocCoords() {
-        return _fldint;
-    }
-
-    void _mthif(Point point) {
-        _fldint = point;
-    }
-
-    public int getModifiers() {
-        return _fldfor;
-    }
-
-    void a(int i) {
-        _fldfor = i;
-    }
-
     public static final int UPDATE_ALL = 1;
     public static final int INSERTED = 2;
     public static final int CHANGED = 3;
@@ -149,11 +71,91 @@ public class GraphicViewerViewEvent extends EventObject {
     public static final int AUTOSCROLL_INSETS_CHANGED = 123;
     public static final int GRID_CHANGED = 124;
     public static final int LAST = 65535;
-    private int _fldif;
-    private int _fldnew;
-    private Object _flddo;
-    private Point _fldtry;
-    private Point _fldint;
-    private int _fldfor;
-    private boolean a;
+    private int myHint;
+    private int myFlags;
+    private Object myObj;
+    private Point myVC;
+    private Point myDC;
+    private int myModifiers;
+    private boolean myConsumed;
+
+    public GraphicViewerViewEvent(GraphicViewerView paramGraphicViewerView,
+            int paramInt1, int paramInt2, Object paramObject,
+            Point paramPoint1, Point paramPoint2, int paramInt3) {
+        super(paramGraphicViewerView);
+        myObj = paramObject;
+        myHint = paramInt1;
+        myFlags = paramInt2;
+        myVC = paramPoint1;
+        myDC = paramPoint2;
+        myModifiers = paramInt3;
+    }
+
+    public int getHint() {
+        return myHint;
+    }
+
+    void setHint(int i) {
+        myHint = i;
+    }
+
+    public int getFlags() {
+        return myFlags;
+    }
+
+    void setFlags(int i) {
+        myFlags = i;
+    }
+
+    public boolean isConsumed() {
+        return myConsumed;
+    }
+
+    void setConsumed(boolean flag) {
+        myConsumed = flag;
+    }
+
+    public void consume() {
+        setConsumed(true);
+    }
+
+    public GraphicViewerObject getGraphicViewerObject() {
+        if (myObj instanceof GraphicViewerObject) {
+            return (GraphicViewerObject) myObj;
+        } else {
+            return null;
+        }
+    }
+
+    public Object getObject() {
+        return myObj;
+    }
+
+    void setObject(Object obj) {
+        myObj = obj;
+    }
+
+    public Point getPointViewCoords() {
+        return myVC;
+    }
+
+    void setPointViewCoords(Point point) {
+        myVC = point;
+    }
+
+    public Point getPointDocCoords() {
+        return myDC;
+    }
+
+    void setPointDocCoords(Point point) {
+        myDC = point;
+    }
+
+    public int getModifiers() {
+        return myModifiers;
+    }
+
+    void setModifiers(int i) {
+        myModifiers = i;
+    }
 }

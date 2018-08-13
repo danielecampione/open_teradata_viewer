@@ -26,7 +26,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -47,35 +46,37 @@ public class ObjectPropsDialog extends JDialog {
 
     private static final long serialVersionUID = -5572916216695814118L;
 
-    public ObjectPropsDialog(Frame frame, String s, boolean flag,
-            GraphicViewerObject graphicviewerobject) {
-        super(frame, s, flag);
-        panel1 = new JPanel();
-        OKButton = new JButton();
-        CancelButton = new JButton();
-        label1 = new JLabel();
-        heightField = new JTextField();
-        xField = new JTextField();
-        label2 = new JLabel();
-        yField = new JTextField();
-        label3 = new JLabel();
-        visibleBox = new JCheckBox();
-        selectableBox = new JCheckBox();
-        resizableBox = new JCheckBox();
-        draggableBox = new JCheckBox();
-        label4 = new JLabel();
-        widthField = new JTextField();
-        classNameLabel = new JLabel();
-        areaLabel = new JLabel();
-        pickableBackgroundBox = new JCheckBox();
-        fComponentsAdjusted = false;
+    JPanel panel1 = new JPanel();
+    JButton OKButton = new JButton();
+    JButton CancelButton = new JButton();
+    JLabel label1 = new JLabel();
+    JTextField heightField = new JTextField();
+    JTextField xField = new JTextField();
+    JLabel label2 = new JLabel();
+    JTextField yField = new JTextField();
+    JLabel label3 = new JLabel();
+    JCheckBox visibleBox = new JCheckBox();
+    JCheckBox selectableBox = new JCheckBox();
+    JCheckBox resizableBox = new JCheckBox();
+    JCheckBox draggableBox = new JCheckBox();
+    JLabel label4 = new JLabel();
+    JTextField widthField = new JTextField();
+    JLabel classNameLabel = new JLabel();
+    JLabel areaLabel = new JLabel();
+    JCheckBox pickableBackgroundBox = new JCheckBox();
+
+    public GraphicViewerObject myObject;
+
+    public ObjectPropsDialog(Frame frame, String title, boolean modal,
+            GraphicViewerObject obj) {
+        super(frame, title, modal);
         try {
             jbInit();
             pack();
-            myObject = graphicviewerobject;
+            myObject = obj;
             UpdateDialog();
-        } catch (Exception e) {
-            ExceptionDialog.hideException(e);
+        } catch (Exception ex) {
+            ExceptionDialog.hideException(ex);
         }
     }
 
@@ -87,32 +88,31 @@ public class ObjectPropsDialog extends JDialog {
         panel1.setLayout(null);
         panel1.setMinimumSize(new Dimension(294, 241));
         panel1.setPreferredSize(new Dimension(294, 241));
-        OKButton.addActionListener(new ActionListener() {
+        OKButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                OKButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                OKButton_actionPerformed(e);
             }
-
         });
-        CancelButton.addActionListener(new ActionListener() {
+        CancelButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                CancelButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                CancelButton_actionPerformed(e);
             }
-
         });
-        setResizable(false);
+        this.setResizable(false);
         getContentPane().add(panel1);
+
         OKButton.setText("OK");
         panel1.add(OKButton);
-        OKButton.setFont(new Font("Dialog", 0, 12));
+        OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(60, 204, 79, 22));
         CancelButton.setText("Cancel");
         panel1.add(CancelButton);
-        CancelButton.setFont(new Font("Dialog", 0, 12));
+        CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(168, 204, 79, 22));
         label1.setText("Height:");
-        label1.setHorizontalAlignment(4);
+        label1.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label1);
         label1.setBounds(new Rectangle(132, 60, 48, 24));
         panel1.add(heightField);
@@ -120,13 +120,13 @@ public class ObjectPropsDialog extends JDialog {
         panel1.add(xField);
         xField.setBounds(new Rectangle(84, 36, 36, 24));
         label2.setText("x:");
-        label2.setHorizontalAlignment(4);
+        label2.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label2);
         label2.setBounds(new Rectangle(24, 36, 48, 24));
         panel1.add(yField);
         yField.setBounds(new Rectangle(84, 60, 36, 24));
         label3.setText("y:");
-        label3.setHorizontalAlignment(4);
+        label3.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label3);
         label3.setBounds(new Rectangle(24, 60, 48, 24));
         visibleBox.setText("Visible");
@@ -142,7 +142,7 @@ public class ObjectPropsDialog extends JDialog {
         panel1.add(draggableBox);
         draggableBox.setBounds(new Rectangle(24, 168, 96, 24));
         label4.setText("Width:");
-        label4.setHorizontalAlignment(4);
+        label4.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label4);
         label4.setBounds(new Rectangle(132, 36, 48, 24));
         panel1.add(widthField);
@@ -156,27 +156,29 @@ public class ObjectPropsDialog extends JDialog {
         pickableBackgroundBox.setText("PickableBackground");
         panel1.add(pickableBackgroundBox);
         pickableBackgroundBox.setBounds(new Rectangle(156, 132, 144, 24));
+
     }
 
     void UpdateDialog() {
-        if (myObject == null)
+        if (myObject == null) {
             return;
+        }
+
         classNameLabel.setText(myObject.getClass().getName());
-        Rectangle rectangle = myObject.getBoundingRect();
-        xField.setText(String.valueOf(rectangle.x));
-        yField.setText(String.valueOf(rectangle.y));
-        heightField.setText(String.valueOf(rectangle.height));
-        widthField.setText(String.valueOf(rectangle.width));
+        Rectangle rect = myObject.getBoundingRect();
+        xField.setText(String.valueOf(rect.x));
+        yField.setText(String.valueOf(rect.y));
+        heightField.setText(String.valueOf(rect.height));
+        widthField.setText(String.valueOf(rect.width));
         visibleBox.setSelected(myObject.isVisible());
         selectableBox.setSelected(myObject.isSelectable());
         resizableBox.setSelected(myObject.isResizable());
         draggableBox.setSelected(myObject.isDraggable());
         if (myObject instanceof GraphicViewerArea) {
-            GraphicViewerArea graphicviewerarea = (GraphicViewerArea) myObject;
+            GraphicViewerArea area = (GraphicViewerArea) myObject;
             areaLabel.setVisible(true);
             pickableBackgroundBox.setVisible(true);
-            pickableBackgroundBox.setSelected(graphicviewerarea
-                    .isPickableBackground());
+            pickableBackgroundBox.setSelected(area.isPickableBackground());
         } else {
             areaLabel.setVisible(false);
             pickableBackgroundBox.setVisible(false);
@@ -184,94 +186,86 @@ public class ObjectPropsDialog extends JDialog {
     }
 
     void UpdateControl() {
-        if (myObject == null)
+        if (myObject == null) {
             return;
-        Rectangle rectangle = new Rectangle(Integer.parseInt(xField.getText()),
+        }
+
+        Rectangle rect = new Rectangle(Integer.parseInt(xField.getText()),
                 Integer.parseInt(yField.getText()), Integer.parseInt(widthField
                         .getText()), Integer.parseInt(heightField.getText()));
-        myObject.setBoundingRect(rectangle);
+        myObject.setBoundingRect(rect);
         myObject.setVisible(visibleBox.isSelected());
         myObject.setSelectable(selectableBox.isSelected());
         myObject.setResizable(resizableBox.isSelected());
         myObject.setDraggable(draggableBox.isSelected());
         if (myObject instanceof GraphicViewerArea) {
-            GraphicViewerArea graphicviewerarea = (GraphicViewerArea) myObject;
-            graphicviewerarea.setPickableBackground(pickableBackgroundBox
-                    .isSelected());
+            GraphicViewerArea area = (GraphicViewerArea) myObject;
+            area.setPickableBackground(pickableBackgroundBox.isSelected());
         }
     }
 
     public void addNotify() {
-        Dimension dimension = getSize();
+        // Record the size of the window prior to calling parents addNotify.
+        Dimension d = getSize();
+
         super.addNotify();
-        if (fComponentsAdjusted)
+
+        if (fComponentsAdjusted) {
             return;
-        Insets insets = getInsets();
-        setSize(insets.left + insets.right + dimension.width, insets.top
-                + insets.bottom + dimension.height);
-        Component acomponent[] = getComponents();
-        for (int i = 0; i < acomponent.length; i++) {
-            Point point = acomponent[i].getLocation();
-            point.translate(insets.left, insets.top);
-            acomponent[i].setLocation(point);
         }
 
+        // Adjust components according to the insets
+        Insets insets = getInsets();
+        setSize(insets.left + insets.right + d.width, insets.top
+                + insets.bottom + d.height);
+        Component components[] = getComponents();
+        for (int i = 0; i < components.length; i++) {
+            Point p = components[i].getLocation();
+            p.translate(insets.left, insets.top);
+            components[i].setLocation(p);
+        }
         fComponentsAdjusted = true;
     }
 
-    public void setVisible(boolean flag) {
-        if (flag) {
-            Rectangle rectangle = getParent().getBounds();
-            Rectangle rectangle1 = getBounds();
-            setLocation(rectangle.x + (rectangle.width - rectangle1.width) / 2,
-                    rectangle.y + (rectangle.height - rectangle1.height) / 2);
+    // Used for addNotify check
+    boolean fComponentsAdjusted = false;
+
+    /**
+     * Shows or hides the component depending on the boolean flag b.
+     * @param b  if true, show the component; otherwise, hide the component.
+     * @see javax.swing.JComponent#isVisible
+     */
+    public void setVisible(boolean b) {
+        if (b) {
+            Rectangle bounds = getParent().getBounds();
+            Rectangle abounds = getBounds();
+
+            setLocation(bounds.x + (bounds.width - abounds.width) / 2, bounds.y
+                    + (bounds.height - abounds.height) / 2);
         }
-        super.setVisible(flag);
+        super.setVisible(b);
     }
 
-    void OKButton_actionPerformed(ActionEvent actionevent) {
+    void OKButton_actionPerformed(ActionEvent e) {
         OnOK();
     }
 
     void OnOK() {
         try {
             UpdateControl();
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
 
-    void CancelButton_actionPerformed(ActionEvent actionevent) {
+    void CancelButton_actionPerformed(ActionEvent e) {
         OnCancel();
     }
 
     void OnCancel() {
         try {
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
-
-    JPanel panel1;
-    JButton OKButton;
-    JButton CancelButton;
-    JLabel label1;
-    JTextField heightField;
-    JTextField xField;
-    JLabel label2;
-    JTextField yField;
-    JLabel label3;
-    JCheckBox visibleBox;
-    JCheckBox selectableBox;
-    JCheckBox resizableBox;
-    JCheckBox draggableBox;
-    JLabel label4;
-    JTextField widthField;
-    JLabel classNameLabel;
-    JLabel areaLabel;
-    JCheckBox pickableBackgroundBox;
-    public GraphicViewerObject myObject;
-    boolean fComponentsAdjusted;
 }

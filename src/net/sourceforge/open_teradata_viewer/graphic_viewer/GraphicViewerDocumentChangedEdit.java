@@ -35,45 +35,68 @@ public class GraphicViewerDocumentChangedEdit extends AbstractUndoableEdit {
 
     private static final long serialVersionUID = 3488644327123099485L;
 
+    private GraphicViewerUndoManager myUndoManager;
+    private boolean myIsBeforeChanging;
+    private GraphicViewerDocument myDoc;
+    private int myHint;
+    private int myFlags;
+    private Object myObject;
+    private int myOldValueInt;
+    private Object myOldValue;
+    private int myNewValueInt;
+    private Object myNewValue;
+
     public GraphicViewerDocumentChangedEdit(
             GraphicViewerDocumentEvent graphicviewerdocumentevent,
             GraphicViewerUndoManager graphicviewerundomanager, boolean flag) {
-        _fldtry = graphicviewerundomanager;
-        _fldif = flag;
-        _fldbyte = (GraphicViewerDocument) graphicviewerdocumentevent
-                .getSource();
-        _fldint = graphicviewerdocumentevent.getHint();
-        a = graphicviewerdocumentevent.getFlags();
-        _fldfor = graphicviewerdocumentevent.getObject();
-        _fldnew = graphicviewerdocumentevent.getPreviousValueInt();
-        _fldcase = graphicviewerdocumentevent.getPreviousValue();
-        _fldbyte.copyOldValueForUndo(this);
-        _fldbyte.copyNewValueForRedo(this);
+        myUndoManager = graphicviewerundomanager;
+        myIsBeforeChanging = flag;
+        myDoc = (GraphicViewerDocument) graphicviewerdocumentevent.getSource();
+        myHint = graphicviewerdocumentevent.getHint();
+        myFlags = graphicviewerdocumentevent.getFlags();
+        myObject = graphicviewerdocumentevent.getObject();
+        myOldValueInt = graphicviewerdocumentevent.getPreviousValueInt();
+        myOldValue = graphicviewerdocumentevent.getPreviousValue();
+        myDoc.copyOldValueForUndo(this);
+        myDoc.copyNewValueForRedo(this);
     }
 
     public void die() {
         super.die();
-        _fldtry = null;
-        _fldbyte = null;
-        _fldfor = null;
-        _fldcase = null;
-        _fldchar = null;
+        myUndoManager = null;
+        myDoc = null;
+        myObject = null;
+        myOldValue = null;
+        myNewValue = null;
     }
 
     public String toString() {
-        String s;
+        String str;
         if (getObject() != null) {
-            s = getObject().getClass().getName();
-            s = s.substring(s.lastIndexOf('.') + 1);
+            str = getObject().getClass().getName();
+            str = str.substring(str.lastIndexOf('.') + 1);
         } else {
-            s = "(null)";
+            str = "(null)";
         }
-        return (isBeforeChanging() ? "B " : "") + Integer.toString(getHint())
-                + ": " + Integer.toString(getFlags()) + " " + s + " "
-                + Integer.toString(getOldValueInt()) + "/"
-                + (getOldValue() == null ? "null" : getOldValue().toString())
-                + " --> " + Integer.toString(getNewValueInt()) + "/"
-                + (getNewValue() == null ? "null" : getNewValue().toString());
+        return new StringBuilder()
+                .append(isBeforeChanging() ? "B " : "")
+                .append(Integer.toString(getHint()))
+                .append(": ")
+                .append(Integer.toString(getFlags()))
+                .append(" ")
+                .append(str)
+                .append(" ")
+                .append(Integer.toString(getOldValueInt()))
+                .append("/")
+                .append(getOldValue() != null
+                        ? getOldValue().toString()
+                        : "null")
+                .append(" --> ")
+                .append(Integer.toString(getNewValueInt()))
+                .append("/")
+                .append(getNewValue() != null
+                        ? getNewValue().toString()
+                        : "null").toString();
     }
 
     public String getPresentationName() {
@@ -81,169 +104,167 @@ public class GraphicViewerDocumentChangedEdit extends AbstractUndoableEdit {
     }
 
     public boolean canUndo() {
-        return super.canUndo() && _fldbyte != null;
+        return super.canUndo() && myDoc != null;
     }
 
     public boolean canRedo() {
-        return super.canRedo() && _fldbyte != null;
+        return super.canRedo() && myDoc != null;
     }
 
     public void undo() throws CannotUndoException {
         super.undo();
-        if (!isBeforeChanging())
-            _fldbyte.changeValue(this, true);
+        if (!isBeforeChanging()) {
+            myDoc.changeValue(this, true);
+        }
     }
 
     public void redo() throws CannotRedoException {
         super.redo();
-        if (!isBeforeChanging())
-            _fldbyte.changeValue(this, false);
+        if (!isBeforeChanging()) {
+            myDoc.changeValue(this, false);
+        }
     }
 
     public boolean isBeforeChanging() {
-        return _fldif;
+        return myIsBeforeChanging;
     }
 
     public GraphicViewerDocumentChangedEdit findBeforeChangingEdit() {
-        if (isBeforeChanging())
+        if (isBeforeChanging()) {
             return null;
-        Vector<UndoableEdit> vector = getUndoManager().getCurrentEditVector();
+        }
+        Vector vector = getUndoManager().getCurrentEditVector();
         for (int i = vector.size() - 1; i >= 0; i--) {
             UndoableEdit undoableedit = (UndoableEdit) vector.elementAt(i);
-            if (!(undoableedit instanceof GraphicViewerDocumentChangedEdit))
+            if (!(undoableedit instanceof GraphicViewerDocumentChangedEdit)) {
                 continue;
+            }
             GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit = (GraphicViewerDocumentChangedEdit) undoableedit;
             if (graphicviewerdocumentchangededit.isBeforeChanging()
                     && graphicviewerdocumentchangededit.getDoc() == getDoc()
                     && graphicviewerdocumentchangededit.getHint() == getHint()
                     && graphicviewerdocumentchangededit.getFlags() == getFlags()
-                    && graphicviewerdocumentchangededit.getObject() == getObject())
+                    && graphicviewerdocumentchangededit.getObject() == getObject()) {
                 return graphicviewerdocumentchangededit;
+            }
         }
 
         return null;
     }
 
     public GraphicViewerUndoManager getUndoManager() {
-        return _fldtry;
+        return myUndoManager;
     }
 
     public GraphicViewerDocument getDoc() {
-        return _fldbyte;
+        return myDoc;
     }
 
     public int getHint() {
-        return _fldint;
+        return myHint;
     }
 
     public int getFlags() {
-        return a;
+        return myFlags;
     }
 
     public Object getObject() {
-        return _fldfor;
+        return myObject;
     }
 
     public int getValueInt(boolean flag) {
-        if (flag)
+        if (flag) {
             return getOldValueInt();
-        else
+        } else {
             return getNewValueInt();
+        }
     }
 
     public boolean getValueBoolean(boolean flag) {
-        if (flag)
+        if (flag) {
             return getOldValueBoolean();
-        else
+        } else {
             return getNewValueBoolean();
+        }
     }
 
     public Object getValue(boolean flag) {
-        if (flag)
+        if (flag) {
             return getOldValue();
-        else
+        } else {
             return getNewValue();
+        }
     }
 
     public double getValueDouble(boolean flag) {
-        if (flag)
+        if (flag) {
             return getOldValueDouble();
-        else
+        } else {
             return getNewValueDouble();
+        }
     }
 
     public int getOldValueInt() {
-        return _fldnew;
+        return myOldValueInt;
     }
 
     public void setOldValueInt(int i) {
-        _fldnew = i;
+        myOldValueInt = i;
     }
 
     public boolean getOldValueBoolean() {
-        return _fldnew != 0;
+        return myOldValueInt != 0;
     }
 
     public void setOldValueBoolean(boolean flag) {
-        _fldnew = flag ? 1 : 0;
+        myOldValueInt = flag ? 1 : 0;
     }
 
     public Object getOldValue() {
-        return _fldcase;
+        return myOldValue;
     }
 
     public void setOldValue(Object obj) {
-        _fldcase = obj;
+        myOldValue = obj;
     }
 
     public double getOldValueDouble() {
-        return ((Double) _fldcase).doubleValue();
+        return ((Double) myOldValue).doubleValue();
     }
 
     public void setOldValueDouble(double d) {
-        _fldcase = new Double(d);
+        myOldValue = new Double(d);
     }
 
     public int getNewValueInt() {
-        return _flddo;
+        return myNewValueInt;
     }
 
     public void setNewValueInt(int i) {
-        _flddo = i;
+        myNewValueInt = i;
     }
 
     public boolean getNewValueBoolean() {
-        return _flddo != 0;
+        return myNewValueInt != 0;
     }
 
     public void setNewValueBoolean(boolean flag) {
-        _flddo = flag ? 1 : 0;
+        myNewValueInt = flag ? 1 : 0;
     }
 
     public Object getNewValue() {
-        return _fldchar;
+        return myNewValue;
     }
 
     public void setNewValue(Object obj) {
-        _fldchar = obj;
+        myNewValue = obj;
     }
 
     public double getNewValueDouble() {
-        return ((Double) _fldchar).doubleValue();
+        return ((Double) myNewValue).doubleValue();
     }
 
     public void setNewValueDouble(double d) {
-        _fldchar = new Double(d);
+        myNewValue = new Double(d);
     }
-
-    private GraphicViewerUndoManager _fldtry;
-    private boolean _fldif;
-    private GraphicViewerDocument _fldbyte;
-    private int _fldint;
-    private int a;
-    private Object _fldfor;
-    private int _fldnew;
-    private Object _fldcase;
-    private int _flddo;
-    private Object _fldchar;
 }

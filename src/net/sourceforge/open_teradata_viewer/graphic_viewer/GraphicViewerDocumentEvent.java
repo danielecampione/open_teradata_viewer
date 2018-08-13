@@ -31,87 +31,6 @@ public class GraphicViewerDocumentEvent extends EventObject {
 
     private static final long serialVersionUID = -4184535562126698115L;
 
-    public GraphicViewerDocumentEvent(
-            GraphicViewerDocument graphicviewerdocument, int i, int j,
-            Object obj) {
-        super(graphicviewerdocument);
-        _fldif = null;
-        _fldint = i;
-        _fldnew = j;
-        a = obj;
-        _fldtry = null;
-        _flddo = 0;
-    }
-
-    public GraphicViewerDocumentEvent(
-            GraphicViewerDocument graphicviewerdocument, int i, int j,
-            Object obj, int k, Object obj1) {
-        super(graphicviewerdocument);
-        _fldif = null;
-        _fldint = i;
-        _fldnew = j;
-        a = obj;
-        _fldtry = obj1;
-        _flddo = k;
-    }
-
-    public int getHint() {
-        return _fldint & 0xffff7fff;
-    }
-
-    void _mthif(int i) {
-        _fldint = i;
-    }
-
-    public int getFlags() {
-        return _fldnew;
-    }
-
-    void a(int i) {
-        _fldnew = i;
-    }
-
-    public GraphicViewerObject getGraphicViewerObject() {
-        if (a instanceof GraphicViewerObject)
-            return (GraphicViewerObject) a;
-        else
-            return null;
-    }
-
-    public Object getObject() {
-        return a;
-    }
-
-    void a(Object obj) {
-        a = obj;
-    }
-
-    public Object getPreviousValue() {
-        return _fldtry;
-    }
-
-    public int getPreviousValueInt() {
-        return _flddo;
-    }
-
-    public boolean isBeforeChanging() {
-        return (_fldint & 0x8000) != 0;
-    }
-
-    void _mthif(Object obj) {
-        _fldtry = obj;
-    }
-
-    void _mthdo(int i) {
-        _flddo = i;
-    }
-
-    Rectangle a() {
-        if (_fldif == null)
-            _fldif = new Rectangle(0, 0, 0, 0);
-        return _fldif;
-    }
-
     public static final int UPDATE_ALL = 100;
     public static final int STARTED_TRANSACTION = 104;
     public static final int FINISHED_TRANSACTION = 105;
@@ -120,7 +39,7 @@ public class GraphicViewerDocumentEvent extends EventObject {
     public static final int FINISHED_UNDO = 108;
     public static final int STARTING_REDO = 109;
     public static final int FINISHED_REDO = 110;
-    static final int _fldfor = 200;
+    static final int FIRST_STATE_CHANGED_HINT = 200;
     public static final int INSERTED = 202;
     public static final int CHANGED = 203;
     public static final int REMOVED = 204;
@@ -140,10 +59,91 @@ public class GraphicViewerDocumentEvent extends EventObject {
     public static final int VALID_CYCLE_CHANGED = 220;
     public static final int BEFORE_CHANGING = 32768;
     public static final int LAST = 65535;
-    private int _fldint;
-    private int _fldnew;
-    private Object a;
-    private Object _fldtry;
-    private int _flddo;
-    private transient Rectangle _fldif;
+    private int myHint;
+    private int myFlags;
+    private Object myObj;
+    private Object myPreviousValue;
+    private int myPreviousValueInt;
+    private transient Rectangle myTempRectangle = null;
+
+    public GraphicViewerDocumentEvent(
+            GraphicViewerDocument graphicviewerdocument, int i, int j,
+            Object obj) {
+        super(graphicviewerdocument);
+        myHint = i;
+        myFlags = j;
+        myObj = obj;
+        myPreviousValue = null;
+        myPreviousValueInt = 0;
+    }
+
+    public GraphicViewerDocumentEvent(
+            GraphicViewerDocument graphicviewerdocument, int i, int j,
+            Object obj, int k, Object obj1) {
+        super(graphicviewerdocument);
+        myHint = i;
+        myFlags = j;
+        myObj = obj;
+        myPreviousValue = obj1;
+        myPreviousValueInt = k;
+    }
+
+    public int getHint() {
+        return myHint & 0xffff7fff;
+    }
+
+    void setHint(int i) {
+        myHint = i;
+    }
+
+    public int getFlags() {
+        return myFlags;
+    }
+
+    void setFlags(int i) {
+        myFlags = i;
+    }
+
+    public GraphicViewerObject getGraphicViewerObject() {
+        if (myObj instanceof GraphicViewerObject) {
+            return (GraphicViewerObject) myObj;
+        } else {
+            return null;
+        }
+    }
+
+    public Object getObject() {
+        return myObj;
+    }
+
+    void setObject(Object obj) {
+        myObj = obj;
+    }
+
+    public Object getPreviousValue() {
+        return myPreviousValue;
+    }
+
+    public int getPreviousValueInt() {
+        return myPreviousValueInt;
+    }
+
+    public boolean isBeforeChanging() {
+        return (myHint & 0x8000) != 0;
+    }
+
+    void setPreviousValue(Object obj) {
+        myPreviousValue = obj;
+    }
+
+    void setPreviousValueInt(int i) {
+        myPreviousValueInt = i;
+    }
+
+    Rectangle getTempRectangle() {
+        if (myTempRectangle == null) {
+            myTempRectangle = new Rectangle(0, 0, 0, 0);
+        }
+        return myTempRectangle;
+    }
 }

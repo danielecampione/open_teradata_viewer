@@ -32,96 +32,89 @@ public class LinearGradientEllipse extends GraphicViewerEllipse {
 
     private static final long serialVersionUID = -6150951656987679358L;
 
+    public static final int ChangedStartColor = LastChangedHint + 512;
+    public static final int ChangedEndColor = LastChangedHint + 513;
+
+    private Color myStartColor = Color.white;
+    private Color myEndColor = Color.gray;
+
     public LinearGradientEllipse() {
-        myStartColor = Color.white;
-        myEndColor = Color.gray;
+        super();
     }
 
-    public void geometryChange(Rectangle rectangle) {
-        super.geometryChange(rectangle);
+    // Make sure there's a color gradient going from the top-middle to the
+    // bottom middle of the ellipse, no matter where the ellipse is or how big
+    // it is
+    public void geometryChange(Rectangle prevRect) {
+        super.geometryChange(prevRect);
         setBrush(null);
     }
 
     public GraphicViewerBrush getBrush() {
-        GraphicViewerBrush graphicviewerbrush = super.getBrush();
-        if (graphicviewerbrush == null) {
-            Rectangle rectangle = getBoundingRect();
-            graphicviewerbrush = new GraphicViewerBrush(new GradientPaint(
-                    rectangle.x + rectangle.width / 2, rectangle.y,
-                    getStartColor(), rectangle.x + rectangle.width / 2,
-                    rectangle.y + rectangle.height, getEndColor()));
-            setBrush(graphicviewerbrush);
+        GraphicViewerBrush b = super.getBrush();
+        if (b == null) {
+            Rectangle rect = getBoundingRect();
+            b = new GraphicViewerBrush(new GradientPaint(rect.x + rect.width
+                    / 2, rect.y, getStartColor(), rect.x + rect.width / 2,
+                    rect.y + rect.height, getEndColor()));
+            setBrush(b);
         }
-        return graphicviewerbrush;
+        return b;
     }
 
     public Color getStartColor() {
         return myStartColor;
     }
-
-    public void setStartColor(Color color) {
-        Color color1 = myStartColor;
-        if (color1 != color) {
-            myStartColor = color;
+    public void setStartColor(Color value) {
+        Color old = myStartColor;
+        if (old != value) {
+            myStartColor = value;
             setBrush(null);
-            update(0x101ff, 0, color1);
+            update(ChangedStartColor, 0, old);
         }
     }
 
     public Color getEndColor() {
         return myEndColor;
     }
-
-    public void setEndColor(Color color) {
-        Color color1 = myEndColor;
-        if (color1 != color) {
-            myEndColor = color;
+    public void setEndColor(Color value) {
+        Color old = myEndColor;
+        if (old != value) {
+            myEndColor = value;
             setBrush(null);
-            update(0x10200, 0, color1);
+            update(ChangedEndColor, 0, old);
         }
     }
 
-    public void copyNewValueForRedo(
-            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
-        switch (graphicviewerdocumentchangededit.getFlags()) {
-            case 66047 :
-                graphicviewerdocumentchangededit.setNewValue(getStartColor());
+    public void copyNewValueForRedo(GraphicViewerDocumentChangedEdit e) {
+        switch (e.getFlags()) {
+            case ChangedStartColor :
+                e.setNewValue(getStartColor());
                 return;
-
-            case 66048 :
-                graphicviewerdocumentchangededit.setNewValue(getEndColor());
+            case ChangedEndColor :
+                e.setNewValue(getEndColor());
+                return;
+            default :
+                super.copyNewValueForRedo(e);
                 return;
         }
-        super.copyNewValueForRedo(graphicviewerdocumentchangededit);
     }
 
-    public void changeValue(
-            GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit,
-            boolean flag) {
-        switch (graphicviewerdocumentchangededit.getFlags()) {
-            case 1 : // '\001'
-                super.changeValue(graphicviewerdocumentchangededit, flag);
+    public void changeValue(GraphicViewerDocumentChangedEdit e, boolean undo) {
+        switch (e.getFlags()) {
+            case ChangedGeometry :
+                super.changeValue(e, undo);
                 setBrush(null);
                 break;
-
-            case 66047 :
-                setStartColor((Color) graphicviewerdocumentchangededit
-                        .getValue(flag));
+            case ChangedStartColor :
+                setStartColor((Color) e.getValue(undo));
                 break;
-
-            case 66048 :
-                setEndColor((Color) graphicviewerdocumentchangededit
-                        .getValue(flag));
+            case ChangedEndColor :
+                setEndColor((Color) e.getValue(undo));
                 break;
-
             default :
-                super.changeValue(graphicviewerdocumentchangededit, flag);
+                super.changeValue(e, undo);
                 break;
         }
     }
-
-    public static final int ChangedStartColor = 0x101ff;
-    public static final int ChangedEndColor = 0x10200;
-    private Color myStartColor;
-    private Color myEndColor;
 }

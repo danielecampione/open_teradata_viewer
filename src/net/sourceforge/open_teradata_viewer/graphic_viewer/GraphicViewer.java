@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -31,6 +32,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,8 +57,8 @@ import javax.swing.border.TitledBorder;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
-import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.LayeredDigraphAutoLayout;
-import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.Network;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerLayeredDigraphAutoLayout;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerNetwork;
 
 /**
  * 
@@ -73,7 +75,6 @@ public class GraphicViewer extends JFrame
     private static final long serialVersionUID = 2780998114828445957L;
 
     private static GraphicViewer GRAPHIC_VIEWER;
-    protected GraphicViewerDocument myDoc;
     private int myDocCount;
     UndoMgr myUndoMgr;
     static final String graphicViewerSVGXML = "Graphic Viewer SVG with XML extensions (*.xhtml)";
@@ -82,7 +83,6 @@ public class GraphicViewer extends JFrame
     public AppAction FileOpenAction;
     public AppAction FileSaveAsAction;
     public AppAction ToggleLogAction;
-    public AppAction ExitAction;
     public AppAction InsertStuffAction;
     public AppAction InsertRectangleAction;
     public AppAction InsertRoundedRectangleAction;
@@ -151,32 +151,55 @@ public class GraphicViewer extends JFrame
     JMenuItem RedoMenuItem;
     AppAction RedoAction;
     private boolean myUpdatingSelection;
+
+    // Let each newly created GraphicViewerBasicNode show an integer label
     int basicNodeCounter;
+
     static boolean myRNorg = true;
     static int myLAorg = 0;
+
+    // Use a flag on GraphicViewerObject to recognize a particular kind of area
+    // (could have implemented our own subclass of GraphicViewerArea, but didn't
+    //  want to bother this time)
     public static final int flagMultiSpotNode = 0x10000;
+
     boolean myIconicNodesAreLinkable;
-    protected GraphicViewerLayer myMainLayer;
-    protected GraphicViewerLayer myForegroundLayer;
-    protected GraphicViewerLayer myBackgroundLayer;
+
     protected JSplitPane myPaletteSplitPane;
     protected JDialog myOverviewDialog;
+
     protected GraphicViewerPalette myPalette;
+
     protected GraphicViewerOverview myOverview;
+
+    // Menu bar
     protected JMenuBar mainMenuBar;
     protected JMenu filemenu;
     protected JMenu editmenu;
     protected JMenu insertmenu;
     protected JMenu layoutmenu;
     protected JMenu helpmenu;
+
     protected Point myDefaultLocation;
     protected boolean myRandom;
 
+    // Basic components for this app
     public OTVView myView;
+    protected OTVDocument myDoc;
+    protected GraphicViewerLayer myMainLayer;
+    protected GraphicViewerLayer myForegroundLayer;
+    protected GraphicViewerLayer myBackgroundLayer;
+
     private int myNodeCounter = 0;
 
+    /** Constructor for the Graphic Viewer module. */
     public GraphicViewer() {
         GRAPHIC_VIEWER = this;
+
+        //==============================================================
+        // Create the main graphics window
+        //==============================================================
+
         this.myView = new AnimatedView();
         getContentPane().add(this.myView, "Center");
 
@@ -203,6 +226,10 @@ public class GraphicViewer extends JFrame
                 + " )");
         myDoc.setMaintainsPartID(true);
         myView.setBackground(new Color(255, 255, 221));
+
+        // Set up a background image
+        //myView.setBackgroundImage((new javax.swing.ImageIcon("C:/jdk1.3.1/demo/applets/ImageMap/images/jim.graham.gif")).getImage());
+
         myMainLayer = myDoc.getFirstLayer();
         myForegroundLayer = myDoc.addLayerAfter(myMainLayer);
         myForegroundLayer.setIdentifier("in foreground layer");
@@ -211,11 +238,20 @@ public class GraphicViewer extends JFrame
                 .setIdentifier("in read-only semitransparent background layer");
         myBackgroundLayer.setTransparency(0.5F);
         myBackgroundLayer.setModifiable(true);
+        // By default new user-drawn links go into this layer:
         myDoc.setLinksLayer(myDoc.addLayerBefore(myMainLayer));
         myView.setGridWidth(20);
         myView.setGridHeight(20);
         myView.setBorder(new TitledBorder("Zoom: "
                 + (int) (myView.getScale() * 100D) + '%'));
+
+        //==============================================================
+        // Add event listeners
+        //==============================================================
+
+        // Note: An alternate way to get notification of events from a
+        // GraphicViewerDocument is to create a subclass of GraphicViewerView
+        // and override the documentChanged() method
         myDoc.addDocumentListener(new IGraphicViewerDocumentListener() {
 
             public void documentChanged(
@@ -224,6 +260,8 @@ public class GraphicViewer extends JFrame
             }
 
         });
+
+        // This will handle selection changes and double clicks
         myView.addViewListener(new IGraphicViewerViewListener() {
 
             public void viewChanged(
@@ -232,31 +270,41 @@ public class GraphicViewer extends JFrame
             }
 
         });
+
+        // Process KeyEvents from the GraphicViewerView--handle the Delete key.
+        //
+        // Normally one overrides GraphicViewerView.onKeyEvent() to make use of
+        // the default behavior supplied by GraphicViewerView. Using a listener,
+        // as this example does, may lead to duplicate and/or conflicting
+        // actions if the same key is handled, and does not allow inhibiting the
+        // default behavior
         myView.addKeyListener(new KeyAdapter() {
 
             public void keyPressed(KeyEvent keyevent) {
                 int i = keyevent.getKeyCode();
-                if (i == 127)
+                if (i == 127) {
                     myView.deleteSelection();
-                else if (keyevent.isControlDown() && i == 81)
+                } else if (keyevent.isControlDown() && i == 81) {
                     System.exit(0);
-                else if (keyevent.isControlDown() && i == 83)
+                } else if (keyevent.isControlDown() && i == 83) {
                     if (keyevent.isShiftDown()) {
                         FileInputStream fileinputstream = null;
                         try {
                             fileinputstream = new FileInputStream(
                                     "GraphicViewer.serialized");
-                            GraphicViewerDocument graphicviewerdocument = GraphicViewer
+                            OTVDocument graphicviewerdocument = GraphicViewer
                                     .loadObjects(fileinputstream);
-                            if (graphicviewerdocument != null)
+                            if (graphicviewerdocument != null) {
                                 getCurrentView().setDocument(
                                         graphicviewerdocument);
+                            }
                         } catch (Exception e) {
                             ExceptionDialog.hideException(e);
                         } finally {
                             try {
-                                if (fileinputstream != null)
+                                if (fileinputstream != null) {
                                     fileinputstream.close();
+                                }
                             } catch (Exception e) {
                                 ExceptionDialog.ignoreException(e);
                             }
@@ -271,13 +319,15 @@ public class GraphicViewer extends JFrame
                             ExceptionDialog.hideException(e);
                         } finally {
                             try {
-                                if (fileoutputstream != null)
+                                if (fileoutputstream != null) {
                                     fileoutputstream.close();
+                                }
                             } catch (Exception e) {
                                 ExceptionDialog.ignoreException(e);
                             }
                         }
                     }
+                }
             }
         });
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -286,14 +336,20 @@ public class GraphicViewer extends JFrame
             public void windowClosing(WindowEvent windowevent) {
                 Object obj = windowevent.getSource();
                 if (obj == GraphicViewer.this) {
-                    setVisible(false);
+                    setVisible(false); // Hide the frame
                 }
             }
 
         });
 
         initMenus();
+
+        //==============================================================
+        // Create the palette
+        // Add a bunch of objects to it in initPalette()
+        //==============================================================
         myPalette = new GraphicViewerPalette();
+
         myPaletteSplitPane = new JSplitPane(0);
         myPaletteSplitPane.setContinuousLayout(true);
         myPaletteSplitPane.setTopComponent(myPalette);
@@ -306,24 +362,24 @@ public class GraphicViewer extends JFrame
 
         setSize(500, 400);
 
-        // init
-        this.myView.setBackground(new Color(255, 255, 221));
-        this.myView.setPrimarySelectionColor(GraphicViewerBrush.ColorMagenta);
-        this.myView.setSecondarySelectionColor(this.myView
+        // Init
+        myView.setPrimarySelectionColor(GraphicViewerBrush.ColorMagenta);
+        myView.setSecondarySelectionColor(this.myView
                 .getPrimarySelectionColor());
-        this.myView.setIncludingNegativeCoords(true);
-        this.myView.setHidingDisabledScrollbars(true);
-        this.myView.addKeyListener(new KeyAdapter() {
+        myView.setIncludingNegativeCoords(true);
+        myView.setHidingDisabledScrollbars(true);
+        myView.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent paramKeyEvent) {
                 GraphicViewer.this.handleKeyPressed(paramKeyEvent);
             }
         });
-        this.myView.addViewListener(this);
+        myView.addViewListener(this);
 
         start();
 
         initPalette();
     }
+
     public void start() {
         new Thread(this).start();
     }
@@ -851,10 +907,14 @@ public class GraphicViewer extends JFrame
                 PrinterJob printerjob = PrinterJob.getPrinterJob();
                 java.awt.print.PageFormat pageformat = printerjob
                         .validatePage(printerjob.defaultPage());
+                // Ask the user what page size they're using, what the margins
+                // are and whether they are printing in landscape or portrait
+                // mode
                 java.awt.print.PageFormat pageformat1 = printerjob
                         .pageDialog(pageformat);
-                if (pageformat1 != pageformat)
+                if (pageformat1 != pageformat) {
                     getView().printPreview("Print Preview", pageformat1);
+                }
             }
 
         };
@@ -1049,9 +1109,10 @@ public class GraphicViewer extends JFrame
                 if (UndoMenuItem != null && getView() != null) {
                     GraphicViewerUndoManager graphicviewerundomanager = getView()
                             .getDocument().getUndoManager();
-                    if (graphicviewerundomanager != null)
+                    if (graphicviewerundomanager != null) {
                         UndoMenuItem.setText(graphicviewerundomanager
                                 .getUndoPresentationName());
+                    }
                 }
             }
 
@@ -1075,9 +1136,10 @@ public class GraphicViewer extends JFrame
                 if (RedoMenuItem != null && getView() != null) {
                     GraphicViewerUndoManager graphicviewerundomanager = getView()
                             .getDocument().getUndoManager();
-                    if (graphicviewerundomanager != null)
+                    if (graphicviewerundomanager != null) {
                         RedoMenuItem.setText(graphicviewerundomanager
                                 .getRedoPresentationName());
+                    }
                 }
             }
 
@@ -1087,7 +1149,7 @@ public class GraphicViewer extends JFrame
     void newProcess() {
         myDoc.deleteContents();
         myDoc.removeLayer(myDoc.getFirstLayer());
-        myDoc = new GraphicViewerDocument();
+        myDoc = new OTVDocument();
         String t = "Untitled" + Integer.toString(myDocCount++);
         myDoc.setName(t);
         setTitle(myDoc.getName() + " - " + Main.APPLICATION_NAME + " ( " + this
@@ -1121,62 +1183,113 @@ public class GraphicViewer extends JFrame
         AppAction.updateAllActions();
     }
 
-    public void processDocChange(
-            GraphicViewerDocumentEvent graphicviewerdocumentevent) {
-        switch (graphicviewerdocumentevent.getHint()) {
-            case 104 : // 'h'
-            case 105 : // 'i'
-            case 106 : // 'j'
-            case 107 : // 'k'
-            case 108 : // 'l'
-            case 109 : // 'm'
-            case 110 : // 'n'
-            default :
+    //==============================================================
+    // Process GraphicViewerDocumentEvents from the GraphicViewerDocument
+    //==============================================================
+    public void processDocChange(GraphicViewerDocumentEvent e) {
+        switch (e.getHint()) {
+            case GraphicViewerDocumentEvent.STARTED_TRANSACTION :
+                //          System.err.println("Started Transaction");
                 break;
-
-            case 202 :
-                if (graphicviewerdocumentevent.getGraphicViewerObject() instanceof GraphicViewerLink) {
-                    GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerdocumentevent
+            case GraphicViewerDocumentEvent.FINISHED_TRANSACTION :
+                //          if (e.getPreviousValue() != null)
+                //            System.err.println("Finished Transaction " + e.getPreviousValue().toString());
+                //          else
+                //            System.err.println("Finished Transaction");
+                //          // Look at all of the GraphicViewerDocumentChangedEdits that
+                // happened in this transaction
+                //          if (e.getObject() instanceof GraphicViewerUndoManager.GraphicViewerCompoundEdit) {
+                //            GraphicViewerUndoManager.GraphicViewerCompoundEdit cedit = (GraphicViewerUndoManager.GraphicViewerCompoundEdit)e.getObject();
+                //            Vector edits = cedit.getAllEdits();
+                //            for (int i = 0; i < edits.size(); i++) {
+                //              if (edits.get(i) instanceof GraphicViewerDocumentChangedEdit) {
+                //                GraphicViewerDocumentChangedEdit edit = (GraphicViewerDocumentChangedEdit)edits.get(i);
+                //                System.err.println("  " + edit.toString());
+                //              }
+                //            }
+                //          }
+                break;
+            case GraphicViewerDocumentEvent.ABORTED_TRANSACTION :
+                //          System.err.println("Aborted Transaction");
+                break;
+            case GraphicViewerDocumentEvent.STARTING_UNDO :
+                //          if (e.getObject() instanceof UndoableEdit)
+                //            System.err.println("Starting Undo " + ((UndoableEdit)e.getObject()).getUndoPresentationName());
+                //          else
+                //            System.err.println("Starting Undo");
+                break;
+            case GraphicViewerDocumentEvent.FINISHED_UNDO :
+                //          System.err.println("Finished Undo");
+                break;
+            case GraphicViewerDocumentEvent.STARTING_REDO :
+                //          if (e.getObject() instanceof UndoableEdit)
+                //            System.err.println("Starting Redo " + ((UndoableEdit)e.getObject()).getRedoPresentationName());
+                //          else
+                //            System.err.println("Starting Redo");
+                break;
+            case GraphicViewerDocumentEvent.FINISHED_REDO :
+                //          System.err.println("Finished Redo");
+                break;
+            case GraphicViewerDocumentEvent.INSERTED :
+                if (e.getGraphicViewerObject() instanceof GraphicViewerLink) {
+                    // Make sure each link that's created has an arrowhead at its front,
+                    // if the "to" port is a port on a GraphicViewerBasicNode
+                    GraphicViewerLink link = (GraphicViewerLink) e
                             .getGraphicViewerObject();
-                    GraphicViewerPort graphicviewerport = graphicviewerlink
-                            .getToPort();
-                    if (graphicviewerport != null) {
-                        if (graphicviewerport instanceof MultiPortNodePort)
-                            graphicviewerlink.setArrowHeads(false, true);
-                        else if (graphicviewerport.getParent() instanceof GraphicViewerBasicNode)
-                            graphicviewerlink.setArrowHeads(false, true);
-                        if (graphicviewerport == graphicviewerlink
-                                .getFromPort()
-                                && (graphicviewerlink instanceof GraphicViewerLabeledLink)) {
-                            GraphicViewerLabeledLink graphicviewerlabeledlink = (GraphicViewerLabeledLink) graphicviewerlink;
-                            GraphicViewerObject graphicviewerobject = graphicviewerlabeledlink
-                                    .getMidLabel();
-                            graphicviewerlabeledlink.setFromLabel(null);
-                            graphicviewerlabeledlink.setToLabel(null);
-                            if (graphicviewerobject != null
-                                    && (graphicviewerobject instanceof GraphicViewerText))
-                                ((GraphicViewerText) graphicviewerobject)
-                                        .setText("loop");
+                    GraphicViewerPort port = link.getToPort();
+                    if (port != null) {
+                        if (port instanceof MultiPortNodePort) {
+                            link.setArrowHeads(false, true);
+                        } else if (port.getParent() instanceof GraphicViewerBasicNode) {
+                            // Only have an arrowhead at the "to" end
+                            link.setArrowHeads(false, true);
+
+                            // The default values produce a traditional looking
+                            // arrowhead; the following values produce a diamond
+                            // instead
+                            //link.setArrowAngle(Math.PI/3);
+                            //link.setArrowLength(8);
+                            //link.setArrowShaftLength(16);
+                        }
+
+                        // If the "from" port is the same as the "to" port, make
+                        // sure it doesn't have labels at either end, and change
+                        // its middle label
+                        if (port == link.getFromPort()
+                                && link instanceof GraphicViewerLabeledLink) {
+                            GraphicViewerLabeledLink ll = (GraphicViewerLabeledLink) link;
+                            GraphicViewerObject mid = ll.getMidLabel();
+                            ll.setFromLabel(null);
+                            ll.setToLabel(null);
+                            if (mid != null && mid instanceof GraphicViewerText) {
+                                ((GraphicViewerText) mid).setText("loop");
+                            }
                         }
                     }
-                    if (graphicviewerport != null
-                            && graphicviewerport.getParent() != null)
-                        if ((graphicviewerport.getParent().getFlags() & 0x10000) != 0) {
-                            graphicviewerlink.setOrthogonal(true);
-                            graphicviewerlink.setAvoidsNodes(true);
-                            graphicviewerlink.setJumpsOver(true);
-                        } else if (graphicviewerport.getParent() instanceof MultiTextNode) {
-                            graphicviewerlink.setOrthogonal(true);
-                            graphicviewerlink.setArrowHeads(false, true);
-                            graphicviewerlink.setArrowShaftLength(0.0D);
+
+                    // If it's connected to a MultiSpotNode, make it
+                    // orthogonally routed (not implemented as a separate class,
+                    // so we're using a flag on the object as a marker)
+                    if (port != null && port.getParent() != null) {
+                        if ((port.getParent().getFlags() & flagMultiSpotNode) != 0) {
+                            link.setOrthogonal(true);
+                            link.setAvoidsNodes(true);
+                            link.setJumpsOver(true);
+                        } else if (port.getParent() instanceof MultiTextNode) {
+                            link.setOrthogonal(true);
+                            link.setArrowHeads(false, true);
+                            link.setArrowShaftLength(0);
                         }
-                    if (graphicviewerlink.getFromPort() != null
-                            && graphicviewerport.getClass() != graphicviewerlink
-                                    .getFromPort().getClass())
-                        graphicviewerlink.setHighlight(GraphicViewerPen.make(
-                                65535,
-                                graphicviewerlink.getPen().getWidth() + 4,
-                                Color.red));
+                    }
+
+                    // If the link connects ports on different kinds of objects,
+                    // highlight it in red
+                    if (link.getFromPort() != null
+                            && port.getClass() != link.getFromPort().getClass()) {
+                        link.setHighlight(GraphicViewerPen.make(
+                                GraphicViewerPen.SOLID, link.getPen()
+                                        .getWidth() + 4, Color.red));
+                    }
                 }
                 break;
         }
@@ -1237,9 +1350,10 @@ public class GraphicViewer extends JFrame
                 localGraphicViewerLink.setBrush(GraphicViewerBrush.gray);
                 localGraphicViewerLink.setArrowHeads(false, true);
             }
-        } else if (paramGraphicViewerViewEvent.getHint() == 25)
+        } else if (paramGraphicViewerViewEvent.getHint() == 25) {
             insertNode(paramGraphicViewerViewEvent.getPointDocCoords(),
                     this.myNodeCounter % 2 == 0);
+        }
     }
 
     public void documentChanged(
@@ -1267,9 +1381,10 @@ public class GraphicViewer extends JFrame
                 Integer.toString(++this.myNodeCounter));
         localGraphicViewerBasicNode.setLabelSpot(0);
         localGraphicViewerBasicNode.setLocation(paramPoint);
-        if (paramBoolean)
+        if (paramBoolean) {
             localGraphicViewerBasicNode
                     .setDrawable(new GraphicViewerRectangle());
+        }
         localGraphicViewerBasicNode.setBrush(GraphicViewerBrush
                 .makeStockBrush(getRandomColor(100)));
         localGraphicViewerBasicNode.setPen(GraphicViewerPen.make(65535, 2,
@@ -1298,6 +1413,7 @@ public class GraphicViewer extends JFrame
         myDoc.endTransaction(s);
     }
 
+    // This calls the appropriate dialog box for the type of object that obj is.
     void callDialog(GraphicViewerObject graphicviewerobject) {
         startTransaction();
         myView.getSelection().clearSelectionHandles(graphicviewerobject);
@@ -1351,11 +1467,12 @@ public class GraphicViewer extends JFrame
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (graphicviewerobject.getParent() != null)
+            if (graphicviewerobject.getParent() != null) {
                 graphicviewerobject.getParent().sendObjectToBack(
                         graphicviewerobject);
-            else
+            } else {
                 myDoc.sendObjectToBack(graphicviewerobject);
+            }
         }
 
         endTransaction(MoveToBackAction.toString());
@@ -1364,8 +1481,9 @@ public class GraphicViewer extends JFrame
     void threeDRectAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(100, 150);
+        }
         GraphicViewer3DRect graphicviewer3drect = new GraphicViewer3DRect(
                 point, new Dimension(55, 25));
         graphicviewer3drect.setBrush(GraphicViewerBrush
@@ -1374,6 +1492,8 @@ public class GraphicViewer extends JFrame
         endTransaction(Insert3DRectAction.toString());
     }
 
+    // Align all object's vertical centers to the vertical center of the primary
+    // selection.
     void verticalAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1384,28 +1504,35 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(0);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(8, new Point(
                         graphicviewerobject1.getLeft(), point.y));
+            }
         } while (true);
         endTransaction(VerticalAction.toString());
     }
 
+    // The default place to put stuff if not dragged there
     Point getDefaultLocation() {
+        // To avoid constantly putting things in the same place, keep shifting
+        // the default location
         if (myDefaultLocation != null) {
             myDefaultLocation.x += 4;
             myDefaultLocation.y += 4;
@@ -1465,14 +1592,16 @@ public class GraphicViewer extends JFrame
     void commentAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(100, 200);
+        }
         Comment comment = new Comment("This is a\nmultiline comment.");
         comment.setTopLeft(point.x, point.y);
         myMainLayer.addObjectAtTail(comment);
         endTransaction(InsertCommentAction.toString());
     }
 
+    // Make the overview window visible.
     void overviewAction() {
         if (myOverview == null) {
             myOverview = new GraphicViewerOverview();
@@ -1486,6 +1615,7 @@ public class GraphicViewer extends JFrame
         UISupport.showDialog(myOverviewDialog);
     }
 
+    /** Display a form to edit the selected GraphicViewerObject's properties. */
     public void doEditProperties() {
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
         if (!graphicviewerselection.isEmpty()) {
@@ -1497,10 +1627,11 @@ public class GraphicViewer extends JFrame
                         .getNextObjectPos(graphicviewerlistposition);
                 callDialog(graphicviewerobject);
             }
-
         }
     }
 
+    // These two actions now work for selected objects that are part of areas as
+    // well as for top-level document objects.
     void moveToFrontAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1510,11 +1641,12 @@ public class GraphicViewer extends JFrame
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (graphicviewerobject.getParent() != null)
+            if (graphicviewerobject.getParent() != null) {
                 graphicviewerobject.getParent().bringObjectToFront(
                         graphicviewerobject);
-            else
+            } else {
                 myDoc.bringObjectToFront(graphicviewerobject);
+            }
         }
 
         endTransaction(MoveToFrontAction.toString());
@@ -1532,8 +1664,9 @@ public class GraphicViewer extends JFrame
     void textAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(150, 50);
+        }
         GraphicViewerText graphicviewertext = new GraphicViewerText(point, 12,
                 "Sample Text", "Serif", true, true, true, 2, false, true);
         graphicviewertext.setResizable(true);
@@ -1545,8 +1678,9 @@ public class GraphicViewer extends JFrame
     void polygonAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(10, 80);
+        }
         GraphicViewerPolygon graphicviewerpolygon = new GraphicViewerPolygon();
         graphicviewerpolygon.setBrush(GraphicViewerBrush
                 .makeStockBrush(Color.red));
@@ -1567,10 +1701,12 @@ public class GraphicViewer extends JFrame
     public ListArea listAreaAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(420, 350);
+        }
         ListArea listarea = new ListArea();
         listarea.initialize();
+        // Have fun trying different orientations and scroll bar arrangements
         switch (myLAorg) {
             case 0 : // '\0'
             default :
@@ -1597,11 +1733,13 @@ public class GraphicViewer extends JFrame
                 myLAorg = 0;
                 break;
         }
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             listarea.addItem(makeListItem(i), null, null, null);
+        }
 
         myMainLayer.addObjectAtTail(listarea);
         listarea.setTopLeft(point.x, point.y);
+        // Start it not with the first object (0)
         listarea.setFirstVisibleIndex(3);
         listarea.setAlignment(0);
         endTransaction(InsertListAreaAction.toString());
@@ -1618,6 +1756,10 @@ public class GraphicViewer extends JFrame
                 .makeStockPen(Color.blue);
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 100; j++) {
+                // GraphicViewerDrawable obj = new GraphicViewerRectangle();
+                // obj.setResizable(false);
+                // obj.setTopLeft(i*40, j*40);
+                // obj.setSize(20, 20);
                 GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                         Integer.toString(i) + "," + Integer.toString(j));
                 graphicviewerbasicnode.setLocation(new Point(i * 40, j * 40));
@@ -1655,6 +1797,7 @@ public class GraphicViewer extends JFrame
         endTransaction(Insert10000Action.toString());
     }
 
+    // Align all object's left sides to the left side of the primary selection.
     void leftAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1665,23 +1808,27 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(1);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(1, new Point(point.x,
                         graphicviewerobject1.getTop()));
+            }
         } while (true);
         endTransaction(LeftAction.toString());
     }
@@ -1692,6 +1839,7 @@ public class GraphicViewer extends JFrame
         updateActions();
     }
 
+    // Make a GraphicViewerSubGraph out of the current selection.
     void subgraphAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1699,9 +1847,12 @@ public class GraphicViewer extends JFrame
                 .getPrimarySelection();
         GraphicViewerSubGraph graphicviewersubgraph = new GraphicViewerSubGraph();
         graphicviewersubgraph.initialize("subgraph!");
+        // Now add the area to the document
         graphicviewerobject.getLayer().addObjectAtTail(graphicviewersubgraph);
+        // Add the selected objects to the area
         graphicviewersubgraph.addCollection(graphicviewerselection, true,
                 myMainLayer);
+        // Update the selection too, for the user's convenience
         graphicviewerselection.selectObject(graphicviewersubgraph);
         endTransaction(SubgraphAction.toString());
     }
@@ -1715,8 +1866,9 @@ public class GraphicViewer extends JFrame
             double d4 = myView.getPrintDocumentSize().height;
             d = Math.min(d1 / d2, d3 / d4);
         }
-        if (d > 2D)
+        if (d > 2D) {
             d = 1.0D;
+        }
         d *= myView.getScale();
         myView.setScale(d);
         myView.setViewPosition(0, 0);
@@ -1732,8 +1884,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort textNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(120, 20);
+        }
         GraphicViewerTextNode graphicviewertextnode = new GraphicViewerTextNode(
                 "text node");
         graphicviewertextnode.setTopLeft(point);
@@ -1744,6 +1897,8 @@ public class GraphicViewer extends JFrame
         return graphicviewertextnode.getBottomPort();
     }
 
+    // Align all object's right sides to the right side of the primary
+    // selection.
     void rightAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1754,23 +1909,27 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(3);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(3, new Point(point.x,
                         graphicviewerobject1.getTop()));
+            }
         } while (true);
         endTransaction(RightAction.toString());
     }
@@ -1779,39 +1938,50 @@ public class GraphicViewer extends JFrame
         Inspector.inspect(myView.getSelection().getPrimarySelection());
     }
 
+    // This action only works on the primary selection, which should be a
+    // GraphicViewerSubGraph
     void ungroupAction() {
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
         GraphicViewerObject graphicviewerobject = graphicviewerselection
                 .getPrimarySelection();
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
-        if (!(graphicviewerobject instanceof GraphicViewerArea))
+        }
+        if (!(graphicviewerobject instanceof GraphicViewerArea)) {
             return;
+        }
         GraphicViewerLayer graphicviewerlayer = graphicviewerobject.getLayer();
-        if (graphicviewerlayer == null)
+        if (graphicviewerlayer == null) {
             return;
+        }
         startTransaction();
         GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
         ArrayList<?> arraylist = null;
+
+        // Special cases for subgraphs--don't promote Handle or Label or other
+        // special subgraph children as stand-alone objects
         if (graphicviewerarea instanceof GraphicViewerSubGraph) {
             GraphicViewerSubGraph graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerarea;
             ArrayList<GraphicViewerObject> arraylist1 = new ArrayList<GraphicViewerObject>();
             GraphicViewerListPosition graphicviewerlistposition = graphicviewersubgraph
                     .getFirstObjectPos();
             do {
-                if (graphicviewerlistposition == null)
+                if (graphicviewerlistposition == null) {
                     break;
+                }
                 GraphicViewerObject graphicviewerobject2 = graphicviewersubgraph
                         .getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewersubgraph
                         .getNextObjectPosAtTop(graphicviewerlistposition);
+                // Check for special subgraph children
                 if (graphicviewerobject2 != graphicviewersubgraph.getHandle()
                         && graphicviewerobject2 != graphicviewersubgraph
                                 .getLabel()
                         && !(graphicviewerobject2 instanceof GraphicViewerPort)
                         && graphicviewerobject2 != graphicviewersubgraph
-                                .getCollapsedObject())
+                                .getCollapsedObject()) {
                     arraylist1.add(graphicviewerobject2);
+                }
             } while (true);
             arraylist = graphicviewerlayer.addCollection(arraylist1, true,
                     myMainLayer);
@@ -1822,15 +1992,20 @@ public class GraphicViewer extends JFrame
         for (int i = 0; i < arraylist.size(); i++) {
             GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) arraylist
                     .get(i);
+            // Update the selectability and visibility, just in case
             graphicviewerobject1.setSelectable(true);
             graphicviewerobject1.setVisible(true);
+            // Update the selection too, for the user's convenience
             graphicviewerselection.extendSelection(graphicviewerobject1);
         }
 
+        // Delete the area
         graphicviewerlayer.removeObject(graphicviewerarea);
         endTransaction(UngroupAction.toString());
     }
 
+    // This makes the widths of all objects equal to the width of the main
+    // selection.
     void sameWidthAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1841,27 +2016,32 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         int i = graphicviewerobject.getWidth();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject1.isTopLevel()
-                    && !(graphicviewerobject1 instanceof GraphicViewerLink))
+                    && !(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setWidth(i);
+            }
         } while (true);
         endTransaction(SameWidthAction.toString());
     }
 
+    // Align all object's tops to the top of the primary selection.
     void topAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1872,23 +2052,27 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(2);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(1, new Point(
                         graphicviewerobject1.getLeft(), point.y));
+            }
         } while (true);
         endTransaction(TopAction.toString());
     }
@@ -1903,6 +2087,8 @@ public class GraphicViewer extends JFrame
         }
     }
 
+    // Align all object's horizontal centers to the horizontal center of the
+    // primary selection.
     void horizontalAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -1913,23 +2099,27 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(0);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(2, new Point(point.x,
                         graphicviewerobject1.getTop()));
+            }
         } while (true);
         endTransaction(HorizontalAction.toString());
     }
@@ -1940,16 +2130,21 @@ public class GraphicViewer extends JFrame
         updateActions();
     }
 
+    // Make a GraphicViewerNode out of the current selection.
     void groupAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
         GraphicViewerObject graphicviewerobject = graphicviewerselection
                 .getPrimarySelection();
         GraphicViewerNode graphicviewernode = new GraphicViewerNode();
+        // Now add the area to the document
         graphicviewerobject.getLayer().addObjectAtTail(graphicviewernode);
+        // Add the selected objects to the area
         ArrayList<GraphicViewerObject> arraylist = graphicviewernode
                 .addCollection(graphicviewerselection, false, myMainLayer);
+        // Update the selection too, for the user's convenience
         graphicviewerselection.selectObject(graphicviewernode);
+        // Make each object not Selectable
         for (int i = 0; i < arraylist.size(); i++) {
             GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) arraylist
                     .get(i);
@@ -1985,11 +2180,13 @@ public class GraphicViewer extends JFrame
         return graphicviewersubgraph;
     }
 
+    // Create a GeneralNode with a random number of input and output ports
     void generalNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(10, 230);
+        }
         GeneralNode generalnode = new GeneralNode();
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
@@ -2011,8 +2208,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort roundTextNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(320, 10);
+        }
         GraphicViewerTextNode graphicviewertextnode = new GraphicViewerTextNode(
                 "rounded text node\ndisplaying three lines\nwith wider insets");
         graphicviewertextnode.setTopLeft(new Point(point.x + 40, point.y));
@@ -2030,8 +2228,9 @@ public class GraphicViewer extends JFrame
     void strokeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(10, 10);
+        }
         GraphicViewerStroke graphicviewerstroke = new GraphicViewerStroke();
         graphicviewerstroke.addPoint(new Point(point.x + 0, point.y + 0));
         graphicviewerstroke.addPoint(new Point(point.x + 68, point.y + 46));
@@ -2048,8 +2247,9 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerdocument
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerdocument
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerdocument
@@ -2062,6 +2262,8 @@ public class GraphicViewer extends JFrame
         } while (true);
     }
 
+    // This makes the heights and widths of all objects equal to the height and
+    // width of the main selection.
     void sameBothAction() {
         startTransaction();
         sameHeightAction();
@@ -2069,10 +2271,13 @@ public class GraphicViewer extends JFrame
         endTransaction(SameBothAction.toString());
     }
 
+    // This enables/disables all known actions.
     public static void updateActions() {
         AppAction.updateAllActions();
     }
 
+    // This makes the heights of all objects equal to the height of the main
+    // selection.
     void sameHeightAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -2083,23 +2288,27 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         int i = graphicviewerobject.getHeight();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject1.isTopLevel()
-                    && !(graphicviewerobject1 instanceof GraphicViewerLink))
+                    && !(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setHeight(i);
+            }
         } while (true);
         endTransaction(SameHeightAction.toString());
     }
@@ -2111,6 +2320,7 @@ public class GraphicViewer extends JFrame
         graphicviewerdocument.endTransaction("LayeredDigraph AutoLayout");
     }
 
+    // Align all object's bottoms to the bottom of the primary selection.
     void bottomAction() {
         startTransaction();
         GraphicViewerSelection graphicviewerselection = myView.getSelection();
@@ -2121,64 +2331,71 @@ public class GraphicViewer extends JFrame
                 .getFirstObjectPos(); graphicviewerobject != null
                 && (graphicviewerobject instanceof GraphicViewerLink)
                 && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
-                .getNextObjectPos(graphicviewerlistposition))
+                .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
+        }
 
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Point point = graphicviewerobject.getSpotLocation(6);
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerselection
                     .getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject1 instanceof GraphicViewerLink))
+            if (!(graphicviewerobject1 instanceof GraphicViewerLink)) {
                 graphicviewerobject1.setSpotLocation(7, new Point(
                         graphicviewerobject1.getLeft(), point.y));
+            }
         } while (true);
         endTransaction(BottomAction.toString());
     }
 
     protected double getRandom() {
-        if (isRandom())
+        if (isRandom()) {
             return Math.random();
-        else
+        } else {
             return 0.56999999999999995D;
+        }
     }
 
-    public static GraphicViewerDocument loadObjects(InputStream inputstream)
+    public static OTVDocument loadObjects(InputStream inputstream)
             throws IOException, ClassNotFoundException {
         ObjectInputStream objectinputstream = new ObjectInputStream(inputstream);
         Object obj = objectinputstream.readObject();
         if (obj instanceof GraphicViewerDocument) {
-            GraphicViewerDocument graphicviewerdocument = (GraphicViewerDocument) obj;
+            OTVDocument graphicviewerdocument = (OTVDocument) obj;
             return graphicviewerdocument;
         } else {
             return null;
         }
     }
 
-    public void processViewChange(GraphicViewerViewEvent graphicviewerviewevent) {
-        switch (graphicviewerviewevent.getHint()) {
-            case 1 : // '\001'
-            case 20 : // '\024'
-            case 21 : // '\025'
+    //==============================================================
+    // Process GraphicViewerViewEvents from the GraphicViewerView
+    //==============================================================
+    public void processViewChange(GraphicViewerViewEvent e) {
+        // If the selection changed, maybe some commands need to be disabled or
+        // re-enabled
+        switch (e.getHint()) {
+            case GraphicViewerViewEvent.UPDATE_ALL :
+            case GraphicViewerViewEvent.SELECTION_GAINED :
+            case GraphicViewerViewEvent.SELECTION_LOST :
                 UpdateControls();
                 break;
-
-            case 37 : // '%'
+            case GraphicViewerViewEvent.SELECTION_STARTING :
                 myUpdatingSelection = true;
                 break;
-
-            case 38 : // '&'
+            case GraphicViewerViewEvent.SELECTION_FINISHED :
                 myUpdatingSelection = false;
                 UpdateControls();
                 break;
-
-            case 108 : // 'l'
+            case GraphicViewerViewEvent.SCALE_CHANGED :
                 myView.updateBorder();
                 break;
         }
@@ -2187,8 +2404,9 @@ public class GraphicViewer extends JFrame
     void multiSpotNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(280, 175);
+        }
         GraphicViewerNode graphicviewernode = new GraphicViewerNode();
         graphicviewernode.setFlags(graphicviewernode.getFlags() | 0x10000);
         GraphicViewerRectangle graphicviewerrectangle = new GraphicViewerRectangle(
@@ -2213,8 +2431,9 @@ public class GraphicViewer extends JFrame
     void multiTextNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(370, 160);
+        }
         MultiTextNode multitextnode = new MultiTextNode();
         multitextnode.initialize();
         multitextnode.setTopLeft(point);
@@ -2229,7 +2448,12 @@ public class GraphicViewer extends JFrame
                 .addString("third line");
         graphicviewertext.setAlignment(2);
         multitextnode.setLinePen(GraphicViewerPen.darkGray);
-        multitextnode.setInsets(new Insets(0, 2, 0, 2));
+        //GraphicViewerRoundRect rr = new GraphicViewerRoundRect();
+        //rr.setSelectable(false);
+        //rr.setArcDimension(new Dimension(20, 20));
+        //tnode.setBackground(rr);
+        //tnode.setInsets(new Insets(5, 5, 5, 5));  // Make room for corners
+        multitextnode.setInsets(new Insets(0, 2, 0, 2)); // Add space on sides
         multitextnode.setItemWidth(100);
         myForegroundLayer.addObjectAtTail(multitextnode);
         endTransaction(InsertMultiTextNodeAction.toString());
@@ -2255,8 +2479,9 @@ public class GraphicViewer extends JFrame
     public GraphicViewerPort selfLoopBasicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(270, 100);
+        }
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 "self loop");
         graphicviewerbasicnode.setInsets(new Insets(10, 18, 10, 18));
@@ -2303,8 +2528,9 @@ public class GraphicViewer extends JFrame
     public void recordNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(500, 100);
+        }
         RecordNode recordnode = makeRecordNode(true, myRNorg);
         recordnode.setTopLeft(point.x + 200, point.y);
         recordnode.setHeight(150);
@@ -2322,9 +2548,10 @@ public class GraphicViewer extends JFrame
         GraphicViewerPort graphicviewerport5 = recordnode.getLeftPort(10);
         GraphicViewerPort graphicviewerport6 = recordnode.getLeftPort(0);
         GraphicViewerPort graphicviewerport7 = recordnode.getLeftPort(19);
-        if (graphicviewerport != null && graphicviewerport4 != null)
+        if (graphicviewerport != null && graphicviewerport4 != null) {
             myForegroundLayer.addObjectAtTail(new GraphicViewerLink(
                     graphicviewerport, graphicviewerport4));
+        }
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage();
         graphicviewerimage.loadImage(
                 (GraphicViewer.class).getResource("star.gif"), true);
@@ -2333,33 +2560,37 @@ public class GraphicViewer extends JFrame
             graphicviewerport4.setStyle(1);
             graphicviewerport4.setPortObject(graphicviewerimage);
         }
-        if (graphicviewerport1 != null && graphicviewerport5 != null)
+        if (graphicviewerport1 != null && graphicviewerport5 != null) {
             myForegroundLayer.addObjectAtTail(new GraphicViewerLink(
                     graphicviewerport1, graphicviewerport5));
+        }
         if (graphicviewerport5 != null) {
             graphicviewerport5.setSize(7, 7);
             graphicviewerport5.setPortObject(graphicviewerimage);
             graphicviewerport5.setStyle(1);
         }
-        if (graphicviewerport2 != null && graphicviewerport6 != null)
+        if (graphicviewerport2 != null && graphicviewerport6 != null) {
             myForegroundLayer.addObjectAtTail(new GraphicViewerLink(
                     graphicviewerport2, graphicviewerport6));
+        }
         if (graphicviewerport6 != null) {
             graphicviewerport6.setSize(7, 7);
             graphicviewerport6.setPortObject(graphicviewerimage);
             graphicviewerport6.setStyle(1);
         }
-        if (graphicviewerport3 != null && graphicviewerport7 != null)
+        if (graphicviewerport3 != null && graphicviewerport7 != null) {
             myForegroundLayer.addObjectAtTail(new GraphicViewerLink(
                     graphicviewerport3, graphicviewerport7));
+        }
         if (graphicviewerport7 != null) {
             graphicviewerport7.setSize(7, 7);
             graphicviewerport7.setPortObject(graphicviewerimage);
             graphicviewerport7.setStyle(1);
         }
-        if (graphicviewerport != null && graphicviewerport6 != null)
+        if (graphicviewerport != null && graphicviewerport6 != null) {
             myForegroundLayer.addObjectAtTail(new GraphicViewerLink(
                     graphicviewerport, graphicviewerport6));
+        }
         GraphicViewerPort graphicviewerport8 = recordnode1.getRightPort(13);
         if (graphicviewerport8 != null) {
             graphicviewerport8.setSize(9, 9);
@@ -2379,8 +2610,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort fixedSizeTextNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(290, 230);
+        }
         GraphicViewerTextNode graphicviewertextnode = new GraphicViewerTextNode(
                 "resizable text node with AutoResize false");
         graphicviewertextnode.setResizable(true);
@@ -2399,8 +2631,9 @@ public class GraphicViewer extends JFrame
     public GraphicViewerPort basicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(40, 140);
+        }
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 Integer.toString(basicNodeCounter));
         if (basicNodeCounter % 18 >= 9) {
@@ -2421,8 +2654,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort fixedSizeCenterLabelBasicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(340, 350);
+        }
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 "resizable basic node with AutoResize false");
         graphicviewerbasicnode.setInsets(new Insets(10, 18, 10, 18));
@@ -2443,8 +2677,9 @@ public class GraphicViewer extends JFrame
     void diamondAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(175, 100);
+        }
         Diamond diamond = new Diamond(point, new Dimension(70, 40));
         diamond.setPen(GraphicViewerPen.make(65535, 3, Color.magenta));
         myMainLayer.addObjectAtTail(diamond);
@@ -2454,8 +2689,9 @@ public class GraphicViewer extends JFrame
     public void ellipseAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(100, 250);
+        }
         GraphicViewerEllipse graphicviewerellipse = new GraphicViewerEllipse(
                 point, new Dimension(50, 75));
         graphicviewerellipse.setBrush(GraphicViewerBrush
@@ -2471,13 +2707,18 @@ public class GraphicViewer extends JFrame
             myMainLayer.setTransparency((float) getRandom());
             myBackgroundLayer.setVisible(getRandom() >= 0.5D);
         } else {
+            // Find which layer the selection is in (well, the first object in
+            // the selection)
             GraphicViewerObject graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerselection.getFirstObjectPos());
             GraphicViewerLayer graphicviewerlayer = graphicviewerobject
                     .getLayer();
+            // Let's choose the layer behind that one
             graphicviewerlayer = graphicviewerlayer.getPrevLayer();
-            if (graphicviewerlayer == null)
+            if (graphicviewerlayer == null) {
                 graphicviewerlayer = myForegroundLayer;
+            }
+            // Now move all the selected objects to that layer
             for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerselection
                     .getFirstObjectPos(); graphicviewerlistposition != null;) {
                 GraphicViewerObject graphicviewerobject1 = graphicviewerselection
@@ -2495,8 +2736,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort rectBasicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(90, 350);
+        }
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 "rectangular basic node");
         graphicviewerbasicnode.setLabelSpot(0);
@@ -2512,11 +2754,13 @@ public class GraphicViewer extends JFrame
     void roundedRectangleAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(180, 150);
+        }
         OTVRoundRect OTVRoundRect = new OTVRoundRect(point, new Dimension(80,
                 80), new Dimension(15, 30));
         OTVRoundRect.setPen(GraphicViewerPen.make(4, 3, Color.darkGray));
+        // Brush gets determined by GraphicViewerRoundRect
         myMainLayer.addObjectAtTail(OTVRoundRect);
         endTransaction(InsertRoundedRectangleAction.toString());
     }
@@ -2524,10 +2768,13 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort draggableLabelIconicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(440, 110);
+        }
         GraphicViewerIconicNode graphicviewericonicnode = new GraphicViewerIconicNode(
                 "draggable label");
+        // Replace the iconic node's standard image with a new one displaying a
+        // GIF
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
         graphicviewerimage.loadImage(
@@ -2543,8 +2790,9 @@ public class GraphicViewer extends JFrame
     void multiPortNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(10, 170);
+        }
         MultiPortNode multiportnode = new MultiPortNode();
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 40, 40));
@@ -2557,14 +2805,16 @@ public class GraphicViewer extends JFrame
                     8 * ((int) (getRandom() * 6D) - 1));
             byte byte0 = 0;
             if (point1.x > point1.y) {
-                if (point1.x < 40 - point1.y)
+                if (point1.x < 40 - point1.y) {
                     byte0 = 2;
-                else
+                } else {
                     byte0 = 4;
-            } else if (point1.x > 40 - point1.y)
+                }
+            } else if (point1.x > 40 - point1.y) {
                 byte0 = 6;
-            else
+            } else {
                 byte0 = 8;
+            }
             new MultiPortNodePort(true, true, byte0, point1,
                     new Dimension(8, 8), graphicviewerimage, multiportnode);
         }
@@ -2576,7 +2826,8 @@ public class GraphicViewer extends JFrame
     public void stuffAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        setDefaultLocation(null);
+        setDefaultLocation(null); // Position everything at absolute default
+                                  // locations
         GraphicViewerPort graphicviewerport2 = fixedSizeCenterLabelBasicNodeAction();
         GraphicViewerPort graphicviewerport4 = fixedSizeTextNodeAction();
         multiPortNodeAction();
@@ -2677,6 +2928,7 @@ public class GraphicViewer extends JFrame
         textAction();
         threeDRectAction();
         commentAction();
+        insertSanKeyNodes();
         DecoratedTextNode decoratedtextnode = new DecoratedTextNode("decorated");
         decoratedtextnode.setLocation(123, 123);
         myDoc.addObjectAtTail(decoratedtextnode);
@@ -2693,10 +2945,12 @@ public class GraphicViewer extends JFrame
     public GraphicViewerPort iconicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(340, 110);
+        }
         GraphicViewerIconicNode graphicviewericonicnode = new GraphicViewerIconicNode(
                 "an iconic node");
+        // Modify the iconic node's standard image to display a GIF
         graphicviewericonicnode.getImage().setSize(50, 50);
         graphicviewericonicnode.getImage().loadImage(
                 (GraphicViewer.class).getResource("document.png"), true);
@@ -2709,8 +2963,9 @@ public class GraphicViewer extends JFrame
     public void simpleNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(100, 70);
+        }
         SimpleNode simplenode = new SimpleNode();
         GraphicViewerImage graphicviewerimage = new GraphicViewerImage(
                 new Rectangle(0, 0, 50, 50));
@@ -2725,8 +2980,9 @@ public class GraphicViewer extends JFrame
     public void rectangleAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(180, 250);
+        }
         GraphicViewerRectangle graphicviewerrectangle = new GraphicViewerRectangle(
                 point, new Dimension(75, 75));
         graphicviewerrectangle.setBrush(GraphicViewerBrush
@@ -2738,8 +2994,9 @@ public class GraphicViewer extends JFrame
     GraphicViewerPort centerLabelBasicNodeAction() {
         startTransaction();
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(270, 30);
+        }
         GraphicViewerBasicNode graphicviewerbasicnode = new GraphicViewerBasicNode(
                 "basic node\ncenter label");
         graphicviewerbasicnode.setInsets(new Insets(10, 18, 10, 18));
@@ -2756,7 +3013,7 @@ public class GraphicViewer extends JFrame
     }
 
     void openProcess() {
-        GraphicViewerDocument doc = myView.getDoc();
+        OTVDocument doc = myView.getDocument();
         String defaultLoc = doc.getLocation();
         doc = open(this, defaultLoc);
         if (doc != null) {
@@ -2781,7 +3038,7 @@ public class GraphicViewer extends JFrame
 
     void saveAsProcess() {
         if (getCurrentView() != null) {
-            getCurrentView().getDoc();
+            getCurrentView().getDocument();
             saveAs(".wfl");
         }
     }
@@ -2804,8 +3061,9 @@ public class GraphicViewer extends JFrame
                     .getNextObjectPosAtTop(graphicviewerlistposition);
             if (graphicviewerobject instanceof GraphicViewerBasicNode) {
                 GraphicViewerBasicNode graphicviewerbasicnode = (GraphicViewerBasicNode) graphicviewerobject;
-                if (graphicviewerbasicnode.getLabel().getText().equals(s))
+                if (graphicviewerbasicnode.getLabel().getText().equals(s)) {
                     return graphicviewerbasicnode;
+                }
             }
         }
 
@@ -2813,6 +3071,7 @@ public class GraphicViewer extends JFrame
     }
 
     GraphicViewerObject makeListItem(int i) {
+        // Just for fun, have a differently sized (and looking) item
         if (i == 7) {
             GraphicViewerPolygon graphicviewerpolygon = new GraphicViewerPolygon();
             graphicviewerpolygon.setBrush(GraphicViewerBrush
@@ -2858,9 +3117,11 @@ public class GraphicViewer extends JFrame
         graphicviewertext2.setSelectBackground(true);
         graphicviewertext2.setBkColor(myView.getSecondarySelectionColor());
         graphicviewertext2.setFaceName("Helvetica");
+        // For fun, if it's a prime number, make it bold
         if (i == 2 || i == 3 || i == 5 || i == 7 || i == 11 || i == 13
-                || i == 17 || i == 19)
+                || i == 17 || i == 19) {
             graphicviewertext2.setBold(true);
+        }
         return graphicviewertext2;
     }
 
@@ -2874,36 +3135,43 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerobjectsimplecollection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerobjectsimplecollection
                     .getNextObjectPosAtTop(graphicviewerlistposition);
-            if (graphicviewerobject instanceof GraphicViewerSubGraph) {
+            if (graphicviewerobject instanceof GraphicViewerSubGraph) { // Recursively lay out subgraphs; make sure they are expanded
                 GraphicViewerSubGraph graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerobject;
                 boolean flag = !graphicviewersubgraph.isExpanded();
-                if (flag)
+                if (flag) {
                     graphicviewersubgraph.expand();
+                }
                 layoutCollection(
                         graphicviewerdocument,
                         ((IGraphicViewerObjectSimpleCollection) (graphicviewersubgraph)));
-                if (flag)
+                if (flag) {
                     graphicviewersubgraph.collapse();
+                }
             }
         } while (true);
-        Network graphicviewernetwork = new Network(
+
+        // Create a GraphicViewerNetwork so we can control exactly which nodes
+        // (and links) are to be laid out
+        GraphicViewerNetwork graphicviewernetwork = new GraphicViewerNetwork(
                 graphicviewerobjectsimplecollection);
         graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = graphicviewerobjectsimplecollection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerobjectsimplecollection
                     .getNextObjectPosAtTop(graphicviewerlistposition);
-            if (graphicviewerobject1 instanceof GraphicViewerLabeledLink) {
+            if (graphicviewerobject1 instanceof GraphicViewerLabeledLink) { // Don't lay out the labels of a labeled link
                 GraphicViewerLabeledLink graphicviewerlabeledlink = (GraphicViewerLabeledLink) graphicviewerobject1;
                 graphicviewernetwork.deleteNode(graphicviewerlabeledlink
                         .getFromLabel());
@@ -2912,10 +3180,11 @@ public class GraphicViewer extends JFrame
                 graphicviewernetwork.deleteNode(graphicviewerlabeledlink
                         .getToLabel());
             } else if (!(graphicviewerobject1 instanceof GraphicViewerNode)
-                    && !(graphicviewerobject1 instanceof GraphicViewerLink))
+                    && !(graphicviewerobject1 instanceof GraphicViewerLink)) { // Ignore other objects
                 graphicviewernetwork.deleteNode(graphicviewerobject1);
+            }
         } while (true);
-        if (graphicviewerobjectsimplecollection instanceof GraphicViewerSubGraph) {
+        if (graphicviewerobjectsimplecollection instanceof GraphicViewerSubGraph) { // Don't lay out any of the special subgraph children
             GraphicViewerSubGraph graphicviewersubgraph1 = (GraphicViewerSubGraph) graphicviewerobjectsimplecollection;
             graphicviewernetwork.deleteNode(graphicviewersubgraph1.getHandle());
             graphicviewernetwork.deleteNode(graphicviewersubgraph1.getLabel());
@@ -2923,18 +3192,20 @@ public class GraphicViewer extends JFrame
             graphicviewernetwork.deleteNode(graphicviewersubgraph1
                     .getCollapsedObject());
         }
-        LayeredDigraphAutoLayout graphicviewerlayereddigraphautolayout = new LayeredDigraphAutoLayout(
+        GraphicViewerLayeredDigraphAutoLayout graphicviewerlayereddigraphautolayout = new GraphicViewerLayeredDigraphAutoLayout(
                 graphicviewerdocument, graphicviewernetwork);
         graphicviewerlayereddigraphautolayout.setDirectionOption(3);
         graphicviewerlayereddigraphautolayout.performLayout();
     }
 
     public void UpdateControls() {
-        if (myUpdatingSelection)
+        if (myUpdatingSelection) {
             return;
+        }
         myView.updateBorder();
-        if (Inspector.getInspector() != null)
+        if (Inspector.getInspector() != null) {
             Inspector.inspect(myView.getSelection().getPrimarySelection());
+        }
         updateActions();
     }
 
@@ -2953,12 +3224,16 @@ public class GraphicViewer extends JFrame
 
     RecordNode makeRecordNode(boolean flag, boolean flag1) {
         Point point = getDefaultLocation();
-        if (point == null)
+        if (point == null) {
             point = new Point(20, 250);
+        }
         RecordNode recordnode = new RecordNode();
         recordnode.initialize();
         recordnode.setScrollBarOnRight(flag);
         recordnode.setVertical(flag1);
+        //tnode.setAlignment(ListArea.ALIGN_RIGHT);  // Icons on left, text on
+        //                                           // right
+
         GraphicViewerText graphicviewertext = new GraphicViewerText("a Record");
         graphicviewertext.setAlignment(2);
         graphicviewertext.setBkColor(Color.blue);
@@ -2966,20 +3241,22 @@ public class GraphicViewer extends JFrame
         graphicviewertext.setBold(true);
         graphicviewertext.setAutoResize(false);
         graphicviewertext.setClipping(true);
-        if (!recordnode.isVertical() && flag)
+        if (!recordnode.isVertical() && flag) {
             recordnode.setFooter(graphicviewertext);
-        else
+        } else {
             recordnode.setHeader(graphicviewertext);
+        }
         for (int i = 0; i < 20; i++) {
             GraphicViewerObject graphicviewerobject = makeListItem(i);
             GraphicViewerImage graphicviewerimage = new GraphicViewerImage();
             graphicviewerimage.loadImage(
                     (GraphicViewer.class).getResource("document.png"), true);
             graphicviewerimage.setSelectable(false);
-            if (recordnode.isVertical())
+            if (recordnode.isVertical()) {
                 graphicviewerimage.setSize(10, 12);
-            else
+            } else {
                 graphicviewerimage.setSize(30, 40);
+            }
             GraphicViewerPort graphicviewerport = null;
             GraphicViewerPort graphicviewerport1 = null;
             if (recordnode.isScrollBarOnRight()) {
@@ -3009,15 +3286,17 @@ public class GraphicViewer extends JFrame
         String ext = ".xhtml";
         JFileChooser chooser = new JFileChooser();
         String loc = myDoc.getLocation();
-        if (loc.equals(""))
-            loc = getCurrentView().getDoc().getLocation();
+        if (loc.equals("")) {
+            loc = getCurrentView().getDocument().getLocation();
+        }
         File currentFile = new File(loc);
         chooser.setCurrentDirectory(currentFile);
         chooser.setAcceptAllFileFilterUsed(false);
         Filter svgFilter1 = new Filter(ext, graphicViewerSVGXML);
         chooser.addChoosableFileFilter(svgFilter1);
-        if (fileType.equalsIgnoreCase(ext))
+        if (fileType.equalsIgnoreCase(ext)) {
             chooser.setFileFilter(svgFilter1);
+        }
         int returnVal = chooser.showSaveDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             Filter FileFilter = (Filter) (chooser.getFileFilter());
@@ -3037,13 +3316,14 @@ public class GraphicViewer extends JFrame
         }
     }
 
-    public GraphicViewerDocument open(Component parent, String defaultLocation) {
+    public OTVDocument open(Component parent, String defaultLocation) {
         JFileChooser chooser = new JFileChooser();
         if ((defaultLocation != null) && (!defaultLocation.equals(""))) {
             File currentFile = new File(defaultLocation);
             chooser.setCurrentDirectory(currentFile);
-        } else
+        } else {
             chooser.setCurrentDirectory(null);
+        }
         chooser.setAcceptAllFileFilterUsed(false);
         Filter svgInputFilter = new Filter(".xhtml",
                 "Graphic Viewer SVG with XML extensions (*.xhtml)");
@@ -3056,12 +3336,14 @@ public class GraphicViewer extends JFrame
             loc.toLowerCase();
             FileInputStream fstream = null;
             try {
-                GraphicViewerDocument doc = null;
+                OTVDocument doc = null;
                 fstream = new FileInputStream(loc);
-                if (loc.endsWith(".xhtml"))
+                if (loc.endsWith(".xhtml")) {
                     doc = myDoc.loadSVG1(fstream);
-                if (doc == null)
+                }
+                if (doc == null) {
                     return null;
+                }
                 doc.setName(name);
                 setTitle(myDoc.getName() + " - " + Main.APPLICATION_NAME
                         + " ( " + this + " )");
@@ -3088,8 +3370,9 @@ public class GraphicViewer extends JFrame
                 return null;
             } finally {
                 try {
-                    if (fstream != null)
+                    if (fstream != null) {
                         fstream.close();
+                    }
                 } catch (Exception e) {
                     ExceptionDialog.ignoreException(e);
                 }
@@ -3116,8 +3399,9 @@ public class GraphicViewer extends JFrame
                 UISupport.getDialogs().showErrorMessage(msg);
             } finally {
                 try {
-                    if (fstream != null)
+                    if (fstream != null) {
                         fstream.close();
+                    }
                 } catch (Exception e) {
                     ExceptionDialog.ignoreException(e);
                 }
@@ -3127,42 +3411,59 @@ public class GraphicViewer extends JFrame
     }
 
     public void initPalette() {
-        GraphicViewerDocument graphicviewerdocument = myDoc;
+        OTVDocument graphicviewerdocument = myDoc;
         GraphicViewerLayer graphicviewerlayer = myBackgroundLayer;
         GraphicViewerLayer graphicviewerlayer1 = myMainLayer;
         GraphicViewerLayer graphicviewerlayer2 = myForegroundLayer;
-        GraphicViewerDocument graphicviewerdocument1 = myPalette.getDocument();
+
+        OTVDocument graphicviewerdocument1 = myPalette.getDocument();
+
+        // Don't care about undo/redo for the palette, so don't need to call
+        // paletteDoc.fireForedate here
         graphicviewerdocument1.setSuspendUpdates(true);
-        myDoc = graphicviewerdocument1;
+
+        myDoc = graphicviewerdocument1; // Temporarily, so objects get created
+                                        // in palette
         myBackgroundLayer = graphicviewerdocument1.getDefaultLayer();
         myMainLayer = graphicviewerdocument1.getDefaultLayer();
         myForegroundLayer = graphicviewerdocument1.getDefaultLayer();
-        stuffAction();
+        stuffAction(); // Make a bunch of stuff in the palette, into myDoc
+
+        // Remove all links between nodes from palette
         ArrayList<GraphicViewerObject> arraylist = new ArrayList<GraphicViewerObject>();
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerdocument1
                 .getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = graphicviewerdocument1
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerdocument1
                     .getNextObjectPosAtTop(graphicviewerlistposition);
-            if (graphicviewerobject instanceof GraphicViewerLink)
+            if (graphicviewerobject instanceof GraphicViewerLink) {
                 arraylist.add(graphicviewerobject);
+            }
         } while (true);
-        for (int i = 0; i < arraylist.size(); i++)
+        for (int i = 0; i < arraylist.size(); i++) {
             graphicviewerdocument1.removeObject((GraphicViewerObject) arraylist
                     .get(i));
+        }
 
-        myDoc = graphicviewerdocument;
+        myDoc = graphicviewerdocument; // Switch back to normal document
         myBackgroundLayer = graphicviewerlayer;
         myMainLayer = graphicviewerlayer1;
         myForegroundLayer = graphicviewerlayer2;
+
         graphicviewerdocument1.setSuspendUpdates(false);
+        // Don't care about undo/redo for the palette, so don't need to call
+        // paletteDoc.fireUpdate here
     }
 
     void initMenus() {
+        //==============================================================
+        // Set up menu bar
+        //==============================================================
         filemenu.setText("File");
         filemenu.add(FileNewAction);
         filemenu.add(FileOpenAction);
@@ -3173,6 +3474,7 @@ public class GraphicViewer extends JFrame
         filemenu.addSeparator();
         filemenu.add(FileSaveAsAction);
         mainMenuBar.add(filemenu);
+
         editmenu.setText("Edit");
         editmenu.add(CutAction).setAccelerator(KeyStroke.getKeyStroke(88, 2));
         editmenu.add(CopyAction).setAccelerator(KeyStroke.getKeyStroke(67, 2));
@@ -3180,13 +3482,23 @@ public class GraphicViewer extends JFrame
         editmenu.add(SelectAllAction).setAccelerator(
                 KeyStroke.getKeyStroke(65, 2));
         editmenu.addSeparator();
+
+        // Add commands for undo/redo
         UndoMenuItem = editmenu.add(UndoAction);
         UndoMenuItem.setAccelerator(KeyStroke.getKeyStroke(90, 2));
         UndoMenuItem.setMnemonic('U');
+
         RedoMenuItem = editmenu.add(RedoAction);
         RedoMenuItem.setAccelerator(KeyStroke.getKeyStroke(89, 2));
         RedoMenuItem.setMnemonic('R');
+
         editmenu.addSeparator();
+
+        // turn on undo/redo
+        // Because this module does not have a GraphicViewerDocument subclass
+        // where we could override endTransaction(String), we do it here as part
+        // of the undo manager. We need to update all of the action menu items
+        // after each transaction
         myDoc.setUndoManager(new GraphicViewerUndoManager() {
 
             private static final long serialVersionUID = 4120351778624595021L;
@@ -3227,6 +3539,7 @@ public class GraphicViewer extends JFrame
         editmenu.add(OverviewAction).setAccelerator(
                 KeyStroke.getKeyStroke(79, 2));
         mainMenuBar.add(editmenu);
+
         insertmenu.setText("Insert");
         insertmenu.add(InsertStuffAction);
         insertmenu.add(InsertStrokeAction);
@@ -3261,6 +3574,7 @@ public class GraphicViewer extends JFrame
         insertmenu.add(AddLeftPortAction);
         insertmenu.add(AddRightPortAction);
         mainMenuBar.add(insertmenu);
+
         layoutmenu.setText("Layout");
         layoutmenu.add(LeftAction);
         layoutmenu.add(HorizontalAction);
@@ -3279,6 +3593,44 @@ public class GraphicViewer extends JFrame
         setJMenuBar(mainMenuBar);
     }
 
+    void insertSanKeyNodes() {
+        startTransaction();
+        SanKeyNode snode = new SanKeyNode("star");
+        // Modify the iconic node's standard image to display a GIF
+        snode.getImage().setSize(50, 50);
+        snode.getImage().loadImage(GraphicViewer.class.getResource("star.gif"),
+                true);
+        snode.setLocation(450, 350);
+        myForegroundLayer.addObjectAtTail(snode);
+
+        SanKeyNode snode2 = new SanKeyNode("doc1");
+        snode2.getImage().setSize(50, 50);
+        snode2.getImage().loadImage(
+                GraphicViewer.class.getResource("doc1.png"), true);
+        snode2.setLocation(600, 300);
+        myForegroundLayer.addObjectAtTail(snode2);
+
+        SanKeyNode snode3 = new SanKeyNode("doc2");
+        snode3.getImage().setSize(50, 50);
+        snode3.getImage().loadImage(
+                GraphicViewer.class.getResource("doc2.png"), true);
+        snode3.setLocation(600, 400);
+        myForegroundLayer.addObjectAtTail(snode3);
+
+        GraphicViewerLink link1 = new GraphicViewerLink(snode.getPort(),
+                snode2.getPort());
+        link1.setPen(GraphicViewerPen.make(GraphicViewerPen.SOLID, 20,
+                Color.blue));
+        myMainLayer.addObjectAtTail(link1);
+
+        GraphicViewerLink link2 = new GraphicViewerLink(snode.getPort(),
+                snode3.getPort());
+        link2.setPen(GraphicViewerPen.make(GraphicViewerPen.SOLID, 10,
+                new Color(0, 128, 0)));
+        myMainLayer.addObjectAtTail(link2);
+        endTransaction(InsertGraphOfGraphsAction.toString());
+    }
+
     public static GraphicViewer getInstance() {
         return GRAPHIC_VIEWER;
     }
@@ -3286,5 +3638,39 @@ public class GraphicViewer extends JFrame
     @Override
     public String toString() {
         return "Graphic Viewer";
+    }
+
+    /**
+     * Shows or hides the component depending on the boolean flag b.
+     * @param b  if true, show the component; otherwise, hide the component.
+     * @see javax.swing.JComponent#isVisible
+     */
+    public void setVisible(boolean b) {
+        if (b) {
+            setLocation(50, 50);
+        }
+        super.setVisible(b);
+    }
+
+    // This public method exists so that any public GraphicViewer action methods
+    // can be shared by other applications. In particular, the GraphicViewer
+    // regression test application makes used of several of these methods.
+    public void setMainLayer(GraphicViewerLayer layer) {
+        myMainLayer = layer;
+    }
+
+    // Create an image for a GraphicViewerObject.
+    public BufferedImage getObjectImage(GraphicViewerObject obj,
+            GraphicViewerView view) {
+        Rectangle r = new Rectangle(obj.getBoundingRect());
+        obj.expandRectByPenWidth(r);
+        BufferedImage img = new BufferedImage(r.width, r.height,
+                BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.translate(-r.x, -r.y);
+        view.applyRenderingHints(g2);
+        obj.paint(g2, view);
+        g2.dispose();
+        return img;
     }
 }

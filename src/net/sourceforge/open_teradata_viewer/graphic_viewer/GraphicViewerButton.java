@@ -39,48 +39,23 @@ public class GraphicViewerButton extends GraphicViewerControl {
 
     private static final long serialVersionUID = -4569987445267136858L;
 
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    class JBListener implements ActionListener {
-
-        public void actionPerformed(ActionEvent actionevent) {
-            a.fireUpdate(22, 0, _fldif);
-            Point point = _fldif.getSpotLocation(0);
-            Point point1 = a.docToViewCoords(point);
-            _fldif.doMouseClick(0, point, point1, a);
-        }
-
-        GraphicViewerButton _fldif;
-        GraphicViewerView a;
-
-        JBListener(GraphicViewerButton graphicviewerbutton1,
-                GraphicViewerView graphicviewerview) {
-            _fldif = graphicviewerbutton1;
-            a = graphicviewerview;
-        }
-    }
+    public static final int ChangedLabel = 1001;
+    private String myLabel = "";
+    private int myFontSize = 10;
 
     public GraphicViewerButton() {
-        dU = "";
-        dV = 10;
     }
 
     public GraphicViewerButton(Rectangle rectangle, String s) {
         super(rectangle);
-        dU = "";
-        dV = 10;
-        dU = s;
+        myLabel = s;
     }
 
     public GraphicViewerButton(Point point, Dimension dimension, String s) {
         super(point, dimension);
-        dU = "";
-        dV = 10;
-        dU = s;
+        myLabel = "";
+        myFontSize = 10;
+        myLabel = s;
     }
 
     public GraphicViewerObject copyObject(
@@ -88,8 +63,8 @@ public class GraphicViewerButton extends GraphicViewerControl {
         GraphicViewerButton graphicviewerbutton = (GraphicViewerButton) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerbutton != null) {
-            graphicviewerbutton.dU = dU;
-            graphicviewerbutton.dV = dV;
+            graphicviewerbutton.myLabel = myLabel;
+            graphicviewerbutton.myFontSize = myFontSize;
         }
         return graphicviewerbutton;
     }
@@ -97,18 +72,19 @@ public class GraphicViewerButton extends GraphicViewerControl {
     public JComponent createComponent(GraphicViewerView graphicviewerview) {
         JButton jbutton = new JButton(getLabel());
         Font font = jbutton.getFont();
-        dV = font.getSize();
+        myFontSize = font.getSize();
         jbutton.addActionListener(new JBListener(this, graphicviewerview));
         return jbutton;
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         if (domdoc.GraphicViewerXMLOutputEnabled()) {
-            IDomElement domelement1 = domdoc.createGraphicViewerClassElement(
-                    "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerButton",
-                    domelement);
-            domelement1.setAttribute("fontsize", Integer.toString(dV));
-            domelement1.setAttribute("label", dU);
+            IDomElement domelement1 = domdoc
+                    .createGraphicViewerClassElement(
+                            "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerButton",
+                            domelement);
+            domelement1.setAttribute("fontsize", Integer.toString(myFontSize));
+            domelement1.setAttribute("label", myLabel);
         }
         if (domdoc.SVGOutputEnabled()) {
             IDomElement domelement2 = domdoc.createElement("rect");
@@ -119,11 +95,11 @@ public class GraphicViewerButton extends GraphicViewerControl {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            dV = Integer.parseInt(domelement1.getAttribute("fontsize"));
-            dU = domelement1.getAttribute("label");
+            myFontSize = Integer.parseInt(domelement1.getAttribute("fontsize"));
+            myLabel = domelement1.getAttribute("label");
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
         }
@@ -158,10 +134,11 @@ public class GraphicViewerButton extends GraphicViewerControl {
             if (Math.abs(graphicviewerview.getScale() - 1.0D) >= 0.01D) {
                 Font font = jbutton.getFont();
                 Font font1 = new Font(font.getFontName(), font.getStyle(),
-                        (int) ((double) dV * graphicviewerview.getScale()));
+                        (int) ((double) myFontSize * graphicviewerview
+                                .getScale()));
                 jcomponent.setFont(font1);
             }
-            Rectangle rectangle = graphicviewerview.c();
+            Rectangle rectangle = graphicviewerview.getTempRectangle();
             Rectangle rectangle1 = getBoundingRect();
             rectangle.x = rectangle1.x;
             rectangle.y = rectangle1.y;
@@ -175,13 +152,13 @@ public class GraphicViewerButton extends GraphicViewerControl {
     }
 
     public String getLabel() {
-        return dU;
+        return myLabel;
     }
 
     public void setLabel(String s) {
-        String s1 = dU;
+        String s1 = myLabel;
         if (!s1.equals(s)) {
-            dU = s == null ? "" : s;
+            myLabel = s == null ? "" : s;
             update(1001, 0, s1);
         }
     }
@@ -208,7 +185,28 @@ public class GraphicViewerButton extends GraphicViewerControl {
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
 
-    public static final int ChangedLabel = 1001;
-    private String dU;
-    private int dV;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    class JBListener implements ActionListener {
+
+        GraphicViewerButton button;
+        GraphicViewerView view;
+
+        JBListener(GraphicViewerButton graphicviewerbutton1,
+                GraphicViewerView graphicviewerview) {
+            button = graphicviewerbutton1;
+            view = graphicviewerview;
+        }
+
+        public void actionPerformed(ActionEvent actionevent) {
+            view.fireUpdate(22, 0, button);
+            Point point = button.getSpotLocation(0);
+            Point point1 = view.docToViewCoords(point);
+            button.doMouseClick(0, point, point1, view);
+        }
+    }
 }

@@ -35,9 +35,13 @@ public class GraphicViewerArea extends GraphicViewerObject
 
     private static final long serialVersionUID = 6303819593066819843L;
 
+    public static final int ChangedPickableBackground = 1900;
+    private static final int ChangedNoClear = 1901;
+    static final int flagPickableBackground = 32768;
+    private GraphicViewerObjList myChildren = new GraphicViewerObjList(true);
+    private GraphicViewerListPosition myCurrentListPosition = null;
+
     public GraphicViewerArea() {
-        cE = new GraphicViewerObjList(true);
-        cG = null;
     }
 
     public GraphicViewerObject copyObject(
@@ -58,109 +62,123 @@ public class GraphicViewerArea extends GraphicViewerObject
         for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            graphicviewerarea._mthdo(
+            graphicviewerarea.addObjectAtTailInternal(
                     graphicviewercopyenvironment.copy(graphicviewerobject),
                     true);
         }
     }
 
-    void a(GraphicViewerLayer graphicviewerlayer, int j, Object obj,
+    void setLayer(GraphicViewerLayer graphicviewerlayer, int j, Object obj,
             GraphicViewerObject graphicviewerobject) {
         if (graphicviewerlayer != null) {
-            super.a(graphicviewerlayer, j, obj, graphicviewerobject);
+            super.setLayer(graphicviewerlayer, j, obj, graphicviewerobject);
             for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
                 GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-                graphicviewerobject1.a(graphicviewerlayer, -1, null,
+                graphicviewerobject1.setLayer(graphicviewerlayer, -1, null,
                         graphicviewerobject);
             }
-
         } else {
             for (GraphicViewerListPosition graphicviewerlistposition1 = getFirstObjectPos(); graphicviewerlistposition1 != null;) {
                 GraphicViewerObject graphicviewerobject2 = getObjectAtPos(graphicviewerlistposition1);
                 graphicviewerlistposition1 = getNextObjectPos(graphicviewerlistposition1);
-                graphicviewerobject2.a(null, -1, null, graphicviewerobject);
+                graphicviewerobject2.setLayer(null, -1, null,
+                        graphicviewerobject);
             }
 
-            super.a(null, j, obj, graphicviewerobject);
+            super.setLayer(null, j, obj, graphicviewerobject);
         }
     }
 
-    void a(GraphicViewerView graphicviewerview,
+    void setView(GraphicViewerView graphicviewerview,
             GraphicViewerObject graphicviewerobject) {
         for (GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            graphicviewerobject1.a(graphicviewerview, graphicviewerobject);
+            graphicviewerobject1
+                    .setView(graphicviewerview, graphicviewerobject);
         }
 
-        super.a(graphicviewerview, graphicviewerobject);
+        super.setView(graphicviewerview, graphicviewerobject);
     }
 
     public void setPickableBackground(boolean flag) {
-        boolean flag1 = (g() & 0x8000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x8000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x8000);
-            else
-                _mthfor(g() & 0xffff7fff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x8000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xffff7fff);
+            }
             update(1900, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isPickableBackground() {
-        return (g() & 0x8000) != 0;
+        return (getInternalFlags() & 0x8000) != 0;
     }
 
     public GraphicViewerObject pick(Point point, boolean flag) {
-        if (!isVisible())
+        if (!isVisible()) {
             return null;
-        if (!getBoundingRect().contains(point.x, point.y))
+        }
+        if (!getBoundingRect().contains(point.x, point.y)) {
             return null;
+        }
         GraphicViewerObject graphicviewerobject = pickObject(point, flag);
-        if (graphicviewerobject != null)
+        if (graphicviewerobject != null) {
             return graphicviewerobject;
+        }
         if (isPickableBackground()) {
-            if (!flag)
+            if (!flag) {
                 return this;
-            if (isSelectable())
+            }
+            if (isSelectable()) {
                 return this;
+            }
             for (GraphicViewerArea graphicviewerarea = getParent(); graphicviewerarea != null; graphicviewerarea = graphicviewerarea
-                    .getParent())
-                if (graphicviewerarea.isSelectable())
+                    .getParent()) {
+                if (graphicviewerarea.isSelectable()) {
                     return graphicviewerarea;
-
+                }
+            }
         }
         return null;
     }
 
     public GraphicViewerObject pickObject(Point point, boolean flag) {
-        if (!getBoundingRect().contains(point.x, point.y))
+        if (!getBoundingRect().contains(point.x, point.y)) {
             return null;
+        }
         for (GraphicViewerListPosition graphicviewerlistposition = getLastObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getPrevObjectPos(graphicviewerlistposition);
             GraphicViewerObject graphicviewerobject1 = graphicviewerobject
                     .pick(point, flag);
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 return graphicviewerobject1;
+            }
         }
 
         return null;
     }
 
-    public ArrayList<GraphicViewerObject> pickObjects(Point point,
-            boolean flag, ArrayList<GraphicViewerObject> arraylist, int j) {
-        if (arraylist == null)
-            arraylist = new ArrayList<GraphicViewerObject>();
-        if (arraylist.size() >= j)
+    public ArrayList pickObjects(Point point, boolean flag,
+            ArrayList arraylist, int j) {
+        if (arraylist == null) {
+            arraylist = new ArrayList();
+        }
+        if (arraylist.size() >= j) {
             return arraylist;
-        if (!isVisible())
+        }
+        if (!isVisible()) {
             return arraylist;
+        }
         GraphicViewerObject graphicviewerobject = pickObject(point, flag);
         if (graphicviewerobject != null
-                && !arraylist.contains(graphicviewerobject))
+                && !arraylist.contains(graphicviewerobject)) {
             arraylist.add(graphicviewerobject);
+        }
         return arraylist;
     }
 
@@ -171,8 +189,9 @@ public class GraphicViewerArea extends GraphicViewerObject
         int k1 = i1;
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject.isVisible()
@@ -194,11 +213,12 @@ public class GraphicViewerArea extends GraphicViewerObject
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         IDomElement domelement1;
-        if (domdoc.GraphicViewerXMLOutputEnabled())
+        if (domdoc.GraphicViewerXMLOutputEnabled()) {
             domelement1 = domdoc
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerArea",
                             domelement);
+        }
         domelement1 = domelement;
         if (domdoc.GraphicViewerXMLOutputEnabled() || domdoc.SVGOutputEnabled()) {
             domelement1 = domdoc.createElement("g");
@@ -215,8 +235,9 @@ public class GraphicViewerArea extends GraphicViewerObject
                 domelement1.appendChild(domelement2);
             }
             boolean flag = domdoc.isGenerateSVG();
-            if (!graphicviewerobject.isVisible())
+            if (!graphicviewerobject.isVisible()) {
                 domdoc.setGenerateSVG(false);
+            }
             graphicviewerobject.SVGWriteObject(domdoc, domelement2);
             domdoc.setGenerateSVG(flag);
         }
@@ -224,8 +245,8 @@ public class GraphicViewerArea extends GraphicViewerObject
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             IDomElement domelement2 = domelement1.getNextSiblingElement();
             domdoc.SVGTraverseChildren(graphicviewerdocument, domelement2,
@@ -239,12 +260,14 @@ public class GraphicViewerArea extends GraphicViewerObject
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            if (graphicviewerobject.isVisible())
+            if (graphicviewerobject.isVisible()) {
                 graphicviewerobject.paint(graphics2d, graphicviewerview);
+            }
         } while (true);
     }
 
@@ -274,18 +297,21 @@ public class GraphicViewerArea extends GraphicViewerObject
         rectangle.height = i1 - k;
     }
 
-    private boolean a(Rectangle rectangle, int j, int k, int l, int i1) {
+    private boolean mightShrink(Rectangle rectangle, int j, int k, int l, int i1) {
         Rectangle rectangle1 = getBoundingRect();
-        if (rectangle1.x == rectangle.x && j > rectangle1.x)
+        if (rectangle1.x == rectangle.x && j > rectangle1.x) {
             return true;
-        if (rectangle1.y == rectangle.y && k > rectangle1.y)
+        }
+        if (rectangle1.y == rectangle.y && k > rectangle1.y) {
             return true;
+        }
         int j1 = rectangle1.x + rectangle1.width;
         int k1 = rectangle1.y + rectangle1.height;
         int l1 = j + l;
         int i2 = k + i1;
-        if (j1 == rectangle.x + rectangle.width && l1 < j1)
+        if (j1 == rectangle.x + rectangle.width && l1 < j1) {
             return true;
+        }
         return k1 == rectangle.y + rectangle.height && i2 < k1;
     }
 
@@ -293,11 +319,12 @@ public class GraphicViewerArea extends GraphicViewerObject
         Rectangle rectangle = null;
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            if (!graphicviewerobject.isBoundingRectInvalid())
+            if (!graphicviewerobject.isBoundingRectInvalid()) {
                 if (rectangle == null) {
                     Rectangle rectangle1 = graphicviewerobject
                             .getBoundingRect();
@@ -306,6 +333,7 @@ public class GraphicViewerArea extends GraphicViewerObject
                 } else {
                     rectangle.add(graphicviewerobject.getBoundingRect());
                 }
+            }
         } while (true);
         return rectangle;
     }
@@ -331,12 +359,14 @@ public class GraphicViewerArea extends GraphicViewerObject
 
     protected void moveChildren(Rectangle rectangle) {
         Rectangle rectangle1 = getBoundingRect();
-        if (rectangle.equals(rectangle1))
+        if (rectangle.equals(rectangle1)) {
             return;
+        }
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject instanceof GraphicViewerLink) {
@@ -349,8 +379,9 @@ public class GraphicViewerArea extends GraphicViewerObject
         } while (true);
         graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
             if (!(graphicviewerobject1 instanceof GraphicViewerLink)
@@ -366,18 +397,22 @@ public class GraphicViewerArea extends GraphicViewerObject
 
     protected void rescaleChildren(Rectangle rectangle) {
         Rectangle rectangle1 = getBoundingRect();
-        if (rectangle.equals(rectangle1))
+        if (rectangle.equals(rectangle1)) {
             return;
+        }
         double d = 1.0D;
-        if (rectangle.width != 0)
+        if (rectangle.width != 0) {
             d = (double) rectangle1.width / (double) rectangle.width;
+        }
         double d1 = 1.0D;
-        if (rectangle.height != 0)
+        if (rectangle.height != 0) {
             d1 = (double) rectangle1.height / (double) rectangle.height;
+        }
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject.isAutoRescale()
@@ -396,8 +431,9 @@ public class GraphicViewerArea extends GraphicViewerObject
         } while (true);
         graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
             if (graphicviewerobject1.isAutoRescale()
@@ -420,58 +456,67 @@ public class GraphicViewerArea extends GraphicViewerObject
     }
 
     public int getNumObjects() {
-        return cE.getNumObjects();
+        return myChildren.getNumObjects();
     }
 
     public boolean isEmpty() {
-        return cE.isEmpty();
+        return myChildren.isEmpty();
     }
 
     public GraphicViewerListPosition addObjectAtHead(
             GraphicViewerObject graphicviewerobject) {
-        return a(graphicviewerobject, false);
+        return addObjectAtHeadInternal(graphicviewerobject, false);
     }
 
-    GraphicViewerListPosition a(GraphicViewerObject graphicviewerobject,
-            boolean flag) {
-        if (graphicviewerobject == null)
+    GraphicViewerListPosition addObjectAtHeadInternal(
+            GraphicViewerObject graphicviewerobject, boolean flag) {
+        if (graphicviewerobject == null) {
             return null;
+        }
         if (graphicviewerobject.getParent() != null) {
-            if (graphicviewerobject.getParent() != this)
+            if (graphicviewerobject.getParent() != this) {
                 return null;
-            GraphicViewerListPosition graphicviewerlistposition = cE
+            }
+            GraphicViewerListPosition graphicviewerlistposition = myChildren
                     .getFirstObjectPos();
-            if (cE.getObjectAtPos(graphicviewerlistposition) == graphicviewerobject)
+            if (myChildren.getObjectAtPos(graphicviewerlistposition) == graphicviewerobject) {
                 return graphicviewerlistposition;
-            graphicviewerlistposition = cE.findObject(graphicviewerobject);
-            GraphicViewerListPosition graphicviewerlistposition2 = cE
+            }
+            graphicviewerlistposition = myChildren
+                    .findObject(graphicviewerobject);
+            GraphicViewerListPosition graphicviewerlistposition2 = myChildren
                     .getNextObjectPos(graphicviewerlistposition);
-            GraphicViewerObject graphicviewerobject1 = cE
+            GraphicViewerObject graphicviewerobject1 = myChildren
                     .getObjectAtPos(graphicviewerlistposition2);
-            cE.removeObjectAtPos(graphicviewerlistposition);
-            GraphicViewerListPosition graphicviewerlistposition3 = cE
+            myChildren.removeObjectAtPos(graphicviewerlistposition);
+            GraphicViewerListPosition graphicviewerlistposition3 = myChildren
                     .addObjectAtHead(graphicviewerobject);
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 graphicviewerobject.update(10, 1, graphicviewerobject1);
-            else
+            } else {
                 graphicviewerobject.update(10, 0, this);
+            }
             return graphicviewerlistposition3;
         }
-        if (graphicviewerobject.getView() != null)
+        if (graphicviewerobject.getView() != null) {
             return null;
-        if (graphicviewerobject.getLayer() != null)
+        }
+        if (graphicviewerobject.getLayer() != null) {
             return null;
-        GraphicViewerListPosition graphicviewerlistposition1 = cE
+        }
+        GraphicViewerListPosition graphicviewerlistposition1 = myChildren
                 .addObjectAtHead(graphicviewerobject);
         graphicviewerobject.setParent(this);
         GraphicViewerLayer graphicviewerlayer = getLayer();
         if (graphicviewerlayer != null) {
-            graphicviewerobject.a(graphicviewerlayer, 6, this,
+            graphicviewerobject.setLayer(graphicviewerlayer, 6, this,
                     graphicviewerobject);
         } else {
             GraphicViewerView graphicviewerview = getView();
-            if (graphicviewerview != null)
-                graphicviewerobject.a(graphicviewerview, graphicviewerobject);
+            if (graphicviewerview != null) {
+                graphicviewerobject.setView(graphicviewerview,
+                        graphicviewerobject);
+            }
         }
         if (!flag) {
             geometryChangeChild(graphicviewerobject,
@@ -483,49 +528,58 @@ public class GraphicViewerArea extends GraphicViewerObject
 
     public GraphicViewerListPosition addObjectAtTail(
             GraphicViewerObject graphicviewerobject) {
-        return _mthdo(graphicviewerobject, false);
+        return addObjectAtTailInternal(graphicviewerobject, false);
     }
 
-    GraphicViewerListPosition _mthdo(GraphicViewerObject graphicviewerobject,
-            boolean flag) {
-        if (graphicviewerobject == null)
+    GraphicViewerListPosition addObjectAtTailInternal(
+            GraphicViewerObject graphicviewerobject, boolean flag) {
+        if (graphicviewerobject == null) {
             return null;
+        }
         if (graphicviewerobject.getParent() != null) {
-            if (graphicviewerobject.getParent() != this)
+            if (graphicviewerobject.getParent() != this) {
                 return null;
-            GraphicViewerListPosition graphicviewerlistposition = cE
+            }
+            GraphicViewerListPosition graphicviewerlistposition = myChildren
                     .getLastObjectPos();
-            if (cE.getObjectAtPos(graphicviewerlistposition) == graphicviewerobject)
+            if (myChildren.getObjectAtPos(graphicviewerlistposition) == graphicviewerobject) {
                 return graphicviewerlistposition;
-            graphicviewerlistposition = cE.findObject(graphicviewerobject);
-            GraphicViewerListPosition graphicviewerlistposition2 = cE
+            }
+            graphicviewerlistposition = myChildren
+                    .findObject(graphicviewerobject);
+            GraphicViewerListPosition graphicviewerlistposition2 = myChildren
                     .getNextObjectPos(graphicviewerlistposition);
-            GraphicViewerObject graphicviewerobject1 = cE
+            GraphicViewerObject graphicviewerobject1 = myChildren
                     .getObjectAtPos(graphicviewerlistposition2);
-            cE.removeObjectAtPos(graphicviewerlistposition);
-            GraphicViewerListPosition graphicviewerlistposition3 = cE
+            myChildren.removeObjectAtPos(graphicviewerlistposition);
+            GraphicViewerListPosition graphicviewerlistposition3 = myChildren
                     .addObjectAtTail(graphicviewerobject);
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 graphicviewerobject.update(10, 1, graphicviewerobject1);
-            else
+            } else {
                 graphicviewerobject.update(10, 0, this);
+            }
             return graphicviewerlistposition3;
         }
-        if (graphicviewerobject.getView() != null)
+        if (graphicviewerobject.getView() != null) {
             return null;
-        if (graphicviewerobject.getLayer() != null)
+        }
+        if (graphicviewerobject.getLayer() != null) {
             return null;
-        GraphicViewerListPosition graphicviewerlistposition1 = cE
+        }
+        GraphicViewerListPosition graphicviewerlistposition1 = myChildren
                 .addObjectAtTail(graphicviewerobject);
         graphicviewerobject.setParent(this);
         GraphicViewerLayer graphicviewerlayer = getLayer();
         if (graphicviewerlayer != null) {
-            graphicviewerobject.a(graphicviewerlayer, 2, this,
+            graphicviewerobject.setLayer(graphicviewerlayer, 2, this,
                     graphicviewerobject);
         } else {
             GraphicViewerView graphicviewerview = getView();
-            if (graphicviewerview != null)
-                graphicviewerobject.a(graphicviewerview, graphicviewerobject);
+            if (graphicviewerview != null) {
+                graphicviewerobject.setView(graphicviewerview,
+                        graphicviewerobject);
+            }
         }
         if (!flag) {
             geometryChangeChild(graphicviewerobject,
@@ -538,53 +592,61 @@ public class GraphicViewerArea extends GraphicViewerObject
     public GraphicViewerListPosition insertObjectBefore(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        return _mthif(graphicviewerlistposition, graphicviewerobject, false);
+        return insertObjectBeforeInternal(graphicviewerlistposition,
+                graphicviewerobject, false);
     }
 
-    GraphicViewerListPosition _mthif(
+    GraphicViewerListPosition insertObjectBeforeInternal(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject, boolean flag) {
-        if (graphicviewerlistposition == null || graphicviewerobject == null)
+        if (graphicviewerlistposition == null || graphicviewerobject == null) {
             return null;
+        }
         if (graphicviewerobject.getParent() != null) {
-            if (graphicviewerobject.getParent() != this)
+            if (graphicviewerobject.getParent() != this) {
                 return null;
-            GraphicViewerListPosition graphicviewerlistposition1 = cE
+            }
+            GraphicViewerListPosition graphicviewerlistposition1 = myChildren
                     .findObject(graphicviewerobject);
             if (graphicviewerlistposition1 != null) {
-                GraphicViewerListPosition graphicviewerlistposition3 = cE
+                GraphicViewerListPosition graphicviewerlistposition3 = myChildren
                         .getNextObjectPos(graphicviewerlistposition1);
-                GraphicViewerObject graphicviewerobject1 = cE
+                GraphicViewerObject graphicviewerobject1 = myChildren
                         .getObjectAtPos(graphicviewerlistposition3);
-                cE.removeObjectAtPos(graphicviewerlistposition1);
-                GraphicViewerListPosition graphicviewerlistposition4 = cE
+                myChildren.removeObjectAtPos(graphicviewerlistposition1);
+                GraphicViewerListPosition graphicviewerlistposition4 = myChildren
                         .insertObjectBefore(graphicviewerlistposition,
                                 graphicviewerobject);
-                if (graphicviewerobject1 != null)
+                if (graphicviewerobject1 != null) {
                     graphicviewerobject.update(10, 1, graphicviewerobject1);
-                else
+                } else {
                     graphicviewerobject.update(10, 0, this);
+                }
                 return graphicviewerlistposition4;
             }
         }
-        if (graphicviewerobject.getView() != null)
+        if (graphicviewerobject.getView() != null) {
             return null;
-        if (graphicviewerobject.getLayer() != null)
+        }
+        if (graphicviewerobject.getLayer() != null) {
             return null;
-        GraphicViewerListPosition graphicviewerlistposition2 = cE
+        }
+        GraphicViewerListPosition graphicviewerlistposition2 = myChildren
                 .insertObjectBefore(graphicviewerlistposition,
                         graphicviewerobject);
         graphicviewerobject.setParent(this);
         GraphicViewerLayer graphicviewerlayer = getLayer();
         if (graphicviewerlayer != null) {
-            GraphicViewerObject graphicviewerobject2 = cE
+            GraphicViewerObject graphicviewerobject2 = myChildren
                     .getObjectAtPos(graphicviewerlistposition);
-            graphicviewerobject.a(graphicviewerlayer, 8, graphicviewerobject2,
-                    graphicviewerobject);
+            graphicviewerobject.setLayer(graphicviewerlayer, 8,
+                    graphicviewerobject2, graphicviewerobject);
         } else {
             GraphicViewerView graphicviewerview = getView();
-            if (graphicviewerview != null)
-                graphicviewerobject.a(graphicviewerview, graphicviewerobject);
+            if (graphicviewerview != null) {
+                graphicviewerobject.setView(graphicviewerview,
+                        graphicviewerobject);
+            }
         }
         if (!flag) {
             geometryChangeChild(graphicviewerobject,
@@ -597,53 +659,61 @@ public class GraphicViewerArea extends GraphicViewerObject
     public GraphicViewerListPosition insertObjectAfter(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        return a(graphicviewerlistposition, graphicviewerobject, false);
+        return insertObjectAfterInternal(graphicviewerlistposition,
+                graphicviewerobject, false);
     }
 
-    GraphicViewerListPosition a(
+    GraphicViewerListPosition insertObjectAfterInternal(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject, boolean flag) {
-        if (graphicviewerlistposition == null || graphicviewerobject == null)
+        if (graphicviewerlistposition == null || graphicviewerobject == null) {
             return null;
+        }
         if (graphicviewerobject.getParent() != null) {
-            if (graphicviewerobject.getParent() != this)
+            if (graphicviewerobject.getParent() != this) {
                 return null;
-            GraphicViewerListPosition graphicviewerlistposition1 = cE
+            }
+            GraphicViewerListPosition graphicviewerlistposition1 = myChildren
                     .findObject(graphicviewerobject);
             if (graphicviewerlistposition1 != null) {
-                GraphicViewerListPosition graphicviewerlistposition3 = cE
+                GraphicViewerListPosition graphicviewerlistposition3 = myChildren
                         .getNextObjectPos(graphicviewerlistposition1);
-                GraphicViewerObject graphicviewerobject1 = cE
+                GraphicViewerObject graphicviewerobject1 = myChildren
                         .getObjectAtPos(graphicviewerlistposition3);
-                cE.removeObjectAtPos(graphicviewerlistposition1);
-                GraphicViewerListPosition graphicviewerlistposition4 = cE
+                myChildren.removeObjectAtPos(graphicviewerlistposition1);
+                GraphicViewerListPosition graphicviewerlistposition4 = myChildren
                         .insertObjectAfter(graphicviewerlistposition,
                                 graphicviewerobject);
-                if (graphicviewerobject1 != null)
+                if (graphicviewerobject1 != null) {
                     graphicviewerobject.update(10, 1, graphicviewerobject1);
-                else
+                } else {
                     graphicviewerobject.update(10, 0, this);
+                }
                 return graphicviewerlistposition4;
             }
         }
-        if (graphicviewerobject.getView() != null)
+        if (graphicviewerobject.getView() != null) {
             return null;
-        if (graphicviewerobject.getLayer() != null)
+        }
+        if (graphicviewerobject.getLayer() != null) {
             return null;
-        GraphicViewerListPosition graphicviewerlistposition2 = cE
+        }
+        GraphicViewerListPosition graphicviewerlistposition2 = myChildren
                 .insertObjectAfter(graphicviewerlistposition,
                         graphicviewerobject);
         graphicviewerobject.setParent(this);
         GraphicViewerLayer graphicviewerlayer = getLayer();
         if (graphicviewerlayer != null) {
-            GraphicViewerObject graphicviewerobject2 = cE
+            GraphicViewerObject graphicviewerobject2 = myChildren
                     .getObjectAtPos(graphicviewerlistposition);
-            graphicviewerobject.a(graphicviewerlayer, 4, graphicviewerobject2,
-                    graphicviewerobject);
+            graphicviewerobject.setLayer(graphicviewerlayer, 4,
+                    graphicviewerobject2, graphicviewerobject);
         } else {
             GraphicViewerView graphicviewerview = getView();
-            if (graphicviewerview != null)
-                graphicviewerobject.a(graphicviewerview, graphicviewerobject);
+            if (graphicviewerview != null) {
+                graphicviewerobject.setView(graphicviewerview,
+                        graphicviewerobject);
+            }
         }
         if (!flag) {
             geometryChangeChild(graphicviewerobject,
@@ -662,51 +732,57 @@ public class GraphicViewerArea extends GraphicViewerObject
     }
 
     public void removeObject(GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
-        if (graphicviewerobject.getParent() != this)
+        }
+        if (graphicviewerobject.getParent() != this) {
             return;
-        GraphicViewerListPosition graphicviewerlistposition = cE
+        }
+        GraphicViewerListPosition graphicviewerlistposition = myChildren
                 .findObject(graphicviewerobject);
-        if (graphicviewerlistposition != null)
+        if (graphicviewerlistposition != null) {
             removeObjectAtPos(graphicviewerlistposition);
+        }
     }
 
     public GraphicViewerObject removeObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        GraphicViewerListPosition graphicviewerlistposition1 = cE
+        GraphicViewerListPosition graphicviewerlistposition1 = myChildren
                 .getNextObjectPos(graphicviewerlistposition);
-        GraphicViewerListPosition graphicviewerlistposition2 = cE
+        GraphicViewerListPosition graphicviewerlistposition2 = myChildren
                 .getPrevObjectPos(graphicviewerlistposition);
-        GraphicViewerObject graphicviewerobject = cE
+        GraphicViewerObject graphicviewerobject = myChildren
                 .removeObjectAtPos(graphicviewerlistposition);
         if (graphicviewerobject != null) {
             if (!isEmpty()) {
                 Rectangle rectangle = getBoundingRect();
-                if (a(rectangle, (rectangle.x + rectangle.width) / 2,
-                        (rectangle.y + rectangle.height) / 2, 0, 0))
+                if (mightShrink(rectangle, (rectangle.x + rectangle.width) / 2,
+                        (rectangle.y + rectangle.height) / 2, 0, 0)) {
                     setBoundingRectInvalid(true);
+                }
             }
             if (graphicviewerobject.getLayer() != null) {
                 GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition1);
                 if (graphicviewerobject1 == null) {
-                    graphicviewerobject.a(null, 2, this, graphicviewerobject);
+                    graphicviewerobject.setLayer(null, 2, this,
+                            graphicviewerobject);
                 } else {
                     GraphicViewerObject graphicviewerobject2 = getObjectAtPos(graphicviewerlistposition2);
                     if (graphicviewerobject2 == null) {
-                        graphicviewerobject.a(null, 6, this,
+                        graphicviewerobject.setLayer(null, 6, this,
                                 graphicviewerobject);
                     } else {
                         Object aobj[] = new Object[3];
                         aobj[0] = this;
                         aobj[1] = graphicviewerobject2;
                         aobj[2] = graphicviewerobject1;
-                        graphicviewerobject.a(null, 0, ((Object) (aobj)),
-                                graphicviewerobject);
+                        graphicviewerobject.setLayer(null, 0,
+                                ((Object) (aobj)), graphicviewerobject);
                     }
                 }
-            } else if (graphicviewerobject.getView() != null)
-                graphicviewerobject.a(null, graphicviewerobject);
+            } else if (graphicviewerobject.getView() != null) {
+                graphicviewerobject.setView(null, graphicviewerobject);
+            }
             geometryChangeChild(graphicviewerobject,
                     graphicviewerobject.getBoundingRect());
             setBoundingRectInvalid(true);
@@ -716,55 +792,58 @@ public class GraphicViewerArea extends GraphicViewerObject
     }
 
     public GraphicViewerListPosition getFirstObjectPos() {
-        return cE.getFirstObjectPos();
+        return myChildren.getFirstObjectPos();
     }
 
     public GraphicViewerListPosition getLastObjectPos() {
-        return cE.getLastObjectPos();
+        return myChildren.getLastObjectPos();
     }
 
     public GraphicViewerListPosition getNextObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return cE.getNextObjectPos(graphicviewerlistposition);
+        return myChildren.getNextObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getNextObjectPosAtTop(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return cE.getNextObjectPos(graphicviewerlistposition);
+        return myChildren.getNextObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getPrevObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return cE.getPrevObjectPos(graphicviewerlistposition);
+        return myChildren.getPrevObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerObject getObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return cE.getObjectAtPos(graphicviewerlistposition);
+        return myChildren.getObjectAtPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition findObject(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return null;
-        if (graphicviewerobject.getParent() == this)
-            return cE.findObject(graphicviewerobject);
-        else
+        }
+        if (graphicviewerobject.getParent() == this) {
+            return myChildren.findObject(graphicviewerobject);
+        } else {
             return null;
+        }
     }
 
-    void a(GraphicViewerListPosition graphicviewerlistposition) {
-        cG = graphicviewerlistposition;
+    void setCurrentListPosition(
+            GraphicViewerListPosition graphicviewerlistposition) {
+        myCurrentListPosition = graphicviewerlistposition;
     }
 
-    GraphicViewerListPosition i() {
-        return cG;
+    GraphicViewerListPosition getCurrentListPosition() {
+        return myCurrentListPosition;
     }
 
-    public final ArrayList<GraphicViewerObject> addCollection(
+    public final ArrayList addCollection(
             IGraphicViewerObjectSimpleCollection graphicviewerobjectsimplecollection,
             boolean flag, GraphicViewerLayer graphicviewerlayer) {
-        ArrayList<GraphicViewerObject> arraylist = new ArrayList<GraphicViewerObject>();
+        ArrayList arraylist = new ArrayList();
         for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerobjectsimplecollection
                 .getFirstObjectPos(); graphicviewerlistposition != null;) {
             GraphicViewerObject graphicviewerobject = graphicviewerobjectsimplecollection
@@ -777,41 +856,44 @@ public class GraphicViewerArea extends GraphicViewerObject
         return addCollection(arraylist, flag, graphicviewerlayer);
     }
 
-    public ArrayList<GraphicViewerObject> addCollection(
-            ArrayList<GraphicViewerObject> arraylist, boolean flag,
+    public ArrayList addCollection(ArrayList arraylist, boolean flag,
             GraphicViewerLayer graphicviewerlayer) {
         update(1901, 0, arraylist);
         for (int j = 0; j < arraylist.size(); j++) {
             GraphicViewerObject graphicviewerobject = (GraphicViewerObject) arraylist
                     .get(j);
-            if (isChildOf(graphicviewerobject) || this == graphicviewerobject)
+            if (isChildOf(graphicviewerobject) || this == graphicviewerobject) {
                 continue;
+            }
             boolean flag1 = graphicviewerobject.getLayer() != null
                     && graphicviewerobject.getParent() != this;
             if (flag1) {
-                _mthif(graphicviewerobject, true);
+                setAllNoClear(graphicviewerobject, true);
                 graphicviewerobject.getLayer()
                         .removeObject(graphicviewerobject);
             }
             addObjectAtTail(graphicviewerobject);
-            if (flag1)
-                _mthif(graphicviewerobject, false);
+            if (flag1) {
+                setAllNoClear(graphicviewerobject, false);
+            }
         }
 
         update(1901, 1, arraylist);
-        if (flag && getDocument() != null)
+        if (flag && getDocument() != null) {
             GraphicViewerSubGraphBase.reparentAllLinksToSubGraphs(arraylist,
                     true, graphicviewerlayer);
+        }
         return arraylist;
     }
 
-    static void _mthif(GraphicViewerObject graphicviewerobject, boolean flag) {
+    static void setAllNoClear(GraphicViewerObject graphicviewerobject,
+            boolean flag) {
         if (graphicviewerobject instanceof GraphicViewerPort) {
             GraphicViewerPort graphicviewerport = (GraphicViewerPort) graphicviewerobject;
-            graphicviewerport._mthcase(flag);
+            graphicviewerport.setNoClearLinks(flag);
         } else if (graphicviewerobject instanceof GraphicViewerLink) {
             GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject;
-            graphicviewerlink._mthfor(flag);
+            graphicviewerlink.setNoClearPorts(flag);
         } else if (graphicviewerobject instanceof GraphicViewerArea) {
             GraphicViewerArea graphicviewerarea = (GraphicViewerArea) graphicviewerobject;
             for (GraphicViewerListPosition graphicviewerlistposition = graphicviewerarea
@@ -820,7 +902,7 @@ public class GraphicViewerArea extends GraphicViewerObject
                         .getObjectAtPos(graphicviewerlistposition);
                 graphicviewerlistposition = graphicviewerarea
                         .getNextObjectPosAtTop(graphicviewerlistposition);
-                _mthif(graphicviewerobject1, flag);
+                setAllNoClear(graphicviewerobject1, flag);
             }
 
         }
@@ -850,7 +932,7 @@ public class GraphicViewerArea extends GraphicViewerObject
                 return;
 
             case 1901 :
-                ArrayList<?> arraylist = (ArrayList<?>) graphicviewerdocumentchangededit
+                ArrayList arraylist = (ArrayList) graphicviewerdocumentchangededit
                         .getOldValue();
                 boolean flag1 = flag
                         ? graphicviewerdocumentchangededit.getOldValueInt() == 1
@@ -858,16 +940,11 @@ public class GraphicViewerArea extends GraphicViewerObject
                 for (int j = 0; j < arraylist.size(); j++) {
                     GraphicViewerObject graphicviewerobject = (GraphicViewerObject) arraylist
                             .get(j);
-                    _mthif(graphicviewerobject, flag1);
+                    setAllNoClear(graphicviewerobject, flag1);
                 }
 
                 return;
         }
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
-
-    public static final int ChangedPickableBackground = 1900;
-    static final int cH = 32768;
-    private GraphicViewerObjList cE;
-    private GraphicViewerListPosition cG;
 }

@@ -91,9 +91,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     public static final Color DEFAULT_FOREGROUND_COLOR_LOG = Color.DARK_GRAY;
     public static final Color WARNING_FOREGROUND_COLOR_LOG = Color.RED;
     public static final int MAX_CHARACTERS_LOG = 100000;
-    /**
-     * Shared variable used by LookAndFeelAction and ApplicationMenuBar
-     */
+    /** Shared variable used by LookAndFeelAction and ApplicationMenuBar. */
     public static final String LAF_MENU_LABEL = "Look & Feel";
 
     /** The output console. */
@@ -763,6 +761,11 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 // the LaF is updated outside of this call, and the property
                 // value is reset to null
                 ClassLoader cl = getLookAndFeelManager().getLAFClassLoader();
+                // Set these properties before instantiating WebLookAndFeel
+                if (WebLookAndFeelUtil.isWebLookAndFeel(lnfClassName)) {
+                    WebLookAndFeelUtil.installWebLookAndFeelProperties(cl);
+                }
+
                 // Load the Look and Feel class. Note that we cannot simply use
                 // its name for some reason (Exceptions are thrown)
                 Class c = cl.loadClass(lnfClassName);

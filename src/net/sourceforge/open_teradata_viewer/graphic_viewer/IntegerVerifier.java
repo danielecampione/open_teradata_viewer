@@ -35,22 +35,25 @@ public class IntegerVerifier extends InputVerifier {
     public IntegerVerifier() {
     }
 
-    public boolean verify(JComponent jcomponent) {
-        String s;
-        JTextField jtextfield = (JTextField) jcomponent;
-        s = jtextfield.getText();
-        Integer.parseInt(s);
-        return true;
+    public boolean verify(JComponent input) {
+        JTextField tf = (JTextField) input;
+        String entered = tf.getText();
+        try {
+            Integer.parseInt(entered);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
-    public boolean shouldYieldFocus(JComponent jcomponent) {
-        if (super.shouldYieldFocus(jcomponent)) {
+    public boolean shouldYieldFocus(JComponent input) {
+        if (super.shouldYieldFocus(input)) {
             return true;
         } else {
-            jcomponent.setInputVerifier(null);
-            String msg = "An illegal integer value was entered";
-            UISupport.getDialogs().showErrorMessage(msg);
-            jcomponent.setInputVerifier(this);
+            input.setInputVerifier(null);
+            UISupport.getDialogs().showInfoMessage(
+                    "An illegal integer value was entered", "Input Error");
+            input.setInputVerifier(this);
             return false;
         }
     }

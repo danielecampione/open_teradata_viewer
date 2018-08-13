@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.graphic_viewer.svg;
 
-
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomText;
 
 import org.w3c.dom.Text;

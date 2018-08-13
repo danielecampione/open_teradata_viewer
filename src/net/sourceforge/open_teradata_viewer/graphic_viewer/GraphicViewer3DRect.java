@@ -33,24 +33,27 @@ public class GraphicViewer3DRect extends GraphicViewerRectangle {
 
     private static final long serialVersionUID = -7943698482448701589L;
 
+    public static final int StateUp = 0;
+    public static final int StateDown = 1;
+    public static final int StateToggled = 2;
+    public static final int ChangedState = 403;
+    private int myState = 0;
+
     public GraphicViewer3DRect() {
-        dR = 0;
-        w();
+        init();
     }
 
     public GraphicViewer3DRect(Rectangle rectangle) {
         super(rectangle);
-        dR = 0;
-        w();
+        init();
     }
 
     public GraphicViewer3DRect(Point point, Dimension dimension) {
         super(point, dimension);
-        dR = 0;
-        w();
+        init();
     }
 
-    private final void w() {
+    private final void init() {
         setBrush(GraphicViewerBrush.lightGray);
         setPen(GraphicViewerPen.lightGray);
     }
@@ -59,21 +62,22 @@ public class GraphicViewer3DRect extends GraphicViewerRectangle {
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewer3DRect graphicviewer3drect = (GraphicViewer3DRect) super
                 .copyObject(graphicviewercopyenvironment);
-        if (graphicviewer3drect != null)
-            graphicviewer3drect.dR = dR;
+        if (graphicviewer3drect != null) {
+            graphicviewer3drect.myState = myState;
+        }
         return graphicviewer3drect;
     }
 
     public void setState(int i) {
-        int j = dR;
+        int j = myState;
         if (j != i) {
-            dR = i;
+            myState = i;
             update(403, j, null);
         }
     }
 
     public int getState() {
-        return dR;
+        return myState;
     }
 
     public void copyNewValueForRedo(
@@ -99,20 +103,22 @@ public class GraphicViewer3DRect extends GraphicViewerRectangle {
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         if (domdoc.GraphicViewerXMLOutputEnabled()) {
-            IDomElement domelement1 = domdoc.createGraphicViewerClassElement(
-                    "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer3DRect",
-                    domelement);
-            domelement1.setAttribute("current_state", Integer.toString(dR));
+            IDomElement domelement1 = domdoc
+                    .createGraphicViewerClassElement(
+                            "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer3DRect",
+                            domelement);
+            domelement1
+                    .setAttribute("current_state", Integer.toString(myState));
         }
         super.SVGWriteObject(domdoc, domelement);
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             String s = domelement1.getAttribute("current_state");
-            dR = Integer.parseInt(s);
+            myState = Integer.parseInt(s);
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
         }
@@ -122,7 +128,7 @@ public class GraphicViewer3DRect extends GraphicViewerRectangle {
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         boolean flag = true;
         Rectangle rectangle = getBoundingRect();
-        switch (dR) {
+        switch (myState) {
             case 0 : // '\0'
                 flag = true;
                 break;
@@ -135,10 +141,4 @@ public class GraphicViewer3DRect extends GraphicViewerRectangle {
         draw3DRect(graphics2d, rectangle.x, rectangle.y, rectangle.width,
                 rectangle.height, flag);
     }
-
-    public static final int StateUp = 0;
-    public static final int StateDown = 1;
-    public static final int StateToggled = 2;
-    public static final int ChangedState = 403;
-    private int dR;
 }

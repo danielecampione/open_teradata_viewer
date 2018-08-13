@@ -39,71 +39,124 @@ public abstract class GraphicViewerObject
 
     private static final long serialVersionUID = -1845625064807221883L;
 
+    public static final int NoSpot = -1;
+    public static final int NoHandle = -1;
+    public static final int Center = 0;
+    public static final int TopLeft = 1;
+    public static final int TopCenter = 2;
+    public static final int TopMiddle = 2;
+    public static final int Top = 2;
+    public static final int TopRight = 3;
+    public static final int RightCenter = 4;
+    public static final int CenterRight = 4;
+    public static final int SideRight = 4;
+    public static final int Right = 4;
+    public static final int BottomRight = 5;
+    public static final int BottomCenter = 6;
+    public static final int BottomMiddle = 6;
+    public static final int Bottom = 6;
+    public static final int BottomLeft = 7;
+    public static final int LeftCenter = 8;
+    public static final int CenterLeft = 8;
+    public static final int SideLeft = 8;
+    public static final int Left = 8;
+    public static final int NumReservedHandles = 100;
+    public static final int RepaintAll = 0;
+    public static final int ChangedGeometry = 1;
+    public static final int ChangedVisible = 2;
+    public static final int ChangedSelectable = 3;
+    public static final int ChangedDraggable = 4;
+    public static final int ChangedResizable = 5;
+    public static final int Changed4ResizeHandles = 6;
+
+    /** @deprecated */
+    public static final int ChangedGrabChildSelection = 9;
+    public static final int ChangedZOrder = 10;
+    public static final int ChangedPen = 11;
+    public static final int ChangedBrush = 12;
+    public static final int ChangedDragsNode = 13;
+    public static final int ChangedUpdatePartner = 14;
+    public static final int ChangedAutoRescale = 15;
+    public static final int ChangedInitializing = 40;
+    public static final int LastChangedHint = 65535;
+    static final int flagVisible = 2;
+    static final int flagSelectable = 4;
+    static final int flagDraggable = 8;
+    static final int flagResizable = 16;
+    static final int flag4ResizeHandles = 32;
+    static final int flagSuspendUpdates = 64;
+    static final int flagSuspendChildUpdates = 128;
+    static final int flagBoundingRectInvalid = 256;
+    static final int flagGrabChildSelection = 512;
+    static final int flagDragsNode = 1024;
+    static final int flagSkipsUndoManager = 2048;
+    static final int flagObject4 = 4096;
+    static final int flagObject3 = 8192;
+    static final int flagObject2 = 16384;
+    static final int flagObject1 = 32768;
+    static final int flagObject5 = 65536;
+    static final int flagObject6 = 131072;
+    static final int flagObject7 = 262144;
+    static final int flagObject8 = 524288;
+    static final int flagInitializing = 1048576;
+    static final int flagSkipsBoundingRectChanged = 2097152;
+    static final int flagAutoRescale = 4194304;
+    static final int flagUpdatePartner = 8388608;
+    private GraphicViewerArea myParentArea = null;
+    private GraphicViewerLayer myLayer = null;
+    private transient GraphicViewerView myView = null;
+    private Rectangle myBoundingRect = new Rectangle(0, 0, 0, 0);
+    private int myInternalFlags = 0;
+    private int myExternalFlags = 0;
+
     public GraphicViewerObject() {
-        bC = null;
-        bL = null;
-        bB = null;
-        bM = new Rectangle(0, 0, 0, 0);
-        bF = 0;
-        b0 = 0;
-        f();
+        init();
     }
 
     public GraphicViewerObject(Rectangle rectangle) {
-        bC = null;
-        bL = null;
-        bB = null;
-        bM = new Rectangle(0, 0, 0, 0);
-        bF = 0;
-        b0 = 0;
-        f();
-        bM.x = rectangle.x;
-        bM.y = rectangle.y;
-        bM.width = rectangle.width;
-        bM.height = rectangle.height;
+        init();
+        myBoundingRect.x = rectangle.x;
+        myBoundingRect.y = rectangle.y;
+        myBoundingRect.width = rectangle.width;
+        myBoundingRect.height = rectangle.height;
     }
 
     public GraphicViewerObject(Point point, Dimension dimension) {
-        bC = null;
-        bL = null;
-        bB = null;
-        bM = new Rectangle(0, 0, 0, 0);
-        bF = 0;
-        b0 = 0;
-        f();
-        bM.x = point.x;
-        bM.y = point.y;
-        bM.width = dimension.width;
-        bM.height = dimension.height;
+        init();
+        myBoundingRect.x = point.x;
+        myBoundingRect.y = point.y;
+        myBoundingRect.width = dimension.width;
+        myBoundingRect.height = dimension.height;
     }
 
-    private final void f() {
-        _mthfor(0x40041e);
+    private final void init() {
+        setInternalFlags(4195358);
     }
 
     public GraphicViewerObject copyObject(
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerObject graphicviewerobject = (GraphicViewerObject) graphicviewercopyenvironment
                 .get(this);
-        if (graphicviewerobject != null)
+        if (graphicviewerobject != null) {
             return null;
+        }
         try {
-            Class<? extends GraphicViewerObject> class1 = getClass();
+            Class class1 = getClass();
             graphicviewerobject = (GraphicViewerObject) class1.newInstance();
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
         }
         if (graphicviewerobject != null) {
             graphicviewercopyenvironment.put(this, graphicviewerobject);
-            graphicviewerobject.bC = null;
-            graphicviewerobject.bL = null;
-            graphicviewerobject.bB = null;
-            graphicviewerobject.bM.x = bM.x;
-            graphicviewerobject.bM.y = bM.y;
-            graphicviewerobject.bM.width = bM.width;
-            graphicviewerobject.bM.height = bM.height;
-            graphicviewerobject.bF = bF;
-            graphicviewerobject.b0 = b0;
+            graphicviewerobject.myParentArea = null;
+            graphicviewerobject.myLayer = null;
+            graphicviewerobject.myView = null;
+            graphicviewerobject.myBoundingRect.x = myBoundingRect.x;
+            graphicviewerobject.myBoundingRect.y = myBoundingRect.y;
+            graphicviewerobject.myBoundingRect.width = myBoundingRect.width;
+            graphicviewerobject.myBoundingRect.height = myBoundingRect.height;
+            graphicviewerobject.myInternalFlags = myInternalFlags;
+            graphicviewerobject.myExternalFlags = myExternalFlags;
         }
         return graphicviewerobject;
     }
@@ -119,53 +172,62 @@ public abstract class GraphicViewerObject
     }
 
     public Rectangle getBoundingRect() {
-        if (isBoundingRectInvalid() && !h()) {
+        if (isBoundingRectInvalid() && !isSkipsBoundingRectChanged()) {
             setBoundingRectInvalid(false);
-            _mthif(true);
+            setSkipsBoundingRectChanged(true);
             Rectangle rectangle = computeBoundingRect();
-            if (rectangle != null)
+            if (rectangle != null) {
                 setBoundingRect(rectangle);
-            _mthif(false);
+            }
+            setSkipsBoundingRectChanged(false);
         }
-        return bM;
+        return myBoundingRect;
     }
 
     public void setBoundingRect(int j, int k, int l, int i1) {
-        if (l >= 0 && i1 >= 0
-                && (bM.x != j || bM.y != k || bM.width != l || bM.height != i1)) {
-            Rectangle rectangle = new Rectangle(bM.x, bM.y, bM.width, bM.height);
-            bM.x = j;
-            bM.y = k;
-            bM.width = l;
-            bM.height = i1;
+        if (l >= 0
+                && i1 >= 0
+                && (myBoundingRect.x != j || myBoundingRect.y != k
+                        || myBoundingRect.width != l || myBoundingRect.height != i1)) {
+            Rectangle rectangle = new Rectangle(myBoundingRect.x,
+                    myBoundingRect.y, myBoundingRect.width,
+                    myBoundingRect.height);
+            myBoundingRect.x = j;
+            myBoundingRect.y = k;
+            myBoundingRect.width = l;
+            myBoundingRect.height = i1;
             update(1, 0, rectangle);
-            if (!h()) {
-                _mthif(true);
+            if (!isSkipsBoundingRectChanged()) {
+                setSkipsBoundingRectChanged(true);
                 geometryChange(rectangle);
                 if (isBoundingRectInvalid()) {
                     setBoundingRectInvalid(false);
                     Rectangle rectangle1 = computeBoundingRect();
-                    if (rectangle1 != null)
+                    if (rectangle1 != null) {
                         setBoundingRect(rectangle1);
+                    }
                 }
             }
-            _mthif(false);
+            setSkipsBoundingRectChanged(false);
             GraphicViewerArea graphicviewerarea = getParent();
-            if (graphicviewerarea != null && !graphicviewerarea.h()) {
-                graphicviewerarea._mthif(true);
+            if (graphicviewerarea != null
+                    && !graphicviewerarea.isSkipsBoundingRectChanged()) {
+                graphicviewerarea.setSkipsBoundingRectChanged(true);
                 graphicviewerarea.geometryChangeChild(this, rectangle);
                 if (graphicviewerarea.isBoundingRectInvalid()) {
                     graphicviewerarea.setBoundingRectInvalid(false);
                     Rectangle rectangle2 = graphicviewerarea
                             .computeBoundingRect();
-                    if (rectangle2 != null)
+                    if (rectangle2 != null) {
                         graphicviewerarea.setBoundingRect(rectangle2);
+                    }
                 }
-                graphicviewerarea._mthif(false);
+                graphicviewerarea.setSkipsBoundingRectChanged(false);
             }
             GraphicViewerDocument graphicviewerdocument = getDocument();
-            if (graphicviewerdocument != null)
+            if (graphicviewerdocument != null) {
                 graphicviewerdocument.updateDocumentSize(this);
+            }
         }
     }
 
@@ -178,8 +240,10 @@ public abstract class GraphicViewerObject
                 rectangle.height);
     }
 
+    /** @deprecated */
     protected final boolean setBoundingRectForce(int j, int k, int l, int i1) {
-        if (bM.x == j && bM.y == k && bM.width == l && bM.height == i1) {
+        if (myBoundingRect.x == j && myBoundingRect.y == k
+                && myBoundingRect.width == l && myBoundingRect.height == i1) {
             return false;
         } else {
             setBoundingRect(j, k, l, i1);
@@ -187,13 +251,14 @@ public abstract class GraphicViewerObject
         }
     }
 
+    /** @deprecated */
     public final boolean setBoundingRectForce(Rectangle rectangle) {
         return setBoundingRectForce(rectangle.x, rectangle.y, rectangle.width,
                 rectangle.height);
     }
 
     protected Rectangle computeBoundingRect() {
-        return bM;
+        return myBoundingRect;
     }
 
     public final Dimension getSize() {
@@ -201,8 +266,9 @@ public abstract class GraphicViewerObject
     }
 
     public final Dimension getSize(Dimension dimension) {
-        if (dimension == null)
+        if (dimension == null) {
             dimension = new Dimension();
+        }
         dimension.width = getWidth();
         dimension.height = getHeight();
         return dimension;
@@ -253,8 +319,9 @@ public abstract class GraphicViewerObject
     }
 
     public final Point getTopLeft(Point point) {
-        if (point == null)
+        if (point == null) {
             point = new Point(0, 0);
+        }
         point.x = getLeft();
         point.y = getTop();
         return point;
@@ -472,10 +539,12 @@ public abstract class GraphicViewerObject
     }
 
     public void update(int j, int k, Object obj) {
-        if (isSuspendUpdates())
+        if (isSuspendUpdates()) {
             return;
-        if (isBoundingRectInvalid())
+        }
+        if (isBoundingRectInvalid()) {
             getBoundingRect();
+        }
         GraphicViewerDocument graphicviewerdocument = getDocument();
         if (graphicviewerdocument != null) {
             graphicviewerdocument.fireUpdate(203, j, this, k, obj);
@@ -484,7 +553,7 @@ public abstract class GraphicViewerObject
             if (graphicviewerview != null) {
                 graphicviewerview.fireUpdate(3, j, this);
                 if (j == 1) {
-                    Rectangle rectangle = graphicviewerview.c();
+                    Rectangle rectangle = graphicviewerview.getTempRectangle();
                     Rectangle rectangle1 = (Rectangle) obj;
                     rectangle.x = rectangle1.x;
                     rectangle.y = rectangle1.y;
@@ -502,19 +571,23 @@ public abstract class GraphicViewerObject
         }
         if (isUpdatePartner()) {
             Object obj1 = getPartner();
-            if (obj1 == null)
+            if (obj1 == null) {
                 obj1 = getParent();
-            if (obj1 != null)
+            }
+            if (obj1 != null) {
                 ((GraphicViewerObject) (obj1)).partnerUpdate(this, j, k, obj);
+            }
         }
     }
 
     public void foredate(int j) {
-        if (isSuspendUpdates())
+        if (isSuspendUpdates()) {
             return;
+        }
         GraphicViewerDocument graphicviewerdocument = getDocument();
-        if (graphicviewerdocument != null)
+        if (graphicviewerdocument != null) {
             graphicviewerdocument.fireForedate(203, j, this);
+        }
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
@@ -546,18 +619,24 @@ public abstract class GraphicViewerObject
     }
 
     public GraphicViewerObject pick(Point point, boolean flag) {
-        if (!isVisible())
+        if (!isVisible()) {
             return null;
-        if (!isPointInObj(point))
+        }
+        if (!isPointInObj(point)) {
             return null;
-        if (!flag)
+        }
+        if (!flag) {
             return this;
-        if (isSelectable())
+        }
+        if (isSelectable()) {
             return this;
+        }
         for (GraphicViewerArea graphicviewerarea = getParent(); graphicviewerarea != null; graphicviewerarea = graphicviewerarea
-                .getParent())
-            if (graphicviewerarea.isSelectable())
+                .getParent()) {
+            if (graphicviewerarea.isSelectable()) {
                 return graphicviewerarea;
+            }
+        }
 
         return null;
     }
@@ -623,10 +702,12 @@ public abstract class GraphicViewerObject
         if (isDragsNode()) {
             for (GraphicViewerArea graphicviewerarea = getParent(); graphicviewerarea != null; graphicviewerarea = graphicviewerarea
                     .getParent()) {
-                if (!graphicviewerarea.isDragsNode())
+                if (!graphicviewerarea.isDragsNode()) {
                     return graphicviewerarea;
-                if (graphicviewerarea.getParent() == null)
+                }
+                if (graphicviewerarea.getParent() == null) {
                     return graphicviewerarea;
+                }
             }
 
         }
@@ -640,8 +721,9 @@ public abstract class GraphicViewerObject
     }
 
     public Point computeMove(int j, int k, int l, int i1, Point point) {
-        if (point == null)
+        if (point == null) {
             point = new Point(0, 0);
+        }
         point.x = l;
         point.y = i1;
         return point;
@@ -651,8 +733,9 @@ public abstract class GraphicViewerObject
             GraphicViewerView graphicviewerview, Rectangle rectangle,
             Point point, int j, int k, int l, int i1) {
         Rectangle rectangle1 = computeResize(rectangle, point, j, l, i1);
-        if (k == 3)
+        if (k == 3) {
             setBoundingRect(rectangle1);
+        }
         return rectangle1;
     }
 
@@ -726,12 +809,18 @@ public abstract class GraphicViewerObject
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerObject",
                             domelement);
-            domelement1.setAttribute("obj_flags", Integer.toString(bF));
-            domelement1.setAttribute("user_flags", Integer.toString(b0));
-            domelement1.setAttribute("objx", Integer.toString(bM.x));
-            domelement1.setAttribute("objy", Integer.toString(bM.y));
-            domelement1.setAttribute("objwidth", Integer.toString(bM.width));
-            domelement1.setAttribute("objheight", Integer.toString(bM.height));
+            domelement1.setAttribute("obj_flags",
+                    Integer.toString(myInternalFlags));
+            domelement1.setAttribute("user_flags",
+                    Integer.toString(myExternalFlags));
+            domelement1
+                    .setAttribute("objx", Integer.toString(myBoundingRect.x));
+            domelement1
+                    .setAttribute("objy", Integer.toString(myBoundingRect.y));
+            domelement1.setAttribute("objwidth",
+                    Integer.toString(myBoundingRect.width));
+            domelement1.setAttribute("objheight",
+                    Integer.toString(myBoundingRect.height));
             domdoc.registerObject(this, domelement1);
         }
         if (domdoc.SVGOutputEnabled() && getToolTipText() != null) {
@@ -749,32 +838,37 @@ public abstract class GraphicViewerObject
         if (domelement1 != null) {
             String s = domelement1.getAttribute("obj_flags");
             if (s.length() > 0) {
-                bF = Integer.parseInt(s);
-                if ((this instanceof GraphicViewerArea) && (bF & 0x200) != 0) {
-                    bF &= 0xfffffdff;
-                    if ((bF & 4) != 0)
-                        bF |= 0x8000;
-                    bF |= 4;
+                myInternalFlags = Integer.parseInt(s);
+                if ((this instanceof GraphicViewerArea)
+                        && (myInternalFlags & 0x200) != 0) {
+                    myInternalFlags &= 0xfffffdff;
+                    if ((myInternalFlags & 4) != 0) {
+                        myInternalFlags |= 0x8000;
+                    }
+                    myInternalFlags |= 4;
                 }
             }
             String s1 = domelement1.getAttribute("user_flags");
-            if (s1.length() > 0)
-                b0 = Integer.parseInt(s1);
-            else
-                b0 = bF;
+            if (s1.length() > 0) {
+                myExternalFlags = Integer.parseInt(s1);
+            } else {
+                myExternalFlags = myInternalFlags;
+            }
             String s2 = domelement1.getAttribute("objx");
             String s3 = domelement1.getAttribute("objy");
             String s4 = domelement1.getAttribute("objwidth");
             String s5 = domelement1.getAttribute("objheight");
             if (s2.length() > 0 && s3.length() > 0 && s4.length() > 0
-                    && s5.length() > 0)
-                bM.x = Integer.parseInt(s2);
-            bM.y = Integer.parseInt(s3);
-            bM.width = Integer.parseInt(s4);
-            bM.height = Integer.parseInt(s5);
+                    && s5.length() > 0) {
+                myBoundingRect.x = Integer.parseInt(s2);
+            }
+            myBoundingRect.y = Integer.parseInt(s3);
+            myBoundingRect.width = Integer.parseInt(s4);
+            myBoundingRect.height = Integer.parseInt(s5);
             String s6 = domelement1.getAttribute("id");
-            if (s6.length() > 0)
+            if (s6.length() > 0) {
                 domdoc.registerTag(s6, this);
+            }
         }
         return domelement.getNextSibling();
     }
@@ -789,11 +883,11 @@ public abstract class GraphicViewerObject
     }
 
     public GraphicViewerArea getParent() {
-        return bC;
+        return myParentArea;
     }
 
     protected void setParent(GraphicViewerArea graphicviewerarea) {
-        bC = graphicviewerarea;
+        myParentArea = graphicviewerarea;
     }
 
     public final boolean isTopLevel() {
@@ -803,7 +897,9 @@ public abstract class GraphicViewerObject
     public GraphicViewerObject getTopLevelObject() {
         Object obj;
         for (obj = this; !((GraphicViewerObject) (obj)).isTopLevel(); obj = ((GraphicViewerObject) (obj))
-                .getParent());
+                .getParent()) {
+            ;
+        }
         return ((GraphicViewerObject) (obj));
     }
 
@@ -811,15 +907,18 @@ public abstract class GraphicViewerObject
         Object obj;
         for (obj = this; ((GraphicViewerObject) (obj)).getParent() != null
                 && !(((GraphicViewerObject) (obj)).getParent() instanceof GraphicViewerSubGraphBase); obj = ((GraphicViewerObject) (obj))
-                .getParent());
+                .getParent()) {
+            ;
+        }
         return ((GraphicViewerObject) (obj));
     }
 
     public GraphicViewerNode getParentGraphicViewerNode() {
         for (Object obj = this; ((GraphicViewerObject) (obj)).getParent() != null;) {
             obj = ((GraphicViewerObject) (obj)).getParent();
-            if (obj instanceof GraphicViewerNode)
+            if (obj instanceof GraphicViewerNode) {
                 return (GraphicViewerNode) obj;
+            }
         }
 
         return null;
@@ -828,9 +927,11 @@ public abstract class GraphicViewerObject
     public boolean isChildOf(GraphicViewerObject graphicviewerobject) {
         if (graphicviewerobject instanceof GraphicViewerArea) {
             for (GraphicViewerArea graphicviewerarea = getParent(); graphicviewerarea != null; graphicviewerarea = graphicviewerarea
-                    .getParent())
-                if (graphicviewerarea == graphicviewerobject)
+                    .getParent()) {
+                if (graphicviewerarea == graphicviewerobject) {
                     return true;
+                }
+            }
 
         }
         return false;
@@ -839,35 +940,46 @@ public abstract class GraphicViewerObject
     public static GraphicViewerObject findCommonParent(
             GraphicViewerObject graphicviewerobject,
             GraphicViewerObject graphicviewerobject1) {
-        if (graphicviewerobject == graphicviewerobject1)
+        if (graphicviewerobject == graphicviewerobject1) {
             return graphicviewerobject;
-        if (graphicviewerobject == null)
+        }
+        if (graphicviewerobject == null) {
             return null;
-        if (graphicviewerobject.getParent() == graphicviewerobject1)
+        }
+        if (graphicviewerobject.getParent() == graphicviewerobject1) {
             return graphicviewerobject1;
-        if (graphicviewerobject1 == null)
+        }
+        if (graphicviewerobject1 == null) {
             return null;
-        if (graphicviewerobject1.getParent() == graphicviewerobject)
+        }
+        if (graphicviewerobject1.getParent() == graphicviewerobject) {
             return graphicviewerobject;
+        }
         if (graphicviewerobject1.getParent() == null) {
             for (Object obj = graphicviewerobject; obj != null; obj = ((GraphicViewerObject) (obj))
-                    .getParent())
-                if (obj == graphicviewerobject1)
+                    .getParent()) {
+                if (obj == graphicviewerobject1) {
                     return graphicviewerobject1;
+                }
+            }
 
         } else if (graphicviewerobject.getParent() == null) {
             for (Object obj1 = graphicviewerobject1; obj1 != null; obj1 = ((GraphicViewerObject) (obj1))
-                    .getParent())
-                if (obj1 == graphicviewerobject)
+                    .getParent()) {
+                if (obj1 == graphicviewerobject) {
                     return graphicviewerobject;
+                }
+            }
 
         } else {
             for (Object obj2 = graphicviewerobject; obj2 != null; obj2 = ((GraphicViewerObject) (obj2))
                     .getParent()) {
                 for (Object obj3 = graphicviewerobject1; obj3 != null; obj3 = ((GraphicViewerObject) (obj3))
-                        .getParent())
-                    if (obj3 == obj2)
+                        .getParent()) {
+                    if (obj3 == obj2) {
                         return ((GraphicViewerObject) (obj3));
+                    }
+                }
 
             }
 
@@ -885,56 +997,60 @@ public abstract class GraphicViewerObject
                 graphicviewerlayer.removeObject(this);
             } else {
                 GraphicViewerView graphicviewerview = getView();
-                if (graphicviewerview != null)
+                if (graphicviewerview != null) {
                     graphicviewerview.removeObject(this);
+                }
             }
         }
     }
 
     public GraphicViewerDocument getDocument() {
-        if (bL == null)
+        if (myLayer == null) {
             return null;
-        else
-            return bL.getDocument();
+        } else {
+            return myLayer.getDocument();
+        }
     }
 
     public GraphicViewerLayer getLayer() {
-        return bL;
+        return myLayer;
     }
 
-    void a(GraphicViewerLayer graphicviewerlayer, int j, Object obj,
+    void setLayer(GraphicViewerLayer graphicviewerlayer, int j, Object obj,
             GraphicViewerObject graphicviewerobject) {
         GraphicViewerDocument graphicviewerdocument = getDocument();
         if (graphicviewerlayer != null) {
-            bL = graphicviewerlayer;
+            myLayer = graphicviewerlayer;
             GraphicViewerDocument graphicviewerdocument1 = getDocument();
             if (graphicviewerdocument != graphicviewerdocument1) {
                 ownerChange(graphicviewerdocument, graphicviewerdocument1,
                         graphicviewerobject);
-                if (j >= 0)
+                if (j >= 0) {
                     graphicviewerdocument1.fireUpdate(202, 0, this, j, obj);
+                }
             }
         } else {
             if (graphicviewerdocument != null) {
                 ownerChange(graphicviewerdocument, null, graphicviewerobject);
-                if (j >= 0)
+                if (j >= 0) {
                     graphicviewerdocument.fireUpdate(204, 0, this, j, obj);
+                }
             }
-            bL = null;
+            myLayer = null;
         }
     }
 
     public GraphicViewerView getView() {
-        return bB;
+        return myView;
     }
 
-    void a(GraphicViewerView graphicviewerview,
+    void setView(GraphicViewerView graphicviewerview,
             GraphicViewerObject graphicviewerobject) {
-        GraphicViewerView graphicviewerview1 = bB;
+        GraphicViewerView graphicviewerview1 = myView;
         if (graphicviewerview != null) {
-            bB = graphicviewerview;
-            if (graphicviewerview1 != bB) {
-                ownerChange(graphicviewerview1, bB, graphicviewerobject);
+            myView = graphicviewerview;
+            if (graphicviewerview1 != myView) {
+                ownerChange(graphicviewerview1, myView, graphicviewerobject);
                 graphicviewerview.fireUpdate(2, 0, this);
             }
         } else {
@@ -942,7 +1058,7 @@ public abstract class GraphicViewerObject
                 ownerChange(graphicviewerview1, null, graphicviewerobject);
                 graphicviewerview1.fireUpdate(4, 0, this);
             }
-            bB = null;
+            myView = null;
         }
     }
 
@@ -965,28 +1081,30 @@ public abstract class GraphicViewerObject
     }
 
     public void setUpdatePartner(boolean flag) {
-        boolean flag1 = (bF & 0x800000) != 0;
+        boolean flag1 = (myInternalFlags & 0x800000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x800000;
-            else
-                bF &= 0xff7fffff;
+            if (flag) {
+                myInternalFlags |= 0x800000;
+            } else {
+                myInternalFlags &= 0xff7fffff;
+            }
             update(14, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isUpdatePartner() {
-        return (bF & 0x800000) != 0;
+        return (myInternalFlags & 0x800000) != 0;
     }
 
     protected void partnerUpdate(GraphicViewerObject graphicviewerobject,
             int j, int k, Object obj) {
     }
 
-    void a(GraphicViewerListPosition graphicviewerlistposition) {
+    void setCurrentListPosition(
+            GraphicViewerListPosition graphicviewerlistposition) {
     }
 
-    GraphicViewerListPosition i() {
+    GraphicViewerListPosition getCurrentListPosition() {
         return null;
     }
 
@@ -1031,8 +1149,9 @@ public abstract class GraphicViewerObject
 
             case 10 : // '\n'
                 Object obj = getParent();
-                if (obj == null)
+                if (obj == null) {
                     obj = getLayer();
+                }
                 if (obj != null) {
                     GraphicViewerListPosition graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                             .findObject(this);
@@ -1117,10 +1236,10 @@ public abstract class GraphicViewerObject
             case 1 : // '\001'
                 Rectangle rectangle = (Rectangle) graphicviewerdocumentchangededit
                         .getValue(flag);
-                bM.x = rectangle.x;
-                bM.y = rectangle.y;
-                bM.width = rectangle.width;
-                bM.height = rectangle.height;
+                myBoundingRect.x = rectangle.x;
+                myBoundingRect.y = rectangle.y;
+                myBoundingRect.width = rectangle.width;
+                myBoundingRect.height = rectangle.height;
                 update();
                 return;
 
@@ -1156,18 +1275,20 @@ public abstract class GraphicViewerObject
                             .getValue(flag);
                     if (graphicviewerobject != null) {
                         Object obj = graphicviewerobject.getParent();
-                        if (obj == null)
+                        if (obj == null) {
                             obj = graphicviewerobject.getLayer();
+                        }
                         if (obj != null) {
                             GraphicViewerListPosition graphicviewerlistposition = ((IGraphicViewerObjectCollection) (obj))
                                     .findObject(graphicviewerobject);
-                            if (graphicviewerlistposition == null)
+                            if (graphicviewerlistposition == null) {
                                 ((IGraphicViewerObjectCollection) (obj))
                                         .addObjectAtTail(this);
-                            else
+                            } else {
                                 ((IGraphicViewerObjectCollection) (obj))
                                         .insertObjectBefore(
                                                 graphicviewerlistposition, this);
+                            }
                         }
                     }
                 } else {
@@ -1237,210 +1358,230 @@ public abstract class GraphicViewerObject
     }
 
     public final void setFlags(int j) {
-        b0 = j;
+        myExternalFlags = j;
     }
 
     public final int getFlags() {
-        return b0;
+        return myExternalFlags;
     }
 
-    final void _mthfor(int j) {
-        bF = j;
+    final void setInternalFlags(int j) {
+        myInternalFlags = j;
     }
 
-    final int g() {
-        return bF;
+    final int getInternalFlags() {
+        return myInternalFlags;
     }
 
     public void setVisible(boolean flag) {
-        boolean flag1 = (bF & 2) != 0;
+        boolean flag1 = (myInternalFlags & 2) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 2;
-            else
-                bF &= -3;
+            if (flag) {
+                myInternalFlags |= 2;
+            } else {
+                myInternalFlags &= -3;
+            }
             update(2, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isVisible() {
-        return (bF & 2) != 0;
+        return (myInternalFlags & 2) != 0;
     }
 
     public boolean canView() {
         for (Object obj = this; obj != null; obj = ((GraphicViewerObject) (obj))
-                .getParent())
-            if (!((GraphicViewerObject) (obj)).isVisible())
+                .getParent()) {
+            if (!((GraphicViewerObject) (obj)).isVisible()) {
                 return false;
+            }
+        }
 
         GraphicViewerLayer graphicviewerlayer = getLayer();
-        if (graphicviewerlayer != null)
+        if (graphicviewerlayer != null) {
             return graphicviewerlayer.isVisible();
-        else
+        } else {
             return true;
+        }
     }
 
     public void setSelectable(boolean flag) {
-        boolean flag1 = (bF & 4) != 0;
+        boolean flag1 = (myInternalFlags & 4) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 4;
-            else
-                bF &= -5;
+            if (flag) {
+                myInternalFlags |= 4;
+            } else {
+                myInternalFlags &= -5;
+            }
             update(3, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isSelectable() {
-        return (bF & 4) != 0;
+        return (myInternalFlags & 4) != 0;
     }
 
     public void setDraggable(boolean flag) {
-        boolean flag1 = (bF & 8) != 0;
+        boolean flag1 = (myInternalFlags & 8) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 8;
-            else
-                bF &= -9;
+            if (flag) {
+                myInternalFlags |= 8;
+            } else {
+                myInternalFlags &= -9;
+            }
             update(4, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isDraggable() {
-        return (bF & 8) != 0;
+        return (myInternalFlags & 8) != 0;
     }
 
     public void setResizable(boolean flag) {
-        boolean flag1 = (bF & 0x10) != 0;
+        boolean flag1 = (myInternalFlags & 0x10) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x10;
-            else
-                bF &= 0xffffffef;
+            if (flag) {
+                myInternalFlags |= 0x10;
+            } else {
+                myInternalFlags &= 0xffffffef;
+            }
             update(5, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isResizable() {
-        return (bF & 0x10) != 0;
+        return (myInternalFlags & 0x10) != 0;
     }
 
     public void set4ResizeHandles(boolean flag) {
-        boolean flag1 = (bF & 0x20) != 0;
+        boolean flag1 = (myInternalFlags & 0x20) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x20;
-            else
-                bF &= 0xffffffdf;
+            if (flag) {
+                myInternalFlags |= 0x20;
+            } else {
+                myInternalFlags &= 0xffffffdf;
+            }
             update(6, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean is4ResizeHandles() {
-        return (bF & 0x20) != 0;
+        return (myInternalFlags & 0x20) != 0;
     }
 
     public void setAutoRescale(boolean flag) {
-        boolean flag1 = (bF & 0x400000) != 0;
+        boolean flag1 = (myInternalFlags & 0x400000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x400000;
-            else
-                bF &= 0xffbfffff;
+            if (flag) {
+                myInternalFlags |= 0x400000;
+            } else {
+                myInternalFlags &= 0xffbfffff;
+            }
             update(15, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isAutoRescale() {
-        return (bF & 0x400000) != 0;
+        return (myInternalFlags & 0x400000) != 0;
     }
 
     public void setDragsNode(boolean flag) {
-        boolean flag1 = (bF & 0x400) != 0;
+        boolean flag1 = (myInternalFlags & 0x400) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x400;
-            else
-                bF &= 0xfffffbff;
+            if (flag) {
+                myInternalFlags |= 0x400;
+            } else {
+                myInternalFlags &= 0xfffffbff;
+            }
             update(13, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isDragsNode() {
-        return (bF & 0x400) != 0;
+        return (myInternalFlags & 0x400) != 0;
     }
 
     public void setSuspendUpdates(boolean flag) {
-        boolean flag1 = (bF & 0x40) != 0;
+        boolean flag1 = (myInternalFlags & 0x40) != 0;
         if (flag1 != flag) {
-            if (flag)
-                bF |= 0x40;
-            else
-                bF &= 0xffffffbf;
+            if (flag) {
+                myInternalFlags |= 0x40;
+            } else {
+                myInternalFlags &= 0xffffffbf;
+            }
             update(0, 1, null);
         }
     }
 
     public boolean isSuspendUpdates() {
-        return (bF & 0x40) != 0;
+        return (myInternalFlags & 0x40) != 0;
     }
 
     public void setSkipsUndoManager(boolean flag) {
-        boolean flag1 = (bF & 0x800) != 0;
-        if (flag1 != flag)
-            if (flag)
-                bF |= 0x800;
-            else
-                bF &= 0xfffff7ff;
+        boolean flag1 = (myInternalFlags & 0x800) != 0;
+        if (flag1 != flag) {
+            if (flag) {
+                myInternalFlags |= 0x800;
+            } else {
+                myInternalFlags &= 0xfffff7ff;
+            }
+        }
     }
 
     public boolean isSkipsUndoManager() {
-        return (bF & 0x800) != 0;
+        return (myInternalFlags & 0x800) != 0;
     }
 
+    /** @deprecated */
     public void setSuspendChildUpdates(boolean flag) {
-        if (((bF & 0x80) != 0) != flag)
-            if (flag)
-                bF |= 0x80;
-            else
-                bF &= 0xffffff7f;
+        if (((myInternalFlags & 0x80) != 0) != flag) {
+            if (flag) {
+                myInternalFlags |= 0x80;
+            } else {
+                myInternalFlags &= 0xffffff7f;
+            }
+        }
     }
 
+    /** @deprecated */
     public boolean isSuspendChildUpdates() {
-        return (bF & 0x80) != 0;
+        return (myInternalFlags & 0x80) != 0;
     }
 
     protected void setBoundingRectInvalid(boolean flag) {
-        if (flag)
-            bF |= 0x100;
-        else
-            bF &= 0xfffffeff;
+        if (flag) {
+            myInternalFlags |= 0x100;
+        } else {
+            myInternalFlags &= 0xfffffeff;
+        }
     }
 
     protected boolean isBoundingRectInvalid() {
-        return (bF & 0x100) != 0;
+        return (myInternalFlags & 0x100) != 0;
     }
 
     public void setInitializing(boolean flag) {
-        if (flag)
-            bF |= 0x100000;
-        else
-            bF &= 0xffefffff;
+        if (flag) {
+            myInternalFlags |= 0x100000;
+        } else {
+            myInternalFlags &= 0xffefffff;
+        }
     }
 
     public boolean isInitializing() {
-        return (bF & 0x100000) != 0;
+        return (myInternalFlags & 0x100000) != 0;
     }
 
-    void _mthif(boolean flag) {
-        if (flag)
-            bF |= 0x200000;
-        else
-            bF &= 0xffdfffff;
+    void setSkipsBoundingRectChanged(boolean flag) {
+        if (flag) {
+            myInternalFlags |= 0x200000;
+        } else {
+            myInternalFlags &= 0xffdfffff;
+        }
     }
 
-    boolean h() {
-        return (bF & 0x200000) != 0;
+    boolean isSkipsBoundingRectChanged() {
+        return (myInternalFlags & 0x200000) != 0;
     }
 
     public static void setBoundsRect(Rectangle rectangle, Rectangle rectangle1) {
@@ -1461,72 +1602,4 @@ public abstract class GraphicViewerObject
         rectangle.y -= k;
         rectangle.height += 2 * k;
     }
-
-    public static final int NoSpot = -1;
-    public static final int NoHandle = -1;
-    public static final int Center = 0;
-    public static final int TopLeft = 1;
-    public static final int TopCenter = 2;
-    public static final int TopMiddle = 2;
-    public static final int Top = 2;
-    public static final int TopRight = 3;
-    public static final int RightCenter = 4;
-    public static final int CenterRight = 4;
-    public static final int SideRight = 4;
-    public static final int Right = 4;
-    public static final int BottomRight = 5;
-    public static final int BottomCenter = 6;
-    public static final int BottomMiddle = 6;
-    public static final int Bottom = 6;
-    public static final int BottomLeft = 7;
-    public static final int LeftCenter = 8;
-    public static final int CenterLeft = 8;
-    public static final int SideLeft = 8;
-    public static final int Left = 8;
-    public static final int NumReservedHandles = 100;
-    public static final int RepaintAll = 0;
-    public static final int ChangedGeometry = 1;
-    public static final int ChangedVisible = 2;
-    public static final int ChangedSelectable = 3;
-    public static final int ChangedDraggable = 4;
-    public static final int ChangedResizable = 5;
-    public static final int Changed4ResizeHandles = 6;
-    public static final int ChangedGrabChildSelection = 9;
-    public static final int ChangedZOrder = 10;
-    public static final int ChangedPen = 11;
-    public static final int ChangedBrush = 12;
-    public static final int ChangedDragsNode = 13;
-    public static final int ChangedUpdatePartner = 14;
-    public static final int ChangedAutoRescale = 15;
-    public static final int ChangedInitializing = 40;
-    public static final int LastChangedHint = 65535;
-    static final int bX = 2;
-    static final int bZ = 4;
-    static final int bQ = 8;
-    static final int bK = 16;
-    static final int bE = 32;
-    static final int b1 = 64;
-    static final int bG = 128;
-    static final int bI = 256;
-    static final int bW = 512;
-    static final int bT = 1024;
-    static final int bA = 2048;
-    static final int bS = 4096;
-    static final int bU = 8192;
-    static final int bV = 16384;
-    static final int bY = 32768;
-    static final int bR = 0x10000;
-    static final int bP = 0x20000;
-    static final int bO = 0x40000;
-    static final int bN = 0x80000;
-    static final int bz = 0x100000;
-    static final int bD = 0x200000;
-    static final int bH = 0x400000;
-    static final int bJ = 0x800000;
-    private GraphicViewerArea bC;
-    private GraphicViewerLayer bL;
-    private transient GraphicViewerView bB;
-    private Rectangle bM;
-    private int bF;
-    private int b0;
 }

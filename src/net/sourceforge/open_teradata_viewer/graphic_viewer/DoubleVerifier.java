@@ -35,22 +35,25 @@ public class DoubleVerifier extends InputVerifier {
     public DoubleVerifier() {
     }
 
-    public boolean verify(JComponent jcomponent) {
-        String s;
-        JTextField jtextfield = (JTextField) jcomponent;
-        s = jtextfield.getText();
-        Double.parseDouble(s);
-        return true;
+    public boolean verify(JComponent input) {
+        JTextField tf = (JTextField) input;
+        String entered = tf.getText();
+        try {
+            double dVal = Double.parseDouble(entered);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
-    public boolean shouldYieldFocus(JComponent jcomponent) {
-        if (super.shouldYieldFocus(jcomponent)) {
+    public boolean shouldYieldFocus(JComponent input) {
+        if (super.shouldYieldFocus(input)) {
             return true;
         } else {
-            jcomponent.setInputVerifier(null);
+            input.setInputVerifier(null);
             UISupport.getDialogs().showErrorMessage(
                     "An illegal double value was entered");
-            jcomponent.setInputVerifier(this);
+            input.setInputVerifier(this);
             return false;
         }
     }

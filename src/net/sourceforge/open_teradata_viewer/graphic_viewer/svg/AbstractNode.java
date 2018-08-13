@@ -19,11 +19,13 @@
 package net.sourceforge.open_teradata_viewer.graphic_viewer.svg;
 
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomElement;
+import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomList;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomNode;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.IDomText;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 /**
@@ -34,12 +36,14 @@ import org.w3c.dom.Text;
  */
 public class AbstractNode implements IDomNode {
 
+    private Node myNode;
+
     public AbstractNode(Node node) {
-        a = node;
+        myNode = node;
     }
 
     public Node getNode() {
-        return a;
+        return myNode;
     }
 
     public IDomNode appendChild(IDomNode domnode) {
@@ -51,7 +55,7 @@ public class AbstractNode implements IDomNode {
     }
 
     public boolean isElement() {
-        return a.getNodeType() == 1;
+        return myNode.getNodeType() == 1;
     }
 
     public IDomElement elementCast() {
@@ -63,78 +67,94 @@ public class AbstractNode implements IDomNode {
         }
     }
 
+    private IDomList getChildNodes() {
+        NodeList localNodeList = myNode.getChildNodes();
+        return new DefaultList(localNodeList);
+    }
+
     public IDomNode getFirstChild() {
-        Node node = a.getFirstChild();
-        if (node == null)
+        Node node = myNode.getFirstChild();
+        if (node == null) {
             return null;
-        else
+        } else {
             return new AbstractNode(node);
+        }
     }
 
     public IDomElement getFirstChildElement() {
-        for (Node node = a.getFirstChild(); node != null; node = node
-                .getNextSibling())
-            if (node.getNodeType() == 1)
+        for (Node node = myNode.getFirstChild(); node != null; node = node
+                .getNextSibling()) {
+            if (node.getNodeType() == 1) {
                 return new DefaultElement((Element) node);
+            }
+        }
 
         return null;
     }
 
     public IDomText getFirstChildText() {
-        for (Node node = a.getFirstChild(); node != null; node = node
-                .getNextSibling())
-            if (node.getNodeType() == 3)
+        for (Node node = myNode.getFirstChild(); node != null; node = node
+                .getNextSibling()) {
+            if (node.getNodeType() == 3) {
                 return new DefaultText((Text) node);
+            }
+        }
 
         return null;
     }
 
     public IDomNode getParentNode() {
-        Node node = a.getParentNode();
-        if (node == null)
+        Node node = myNode.getParentNode();
+        if (node == null) {
             return null;
-        else
+        } else {
             return new AbstractNode(node);
+        }
     }
 
     public IDomNode getNextSibling() {
-        Node node = a.getNextSibling();
-        if (node == null)
+        Node node = myNode.getNextSibling();
+        if (node == null) {
             return null;
-        else
+        } else {
             return new AbstractNode(node);
+        }
     }
 
     public IDomElement getNextSiblingElement() {
-        for (Node node = a.getNextSibling(); node != null; node = node
-                .getNextSibling())
-            if (node.getNodeType() == 1)
+        for (Node node = myNode.getNextSibling(); node != null; node = node
+                .getNextSibling()) {
+            if (node.getNodeType() == 1) {
                 return new DefaultElement((Element) node);
+            }
+        }
 
         return null;
     }
 
     public IDomElement getNextSiblingGraphicViewerClassElement() {
-        for (Node node = a.getNextSibling(); node != null; node = node
+        for (Node node = myNode.getNextSibling(); node != null; node = node
                 .getNextSibling()) {
-            if (node.getNodeType() != 1)
+            if (node.getNodeType() != 1) {
                 continue;
+            }
             Element element = (Element) node;
-            if (element.getLocalName().equals("GraphicViewerClass"))
+            if (element.getLocalName().equals("GraphicViewerClass")) {
                 return new DefaultElement(element);
+            }
         }
 
         return null;
     }
 
     public IDomText getNextSiblingText() {
-        for (Node node = a.getNextSibling(); node != null; node = node
-                .getNextSibling())
-            if (node.getNodeType() == 3)
+        for (Node node = myNode.getNextSibling(); node != null; node = node
+                .getNextSibling()) {
+            if (node.getNodeType() == 3) {
                 return new DefaultText((Text) node);
+            }
+        }
 
         return null;
     }
-
-    private Node a;
 }

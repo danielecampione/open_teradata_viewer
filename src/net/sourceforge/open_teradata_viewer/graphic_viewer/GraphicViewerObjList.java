@@ -30,98 +30,111 @@ class GraphicViewerObjList implements Serializable {
 
     private static final long serialVersionUID = 872776455730424153L;
 
+    private GraphicViewerListPosition myHead = null;
+    private GraphicViewerListPosition myTail = null;
+    private int myNumObjects = 0;
+    private boolean myOwner = false;
+
     public GraphicViewerObjList() {
-        _fldif = null;
-        a = null;
-        _flddo = 0;
-        _fldfor = false;
     }
 
     public GraphicViewerObjList(boolean flag) {
-        _fldif = null;
-        a = null;
-        _flddo = 0;
-        _fldfor = false;
-        _fldfor = flag;
+        myOwner = flag;
     }
 
     public int getNumObjects() {
-        return _flddo;
+        return myNumObjects;
     }
 
     public boolean isEmpty() {
-        return _fldif == null;
+        return myHead == null;
     }
 
     public GraphicViewerListPosition addObjectAtHead(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return null;
+        }
         GraphicViewerListPosition graphicviewerlistposition = new GraphicViewerListPosition(
-                graphicviewerobject, null, _fldif);
-        if (_fldif != null)
-            _fldif._fldif = graphicviewerlistposition;
-        _fldif = graphicviewerlistposition;
-        if (a == null)
-            a = _fldif;
-        _flddo++;
-        if (_fldfor)
-            graphicviewerobject.a(_fldif);
-        return _fldif;
+                graphicviewerobject, null, myHead);
+        if (myHead != null) {
+            myHead.prev = graphicviewerlistposition;
+        }
+        myHead = graphicviewerlistposition;
+        if (myTail == null) {
+            myTail = myHead;
+        }
+        myNumObjects++;
+        if (myOwner) {
+            graphicviewerobject.setCurrentListPosition(myHead);
+        }
+        return myHead;
     }
 
     public GraphicViewerListPosition addObjectAtTail(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return null;
+        }
         GraphicViewerListPosition graphicviewerlistposition = new GraphicViewerListPosition(
-                graphicviewerobject, a, null);
-        if (a != null)
-            a.a = graphicviewerlistposition;
-        a = graphicviewerlistposition;
-        if (_fldif == null)
-            _fldif = a;
-        _flddo++;
-        if (_fldfor)
-            graphicviewerobject.a(a);
-        return a;
+                graphicviewerobject, myTail, null);
+        if (myTail != null) {
+            myTail.next = graphicviewerlistposition;
+        }
+        myTail = graphicviewerlistposition;
+        if (myHead == null) {
+            myHead = myTail;
+        }
+        myNumObjects++;
+        if (myOwner) {
+            graphicviewerobject.setCurrentListPosition(myTail);
+        }
+        return myTail;
     }
 
     public GraphicViewerListPosition insertObjectBefore(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerlistposition == null || graphicviewerobject == null)
+        if (graphicviewerlistposition == null || graphicviewerobject == null) {
             return null;
+        }
         GraphicViewerListPosition graphicviewerlistposition1 = new GraphicViewerListPosition(
-                graphicviewerobject, graphicviewerlistposition._fldif,
+                graphicviewerobject, graphicviewerlistposition.prev,
                 graphicviewerlistposition);
-        if (graphicviewerlistposition._fldif != null)
-            graphicviewerlistposition._fldif.a = graphicviewerlistposition1;
-        else
-            _fldif = graphicviewerlistposition1;
-        graphicviewerlistposition._fldif = graphicviewerlistposition1;
-        _flddo++;
-        if (_fldfor)
-            graphicviewerobject.a(graphicviewerlistposition1);
+        if (graphicviewerlistposition.prev != null) {
+            graphicviewerlistposition.prev.next = graphicviewerlistposition1;
+        } else {
+            myHead = graphicviewerlistposition1;
+        }
+        graphicviewerlistposition.prev = graphicviewerlistposition1;
+        myNumObjects++;
+        if (myOwner) {
+            graphicviewerobject
+                    .setCurrentListPosition(graphicviewerlistposition1);
+        }
         return graphicviewerlistposition1;
     }
 
     public GraphicViewerListPosition insertObjectAfter(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerlistposition == null || graphicviewerobject == null)
+        if (graphicviewerlistposition == null || graphicviewerobject == null) {
             return null;
+        }
         GraphicViewerListPosition graphicviewerlistposition1 = new GraphicViewerListPosition(
                 graphicviewerobject, graphicviewerlistposition,
-                graphicviewerlistposition.a);
-        if (graphicviewerlistposition.a != null)
-            graphicviewerlistposition.a._fldif = graphicviewerlistposition1;
-        else
-            a = graphicviewerlistposition1;
-        graphicviewerlistposition.a = graphicviewerlistposition1;
-        _flddo++;
-        if (_fldfor)
-            graphicviewerobject.a(graphicviewerlistposition1);
+                graphicviewerlistposition.next);
+        if (graphicviewerlistposition.next != null) {
+            graphicviewerlistposition.next.prev = graphicviewerlistposition1;
+        } else {
+            myTail = graphicviewerlistposition1;
+        }
+        graphicviewerlistposition.next = graphicviewerlistposition1;
+        myNumObjects++;
+        if (myOwner) {
+            graphicviewerobject
+                    .setCurrentListPosition(graphicviewerlistposition1);
+        }
         return graphicviewerlistposition1;
     }
 
@@ -132,74 +145,81 @@ class GraphicViewerObjList implements Serializable {
 
     public GraphicViewerObject removeObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        GraphicViewerObject graphicviewerobject = graphicviewerlistposition._flddo;
-        if (graphicviewerlistposition == _fldif)
-            _fldif = graphicviewerlistposition.a;
-        if (graphicviewerlistposition == a)
-            a = graphicviewerlistposition._fldif;
-        if (graphicviewerlistposition._fldif != null)
-            graphicviewerlistposition._fldif.a = graphicviewerlistposition.a;
-        if (graphicviewerlistposition.a != null)
-            graphicviewerlistposition.a._fldif = graphicviewerlistposition._fldif;
-        graphicviewerlistposition._fldif = null;
-        graphicviewerlistposition.a = null;
-        if (_fldfor)
-            graphicviewerobject.a(null);
-        _flddo--;
+        }
+        GraphicViewerObject graphicviewerobject = graphicviewerlistposition.obj;
+        if (graphicviewerlistposition == myHead) {
+            myHead = graphicviewerlistposition.next;
+        }
+        if (graphicviewerlistposition == myTail) {
+            myTail = graphicviewerlistposition.prev;
+        }
+        if (graphicviewerlistposition.prev != null) {
+            graphicviewerlistposition.prev.next = graphicviewerlistposition.next;
+        }
+        if (graphicviewerlistposition.next != null) {
+            graphicviewerlistposition.next.prev = graphicviewerlistposition.prev;
+        }
+        graphicviewerlistposition.prev = null;
+        graphicviewerlistposition.next = null;
+        if (myOwner) {
+            graphicviewerobject.setCurrentListPosition(null);
+        }
+        myNumObjects--;
         return graphicviewerobject;
     }
 
     public GraphicViewerListPosition getFirstObjectPos() {
-        return _fldif;
+        return myHead;
     }
 
     public GraphicViewerListPosition getLastObjectPos() {
-        return a;
+        return myTail;
     }
 
     public GraphicViewerListPosition getNextObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        else
-            return graphicviewerlistposition.a;
+        } else {
+            return graphicviewerlistposition.next;
+        }
     }
 
     public GraphicViewerListPosition getPrevObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        else
-            return graphicviewerlistposition._fldif;
+        } else {
+            return graphicviewerlistposition.prev;
+        }
     }
 
     public GraphicViewerObject getObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        if (graphicviewerlistposition == null)
+        if (graphicviewerlistposition == null) {
             return null;
-        else
-            return graphicviewerlistposition._flddo;
+        } else {
+            return graphicviewerlistposition.obj;
+        }
     }
 
     public GraphicViewerListPosition findObject(
             GraphicViewerObject graphicviewerobject) {
-        if (_fldfor) {
+        if (myOwner) {
             GraphicViewerListPosition graphicviewerlistposition = graphicviewerobject
-                    .i();
-            if (graphicviewerlistposition != null)
+                    .getCurrentListPosition();
+            if (graphicviewerlistposition != null) {
                 return graphicviewerlistposition;
+            }
         }
-        for (GraphicViewerListPosition graphicviewerlistposition1 = _fldif; graphicviewerlistposition1 != null; graphicviewerlistposition1 = graphicviewerlistposition1.a)
-            if (graphicviewerlistposition1._flddo == graphicviewerobject)
+        for (GraphicViewerListPosition graphicviewerlistposition1 = myHead; graphicviewerlistposition1 != null; graphicviewerlistposition1 = graphicviewerlistposition1.next) {
+            if (graphicviewerlistposition1.obj == graphicviewerobject) {
                 return graphicviewerlistposition1;
+            }
+        }
 
         return null;
     }
-
-    private GraphicViewerListPosition _fldif;
-    private GraphicViewerListPosition a;
-    private int _flddo;
-    private boolean _fldfor;
 }

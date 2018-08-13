@@ -38,74 +38,34 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
 
     private static final long serialVersionUID = 5287373060672811611L;
 
-    /**
-     * 
-     * 
-     * @author D. Campione
-     *
-     */
-    static class ArrowInfo implements Serializable {
+    public static final int ChangedAddPoint = 101;
+    public static final int ChangedRemovePoint = 102;
+    public static final int ChangedModifiedPoint = 103;
+    public static final int ChangedArrowHeads = 104;
+    public static final int ChangedArrowLength = 105;
+    public static final int ChangedArrowShaftLength = 106;
 
-        private static final long serialVersionUID = -9160998475192949070L;
-
-        int[] _mthif() {
-            if (_fldif == null) {
-                _fldif = new int[4];
-            }
-            return _fldif;
-        }
-
-        int[] a() {
-            if (a == null) {
-                a = new int[4];
-            }
-            return a;
-        }
-
-        public void SVGWriteGraphicViewerElementAttributes(
-                IDomElement domelement) {
-            domelement.setAttribute("arrow_length", Double.toString(_fldint));
-            domelement.setAttribute("arrow_shaftlength",
-                    Double.toString(_fldfor));
-            domelement.setAttribute("arrow_width", Double.toString(_flddo));
-        }
-
-        public void SVGReadGraphicViewerElementAttributes(IDomElement domelement) {
-            String s = domelement.getAttribute("arrow_length");
-            _fldint = Double.parseDouble(s);
-            String s1 = domelement.getAttribute("arrow_shaftlength");
-            _fldfor = Double.parseDouble(s1);
-            String s2 = domelement.getAttribute("arrow_angle");
-            if (s2.length() > 0) {
-                double d = Double.parseDouble(s2);
-                _flddo = _fldint * Math.tan(d / 2D) * 2D;
-            } else {
-                String s3 = domelement.getAttribute("arrow_width");
-                _flddo = Double.parseDouble(s3);
-            }
-        }
-
-        double _fldint;
-        double _fldfor;
-        double _flddo;
-        transient int _fldif[];
-        transient int a[];
-
-        ArrowInfo() {
-            _fldint = 10D;
-            _fldfor = 8D;
-            _flddo = 8D;
-            _fldif = null;
-            a = null;
-        }
-    }
+    /** @deprecated */
+    public static final int ChangedArrowAngle = 107;
+    public static final int ChangedHighlight = 108;
+    public static final int ChangedCubic = 109;
+    public static final int ChangedAllPoints = 110;
+    public static final int ChangedArrowWidth = 111;
+    private static final int LINE_FUZZ = 3;
+    private static final int NUM_HEADPOINTS = 4;
+    private static final double DEFAULT_ARROW_LENGTH = 10.0D;
+    private static final double DEFAULT_ARROW_SHAFT_LENGTH = 8.0D;
+    private static final double DEFAULT_ARROW_WIDTH = 8.0D;
+    private static final int flagStrokeArrowStart = 32768;
+    private static final int flagStrokeArrowEnd = 16384;
+    private static final int flagStrokeCubic = 4096;
+    protected ArrayList myPoints = new ArrayList();
+    private GraphicViewerPen myHighlightPen = null;
+    private ArrowInfo myArrowInfo = null;
+    private transient Point myTempPoint = null;
+    private transient GeneralPath myPath = null;
 
     public GraphicViewerStroke() {
-        myPoints = new ArrayList<Point>();
-        cg = null;
-        ck = null;
-        cm = null;
-        cj = null;
         setBrush(GraphicViewerBrush.black);
     }
 
@@ -120,13 +80,13 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                         .add(i, new Point(point.x, point.y));
             }
 
-            if (ck != null) {
-                graphicviewerstroke.ck = new ArrowInfo();
-                graphicviewerstroke.ck._fldint = ck._fldint;
-                graphicviewerstroke.ck._fldfor = ck._fldfor;
-                graphicviewerstroke.ck._flddo = ck._flddo;
+            if (myArrowInfo != null) {
+                graphicviewerstroke.myArrowInfo = new ArrowInfo();
+                graphicviewerstroke.myArrowInfo.myLength = myArrowInfo.myLength;
+                graphicviewerstroke.myArrowInfo.myShaftLength = myArrowInfo.myShaftLength;
+                graphicviewerstroke.myArrowInfo.myWidth = myArrowInfo.myWidth;
             }
-            graphicviewerstroke.cg = cg;
+            graphicviewerstroke.myHighlightPen = myHighlightPen;
         }
         return graphicviewerstroke;
     }
@@ -148,8 +108,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 domdoc.registerReferencingNode(domelement1, "highlightpen",
                         getHighlight());
             }
-            if (ck != null) {
-                ck.SVGWriteGraphicViewerElementAttributes(domelement1);
+            if (myArrowInfo != null) {
+                myArrowInfo.SVGWriteGraphicViewerElementAttributes(domelement1);
             }
             String s1 = "";
             String s2 = "";
@@ -177,8 +137,9 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 s = s + " " + Integer.toString(point.y);
                 for (int l = 1; l < myPoints.size(); l += 3) {
                     Point point4 = (Point) myPoints.get(l);
-                    if (l + 6 > myPoints.size())
+                    if (l + 6 > myPoints.size()) {
                         l = myPoints.size() - 3;
+                    }
                     Point point5 = (Point) myPoints.get(l + 1);
                     Point point6 = (Point) myPoints.get(l + 2);
                     s = s + " C " + Integer.toString(point4.x);
@@ -205,9 +166,9 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             }
             IDomElement domelement4 = null;
             IDomElement domelement5 = null;
-            if (ck != null) {
-                int ai[] = ck._mthif();
-                int ai1[] = ck.a();
+            if (myArrowInfo != null) {
+                int ai[] = myArrowInfo.getXs();
+                int ai1[] = myArrowInfo.getYs();
                 if (hasArrowAtEnd()) {
                     domelement4 = domdoc.createElement("polygon");
                     String s4 = "";
@@ -216,9 +177,10 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                     if (point7 != null && point9 != null) {
                         calculateFilledArrowhead(point7.x, point7.y, point9.x,
                                 point9.y, 1, ai, ai1);
-                        for (int l1 = 0; l1 < ai.length; l1++)
+                        for (int l1 = 0; l1 < ai.length; l1++) {
                             s4 = s4 + " " + Integer.toString(ai[l1]) + " "
                                     + Integer.toString(ai1[l1]);
+                        }
 
                         domelement4.setAttribute("points", s4);
                     }
@@ -231,9 +193,10 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                     if (point8 != null && point10 != null) {
                         calculateFilledArrowhead(point8.x, point8.y, point10.x,
                                 point10.y, 0, ai, ai1);
-                        for (int i2 = 0; i2 < ai.length; i2++)
+                        for (int i2 = 0; i2 < ai.length; i2++) {
                             s5 = s5 + " " + Integer.toString(ai[i2]) + " "
                                     + Integer.toString(ai1[i2]);
+                        }
 
                         domelement5.setAttribute("points", s5);
                     }
@@ -272,10 +235,10 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             String s = domelement1.getAttribute("highlightpen");
             domdoc.registerReferencingObject(this, "highlightpen", s);
             if (domelement1.getAttribute("arrow_length").length() > 0) {
-                if (ck == null) {
-                    ck = new ArrowInfo();
+                if (myArrowInfo == null) {
+                    myArrowInfo = new ArrowInfo();
                 }
-                ck.SVGReadGraphicViewerElementAttributes(domelement1);
+                myArrowInfo.SVGReadGraphicViewerElementAttributes(domelement1);
             }
             String s2 = domelement1.getAttribute("xpoints");
             String s7;
@@ -323,24 +286,27 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("highlightpen"))
+        if (s.equals("highlightpen")) {
             setHighlight((GraphicViewerPen) obj);
+        }
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         GraphicViewerPen graphicviewerpen = getPen();
-        if (graphicviewerpen == null || graphicviewerpen.getStyle() == 0)
+        if (graphicviewerpen == null || graphicviewerpen.getStyle() == 0) {
             return;
+        }
         GraphicViewerPen graphicviewerpen1 = getHighlight();
         if (getNumPoints() == 2) {
             Point point = getPoint(0);
             int i = point.x;
             int k = point.y;
             if (hasArrowAtStart() && getArrowShaftLength() > 0.0D) {
-                if (ck == null)
-                    ck = new ArrowInfo();
-                int ai[] = ck._mthif();
-                int ai1[] = ck.a();
+                if (myArrowInfo == null) {
+                    myArrowInfo = new ArrowInfo();
+                }
+                int ai[] = myArrowInfo.getXs();
+                int ai1[] = myArrowInfo.getYs();
                 Point point2 = getArrowFromAnchorPoint();
                 Point point3 = getArrowFromEndPoint();
                 if (point2 != null && point3 != null) {
@@ -354,10 +320,11 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             int l = point1.x;
             int i1 = point1.y;
             if (hasArrowAtEnd() && getArrowShaftLength() > 0.0D) {
-                if (ck == null)
-                    ck = new ArrowInfo();
-                int ai2[] = ck._mthif();
-                int ai3[] = ck.a();
+                if (myArrowInfo == null) {
+                    myArrowInfo = new ArrowInfo();
+                }
+                int ai2[] = myArrowInfo.getXs();
+                int ai3[] = myArrowInfo.getYs();
                 Point point4 = getArrowToAnchorPoint();
                 Point point5 = getArrowToEndPoint();
                 if (point4 != null && point5 != null) {
@@ -374,140 +341,147 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         } else {
             if (graphicviewerpen1 != null && graphicviewerpen1.getStyle() != 0) {
                 drawPath(graphics2d, graphicviewerpen1, null,
-                        _mthdo(graphicviewerview));
+                        getPath(graphicviewerview));
             }
             drawPath(graphics2d, graphicviewerpen, null,
-                    _mthdo(graphicviewerview));
+                    getPath(graphicviewerview));
         }
         drawArrowHeads(graphics2d);
     }
 
-    void a(GeneralPath generalpath, GraphicViewerView graphicviewerview) {
+    void makePath(GeneralPath paramGeneralPath,
+            GraphicViewerView paramGraphicViewerView) {
         int i = getNumPoints();
-        if (isCubic() && i >= 4) {
-            Point point = getPoint(0);
-            int k = point.x;
-            int i1 = point.y;
-            if (hasArrowAtStart() && getArrowShaftLength() > 0.0D) {
-                if (ck == null) {
-                    ck = new ArrowInfo();
+        if ((isCubic()) && (i >= 4)) {
+            Point localPoint1 = getPoint(0);
+            int j = localPoint1.x;
+            int k = localPoint1.y;
+            if ((hasArrowAtStart()) && (getArrowShaftLength() > 0.0D)) {
+                if (myArrowInfo == null) {
+                    myArrowInfo = new ArrowInfo();
                 }
-                int ai[] = ck._mthif();
-                int ai2[] = ck.a();
-                Point point4 = getArrowFromAnchorPoint();
-                Point point7 = getArrowFromEndPoint();
-                if (point4 != null && point7 != null) {
-                    calculateFilledArrowhead(point4.x, point4.y, point7.x,
-                            point7.y, 0, ai, ai2);
-                    k = ai[0];
-                    i1 = ai2[0];
+                int[] arrayOfInt1 = myArrowInfo.getXs();
+                int localObject1[] = myArrowInfo.getYs();
+                Point localPoint2 = getArrowFromAnchorPoint();
+                Point localPoint3 = getArrowFromEndPoint();
+                if ((localPoint2 != null) && (localPoint3 != null)) {
+                    calculateFilledArrowhead(localPoint2.x, localPoint2.y,
+                            localPoint3.x, localPoint3.y, 0, arrayOfInt1,
+                            (int[]) localObject1);
+                    j = arrayOfInt1[0];
+                    k = localObject1[0];
                 }
             }
-            generalpath.moveTo(k, i1);
-            for (int k1 = 3; k1 < i; k1 += 3) {
-                Point point2 = getPoint(k1 - 2);
-                if (k1 + 3 >= i) {
-                    k1 = i - 1;
+            paramGeneralPath.moveTo(j, k);
+            for (int m = 3; m < i; m += 3) {
+                Point localObject1 = getPoint(m - 2);
+                if (m + 3 >= i) {
+                    m = i - 1;
                 }
-                Point point5 = getPoint(k1 - 1);
-                Point point8 = getPoint(k1);
-                int k2 = point8.x;
-                int l2 = point8.y;
-                if (k1 == i - 1 && hasArrowAtEnd()
-                        && getArrowShaftLength() > 0.0D) {
-                    if (ck == null) {
-                        ck = new ArrowInfo();
+                Point localPoint2 = getPoint(m - 1);
+                Point localPoint3 = getPoint(m);
+                int i3 = localPoint3.x;
+                int i4 = localPoint3.y;
+                if ((m == i - 1) && (hasArrowAtEnd())
+                        && (getArrowShaftLength() > 0.0D)) {
+                    if (myArrowInfo == null) {
+                        myArrowInfo = new ArrowInfo();
                     }
-                    int ai6[] = ck._mthif();
-                    int ai7[] = ck.a();
-                    Point point12 = getArrowToAnchorPoint();
-                    Point point13 = getArrowToEndPoint();
-                    if (point12 != null && point13 != null) {
-                        calculateFilledArrowhead(point12.x, point12.y,
-                                point13.x, point13.y, 1, ai6, ai7);
-                        k2 = ai6[0];
-                        l2 = ai7[0];
+                    int[] localObject2 = myArrowInfo.getXs();
+                    int[] localObject3 = myArrowInfo.getYs();
+                    Point localPoint4 = getArrowToAnchorPoint();
+                    Point localPoint5 = getArrowToEndPoint();
+                    if ((localPoint4 != null) && (localPoint5 != null)) {
+                        calculateFilledArrowhead(localPoint4.x, localPoint4.y,
+                                localPoint5.x, localPoint5.y, 1,
+                                (int[]) localObject2, (int[]) localObject3);
+                        i3 = localObject2[0];
+                        i4 = localObject3[0];
                     }
                 }
-                generalpath.curveTo(point2.x, point2.y, point5.x, point5.y, k2,
-                        l2);
+                paramGeneralPath.curveTo(((Point) localObject1).x,
+                        ((Point) localObject1).y, localPoint2.x, localPoint2.y,
+                        i3, i4);
             }
-
         } else if (i >= 2) {
-            Point point1 = getPoint(0);
-            int l = point1.x;
-            int j1 = point1.y;
-            if (hasArrowAtStart() && getArrowShaftLength() > 0.0D) {
-                if (ck == null) {
-                    ck = new ArrowInfo();
+            Point localPoint1 = getPoint(0);
+            int j = localPoint1.x;
+            int k = localPoint1.y;
+            if ((hasArrowAtStart()) && (getArrowShaftLength() > 0.0D)) {
+                if (myArrowInfo == null) {
+                    myArrowInfo = new ArrowInfo();
                 }
-                int ai1[] = ck._mthif();
-                int ai3[] = ck.a();
-                Point point6 = getArrowFromAnchorPoint();
-                Point point9 = getArrowFromEndPoint();
-                if (point6 != null && point9 != null) {
-                    calculateFilledArrowhead(point6.x, point6.y, point9.x,
-                            point9.y, 0, ai1, ai3);
-                    l = ai1[0];
-                    j1 = ai3[0];
+                int[] arrayOfInt2 = myArrowInfo.getXs();
+                int[] localObject1 = myArrowInfo.getYs();
+                Point localPoint2 = getArrowFromAnchorPoint();
+                Point localPoint3 = getArrowFromEndPoint();
+                if ((localPoint2 != null) && (localPoint3 != null)) {
+                    calculateFilledArrowhead(localPoint2.x, localPoint2.y,
+                            localPoint3.x, localPoint3.y, 0, arrayOfInt2,
+                            (int[]) localObject1);
+                    j = arrayOfInt2[0];
+                    k = localObject1[0];
                 }
             }
-            generalpath.moveTo(l, j1);
-            for (int l1 = 1; l1 < i; l1++) {
-                Point point3 = getPoint(l1);
-                int i2 = point3.x;
-                int j2 = point3.y;
-                if (l1 == i - 1 && hasArrowAtEnd()
-                        && getArrowShaftLength() > 0.0D) {
-                    if (ck == null) {
-                        ck = new ArrowInfo();
+            paramGeneralPath.moveTo(j, k);
+            for (int n = 1; n < i; n++) {
+                Point localObject1 = getPoint(n);
+                int i1 = ((Point) localObject1).x;
+                int i2 = ((Point) localObject1).y;
+                if ((n == i - 1) && (hasArrowAtEnd())
+                        && (getArrowShaftLength() > 0.0D)) {
+                    if (myArrowInfo == null) {
+                        myArrowInfo = new ArrowInfo();
                     }
-                    int ai4[] = ck._mthif();
-                    int ai5[] = ck.a();
-                    Point point10 = getArrowToAnchorPoint();
-                    Point point11 = getArrowToEndPoint();
-                    if (point10 != null && point11 != null) {
-                        calculateFilledArrowhead(point10.x, point10.y,
-                                point11.x, point11.y, 1, ai4, ai5);
-                        i2 = ai4[0];
-                        j2 = ai5[0];
+                    int[] arrayOfInt3 = myArrowInfo.getXs();
+                    int[] arrayOfInt4 = myArrowInfo.getYs();
+                    Point localObject2 = getArrowToAnchorPoint();
+                    Point localObject3 = getArrowToEndPoint();
+                    if ((localObject2 != null) && (localObject3 != null)) {
+                        calculateFilledArrowhead(((Point) localObject2).x,
+                                ((Point) localObject2).y,
+                                ((Point) localObject3).x,
+                                ((Point) localObject3).y, 1, arrayOfInt3,
+                                arrayOfInt4);
+                        i1 = arrayOfInt3[0];
+                        i2 = arrayOfInt4[0];
                     }
                 }
-                generalpath.lineTo(i2, j2);
+                paramGeneralPath.lineTo(i1, i2);
             }
         }
     }
 
-    GeneralPath _mthdo(GraphicViewerView graphicviewerview) {
-        if (cj == null) {
+    GeneralPath getPath(GraphicViewerView graphicviewerview) {
+        if (myPath == null) {
             int i = getNumPoints();
-            cj = new GeneralPath(1, 2 * i);
+            myPath = new GeneralPath(1, 2 * i);
         }
-        if (cj.getCurrentPoint() == null) {
-            a(cj, graphicviewerview);
+        if (myPath.getCurrentPoint() == null) {
+            makePath(myPath, graphicviewerview);
         }
-        return cj;
+        return myPath;
     }
 
-    void j() {
-        if (cj != null) {
-            cj.reset();
+    void resetPath() {
+        if (myPath != null) {
+            myPath.reset();
         }
     }
 
     public boolean isCubic() {
-        return (g() & 0x1000) != 0;
+        return (getInternalFlags() & 0x1000) != 0;
     }
 
     public void setCubic(boolean flag) {
-        boolean flag1 = (g() & 0x1000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x1000) != 0;
         if (flag1 != flag) {
             if (flag) {
-                _mthfor(g() | 0x1000);
+                setInternalFlags(getInternalFlags() | 0x1000);
             } else {
-                _mthfor(g() & 0xffffefff);
+                setInternalFlags(getInternalFlags() & 0xffffefff);
             }
-            j();
+            resetPath();
             update(109, flag1 ? 1 : 0, null);
         }
     }
@@ -517,7 +491,7 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     }
 
     public int addPoint(int i, int k) {
-        return a(myPoints.size(), i, k, false);
+        return internalInsertPoint(myPoints.size(), i, k, false);
     }
 
     public final int insertPoint(int i, Point point) {
@@ -525,10 +499,10 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     }
 
     public int insertPoint(int i, int k, int l) {
-        return a(i, k, l, false);
+        return internalInsertPoint(i, k, l, false);
     }
 
-    private int a(int i, int k, int l, boolean flag) {
+    private int internalInsertPoint(int i, int k, int l, boolean flag) {
         Point point = new Point(k, l);
         int i1 = i;
         try {
@@ -540,16 +514,16 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         if (!flag) {
             setBoundingRectInvalid(true);
         }
-        j();
+        resetPath();
         update(101, i1, point);
         return i1;
     }
 
     public void removePoint(int i) {
-        a(i, false);
+        internalRemovePoint(i, false);
     }
 
-    private void a(int i, boolean flag) {
+    private void internalRemovePoint(int i, boolean flag) {
         if (i >= 0 && i < getNumPoints()) {
             Point point = null;
             try {
@@ -560,7 +534,7 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             if (!flag) {
                 setBoundingRectInvalid(true);
             }
-            j();
+            resetPath();
             update(102, i, point);
         }
     }
@@ -596,25 +570,25 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     }
 
     public void setPoint(int i, int k, int l) {
-        _mthif(i, k, l, false);
+        internalSetPoint(i, k, l, false);
     }
 
-    private void _mthif(int i, int k, int l, boolean flag) {
+    private void internalSetPoint(int i, int k, int l, boolean flag) {
         Point point = getPoint(i);
         if (point != null && (point.x != k || point.y != l)) {
-            if (cm == null) {
-                cm = new Point(point.x, point.y);
+            if (myTempPoint == null) {
+                myTempPoint = new Point(point.x, point.y);
             } else {
-                cm.x = point.x;
-                cm.y = point.y;
+                myTempPoint.x = point.x;
+                myTempPoint.y = point.y;
             }
             point.x = k;
             point.y = l;
             if (!flag) {
                 setBoundingRectInvalid(true);
             }
-            j();
-            update(103, i, cm);
+            resetPath();
+            update(103, i, myTempPoint);
         }
     }
 
@@ -622,11 +596,11 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         foredate(110);
         myPoints.clear();
         setBoundingRectInvalid(true);
-        j();
+        resetPath();
         update(110, 0, null);
     }
 
-    public void setPoints(Vector<?> vector) {
+    public void setPoints(Vector vector) {
         foredate(110);
         myPoints.clear();
         for (int i = 0; i < vector.size(); i++) {
@@ -636,15 +610,15 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         }
 
         setBoundingRectInvalid(true);
-        j();
+        resetPath();
         update(110, 0, null);
     }
 
-    public void setPoints(ArrayList<?> arraylist) {
-        a(arraylist, false);
+    public void setPoints(ArrayList arraylist) {
+        internalSetPoints(arraylist, false);
     }
 
-    void a(ArrayList<?> arraylist, boolean flag) {
+    void internalSetPoints(ArrayList arraylist, boolean flag) {
         foredate(110);
         myPoints.clear();
         for (int i = 0; i < arraylist.size(); i++) {
@@ -656,12 +630,12 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         if (!flag) {
             setBoundingRectInvalid(true);
         }
-        j();
+        resetPath();
         update(110, 0, null);
     }
 
-    public Vector<Point> copyPoints() {
-        Vector<Point> vector = new Vector<Point>();
+    public Vector copyPoints() {
+        Vector vector = new Vector();
         int i = getNumPoints();
         for (int k = 0; k < i; k++) {
             Point point = getPoint(k);
@@ -671,8 +645,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         return vector;
     }
 
-    public ArrayList<Point> copyPointsArray() {
-        ArrayList<Point> arraylist = new ArrayList<Point>();
+    public ArrayList copyPointsArray() {
+        ArrayList arraylist = new ArrayList();
         int i = getNumPoints();
         for (int k = 0; k < i; k++) {
             Point point = getPoint(k);
@@ -735,7 +709,7 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
 
             setBoundingRectInvalid(false);
             setSuspendUpdates(false);
-            j();
+            resetPath();
             update(110, 0, null);
         } else {
             Rectangle rectangle2 = getBoundingRect();
@@ -764,7 +738,7 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
 
             setBoundingRectInvalid(false);
             setSuspendUpdates(false);
-            j();
+            resetPath();
             update(110, 0, null);
         }
     }
@@ -803,8 +777,9 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 }
                 Point point4 = getPoint(l1 - 1);
                 Point point5 = getPoint(l1);
-                Rectangle rectangle = a(point2.x, point2.y, point3.x, point3.y,
-                        point4.x, point4.y, point5.x, point5.y);
+                Rectangle rectangle = BezierBounds(point2.x, point2.y,
+                        point3.x, point3.y, point4.x, point4.y, point5.x,
+                        point5.y);
                 k = Math.min(k, rectangle.x);
                 l = Math.min(l, rectangle.y);
                 i1 = Math.max(i1, rectangle.x + rectangle.width);
@@ -870,8 +845,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 }
                 Point point4 = getPoint(i1 - 1);
                 Point point6 = getPoint(i1);
-                if (a(point1.x, point1.y, point2.x, point2.y, point4.x,
-                        point4.y, point6.x, point6.y, i, point)) {
+                if (BezierContainsPoint(point1.x, point1.y, point2.x, point2.y,
+                        point4.x, point4.y, point6.x, point6.y, i, point)) {
                     return j1;
                 }
             }
@@ -880,7 +855,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             for (int l = 0; l < k - 1; l++) {
                 Point point3 = getPoint(l);
                 Point point5 = getPoint(l + 1);
-                if (a(point3.x, point3.y, point5.x, point5.y, i, point)) {
+                if (LineContainsPoint(point3.x, point3.y, point5.x, point5.y,
+                        i, point)) {
                     return l;
                 }
             }
@@ -888,105 +864,107 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         return -1;
     }
 
-    static boolean a(int i, int k, int l, int i1, int j1, Point point) {
-        int k1;
-        int l1;
-        if (i < l) {
-            l1 = i;
-            k1 = l;
+    static boolean LineContainsPoint(int paramInt1, int paramInt2,
+            int paramInt3, int paramInt4, int paramInt5, Point paramPoint) {
+        return LineContainsPoint(paramInt1, paramInt2, paramInt3, paramInt4,
+                paramInt5, paramPoint.x, paramPoint.y);
+    }
+
+    static boolean LineContainsPoint(int paramInt1, int paramInt2,
+            int paramInt3, int paramInt4, int paramInt5, int paramInt6,
+            int paramInt7) {
+        int j;
+        int i;
+        if (paramInt1 < paramInt3) {
+            j = paramInt1;
+            i = paramInt3;
         } else {
-            l1 = l;
-            k1 = i;
+            j = paramInt3;
+            i = paramInt1;
         }
-        int i2;
-        int j2;
-        if (k < i1) {
-            j2 = k;
-            i2 = i1;
+        int m;
+        int k;
+        if (paramInt2 < paramInt4) {
+            m = paramInt2;
+            k = paramInt4;
         } else {
-            j2 = i1;
-            i2 = k;
+            m = paramInt4;
+            k = paramInt2;
         }
-        if (i == l && i - j1 <= point.x && point.x <= i + j1 && j2 <= point.y
-                && point.y <= i2) {
+        if ((paramInt1 == paramInt3) && (paramInt1 - paramInt5 <= paramInt6)
+                && (paramInt6 <= paramInt1 + paramInt5) && (m <= paramInt7)
+                && (paramInt7 <= k)) {
             return true;
         }
-        if (k == i1 && k - j1 <= point.y && point.y <= k + j1 && l1 <= point.x
-                && point.x <= k1) {
+        if ((paramInt2 == paramInt4) && (paramInt2 - paramInt5 <= paramInt7)
+                && (paramInt7 <= paramInt2 + paramInt5) && (j <= paramInt6)
+                && (paramInt6 <= i)) {
             return true;
         }
-        int k2 = k1 + j1;
-        int l2 = l1 - j1;
-        if (l2 <= point.x && point.x <= k2) {
-            int i3 = i2 + j1;
-            int j3 = j2 - j1;
-            if (j3 <= point.y && point.y <= i3)
-                if (k2 - l2 > i3 - j3) {
-                    if (Math.abs(i - l) > j1) {
-                        double d = (double) (i1 - k) / (double) (l - i);
-                        double d2 = d * (double) (point.x - i) + (double) k;
-                        if (d2 - (double) j1 <= (double) point.y
-                                && (double) point.y <= d2 + (double) j1) {
+        int n = i + paramInt5;
+        int i1 = j - paramInt5;
+        if ((i1 <= paramInt6) && (paramInt6 <= n)) {
+            int i2 = k + paramInt5;
+            int i3 = m - paramInt5;
+            if ((i3 <= paramInt7) && (paramInt7 <= i2)) {
+                double d1;
+                double d2;
+                if (n - i1 > i2 - i3) {
+                    if (Math.abs(paramInt1 - paramInt3) > paramInt5) {
+                        d1 = (paramInt4 - paramInt2) / (paramInt3 - paramInt1);
+                        d2 = d1 * (paramInt6 - paramInt1) + paramInt2;
+                        if ((d2 - paramInt5 <= paramInt7)
+                                && (paramInt7 <= d2 + paramInt5)) {
                             return true;
                         }
                     } else {
                         return true;
                     }
-                } else if (Math.abs(k - i1) > j1) {
-                    double d1 = (double) (l - i) / (double) (i1 - k);
-                    double d3 = d1 * (double) (point.y - k) + (double) i;
-                    if (d3 - (double) j1 <= (double) point.x
-                            && (double) point.x <= d3 + (double) j1) {
+                } else if (Math.abs(paramInt2 - paramInt4) > paramInt5) {
+                    d1 = (paramInt3 - paramInt1) / (paramInt4 - paramInt2);
+                    d2 = d1 * (paramInt7 - paramInt2) + paramInt1;
+                    if ((d2 - paramInt5 <= paramInt6)
+                            && (paramInt6 <= d2 + paramInt5)) {
                         return true;
                     }
                 } else {
                     return true;
                 }
+            }
         }
         return false;
     }
 
-    static boolean a(int i, int k, int l, int i1, int j1, int k1, int l1,
-            int i2, int j2, Point point) {
-        int k2 = i;
-        int l2 = k;
-        int i3 = (i + l) / 2;
-        int j3 = (k + i1) / 2;
-        int k3 = (l + j1) / 2;
-        int l3 = (i1 + k1) / 2;
-        int i4 = (j1 + l1) / 2;
-        int j4 = (k1 + i2) / 2;
-        int k4 = l1;
-        int l4 = i2;
-        int i5 = k2;
-        int j5 = l2;
-        int k5 = (k2 + i3) / 2;
-        int l5 = (l2 + j3) / 2;
-        int i6 = (i3 + k3) / 2;
-        int j6 = (j3 + l3) / 2;
-        int k6 = (k3 + i4) / 2;
-        int l6 = (l3 + j4) / 2;
-        int i7 = (i4 + k4) / 2;
-        int j7 = (j4 + l4) / 2;
-        int k7 = k4;
-        int l7 = l4;
-        if (a(i5, j5, k5, l5, j2, point)) {
-            return true;
+    static boolean BezierContainsPoint(int paramInt1, int paramInt2,
+            int paramInt3, int paramInt4, int paramInt5, int paramInt6,
+            int paramInt7, int paramInt8, int paramInt9, Point paramPoint) {
+        if ((!LineContainsPoint(paramInt1, paramInt2, paramInt7, paramInt8,
+                paramInt9, paramInt3, paramInt4))
+                || (!LineContainsPoint(paramInt1, paramInt2, paramInt7,
+                        paramInt8, paramInt9, paramInt5, paramInt6))) {
+            int i = (paramInt1 + paramInt3) / 2;
+            int j = (paramInt2 + paramInt4) / 2;
+            int k = (paramInt3 + paramInt5) / 2;
+            int m = (paramInt4 + paramInt6) / 2;
+            int n = (paramInt5 + paramInt7) / 2;
+            int i1 = (paramInt6 + paramInt8) / 2;
+            int i2 = (i + k) / 2;
+            int i3 = (j + m) / 2;
+            int i4 = (k + n) / 2;
+            int i5 = (m + i1) / 2;
+            int i6 = (i2 + i4) / 2;
+            int i7 = (i3 + i5) / 2;
+            return (BezierContainsPoint(paramInt1, paramInt2, i, j, i2, i3, i6,
+                    i7, paramInt9, paramPoint))
+                    || (BezierContainsPoint(i6, i7, i4, i5, n, i1, paramInt7,
+                            paramInt8, paramInt9, paramPoint));
         }
-        if (a(k5, l5, i6, j6, j2, point)) {
-            return true;
-        }
-        if (a(i6, j6, k6, l6, j2, point)) {
-            return true;
-        }
-        if (a(k6, l6, i7, j7, j2, point)) {
-            return true;
-        }
-        return a(i7, j7, k7, l7, j2, point);
+        return LineContainsPoint(paramInt1, paramInt2, paramInt7, paramInt8,
+                paramInt9, paramPoint.x, paramPoint.y);
     }
 
-    static void a(int i, int k, int l, int i1, int j1, int k1, int l1, int i2,
-            Point point, Point point1) {
+    static void BezierMidPoint(int i, int k, int l, int i1, int j1, int k1,
+            int l1, int i2, Point point, Point point1) {
         int l2 = (i + l) / 2;
         int i3 = (k + i1) / 2;
         int j3 = (l + j1) / 2;
@@ -999,8 +977,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         point1.y = (k3 + i4) / 2;
     }
 
-    static Rectangle a(int i, int k, int l, int i1, int j1, int k1, int l1,
-            int i2) {
+    static Rectangle BezierBounds(int i, int k, int l, int i1, int j1, int k1,
+            int l1, int i2) {
         int j2 = i;
         int k2 = k;
         int l2 = (i + l) / 2;
@@ -1080,8 +1058,9 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         return new Rectangle(l7 - 10, j8 - 10, (i8 - l7) + 20, (k8 - j8) + 20);
     }
 
-    static boolean a(int i, int k, int l, int i1, int j1, int k1, int l1,
-            int i2, int j2, int k2, int l2, int i3, Point point) {
+    static boolean BezierNearestIntersectionOnLine(int i, int k, int l, int i1,
+            int j1, int k1, int l1, int i2, int j2, int k2, int l2, int i3,
+            Point point) {
         int j3 = i;
         int k3 = k;
         int l3 = (i + l) / 2;
@@ -1303,12 +1282,14 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             for (int l1 = 3; l1 < j1; l1 += 3) {
                 Point point2 = getPoint(l1 - 3);
                 Point point3 = getPoint(l1 - 2);
-                if (l1 + 3 >= j1)
+                if (l1 + 3 >= j1) {
                     l1 = j1 - 1;
+                }
                 Point point5 = getPoint(l1 - 1);
                 Point point7 = getPoint(l1);
-                if (a(point2.x, point2.y, point3.x, point3.y, point5.x,
-                        point5.y, point7.x, point7.y, i, k, l, i1, point1)) {
+                if (BezierNearestIntersectionOnLine(point2.x, point2.y,
+                        point3.x, point3.y, point5.x, point5.y, point7.x,
+                        point7.y, i, k, l, i1, point1)) {
                     double d2 = (point1.x - i) * (point1.x - i)
                             + (point1.y - k) * (point1.y - k);
                     if (d2 < d) {
@@ -1318,7 +1299,6 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                     }
                 }
             }
-
         } else {
             for (int k1 = 0; k1 < j1 - 1; k1++) {
                 Point point4 = getPoint(k1);
@@ -1341,8 +1321,8 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     }
 
     public void setArrowHeads(boolean flag, boolean flag1) {
-        boolean flag2 = (g() & 0x4000) != 0;
-        boolean flag3 = (g() & 0x8000) != 0;
+        boolean flag2 = (getInternalFlags() & 0x4000) != 0;
+        boolean flag3 = (getInternalFlags() & 0x8000) != 0;
         if (flag2 != flag1 || flag3 != flag) {
             int i = 0;
             int k = 0;
@@ -1356,17 +1336,17 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
             } else {
                 k |= 0x4000;
             }
-            _mthfor(g() & ~k | i);
+            setInternalFlags(getInternalFlags() & ~k | i);
             update(104, (flag2 ? 2 : 0) + (flag3 ? 1 : 0), null);
         }
     }
 
     public boolean hasArrowAtEnd() {
-        return (g() & 0x4000) != 0;
+        return (getInternalFlags() & 0x4000) != 0;
     }
 
     public boolean hasArrowAtStart() {
-        return (g() & 0x8000) != 0;
+        return (getInternalFlags() & 0x8000) != 0;
     }
 
     public Point getArrowToEndPoint() {
@@ -1388,17 +1368,17 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     public void setArrowLength(double d) {
         double d1 = getArrowLength();
         if (d1 != d) {
-            if (ck == null) {
-                ck = new ArrowInfo();
+            if (myArrowInfo == null) {
+                myArrowInfo = new ArrowInfo();
             }
-            ck._fldint = d;
+            myArrowInfo.myLength = d;
             update(105, 0, new Double(d1));
         }
     }
 
     public double getArrowLength() {
-        if (ck != null) {
-            return ck._fldint;
+        if (myArrowInfo != null) {
+            return myArrowInfo.myLength;
         } else {
             return 10D;
         }
@@ -1407,26 +1387,28 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     public void setArrowShaftLength(double d) {
         double d1 = getArrowShaftLength();
         if (d1 != d) {
-            if (ck == null) {
-                ck = new ArrowInfo();
+            if (myArrowInfo == null) {
+                myArrowInfo = new ArrowInfo();
             }
-            ck._fldfor = d;
+            myArrowInfo.myShaftLength = d;
             update(106, 0, new Double(d1));
         }
     }
 
     public double getArrowShaftLength() {
-        if (ck != null) {
-            return ck._fldfor;
+        if (myArrowInfo != null) {
+            return myArrowInfo.myShaftLength;
         } else {
             return 8D;
         }
     }
 
+    /** @deprecated */
     public void setArrowAngle(double d) {
         setArrowWidth(getArrowLength() * Math.tan(d / 2D) * 2D);
     }
 
+    /** @deprecated */
     public double getArrowAngle() {
         double d = getArrowLength();
         if (d < 1.0D) {
@@ -1438,17 +1420,17 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     public void setArrowWidth(double d) {
         double d1 = getArrowWidth();
         if (d1 != d && d >= 0.0D) {
-            if (ck == null) {
-                ck = new ArrowInfo();
+            if (myArrowInfo == null) {
+                myArrowInfo = new ArrowInfo();
             }
-            ck._flddo = d;
+            myArrowInfo.myWidth = d;
             update(111, 0, new Double(d1));
         }
     }
 
     public double getArrowWidth() {
-        if (ck != null) {
-            return ck._flddo;
+        if (myArrowInfo != null) {
+            return myArrowInfo.myWidth;
         } else {
             return 8D;
         }
@@ -1458,11 +1440,11 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         boolean flag = hasArrowAtEnd();
         boolean flag1 = hasArrowAtStart();
         if (flag || flag1) {
-            if (ck == null) {
-                ck = new ArrowInfo();
+            if (myArrowInfo == null) {
+                myArrowInfo = new ArrowInfo();
             }
-            int ai[] = ck._mthif();
-            int ai1[] = ck.a();
+            int ai[] = myArrowInfo.getXs();
+            int ai1[] = myArrowInfo.getYs();
             if (flag) {
                 Point point = getArrowToAnchorPoint();
                 Point point2 = getArrowToEndPoint();
@@ -1525,15 +1507,15 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
     }
 
     public void setHighlight(GraphicViewerPen graphicviewerpen) {
-        GraphicViewerPen graphicviewerpen1 = cg;
+        GraphicViewerPen graphicviewerpen1 = myHighlightPen;
         if (graphicviewerpen1 != graphicviewerpen) {
-            cg = graphicviewerpen;
+            myHighlightPen = graphicviewerpen;
             update(108, 0, graphicviewerpen1);
         }
     }
 
     public GraphicViewerPen getHighlight() {
-        return cg;
+        return myHighlightPen;
     }
 
     public void copyOldValueForUndo(
@@ -1641,7 +1623,7 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 return;
 
             case 110 : // 'n'
-                ArrayList<Point> arraylist = copyPointsArray();
+                ArrayList arraylist = copyPointsArray();
                 graphicviewerdocumentchangededit.setNewValue(arraylist);
                 return;
 
@@ -1658,11 +1640,14 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         switch (graphicviewerdocumentchangededit.getFlags()) {
             case 101 : // 'e'
                 if (flag) {
-                    a(graphicviewerdocumentchangededit.getOldValueInt(), true);
+                    internalRemovePoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
+                            true);
                 } else {
                     Point point = (Point) graphicviewerdocumentchangededit
                             .getNewValue();
-                    a(graphicviewerdocumentchangededit.getOldValueInt(),
+                    internalInsertPoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
                             point.x, point.y, true);
                 }
                 return;
@@ -1671,10 +1656,13 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 if (flag) {
                     Point point1 = (Point) graphicviewerdocumentchangededit
                             .getOldValue();
-                    a(graphicviewerdocumentchangededit.getOldValueInt(),
+                    internalInsertPoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
                             point1.x, point1.y, true);
                 } else {
-                    a(graphicviewerdocumentchangededit.getOldValueInt(), true);
+                    internalRemovePoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
+                            true);
                 }
                 return;
 
@@ -1682,12 +1670,14 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 if (flag) {
                     Point point2 = (Point) graphicviewerdocumentchangededit
                             .getOldValue();
-                    _mthif(graphicviewerdocumentchangededit.getOldValueInt(),
+                    internalSetPoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
                             point2.x, point2.y, true);
                 } else {
                     Point point3 = (Point) graphicviewerdocumentchangededit
                             .getNewValue();
-                    _mthif(graphicviewerdocumentchangededit.getOldValueInt(),
+                    internalSetPoint(
+                            graphicviewerdocumentchangededit.getOldValueInt(),
                             point3.x, point3.y, true);
                 }
                 return;
@@ -1724,9 +1714,9 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                 return;
 
             case 110 : // 'n'
-                ArrayList<?> arraylist = (ArrayList<?>) graphicviewerdocumentchangededit
+                ArrayList arraylist = (ArrayList) graphicviewerdocumentchangededit
                         .getValue(flag);
-                a(arraylist, true);
+                internalSetPoints(arraylist, true);
                 return;
 
             case 107 : // 'k'
@@ -1736,20 +1726,57 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
         }
     }
 
-    public static final int ChangedAddPoint = 101;
-    public static final int ChangedRemovePoint = 102;
-    public static final int ChangedModifiedPoint = 103;
-    public static final int ChangedArrowHeads = 104;
-    public static final int ChangedArrowLength = 105;
-    public static final int ChangedArrowShaftLength = 106;
-    public static final int ChangedArrowAngle = 107;
-    public static final int ChangedHighlight = 108;
-    public static final int ChangedCubic = 109;
-    public static final int ChangedAllPoints = 110;
-    public static final int ChangedArrowWidth = 111;
-    protected ArrayList<Point> myPoints;
-    private GraphicViewerPen cg;
-    private ArrowInfo ck;
-    private transient Point cm;
-    private transient GeneralPath cj;
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    static class ArrowInfo implements Serializable {
+
+        private static final long serialVersionUID = -9160998475192949070L;
+
+        double myLength = 10.0D;
+        double myShaftLength = 8.0D;
+        double myWidth = 8.0D;
+        transient int[] headx = null;
+        transient int[] heady = null;
+
+        int[] getXs() {
+            if (headx == null) {
+                headx = new int[4];
+            }
+            return headx;
+        }
+
+        int[] getYs() {
+            if (heady == null) {
+                heady = new int[4];
+            }
+            return heady;
+        }
+
+        public void SVGWriteGraphicViewerElementAttributes(
+                IDomElement domelement) {
+            domelement.setAttribute("arrow_length", Double.toString(myLength));
+            domelement.setAttribute("arrow_shaftlength",
+                    Double.toString(myShaftLength));
+            domelement.setAttribute("arrow_width", Double.toString(myWidth));
+        }
+
+        public void SVGReadGraphicViewerElementAttributes(IDomElement domelement) {
+            String s = domelement.getAttribute("arrow_length");
+            myLength = Double.parseDouble(s);
+            String s1 = domelement.getAttribute("arrow_shaftlength");
+            myShaftLength = Double.parseDouble(s1);
+            String s2 = domelement.getAttribute("arrow_angle");
+            if (s2.length() > 0) {
+                double d = Double.parseDouble(s2);
+                myWidth = myLength * Math.tan(d / 2D) * 2D;
+            } else {
+                String s3 = domelement.getAttribute("arrow_width");
+                myWidth = Double.parseDouble(s3);
+            }
+        }
+    }
 }

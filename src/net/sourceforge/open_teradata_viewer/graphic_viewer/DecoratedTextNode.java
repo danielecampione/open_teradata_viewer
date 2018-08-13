@@ -30,59 +30,57 @@ public class DecoratedTextNode extends GraphicViewerTextNode {
 
     private static final long serialVersionUID = -7979415432735633257L;
 
+    private GraphicViewerImage myDecoration;
+    private String myImgName = "star.gif";
+
     public DecoratedTextNode() {
-        myImgName = "star.gif";
     }
 
     public DecoratedTextNode(String s) {
         super(s);
-        myImgName = "star.gif";
         setTopPort(null);
-        GraphicViewerImage graphicviewerimage = new GraphicViewerImage();
-        graphicviewerimage.setSelectable(false);
-        graphicviewerimage.loadImage(
-                (DecoratedTextNode.class).getResource(myImgName), true);
-        graphicviewerimage.setSize(32, 32);
-        insertObjectAfter(findObject(getBackground()), graphicviewerimage);
-        myDecoration = graphicviewerimage;
+        GraphicViewerImage img = new GraphicViewerImage();
+        img.setSelectable(false);
+        img.loadImage(GraphicViewer.class.getResource(myImgName), true);
+        img.setSize(32, 32);
+        insertObjectAfter(findObject(getBackground()), img);
+        myDecoration = img;
         layoutChildren(getDecoration());
     }
 
-    public GraphicViewerObject copyObject(
-            IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
-        DecoratedTextNode decoratedtextnode = (DecoratedTextNode) super
-                .copyObject(graphicviewercopyenvironment);
-        decoratedtextnode.myDecoration = (GraphicViewerImage) graphicviewercopyenvironment
-                .get(myDecoration);
-        return decoratedtextnode;
+    public GraphicViewerObject copyObject(IGraphicViewerCopyEnvironment env) {
+        DecoratedTextNode newobj = (DecoratedTextNode) super.copyObject(env);
+        newobj.myDecoration = (GraphicViewerImage) env.get(myDecoration);
+        return newobj;
     }
 
-    public GraphicViewerObject removeObjectAtPos(
-            GraphicViewerListPosition graphicviewerlistposition) {
-        GraphicViewerObject graphicviewerobject = super
-                .removeObjectAtPos(graphicviewerlistposition);
-        if (graphicviewerobject == myDecoration)
+    public GraphicViewerObject removeObjectAtPos(GraphicViewerListPosition pos) {
+        GraphicViewerObject obj = super.removeObjectAtPos(pos);
+        if (obj == myDecoration) {
             myDecoration = null;
-        return graphicviewerobject;
+        }
+        return obj;
     }
 
-    public void layoutChildren(GraphicViewerObject graphicviewerobject) {
-        super.layoutChildren(graphicviewerobject);
+    public void layoutChildren(GraphicViewerObject child) {
+        super.layoutChildren(child);
         if (!isInitializing() && getDecoration() != null
-                && getBackground() != null)
-            getDecoration().setSpotLocation(6, getBackground(), 2);
+                && getBackground() != null) {
+            getDecoration().setSpotLocation(BottomCenter, getBackground(),
+                    TopCenter);
+        }
     }
 
-    public boolean doMouseDblClick(int i, Point point, Point point1,
-            GraphicViewerView graphicviewerview) {
+    public boolean doMouseDblClick(int modifiers, Point dc, Point vc,
+            GraphicViewerView view) {
         if (getDecoration() != null) {
             if (myImgName.equals("star.gif")) {
-                myImgName = "document.png";
+                myImgName = "doc.gif";
             } else {
                 myImgName = "star.gif";
             }
             getDecoration().loadImage(
-                    (DecoratedTextNode.class).getResource(myImgName), true);
+                    GraphicViewer.class.getResource(myImgName), true);
         }
         return true;
     }
@@ -90,7 +88,4 @@ public class DecoratedTextNode extends GraphicViewerTextNode {
     public GraphicViewerImage getDecoration() {
         return myDecoration;
     }
-
-    private GraphicViewerImage myDecoration;
-    private String myImgName;
 }

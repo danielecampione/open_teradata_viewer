@@ -38,18 +38,18 @@ public class GraphicViewerOverviewRectangle extends GraphicViewerRectangle
 
     private static final long serialVersionUID = -1244601428380489567L;
 
+    private boolean myChanging = false;
+
     public GraphicViewerOverviewRectangle() {
-        dQ = false;
     }
 
     public GraphicViewerOverviewRectangle(Point point, Dimension dimension) {
         super(point, dimension);
-        dQ = false;
         setPen(GraphicViewerPen.make(65535, 8, new Color(0, 128, 128)));
         setResizable(false);
     }
 
-    private GraphicViewerView v() {
+    private GraphicViewerView getObserved() {
         if (getView() instanceof GraphicViewerOverview) {
             GraphicViewerOverview graphicvieweroverview = (GraphicViewerOverview) getView();
             return graphicvieweroverview.getObserved();
@@ -59,58 +59,68 @@ public class GraphicViewerOverviewRectangle extends GraphicViewerRectangle
     }
 
     public void updateRectFromView() {
-        GraphicViewerView graphicviewerview = v();
-        if (graphicviewerview == null)
+        GraphicViewerView graphicviewerview = getObserved();
+        if (graphicviewerview == null) {
             return;
-        if (dQ) {
+        }
+        if (myChanging) {
             return;
         } else {
-            dQ = true;
+            myChanging = true;
             setBoundingRect(graphicviewerview.getViewPosition(),
                     graphicviewerview.getExtentSize());
             getView().scrollRectToVisible(getBoundingRect());
-            dQ = false;
+            myChanging = false;
             return;
         }
     }
 
     public void setBoundingRect(int i, int j, int k, int l) {
-        if (getView() == null)
+        if (getView() == null) {
             return;
-        GraphicViewerView graphicviewerview = v();
+        }
+        GraphicViewerView graphicviewerview = getObserved();
         if (graphicviewerview != null) {
             Point point = graphicviewerview.getDocumentTopLeft();
             Dimension dimension = graphicviewerview.getDocumentSize();
-            if (i + k > point.x + dimension.width)
+            if (i + k > point.x + dimension.width) {
                 i = (point.x + dimension.width) - k;
-            if (i < point.x)
+            }
+            if (i < point.x) {
                 i = point.x;
-            if (j + l > point.y + dimension.height)
+            }
+            if (j + l > point.y + dimension.height) {
                 j = (point.y + dimension.height) - l;
-            if (j < point.y)
+            }
+            if (j < point.y) {
                 j = point.y;
+            }
         }
         if (!getView().isIncludingNegativeCoords()) {
-            if (i < 0)
+            if (i < 0) {
                 i = 0;
-            if (j < 0)
+            }
+            if (j < 0) {
                 j = 0;
+            }
         }
         super.setBoundingRect(i, j, k, l);
     }
 
     protected void geometryChange(Rectangle rectangle) {
-        if (getView() == null)
+        if (getView() == null) {
             return;
-        GraphicViewerView graphicviewerview = v();
-        if (graphicviewerview == null)
+        }
+        GraphicViewerView graphicviewerview = getObserved();
+        if (graphicviewerview == null) {
             return;
-        if (dQ) {
+        }
+        if (myChanging) {
             return;
         } else {
-            dQ = true;
+            myChanging = true;
             graphicviewerview.setViewPosition(getTopLeft());
-            dQ = false;
+            myChanging = false;
             return;
         }
     }
@@ -124,7 +134,7 @@ public class GraphicViewerOverviewRectangle extends GraphicViewerRectangle
     public void viewChanged(GraphicViewerViewEvent graphicviewerviewevent) {
         switch (graphicviewerviewevent.getHint()) {
             case 1 : // '\001'
-                GraphicViewerView graphicviewerview = v();
+                GraphicViewerView graphicviewerview = getObserved();
                 if (graphicviewerview != null
                         && graphicviewerview.getDocument() != graphicviewerviewevent
                                 .getObject()) {
@@ -161,6 +171,4 @@ public class GraphicViewerOverviewRectangle extends GraphicViewerRectangle
     public void componentResized(ComponentEvent componentevent) {
         updateRectFromView();
     }
-
-    private boolean dQ;
 }

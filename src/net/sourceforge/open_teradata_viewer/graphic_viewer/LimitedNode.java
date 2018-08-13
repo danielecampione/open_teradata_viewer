@@ -37,16 +37,20 @@ public class LimitedNode extends GraphicViewerBasicNode {
         super(s);
     }
 
-    public Point computeMove(int i, int j, int k, int l, Point point) {
-        if (point == null)
-            point = new Point(0, 0);
-        if (k < 50)
-            point.x = 50;
-        else if (k > 500)
-            point.x = 500;
-        else
-            point.x = k;
-        point.y = l;
-        return point;
+    // Limit the X axis Location of this node to between 50 and 500.
+    public Point computeMove(int origX, int origY, int newX, int newY,
+            Point result) {
+        if (result == null) {
+            result = new Point(0, 0);
+        }
+        if (newX < 50) {
+            result.x = 50;
+        } else if (newX > 500) {
+            result.x = 500;
+        } else {
+            result.x = newX;
+        }
+        result.y = newY;
+        return result;
     }
 }

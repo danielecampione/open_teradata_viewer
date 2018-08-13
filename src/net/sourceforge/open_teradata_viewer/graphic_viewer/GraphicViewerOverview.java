@@ -34,46 +34,49 @@ public class GraphicViewerOverview extends GraphicViewerView {
 
     private static final long serialVersionUID = 8739515364572335798L;
 
+    private GraphicViewerView myObserved = null;
+    private GraphicViewerOverviewRectangle myOverviewRect = null;
+
     public GraphicViewerOverview() {
-        bw = null;
-        bx = null;
         setHidingDisabledScrollbars(true);
         setInternalMouseActions(2);
         setScale(0.125D);
     }
 
     public void removeNotify() {
-        e();
-        bw = null;
+        removeListeners();
+        myObserved = null;
         super.removeNotify();
     }
 
-    private void e() {
-        if (bw != null && bx != null) {
-            bw.getDocument().removeDocumentListener(this);
-            bw.removeViewListener(bx);
-            bw.getCanvas().removeComponentListener(bx);
+    private void removeListeners() {
+        if (myObserved != null && myOverviewRect != null) {
+            myObserved.getDocument().removeDocumentListener(this);
+            myObserved.removeViewListener(myOverviewRect);
+            myObserved.getCanvas().removeComponentListener(myOverviewRect);
         }
     }
 
     public void setObserved(GraphicViewerView graphicviewerview) {
-        if (graphicviewerview instanceof GraphicViewerOverview)
+        if (graphicviewerview instanceof GraphicViewerOverview) {
             return;
-        GraphicViewerView graphicviewerview1 = bw;
+        }
+        GraphicViewerView graphicviewerview1 = myObserved;
         if (graphicviewerview1 != graphicviewerview) {
-            e();
-            bw = graphicviewerview;
-            if (bw != null) {
-                if (bx == null) {
-                    bx = new GraphicViewerOverviewRectangle(
-                            bw.getViewPosition(), bw.getExtentSize());
-                    addObjectAtTail(bx);
+            removeListeners();
+            myObserved = graphicviewerview;
+            if (myObserved != null) {
+                if (myOverviewRect == null) {
+                    myOverviewRect = new GraphicViewerOverviewRectangle(
+                            myObserved.getViewPosition(),
+                            myObserved.getExtentSize());
+                    addObjectAtTail(myOverviewRect);
                 } else {
-                    bx.setBoundingRect(bw.getViewRect());
+                    myOverviewRect.setBoundingRect(myObserved.getViewRect());
                 }
-                bw.getDocument().addDocumentListener(this);
-                bw.addViewListener(bx);
-                bw.getCanvas().addComponentListener(bx);
+                myObserved.getDocument().addDocumentListener(this);
+                myObserved.addViewListener(myOverviewRect);
+                myObserved.getCanvas().addComponentListener(myOverviewRect);
                 firePropertyChange("observed", graphicviewerview1,
                         graphicviewerview);
                 updateView();
@@ -82,7 +85,7 @@ public class GraphicViewerOverview extends GraphicViewerView {
     }
 
     public GraphicViewerView getObserved() {
-        return bw;
+        return myObserved;
     }
 
     public boolean isDropFlavorAcceptable(
@@ -95,14 +98,15 @@ public class GraphicViewerOverview extends GraphicViewerView {
     }
 
     public GraphicViewerOverviewRectangle getOverviewRect() {
-        return bx;
+        return myOverviewRect;
     }
 
     public GraphicViewerObject pickDocObject(Point point, boolean flag) {
-        if (getOverviewRect() != null && getOverviewRect().isPointInObj(point))
+        if (getOverviewRect() != null && getOverviewRect().isPointInObj(point)) {
             return getOverviewRect();
-        else
+        } else {
             return null;
+        }
     }
 
     public void selectInBox(Rectangle rectangle) {
@@ -116,42 +120,44 @@ public class GraphicViewerOverview extends GraphicViewerView {
         }
     }
 
-    public GraphicViewerDocument getDocument() {
-        if (getObserved() != null)
+    public OTVDocument getDocument() {
+        if (getObserved() != null) {
             return getObserved().getDocument();
-        else
+        } else {
             return super.getDocument();
+        }
     }
 
     public Dimension getDocumentSize() {
-        if (getDocument() != null)
+        if (getDocument() != null) {
             return getDocument().getDocumentSize();
-        else
+        } else {
             return new Dimension();
+        }
     }
 
     public boolean isIncludingNegativeCoords() {
-        if (getObserved() != null)
+        if (getObserved() != null) {
             return getObserved().isIncludingNegativeCoords();
-        else
+        } else {
             return false;
+        }
     }
 
     public String getToolTipText(MouseEvent mouseevent) {
-        if (getObserved() == null)
+        if (getObserved() == null) {
             return null;
-        Point point = a(mouseevent);
+        }
+        Point point = getMouseEventPoint(mouseevent);
         convertViewToDoc(point);
         for (Object obj = getObserved().pickDocObject(point, false); obj != null; obj = ((GraphicViewerObject) (obj))
                 .getParent()) {
             String s = ((GraphicViewerObject) (obj)).getToolTipText();
-            if (s != null)
+            if (s != null) {
                 return s;
+            }
         }
 
         return null;
     }
-
-    private GraphicViewerView bw;
-    private GraphicViewerOverviewRectangle bx;
 }

@@ -67,7 +67,7 @@ public final class Config {
 
     public static final String HOME_PAGE = "http://openteradata.sourceforge.net/";
     public static final String SOURCEFORGE_MIRROR = "http://sourceforge.net/projects/openteradata/";
-    public static final String JAVANET_MIRROR = "http://java.net/downloads/openteradata/Open%20Teradata%20Viewer/";
+    public static final String JAVANET_MIRROR = "https://java.net/downloads/openteradata/Open%20Teradata%20Viewer/";
 
     private Config() {
     }

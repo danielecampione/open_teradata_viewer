@@ -33,59 +33,66 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
 
     private static final long serialVersionUID = 6233692699831637870L;
 
+    private static Dimension DefaultPortSize = new Dimension(7, 7);
+    private static Dimension DefaultDrawableMargin = new Dimension(7, 7);
+    public static final int ChangedLabelSpot = 2101;
+    public static final int ChangedDrawable = 2102;
+    public static final int ChangedLabel = 2103;
+    public static final int ChangedPort = 2104;
+    public static final int ChangedInsets = 2105;
+    public static final int ChangedAutoResize = 2106;
+    private static final int flagAutoResize = 65536;
+    private GraphicViewerDrawable myDrawable = null;
+    private GraphicViewerText myLabel = null;
+    private GraphicViewerPort myPort = null;
+    private int myLabelSpot = 2;
+    private Insets myInsets = new Insets(5, 10, 5, 10);
+
     public GraphicViewerBasicNode() {
-        dc = null;
-        dh = null;
-        dg = null;
-        df = 2;
-        de = new Insets(5, 10, 5, 10);
-        r();
+        initCommon();
     }
 
     public GraphicViewerBasicNode(String s) {
-        dc = null;
-        dh = null;
-        dg = null;
-        df = 2;
-        de = new Insets(5, 10, 5, 10);
-        r();
-        _mthdo(s);
+        initCommon();
+        init(s);
     }
 
-    private void r() {
-        _mthfor(g() & 0xffffffef | 0x10000);
+    private void initCommon() {
+        setInternalFlags(getInternalFlags() & 0xffffffef | 0x10000);
     }
 
-    private void _mthdo(String s) {
+    private void init(String s) {
         setInitializing(true);
-        dg = createPort();
-        dc = createDrawable(dg);
-        dh = createLabel(s);
-        addObjectAtHead(dc);
-        addObjectAtTail(dg);
-        addObjectAtTail(dh);
-        if (dg != null)
-            dg.setPortObject(dc);
+        myPort = createPort();
+        myDrawable = createDrawable(myPort);
+        myLabel = createLabel(s);
+        addObjectAtHead(myDrawable);
+        addObjectAtTail(myPort);
+        addObjectAtTail(myLabel);
+        if (myPort != null) {
+            myPort.setPortObject(myDrawable);
+        }
         setInitializing(false);
         layoutChildren(null);
     }
 
     public GraphicViewerPort createPort() {
         GraphicViewerPort graphicviewerport = new GraphicViewerPort();
-        if (getLabelSpot() == 0)
+        if (getLabelSpot() == 0) {
             graphicviewerport.setStyle(0);
-        else
+        } else {
             graphicviewerport.setStyle(2);
+        }
         graphicviewerport.setFromSpot(-1);
         graphicviewerport.setToSpot(-1);
-        graphicviewerport.setSize(db);
+        graphicviewerport.setSize(DefaultPortSize);
         return graphicviewerport;
     }
 
     public GraphicViewerDrawable createDrawable(
             GraphicViewerPort graphicviewerport) {
         GraphicViewerEllipse graphicviewerellipse = new GraphicViewerEllipse();
-        Dimension dimension = da;
+        Dimension dimension = DefaultDrawableMargin;
         graphicviewerellipse.setSize(graphicviewerport.getWidth() + 2
                 * dimension.width, graphicviewerport.getHeight() + 2
                 * dimension.height);
@@ -112,36 +119,38 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
     protected void copyChildren(GraphicViewerArea graphicviewerarea,
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerBasicNode graphicviewerbasicnode = (GraphicViewerBasicNode) graphicviewerarea;
-        graphicviewerbasicnode.df = df;
-        graphicviewerbasicnode.de = new Insets(de.top, de.left, de.bottom,
-                de.right);
+        graphicviewerbasicnode.myLabelSpot = myLabelSpot;
+        graphicviewerbasicnode.myInsets = new Insets(myInsets.top,
+                myInsets.left, myInsets.bottom, myInsets.right);
         super.copyChildren(graphicviewerarea, graphicviewercopyenvironment);
-        graphicviewerbasicnode.dc = (GraphicViewerDrawable) graphicviewercopyenvironment
-                .get(dc);
-        graphicviewerbasicnode.dg = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(dg);
-        graphicviewerbasicnode.dh = (GraphicViewerText) graphicviewercopyenvironment
-                .get(dh);
+        graphicviewerbasicnode.myDrawable = (GraphicViewerDrawable) graphicviewercopyenvironment
+                .get(myDrawable);
+        graphicviewerbasicnode.myPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myPort);
+        graphicviewerbasicnode.myLabel = (GraphicViewerText) graphicviewercopyenvironment
+                .get(myLabel);
     }
 
     public GraphicViewerObject removeObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
         GraphicViewerObject graphicviewerobject = super
                 .removeObjectAtPos(graphicviewerlistposition);
-        if (graphicviewerobject == dc)
-            dc = null;
-        else if (graphicviewerobject == dh)
-            dh = null;
-        else if (graphicviewerobject == dg)
-            dg = null;
+        if (graphicviewerobject == myDrawable) {
+            myDrawable = null;
+        } else if (graphicviewerobject == myLabel) {
+            myLabel = null;
+        } else if (graphicviewerobject == myPort) {
+            myPort = null;
+        }
         return graphicviewerobject;
     }
 
     public Point getLocation(Point point) {
-        if (getDrawable() != null)
+        if (getDrawable() != null) {
             return getDrawable().getSpotLocation(0, point);
-        else
+        } else {
             return getSpotLocation(0, point);
+        }
     }
 
     public void setLocation(int i, int j) {
@@ -158,17 +167,20 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
             Rectangle rectangle1 = getBoundingRect();
             int l = rectangle1.x + rectangle1.width / 2;
             int j1 = rectangle1.y + rectangle1.height / 2;
-            if (i != l || j != j1)
+            if (i != l || j != j1) {
                 setTopLeft(i - rectangle1.width / 2, j - rectangle1.height / 2);
+            }
         }
     }
 
     public void layoutChildren(GraphicViewerObject graphicviewerobject) {
-        if (isInitializing())
+        if (isInitializing()) {
             return;
+        }
         GraphicViewerDrawable graphicviewerdrawable = getDrawable();
-        if (graphicviewerdrawable == null)
+        if (graphicviewerdrawable == null) {
             return;
+        }
         GraphicViewerText graphicviewertext = getLabel();
         if (graphicviewertext != null) {
             int i = getLabelSpot();
@@ -194,7 +206,7 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
                             - (insets.top + insets.bottom), 0);
                     graphicviewertext.setWidth(i1);
                     graphicviewertext.setWrappingWidth(i1);
-                    graphicviewertext.C();
+                    graphicviewertext.recalcBoundingRect();
                     int l1 = Math.min(graphicviewertext.getHeight(), k1);
                     int i2 = graphicviewerdrawable.getLeft() + insets.left;
                     int j2 = graphicviewerdrawable.getTop() + insets.top
@@ -203,103 +215,115 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
                 }
                 graphicviewertext.setAlignment(0);
                 graphicviewertext.setSpotLocation(0, j, k);
-                if (getPort() != null)
+                if (getPort() != null) {
                     getPort().setBoundingRect(
                             graphicviewerdrawable.getBoundingRect());
+                }
             } else {
                 graphicviewertext.setAlignment(spotOpposite(i));
                 graphicviewertext.setSpotLocation(spotOpposite(i),
                         graphicviewerdrawable, i);
             }
         }
-        if (getPort() != null)
+        if (getPort() != null) {
             getPort().setSpotLocation(0, graphicviewerdrawable, 0);
-    }
-
-    public int getLabelSpot() {
-        return df;
-    }
-
-    public void setLabelSpot(int i) {
-        _mthfor(i, false);
-    }
-
-    private void _mthfor(int i, boolean flag) {
-        int j = df;
-        if (j != i) {
-            df = i;
-            update(2101, j, null);
-            if (!flag)
-                labelSpotChanged(j);
         }
     }
 
-    public void labelSpotChanged(int i) {
-        GraphicViewerPort graphicviewerport = getPort();
-        if (graphicviewerport != null)
-            if (getLabelSpot() == 0) {
-                graphicviewerport.setStyle(0);
-                setResizable(false);
-            } else if (i == 0) {
-                graphicviewerport.setStyle(2);
-                GraphicViewerDrawable graphicviewerdrawable = getDrawable();
-                int j = graphicviewerdrawable.getLeft()
-                        + graphicviewerdrawable.getWidth() / 2;
-                int k = graphicviewerdrawable.getTop()
-                        + graphicviewerdrawable.getHeight() / 2;
-                Rectangle rectangle = new Rectangle(j - db.width / 2, k
-                        - db.height / 2, db.width, db.height);
-                graphicviewerdrawable.setBoundingRect(j - rectangle.width / 2
-                        - da.width, k - rectangle.height / 2 - da.height,
-                        rectangle.width + 2 * da.width, rectangle.height + 2
-                                * da.height);
-                graphicviewerport.setBoundingRect(rectangle);
+    public int getLabelSpot() {
+        return myLabelSpot;
+    }
+
+    public void setLabelSpot(int i) {
+        internalSetLabelSpot(i, false);
+    }
+
+    private void internalSetLabelSpot(int i, boolean flag) {
+        int j = myLabelSpot;
+        if (j != i) {
+            myLabelSpot = i;
+            update(2101, j, null);
+            if (!flag) {
+                labelSpotChanged(j);
             }
+        }
+    }
+
+    public void labelSpotChanged(int paramInt) {
+        GraphicViewerPort localGraphicViewerPort = getPort();
+        if (localGraphicViewerPort != null) {
+            if (getLabelSpot() == 0) {
+                localGraphicViewerPort.setStyle(0);
+                setResizable(false);
+            } else if (paramInt == 0) {
+                localGraphicViewerPort.setStyle(2);
+                GraphicViewerDrawable localGraphicViewerDrawable = getDrawable();
+                int i = localGraphicViewerDrawable.getLeft()
+                        + localGraphicViewerDrawable.getWidth() / 2;
+                int j = localGraphicViewerDrawable.getTop()
+                        + localGraphicViewerDrawable.getHeight() / 2;
+                Rectangle localRectangle = new Rectangle(i
+                        - DefaultPortSize.width / 2, j - DefaultPortSize.height
+                        / 2, DefaultPortSize.width, DefaultPortSize.height);
+                localGraphicViewerDrawable.setBoundingRect(i
+                        - localRectangle.width / 2
+                        - DefaultDrawableMargin.width, j
+                        - localRectangle.height / 2
+                        - DefaultDrawableMargin.height, localRectangle.width
+                        + 2 * DefaultDrawableMargin.width,
+                        localRectangle.height + 2
+                                * DefaultDrawableMargin.height);
+                localGraphicViewerPort.setBoundingRect(localRectangle);
+            }
+        }
         layoutChildren(getLabel());
     }
 
     public Insets getInsets() {
-        return de;
+        return myInsets;
     }
 
     public void setInsets(Insets insets) {
-        a(insets, false);
+        internalSetInsets(insets, false);
     }
 
-    private void a(Insets insets, boolean flag) {
-        Insets insets1 = de;
+    private void internalSetInsets(Insets insets, boolean flag) {
+        Insets insets1 = myInsets;
         if (!insets1.equals(insets)) {
             Insets insets2 = new Insets(insets1.top, insets1.left,
                     insets1.bottom, insets1.right);
-            de.top = insets.top;
-            de.left = insets.left;
-            de.bottom = insets.bottom;
-            de.right = insets.right;
+            myInsets.top = insets.top;
+            myInsets.left = insets.left;
+            myInsets.bottom = insets.bottom;
+            myInsets.right = insets.right;
             update(2105, 0, insets2);
-            if (!flag)
+            if (!flag) {
                 layoutChildren(null);
+            }
         }
     }
 
     public void setAutoResize(boolean flag) {
-        _mthdo(flag, false);
+        internalSetAutoResize(flag, false);
     }
 
-    private void _mthdo(boolean flag, boolean flag1) {
-        boolean flag2 = (g() & 0x10000) != 0;
+    private void internalSetAutoResize(boolean flag, boolean flag1) {
+        boolean flag2 = (getInternalFlags() & 0x10000) != 0;
         if (flag2 != flag) {
-            if (flag)
-                _mthfor(g() | 0x10000);
-            else
-                _mthfor(g() & 0xfffeffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x10000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffeffff);
+            }
             update(2106, flag2 ? 1 : 0, null);
-            if (!flag1)
+            if (!flag1) {
                 onAutoResizeChanged(flag2);
+            }
         }
     }
 
     public boolean isAutoResize() {
-        return (g() & 0x10000) != 0;
+        return (getInternalFlags() & 0x10000) != 0;
     }
 
     public void onAutoResizeChanged(boolean flag) {
@@ -328,32 +352,35 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
     }
 
     public String getText() {
-        if (getLabel() != null)
+        if (getLabel() != null) {
             return getLabel().getText();
-        else
+        } else {
             return "";
+        }
     }
 
     public void setText(String s) {
-        if (s == null)
-            removeObject(dh);
-        else if (getLabel() == null)
+        if (s == null) {
+            removeObject(myLabel);
+        } else if (getLabel() == null) {
             setLabel(createLabel(s));
-        else
+        } else {
             getLabel().setText(s);
+        }
     }
 
     public GraphicViewerDrawable getDrawable() {
-        return dc;
+        return myDrawable;
     }
 
     public void setDrawable(GraphicViewerDrawable graphicviewerdrawable) {
-        GraphicViewerDrawable graphicviewerdrawable1 = dc;
+        GraphicViewerDrawable graphicviewerdrawable1 = myDrawable;
         if (graphicviewerdrawable1 != graphicviewerdrawable) {
-            a(graphicviewerdrawable1, graphicviewerdrawable);
-            if (graphicviewerdrawable1 != null)
+            copyProperties(graphicviewerdrawable1, graphicviewerdrawable);
+            if (graphicviewerdrawable1 != null) {
                 removeObject(graphicviewerdrawable1);
-            dc = graphicviewerdrawable;
+            }
+            myDrawable = graphicviewerdrawable;
             if (graphicviewerdrawable != null) {
                 if (graphicviewerdrawable1 == null) {
                     graphicviewerdrawable.setSelectable(false);
@@ -363,54 +390,61 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
             }
             update(2102, 0, graphicviewerdrawable1);
             if (getPort() != null
-                    && getPort().getPortObject() == graphicviewerdrawable1)
+                    && getPort().getPortObject() == graphicviewerdrawable1) {
                 getPort().setPortObject(graphicviewerdrawable);
+            }
         }
     }
 
     public GraphicViewerText getLabel() {
-        return dh;
+        return myLabel;
     }
 
     public void setLabel(GraphicViewerText graphicviewertext) {
-        GraphicViewerText graphicviewertext1 = dh;
+        GraphicViewerText graphicviewertext1 = myLabel;
         if (graphicviewertext1 != graphicviewertext) {
-            if (graphicviewertext1 != null)
+            if (graphicviewertext1 != null) {
                 removeObject(graphicviewertext1);
-            dh = graphicviewertext;
-            if (graphicviewertext != null)
+            }
+            myLabel = graphicviewertext;
+            if (graphicviewertext != null) {
                 addObjectAtTail(graphicviewertext);
+            }
             update(2103, 0, graphicviewertext1);
         }
     }
 
     public GraphicViewerPort getPort() {
-        return dg;
+        return myPort;
     }
 
     public void setPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = dg;
+        GraphicViewerPort graphicviewerport1 = myPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            dg = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtTail(graphicviewerport);
+            }
             update(2104, 0, graphicviewerport1);
             if (graphicviewerport != null
-                    && graphicviewerport.getPortObject() == null)
+                    && graphicviewerport.getPortObject() == null) {
                 graphicviewerport.setPortObject(getDrawable());
+            }
         }
     }
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("drawable"))
-            dc = (GraphicViewerDrawable) obj;
-        else if (s.equals("label"))
-            dh = (GraphicViewerText) obj;
-        else if (s.equals("port"))
-            dg = (GraphicViewerPort) obj;
+        if (s.equals("drawable")) {
+            myDrawable = (GraphicViewerDrawable) obj;
+        } else if (s.equals("label")) {
+            myLabel = (GraphicViewerText) obj;
+        } else if (s.equals("port")) {
+            myPort = (GraphicViewerPort) obj;
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -419,40 +453,52 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode",
                             domelement);
-            domelement1.setAttribute("labelspot", Integer.toString(df));
-            domelement1.setAttribute("insets_top", Integer.toString(de.top));
             domelement1
-                    .setAttribute("insets_right", Integer.toString(de.right));
+                    .setAttribute("labelspot", Integer.toString(myLabelSpot));
+            domelement1.setAttribute("insets_top",
+                    Integer.toString(myInsets.top));
+            domelement1.setAttribute("insets_right",
+                    Integer.toString(myInsets.right));
             domelement1.setAttribute("insets_bottom",
-                    Integer.toString(de.bottom));
-            domelement1.setAttribute("insets_left", Integer.toString(de.left));
-            if (dc != null)
-                domdoc.registerReferencingNode(domelement1, "drawable", dc);
-            if (dh != null)
-                domdoc.registerReferencingNode(domelement1, "label", dh);
-            if (dg != null)
-                domdoc.registerReferencingNode(domelement1, "port", dg);
+                    Integer.toString(myInsets.bottom));
+            domelement1.setAttribute("insets_left",
+                    Integer.toString(myInsets.left));
+            if (myDrawable != null) {
+                domdoc.registerReferencingNode(domelement1, "drawable",
+                        myDrawable);
+            }
+            if (myLabel != null) {
+                domdoc.registerReferencingNode(domelement1, "label", myLabel);
+            }
+            if (myPort != null) {
+                domdoc.registerReferencingNode(domelement1, "port", myPort);
+            }
         }
         super.SVGWriteObject(domdoc, domelement);
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            df = Integer.parseInt(domelement1.getAttribute("labelspot"));
+            myLabelSpot = Integer.parseInt(domelement1
+                    .getAttribute("labelspot"));
             String s = domelement1.getAttribute("insets_top");
-            if (s.length() > 0)
-                de.top = Integer.parseInt(s);
+            if (s.length() > 0) {
+                myInsets.top = Integer.parseInt(s);
+            }
             String s1 = domelement1.getAttribute("insets_right");
-            if (s1.length() > 0)
-                de.right = Integer.parseInt(s1);
+            if (s1.length() > 0) {
+                myInsets.right = Integer.parseInt(s1);
+            }
             String s2 = domelement1.getAttribute("insets_bottom");
-            if (s2.length() > 0)
-                de.bottom = Integer.parseInt(s2);
+            if (s2.length() > 0) {
+                myInsets.bottom = Integer.parseInt(s2);
+            }
             String s3 = domelement1.getAttribute("insets_left");
-            if (s3.length() > 0)
-                de.left = Integer.parseInt(s3);
+            if (s3.length() > 0) {
+                myInsets.left = Integer.parseInt(s3);
+            }
             String s4 = domelement1.getAttribute("drawable");
             domdoc.registerReferencingObject(this, "drawable", s4);
             String s5 = domelement1.getAttribute("label");
@@ -503,7 +549,8 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
             boolean flag) {
         switch (graphicviewerdocumentchangededit.getFlags()) {
             case 2101 :
-                _mthfor(graphicviewerdocumentchangededit.getValueInt(flag),
+                internalSetLabelSpot(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
                         true);
                 return;
 
@@ -523,30 +570,18 @@ public class GraphicViewerBasicNode extends GraphicViewerNode {
                 return;
 
             case 2105 :
-                a((Insets) graphicviewerdocumentchangededit.getValue(flag),
+                internalSetInsets(
+                        (Insets) graphicviewerdocumentchangededit
+                                .getValue(flag),
                         true);
                 return;
 
             case 2106 :
-                _mthdo(graphicviewerdocumentchangededit.getValueBoolean(flag),
+                internalSetAutoResize(
+                        graphicviewerdocumentchangededit.getValueBoolean(flag),
                         true);
                 return;
         }
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
-
-    private static Dimension db = new Dimension(7, 7);
-    private static Dimension da = new Dimension(7, 7);
-    public static final int ChangedLabelSpot = 2101;
-    public static final int ChangedDrawable = 2102;
-    public static final int ChangedLabel = 2103;
-    public static final int ChangedPort = 2104;
-    public static final int ChangedInsets = 2105;
-    public static final int ChangedAutoResize = 2106;
-    private GraphicViewerDrawable dc;
-    private GraphicViewerText dh;
-    private GraphicViewerPort dg;
-    private int df;
-    private Insets de;
-
 }

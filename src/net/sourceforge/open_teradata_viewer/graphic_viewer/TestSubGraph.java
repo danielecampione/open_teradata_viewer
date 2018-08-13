@@ -32,81 +32,82 @@ public class TestSubGraph extends GraphicViewerSubGraph {
 
     private static final long serialVersionUID = 4183215077598003075L;
 
-    public TestSubGraph() {
-        myInput = null;
-        myOutput = null;
-    }
-
-    public TestSubGraph(String s) {
-        super(s);
-        myInput = null;
-        myOutput = null;
-        init();
-    }
-
-    public void init() {
-        setInitializing(true);
-        setLabelSpot(1);
-        setCollapsedLabelSpot(6);
-        setInsets(new Insets(10, 10, 10, 10));
-        setCollapsedInsets(new Insets(10, 10, 10, 10));
-        myInput = new GraphicViewerPort();
-        myInput.setSize(7, 7);
-        myInput.setBrush(GraphicViewerBrush.green);
-        myInput.setStyle(3);
-        myInput.setValidSource(false);
-        addObjectAtTail(myInput);
-        myOutput = new GraphicViewerPort();
-        myOutput.setSize(7, 7);
-        myOutput.setBrush(GraphicViewerBrush.green);
-        myOutput.setStyle(3);
-        myOutput.setValidDestination(false);
-        addObjectAtTail(myOutput);
-        setInitializing(false);
-        layoutChildren(null);
-    }
-
-    protected void copyChildren(GraphicViewerArea graphicviewerarea,
-            IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
-        super.copyChildren(graphicviewerarea, graphicviewercopyenvironment);
-        TestSubGraph testsubgraph = (TestSubGraph) graphicviewerarea;
-        testsubgraph.myInput = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(myInput);
-        testsubgraph.myOutput = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(myOutput);
-    }
-
-    public GraphicViewerObject removeObjectAtPos(
-            GraphicViewerListPosition graphicviewerlistposition) {
-        GraphicViewerObject graphicviewerobject = super
-                .removeObjectAtPos(graphicviewerlistposition);
-        if (graphicviewerobject == myInput)
-            myInput = null;
-        else if (graphicviewerobject == myOutput)
-            myOutput = null;
-        return graphicviewerobject;
-    }
-
-    public void layoutPort() {
-        Rectangle rectangle = computeBorder();
-        if (getInput() != null)
-            getInput().setSpotLocation(8,
-                    new Point(rectangle.x, rectangle.y + rectangle.height / 2));
-        if (getOutput() != null)
-            getOutput().setSpotLocation(
-                    4,
-                    new Point(rectangle.x + rectangle.width, rectangle.y
-                            + rectangle.height / 2));
-    }
-
     public GraphicViewerPort getInput() {
         return myInput;
     }
-
     public GraphicViewerPort getOutput() {
         return myOutput;
     }
 
-    private GraphicViewerPort myInput;
-    private GraphicViewerPort myOutput;
+    private GraphicViewerPort myInput = null;
+    private GraphicViewerPort myOutput = null;
+
+    /** Default constructor, just for copying. */
+    public TestSubGraph() {
+    }
+
+    public TestSubGraph(String s) {
+        super(s);
+        init();
+    }
+
+    /** Create an input port and an output port, each a green triangle. */
+    public void init() {
+        setInitializing(true);
+        setLabelSpot(GraphicViewerObject.TopLeft);
+        setCollapsedLabelSpot(GraphicViewerObject.BottomCenter);
+        setInsets(new Insets(10, 10, 10, 10));
+        setCollapsedInsets(new Insets(10, 10, 10, 10));
+
+        myInput = new GraphicViewerPort();
+        myInput.setSize(7, 7);
+        myInput.setBrush(GraphicViewerBrush.green);
+        myInput.setStyle(GraphicViewerPort.StyleTriangle);
+        myInput.setValidSource(false);
+        addObjectAtTail(myInput);
+
+        myOutput = new GraphicViewerPort();
+        myOutput.setSize(7, 7);
+        myOutput.setBrush(GraphicViewerBrush.green);
+        myOutput.setStyle(GraphicViewerPort.StyleTriangle);
+        myOutput.setValidDestination(false);
+        addObjectAtTail(myOutput);
+
+        setInitializing(false);
+        layoutChildren(null);
+    }
+
+    protected void copyChildren(GraphicViewerArea newarea,
+            IGraphicViewerCopyEnvironment env) {
+        super.copyChildren(newarea, env);
+        TestSubGraph newobj = (TestSubGraph) newarea;
+        newobj.myInput = (GraphicViewerPort) env.get(myInput);
+        newobj.myOutput = (GraphicViewerPort) env.get(myOutput);
+    }
+
+    public GraphicViewerObject removeObjectAtPos(GraphicViewerListPosition pos) {
+        GraphicViewerObject child = super.removeObjectAtPos(pos);
+        if (child == myInput) {
+            myInput = null;
+        } else if (child == myOutput) {
+            myOutput = null;
+        }
+        return child;
+    }
+
+    /**
+     * The input port is positioned inside the center left point of the
+     * subgraph; the output port is position inside the center right spot.
+     */
+    public void layoutPort() {
+        Rectangle b = computeBorder();
+        if (getInput() != null) {
+            getInput().setSpotLocation(CenterLeft,
+                    new Point(b.x, b.y + b.height / 2));
+        }
+        if (getOutput() != null) {
+            getOutput().setSpotLocation(CenterRight,
+                    new Point(b.x + b.width, b.y + b.height / 2));
+        }
+    }
 }

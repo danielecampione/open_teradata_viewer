@@ -38,103 +38,109 @@ public class GraphicViewerCopyMap
 
     private static final long serialVersionUID = -9041495972527243790L;
 
-    public GraphicViewerCopyMap() {
-        _fldif = new HashMap<Object, Object>();
-        a = new Vector<Object>();
-    }
+    private HashMap myMap = new HashMap();
+    private Vector myDelayeds = new Vector();
 
     public void clear() {
-        _fldif.clear();
+        myMap.clear();
     }
 
     public boolean containsKey(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return false;
-        else
-            return _fldif.containsKey(obj);
+        } else {
+            return myMap.containsKey(obj);
+        }
     }
 
     public boolean containsValue(Object obj) {
-        return _fldif.containsValue(obj);
+        return myMap.containsValue(obj);
     }
 
     public Set entrySet() {
-        return _fldif.entrySet();
+        return myMap.entrySet();
     }
 
     public boolean equals(Object obj) {
         if (obj instanceof GraphicViewerCopyMap) {
             GraphicViewerCopyMap graphicviewercopymap = (GraphicViewerCopyMap) obj;
-            return _fldif.equals(graphicviewercopymap._fldif)
-                    && a.equals(graphicviewercopymap.a);
+            return myMap.equals(graphicviewercopymap.myMap)
+                    && myDelayeds.equals(graphicviewercopymap.myDelayeds);
         } else {
             return false;
         }
     }
 
     public Object get(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return null;
-        else
-            return _fldif.get(obj);
+        } else {
+            return myMap.get(obj);
+        }
     }
 
     public int hashCode() {
-        return _fldif.hashCode();
+        return myMap.hashCode();
     }
 
     public boolean isEmpty() {
-        return _fldif.isEmpty();
+        return myMap.isEmpty();
     }
 
     public Set keySet() {
-        return _fldif.keySet();
+        return myMap.keySet();
     }
 
     public Object put(Object obj, Object obj1) {
-        if (obj == null)
+        if (obj == null) {
             return null;
-        else
-            return _fldif.put(obj, obj1);
+        } else {
+            return myMap.put(obj, obj1);
+        }
     }
 
-    public void putAll(Map<?, ?> map) {
-        _fldif.putAll(map);
+    public void putAll(Map map) {
+        myMap.putAll(map);
     }
 
     public Object remove(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return null;
-        else
-            return _fldif.remove(obj);
+        } else {
+            return myMap.remove(obj);
+        }
     }
 
     public int size() {
-        return _fldif.size();
+        return myMap.size();
     }
 
     public Collection values() {
-        return _fldif.values();
+        return myMap.values();
     }
 
     public GraphicViewerObject copy(GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return null;
-        GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) _fldif
+        }
+        GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) myMap
                 .get(graphicviewerobject);
-        if (graphicviewerobject1 == null)
+        if (graphicviewerobject1 == null) {
             graphicviewerobject1 = graphicviewerobject.copyObject(this);
+        }
         return graphicviewerobject1;
     }
 
     public void finishDelayedCopies() {
-        Vector<Object> vector = getDelayeds();
-        if (vector == null)
+        Vector vector = getDelayeds();
+        if (vector == null) {
             return;
+        }
         for (int i = 0; i < vector.size(); i++) {
             Object obj = vector.get(i);
-            if (!(obj instanceof GraphicViewerObject))
+            if (!(obj instanceof GraphicViewerObject)) {
                 continue;
+            }
             GraphicViewerObject graphicviewerobject = (GraphicViewerObject) obj;
             GraphicViewerObject graphicviewerobject1 = (GraphicViewerObject) get(graphicviewerobject);
             if (graphicviewerobject1 instanceof GraphicViewerObject) {
@@ -158,34 +164,30 @@ public class GraphicViewerCopyMap
     }
 
     public void clearDelayeds() {
-        a.clear();
+        myDelayeds.clear();
     }
 
     public boolean isEmptyDelayeds() {
-        return a.isEmpty();
+        return myDelayeds.isEmpty();
     }
 
     public int sizeDelayeds() {
-        return a.size();
+        return myDelayeds.size();
     }
 
     public boolean isDelayed(Object obj) {
-        return a.contains(obj);
+        return myDelayeds.contains(obj);
     }
 
     public void delay(Object obj) {
-        a.add(obj);
+        myDelayeds.add(obj);
     }
 
     public void removeDelayed(Object obj) {
-        a.remove(obj);
+        myDelayeds.remove(obj);
     }
 
-    public Vector<Object> getDelayeds() {
-        return a;
+    public Vector getDelayeds() {
+        return myDelayeds;
     }
-
-    private HashMap<Object, Object> _fldif;
-
-    private Vector<Object> a;
 }

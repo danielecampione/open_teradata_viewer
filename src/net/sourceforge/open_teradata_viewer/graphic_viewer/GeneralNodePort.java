@@ -31,21 +31,22 @@ public class GeneralNodePort extends GraphicViewerPort {
 
     private static final long serialVersionUID = 6034782618020815813L;
 
+    public static final int NameChanged = 75550;
+    public static final int LabelChanged = 75551;
+    private static Rectangle myTriangleRect = new Rectangle(0, 0, 8, 8);
+
+    private boolean myLeftSide = true;
+    private int myIndex = 0;
+    private GeneralNodePortLabel myPortLabel = null;
+    private String myName = "";
+
     public GeneralNodePort() {
-        myLeftSide = true;
-        myIndex = 0;
-        myPortLabel = null;
-        myName = "";
     }
 
-    public GeneralNodePort(boolean flag, String s,
-            GraphicViewerArea graphicviewerarea) {
+    public GeneralNodePort(boolean paramBoolean, String paramString,
+            GraphicViewerArea paramGraphicViewerArea) {
         super(TriangleRect());
-        myLeftSide = true;
-        myIndex = 0;
-        myPortLabel = null;
-        myName = "";
-        initialize(flag, s, graphicviewerarea);
+        initialize(paramBoolean, paramString, paramGraphicViewerArea);
     }
 
     public void initialize(boolean flag, String s,
@@ -82,19 +83,21 @@ public class GeneralNodePort extends GraphicViewerPort {
     }
 
     public boolean validLink(GraphicViewerPort graphicviewerport) {
-        if (graphicviewerport.getParent() == null)
+        if (graphicviewerport.getParent() == null) {
             return false;
-        if (graphicviewerport instanceof GeneralNodePort)
+        }
+        if (graphicviewerport instanceof GeneralNodePort) {
             return super.validLink(graphicviewerport)
                     && getParent() != graphicviewerport.getParent()
                     && isOutput()
                     && (graphicviewerport instanceof GeneralNodePort)
                     && ((GeneralNodePort) graphicviewerport).isInput()
                     && !alreadyLinked(graphicviewerport);
-        else
+        } else {
             return super.validLink(graphicviewerport)
                     && getParent() != graphicviewerport.getParent()
                     && isOutput();
+        }
     }
 
     public boolean alreadyLinked(GraphicViewerPort graphicviewerport) {
@@ -102,8 +105,9 @@ public class GeneralNodePort extends GraphicViewerPort {
             GraphicViewerLink graphicviewerlink = getLinkAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextLinkPos(graphicviewerlistposition);
             if (graphicviewerlink.getFromPort() == this
-                    && graphicviewerlink.getToPort() == graphicviewerport)
+                    && graphicviewerlink.getToPort() == graphicviewerport) {
                 return true;
+            }
         }
 
         return false;
@@ -130,19 +134,22 @@ public class GeneralNodePort extends GraphicViewerPort {
         GeneralNodePortLabel generalnodeportlabel1 = myPortLabel;
         if (generalnodeportlabel1 != generalnodeportlabel) {
             if (generalnodeportlabel1 != null) {
-                if (getParent() != null)
+                if (getParent() != null) {
                     getParent().removeObject(generalnodeportlabel1);
+                }
                 generalnodeportlabel1.setPartner(null);
             }
             myPortLabel = generalnodeportlabel;
             if (generalnodeportlabel != null) {
                 generalnodeportlabel.setPartner(this);
-                if (isOnLeftSide())
+                if (isOnLeftSide()) {
                     generalnodeportlabel.setAlignment(3);
-                else
+                } else {
                     generalnodeportlabel.setAlignment(1);
-                if (getParent() != null)
+                }
+                if (getParent() != null) {
                     getParent().addObjectAtTail(generalnodeportlabel);
+                }
             }
             layoutLabel();
             update(0x1271f, 0, generalnodeportlabel1);
@@ -150,7 +157,7 @@ public class GeneralNodePort extends GraphicViewerPort {
     }
 
     public void layoutLabel() {
-        if (getLabel() != null)
+        if (getLabel() != null) {
             if (isOnLeftSide()) {
                 getLabel().setSpotLocation(4, this, 8);
                 getLabel().setLeft(getLabel().getLeft() - getLabelSpacing());
@@ -158,51 +165,60 @@ public class GeneralNodePort extends GraphicViewerPort {
                 getLabel().setSpotLocation(8, this, 4);
                 getLabel().setLeft(getLabel().getLeft() + getLabelSpacing());
             }
+        }
     }
 
     public int getLabelSpacing() {
         return 2;
     }
 
-    public Point getLinkPoint(int i, Point point) {
-        switch (i) {
+    public Point getLinkPoint(int paramInt, Point paramPoint) {
+        Rectangle localRectangle;
+        GeneralNodePortLabel localGeneralNodePortLabel;
+        switch (paramInt) {
             default :
-                return super.getLinkPoint(i, point);
+                return super.getLinkPoint(paramInt, paramPoint);
+            case 4 :
+                localRectangle = getBoundingRect();
+                if (paramPoint == null) {
+                    paramPoint = new Point(0, 0);
+                }
+                paramPoint.x = (localRectangle.x + localRectangle.width);
+                paramPoint.y = (localRectangle.y + localRectangle.height / 2);
 
-            case 4 : // '\004'
-                Rectangle rectangle = getBoundingRect();
-                if (point == null)
-                    point = new Point(0, 0);
-                point.x = rectangle.x + rectangle.width;
-                point.y = rectangle.y + rectangle.height / 2;
-                GeneralNodePortLabel generalnodeportlabel = getLabel();
-                if (generalnodeportlabel != null
-                        && generalnodeportlabel.isVisible())
-                    point.x += generalnodeportlabel.getWidth()
+                localGeneralNodePortLabel = getLabel();
+                if ((localGeneralNodePortLabel != null)
+                        && (localGeneralNodePortLabel.isVisible())) {
+                    paramPoint.x += localGeneralNodePortLabel.getWidth()
                             + getLabelSpacing();
+                }
                 break;
+            case 8 :
+                localRectangle = getBoundingRect();
+                if (paramPoint == null) {
+                    paramPoint = new Point(0, 0);
+                }
+                paramPoint.x = localRectangle.x;
+                paramPoint.y = (localRectangle.y + localRectangle.height / 2);
 
-            case 8 : // '\b'
-                Rectangle rectangle1 = getBoundingRect();
-                if (point == null)
-                    point = new Point(0, 0);
-                point.x = rectangle1.x;
-                point.y = rectangle1.y + rectangle1.height / 2;
-                GeneralNodePortLabel generalnodeportlabel1 = getLabel();
-                if (generalnodeportlabel1 != null
-                        && generalnodeportlabel1.isVisible())
-                    point.x -= generalnodeportlabel1.getWidth()
+                localGeneralNodePortLabel = getLabel();
+                if ((localGeneralNodePortLabel != null)
+                        && (localGeneralNodePortLabel.isVisible())) {
+                    paramPoint.x -= localGeneralNodePortLabel.getWidth()
                             + getLabelSpacing();
+                }
                 break;
         }
-        return point;
+
+        return paramPoint;
     }
 
     public Point getLinkPointFromPoint(int i, int j, Point point) {
-        if (isOnLeftSide())
+        if (isOnLeftSide()) {
             return getLinkPoint(8, point);
-        else
+        } else {
             return getLinkPoint(4, point);
+        }
     }
 
     public String getName() {
@@ -213,8 +229,9 @@ public class GeneralNodePort extends GraphicViewerPort {
         String s1 = myName;
         if (!s1.equals(s)) {
             myName = s;
-            if (getLabel() != null)
+            if (getLabel() != null) {
                 getLabel().setText(s);
+            }
             update(0x1271e, 0, s1);
         }
     }
@@ -260,8 +277,9 @@ public class GeneralNodePort extends GraphicViewerPort {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("portlabel"))
+        if (s.equals("portlabel")) {
             myPortLabel = (GeneralNodePortLabel) obj;
+        }
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
@@ -273,9 +291,10 @@ public class GeneralNodePort extends GraphicViewerPort {
             domelement1.setAttribute("index", Integer.toString(myIndex));
             domelement1.setAttribute("leftside", myLeftSide ? "true" : "false");
             domelement1.setAttribute("name", myName);
-            if (myPortLabel != null)
+            if (myPortLabel != null) {
                 domdoc.registerReferencingNode(domelement1, "portlabel",
                         myPortLabel);
+            }
         }
         super.SVGWriteObject(domdoc, domelement);
     }
@@ -298,12 +317,4 @@ public class GeneralNodePort extends GraphicViewerPort {
     public static Rectangle TriangleRect() {
         return myTriangleRect;
     }
-
-    public static final int NameChanged = 0x1271e;
-    public static final int LabelChanged = 0x1271f;
-    private static Rectangle myTriangleRect = new Rectangle(0, 0, 8, 8);
-    private boolean myLeftSide;
-    private int myIndex;
-    private GeneralNodePortLabel myPortLabel;
-    private String myName;
 }

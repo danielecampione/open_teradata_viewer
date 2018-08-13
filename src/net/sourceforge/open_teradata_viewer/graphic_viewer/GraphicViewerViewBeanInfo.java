@@ -35,164 +35,166 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  */
 public class GraphicViewerViewBeanInfo extends SimpleBeanInfo {
 
-    public GraphicViewerViewBeanInfo() {
-        _fldfor = GraphicViewerView.class;
-        a = "icons/logo16.png";
-        _flddo = "icons/logo32.png";
-        _fldif = "icons/logo16.png";
-        _fldint = "icons/logo32.png";
-    }
+    Class beanClass = GraphicViewerView.class;
+    String iconColor16x16Filename = "icons/logo16.png";
+    String iconColor32x32Filename = "icons/logo32.png";
+    String iconMono16x16Filename = "icons/logo16.png";
+    String iconMono32x32Filename = "icons/logo32.png";
 
     public PropertyDescriptor[] getPropertyDescriptors() {
         PropertyDescriptor apropertydescriptor[] = null;
         PropertyDescriptor propertydescriptor;
         try {
             propertydescriptor = new PropertyDescriptor("autoscrollInsets",
-                    _fldfor, "getAutoscrollInsets", "setAutoscrollInsets");
+                    beanClass, "getAutoscrollInsets", "setAutoscrollInsets");
             PropertyDescriptor propertydescriptor1 = new PropertyDescriptor(
-                    "backgroundImage", _fldfor, "getBackgroundImage",
+                    "backgroundImage", beanClass, "getBackgroundImage",
                     "setBackgroundImage");
             PropertyDescriptor propertydescriptor2 = new PropertyDescriptor(
-                    "bounds", _fldfor, null, "setBounds");
+                    "bounds", beanClass, null, "setBounds");
             PropertyDescriptor propertydescriptor3 = new PropertyDescriptor(
-                    "canvas", _fldfor, "getCanvas", null);
+                    "canvas", beanClass, "getCanvas", null);
             PropertyDescriptor propertydescriptor4 = new PropertyDescriptor(
-                    "corner", _fldfor, "getCorner", "setCorner");
+                    "corner", beanClass, "getCorner", "setCorner");
             PropertyDescriptor propertydescriptor5 = new PropertyDescriptor(
-                    "currentObject", _fldfor, "getCurrentObject",
+                    "currentObject", beanClass, "getCurrentObject",
                     "setCurrentObject");
             PropertyDescriptor propertydescriptor6 = new PropertyDescriptor(
-                    "cursor", _fldfor, null, "setCursor");
+                    "cursor", beanClass, null, "setCursor");
             PropertyDescriptor propertydescriptor7 = new PropertyDescriptor(
-                    "cursorImmediately", _fldfor, null, "setCursorImmediately");
+                    "cursorImmediately", beanClass, null,
+                    "setCursorImmediately");
             PropertyDescriptor propertydescriptor8 = new PropertyDescriptor(
-                    "debugFlags", _fldfor, "getDebugFlags", "setDebugFlags");
+                    "debugFlags", beanClass, "getDebugFlags", "setDebugFlags");
             PropertyDescriptor propertydescriptor9 = new PropertyDescriptor(
-                    "defaultCursor", _fldfor, "getDefaultCursor",
+                    "defaultCursor", beanClass, "getDefaultCursor",
                     "setDefaultCursor");
             PropertyDescriptor propertydescriptor10 = new PropertyDescriptor(
-                    "document", _fldfor, "getDocument", "setDocument");
+                    "document", beanClass, "getDocument", "setDocument");
             PropertyDescriptor propertydescriptor11 = new PropertyDescriptor(
-                    "documentSize", _fldfor, "getDocumentSize", null);
+                    "documentSize", beanClass, "getDocumentSize", null);
             PropertyDescriptor propertydescriptor12 = new PropertyDescriptor(
-                    "documentTopLeft", _fldfor, "getDocumentTopLeft", null);
+                    "documentTopLeft", beanClass, "getDocumentTopLeft", null);
             PropertyDescriptor propertydescriptor13 = new PropertyDescriptor(
-                    "dragDropEnabled", _fldfor, "isDragDropEnabled",
+                    "dragDropEnabled", beanClass, "isDragDropEnabled",
                     "setDragDropEnabled");
             PropertyDescriptor propertydescriptor14 = new PropertyDescriptor(
-                    "dragEnabled", _fldfor, "isDragEnabled", "setDragEnabled");
+                    "dragEnabled", beanClass, "isDragEnabled", "setDragEnabled");
             PropertyDescriptor propertydescriptor15 = new PropertyDescriptor(
-                    "dragsRealtime", _fldfor, "isDragsRealtime",
+                    "dragsRealtime", beanClass, "isDragsRealtime",
                     "setDragsRealtime");
             PropertyDescriptor propertydescriptor16 = new PropertyDescriptor(
-                    "dragsSelectionImage", _fldfor, "isDragsSelectionImage",
+                    "dragsSelectionImage", beanClass, "isDragsSelectionImage",
                     "setDragsSelectionImage");
             PropertyDescriptor propertydescriptor17 = new PropertyDescriptor(
-                    "dropEnabled", _fldfor, "isDropEnabled", "setDropEnabled");
+                    "dropEnabled", beanClass, "isDropEnabled", "setDropEnabled");
             PropertyDescriptor propertydescriptor18 = new PropertyDescriptor(
-                    "editControl", _fldfor, "getEditControl", "setEditControl");
+                    "editControl", beanClass, "getEditControl",
+                    "setEditControl");
             PropertyDescriptor propertydescriptor19 = new PropertyDescriptor(
-                    "editingTextControl", _fldfor, "isEditingTextControl", null);
+                    "editingTextControl", beanClass, "isEditingTextControl",
+                    null);
             PropertyDescriptor propertydescriptor20 = new PropertyDescriptor(
-                    "empty", _fldfor, "isEmpty", null);
+                    "empty", beanClass, "isEmpty", null);
             PropertyDescriptor propertydescriptor21 = new PropertyDescriptor(
-                    "extentSize", _fldfor, "getExtentSize", null);
+                    "extentSize", beanClass, "getExtentSize", null);
             PropertyDescriptor propertydescriptor22 = new PropertyDescriptor(
-                    "firstLayer", _fldfor, "getFirstLayer", null);
+                    "firstLayer", beanClass, "getFirstLayer", null);
             PropertyDescriptor propertydescriptor23 = new PropertyDescriptor(
-                    "firstObjectPos", _fldfor, "getFirstObjectPos", null);
+                    "firstObjectPos", beanClass, "getFirstObjectPos", null);
             PropertyDescriptor propertydescriptor24 = new PropertyDescriptor(
-                    "focusTraversable", _fldfor, "isFocusTraversable", null);
+                    "focusTraversable", beanClass, "isFocusTraversable", null);
             PropertyDescriptor propertydescriptor25 = new PropertyDescriptor(
-                    "frame", _fldfor, "getFrame", null);
+                    "frame", beanClass, "getFrame", null);
             PropertyDescriptor propertydescriptor26 = new PropertyDescriptor(
-                    "gridHeight", _fldfor, "getGridHeight", "setGridHeight");
+                    "gridHeight", beanClass, "getGridHeight", "setGridHeight");
             PropertyDescriptor propertydescriptor27 = new PropertyDescriptor(
-                    "gridOrigin", _fldfor, "getGridOrigin", "setGridOrigin");
+                    "gridOrigin", beanClass, "getGridOrigin", "setGridOrigin");
             PropertyDescriptor propertydescriptor28 = new PropertyDescriptor(
-                    "gridPen", _fldfor, "getGridPen", "setGridPen");
+                    "gridPen", beanClass, "getGridPen", "setGridPen");
             PropertyDescriptor propertydescriptor29 = new PropertyDescriptor(
-                    "gridSpot", _fldfor, "getGridSpot", "setGridSpot");
+                    "gridSpot", beanClass, "getGridSpot", "setGridSpot");
             PropertyDescriptor propertydescriptor30 = new PropertyDescriptor(
-                    "gridStyle", _fldfor, "getGridStyle", "setGridStyle");
+                    "gridStyle", beanClass, "getGridStyle", "setGridStyle");
             propertydescriptor30
                     .setPropertyEditorClass(GraphicViewerGridStyleEditor.class);
             PropertyDescriptor propertydescriptor31 = new PropertyDescriptor(
-                    "gridWidth", _fldfor, "getGridWidth", "setGridWidth");
+                    "gridWidth", beanClass, "getGridWidth", "setGridWidth");
             PropertyDescriptor propertydescriptor32 = new PropertyDescriptor(
-                    "hidingDisabledScrollbars", _fldfor,
+                    "hidingDisabledScrollbars", beanClass,
                     "isHidingDisabledScrollbars", "setHidingDisabledScrollbars");
             PropertyDescriptor propertydescriptor33 = new PropertyDescriptor(
-                    "horizontalScrollBar", _fldfor, "getHorizontalScrollBar",
+                    "horizontalScrollBar", beanClass, "getHorizontalScrollBar",
                     "setHorizontalScrollBar");
             PropertyDescriptor propertydescriptor34 = new PropertyDescriptor(
-                    "ignoreNextMouseDown", _fldfor, "isIgnoreNextMouseDown",
+                    "ignoreNextMouseDown", beanClass, "isIgnoreNextMouseDown",
                     "setIgnoreNextMouseDown");
             PropertyDescriptor propertydescriptor35 = new PropertyDescriptor(
-                    "includingNegativeCoords", _fldfor,
+                    "includingNegativeCoords", beanClass,
                     "isIncludingNegativeCoords", "setIncludingNegativeCoords");
             PropertyDescriptor propertydescriptor36 = new PropertyDescriptor(
-                    "internalMouseActions", _fldfor, "getInternalMouseActions",
-                    "setInternalMouseActions");
+                    "internalMouseActions", beanClass,
+                    "getInternalMouseActions", "setInternalMouseActions");
             propertydescriptor36
                     .setPropertyEditorClass(GraphicViewerInternalMouseActionsEditor.class);
             PropertyDescriptor propertydescriptor37 = new PropertyDescriptor(
-                    "GraphicViewerGraphics", _fldfor,
+                    "GraphicViewerGraphics", beanClass,
                     "getGraphicViewerGraphics", null);
             PropertyDescriptor propertydescriptor38 = new PropertyDescriptor(
-                    "keyEnabled", _fldfor, "isKeyEnabled", "setKeyEnabled");
+                    "keyEnabled", beanClass, "isKeyEnabled", "setKeyEnabled");
             PropertyDescriptor propertydescriptor39 = new PropertyDescriptor(
-                    "lastLayer", _fldfor, "getLastLayer", null);
+                    "lastLayer", beanClass, "getLastLayer", null);
             PropertyDescriptor propertydescriptor40 = new PropertyDescriptor(
-                    "lastObjectPos", _fldfor, "getLastObjectPos", null);
+                    "lastObjectPos", beanClass, "getLastObjectPos", null);
             PropertyDescriptor propertydescriptor41 = new PropertyDescriptor(
-                    "minimumSize", _fldfor, "getMinimumSize", null);
+                    "minimumSize", beanClass, "getMinimumSize", null);
             PropertyDescriptor propertydescriptor42 = new PropertyDescriptor(
-                    "mouseEnabled", _fldfor, "isMouseEnabled",
+                    "mouseEnabled", beanClass, "isMouseEnabled",
                     "setMouseEnabled");
             PropertyDescriptor propertydescriptor43 = new PropertyDescriptor(
-                    "numObjects", _fldfor, "getNumObjects", null);
+                    "numObjects", beanClass, "getNumObjects", null);
             PropertyDescriptor propertydescriptor44 = new PropertyDescriptor(
-                    "portGravity", _fldfor, "getPortGravity", null);
+                    "portGravity", beanClass, "getPortGravity", null);
             PropertyDescriptor propertydescriptor45 = new PropertyDescriptor(
-                    "preferredSize", _fldfor, "getPreferredSize", null);
+                    "preferredSize", beanClass, "getPreferredSize", null);
             PropertyDescriptor propertydescriptor46 = new PropertyDescriptor(
-                    "primarySelectionColor", _fldfor,
+                    "primarySelectionColor", beanClass,
                     "getPrimarySelectionColor", "setPrimarySelectionColor");
             PropertyDescriptor propertydescriptor47 = new PropertyDescriptor(
-                    "printDocumentSize", _fldfor, "getPrintDocumentSize", null);
-            PropertyDescriptor propertydescriptor48 = new PropertyDescriptor(
-                    "printDocumentTopLeft", _fldfor, "getPrintDocumentTopLeft",
+                    "printDocumentSize", beanClass, "getPrintDocumentSize",
                     null);
+            PropertyDescriptor propertydescriptor48 = new PropertyDescriptor(
+                    "printDocumentTopLeft", beanClass,
+                    "getPrintDocumentTopLeft", null);
             PropertyDescriptor propertydescriptor49 = new PropertyDescriptor(
-                    "printing", _fldfor, "isPrinting", null);
+                    "printing", beanClass, "isPrinting", null);
             PropertyDescriptor propertydescriptor50 = new PropertyDescriptor(
-                    "scale", _fldfor, "getScale", "setScale");
+                    "scale", beanClass, "getScale", "setScale");
             PropertyDescriptor propertydescriptor51 = new PropertyDescriptor(
-                    "secondarySelectionColor", _fldfor,
+                    "secondarySelectionColor", beanClass,
                     "getSecondarySelectionColor", "setSecondarySelectionColor");
             PropertyDescriptor propertydescriptor52 = new PropertyDescriptor(
-                    "selection", _fldfor, "getSelection", null);
+                    "selection", beanClass, "getSelection", null);
             PropertyDescriptor propertydescriptor53 = new PropertyDescriptor(
-                    "size", _fldfor, null, "setSize");
+                    "size", beanClass, null, "setSize");
             PropertyDescriptor propertydescriptor54 = new PropertyDescriptor(
-                    "snapMove", _fldfor, "getSnapMove", "setSnapMove");
+                    "snapMove", beanClass, "getSnapMove", "setSnapMove");
             propertydescriptor54
                     .setPropertyEditorClass(GraphicViewerSnapEditor.class);
             PropertyDescriptor propertydescriptor55 = new PropertyDescriptor(
-                    "snapResize", _fldfor, "getSnapResize", "setSnapResize");
+                    "snapResize", beanClass, "getSnapResize", "setSnapResize");
             propertydescriptor55
                     .setPropertyEditorClass(GraphicViewerSnapEditor.class);
             PropertyDescriptor propertydescriptor56 = new PropertyDescriptor(
-                    "state", _fldfor, "getState", "setState");
+                    "state", beanClass, "getState", "setState");
             PropertyDescriptor propertydescriptor57 = new PropertyDescriptor(
-                    "verticalScrollBar", _fldfor, "getVerticalScrollBar",
+                    "verticalScrollBar", beanClass, "getVerticalScrollBar",
                     "setVerticalScrollBar");
             PropertyDescriptor propertydescriptor58 = new PropertyDescriptor(
-                    "viewPosition", _fldfor, "getViewPosition",
+                    "viewPosition", beanClass, "getViewPosition",
                     "setViewPosition");
             PropertyDescriptor propertydescriptor59 = new PropertyDescriptor(
-                    "viewRect", _fldfor, "getViewRect", null);
+                    "viewRect", beanClass, "getViewRect", null);
             apropertydescriptor = (new PropertyDescriptor[]{propertydescriptor,
                     propertydescriptor1, propertydescriptor2,
                     propertydescriptor3, propertydescriptor4,
@@ -233,22 +235,30 @@ public class GraphicViewerViewBeanInfo extends SimpleBeanInfo {
     public Image getIcon(int i) {
         switch (i) {
             case 1 : // '\001'
-                return a == null ? null : loadImage(a);
+                return iconColor16x16Filename == null
+                        ? null
+                        : loadImage(iconColor16x16Filename);
 
             case 2 : // '\002'
-                return _flddo == null ? null : loadImage(_flddo);
+                return iconColor32x32Filename == null
+                        ? null
+                        : loadImage(iconColor32x32Filename);
 
             case 3 : // '\003'
-                return _fldif == null ? null : loadImage(_fldif);
+                return iconMono16x16Filename == null
+                        ? null
+                        : loadImage(iconMono16x16Filename);
 
             case 4 : // '\004'
-                return _fldint == null ? null : loadImage(_fldint);
+                return iconMono32x32Filename == null
+                        ? null
+                        : loadImage(iconMono32x32Filename);
         }
         return null;
     }
 
     public BeanInfo[] getAdditionalBeanInfo() {
-        Class<?> class1 = _fldfor.getSuperclass();
+        Class class1 = beanClass.getSuperclass();
         BeanInfo beaninfo = null;
         try {
             beaninfo = Introspector.getBeanInfo(class1);
@@ -257,10 +267,4 @@ public class GraphicViewerViewBeanInfo extends SimpleBeanInfo {
         }
         return (new BeanInfo[]{beaninfo});
     }
-
-    Class<GraphicViewerView> _fldfor;
-    String a;
-    String _flddo;
-    String _fldif;
-    String _fldint;
 }

@@ -32,33 +32,30 @@ public class GraphicViewerHandle extends GraphicViewerRectangle {
 
     private static final long serialVersionUID = 6887336048602576402L;
 
+    private static int myDefaultHandleWidth = 5;
+    private static int myDefaultHandleHeight = 5;
+    private int myCursorType = 0;
+    private int myHandleType = 0;
+    private GraphicViewerObject myHandleFor = null;
+
     public GraphicViewerHandle() {
-        dN = 0;
-        dO = 0;
-        dL = null;
-        a(0, 0);
+        init(0, 0);
     }
 
     public GraphicViewerHandle(Rectangle rectangle, int i) {
         super(rectangle);
-        dN = 0;
-        dO = 0;
-        dL = null;
-        a(i, 0);
+        init(i, 0);
     }
 
     public GraphicViewerHandle(Rectangle rectangle, int i, int j) {
         super(rectangle);
-        dN = 0;
-        dO = 0;
-        dL = null;
-        a(i, j);
+        init(i, j);
     }
 
-    private final void a(int i, int j) {
-        _mthfor(g() & 0xffffffeb);
-        dN = i;
-        dO = j;
+    private final void init(int i, int j) {
+        setInternalFlags(getInternalFlags() & 0xffffffeb);
+        myCursorType = i;
+        myHandleType = j;
         setBrush(GraphicViewerBrush.black);
     }
 
@@ -72,10 +69,11 @@ public class GraphicViewerHandle extends GraphicViewerRectangle {
         GraphicViewerObject graphicviewerobject = getHandleFor();
         if (graphicviewerobject != null
                 && graphicviewerobject.getLayer() != null
-                && !graphicviewerobject.getLayer().isModifiable())
+                && !graphicviewerobject.getLayer().isModifiable()) {
             return false;
+        }
         if (getCursorType() != 0) {
-            graphicviewerview.a(getCursorType());
+            graphicviewerview.setCursorType(getCursorType());
             return true;
         } else {
             return false;
@@ -97,11 +95,11 @@ public class GraphicViewerHandle extends GraphicViewerRectangle {
     }
 
     public GraphicViewerObject getPartner() {
-        return dL;
+        return myHandleFor;
     }
 
     public void setPartner(GraphicViewerObject graphicviewerobject) {
-        dL = graphicviewerobject;
+        myHandleFor = graphicviewerobject;
     }
 
     public final void setHandleFor(GraphicViewerObject graphicviewerobject) {
@@ -113,10 +111,10 @@ public class GraphicViewerHandle extends GraphicViewerRectangle {
     }
 
     public void setHandleType(int i) {
-        dO = i;
+        myHandleType = i;
         int j = getCursorType();
         int k = j;
-        switch (dO) {
+        switch (myHandleType) {
             case 1 : // '\001'
                 k = 6;
                 break;
@@ -157,41 +155,36 @@ public class GraphicViewerHandle extends GraphicViewerRectangle {
                 k = 12;
                 break;
         }
-        if (k != j)
+        if (k != j) {
             setCursorType(k);
+        }
     }
 
     public int getHandleType() {
-        return dO;
+        return myHandleType;
     }
 
     public void setCursorType(int i) {
-        dN = i;
+        myCursorType = i;
     }
 
     public int getCursorType() {
-        return dN;
+        return myCursorType;
     }
 
     public static int getDefaultHandleWidth() {
-        return dM;
+        return myDefaultHandleWidth;
     }
 
     public static void setDefaultHandleWidth(int i) {
-        dM = i;
+        myDefaultHandleWidth = i;
     }
 
     public static int getDefaultHandleHeight() {
-        return dP;
+        return myDefaultHandleHeight;
     }
 
     public static void setDefaultHandleHeight(int i) {
-        dP = i;
+        myDefaultHandleHeight = i;
     }
-
-    private static int dM = 5;
-    private static int dP = 5;
-    private int dN;
-    private int dO;
-    private GraphicViewerObject dL;
 }

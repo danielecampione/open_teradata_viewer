@@ -31,37 +31,40 @@ import javax.swing.Icon;
  *
  */
 public abstract class AppAction extends AbstractAction {
+
     private static final long serialVersionUID = -4788463998005168537L;
 
-    public AppAction(String s, Container container) {
-        super(s);
-        init(container);
-    }
-
-    public AppAction(String s, Icon icon, Container container) {
-        super(s, icon);
-        init(container);
-    }
+    private static Vector myAllActions = new Vector();
 
     public GraphicViewer getApp() {
         return (GraphicViewer) myApp;
     }
 
-    public OTVView getView() {
+    public GraphicViewerView getView() {
         return getApp().getCurrentView();
     }
 
-    private final void init(Container container) {
-        myApp = container;
+    public AppAction(String name, Container app) {
+        super(name);
+        init(app);
+    }
+
+    public AppAction(String name, Icon icon, Container app) {
+        super(name, icon);
+        init(app);
+    }
+
+    private final void init(Container app) {
+        myApp = app;
         myAllActions.add(this);
     }
 
     public String toString() {
-        return (String) getValue("Name");
+        return (String) getValue(NAME);
     }
 
     public boolean canAct() {
-        return getView() != null;
+        return (getView() != null);
     }
 
     public void updateEnabled() {
@@ -73,19 +76,18 @@ public abstract class AppAction extends AbstractAction {
         myApp = null;
     }
 
-    public static void updateAllActions() {
-        for (int i = 0; i < myAllActions.size(); i++) {
-            AppAction appaction = (AppAction) myAllActions.elementAt(i);
-            appaction.updateEnabled();
-        }
-
-    }
-
-    public static Vector<AppAction> allActions() {
-        return myAllActions;
-    }
-
     private Container myApp;
 
-    private static Vector<AppAction> myAllActions = new Vector<AppAction>();
+    // Keep track of all instances of AppAction
+
+    public static void updateAllActions() {
+        for (int i = 0; i < myAllActions.size(); i++) {
+            AppAction act = (AppAction) myAllActions.elementAt(i);
+            act.updateEnabled();
+        }
+    }
+
+    public static Vector allActions() {
+        return myAllActions;
+    }
 }

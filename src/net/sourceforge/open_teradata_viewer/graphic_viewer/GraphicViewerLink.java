@@ -37,37 +37,59 @@ public class GraphicViewerLink extends GraphicViewerStroke
 
     private static final long serialVersionUID = -16146961797393251L;
 
+    public static final int AdjustingStyleCalculate = 0;
+    public static final int AdjustingStyleScale = 1;
+    public static final int AdjustingStyleStretch = 2;
+    public static final int AdjustingStyleEnd = 3;
+    public static final int RelinkableFromHandle = 91;
+    public static final int RelinkableToHandle = 92;
+    public static final int ChangedFromPort = 201;
+    public static final int ChangedToPort = 202;
+    public static final int ChangedOrthogonal = 203;
+    public static final int ChangedRelinkable = 204;
+    public static final int ChangedJumpsOver = 205;
+    public static final int ChangedAvoidsNodes = 206;
+    public static final int ChangedCurviness = 207;
+    public static final int ChangedAdjustingStyle = 208;
+    public static final int ChangedUserObject = 209;
+    public static final int ChangedPartID = 210;
+    public static final int ChangedRoundedCorners = 211;
+    private static final int flagAdjustingStyle = 15;
+    private static final int flagLinkOrtho = 8192;
+    private static final int flagLinkRelinkable = 65536;
+    private static final int flagLinkJumpsOver = 131072;
+    private static final int flagLinkAvoidsNodes = 262144;
+    private static final int flagNoClearPorts = 524288;
+    private static final int flagRoundedCorners = 1048576;
+    private static boolean myResizingModifiesExistingLink = true;
+    private int myPartID = -1;
+    private Object myUserObject = null;
+    private int myLinkFlags = 0;
+    private GraphicViewerPort myFromPort = null;
+    private GraphicViewerPort myToPort = null;
+    private int myCurviness = 10;
+
     public GraphicViewerLink() {
-        cr = -1;
-        cu = null;
-        cA = 0;
-        ct = null;
-        cy = null;
-        cx = 10;
-        l();
+        init();
     }
 
-    public GraphicViewerLink(GraphicViewerPort graphicviewerport,
-            GraphicViewerPort graphicviewerport1) {
-        cr = -1;
-        cu = null;
-        cA = 0;
-        ct = null;
-        cy = null;
-        cx = 10;
-        l();
-        ct = graphicviewerport;
-        cy = graphicviewerport1;
-        if (ct != null)
-            ct.a(this);
-        if (cy != null)
-            cy.a(this);
+    public GraphicViewerLink(GraphicViewerPort paramGraphicViewerPort1,
+            GraphicViewerPort paramGraphicViewerPort2) {
+        init();
+        myFromPort = paramGraphicViewerPort1;
+        myToPort = paramGraphicViewerPort2;
+        if (myFromPort != null) {
+            myFromPort.addLink(this);
+        }
+        if (myToPort != null) {
+            myToPort.addLink(this);
+        }
         calculateStroke();
     }
 
-    private final void l() {
-        _mthfor(g() & -9 & 0xfffffbff);
-        cA = 0x10000;
+    private final void init() {
+        setInternalFlags(getInternalFlags() & -9 & 0xfffffbff);
+        myLinkFlags = 0x10000;
     }
 
     public GraphicViewerObject copyObject(
@@ -75,12 +97,12 @@ public class GraphicViewerLink extends GraphicViewerStroke
         GraphicViewerLink graphicviewerlink = (GraphicViewerLink) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerlink != null) {
-            graphicviewerlink.cr = cr;
-            graphicviewerlink.cu = cu;
-            graphicviewerlink.cA = cA;
+            graphicviewerlink.myPartID = myPartID;
+            graphicviewerlink.myUserObject = myUserObject;
+            graphicviewerlink.myLinkFlags = myLinkFlags;
             graphicviewercopyenvironment.delay(this);
-            graphicviewerlink.ct = null;
-            graphicviewerlink.cy = null;
+            graphicviewerlink.myFromPort = null;
+            graphicviewerlink.myToPort = null;
         }
         return graphicviewerlink;
     }
@@ -88,8 +110,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
     public void copyObjectDelayed(
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment,
             GraphicViewerObject graphicviewerobject) {
-        if (!(graphicviewerobject instanceof GraphicViewerLink))
+        if (!(graphicviewerobject instanceof GraphicViewerLink)) {
             return;
+        }
         GraphicViewerLink graphicviewerlink = this;
         GraphicViewerLink graphicviewerlink1 = (GraphicViewerLink) graphicviewerobject;
         GraphicViewerPort graphicviewerport = graphicviewerlink.getFromPort();
@@ -100,33 +123,38 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 && (obj1 instanceof GraphicViewerPort)) {
             GraphicViewerPort graphicviewerport2 = (GraphicViewerPort) obj;
             GraphicViewerPort graphicviewerport3 = (GraphicViewerPort) obj1;
-            graphicviewerlink1.ct = graphicviewerport2;
-            graphicviewerlink1.cy = graphicviewerport3;
-            graphicviewerport2.a(graphicviewerlink1);
-            graphicviewerport3.a(graphicviewerlink1);
-        } else if (graphicviewerlink1.getLayer() != null)
+            graphicviewerlink1.myFromPort = graphicviewerport2;
+            graphicviewerlink1.myToPort = graphicviewerport3;
+            graphicviewerport2.addLink(graphicviewerlink1);
+            graphicviewerport3.addLink(graphicviewerlink1);
+        } else if (graphicviewerlink1.getLayer() != null) {
             graphicviewerlink1.getLayer().removeObject(graphicviewerlink1);
+        }
     }
 
     public void unlink() {
         GraphicViewerLayer graphicviewerlayer = getLayer();
         if (graphicviewerlayer != null) {
             GraphicViewerPort graphicviewerport = getFromPort();
-            if (graphicviewerport != null)
-                graphicviewerport._mthif(this);
+            if (graphicviewerport != null) {
+                graphicviewerport.removeLink(this);
+            }
             graphicviewerport = getToPort();
-            if (graphicviewerport != null)
-                graphicviewerport._mthif(this);
+            if (graphicviewerport != null) {
+                graphicviewerport.removeLink(this);
+            }
             graphicviewerlayer.removeObject(this);
         } else {
             GraphicViewerView graphicviewerview = getView();
             if (graphicviewerview != null) {
                 GraphicViewerPort graphicviewerport1 = getFromPort();
-                if (graphicviewerport1 != null)
-                    graphicviewerport1._mthif(this);
+                if (graphicviewerport1 != null) {
+                    graphicviewerport1.removeLink(this);
+                }
                 graphicviewerport1 = getToPort();
-                if (graphicviewerport1 != null)
-                    graphicviewerport1._mthif(this);
+                if (graphicviewerport1 != null) {
+                    graphicviewerport1.removeLink(this);
+                }
                 graphicviewerview.removeObject(this);
             }
         }
@@ -141,43 +169,47 @@ public class GraphicViewerLink extends GraphicViewerStroke
             boolean flag = isRelinkable();
             for (int i1 = i + 1; i1 <= j - 1; i1++) {
                 Point point1 = getPoint(i1);
-                if (point1 == null)
+                if (point1 == null) {
                     continue;
+                }
                 int j1 = 100 + i1;
-                if (isOrthogonal())
-                    if (getNumPoints() < 6)
+                if (isOrthogonal()) {
+                    if (getNumPoints() < 6) {
                         j1 = -1;
-                    else if (i1 == i + 1) {
+                    } else if (i1 == i + 1) {
                         Point point2 = getPoint(i);
-                        if (point2.y == point1.y && point2.x != point1.x)
+                        if (point2.y == point1.y && point2.x != point1.x) {
                             j1 = 8;
-                        else if (point2.x == point1.x && point2.y != point1.y)
+                        } else if (point2.x == point1.x && point2.y != point1.y) {
                             j1 = 2;
-                        else if (point2.x == point1.x && point2.y == point1.y
+                        } else if (point2.x == point1.x && point2.y == point1.y
                                 && i + 2 <= j) {
                             Point point4 = getPoint(i + 2);
-                            if (point4.y == point1.y && point4.x != point1.x)
+                            if (point4.y == point1.y && point4.x != point1.x) {
                                 j1 = 2;
-                            else if (point4.x == point1.x
-                                    && point4.y != point1.y)
+                            } else if (point4.x == point1.x
+                                    && point4.y != point1.y) {
                                 j1 = 8;
+                            }
                         }
                     } else if (i1 == j - 1) {
                         Point point3 = getPoint(j);
-                        if (point1.y == point3.y && point1.x != point3.x)
+                        if (point1.y == point3.y && point1.x != point3.x) {
                             j1 = 4;
-                        else if (point1.x == point3.x && point1.y != point3.y)
+                        } else if (point1.x == point3.x && point1.y != point3.y) {
                             j1 = 6;
-                        else if (point3.x == point1.x && point3.y == point1.y
+                        } else if (point3.x == point1.x && point3.y == point1.y
                                 && j - 2 >= i) {
                             Point point5 = getPoint(j - 2);
-                            if (point5.y == point1.y && point5.x != point1.x)
+                            if (point5.y == point1.y && point5.x != point1.x) {
                                 j1 = 6;
-                            else if (point5.x == point1.x
-                                    && point5.y != point1.y)
+                            } else if (point5.x == point1.x
+                                    && point5.y != point1.y) {
                                 j1 = 4;
+                            }
                         }
                     }
+                }
                 graphicviewerselection.createResizeHandle(this, point1.x,
                         point1.y, j1, j1 != -1);
             }
@@ -206,10 +238,11 @@ public class GraphicViewerLink extends GraphicViewerStroke
         if (graphicviewerport != null) {
             if (isDefaultResizingRelinks()) {
                 GraphicViewerLink graphicviewerlink = this;
-                if (graphicviewerlink.getFromPort() == graphicviewerport)
+                if (graphicviewerlink.getFromPort() == graphicviewerport) {
                     graphicviewerlink.setToPort(null);
-                else if (graphicviewerlink.getToPort() == graphicviewerport)
+                } else if (graphicviewerlink.getToPort() == graphicviewerport) {
                     graphicviewerlink.setFromPort(null);
+                }
                 graphicviewerview.startReLink(graphicviewerlink,
                         graphicviewerport1, point);
             } else {
@@ -244,8 +277,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 case 5 : // '\005'
                 case 7 : // '\007'
                 default :
-                    if (i < 100)
+                    if (i < 100) {
                         break;
+                    }
                     int i2 = i - 100;
                     Point point1 = getPoint(i2);
                     if (isOrthogonal()) {
@@ -267,8 +301,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     }
                     setPoint(i2, point);
                     int j2 = getNumPoints();
-                    if (j2 < 3)
+                    if (j2 < 3) {
                         break;
+                    }
                     if (i2 == 1 && getFromPort() != null) {
                         Point point4 = new Point(0, 0);
                         setPoint(
@@ -295,153 +330,176 @@ public class GraphicViewerLink extends GraphicViewerStroke
             GraphicViewerObject graphicviewerobject) {
         super.ownerChange(graphicviewerobjectcollection,
                 graphicviewerobjectcollection1, graphicviewerobject);
-        if (graphicviewerobjectcollection1 == null && !k()
+        if (graphicviewerobjectcollection1 == null && !isNoClearPorts()
                 && !isChildOf(graphicviewerobject)) {
             GraphicViewerPort graphicviewerport = getFromPort();
-            if (graphicviewerport != null)
-                graphicviewerport._mthif(this);
+            if (graphicviewerport != null) {
+                graphicviewerport.removeLink(this);
+            }
             graphicviewerport = getToPort();
-            if (graphicviewerport != null)
-                graphicviewerport._mthif(this);
+            if (graphicviewerport != null) {
+                graphicviewerport.removeLink(this);
+            }
         }
     }
 
-    void _mthfor(boolean flag) {
-        int i = cA;
-        if (flag)
+    void setNoClearPorts(boolean flag) {
+        int i = myLinkFlags;
+        if (flag) {
             i |= 0x80000;
-        else
+        } else {
             i &= 0xfff7ffff;
-        cA = i;
+        }
+        myLinkFlags = i;
     }
 
-    boolean k() {
-        return (cA & 0x80000) != 0;
+    boolean isNoClearPorts() {
+        return (myLinkFlags & 0x80000) != 0;
     }
 
     public void portChange(GraphicViewerPort graphicviewerport, int i, int j,
             Object obj) {
-        if (i != 301 && i != 302 && i != 0)
+        if (i != 301 && i != 302 && i != 0) {
             if (graphicviewerport != null && graphicviewerport == getFromPort()
                     && getNumPoints() > 0) {
                 Point point = new Point(0, 0);
                 point = graphicviewerport.getFromLinkPoint(this, point);
                 Point point2 = getPoint(0);
                 if (Math.abs(point.x - point2.x) > 1
-                        || Math.abs(point.y - point2.y) > 1)
+                        || Math.abs(point.y - point2.y) > 1) {
                     calculateStroke();
+                }
             } else if (graphicviewerport != null
                     && graphicviewerport == getToPort() && getNumPoints() >= 2) {
                 Point point1 = new Point(0, 0);
                 point1 = graphicviewerport.getToLinkPoint(this, point1);
                 Point point3 = getPoint(getNumPoints() - 1);
                 if (Math.abs(point1.x - point3.x) > 1
-                        || Math.abs(point1.y - point3.y) > 1)
+                        || Math.abs(point1.y - point3.y) > 1) {
                     calculateStroke();
+                }
             } else {
                 calculateStroke();
             }
+        }
     }
 
     public int getFirstPickPoint() {
         GraphicViewerPort graphicviewerport = getFromPort();
-        if (graphicviewerport == null)
+        if (graphicviewerport == null) {
             return 0;
+        }
         int i = getNumPoints();
-        if (i <= 2)
+        if (i <= 2) {
             return 0;
+        }
         return graphicviewerport.getFromSpot() == -1 && !isOrthogonal() ? 0 : 1;
     }
 
     public int getLastPickPoint() {
         int i = getNumPoints();
-        if (i == 0)
+        if (i == 0) {
             return 0;
+        }
         GraphicViewerPort graphicviewerport = getToPort();
-        if (graphicviewerport == null)
+        if (graphicviewerport == null) {
             return i - 1;
-        if (i <= 2)
+        }
+        if (i <= 2) {
             return i - 1;
-        if (graphicviewerport.getToSpot() != -1 || isOrthogonal())
+        }
+        if (graphicviewerport.getToSpot() != -1 || isOrthogonal()) {
             return i - 2;
-        else
+        } else {
             return i - 1;
+        }
     }
 
     public GraphicViewerPort getFromPort() {
-        return ct;
+        return myFromPort;
     }
 
     public GraphicViewerPort getToPort() {
-        return cy;
+        return myToPort;
     }
 
     public void setFromPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = ct;
+        GraphicViewerPort graphicviewerport1 = myFromPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
-                graphicviewerport1._mthif(this);
-            ct = graphicviewerport;
-            if (ct != null)
-                ct.a(this);
+            if (graphicviewerport1 != null) {
+                graphicviewerport1.removeLink(this);
+            }
+            myFromPort = graphicviewerport;
+            if (myFromPort != null) {
+                myFromPort.addLink(this);
+            }
             removeAllPoints();
             calculateStroke();
             update(201, 0, graphicviewerport1);
         }
     }
 
-    private void _mthif(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = ct;
+    private void setFromPortNoCalc(GraphicViewerPort graphicviewerport) {
+        GraphicViewerPort graphicviewerport1 = myFromPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
-                graphicviewerport1._mthif(this);
-            ct = graphicviewerport;
-            if (ct != null)
-                ct.a(this);
+            if (graphicviewerport1 != null) {
+                graphicviewerport1.removeLink(this);
+            }
+            myFromPort = graphicviewerport;
+            if (myFromPort != null) {
+                myFromPort.addLink(this);
+            }
             update(201, 0, graphicviewerport1);
         }
     }
 
     public void setToPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = cy;
+        GraphicViewerPort graphicviewerport1 = myToPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
-                graphicviewerport1._mthif(this);
-            cy = graphicviewerport;
-            if (cy != null)
-                cy.a(this);
+            if (graphicviewerport1 != null) {
+                graphicviewerport1.removeLink(this);
+            }
+            myToPort = graphicviewerport;
+            if (myToPort != null) {
+                myToPort.addLink(this);
+            }
             removeAllPoints();
             calculateStroke();
             update(202, 0, graphicviewerport1);
         }
     }
 
-    private void a(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = cy;
+    private void setToPortNoCalc(GraphicViewerPort graphicviewerport) {
+        GraphicViewerPort graphicviewerport1 = myToPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
-                graphicviewerport1._mthif(this);
-            cy = graphicviewerport;
-            if (cy != null)
-                cy.a(this);
+            if (graphicviewerport1 != null) {
+                graphicviewerport1.removeLink(this);
+            }
+            myToPort = graphicviewerport;
+            if (myToPort != null) {
+                myToPort.addLink(this);
+            }
             update(202, 0, graphicviewerport1);
         }
     }
 
     public GraphicViewerPort getOtherPort(GraphicViewerPort graphicviewerport) {
-        if (getFromPort() == graphicviewerport)
+        if (getFromPort() == graphicviewerport) {
             return getToPort();
-        if (getToPort() == graphicviewerport)
+        }
+        if (getToPort() == graphicviewerport) {
             return getFromPort();
-        else
+        } else {
             return null;
+        }
     }
 
     public boolean isCubic() {
-        if (isSelfLoop() && !isOrthogonal())
+        if (isSelfLoop() && !isOrthogonal()) {
             return true;
-        else
+        } else {
             return super.isCubic();
+        }
     }
 
     public boolean isSelfLoop() {
@@ -449,13 +507,13 @@ public class GraphicViewerLink extends GraphicViewerStroke
     }
 
     public int getCurviness() {
-        return cx;
+        return myCurviness;
     }
 
     public void setCurviness(int i) {
-        int j = cx;
+        int j = myCurviness;
         if (j != i) {
-            cx = i;
+            myCurviness = i;
             update(207, i, null);
         }
     }
@@ -463,10 +521,12 @@ public class GraphicViewerLink extends GraphicViewerStroke
     public void calculateStroke() {
         GraphicViewerPort graphicviewerport = getFromPort();
         GraphicViewerPort graphicviewerport1 = getToPort();
-        if (graphicviewerport == null)
+        if (graphicviewerport == null) {
             return;
-        if (graphicviewerport1 == null)
+        }
+        if (graphicviewerport1 == null) {
             return;
+        }
         int i = getNumPoints();
         int j = graphicviewerport.getFromSpot();
         int i1 = graphicviewerport1.getToSpot();
@@ -476,8 +536,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
         boolean flag3 = getAdjustingStyle() == 0;
         int j1 = getCurviness();
         boolean flag4 = isSuspendUpdates();
-        if (!flag4)
+        if (!flag4) {
             foredate(110);
+        }
         setSuspendUpdates(true);
         if (!flag1 && j == -1 && i1 == -1 && !flag) {
             boolean flag5 = false;
@@ -495,11 +556,13 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 int i3 = point1.y;
                 flag5 = adjustPoints(0, i2, j2, i - 1, k2, i3);
             }
-            if (!flag5)
-                if (flag2)
-                    _mthif(graphicviewerport, graphicviewerport1);
-                else
-                    a(graphicviewerport, graphicviewerport1);
+            if (!flag5) {
+                if (flag2) {
+                    calculateBezierNoSpot(graphicviewerport, graphicviewerport1);
+                } else {
+                    calculateLineNoSpot(graphicviewerport, graphicviewerport1);
+                }
+            }
         } else {
             Point point = new Point(0, 0);
             point = graphicviewerport.getFromLinkPoint(this, point);
@@ -509,41 +572,46 @@ public class GraphicViewerLink extends GraphicViewerStroke
             if (flag1 || j != -1 || flag) {
                 int l2 = graphicviewerport.getEndSegmentLength();
                 d = graphicviewerport.getFromLinkDir(this);
-                if (flag)
+                if (flag) {
                     if (flag1) {
-                        if (d == 0.0D)
+                        if (d == 0.0D) {
                             d = 4.7123889803846897D;
-                        else if (d == 1.5707963267948966D)
+                        } else if (d == 1.5707963267948966D) {
                             d = 0.0D;
-                        else if (d == 3.1415926535897931D)
+                        } else if (d == 3.1415926535897931D) {
                             d = 1.5707963267948966D;
-                        else if (d == 4.7123889803846897D)
+                        } else if (d == 4.7123889803846897D) {
                             d = 3.1415926535897931D;
+                        }
                     } else {
                         d -= 0.5D;
-                        if (j1 < 0)
+                        if (j1 < 0) {
                             d -= 3.1415926535897931D;
+                        }
                     }
+                }
                 if (flag2 && i >= 4) {
                     l2 += 15;
-                    if (flag)
+                    if (flag) {
                         l2 += Math.abs(j1);
+                    }
                 }
-                if (d == 0.0D)
+                if (d == 0.0D) {
                     k1 = l2;
-                else if (d == 1.5707963267948966D)
+                } else if (d == 1.5707963267948966D) {
                     l1 = l2;
-                else if (d == 3.1415926535897931D)
+                } else if (d == 3.1415926535897931D) {
                     k1 = -l2;
-                else if (d == 4.7123889803846897D) {
+                } else if (d == 4.7123889803846897D) {
                     l1 = -l2;
                 } else {
                     k1 = (int) Math.rint((double) l2 * Math.cos(d));
                     l1 = (int) Math.rint((double) l2 * Math.sin(d));
                 }
-                if (j == -1 && flag)
+                if (j == -1 && flag) {
                     point = graphicviewerport.getLinkPointFromPoint(point.x
                             + k1 * 1000, point.y + l1 * 1000, point);
+                }
             }
             Point point3 = new Point(0, 0);
             point3 = graphicviewerport1.getToLinkPoint(this, point3);
@@ -555,42 +623,47 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 d1 = graphicviewerport1.getToLinkDir(this);
                 if (flag && !flag1) {
                     d1 += 0.5D;
-                    if (j1 < 0)
+                    if (j1 < 0) {
                         d1 += 3.1415926535897931D;
+                    }
                 }
                 if (flag2 && i >= 4) {
                     l3 += 15;
-                    if (flag)
+                    if (flag) {
                         l3 += Math.abs(j1);
+                    }
                 }
-                if (d1 == 0.0D)
+                if (d1 == 0.0D) {
                     j3 = l3;
-                else if (d1 == 1.5707963267948966D)
+                } else if (d1 == 1.5707963267948966D) {
                     k3 = l3;
-                else if (d1 == 3.1415926535897931D)
+                } else if (d1 == 3.1415926535897931D) {
                     j3 = -l3;
-                else if (d1 == 4.7123889803846897D) {
+                } else if (d1 == 4.7123889803846897D) {
                     k3 = -l3;
                 } else {
                     j3 = (int) Math.rint((double) l3 * Math.cos(d1));
                     k3 = (int) Math.rint((double) l3 * Math.sin(d1));
                 }
-                if (i1 == -1 && flag)
+                if (i1 == -1 && flag) {
                     point3 = graphicviewerport1.getLinkPointFromPoint(point3.x
                             + j3 * 1000, point3.y + k3 * 1000, point3);
+                }
             }
-            if (flag1 || flag)
+            if (flag1 || flag) {
                 point = graphicviewerport.getLinkPointFromPoint(point.x + k1
                         * 1000, point.y + l1 * 1000, point);
-            else if (j == -1)
+            } else if (j == -1) {
                 point = graphicviewerport.getLinkPointFromPoint(point3.x + j3,
                         point3.y + k3, point);
-            if (flag1 || flag)
+            }
+            if (flag1 || flag) {
                 point3 = graphicviewerport1.getLinkPointFromPoint(point3.x + j3
                         * 1000, point3.y + k3 * 1000, point3);
-            else if (i1 == -1)
+            } else if (i1 == -1) {
                 point3 = graphicviewerport1.getLinkPointFromPoint(point.x + k1,
                         point.y + l1, point3);
+            }
             int i4 = point.x;
             int j4 = point.y;
             if (flag1 || j != -1 || flag) {
@@ -604,12 +677,12 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 l4 += k3;
             }
             if (!flag3 && !flag1 && j == -1 && i > 3
-                    && adjustPoints(0, point.x, point.y, i - 2, k4, l4))
+                    && adjustPoints(0, point.x, point.y, i - 2, k4, l4)) {
                 setPoint(i - 1, point3);
-            else if (!flag3 && !flag1 && i1 == -1 && i > 3
-                    && adjustPoints(1, i4, j4, i - 1, point3.x, point3.y))
+            } else if (!flag3 && !flag1 && i1 == -1 && i > 3
+                    && adjustPoints(1, i4, j4, i - 1, point3.x, point3.y)) {
                 setPoint(0, point);
-            else if (!flag3 && !flag1 && i > 4
+            } else if (!flag3 && !flag1 && i > 4
                     && adjustPoints(1, i4, j4, i - 2, k4, l4)) {
                 setPoint(0, point);
                 setPoint(i - 1, point3);
@@ -620,22 +693,26 @@ public class GraphicViewerLink extends GraphicViewerStroke
             } else {
                 removeAllPoints();
                 addPoint(point);
-                if (flag1 || j != -1 || flag)
+                if (flag1 || j != -1 || flag) {
                     addPoint(i4, j4);
-                if (flag1)
+                }
+                if (flag1) {
                     addOrthoPoints(i4, j4, d, k4, l4, d1);
-                if (flag1 || i1 != -1 || flag)
+                }
+                if (flag1 || i1 != -1 || flag) {
                     addPoint(k4, l4);
+                }
                 addPoint(point3);
             }
         }
         setBoundingRectInvalid(true);
         setSuspendUpdates(flag4);
-        if (!flag4)
+        if (!flag4) {
             update(110, 0, null);
+        }
     }
 
-    private void a(GraphicViewerPort graphicviewerport,
+    private void calculateLineNoSpot(GraphicViewerPort graphicviewerport,
             GraphicViewerPort graphicviewerport1) {
         removeAllPoints();
         Point point = new Point(0, 0);
@@ -656,7 +733,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
         addPoint(i1, j1);
     }
 
-    private void _mthif(GraphicViewerPort graphicviewerport,
+    private void calculateBezierNoSpot(GraphicViewerPort graphicviewerport,
             GraphicViewerPort graphicviewerport1) {
         removeAllPoints();
         Point point = new Point(0, 0);
@@ -677,8 +754,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d1 = j1 - j;
         double d3 = getCurviness();
         double d4 = Math.abs(d3);
-        if (d3 < 0.0D)
+        if (d3 < 0.0D) {
             d4 = -d4;
+        }
         double d5 = 0.0D;
         double d6 = 0.0D;
         double d7 = (double) i + d / 3D;
@@ -686,15 +764,17 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d9 = d7;
         double d10 = d8;
         if (Math.abs(d1) < 1.0D) {
-            if (d > 0.0D)
+            if (d > 0.0D) {
                 d10 -= d4;
-            else
+            } else {
                 d10 += d4;
+            }
         } else {
             d5 = -d / d1;
             d6 = Math.sqrt((d4 * d4) / (d5 * d5 + 1.0D));
-            if (d3 < 0.0D)
+            if (d3 < 0.0D) {
                 d6 = -d6;
+            }
             d9 = (double) (d1 >= 0.0D ? 1 : -1) * d6 + d7;
             d10 = d5 * (d9 - d7) + d8;
         }
@@ -703,10 +783,11 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d11 = d7;
         double d12 = d8;
         if (Math.abs(d1) < 1.0D) {
-            if (d > 0.0D)
+            if (d > 0.0D) {
                 d12 -= d4;
-            else
+            } else {
                 d12 += d4;
+            }
         } else {
             d11 = (double) (d1 >= 0.0D ? 1 : -1) * d6 + d7;
             d12 = d5 * (d11 - d7) + d8;
@@ -726,10 +807,12 @@ public class GraphicViewerLink extends GraphicViewerStroke
     protected boolean adjustPoints(int i, int j, int i1, int j1, int k1, int l1) {
         int i2 = getAdjustingStyle();
         if (isOrthogonal()) {
-            if (i2 == 1)
+            if (i2 == 1) {
                 return false;
-            if (i2 == 2)
+            }
+            if (i2 == 2) {
                 i2 = 3;
+            }
         }
         switch (i2) {
             case 1 : // '\001'
@@ -747,8 +830,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
     protected boolean rescalePoints(int i, int j, int i1, int j1, int k1, int l1) {
         Point point = getPoint(i);
         Point point1 = getPoint(j1);
-        if (point.x == j && point.y == i1 && point1.x == k1 && point1.y == l1)
+        if (point.x == j && point.y == i1 && point1.x == k1 && point1.y == l1) {
             return true;
+        }
         double d = point.x;
         double d1 = point.y;
         double d2 = point1.x;
@@ -756,18 +840,21 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d4 = d2 - d;
         double d6 = d3 - d1;
         double d8 = Math.sqrt(d4 * d4 + d6 * d6);
-        if (d8 < 1.0D)
+        if (d8 < 1.0D) {
             d8 = 1.0D;
+        }
         double d9;
         if (d4 == 0.0D) {
-            if (d6 < 0.0D)
+            if (d6 < 0.0D) {
                 d9 = -1.5707963267948966D;
-            else
+            } else {
                 d9 = 1.5707963267948966D;
+            }
         } else {
             d9 = Math.atan(d6 / Math.abs(d4));
-            if (d4 < 0.0D)
+            if (d4 < 0.0D) {
                 d9 = 3.1415926535897931D - d9;
+            }
         }
         double d10 = j;
         double d11 = i1;
@@ -778,14 +865,16 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d16 = Math.sqrt(d14 * d14 + d15 * d15);
         double d17;
         if (d14 == 0.0D) {
-            if (d15 < 0.0D)
+            if (d15 < 0.0D) {
                 d17 = -1.5707963267948966D;
-            else
+            } else {
                 d17 = 1.5707963267948966D;
+            }
         } else {
             d17 = Math.atan(d15 / Math.abs(d14));
-            if (d14 < 0.0D)
+            if (d14 < 0.0D) {
                 d17 = 3.1415926535897931D - d17;
+            }
         }
         double d18 = d16 / d8;
         double d19 = d17 - d9;
@@ -795,18 +884,21 @@ public class GraphicViewerLink extends GraphicViewerStroke
             double d5 = (double) point2.x - d;
             double d7 = (double) point2.y - d1;
             double d20 = Math.sqrt(d5 * d5 + d7 * d7);
-            if (d20 < 1.0D)
+            if (d20 < 1.0D) {
                 d20 = 1.0D;
+            }
             double d21;
             if (d5 == 0.0D) {
-                if (d7 < 0.0D)
+                if (d7 < 0.0D) {
                     d21 = -1.5707963267948966D;
-                else
+                } else {
                     d21 = 1.5707963267948966D;
+                }
             } else {
                 d21 = Math.atan(d7 / Math.abs(d5));
-                if (d5 < 0.0D)
+                if (d5 < 0.0D) {
                     d21 = 3.1415926535897931D - d21;
+                }
             }
             double d22 = d21 + d19;
             double d23 = d20 * d18;
@@ -822,8 +914,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
     protected boolean stretchPoints(int i, int j, int i1, int j1, int k1, int l1) {
         Point point = getPoint(i);
         Point point1 = getPoint(j1);
-        if (point.x == j && point.y == i1 && point1.x == k1 && point1.y == l1)
+        if (point.x == j && point.y == i1 && point1.x == k1 && point1.y == l1) {
             return true;
+        }
         double d = point.x;
         double d1 = point.y;
         double d2 = point1.x;
@@ -835,28 +928,33 @@ public class GraphicViewerLink extends GraphicViewerStroke
         double d8 = l1;
         double d9 = 0.0D;
         double d10 = 1.0D;
-        if (d7 - d5 != 0.0D)
+        if (d7 - d5 != 0.0D) {
             d9 = (d8 - d6) / (d7 - d5);
-        else
+        } else {
             d9 = 9900000000D;
-        if (d9 != 0.0D)
+        }
+        if (d9 != 0.0D) {
             d10 = Math.sqrt(1.0D + 1.0D / (d9 * d9));
+        }
         setPoint(i, j, i1);
         for (int i2 = i + 1; i2 < j1; i2++) {
             Point point2 = getPoint(i2);
             double d11 = point2.x;
             double d12 = point2.y;
             double d13 = 0.5D;
-            if (d4 != 0.0D)
+            if (d4 != 0.0D) {
                 d13 = ((d - d11) * (d - d2) + (d1 - d12) * (d1 - d3)) / d4;
+            }
             double d14 = d + d13 * (d2 - d);
             double d15 = d1 + d13 * (d3 - d1);
             double d16 = Math.sqrt((d11 - d14) * (d11 - d14) + (d12 - d15)
                     * (d12 - d15));
-            if (d12 < d9 * (d11 - d14) + d15)
+            if (d12 < d9 * (d11 - d14) + d15) {
                 d16 = -d16;
-            if (d9 > 0.0D)
+            }
+            if (d9 > 0.0D) {
                 d16 = -d16;
+            }
             double d17 = d5 + d13 * (d7 - d5);
             double d18 = d6 + d13 * (d8 - d6);
             if (d9 != 0.0D) {
@@ -877,16 +975,18 @@ public class GraphicViewerLink extends GraphicViewerStroke
         if (isOrthogonal()) {
             Point point = getPoint(i + 1);
             Point point1 = getPoint(i + 2);
-            if (point.x == point1.x && point.y != point1.y)
+            if (point.x == point1.x && point.y != point1.y) {
                 setPoint(i + 1, point.x, i1);
-            else if (point.y == point1.y)
+            } else if (point.y == point1.y) {
                 setPoint(i + 1, j, point.y);
+            }
             point = getPoint(j1 - 1);
             point1 = getPoint(j1 - 2);
-            if (point.x == point1.x && point.y != point1.y)
+            if (point.x == point1.x && point.y != point1.y) {
                 setPoint(j1 - 1, point.x, l1);
-            else if (point.y == point1.y)
+            } else if (point.y == point1.y) {
                 setPoint(j1 - 1, k1, point.y);
+            }
         }
         setPoint(i, j, i1);
         setPoint(j1, k1, l1);
@@ -896,11 +996,13 @@ public class GraphicViewerLink extends GraphicViewerStroke
     protected void addOrthoPoints(int i, int j, double d, int i1, int j1,
             double d1) {
         if (d != 0.0D && d != 1.5707963267948966D && d != 3.1415926535897931D
-                && d != 4.7123889803846897D)
+                && d != 4.7123889803846897D) {
             return;
+        }
         if (d1 != 0.0D && d1 != 1.5707963267948966D
-                && d1 != 3.1415926535897931D && d1 != 4.7123889803846897D)
+                && d1 != 3.1415926535897931D && d1 != 4.7123889803846897D) {
             return;
+        }
         int k1 = i;
         int l1 = j;
         int i2 = i1;
@@ -926,7 +1028,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
         rectangle2.height += k2 * 2;
         if (isAvoidsNodes() && getDocument() != null) {
             GraphicViewerPositionArray graphicviewerpositionarray = getDocument()
-                    .E();
+                    .getPositions();
             int i3 = Math.min(rectangle1.x, rectangle2.x);
             int k3 = Math.min(rectangle1.y, rectangle2.y);
             int i4 = Math.max(rectangle1.x + rectangle1.width, rectangle2.x
@@ -947,7 +1049,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
             }
             if (l4 < 0x7fffffff
                     && !graphicviewerpositionarray.isOccupied(i1, j1)) {
-                a(graphicviewerpositionarray, i1, j1, d1, true);
+                traversePositions(graphicviewerpositionarray, i1, j1, d1, true);
                 Point point = getPoint(2);
                 if (getNumPoints() < 4) {
                     if (d == 0.0D || d == 3.1415926535897931D) {
@@ -978,7 +1080,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
                             setPoint(2, i, point.y);
                         }
                     } else if (d == 1.5707963267948966D
-                            || d == 4.7123889803846897D)
+                            || d == 4.7123889803846897D) {
                         if (point.y == point1.y) {
                             int j5 = d != 1.5707963267948966D ? Math.min(
                                     point.y, j) : Math.max(point.y, j);
@@ -994,6 +1096,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
                         } else {
                             setPoint(2, point.x, j);
                         }
+                    }
                 }
                 return;
             }
@@ -1017,21 +1120,23 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     j4 = j2;
                 } else if (d1 == 4.7123889803846897D && j2 < l1
                         || d1 == 1.5707963267948966D && j2 >= l1) {
-                    if (k1 < rectangle2.x)
+                    if (k1 < rectangle2.x) {
                         l2 = getMidOrthoPosition(k1, rectangle2.x, false);
-                    else if (k1 < i2 && l1 < rectangle2.y + rectangle2.height)
+                    } else if (k1 < i2 && l1 < rectangle2.y + rectangle2.height) {
                         l2 = getMidOrthoPosition(k1, i2, false);
-                    else
+                    } else {
                         l2 = rectangle2.x + rectangle2.width;
+                    }
                     l3 = l2;
                     j4 = j2;
                 } else if (d1 == 0.0D && j3 > rectangle2.y
                         && j3 < rectangle2.y + rectangle2.height) {
                     l2 = k1;
-                    if (l1 < j2)
+                    if (l1 < j2) {
                         j3 = Math.min(j2, rectangle2.y);
-                    else
+                    } else {
                         j3 = Math.max(j2, rectangle2.y + rectangle2.height);
+                    }
                     j4 = j3;
                 }
             } else {
@@ -1043,19 +1148,20 @@ public class GraphicViewerLink extends GraphicViewerStroke
                         && j2 < rectangle1.y || d1 == 4.7123889803846897D
                         && j2 > rectangle1.y + rectangle1.height) {
                     if (j2 < l1
-                            && (d1 == 3.1415926535897931D || d1 == 1.5707963267948966D))
+                            && (d1 == 3.1415926535897931D || d1 == 1.5707963267948966D)) {
                         j3 = getMidOrthoPosition(rectangle1.y,
                                 Math.max(j2, rectangle2.y + rectangle2.height),
                                 true);
-                    else if (j2 >= l1
-                            && (d1 == 3.1415926535897931D || d1 == 4.7123889803846897D))
+                    } else if (j2 >= l1
+                            && (d1 == 3.1415926535897931D || d1 == 4.7123889803846897D)) {
                         j3 = getMidOrthoPosition(rectangle1.y
                                 + rectangle1.height,
                                 Math.min(j2, rectangle2.y), true);
+                    }
                     l3 = i2;
                     j4 = j3;
                 }
-                if (j3 > rectangle1.y && j3 < rectangle1.y + rectangle1.height)
+                if (j3 > rectangle1.y && j3 < rectangle1.y + rectangle1.height) {
                     if (i2 >= rectangle1.x && i2 <= k1
                             || k1 <= rectangle2.x + rectangle2.width
                             && k1 >= i2) {
@@ -1074,15 +1180,17 @@ public class GraphicViewerLink extends GraphicViewerStroke
                         l3 = i2;
                         if (d1 == 4.7123889803846897D
                                 || (d1 == 0.0D || d1 == 3.1415926535897931D)
-                                && j2 < l1)
+                                && j2 < l1) {
                             j3 = Math.min(j2,
                                     Math.min(rectangle1.y, rectangle2.y));
-                        else
+                        } else {
                             j3 = Math.max(j2, Math.max(rectangle1.y
                                     + rectangle1.height, rectangle2.y
                                     + rectangle2.height));
+                        }
                         j4 = j3;
                     }
+                }
             }
         } else if (d == 3.1415926535897931D) {
             if (i2 <= k1 || d1 == 4.7123889803846897D && j2 < l1
@@ -1098,23 +1206,25 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     j4 = j2;
                 } else if (d1 == 4.7123889803846897D && j2 < l1
                         || d1 == 1.5707963267948966D && j2 >= l1) {
-                    if (k1 > rectangle2.x + rectangle2.width)
+                    if (k1 > rectangle2.x + rectangle2.width) {
                         l2 = getMidOrthoPosition(k1, rectangle2.x
                                 + rectangle2.width, false);
-                    else if (k1 > i2 && l1 < rectangle2.y + rectangle2.height)
+                    } else if (k1 > i2 && l1 < rectangle2.y + rectangle2.height) {
                         l2 = getMidOrthoPosition(k1, i2, false);
-                    else
+                    } else {
                         l2 = rectangle2.x;
+                    }
                     l3 = l2;
                     j4 = j2;
                 }
                 if (d1 == 3.1415926535897931D && j3 > rectangle2.y
                         && j3 < rectangle2.y + rectangle2.height) {
                     l2 = k1;
-                    if (l1 < j2)
+                    if (l1 < j2) {
                         j3 = Math.min(j2, rectangle2.y);
-                    else
+                    } else {
                         j3 = Math.max(j2, rectangle2.y + rectangle2.height);
+                    }
                     j4 = j3;
                 }
             } else {
@@ -1125,19 +1235,20 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 if (d1 == 0.0D || d1 == 1.5707963267948966D
                         && j2 < rectangle1.y || d1 == 4.7123889803846897D
                         && j2 > rectangle1.y + rectangle1.height) {
-                    if (j2 < l1 && (d1 == 0.0D || d1 == 1.5707963267948966D))
+                    if (j2 < l1 && (d1 == 0.0D || d1 == 1.5707963267948966D)) {
                         j3 = getMidOrthoPosition(rectangle1.y,
                                 Math.max(j2, rectangle2.y + rectangle2.height),
                                 true);
-                    else if (j2 >= l1
-                            && (d1 == 0.0D || d1 == 4.7123889803846897D))
+                    } else if (j2 >= l1
+                            && (d1 == 0.0D || d1 == 4.7123889803846897D)) {
                         j3 = getMidOrthoPosition(rectangle1.y
                                 + rectangle1.height,
                                 Math.min(j2, rectangle2.y), true);
+                    }
                     l3 = i2;
                     j4 = j3;
                 }
-                if (j3 > rectangle1.y && j3 < rectangle1.y + rectangle1.height)
+                if (j3 > rectangle1.y && j3 < rectangle1.y + rectangle1.height) {
                     if (i2 >= rectangle1.x && i2 <= k1
                             || k1 <= rectangle2.x + rectangle2.width
                             && k1 >= i2) {
@@ -1156,15 +1267,17 @@ public class GraphicViewerLink extends GraphicViewerStroke
                         l3 = i2;
                         if (d1 == 4.7123889803846897D
                                 || (d1 == 0.0D || d1 == 3.1415926535897931D)
-                                && j2 < l1)
+                                && j2 < l1) {
                             j3 = Math.min(j2,
                                     Math.min(rectangle1.y, rectangle2.y));
-                        else
+                        } else {
                             j3 = Math.max(j2, Math.max(rectangle1.y
                                     + rectangle1.height, rectangle2.y
                                     + rectangle2.height));
+                        }
                         j4 = j3;
                     }
+                }
             }
         } else if (d == 1.5707963267948966D) {
             if (j2 > l1 || d1 == 3.1415926535897931D && i2 < k1
@@ -1180,21 +1293,23 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     j4 = j3;
                 } else if (d1 == 3.1415926535897931D && i2 < k1 || d1 == 0.0D
                         && i2 >= k1) {
-                    if (l1 < rectangle2.y)
+                    if (l1 < rectangle2.y) {
                         j3 = getMidOrthoPosition(l1, rectangle2.y, true);
-                    else if (l1 < j2 && k1 < rectangle2.x + rectangle2.width)
+                    } else if (l1 < j2 && k1 < rectangle2.x + rectangle2.width) {
                         j3 = getMidOrthoPosition(l1, j2, true);
-                    else
+                    } else {
                         j3 = rectangle2.y + rectangle2.height;
+                    }
                     l3 = i2;
                     j4 = j3;
                 }
                 if (d1 == 1.5707963267948966D && l2 > rectangle2.x
                         && l2 < rectangle2.x + rectangle2.width) {
-                    if (k1 < i2)
+                    if (k1 < i2) {
                         l2 = Math.min(i2, rectangle2.x);
-                    else
+                    } else {
                         l2 = Math.max(i2, rectangle2.x + rectangle2.width);
+                    }
                     j3 = l1;
                     l3 = l2;
                 }
@@ -1206,19 +1321,20 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 if (d1 == 4.7123889803846897D || d1 == 0.0D
                         && i2 < rectangle1.x || d1 == 3.1415926535897931D
                         && i2 > rectangle1.x + rectangle1.width) {
-                    if (i2 < k1 && (d1 == 4.7123889803846897D || d1 == 0.0D))
+                    if (i2 < k1 && (d1 == 4.7123889803846897D || d1 == 0.0D)) {
                         l2 = getMidOrthoPosition(rectangle1.x,
                                 Math.max(i2, rectangle2.x + rectangle2.width),
                                 false);
-                    else if (i2 >= k1
-                            && (d1 == 4.7123889803846897D || d1 == 3.1415926535897931D))
+                    } else if (i2 >= k1
+                            && (d1 == 4.7123889803846897D || d1 == 3.1415926535897931D)) {
                         l2 = getMidOrthoPosition(rectangle1.x
                                 + rectangle1.width, Math.min(i2, rectangle2.x),
                                 false);
+                    }
                     l3 = l2;
                     j4 = j2;
                 }
-                if (l2 > rectangle1.x && l2 < rectangle1.x + rectangle1.width)
+                if (l2 > rectangle1.x && l2 < rectangle1.x + rectangle1.width) {
                     if (j2 >= rectangle1.y && j2 <= l1
                             || l1 <= rectangle2.y + rectangle2.height
                             && l1 >= j2) {
@@ -1236,16 +1352,18 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     } else {
                         if (d1 == 3.1415926535897931D
                                 || (d1 == 1.5707963267948966D || d1 == 4.7123889803846897D)
-                                && i2 < k1)
+                                && i2 < k1) {
                             l2 = Math.min(i2,
                                     Math.min(rectangle1.x, rectangle2.x));
-                        else
+                        } else {
                             l2 = Math.max(i2, Math.max(rectangle1.x
                                     + rectangle1.width, rectangle2.x
                                     + rectangle2.width));
+                        }
                         l3 = l2;
                         j4 = j2;
                     }
+                }
             }
         } else if (j2 <= l1 || d1 == 3.1415926535897931D && i2 < k1
                 && rectangle2.y < l1 || d1 == 0.0D && i2 > k1
@@ -1260,22 +1378,24 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 j4 = j3;
             } else if (d1 == 3.1415926535897931D && i2 < k1 || d1 == 0.0D
                     && i2 >= k1) {
-                if (l1 > rectangle2.y + rectangle2.height)
+                if (l1 > rectangle2.y + rectangle2.height) {
                     j3 = getMidOrthoPosition(l1, rectangle2.y
                             + rectangle2.height, true);
-                else if (l1 > j2 && k1 < rectangle2.x + rectangle2.width)
+                } else if (l1 > j2 && k1 < rectangle2.x + rectangle2.width) {
                     j3 = getMidOrthoPosition(l1, j2, true);
-                else
+                } else {
                     j3 = rectangle2.y;
+                }
                 l3 = i2;
                 j4 = j3;
             }
             if (d1 == 4.7123889803846897D && l2 > rectangle2.x
                     && l2 < rectangle2.x + rectangle2.width) {
-                if (k1 < i2)
+                if (k1 < i2) {
                     l2 = Math.min(i2, rectangle2.x);
-                else
+                } else {
                     l2 = Math.max(i2, rectangle2.x + rectangle2.width);
+                }
                 j3 = l1;
                 l3 = l2;
             }
@@ -1287,18 +1407,19 @@ public class GraphicViewerLink extends GraphicViewerStroke
             if (d1 == 1.5707963267948966D || d1 == 0.0D && i2 < rectangle1.x
                     || d1 == 3.1415926535897931D
                     && i2 > rectangle1.x + rectangle1.width) {
-                if (i2 < k1 && (d1 == 1.5707963267948966D || d1 == 0.0D))
+                if (i2 < k1 && (d1 == 1.5707963267948966D || d1 == 0.0D)) {
                     l2 = getMidOrthoPosition(rectangle1.x,
                             Math.max(i2, rectangle2.x + rectangle2.width),
                             false);
-                else if (i2 >= k1
-                        && (d1 == 1.5707963267948966D || d1 == 3.1415926535897931D))
+                } else if (i2 >= k1
+                        && (d1 == 1.5707963267948966D || d1 == 3.1415926535897931D)) {
                     l2 = getMidOrthoPosition(rectangle1.x + rectangle1.width,
                             Math.min(i2, rectangle2.x), false);
+                }
                 l3 = l2;
                 j4 = j2;
             }
-            if (l2 > rectangle1.x && l2 < rectangle1.x + rectangle1.width)
+            if (l2 > rectangle1.x && l2 < rectangle1.x + rectangle1.width) {
                 if (j2 >= rectangle1.y && j2 <= l1
                         || l1 <= rectangle2.y + rectangle2.height && l1 >= j2) {
                     if (d1 == 0.0D || d1 == 3.1415926535897931D) {
@@ -1315,15 +1436,17 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 } else {
                     if (d1 == 3.1415926535897931D
                             || (d1 == 1.5707963267948966D || d1 == 4.7123889803846897D)
-                            && i2 < k1)
+                            && i2 < k1) {
                         l2 = Math.min(i2, Math.min(rectangle1.x, rectangle2.x));
-                    else
+                    } else {
                         l2 = Math.max(i2, Math.max(rectangle1.x
                                 + rectangle1.width, rectangle2.x
                                 + rectangle2.width));
+                    }
                     l3 = l2;
                     j4 = j2;
                 }
+            }
         }
         addPoint(l2, j3);
         addPoint(l3, j4);
@@ -1333,22 +1456,24 @@ public class GraphicViewerLink extends GraphicViewerStroke
         return (i + j) / 2;
     }
 
-    private void a(GraphicViewerPositionArray graphicviewerpositionarray,
-            int i, int j, double d, boolean flag) {
+    private void traversePositions(
+            GraphicViewerPositionArray graphicviewerpositionarray, int i,
+            int j, double d, boolean flag) {
         Dimension dimension = graphicviewerpositionarray.getCellSize();
         int i1 = graphicviewerpositionarray.getDist(i, j);
         int j1 = i;
         int k1 = j;
         int l1 = j1;
         int i2 = k1;
-        if (d == 0.0D)
+        if (d == 0.0D) {
             l1 += dimension.width;
-        else if (d == 1.5707963267948966D)
+        } else if (d == 1.5707963267948966D) {
             i2 += dimension.height;
-        else if (d == 3.1415926535897931D)
+        } else if (d == 3.1415926535897931D) {
             l1 -= dimension.width;
-        else
+        } else {
             i2 -= dimension.height;
+        }
         for (; i1 > 1 && graphicviewerpositionarray.getDist(l1, i2) == i1 - 1; i1--) {
             j1 = l1;
             k1 = i2;
@@ -1360,22 +1485,25 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 i2 += dimension.height;
                 continue;
             }
-            if (d == 3.1415926535897931D)
+            if (d == 3.1415926535897931D) {
                 l1 -= dimension.width;
-            else
+            } else {
                 i2 -= dimension.height;
+            }
         }
 
         if (flag) {
-            if (i1 > 1)
-                if (d == 3.1415926535897931D || d == 0.0D)
+            if (i1 > 1) {
+                if (d == 3.1415926535897931D || d == 0.0D) {
                     j1 = (int) Math.floor((double) j1
                             / (double) dimension.width)
                             * dimension.width + dimension.width / 2;
-                else
+                } else {
                     k1 = (int) Math.floor((double) k1
                             / (double) dimension.height)
                             * dimension.height + dimension.height / 2;
+                }
+            }
         } else {
             j1 = (int) Math.floor((double) j1 / (double) dimension.width)
                     * dimension.width + dimension.width / 2;
@@ -1400,7 +1528,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 j2 += dimension.width;
             }
             if (graphicviewerpositionarray.getDist(j2, k2) == i1 - 1) {
-                a(graphicviewerpositionarray, j2, k2, d1, false);
+                traversePositions(graphicviewerpositionarray, j2, k2, d1, false);
             } else {
                 int l2 = j1;
                 int i3 = k1;
@@ -1417,26 +1545,29 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     d1 = 3.1415926535897931D;
                     l2 -= dimension.width;
                 }
-                if (graphicviewerpositionarray.getDist(l2, i3) == i1 - 1)
-                    a(graphicviewerpositionarray, l2, i3, d1, false);
+                if (graphicviewerpositionarray.getDist(l2, i3) == i1 - 1) {
+                    traversePositions(graphicviewerpositionarray, l2, i3, d1,
+                            false);
+                }
             }
         }
         addPoint(j1, k1);
     }
 
     public boolean isOrthogonal() {
-        return (g() & 0x2000) != 0;
+        return (getInternalFlags() & 0x2000) != 0;
     }
 
     public void setOrthogonal(boolean flag) {
-        boolean flag1 = (g() & 0x2000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x2000) != 0;
         if (flag1 != flag) {
-            int i = g();
-            if (flag)
+            int i = getInternalFlags();
+            if (flag) {
                 i |= 0x2000;
-            else
+            } else {
                 i &= 0xffffdfff;
-            _mthfor(i);
+            }
+            setInternalFlags(i);
             update(203, flag1 ? 1 : 0, null);
             if (!isInitializing() && flag) {
                 removeAllPoints();
@@ -1446,50 +1577,53 @@ public class GraphicViewerLink extends GraphicViewerStroke
     }
 
     public void setJumpsOver(boolean flag) {
-        boolean flag1 = (cA & 0x20000) != 0;
+        boolean flag1 = (myLinkFlags & 0x20000) != 0;
         if (flag1 != flag) {
-            int i = cA;
-            if (flag)
+            int i = myLinkFlags;
+            if (flag) {
                 i |= 0x20000;
-            else
+            } else {
                 i &= 0xfffdffff;
-            cA = i;
-            j();
+            }
+            myLinkFlags = i;
+            resetPath();
             update(205, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isJumpsOver() {
-        return (cA & 0x20000) != 0;
+        return (myLinkFlags & 0x20000) != 0;
     }
 
     public void setRoundedCorners(boolean flag) {
-        boolean flag1 = (cA & 0x100000) != 0;
+        boolean flag1 = (myLinkFlags & 0x100000) != 0;
         if (flag1 != flag) {
-            int i = cA;
-            if (flag)
+            int i = myLinkFlags;
+            if (flag) {
                 i |= 0x100000;
-            else
+            } else {
                 i &= 0xffefffff;
-            cA = i;
-            j();
+            }
+            myLinkFlags = i;
+            resetPath();
             update(211, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isRoundedCorners() {
-        return (cA & 0x100000) != 0;
+        return (myLinkFlags & 0x100000) != 0;
     }
 
     public void setAvoidsNodes(boolean flag) {
-        boolean flag1 = (cA & 0x40000) != 0;
+        boolean flag1 = (myLinkFlags & 0x40000) != 0;
         if (flag1 != flag) {
-            int i = cA;
-            if (flag)
+            int i = myLinkFlags;
+            if (flag) {
                 i |= 0x40000;
-            else
+            } else {
                 i &= 0xfffbffff;
-            cA = i;
+            }
+            myLinkFlags = i;
             update(206, flag1 ? 1 : 0, null);
             if (!isInitializing() && flag) {
                 removeAllPoints();
@@ -1499,101 +1633,108 @@ public class GraphicViewerLink extends GraphicViewerStroke
     }
 
     public boolean isAvoidsNodes() {
-        return (cA & 0x40000) != 0;
+        return (myLinkFlags & 0x40000) != 0;
     }
 
     public void setAdjustingStyle(int i) {
-        int j = cA & 0xf;
+        int j = myLinkFlags & 0xf;
         if (j != i) {
-            int i1 = cA;
+            int i1 = myLinkFlags;
             i1 &= 0xfffffff0;
             i1 |= i;
-            cA = i1;
+            myLinkFlags = i1;
             update(208, j, null);
         }
     }
 
     public int getAdjustingStyle() {
-        return cA & 0xf;
+        return myLinkFlags & 0xf;
     }
 
     public void setRelinkable(boolean flag) {
-        boolean flag1 = (cA & 0x10000) != 0;
+        boolean flag1 = (myLinkFlags & 0x10000) != 0;
         if (flag1 != flag) {
-            int i = cA;
-            if (flag)
+            int i = myLinkFlags;
+            if (flag) {
                 i |= 0x10000;
-            else
+            } else {
                 i &= 0xfffeffff;
-            cA = i;
+            }
+            myLinkFlags = i;
             update(204, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isRelinkable() {
-        return (cA & 0x10000) != 0;
+        return (myLinkFlags & 0x10000) != 0;
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         if (graphicviewerview != null
                 && graphicviewerview.getScale() > 0.29999999999999999D
-                && isJumpsOver() && isOrthogonal() && !isCubic())
-            j();
+                && isJumpsOver() && isOrthogonal() && !isCubic()) {
+            resetPath();
+        }
         super.paint(graphics2d, graphicviewerview);
     }
 
-    void a(GeneralPath generalpath, GraphicViewerView graphicviewerview) {
+    void makePath(GeneralPath paramGeneralPath, GraphicViewerView paramGraphicViewerView) {
         int i = getNumPoints();
-        if (i >= 2 && graphicviewerview != null && isOrthogonal() && !isCubic()
-                && (isRoundedCorners() || isJumpsOver())) {
-            Point point = new Point(0, 0);
-            Point point1 = getPoint(0);
-            generalpath.moveTo(point1.x, point1.y);
-            int j = 1;
-            do {
-                if (j >= i)
-                    break;
-                j = _mthdo(point1.x, point1.y, j, j > 1);
-                Point point2 = getPoint(j);
+        if ((i >= 2) && (paramGraphicViewerView != null) && (isOrthogonal())
+                && (!isCubic()) && ((isRoundedCorners()) || (isJumpsOver()))) {
+            Point localPoint1 = new Point(0, 0);
+            Point localPoint2 = getPoint(0);
+            paramGeneralPath.moveTo(localPoint2.x, localPoint2.y);
+            int k;
+            for (int j = 1; j < i; j = k) {
+                j = furthestPoint(localPoint2.x, localPoint2.y, j, j > 1);
+                Point localPoint3 = getPoint(j);
                 if (j >= i - 1) {
-                    if (point1.x != point2.x || point1.y != point2.y)
-                        a(generalpath, point1.x, point1.y, point2.x, point2.y,
-                                graphicviewerview);
+                    if ((localPoint2.x == localPoint3.x)
+                            && (localPoint2.y == localPoint3.y)) {
+                        break;
+                    }
+                    addLine(paramGeneralPath, localPoint2.x, localPoint2.y,
+                            localPoint3.x, localPoint3.y, paramGraphicViewerView);
                     break;
                 }
-                int i1 = _mthdo(point2.x, point2.y, j + 1, j < i - 3);
-                Point point3 = getPoint(i1);
-                a(generalpath, point1.x, point1.y, point2.x, point2.y,
-                        point3.x, point3.y, graphicviewerview, point);
-                point1 = point;
-                j = i1;
-            } while (true);
+                k = furthestPoint(localPoint3.x, localPoint3.y, j + 1,
+                        j < i - 3);
+                Point localPoint4 = getPoint(k);
+                addLineAndCorner(paramGeneralPath, localPoint2.x,
+                        localPoint2.y, localPoint3.x, localPoint3.y,
+                        localPoint4.x, localPoint4.y, paramGraphicViewerView, localPoint1);
+                localPoint2 = localPoint1;
+            }
         } else {
-            super.a(generalpath, graphicviewerview);
+            super.makePath(paramGeneralPath, paramGraphicViewerView);
         }
     }
 
-    int _mthdo(int i, int j, int i1, boolean flag) {
+    int furthestPoint(int i, int j, int i1, boolean flag) {
         int j1 = getNumPoints();
         int k1 = i;
         int l1;
         Point point;
         for (l1 = j; i == k1 && j == l1; l1 = point.y) {
-            if (i1 >= j1)
+            if (i1 >= j1) {
                 return j1 - 1;
+            }
             point = getPoint(i1++);
             k1 = point.x;
         }
 
-        if (i != k1 && j != l1)
+        if (i != k1 && j != l1) {
             return i1 - 1;
+        }
         int i2 = k1;
         Point point1;
         for (int j2 = l1; i == k1 && k1 == i2
                 && (!flag || (j < l1 ? l1 <= j2 : l1 >= j2)) || j == l1
                 && l1 == j2 && (!flag || (i < k1 ? k1 <= i2 : k1 >= i2)); j2 = point1.y) {
-            if (i1 >= j1)
+            if (i1 >= j1) {
                 return j1 - 1;
+            }
             point1 = getPoint(i1++);
             i2 = point1.x;
         }
@@ -1601,15 +1742,16 @@ public class GraphicViewerLink extends GraphicViewerStroke
         return i1 - 2;
     }
 
-    private void a(GeneralPath generalpath, int i, int j, int i1, int j1,
-            int k1, int l1, GraphicViewerView graphicviewerview, Point point) {
+    private void addLineAndCorner(GeneralPath generalpath, int i, int j,
+            int i1, int j1, int k1, int l1,
+            GraphicViewerView graphicviewerview, Point point) {
         if (j == j1 && i1 == k1) {
             int i2 = isRoundedCorners() ? Math.abs(getCurviness()) : 0;
             int k2 = Math.min(i2, Math.abs(i1 - i) / 2);
             int i3 = Math.min(k2, Math.abs(l1 - j1) / 2);
             k2 = i3;
             if (k2 < 1 || i3 < 1) {
-                a(generalpath, i, j, i1, j1, graphicviewerview);
+                addLine(generalpath, i, j, i1, j1, graphicviewerview);
                 point.x = i1;
                 point.y = j1;
                 return;
@@ -1620,18 +1762,20 @@ public class GraphicViewerLink extends GraphicViewerStroke
             int i5 = j1;
             if (i1 > i) {
                 k3 -= k2;
-                if (l1 > j1)
+                if (l1 > j1) {
                     i5 += i3;
-                else
+                } else {
                     i5 -= i3;
+                }
             } else {
                 k3 += k2;
-                if (l1 > j1)
+                if (l1 > j1) {
                     i5 += i3;
-                else
+                } else {
                     i5 -= i3;
+                }
             }
-            a(generalpath, i, j, k3, i4, graphicviewerview);
+            addLine(generalpath, i, j, k3, i4, graphicviewerview);
             generalpath.quadTo(i1, j1, k4, i5);
             point.x = k4;
             point.y = i5;
@@ -1641,7 +1785,7 @@ public class GraphicViewerLink extends GraphicViewerStroke
             int j3 = Math.min(l2, Math.abs(k1 - i1) / 2);
             l2 = j3;
             if (j3 < 1 || l2 < 1) {
-                a(generalpath, i, j, i1, j1, graphicviewerview);
+                addLine(generalpath, i, j, i1, j1, graphicviewerview);
                 point.x = i1;
                 point.y = j1;
                 return;
@@ -1652,127 +1796,134 @@ public class GraphicViewerLink extends GraphicViewerStroke
             int j5 = j1;
             if (j1 > j) {
                 j4 -= l2;
-                if (k1 > i1)
+                if (k1 > i1) {
                     l4 += j3;
-                else
+                } else {
                     l4 -= j3;
+                }
             } else {
                 j4 += l2;
-                if (k1 > i1)
+                if (k1 > i1) {
                     l4 += j3;
-                else
+                } else {
                     l4 -= j3;
+                }
             }
-            a(generalpath, i, j, l3, j4, graphicviewerview);
+            addLine(generalpath, i, j, l3, j4, graphicviewerview);
             generalpath.quadTo(i1, j1, l4, j5);
             point.x = l4;
             point.y = j5;
         } else {
-            a(generalpath, i, j, i1, j1, graphicviewerview);
-            a(generalpath, i1, j1, k1, l1, graphicviewerview);
+            addLine(generalpath, i, j, i1, j1, graphicviewerview);
+            addLine(generalpath, i1, j1, k1, l1, graphicviewerview);
             point.x = k1;
             point.y = l1;
         }
     }
 
-    void a(GeneralPath generalpath, int i, int j, int i1, int j1,
-            GraphicViewerView graphicviewerview) {
-        byte byte0 = 10;
-        int k1 = byte0 / 2;
-        int ai[] = graphicviewerview._mthdo(100);
-        Point point = graphicviewerview._mthlong();
-        int l1 = a(i, j, i1, j1, ai, point);
-        if (l1 > 0)
-            if (j == j1) {
-                if (i < i1) {
-                    for (int i2 = 0; i2 < l1;) {
-                        int i3 = Math.max(i,
-                                Math.min(ai[i2++] - k1, i1 - byte0));
-                        generalpath.lineTo(i3, j1);
-                        int i4 = Math.min(i3 + byte0, i1);
-                        do {
-                            if (i2 >= l1)
+    void addLine(GeneralPath paramGeneralPath, int paramInt1, int paramInt2,
+            int paramInt3, int paramInt4,
+            GraphicViewerView paramGraphicViewerView) {
+        int i = 10;
+        int j = i / 2;
+        int[] arrayOfInt = paramGraphicViewerView.getTempXs(100);
+        Point localPoint = paramGraphicViewerView.getTempPoint();
+        int k = getIntersections(paramInt1, paramInt2, paramInt3, paramInt4,
+                arrayOfInt, localPoint);
+        if (k > 0) {
+            int m;
+            int n;
+            int i1;
+            int i2;
+            if (paramInt2 == paramInt4) {
+                if (paramInt1 < paramInt3) {
+                    m = 0;
+                    while (m < k) {
+                        n = Math.max(paramInt1,
+                                Math.min(arrayOfInt[(m++)] - j, paramInt3 - i));
+                        paramGeneralPath.lineTo(n, paramInt4);
+                        for (i1 = Math.min(n + i, paramInt3); m < k; i1 = Math
+                                .min(i2 + j, paramInt3)) {
+                            i2 = arrayOfInt[m];
+                            if (i2 >= i1 + i) {
                                 break;
-                            int i5 = ai[i2];
-                            if (i5 >= i4 + byte0)
-                                break;
-                            i2++;
-                            i4 = Math.min(i5 + k1, i1);
-                        } while (true);
-                        generalpath.quadTo((i3 + i4) / 2, j1 - byte0, i4, j1);
+                            }
+                            m++;
+                        }
+                        paramGeneralPath.quadTo((n + i1) / 2, paramInt4 - i,
+                                i1, paramInt4);
                     }
-
                 } else {
-                    for (int j2 = l1 - 1; j2 >= 0;) {
-                        int j3 = Math.min(i,
-                                Math.max(ai[j2--] + k1, i1 + byte0));
-                        generalpath.lineTo(j3, j1);
-                        int j4 = Math.max(j3 - byte0, i1);
-                        do {
-                            if (j2 < 0)
+                    m = k - 1;
+                    while (m >= 0) {
+                        n = Math.min(paramInt1,
+                                Math.max(arrayOfInt[(m--)] + j, paramInt3 + i));
+                        paramGeneralPath.lineTo(n, paramInt4);
+                        for (i1 = Math.max(n - i, paramInt3); m >= 0; i1 = Math
+                                .max(i2 - j, paramInt3)) {
+                            i2 = arrayOfInt[m];
+                            if (i2 <= i1 - i) {
                                 break;
-                            int j5 = ai[j2];
-                            if (j5 <= j4 - byte0)
-                                break;
-                            j2--;
-                            j4 = Math.max(j5 - k1, i1);
-                        } while (true);
-                        generalpath.quadTo((j3 + j4) / 2, j1 - byte0, j4, j1);
+                            }
+                            m--;
+                        }
+                        paramGeneralPath.quadTo((n + i1) / 2, paramInt4 - i,
+                                i1, paramInt4);
                     }
-
                 }
-            } else if (i == i1)
-                if (j < j1) {
-                    for (int k2 = 0; k2 < l1;) {
-                        int k3 = Math.max(j,
-                                Math.min(ai[k2++] - k1, j1 - byte0));
-                        generalpath.lineTo(i1, k3);
-                        int k4 = Math.min(k3 + byte0, j1);
-                        do {
-                            if (k2 >= l1)
+            } else if (paramInt1 == paramInt3) {
+                if (paramInt2 < paramInt4) {
+                    m = 0;
+                    while (m < k) {
+                        n = Math.max(paramInt2,
+                                Math.min(arrayOfInt[(m++)] - j, paramInt4 - i));
+                        paramGeneralPath.lineTo(paramInt3, n);
+                        for (i1 = Math.min(n + i, paramInt4); m < k; i1 = Math
+                                .min(i2 + j, paramInt4)) {
+                            i2 = arrayOfInt[m];
+                            if (i2 >= i1 + i) {
                                 break;
-                            int k5 = ai[k2];
-                            if (k5 >= k4 + byte0)
-                                break;
-                            k2++;
-                            k4 = Math.min(k5 + k1, j1);
-                        } while (true);
-                        generalpath.quadTo(i1 - byte0, (k3 + k4) / 2, i1, k4);
+                            }
+                            m++;
+                        }
+                        paramGeneralPath.quadTo(paramInt3 - i, (n + i1) / 2,
+                                paramInt3, i1);
                     }
-
                 } else {
-                    int l3;
-                    int l4;
-                    label0 : for (int l2 = l1 - 1; l2 >= 0; generalpath.quadTo(
-                            i1 - byte0, (l3 + l4) / 2, i1, l4)) {
-                        l3 = Math.min(j, Math.max(ai[l2--] + k1, j1 + byte0));
-                        generalpath.lineTo(i1, l3);
-                        l4 = Math.max(l3 - byte0, j1);
-                        do {
-                            if (l2 < 0)
-                                continue label0;
-                            int l5 = ai[l2];
-                            if (l5 <= l4 - byte0)
-                                continue label0;
-                            l2--;
-                            l4 = Math.max(l5 - k1, j1);
-                        } while (true);
+                    m = k - 1;
+                    while (m >= 0) {
+                        n = Math.min(paramInt2,
+                                Math.max(arrayOfInt[(m--)] + j, paramInt4 + i));
+                        paramGeneralPath.lineTo(paramInt3, n);
+                        for (i1 = Math.max(n - i, paramInt4); m >= 0; i1 = Math
+                                .max(i2 - j, paramInt4)) {
+                            i2 = arrayOfInt[m];
+                            if (i2 <= i1 - i) {
+                                break;
+                            }
+                            m--;
+                        }
+                        paramGeneralPath.quadTo(paramInt3 - i, (n + i1) / 2,
+                                paramInt3, i1);
                     }
-
                 }
-        generalpath.lineTo(i1, j1);
+            }
+        }
+        paramGeneralPath.lineTo(paramInt3, paramInt4);
     }
 
-    int a(int i, int j, int i1, int j1, int ai[], Point point) {
+    int getIntersections(int i, int j, int i1, int j1, int ai[], Point point) {
         int k1 = 0;
         GraphicViewerDocument graphicviewerdocument = getDocument();
-        if (graphicviewerdocument == null)
+        if (graphicviewerdocument == null) {
             return 0;
+        }
         label0 : for (GraphicViewerLayer graphicviewerlayer = graphicviewerdocument
                 .getFirstLayer(); graphicviewerlayer != null; graphicviewerlayer = graphicviewerdocument
                 .getNextLayer(graphicviewerlayer)) {
-            if (!graphicviewerlayer.isVisible())
+            if (!graphicviewerlayer.isVisible()) {
                 continue;
+            }
             GraphicViewerListPosition graphicviewerlistposition = graphicviewerlayer
                     .getFirstObjectPos();
             do {
@@ -1780,8 +1931,9 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 do {
                     GraphicViewerObject graphicviewerobject;
                     do {
-                        if (graphicviewerlistposition == null)
+                        if (graphicviewerlistposition == null) {
                             continue label0;
+                        }
                         graphicviewerobject = graphicviewerlayer
                                 .getObjectAtPos(graphicviewerlistposition);
                         graphicviewerlistposition = graphicviewerlayer
@@ -1801,12 +1953,14 @@ public class GraphicViewerLink extends GraphicViewerStroke
                 while (i2 < l1) {
                     Point point1 = graphicviewerlink.getPoint(i2 - 1);
                     Point point2 = graphicviewerlink.getPoint(i2);
-                    if (a(i, j, i1, j1, point1, point2, point)
-                            && k1 < ai.length)
-                        if (j == j1)
+                    if (getOrthoSegmentIntersection(i, j, i1, j1, point1,
+                            point2, point) && k1 < ai.length) {
+                        if (j == j1) {
                             ai[k1++] = point.x;
-                        else
+                        } else {
                             ai[k1++] = point.y;
+                        }
+                    }
                     i2++;
                 }
             } while (true);
@@ -1816,8 +1970,8 @@ public class GraphicViewerLink extends GraphicViewerStroke
         return k1;
     }
 
-    boolean a(int i, int j, int i1, int j1, Point point, Point point1,
-            Point point2) {
+    boolean getOrthoSegmentIntersection(int i, int j, int i1, int j1,
+            Point point, Point point1, Point point2) {
         if (i != i1) {
             if (point.x == point1.x && Math.min(i, i1) < point.x
                     && Math.max(i, i1) > point.x
@@ -1838,25 +1992,25 @@ public class GraphicViewerLink extends GraphicViewerStroke
     }
 
     public int getPartID() {
-        return cr;
+        return myPartID;
     }
 
     public void setPartID(int i) {
-        int j = cr;
+        int j = myPartID;
         if (j != i) {
-            cr = i;
+            myPartID = i;
             update(210, j, null);
         }
     }
 
     public Object getUserObject() {
-        return cu;
+        return myUserObject;
     }
 
     public void setUserObject(Object obj) {
-        Object obj1 = cu;
+        Object obj1 = myUserObject;
         if (obj1 != obj) {
-            cu = obj;
+            myUserObject = obj;
             update(209, 0, obj1);
         }
     }
@@ -1922,12 +2076,12 @@ public class GraphicViewerLink extends GraphicViewerStroke
             boolean flag) {
         switch (graphicviewerdocumentchangededit.getFlags()) {
             case 201 :
-                ct = (GraphicViewerPort) graphicviewerdocumentchangededit
+                myFromPort = (GraphicViewerPort) graphicviewerdocumentchangededit
                         .getValue(flag);
                 return;
 
             case 202 :
-                cy = (GraphicViewerPort) graphicviewerdocumentchangededit
+                myToPort = (GraphicViewerPort) graphicviewerdocumentchangededit
                         .getValue(flag);
                 return;
 
@@ -1988,12 +2142,14 @@ public class GraphicViewerLink extends GraphicViewerStroke
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerLink",
                             domelement);
-            domelement1.setAttribute("partid", Integer.toString(cr));
+            domelement1.setAttribute("partid", Integer.toString(myPartID));
             domdoc.registerReferencingNode(domelement1, "fromport",
                     getFromPort());
             domdoc.registerReferencingNode(domelement1, "toport", getToPort());
-            domelement1.setAttribute("linkflags", Integer.toString(cA));
-            domelement1.setAttribute("curviness", Integer.toString(cx));
+            domelement1
+                    .setAttribute("linkflags", Integer.toString(myLinkFlags));
+            domelement1
+                    .setAttribute("curviness", Integer.toString(myCurviness));
         }
         super.SVGWriteObject(domdoc, domelement);
     }
@@ -2003,16 +2159,19 @@ public class GraphicViewerLink extends GraphicViewerStroke
             IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             String s = domelement1.getAttribute("partid");
-            if (s.length() > 0)
-                cr = Integer.parseInt(s);
+            if (s.length() > 0) {
+                myPartID = Integer.parseInt(s);
+            }
             String s1 = domelement1.getAttribute("fromport");
             String s2 = domelement1.getAttribute("toport");
             domdoc.registerReferencingObject(this, "fromport", s1);
             domdoc.registerReferencingObject(this, "toport", s2);
-            cA = Integer.parseInt(domelement1.getAttribute("linkflags"));
+            myLinkFlags = Integer.parseInt(domelement1
+                    .getAttribute("linkflags"));
             String s3 = domelement1.getAttribute("curviness");
-            if (s3.length() > 0)
+            if (s3.length() > 0) {
                 setCurviness(Integer.parseInt(s3));
+            }
             super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                     domelement1.getNextSiblingGraphicViewerClassElement());
             return domelement.getNextSibling();
@@ -2024,46 +2183,23 @@ public class GraphicViewerLink extends GraphicViewerStroke
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
         if (s.equals("fromport")) {
-            _mthif((GraphicViewerPort) obj);
-            if (isSelfLoop())
+            setFromPortNoCalc((GraphicViewerPort) obj);
+            if (isSelfLoop()) {
                 calculateStroke();
+            }
         } else if (s.equals("toport")) {
-            a((GraphicViewerPort) obj);
-            if (isSelfLoop())
+            setToPortNoCalc((GraphicViewerPort) obj);
+            if (isSelfLoop()) {
                 calculateStroke();
+            }
         }
     }
 
     public static void setDefaultResizingRelinks(boolean flag) {
-        co = flag;
+        myResizingModifiesExistingLink = flag;
     }
 
     public static boolean isDefaultResizingRelinks() {
-        return co;
+        return myResizingModifiesExistingLink;
     }
-
-    public static final int AdjustingStyleCalculate = 0;
-    public static final int AdjustingStyleScale = 1;
-    public static final int AdjustingStyleStretch = 2;
-    public static final int AdjustingStyleEnd = 3;
-    public static final int RelinkableFromHandle = 91;
-    public static final int RelinkableToHandle = 92;
-    public static final int ChangedFromPort = 201;
-    public static final int ChangedToPort = 202;
-    public static final int ChangedOrthogonal = 203;
-    public static final int ChangedRelinkable = 204;
-    public static final int ChangedJumpsOver = 205;
-    public static final int ChangedAvoidsNodes = 206;
-    public static final int ChangedCurviness = 207;
-    public static final int ChangedAdjustingStyle = 208;
-    public static final int ChangedUserObject = 209;
-    public static final int ChangedPartID = 210;
-    public static final int ChangedRoundedCorners = 211;
-    private static boolean co = true;
-    private int cr;
-    private Object cu;
-    private int cA;
-    private GraphicViewerPort ct;
-    private GraphicViewerPort cy;
-    private int cx;
 }

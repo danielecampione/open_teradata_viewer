@@ -32,20 +32,23 @@ public class TestSubGraph2Port extends GraphicViewerPort {
     private static final long serialVersionUID = 8909835236580306597L;
 
     public TestSubGraph2Port() {
-        setFromSpot(-1);
-        setToSpot(-1);
-        setStyle(0);
+        setFromSpot(NoSpot);
+        setToSpot(NoSpot);
+        setStyle(GraphicViewerPort.StyleHidden);
     }
 
-    public GraphicViewerObject pick(Point point, boolean flag) {
-        Rectangle rectangle = getBoundingRect();
-        byte byte0 = 5;
-        if (point.x > rectangle.x + byte0
-                && point.x < (rectangle.x + rectangle.width) - byte0
-                && point.y > rectangle.y + byte0
-                && point.y < (rectangle.y + rectangle.height) - byte0)
+    /**
+     * Make this port "hollow" by not allowing a pick inside the bounds of the
+     * port except along an outer margin.
+     */
+    public GraphicViewerObject pick(Point p, boolean selectableOnly) {
+        Rectangle r = getBoundingRect();
+        int margin = 5;
+        if (p.x > r.x + margin && p.x < r.x + r.width - margin
+                && p.y > r.y + margin && p.y < r.y + r.height - margin) {
             return null;
-        else
-            return super.pick(point, flag);
+        } else {
+            return super.pick(p, selectableOnly);
+        }
     }
 }

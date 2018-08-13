@@ -24,7 +24,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,58 +39,68 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     private static final long serialVersionUID = 8665889205874001054L;
 
+    private static final int flagExpanded = 65536;
+    private static final int flagCollapsible = 131072;
+    private static final int flagExpandedResizable = 262144;
+    private static final int flagWasExpanded = 524288;
+    public static final int StateExpanded = 0;
+    public static final int StateCollapsed = 1;
+    public static final int StateExpanding = 2;
+    public static final int StateCollapsing = 3;
+    public static final int ChangedBackgroundColor = 2401;
+    public static final int ChangedBorderPen = 2402;
+    public static final int ChangedLabelSpot = 2403;
+    public static final int ChangedCollapsible = 2405;
+    public static final int ChangedInsets = 2406;
+    public static final int ChangedOpacity = 2407;
+    public static final int ChangedCollapsedLabelSpot = 2408;
+    public static final int ChangedCollapsedInsets = 2409;
+    public static final int ChangedCollapsedObject = 2410;
+    public static final int ChangedLabel = 2411;
+    public static final int ChangedPort = 2412;
+    public static final int ChangedState = 2413;
+    public static final int ChangedSavedBounds = 2414;
+    public static final int ChangedSavedPaths = 2415;
+    public static final int ChangedWasExpanded = 2416;
+    public static final int ChangedExpandedResizable = 2417;
+    private int myState = 0;
+    private GraphicViewerSubGraphHandle myHandle = null;
+    private GraphicViewerText myLabel = null;
+    private GraphicViewerPort myPort = null;
+    private GraphicViewerObject myCollapsedObject = null;
+    private Color myBackgroundColor = new Color(200, 200, 255, 63);
+    private double myOpacity = 0.2D;
+    private GraphicViewerPen myBorderPen = null;
+    private int myLabelSpot = 2;
+    private int myCollapsedLabelSpot = 0;
+    private Insets myInsets = new Insets(4, 4, 4, 4);
+    private Insets myCollapsedInsets = new Insets(0, 0, 0, 0);
+    private HashMap myBoundsHashtable = new HashMap();
+    private HashMap myPathsHashtable = new HashMap();
+    private transient Rectangle mySavedBoundsInsideMargins = null;
+
     public GraphicViewerSubGraph() {
-        cT = 0;
-        cY = null;
-        cQ = null;
-        cX = null;
-        cL = null;
-        cV = new Color(200, 200, 255, 63);
-        cZ = 0.20000000000000001D;
-        cP = null;
-        cO = 2;
-        c2 = 0;
-        c1 = new Insets(4, 4, 4, 4);
-        c0 = new Insets(0, 0, 0, 0);
-        c3 = new HashMap<Object, Serializable>();
-        cU = new HashMap<Object, Serializable>();
-        cM = null;
-        o();
+        initCommon();
     }
 
     public GraphicViewerSubGraph(String s) {
-        cT = 0;
-        cY = null;
-        cQ = null;
-        cX = null;
-        cL = null;
-        cV = new Color(200, 200, 255, 63);
-        cZ = 0.20000000000000001D;
-        cP = null;
-        cO = 2;
-        c2 = 0;
-        c1 = new Insets(4, 4, 4, 4);
-        c0 = new Insets(0, 0, 0, 0);
-        c3 = new HashMap<Object, Serializable>();
-        cU = new HashMap<Object, Serializable>();
-        cM = null;
-        o();
+        initCommon();
         initialize(s);
     }
 
-    private void o() {
-        _mthfor((g() | 0x100000 | 0x10000 | 0x20000) & 0xffffffef & 0xfffffbff);
+    private void initCommon() {
+        setInternalFlags((getInternalFlags() | 0x100000 | 0x10000 | 0x20000) & 0xffffffef & 0xfffffbff);
     }
 
     public void initialize(String s) {
-        cL = createCollapsedObject();
-        super.addObjectAtTail(cL);
-        cQ = createLabel(s);
-        super.addObjectAtTail(cQ);
-        cY = createHandle();
-        super.addObjectAtTail(cY);
-        cX = createPort();
-        super.addObjectAtHead(cX);
+        myCollapsedObject = createCollapsedObject();
+        super.addObjectAtTail(myCollapsedObject);
+        myLabel = createLabel(s);
+        super.addObjectAtTail(myLabel);
+        myHandle = createHandle();
+        super.addObjectAtTail(myHandle);
+        myPort = createPort();
+        super.addObjectAtHead(myPort);
         setInitializing(false);
         layoutChildren(null);
     }
@@ -130,36 +139,36 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     protected void copyChildren(GraphicViewerArea graphicviewerarea,
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerSubGraph graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerarea;
-        graphicviewersubgraph.cT = cT;
-        graphicviewersubgraph.cV = cV;
-        graphicviewersubgraph.cZ = cZ;
-        graphicviewersubgraph.cP = cP;
-        graphicviewersubgraph.cO = cO;
-        graphicviewersubgraph.c2 = c2;
-        graphicviewersubgraph.c1.top = c1.top;
-        graphicviewersubgraph.c1.left = c1.left;
-        graphicviewersubgraph.c1.bottom = c1.bottom;
-        graphicviewersubgraph.c1.right = c1.right;
-        graphicviewersubgraph.c0.top = c0.top;
-        graphicviewersubgraph.c0.left = c0.left;
-        graphicviewersubgraph.c0.bottom = c0.bottom;
-        graphicviewersubgraph.c0.right = c0.right;
+        graphicviewersubgraph.myState = myState;
+        graphicviewersubgraph.myBackgroundColor = myBackgroundColor;
+        graphicviewersubgraph.myOpacity = myOpacity;
+        graphicviewersubgraph.myBorderPen = myBorderPen;
+        graphicviewersubgraph.myLabelSpot = myLabelSpot;
+        graphicviewersubgraph.myCollapsedLabelSpot = myCollapsedLabelSpot;
+        graphicviewersubgraph.myInsets.top = myInsets.top;
+        graphicviewersubgraph.myInsets.left = myInsets.left;
+        graphicviewersubgraph.myInsets.bottom = myInsets.bottom;
+        graphicviewersubgraph.myInsets.right = myInsets.right;
+        graphicviewersubgraph.myCollapsedInsets.top = myCollapsedInsets.top;
+        graphicviewersubgraph.myCollapsedInsets.left = myCollapsedInsets.left;
+        graphicviewersubgraph.myCollapsedInsets.bottom = myCollapsedInsets.bottom;
+        graphicviewersubgraph.myCollapsedInsets.right = myCollapsedInsets.right;
         super.copyChildren(graphicviewerarea, graphicviewercopyenvironment);
-        graphicviewersubgraph.cY = (GraphicViewerSubGraphHandle) graphicviewercopyenvironment
-                .get(cY);
-        graphicviewersubgraph.cQ = (GraphicViewerText) graphicviewercopyenvironment
-                .get(cQ);
-        graphicviewersubgraph.cX = (GraphicViewerPort) graphicviewercopyenvironment
-                .get(cX);
-        graphicviewersubgraph.cL = (GraphicViewerObject) graphicviewercopyenvironment
-                .get(cL);
-        HashMap<Object, Serializable> hashmap = graphicviewersubgraph.c3;
+        graphicviewersubgraph.myHandle = (GraphicViewerSubGraphHandle) graphicviewercopyenvironment
+                .get(myHandle);
+        graphicviewersubgraph.myLabel = (GraphicViewerText) graphicviewercopyenvironment
+                .get(myLabel);
+        graphicviewersubgraph.myPort = (GraphicViewerPort) graphicviewercopyenvironment
+                .get(myPort);
+        graphicviewersubgraph.myCollapsedObject = (GraphicViewerObject) graphicviewercopyenvironment
+                .get(myCollapsedObject);
+        HashMap hashmap = graphicviewersubgraph.myBoundsHashtable;
         GraphicViewerObject graphicviewerobject1;
         Rectangle rectangle;
-        for (Iterator<?> iterator = c3.entrySet().iterator(); iterator
+        for (Iterator iterator = myBoundsHashtable.entrySet().iterator(); iterator
                 .hasNext(); hashmap.put(graphicviewerobject1, new Rectangle(
                 rectangle.x, rectangle.y, rectangle.width, rectangle.height))) {
-            Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+            Entry entry = (Entry) iterator.next();
             GraphicViewerObject graphicviewerobject = (GraphicViewerObject) entry
                     .getKey();
             graphicviewerobject1 = (GraphicViewerObject) graphicviewercopyenvironment
@@ -167,19 +176,20 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             rectangle = (Rectangle) entry.getValue();
         }
 
-        hashmap = graphicviewersubgraph.cU;
-        Iterator<?> iterator1 = cU.entrySet().iterator();
+        hashmap = graphicviewersubgraph.myPathsHashtable;
+        Iterator iterator1 = myPathsHashtable.entrySet().iterator();
         do {
-            if (!iterator1.hasNext())
+            if (!iterator1.hasNext()) {
                 break;
-            Entry<?, ?> entry1 = (Entry<?, ?>) iterator1.next();
+            }
+            Entry entry1 = (Entry) iterator1.next();
             GraphicViewerStroke graphicviewerstroke = (GraphicViewerStroke) entry1
                     .getKey();
             GraphicViewerStroke graphicviewerstroke1 = (GraphicViewerStroke) graphicviewercopyenvironment
                     .get(graphicviewerstroke);
             if (graphicviewerstroke != null) {
-                ArrayList<?> arraylist = (ArrayList<?>) entry1.getValue();
-                ArrayList<Point> arraylist1 = new ArrayList<Point>();
+                ArrayList arraylist = (ArrayList) entry1.getValue();
+                ArrayList arraylist1 = new ArrayList();
                 for (int i = 0; i < arraylist.size(); i++) {
                     Point point = (Point) arraylist.get(i);
                     arraylist1.add(new Point(point.x, point.y));
@@ -194,24 +204,28 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             GraphicViewerObject graphicviewerobject) {
         GraphicViewerListPosition graphicviewerlistposition = super
                 .addObjectAtHead(graphicviewerobject);
-        if (graphicviewerlistposition != null)
+        if (graphicviewerlistposition != null) {
             graphicviewerobject.setDragsNode(false);
+        }
         return graphicviewerlistposition;
     }
 
     public GraphicViewerListPosition addObjectAtTail(
             GraphicViewerObject graphicviewerobject) {
         Object obj = getLabel();
-        if (obj == null)
+        if (obj == null) {
             obj = getHandle();
-        if (obj != null)
+        }
+        if (obj != null) {
             return insertObjectBefore(
                     findObject(((GraphicViewerObject) (obj))),
                     graphicviewerobject);
+        }
         GraphicViewerListPosition graphicviewerlistposition = super
                 .addObjectAtTail(graphicviewerobject);
-        if (graphicviewerlistposition != null)
+        if (graphicviewerlistposition != null) {
             graphicviewerobject.setDragsNode(false);
+        }
         return graphicviewerlistposition;
     }
 
@@ -221,8 +235,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         GraphicViewerListPosition graphicviewerlistposition1 = super
                 .insertObjectBefore(graphicviewerlistposition,
                         graphicviewerobject);
-        if (graphicviewerlistposition1 != null)
+        if (graphicviewerlistposition1 != null) {
             graphicviewerobject.setDragsNode(false);
+        }
         return graphicviewerlistposition1;
     }
 
@@ -232,8 +247,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         GraphicViewerListPosition graphicviewerlistposition1 = super
                 .insertObjectAfter(graphicviewerlistposition,
                         graphicviewerobject);
-        if (graphicviewerlistposition1 != null)
+        if (graphicviewerlistposition1 != null) {
             graphicviewerobject.setDragsNode(false);
+        }
         return graphicviewerlistposition1;
     }
 
@@ -241,24 +257,28 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             GraphicViewerListPosition graphicviewerlistposition) {
         GraphicViewerObject graphicviewerobject = super
                 .removeObjectAtPos(graphicviewerlistposition);
-        if (graphicviewerobject == cQ)
-            cQ = null;
-        else if (graphicviewerobject == cY)
-            cY = null;
-        else if (graphicviewerobject == cX)
-            cX = null;
-        else if (graphicviewerobject == cL)
-            cL = null;
-        if (getSavedBounds().containsKey(graphicviewerobject))
+        if (graphicviewerobject == myLabel) {
+            myLabel = null;
+        } else if (graphicviewerobject == myHandle) {
+            myHandle = null;
+        } else if (graphicviewerobject == myPort) {
+            myPort = null;
+        } else if (graphicviewerobject == myCollapsedObject) {
+            myCollapsedObject = null;
+        }
+        if (getSavedBounds().containsKey(graphicviewerobject)) {
             getSavedBounds().remove(graphicviewerobject);
-        if (getSavedPaths().containsKey(graphicviewerobject))
+        }
+        if (getSavedPaths().containsKey(graphicviewerobject)) {
             getSavedPaths().remove(graphicviewerobject);
+        }
         return graphicviewerobject;
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
-        if (paintsDecoration(graphicviewerview))
+        if (paintsDecoration(graphicviewerview)) {
             paintDecoration(graphics2d, graphicviewerview);
+        }
         super.paint(graphics2d, graphicviewerview);
     }
 
@@ -273,10 +293,11 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         GraphicViewerPen graphicviewerpen = getBorderPen();
         if (color != null || graphicviewerpen != null) {
             Rectangle rectangle = computeBorder();
-            if (color.getAlpha() == 255)
+            if (color.getAlpha() == 255) {
                 color = new Color(color.getRed(), color.getGreen(),
                         color.getBlue(), Math.max(0,
                                 Math.min(255, (int) (255D * getOpacity()))));
+            }
             GraphicViewerDrawable.drawRect(graphics2d, graphicviewerpen,
                     GraphicViewerBrush.makeStockBrush(color), rectangle.x,
                     rectangle.y, rectangle.width, rectangle.height);
@@ -286,14 +307,16 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     public void expandRectByPenWidth(Rectangle rectangle) {
         super.expandRectByPenWidth(rectangle);
         Insets insets;
-        if (isExpanded())
+        if (isExpanded()) {
             insets = getInsets();
-        else
+        } else {
             insets = getCollapsedInsets();
+        }
         int i = 1;
         GraphicViewerPen graphicviewerpen = getBorderPen();
-        if (graphicviewerpen != null)
+        if (graphicviewerpen != null) {
             i = graphicviewerpen.getWidth();
+        }
         rectangle.x -= i + insets.left;
         rectangle.y -= i + insets.top;
         rectangle.width += i + insets.left + insets.right;
@@ -305,8 +328,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         boolean flag = false;
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
             if (graphicviewerobject.isVisible()) {
@@ -322,8 +346,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 }
             }
         } while (true);
-        if (!flag)
+        if (!flag) {
             rectangle = getBoundingRect();
+        }
         Rectangle rectangle1 = computeBorder();
         rectangle1.add(rectangle);
         return rectangle1;
@@ -333,10 +358,11 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         Rectangle rectangle = computeInsideMargins(null);
         if (rectangle.width > 0 && rectangle.height > 0) {
             Insets insets;
-            if (isExpanded())
+            if (isExpanded()) {
                 insets = getInsets();
-            else
+            } else {
                 insets = getCollapsedInsets();
+            }
             rectangle.x -= insets.left;
             rectangle.y -= insets.top;
             rectangle.width += insets.left + insets.right;
@@ -347,6 +373,27 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         return rectangle;
     }
 
+    private static Rectangle getBoundsWithoutMargins(
+            GraphicViewerSubGraph paramGraphicViewerSubGraph,
+            Rectangle paramRectangle) {
+        if (paramRectangle == null) {
+            paramRectangle = new Rectangle(0, 0, 0, 0);
+        }
+        setBoundsRect(paramRectangle,
+                paramGraphicViewerSubGraph.getBoundingRect());
+        Insets localInsets;
+        if (paramGraphicViewerSubGraph.isExpanded()) {
+            localInsets = paramGraphicViewerSubGraph.getInsets();
+        } else {
+            localInsets = paramGraphicViewerSubGraph.getCollapsedInsets();
+        }
+        paramRectangle.x += localInsets.left;
+        paramRectangle.y += localInsets.top;
+        paramRectangle.width -= localInsets.left + localInsets.right;
+        paramRectangle.height -= localInsets.top + localInsets.bottom;
+        return paramRectangle;
+    }
+
     public Rectangle computeInsideMargins(
             GraphicViewerObject graphicviewerobject) {
         Rectangle rectangle = new Rectangle(0, 0, 0, 0);
@@ -354,8 +401,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         boolean flag1 = false;
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
             if ((graphicviewerobject == null || graphicviewerobject1 != graphicviewerobject)
@@ -371,43 +419,53 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             }
         } while (true);
         if (!flag) {
-            if (getCollapsedObject() != null)
+            if (getCollapsedObject() != null) {
                 setBoundsRect(rectangle, getCollapsedObject().getBoundingRect());
-            else if (cM != null)
-                setBoundsRect(rectangle, cM);
+            } else if (mySavedBoundsInsideMargins != null) {
+                setBoundsRect(rectangle, mySavedBoundsInsideMargins);
+            }
         } else if (flag && !flag1) {
-            if (cM == null)
-                cM = new Rectangle(0, 0, 0, 0);
-            setBoundsRect(cM, rectangle);
+            if (mySavedBoundsInsideMargins == null) {
+                mySavedBoundsInsideMargins = new Rectangle(0, 0, 0, 0);
+            }
+            setBoundsRect(mySavedBoundsInsideMargins, rectangle);
         }
         return rectangle;
     }
 
     protected boolean computeInsideMarginsSkip(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == getHandle())
+        if (graphicviewerobject == getHandle()) {
             return true;
-        if (graphicviewerobject == getLabel())
+        }
+        if (graphicviewerobject == getLabel()) {
             return !graphicviewerobject.isVisible();
-        if (graphicviewerobject instanceof GraphicViewerPort)
+        }
+        if (graphicviewerobject instanceof GraphicViewerPort) {
             return true;
-        if (graphicviewerobject == getCollapsedObject())
+        }
+        if (graphicviewerobject == getCollapsedObject()) {
             return !graphicviewerobject.isVisible();
+        }
         GraphicViewerLink graphicviewerlink = null;
-        if (graphicviewerobject instanceof GraphicViewerLink)
+        if (graphicviewerobject instanceof GraphicViewerLink) {
             graphicviewerlink = (GraphicViewerLink) graphicviewerobject;
+        }
         if (graphicviewerlink != null) {
-            if (!graphicviewerlink.isVisible() || !isExpanded())
+            if (!graphicviewerlink.isVisible() || !isExpanded()) {
                 return true;
+            }
             if (getPort() != null
                     && (graphicviewerlink.getFromPort() != null
                             && graphicviewerlink.getFromPort().getParent() == this || graphicviewerlink
                             .getToPort() != null
-                            && graphicviewerlink.getToPort().getParent() == this))
+                            && graphicviewerlink.getToPort().getParent() == this)) {
                 return true;
+            }
         } else if (getCollapsedObject() != null
-                && !graphicviewerobject.isVisible() && !isExpanded())
+                && !graphicviewerobject.isVisible() && !isExpanded()) {
             return true;
+        }
         return false;
     }
 
@@ -447,34 +505,40 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                                 - (rectangle1.y + rectangle1.height)),
                 Math.max(0, (rectangle2.x + rectangle2.width)
                         - (rectangle1.x + rectangle1.width)));
-        if (isExpanded())
+        if (isExpanded()) {
             setInsets(insets);
-        else
+        } else {
             setCollapsedInsets(insets);
+        }
         return null;
     }
 
     public void layoutChildren(GraphicViewerObject graphicviewerobject) {
-        if (isInitializing())
+        if (isInitializing()) {
             return;
-        if (graphicviewerobject != null && graphicviewerobject == getHandle())
+        }
+        if (graphicviewerobject != null && graphicviewerobject == getHandle()) {
             return;
-        if (graphicviewerobject != null && graphicviewerobject == getPort())
+        }
+        if (graphicviewerobject != null && graphicviewerobject == getPort()) {
             return;
+        }
         layoutCollapsedObject();
         layoutLabel();
         layoutHandle();
         if (getHandle() != null && getLabel() != null
                 && getHandle().getLeft() == getLabel().getLeft()
-                && getHandle().getTop() == getLabel().getTop())
+                && getHandle().getTop() == getLabel().getTop()) {
             layoutLabel();
+        }
         layoutPort();
     }
 
     protected void layoutCollapsedObject() {
         GraphicViewerObject graphicviewerobject = getCollapsedObject();
-        if (graphicviewerobject == null)
+        if (graphicviewerobject == null) {
             return;
+        }
         Rectangle rectangle;
         if (isExpanded()) {
             rectangle = computeInsideMargins(graphicviewerobject);
@@ -490,8 +554,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     protected void layoutLabel() {
         GraphicViewerText graphicviewertext = getLabel();
-        if (graphicviewertext == null)
+        if (graphicviewertext == null) {
             return;
+        }
         Rectangle rectangle;
         int i;
         if (!isExpanded()) {
@@ -510,11 +575,12 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         Point point = getRectangleSpotLocation(rectangle, i, null);
         boolean flag = isInitializing();
         setInitializing(true);
-        a(graphicviewertext, i, point);
+        positionLabel(graphicviewertext, i, point);
         setInitializing(flag);
     }
 
-    private void a(GraphicViewerText graphicviewertext, int i, Point point) {
+    private void positionLabel(GraphicViewerText graphicviewertext, int i,
+            Point point) {
         if (i == 1) {
             graphicviewertext.setAlignment(i);
             graphicviewertext.setSpotLocation(7, point);
@@ -540,8 +606,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     protected void layoutHandle() {
-        if (!isExpanded())
+        if (!isExpanded()) {
             return;
+        }
         GraphicViewerSubGraphHandle graphicviewersubgraphhandle = getHandle();
         if (graphicviewersubgraphhandle != null) {
             Rectangle rectangle = computeInsideMargins(null);
@@ -551,7 +618,7 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     public void layoutPort() {
         GraphicViewerPort graphicviewerport = getPort();
-        if (graphicviewerport != null)
+        if (graphicviewerport != null) {
             if (getHandle() != null) {
                 Rectangle rectangle = getHandle().getBoundingRect();
                 graphicviewerport.setBoundingRect(rectangle);
@@ -561,6 +628,7 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 Rectangle rectangle1 = computeInsideMargins(null);
                 graphicviewerport.setTopLeft(rectangle1.x, rectangle1.y);
             }
+        }
     }
 
     public Dimension computeCollapsedSize(boolean flag) {
@@ -572,18 +640,21 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         }
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
             if (!computeCollapsedSizeSkip(graphicviewerobject)) {
                 Dimension dimension2 = graphicviewerobject.getSize();
                 GraphicViewerSubGraph graphicviewersubgraph = null;
-                if (graphicviewerobject instanceof GraphicViewerSubGraph)
+                if (graphicviewerobject instanceof GraphicViewerSubGraph) {
                     graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerobject;
-                if (graphicviewersubgraph != null)
+                }
+                if (graphicviewersubgraph != null) {
                     dimension2 = graphicviewersubgraph
                             .computeCollapsedSize(false);
+                }
                 dimension.width = Math.max(dimension.width, dimension2.width);
                 dimension.height = Math
                         .max(dimension.height, dimension2.height);
@@ -594,27 +665,34 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     protected boolean computeCollapsedSizeSkip(
             GraphicViewerObject graphicviewerobject) {
-        if (graphicviewerobject == getHandle())
+        if (graphicviewerobject == getHandle()) {
             return true;
-        if (graphicviewerobject == getLabel())
+        }
+        if (graphicviewerobject == getLabel()) {
             return true;
-        if (graphicviewerobject == getCollapsedObject())
+        }
+        if (graphicviewerobject == getCollapsedObject()) {
             return true;
-        if (graphicviewerobject instanceof GraphicViewerPort)
+        }
+        if (graphicviewerobject instanceof GraphicViewerPort) {
             return true;
-        if (graphicviewerobject instanceof GraphicViewerLink)
+        }
+        if (graphicviewerobject instanceof GraphicViewerLink) {
             return true;
-        if (graphicviewerobject.getPartner() instanceof GraphicViewerLabeledLink)
+        }
+        if (graphicviewerobject.getPartner() instanceof GraphicViewerLabeledLink) {
             return true;
+        }
         return getCollapsedObject() != null && !graphicviewerobject.isVisible();
     }
 
     protected Point computeReferencePoint() {
         Point point;
-        if (getHandle() != null)
+        if (getHandle() != null) {
             point = getHandle().getTopLeft();
-        else
+        } else {
             point = getTopLeft();
+        }
         return point;
     }
 
@@ -625,10 +703,12 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     public void collapse() {
-        if (getState() != 0)
+        if (getState() != 0) {
             return;
-        if (!isCollapsible())
+        }
+        if (!isCollapsible()) {
             return;
+        }
         setState(3);
         setInitializing(true);
         foredate(40);
@@ -665,17 +745,21 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     protected void saveChildBounds(GraphicViewerObject graphicviewerobject,
             Rectangle rectangle) {
-        if (graphicviewerobject == getHandle())
+        if (graphicviewerobject == getHandle()) {
             return;
-        if (graphicviewerobject == getLabel())
+        }
+        if (graphicviewerobject == getLabel()) {
             return;
-        if (graphicviewerobject == getCollapsedObject())
+        }
+        if (graphicviewerobject == getCollapsedObject()) {
             return;
-        if (graphicviewerobject instanceof GraphicViewerPort)
+        }
+        if (graphicviewerobject instanceof GraphicViewerPort) {
             return;
+        }
         if (graphicviewerobject instanceof GraphicViewerLink) {
             GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject;
-            ArrayList<?> arraylist = graphicviewerlink.copyPointsArray();
+            ArrayList arraylist = graphicviewerlink.copyPointsArray();
             for (int i = 0; i < arraylist.size(); i++) {
                 Point point = (Point) arraylist.get(i);
                 point.x -= rectangle.x;
@@ -695,21 +779,26 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     protected void collapseChild(GraphicViewerObject graphicviewerobject,
             Rectangle rectangle) {
-        if (graphicviewerobject == getHandle())
+        if (graphicviewerobject == getHandle()) {
             return;
-        if (graphicviewerobject == getLabel())
+        }
+        if (graphicviewerobject == getLabel()) {
             return;
-        if (graphicviewerobject == getCollapsedObject())
+        }
+        if (graphicviewerobject == getCollapsedObject()) {
             return;
-        if (graphicviewerobject instanceof GraphicViewerPort)
+        }
+        if (graphicviewerobject instanceof GraphicViewerPort) {
             return;
+        }
         if (!(graphicviewerobject instanceof GraphicViewerLink)) {
             GraphicViewerSubGraph graphicviewersubgraph = null;
-            if (graphicviewerobject instanceof GraphicViewerSubGraph)
+            if (graphicviewerobject instanceof GraphicViewerSubGraph) {
                 graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerobject;
+            }
             if (graphicviewersubgraph != null
                     && graphicviewersubgraph.isExpanded()) {
-                graphicviewersubgraph._mthint(true);
+                graphicviewersubgraph.setWasExpanded(true);
                 graphicviewersubgraph.collapse();
             }
             Point point = new Point(rectangle.x + rectangle.width / 2,
@@ -720,19 +809,22 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     protected void finishCollapse(Rectangle rectangle) {
-        if (getCollapsedObject() != null)
+        if (getCollapsedObject() != null) {
             getCollapsedObject().setVisible(true);
+        }
         if (isResizable()) {
-            _mthnew(true);
+            setExpandedResizable(true);
             setResizable(false);
         }
     }
 
     public void expand() {
-        if (getState() != 1)
+        if (getState() != 1) {
             return;
-        if (!isCollapsible())
+        }
+        if (!isCollapsible()) {
             return;
+        }
         setState(2);
         setInitializing(true);
         foredate(40);
@@ -742,33 +834,39 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         Point point = computeReferencePoint();
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            if (!(graphicviewerobject instanceof GraphicViewerLink))
+            if (!(graphicviewerobject instanceof GraphicViewerLink)) {
                 expandChild(graphicviewerobject, point);
+            }
         } while (true);
         graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject1 = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPos(graphicviewerlistposition);
-            if (graphicviewerobject1 instanceof GraphicViewerLink)
+            if (graphicviewerobject1 instanceof GraphicViewerLink) {
                 expandChild(graphicviewerobject1, point);
+            }
         } while (true);
         boolean flag = getSavedBounds().size() <= 1;
         Rectangle rectangle = null;
-        if (getSavedBounds().containsKey(this))
+        if (getSavedBounds().containsKey(this)) {
             rectangle = (Rectangle) getSavedBounds().get(this);
+        }
         finishExpand(point);
         setInitializing(false);
         setState(0);
         layoutChildren(null);
         setBoundingRectInvalid(true);
-        if (flag && rectangle != null)
+        if (flag && rectangle != null) {
             setTopLeft(rectangle.x, rectangle.y);
+        }
         update(2414, 0, null);
         update(2415, 0, null);
         update(40, 0, null);
@@ -779,15 +877,16 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     protected void expandChild(GraphicViewerObject graphicviewerobject,
             Point point) {
-        if (graphicviewerobject == getCollapsedObject())
+        if (graphicviewerobject == getCollapsedObject()) {
             return;
+        }
         graphicviewerobject.setVisible(true);
         if (graphicviewerobject instanceof GraphicViewerLink) {
             GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerobject;
             if (getSavedPaths().containsKey(graphicviewerlink)) {
-                ArrayList<?> arraylist = (ArrayList<?>) getSavedPaths().get(
+                ArrayList arraylist = (ArrayList) getSavedPaths().get(
                         graphicviewerlink);
-                ArrayList<Point> arraylist1 = new ArrayList<Point>();
+                ArrayList arraylist1 = new ArrayList();
                 for (int i = 0; i < arraylist.size(); i++) {
                     Point point1 = (Point) arraylist.get(i);
                     arraylist1.add(new Point(point1.x + point.x, point1.y
@@ -801,8 +900,8 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                     graphicviewerobject);
             if (graphicviewerobject instanceof GraphicViewerSubGraph) {
                 GraphicViewerSubGraph graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerobject;
-                if (graphicviewersubgraph.n()) {
-                    graphicviewersubgraph._mthint(false);
+                if (graphicviewersubgraph.isWasExpanded()) {
+                    graphicviewersubgraph.setWasExpanded(false);
                     graphicviewersubgraph.expand();
                 }
                 graphicviewersubgraph.setTopLeft(point.x + rectangle.x, point.y
@@ -816,10 +915,11 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     protected void finishExpand(Point point) {
-        if (getCollapsedObject() != null)
+        if (getCollapsedObject() != null) {
             getCollapsedObject().setVisible(false);
-        if (p()) {
-            _mthnew(false);
+        }
+        if (isExpandedResizable()) {
+            setExpandedResizable(false);
             setResizable(true);
         }
         getSavedBounds().clear();
@@ -827,196 +927,208 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     public void toggle() {
-        if (getState() == 0)
+        if (getState() == 0) {
             collapse();
-        else if (getState() == 1)
+        } else if (getState() == 1) {
             expand();
+        }
     }
 
     public void expandAll() {
         expand();
         GraphicViewerListPosition graphicviewerlistposition = getFirstObjectPos();
         do {
-            if (graphicviewerlistposition == null)
+            if (graphicviewerlistposition == null) {
                 break;
+            }
             GraphicViewerObject graphicviewerobject = getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = getNextObjectPosAtTop(graphicviewerlistposition);
-            if (graphicviewerobject instanceof GraphicViewerSubGraph)
+            if (graphicviewerobject instanceof GraphicViewerSubGraph) {
                 ((GraphicViewerSubGraph) graphicviewerobject).expandAll();
+            }
         } while (true);
     }
 
-    public HashMap<Object, Serializable> getSavedBounds() {
-        return c3;
+    public HashMap getSavedBounds() {
+        return myBoundsHashtable;
     }
 
-    public HashMap<Object, Serializable> getSavedPaths() {
-        return cU;
+    public HashMap getSavedPaths() {
+        return myPathsHashtable;
     }
 
     public GraphicViewerSubGraphHandle getHandle() {
-        return cY;
+        return myHandle;
     }
 
     public GraphicViewerText getLabel() {
-        return cQ;
+        return myLabel;
     }
 
     public void setLabel(GraphicViewerText graphicviewertext) {
-        GraphicViewerText graphicviewertext1 = cQ;
+        GraphicViewerText graphicviewertext1 = myLabel;
         if (graphicviewertext1 != graphicviewertext) {
-            if (graphicviewertext1 != null)
+            if (graphicviewertext1 != null) {
                 removeObject(graphicviewertext1);
-            cQ = graphicviewertext;
-            if (graphicviewertext != null)
+            }
+            myLabel = graphicviewertext;
+            if (graphicviewertext != null) {
                 addObjectAtTail(graphicviewertext);
+            }
             update(2411, 0, graphicviewertext1);
         }
     }
 
     public GraphicViewerPort getPort() {
-        return cX;
+        return myPort;
     }
 
     public void setPort(GraphicViewerPort graphicviewerport) {
-        GraphicViewerPort graphicviewerport1 = cX;
+        GraphicViewerPort graphicviewerport1 = myPort;
         if (graphicviewerport1 != graphicviewerport) {
-            if (graphicviewerport1 != null)
+            if (graphicviewerport1 != null) {
                 removeObject(graphicviewerport1);
-            cX = graphicviewerport;
-            if (graphicviewerport != null)
+            }
+            myPort = graphicviewerport;
+            if (graphicviewerport != null) {
                 addObjectAtHead(graphicviewerport);
+            }
             update(2412, 0, graphicviewerport1);
         }
     }
 
     public GraphicViewerObject getCollapsedObject() {
-        return cL;
+        return myCollapsedObject;
     }
 
     public void setCollapsedObject(GraphicViewerObject graphicviewerobject) {
-        GraphicViewerObject graphicviewerobject1 = cL;
+        GraphicViewerObject graphicviewerobject1 = myCollapsedObject;
         if (graphicviewerobject1 != graphicviewerobject) {
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 removeObject(graphicviewerobject1);
-            cL = graphicviewerobject;
-            if (graphicviewerobject != null)
+            }
+            myCollapsedObject = graphicviewerobject;
+            if (graphicviewerobject != null) {
                 addObjectAtHead(graphicviewerobject);
+            }
             update(2410, 0, graphicviewerobject1);
-            if (getCollapsedObject() != null && graphicviewerobject1 != null)
+            if (getCollapsedObject() != null && graphicviewerobject1 != null) {
                 getCollapsedObject().setVisible(
                         graphicviewerobject1.isVisible());
+            }
         }
     }
 
     public Color getBackgroundColor() {
-        return cV;
+        return myBackgroundColor;
     }
 
     public void setBackgroundColor(Color color) {
-        Color color1 = cV;
+        Color color1 = myBackgroundColor;
         if (color1 == null && color != null || !color1.equals(color)) {
-            cV = color;
+            myBackgroundColor = color;
             update(2401, 0, color1);
         }
     }
 
     public void setOpacity(double d) {
-        double d1 = cZ;
+        double d1 = myOpacity;
         if (d1 != d && d >= 0.0D && d <= 1.0D) {
-            cZ = d;
+            myOpacity = d;
             update(2407, 0, new Double(d1));
         }
     }
 
     public double getOpacity() {
-        return cZ;
+        return myOpacity;
     }
 
     public GraphicViewerPen getBorderPen() {
-        return cP;
+        return myBorderPen;
     }
 
     public void setBorderPen(GraphicViewerPen graphicviewerpen) {
-        GraphicViewerPen graphicviewerpen1 = cP;
+        GraphicViewerPen graphicviewerpen1 = myBorderPen;
         if (graphicviewerpen1 == null && graphicviewerpen != null
                 || !graphicviewerpen1.equals(graphicviewerpen)) {
-            cP = graphicviewerpen;
+            myBorderPen = graphicviewerpen;
             update(2402, 0, graphicviewerpen1);
         }
     }
 
     public Insets getInsets() {
-        return c1;
+        return myInsets;
     }
 
     public void setInsets(Insets insets) {
-        Insets insets1 = c1;
+        Insets insets1 = myInsets;
         if (!insets1.equals(insets) && insets.top >= 0 && insets.left >= 0
                 && insets.bottom >= 0 && insets.right >= 0) {
             update();
             Insets insets2 = new Insets(insets1.top, insets1.left,
                     insets1.bottom, insets1.right);
-            c1.top = insets.top;
-            c1.left = insets.left;
-            c1.bottom = insets.bottom;
-            c1.right = insets.right;
+            myInsets.top = insets.top;
+            myInsets.left = insets.left;
+            myInsets.bottom = insets.bottom;
+            myInsets.right = insets.right;
             update(2406, 0, insets2);
         }
     }
 
     public Insets getCollapsedInsets() {
-        return c0;
+        return myCollapsedInsets;
     }
 
     public void setCollapsedInsets(Insets insets) {
-        Insets insets1 = c0;
+        Insets insets1 = myCollapsedInsets;
         if (!insets1.equals(insets) && insets.top >= 0 && insets.left >= 0
                 && insets.bottom >= 0 && insets.right >= 0) {
             update();
             Insets insets2 = new Insets(insets1.top, insets1.left,
                     insets1.bottom, insets1.right);
-            c0.top = insets.top;
-            c0.left = insets.left;
-            c0.bottom = insets.bottom;
-            c0.right = insets.right;
+            myCollapsedInsets.top = insets.top;
+            myCollapsedInsets.left = insets.left;
+            myCollapsedInsets.bottom = insets.bottom;
+            myCollapsedInsets.right = insets.right;
             update(2406, 0, insets2);
         }
     }
 
     public int getLabelSpot() {
-        return cO;
+        return myLabelSpot;
     }
 
     public void setLabelSpot(int i) {
-        _mthdo(i, false);
+        setLabelSpot(i, false);
     }
 
-    private void _mthdo(int i, boolean flag) {
-        int j = cO;
+    private void setLabelSpot(int i, boolean flag) {
+        int j = myLabelSpot;
         if (j != i) {
-            cO = i;
+            myLabelSpot = i;
             update(2403, j, null);
-            if (!flag)
+            if (!flag) {
                 layoutChildren(null);
+            }
         }
     }
 
     public int getCollapsedLabelSpot() {
-        return c2;
+        return myCollapsedLabelSpot;
     }
 
     public void setCollapsedLabelSpot(int i) {
-        _mthif(i, false);
+        setCollapsedLabelSpot(i, false);
     }
 
-    private void _mthif(int i, boolean flag) {
-        int j = c2;
+    private void setCollapsedLabelSpot(int i, boolean flag) {
+        int j = myCollapsedLabelSpot;
         if (j != i) {
-            c2 = i;
+            myCollapsedLabelSpot = i;
             update(2408, j, null);
-            if (!flag)
+            if (!flag) {
                 layoutChildren(null);
+            }
         }
     }
 
@@ -1025,13 +1137,13 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     protected int getState() {
-        return cT;
+        return myState;
     }
 
     protected void setState(int i) {
-        int j = cT;
+        int j = myState;
         if (j != i) {
-            cT = i;
+            myState = i;
             Rectangle rectangle = getBoundingRect();
             update(2413, j, new Rectangle(rectangle.x, rectangle.y,
                     rectangle.width, rectangle.height));
@@ -1039,48 +1151,51 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     public void setCollapsible(boolean flag) {
-        boolean flag1 = (g() & 0x20000) != 0;
+        boolean flag1 = (getInternalFlags() & 0x20000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x20000);
-            else
-                _mthfor(g() & 0xfffdffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x20000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffdffff);
+            }
             update(2405, flag1 ? 1 : 0, null);
         }
     }
 
     public boolean isCollapsible() {
-        return (g() & 0x20000) != 0;
+        return (getInternalFlags() & 0x20000) != 0;
     }
 
-    void _mthnew(boolean flag) {
-        boolean flag1 = (g() & 0x40000) != 0;
+    public void setWasExpanded(boolean paramBoolean) {
+        boolean bool = (getInternalFlags() & 0x80000) != 0;
+        if (bool != paramBoolean) {
+            if (paramBoolean) {
+                setInternalFlags(getInternalFlags() | 0x80000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xFFF7FFFF);
+            }
+            update(2416, bool ? 1 : 0, null);
+        }
+    }
+
+    public boolean isWasExpanded() {
+        return (getInternalFlags() & 0x80000) != 0;
+    }
+
+    void setExpandedResizable(boolean flag) {
+        boolean flag1 = (getInternalFlags() & 0x40000) != 0;
         if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x40000);
-            else
-                _mthfor(g() & 0xfffbffff);
+            if (flag) {
+                setInternalFlags(getInternalFlags() | 0x40000);
+            } else {
+                setInternalFlags(getInternalFlags() & 0xfffbffff);
+            }
             update(2417, flag1 ? 1 : 0, null);
         }
     }
 
-    boolean p() {
-        return (g() & 0x40000) != 0;
-    }
-
-    void _mthint(boolean flag) {
-        boolean flag1 = (g() & 0x80000) != 0;
-        if (flag1 != flag) {
-            if (flag)
-                _mthfor(g() | 0x80000);
-            else
-                _mthfor(g() & 0xfff7ffff);
-            update(2416, flag1 ? 1 : 0, null);
-        }
-    }
-
-    boolean n() {
-        return (g() & 0x80000) != 0;
+    boolean isExpandedResizable() {
+        return (getInternalFlags() & 0x40000) != 0;
     }
 
     public void copyOldValueForUndo(
@@ -1091,10 +1206,11 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 if (!graphicviewerdocumentchangededit.isBeforeChanging()) {
                     GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit1 = graphicviewerdocumentchangededit
                             .findBeforeChangingEdit();
-                    if (graphicviewerdocumentchangededit1 != null)
+                    if (graphicviewerdocumentchangededit1 != null) {
                         graphicviewerdocumentchangededit
                                 .setOldValue(graphicviewerdocumentchangededit1
                                         .getNewValue());
+                    }
                 }
                 return;
         }
@@ -1173,11 +1289,13 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 return;
 
             case 2417 :
-                graphicviewerdocumentchangededit.setNewValueBoolean(p());
+                graphicviewerdocumentchangededit
+                        .setNewValueBoolean(isExpandedResizable());
                 return;
 
             case 2416 :
-                graphicviewerdocumentchangededit.setNewValueBoolean(n());
+                graphicviewerdocumentchangededit
+                        .setNewValueBoolean(isWasExpanded());
                 return;
 
             case 2404 :
@@ -1206,7 +1324,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 return;
 
             case 2403 :
-                _mthdo(graphicviewerdocumentchangededit.getValueInt(flag), true);
+                setLabelSpot(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
+                        true);
                 return;
 
             case 2405 :
@@ -1225,7 +1345,9 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 return;
 
             case 2408 :
-                _mthif(graphicviewerdocumentchangededit.getValueInt(flag), true);
+                setCollapsedLabelSpot(
+                        graphicviewerdocumentchangededit.getValueInt(flag),
+                        true);
                 return;
 
             case 2409 :
@@ -1249,29 +1371,33 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 return;
 
             case 2414 :
-                HashMap<Object, Serializable> hashmap = (HashMap<Object, Serializable>) graphicviewerdocumentchangededit
+                HashMap hashmap = (HashMap) graphicviewerdocumentchangededit
                         .getValue(flag);
-                if (hashmap != null)
-                    c3 = (HashMap<Object, Serializable>) hashmap.clone();
-                else
-                    c3.clear();
+                if (hashmap != null) {
+                    myBoundsHashtable = (HashMap) hashmap.clone();
+                } else {
+                    myBoundsHashtable.clear();
+                }
                 return;
 
             case 2415 :
-                HashMap<Object, Serializable> hashmap1 = (HashMap<Object, Serializable>) graphicviewerdocumentchangededit
+                HashMap hashmap1 = (HashMap) graphicviewerdocumentchangededit
                         .getValue(flag);
-                if (hashmap1 != null)
-                    cU = (HashMap<Object, Serializable>) hashmap1.clone();
-                else
-                    cU.clear();
+                if (hashmap1 != null) {
+                    myPathsHashtable = (HashMap) hashmap1.clone();
+                } else {
+                    myPathsHashtable.clear();
+                }
                 return;
 
             case 2417 :
-                _mthnew(graphicviewerdocumentchangededit.getValueBoolean(flag));
+                setExpandedResizable(graphicviewerdocumentchangededit
+                        .getValueBoolean(flag));
                 return;
 
             case 2416 :
-                _mthint(graphicviewerdocumentchangededit.getValueBoolean(flag));
+                setWasExpanded(graphicviewerdocumentchangededit
+                        .getValueBoolean(flag));
                 return;
 
             case 2404 :
@@ -1283,28 +1409,30 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
 
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
-        if (s.equals("subgraphlabel"))
-            cQ = (GraphicViewerText) obj;
-        else if (s.equals("subgraphhandle"))
-            cY = (GraphicViewerSubGraphHandle) obj;
-        else if (s.equals("subgraphport"))
-            cX = (GraphicViewerPort) obj;
-        else if (s.equals("collapsedobject"))
-            cL = (GraphicViewerObject) obj;
-        else if (s.equals("borderpen"))
-            cP = (GraphicViewerPen) obj;
-        else if (s.equals("hashtableobjs")) {
+        if (s.equals("subgraphlabel")) {
+            myLabel = (GraphicViewerText) obj;
+        } else if (s.equals("subgraphhandle")) {
+            myHandle = (GraphicViewerSubGraphHandle) obj;
+        } else if (s.equals("subgraphport")) {
+            myPort = (GraphicViewerPort) obj;
+        } else if (s.equals("collapsedobject")) {
+            myCollapsedObject = (GraphicViewerObject) obj;
+        } else if (s.equals("borderpen")) {
+            myBorderPen = (GraphicViewerPen) obj;
+        } else if (s.equals("hashtableobjs")) {
             Integer integer = null;
-            Iterator<?> iterator = getSavedBounds().entrySet().iterator();
+            Iterator iterator = getSavedBounds().entrySet().iterator();
             do {
-                if (!iterator.hasNext())
+                if (!iterator.hasNext()) {
                     break;
-                Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+                }
+                Entry entry = (Entry) iterator.next();
                 if (entry.getKey() instanceof Integer) {
                     Integer integer1 = (Integer) entry.getKey();
                     if (integer == null
-                            || integer1.intValue() < integer.intValue())
+                            || integer1.intValue() < integer.intValue()) {
                         integer = integer1;
+                    }
                 }
             } while (true);
             if (integer != null) {
@@ -1321,14 +1449,15 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerSubGraph",
                             domelement);
-            domelement1.setAttribute("labelspot", Integer.toString(cO));
             domelement1
-                    .setAttribute("collapsedlabelspot", Integer.toString(c2));
-            if (cV != null) {
-                int i = cV.getRed();
-                int j = cV.getGreen();
-                int k = cV.getBlue();
-                int l = cV.getAlpha();
+                    .setAttribute("labelspot", Integer.toString(myLabelSpot));
+            domelement1.setAttribute("collapsedlabelspot",
+                    Integer.toString(myCollapsedLabelSpot));
+            if (myBackgroundColor != null) {
+                int i = myBackgroundColor.getRed();
+                int j = myBackgroundColor.getGreen();
+                int k = myBackgroundColor.getBlue();
+                int l = myBackgroundColor.getAlpha();
                 String s4 = "rgbalpha(" + Integer.toString(i) + ","
                         + Integer.toString(j) + "," + Integer.toString(k) + ","
                         + Integer.toString(l) + ")";
@@ -1338,8 +1467,10 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             domelement1.setAttribute("expanded", isExpanded()
                     ? "true"
                     : "false");
-            domelement1.setAttribute("wasexpanded", n() ? "true" : "false");
-            domelement1.setAttribute("expandedresizable", p()
+            domelement1.setAttribute("wasexpanded", isWasExpanded()
+                    ? "true"
+                    : "false");
+            domelement1.setAttribute("expandedresizable", isExpandedResizable()
                     ? "true"
                     : "false");
             domelement1.setAttribute("collapsible", isCollapsible()
@@ -1361,32 +1492,39 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                     Integer.toString(getCollapsedInsets().bottom));
             domelement1.setAttribute("collapsed_insets_right",
                     Integer.toString(getCollapsedInsets().right));
-            if (cQ != null)
-                domdoc.registerReferencingNode(domelement1, "subgraphlabel", cQ);
-            if (cY != null)
+            if (myLabel != null) {
+                domdoc.registerReferencingNode(domelement1, "subgraphlabel",
+                        myLabel);
+            }
+            if (myHandle != null) {
                 domdoc.registerReferencingNode(domelement1, "subgraphhandle",
-                        cY);
-            if (cX != null)
-                domdoc.registerReferencingNode(domelement1, "subgraphport", cX);
-            if (cL != null)
+                        myHandle);
+            }
+            if (myPort != null) {
+                domdoc.registerReferencingNode(domelement1, "subgraphport",
+                        myPort);
+            }
+            if (myCollapsedObject != null) {
                 domdoc.registerReferencingNode(domelement1, "collapsedobject",
-                        cL);
-            if (cP != null) {
-                if (!domdoc.isRegisteredReference(cP)) {
+                        myCollapsedObject);
+            }
+            if (myBorderPen != null) {
+                if (!domdoc.isRegisteredReference(myBorderPen)) {
                     domelement1.setAttribute("embeddedborderpen", "true");
                     IDomElement domelement2 = domdoc.createElement("g");
                     domelement1.appendChild(domelement2);
-                    cP.SVGWriteObject(domdoc, domelement2);
+                    myBorderPen.SVGWriteObject(domdoc, domelement2);
                 }
-                domdoc.registerReferencingNode(domelement1, "borderpen", cP);
+                domdoc.registerReferencingNode(domelement1, "borderpen",
+                        myBorderPen);
             }
             String s = "";
             String s1 = "";
             String s2 = "";
             String s3 = "";
-            for (Iterator<?> iterator = getSavedBounds().entrySet().iterator(); iterator
+            for (Iterator iterator = getSavedBounds().entrySet().iterator(); iterator
                     .hasNext();) {
-                Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
+                Entry entry = (Entry) iterator.next();
                 GraphicViewerObject graphicviewerobject = (GraphicViewerObject) entry
                         .getKey();
                 Rectangle rectangle = (Rectangle) entry.getValue();
@@ -1415,13 +1553,15 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
-            cO = Integer.parseInt(domelement1.getAttribute("labelspot"));
+            myLabelSpot = Integer.parseInt(domelement1
+                    .getAttribute("labelspot"));
             String s = domelement1.getAttribute("collapsedlabelspot");
-            if (s.length() > 0)
-                c2 = Integer.parseInt(s);
+            if (s.length() > 0) {
+                myCollapsedLabelSpot = Integer.parseInt(s);
+            }
             String s1 = domelement1.getAttribute("backgroundcolor");
             if (s1.length() > 0 && s1.startsWith("rgbalpha")) {
                 int i = s1.indexOf("(") + 1;
@@ -1436,48 +1576,62 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                 i = j + 1;
                 j = s1.indexOf(")", i);
                 String s10 = s1.substring(i, j);
-                cV = new Color(Integer.parseInt(s4), Integer.parseInt(s6),
-                        Integer.parseInt(s8), Integer.parseInt(s10));
+                myBackgroundColor = new Color(Integer.parseInt(s4),
+                        Integer.parseInt(s6), Integer.parseInt(s8),
+                        Integer.parseInt(s10));
             }
             String s2 = domelement.getAttribute("opacity");
-            if (s2.length() > 0)
-                cZ = Double.parseDouble(s2);
+            if (s2.length() > 0) {
+                myOpacity = Double.parseDouble(s2);
+            }
             String s3 = domelement.getAttribute("expanded");
-            if (s3.length() > 0)
+            if (s3.length() > 0) {
                 setState(s3.equals("true") ? 0 : 1);
+            }
             s3 = domelement.getAttribute("wasexpanded");
-            if (s3.length() > 0)
-                _mthint(s3.equals("true"));
+            if (s3.length() > 0) {
+                setWasExpanded(s3.equals("true"));
+            }
             s3 = domelement.getAttribute("expandedresizable");
-            if (s3.length() > 0)
-                _mthnew(s3.equals("true"));
+            if (s3.length() > 0) {
+                setExpandedResizable(s3.equals("true"));
+            }
             s3 = domelement.getAttribute("collapsible");
-            if (s3.length() > 0)
+            if (s3.length() > 0) {
                 setCollapsible(s3.equals("true"));
+            }
             String s5 = domelement.getAttribute("insets_top");
-            if (s5.length() > 0)
-                c1.top = Integer.parseInt(s5);
+            if (s5.length() > 0) {
+                myInsets.top = Integer.parseInt(s5);
+            }
             String s7 = domelement.getAttribute("insets_left");
-            if (s7.length() > 0)
-                c1.left = Integer.parseInt(s7);
+            if (s7.length() > 0) {
+                myInsets.left = Integer.parseInt(s7);
+            }
             String s9 = domelement.getAttribute("insets_bottom");
-            if (s9.length() > 0)
-                c1.bottom = Integer.parseInt(s9);
+            if (s9.length() > 0) {
+                myInsets.bottom = Integer.parseInt(s9);
+            }
             String s11 = domelement.getAttribute("insets_right");
-            if (s11.length() > 0)
-                c1.right = Integer.parseInt(s11);
+            if (s11.length() > 0) {
+                myInsets.right = Integer.parseInt(s11);
+            }
             String s12 = domelement.getAttribute("collapsed_insets_top");
-            if (s12.length() > 0)
-                c0.top = Integer.parseInt(s12);
+            if (s12.length() > 0) {
+                myCollapsedInsets.top = Integer.parseInt(s12);
+            }
             String s13 = domelement.getAttribute("collapsed_insets_left");
-            if (s13.length() > 0)
-                c0.left = Integer.parseInt(s13);
+            if (s13.length() > 0) {
+                myCollapsedInsets.left = Integer.parseInt(s13);
+            }
             String s14 = domelement.getAttribute("collapsed_insets_bottom");
-            if (s14.length() > 0)
-                c0.bottom = Integer.parseInt(s14);
+            if (s14.length() > 0) {
+                myCollapsedInsets.bottom = Integer.parseInt(s14);
+            }
             String s15 = domelement.getAttribute("collapsed_insets_right");
-            if (s15.length() > 0)
-                c0.right = Integer.parseInt(s15);
+            if (s15.length() > 0) {
+                myCollapsedInsets.right = Integer.parseInt(s15);
+            }
             String s16 = domelement1.getAttribute("subgraphlabel");
             domdoc.registerReferencingObject(this, "subgraphlabel", s16);
             String s17 = domelement1.getAttribute("subgraphhandle");
@@ -1486,9 +1640,10 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             domdoc.registerReferencingObject(this, "subgraphport", s18);
             String s19 = domelement1.getAttribute("collapsedobject");
             domdoc.registerReferencingObject(this, "collapsedobject", s19);
-            if (domelement1.getAttribute("embeddedborderpen").equals("true"))
+            if (domelement1.getAttribute("embeddedborderpen").equals("true")) {
                 domdoc.SVGTraverseChildren(graphicviewerdocument, domelement1,
                         null, false);
+            }
             String s20 = domelement1.getAttribute("borderpen");
             domdoc.registerReferencingObject(this, "borderpen", s20);
             String s22;
@@ -1496,13 +1651,15 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
                     .length() > 0; domdoc.registerReferencingObject(this,
                     "hashtableobjs", s22)) {
                 int k = s21.indexOf(" ");
-                if (k == -1)
+                if (k == -1) {
                     k = s21.length();
+                }
                 s22 = s21.substring(0, k);
-                if (k >= s21.length())
+                if (k >= s21.length()) {
                     s21 = "";
-                else
+                } else {
                     s21 = s21.substring(k + 1);
+                }
             }
 
             int l = 0;
@@ -1514,37 +1671,45 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
             for (; s23.length() > 0 && s24.length() > 0; getSavedBounds().put(
                     new Integer(l++), rectangle)) {
                 int i1 = s23.indexOf(" ");
-                if (i1 == -1)
+                if (i1 == -1) {
                     i1 = s23.length();
+                }
                 String s27 = s23.substring(0, i1);
-                if (i1 >= s23.length())
+                if (i1 >= s23.length()) {
                     s23 = "";
-                else
+                } else {
                     s23 = s23.substring(i1 + 1);
+                }
                 i1 = s24.indexOf(" ");
-                if (i1 == -1)
+                if (i1 == -1) {
                     i1 = s24.length();
+                }
                 String s28 = s24.substring(0, i1);
-                if (i1 >= s24.length())
+                if (i1 >= s24.length()) {
                     s24 = "";
-                else
+                } else {
                     s24 = s24.substring(i1 + 1);
+                }
                 i1 = s25.indexOf(" ");
-                if (i1 == -1)
+                if (i1 == -1) {
                     i1 = s25.length();
+                }
                 String s29 = s25.substring(0, i1);
-                if (i1 >= s25.length())
+                if (i1 >= s25.length()) {
                     s25 = "";
-                else
+                } else {
                     s25 = s25.substring(i1 + 1);
+                }
                 i1 = s26.indexOf(" ");
-                if (i1 == -1)
+                if (i1 == -1) {
                     i1 = s26.length();
+                }
                 String s30 = s26.substring(0, i1);
-                if (i1 >= s26.length())
+                if (i1 >= s26.length()) {
                     s26 = "";
-                else
+                } else {
                     s26 = s26.substring(i1 + 1);
+                }
                 rectangle = new Rectangle(Integer.parseInt(s27),
                         Integer.parseInt(s28), Integer.parseInt(s29),
                         Integer.parseInt(s30));
@@ -1555,42 +1720,4 @@ public class GraphicViewerSubGraph extends GraphicViewerSubGraphBase {
         }
         return domelement.getNextSibling();
     }
-
-    public static final int StateExpanded = 0;
-    public static final int StateCollapsed = 1;
-    public static final int StateExpanding = 2;
-    public static final int StateCollapsing = 3;
-    public static final int ChangedBackgroundColor = 2401;
-    public static final int ChangedBorderPen = 2402;
-    public static final int ChangedLabelSpot = 2403;
-    public static final int ChangedCollapsible = 2405;
-    public static final int ChangedInsets = 2406;
-    public static final int ChangedOpacity = 2407;
-    public static final int ChangedCollapsedLabelSpot = 2408;
-    public static final int ChangedCollapsedInsets = 2409;
-    public static final int ChangedCollapsedObject = 2410;
-    public static final int ChangedLabel = 2411;
-    public static final int ChangedPort = 2412;
-    public static final int ChangedState = 2413;
-    public static final int ChangedSavedBounds = 2414;
-    public static final int ChangedSavedPaths = 2415;
-    public static final int ChangedWasExpanded = 2416;
-    public static final int ChangedExpandedResizable = 2417;
-    private int cT;
-    private GraphicViewerSubGraphHandle cY;
-    private GraphicViewerText cQ;
-    private GraphicViewerPort cX;
-    private GraphicViewerObject cL;
-    private Color cV;
-    private double cZ;
-    private GraphicViewerPen cP;
-    private int cO;
-    private int c2;
-    private Insets c1;
-    private Insets c0;
-
-    private HashMap<Object, Serializable> c3;
-
-    private HashMap<Object, Serializable> cU;
-    private transient Rectangle cM;
 }

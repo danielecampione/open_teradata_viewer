@@ -19,8 +19,10 @@
 package net.sourceforge.open_teradata_viewer.graphic_viewer;
 
 import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
+import java.awt.dnd.DragGestureRecognizer;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
@@ -37,54 +39,53 @@ import javax.swing.JList;
  * @author D. Campione
  *
  */
-public class OTVList extends JList<Object>
+public class OTVList extends JList
         implements
             DragSourceListener,
             DragGestureListener {
 
     private static final long serialVersionUID = -4864290838503898544L;
 
-    public OTVList() {
-        myDragSource = new DragSource();
-        myDragSource.createDefaultDragGestureRecognizer(this, 3, this);
-        addMouseListener(new MouseAdapter() {
-
-            public void mouseClicked(MouseEvent mouseevent) {
-                if (mouseevent.getClickCount() == 2) {
-                    int i = locationToIndex(mouseevent.getPoint());
-                    AppAction appaction = (AppAction) getModel()
-                            .getElementAt(i);
-                    appaction.actionPerformed(null);
-                }
-            }
-
-        });
+    public void dragDropEnd(DragSourceDropEvent e) {
     }
-
-    public void dragGestureRecognized(DragGestureEvent draggestureevent) {
-        AppAction appaction = (AppAction) getSelectedValue();
-        if (appaction != null) {
-            StringSelection stringselection = new StringSelection(
-                    appaction.toString());
-            draggestureevent.startDrag(DragSource.DefaultCopyDrop,
-                    stringselection, this);
-        }
+    public void dragEnter(DragSourceDragEvent e) {
     }
-
-    public void dragDropEnd(DragSourceDropEvent dragsourcedropevent) {
+    public void dragExit(DragSourceEvent e) {
     }
-
-    public void dragEnter(DragSourceDragEvent dragsourcedragevent) {
+    public void dragOver(DragSourceDragEvent e) {
     }
-
-    public void dragExit(DragSourceEvent dragsourceevent) {
-    }
-
-    public void dragOver(DragSourceDragEvent dragsourcedragevent) {
-    }
-
-    public void dropActionChanged(DragSourceDragEvent dragsourcedragevent) {
+    public void dropActionChanged(DragSourceDragEvent e) {
     }
 
     private DragSource myDragSource;
+    private DragGestureRecognizer myRecognizer;
+
+    public OTVList() {
+        myDragSource = new DragSource();
+        myRecognizer = myDragSource.createDefaultDragGestureRecognizer(this,
+                DnDConstants.ACTION_COPY_OR_MOVE, this);
+        // If the user double-clicks on a list item, execute the item's action
+        // which will presumably create something in the main view
+        addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = locationToIndex(e.getPoint());
+                    AppAction item = (AppAction) getModel().getElementAt(index);
+                    item.actionPerformed(null);
+                }
+            }
+        });
+    }
+
+    // Users can drag an item from the list to drop it on the main view, thereby
+    // invoking the action. Represent the item selected for the drag-and-drop
+    // transfer by using a StringSelection. The main view will interpret the
+    // string and determine the action to perform
+    public void dragGestureRecognized(DragGestureEvent e) {
+        AppAction item = (AppAction) getSelectedValue();
+        if (item != null) {
+            StringSelection sel = new StringSelection(item.toString());
+            e.startDrag(DragSource.DefaultCopyDrop, sel, this);
+        }
+    }
 }

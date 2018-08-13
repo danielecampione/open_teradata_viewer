@@ -27,8 +27,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.ButtonGroup;
@@ -53,56 +51,51 @@ public class GridOptionsDialog extends JDialog {
 
     private static final long serialVersionUID = 3486810311289326513L;
 
-    public GridOptionsDialog(Frame frame, String s, boolean flag,
-            GraphicViewerView graphicviewerview) {
-        super(frame, s, flag);
-        panel1 = new JPanel();
-        OKButton = new JButton();
-        CancelButton = new JButton();
-        label4 = new JLabel();
-        widthField = new JTextField();
-        label1 = new JLabel();
-        heightField = new JTextField();
-        gridStyleGroup = new ButtonGroup();
-        gridInvisibleRadio = new JRadioButton();
-        gridDotsRadio = new JRadioButton();
-        gridCrossesRadio = new JRadioButton();
-        gridLinesRadio = new JRadioButton();
-        label2 = new JLabel();
-        label3 = new JLabel();
-        paperColorButton = new JButton();
-        moveSnapGroup = new ButtonGroup();
-        moveNoSnapRadio = new JRadioButton();
-        moveJumpRadio = new JRadioButton();
-        moveAfterRadio = new JRadioButton();
-        jLabel2 = new JLabel();
-        resizeSnapGroup = new ButtonGroup();
-        resizeAfterRadio = new JRadioButton();
-        resizeJumpRadio = new JRadioButton();
-        resizeNoSnapRadio = new JRadioButton();
-        jLabel3 = new JLabel();
-        label5 = new JLabel();
-        label6 = new JLabel();
-        label7 = new JLabel();
-        fontName = new JTextField();
-        fontSize = new JTextField();
-        myView = null;
-        fComponentsAdjusted = false;
-        hideDisabledScrollBars = new JCheckBox();
-        dragEnabled = new JCheckBox();
-        dragsSelectionImage = new JCheckBox();
-        dropEnabled = new JCheckBox();
-        dragsRealtime = new JCheckBox();
-        includeNegativeCoords = new JCheckBox();
-        mouseEnabled = new JCheckBox();
-        keyEnabled = new JCheckBox();
+    JPanel panel1 = new JPanel();
+    JButton OKButton = new JButton();
+    JButton CancelButton = new JButton();
+    JLabel label4 = new JLabel();
+    JTextField widthField = new JTextField();
+    JLabel label1 = new JLabel();
+    JTextField heightField = new JTextField();
+    ButtonGroup gridStyleGroup = new ButtonGroup();
+    JRadioButton gridInvisibleRadio = new JRadioButton();
+    JRadioButton gridDotsRadio = new JRadioButton();
+    JRadioButton gridCrossesRadio = new JRadioButton();
+    JRadioButton gridLinesRadio = new JRadioButton();
+    JLabel label2 = new JLabel();
+    JLabel label3 = new JLabel();
+    JButton paperColorButton = new JButton();
+    ButtonGroup moveSnapGroup = new ButtonGroup();
+    JRadioButton moveNoSnapRadio = new JRadioButton();
+    JRadioButton moveJumpRadio = new JRadioButton();
+    JRadioButton moveAfterRadio = new JRadioButton();
+    JLabel jLabel2 = new JLabel();
+    ButtonGroup resizeSnapGroup = new ButtonGroup();
+    JRadioButton resizeAfterRadio = new JRadioButton();
+    JRadioButton resizeJumpRadio = new JRadioButton();
+    JRadioButton resizeNoSnapRadio = new JRadioButton();
+    JLabel jLabel3 = new JLabel();
+    JLabel label5 = new JLabel();
+    JLabel label6 = new JLabel();
+    JLabel label7 = new JLabel();
+    JTextField fontName = new JTextField();
+    JTextField fontSize = new JTextField();
+
+    Color myPaperColor;
+
+    public GraphicViewerView myView = null;
+
+    public GridOptionsDialog(Frame frame, String title, boolean modal,
+            GraphicViewerView view) {
+        super(frame, title, modal);
         try {
             jbInit();
             pack();
-            myView = graphicviewerview;
+            myView = view;
             UpdateDialog();
-        } catch (Exception e) {
-            ExceptionDialog.hideException(e);
+        } catch (Exception ex) {
+            ExceptionDialog.hideException(ex);
         }
     }
 
@@ -114,40 +107,35 @@ public class GridOptionsDialog extends JDialog {
         panel1.setLayout(null);
         panel1.setMinimumSize(new Dimension(586, 265));
         panel1.setPreferredSize(new Dimension(586, 265));
-        OKButton.addActionListener(new ActionListener() {
+        OKButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                OKButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                OKButton_actionPerformed(e);
             }
-
         });
-        CancelButton.addActionListener(new ActionListener() {
+        CancelButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                CancelButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                CancelButton_actionPerformed(e);
             }
-
         });
-        OKButton.addKeyListener(new KeyAdapter() {
+        OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
-            public void keyPressed(KeyEvent keyevent) {
-                OKButton_keyPressed(keyevent);
+            public void keyPressed(KeyEvent e) {
+                OKButton_keyPressed(e);
             }
-
         });
-        CancelButton.addKeyListener(new KeyAdapter() {
+        CancelButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
-            public void keyPressed(KeyEvent keyevent) {
-                CancelButton_keyPressed(keyevent);
+            public void keyPressed(KeyEvent e) {
+                CancelButton_keyPressed(e);
             }
-
         });
-        paperColorButton.addActionListener(new ActionListener() {
+        paperColorButton.addActionListener(new java.awt.event.ActionListener() {
 
-            public void actionPerformed(ActionEvent actionevent) {
-                paperColorButton_actionPerformed(actionevent);
+            public void actionPerformed(ActionEvent e) {
+                paperColorButton_actionPerformed(e);
             }
-
         });
         moveNoSnapRadio.setText("No snap");
         moveNoSnapRadio.setBounds(new Rectangle(255, 36, 86, 24));
@@ -182,22 +170,23 @@ public class GridOptionsDialog extends JDialog {
         mouseEnabled.setBounds(new Rectangle(25, 155, 111, 20));
         keyEnabled.setText("Key Enabled");
         keyEnabled.setBounds(new Rectangle(25, 140, 98, 20));
-        setResizable(false);
+        this.setResizable(false);
         getContentPane().add(panel1);
+
         OKButton.setText("OK");
-        OKButton.setFont(new Font("Dialog", 0, 12));
+        OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(185, 228, 79, 22));
         CancelButton.setText("Cancel");
-        CancelButton.setFont(new Font("Dialog", 0, 12));
+        CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(293, 228, 79, 22));
         label4.setText("Width:");
-        label4.setHorizontalAlignment(4);
+        label4.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label4);
         label4.setBounds(new Rectangle(30, 36, 48, 24));
         panel1.add(widthField);
         widthField.setBounds(new Rectangle(90, 36, 36, 24));
         label1.setText("Height:");
-        label1.setHorizontalAlignment(4);
+        label1.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label1);
         label1.setBounds(new Rectangle(30, 60, 48, 24));
         panel1.add(heightField);
@@ -239,7 +228,7 @@ public class GridOptionsDialog extends JDialog {
         resizeSnapGroup.add(resizeAfterRadio);
         panel1.add(resizeAfterRadio, null);
         panel1.add(jLabel3, null);
-        paperColorButton.setBackground(Color.lightGray);
+        paperColorButton.setBackground(java.awt.Color.lightGray);
         paperColorButton.setBounds(new Rectangle(453, 146, 116, 24));
         jLabel2.setBounds(new Rectangle(243, 12, 98, 24));
         jLabel2.setBounds(new Rectangle(243, 12, 98, 24));
@@ -270,33 +259,38 @@ public class GridOptionsDialog extends JDialog {
     }
 
     void UpdateDialog() {
-        if (myView == null)
+        if (myView == null) {
             return;
+        }
+
         widthField.setText(String.valueOf(myView.getGridWidth()));
         heightField.setText(String.valueOf(myView.getGridHeight()));
-        int i = myView.getGridStyle();
-        if (i == 0)
+        int style = myView.getGridStyle();
+        if (style == GraphicViewerView.GridInvisible) {
             gridInvisibleRadio.setSelected(true);
-        else if (i == 1)
+        } else if (style == GraphicViewerView.GridDot) {
             gridDotsRadio.setSelected(true);
-        else if (i == 2)
+        } else if (style == GraphicViewerView.GridCross) {
             gridCrossesRadio.setSelected(true);
-        else if (i == 3)
+        } else if (style == GraphicViewerView.GridLine) {
             gridLinesRadio.setSelected(true);
-        int j = myView.getSnapMove();
-        if (j == 0)
+        }
+        int snapmove = myView.getSnapMove();
+        if (snapmove == GraphicViewerView.NoSnap) {
             moveNoSnapRadio.setSelected(true);
-        else if (j == 1)
+        } else if (snapmove == GraphicViewerView.SnapJump) {
             moveJumpRadio.setSelected(true);
-        else if (j == 2)
+        } else if (snapmove == GraphicViewerView.SnapAfter) {
             moveAfterRadio.setSelected(true);
-        int k = myView.getSnapResize();
-        if (k == 0)
+        }
+        int snapresize = myView.getSnapResize();
+        if (snapresize == GraphicViewerView.NoSnap) {
             resizeNoSnapRadio.setSelected(true);
-        else if (k == 1)
+        } else if (snapresize == GraphicViewerView.SnapJump) {
             resizeJumpRadio.setSelected(true);
-        else if (k == 2)
+        } else if (snapresize == GraphicViewerView.SnapAfter) {
             resizeAfterRadio.setSelected(true);
+        }
         myPaperColor = myView.getDocument().getPaperColor();
         fontSize.setText(String.valueOf(GraphicViewerText.getDefaultFontSize()));
         fontName.setText(GraphicViewerText.getDefaultFontFaceName());
@@ -311,36 +305,41 @@ public class GridOptionsDialog extends JDialog {
     }
 
     void UpdateControl() {
-        if (myView == null)
+        if (myView == null) {
             return;
+        }
+
         myView.setGridWidth(Integer.parseInt(widthField.getText()));
         myView.setGridHeight(Integer.parseInt(heightField.getText()));
-        byte byte0 = 0;
-        if (gridInvisibleRadio.isSelected())
-            byte0 = 0;
-        else if (gridDotsRadio.isSelected())
-            byte0 = 1;
-        else if (gridCrossesRadio.isSelected())
-            byte0 = 2;
-        else if (gridLinesRadio.isSelected())
-            byte0 = 3;
-        myView.setGridStyle(byte0);
-        byte byte1 = 0;
-        if (moveNoSnapRadio.isSelected())
-            byte1 = 0;
-        else if (moveJumpRadio.isSelected())
-            byte1 = 1;
-        else if (moveAfterRadio.isSelected())
-            byte1 = 2;
-        myView.setSnapMove(byte1);
-        byte byte2 = 0;
-        if (resizeNoSnapRadio.isSelected())
-            byte2 = 0;
-        else if (resizeJumpRadio.isSelected())
-            byte2 = 1;
-        else if (resizeAfterRadio.isSelected())
-            byte2 = 2;
-        myView.setSnapResize(byte2);
+        int style = 0;
+        if (gridInvisibleRadio.isSelected()) {
+            style = GraphicViewerView.GridInvisible;
+        } else if (gridDotsRadio.isSelected()) {
+            style = GraphicViewerView.GridDot;
+        } else if (gridCrossesRadio.isSelected()) {
+            style = GraphicViewerView.GridCross;
+        } else if (gridLinesRadio.isSelected()) {
+            style = GraphicViewerView.GridLine;
+        }
+        myView.setGridStyle(style);
+        int snapmove = 0;
+        if (moveNoSnapRadio.isSelected()) {
+            snapmove = GraphicViewerView.NoSnap;
+        } else if (moveJumpRadio.isSelected()) {
+            snapmove = GraphicViewerView.SnapJump;
+        } else if (moveAfterRadio.isSelected()) {
+            snapmove = GraphicViewerView.SnapAfter;
+        }
+        myView.setSnapMove(snapmove);
+        int snapresize = 0;
+        if (resizeNoSnapRadio.isSelected()) {
+            snapresize = GraphicViewerView.NoSnap;
+        } else if (resizeJumpRadio.isSelected()) {
+            snapresize = GraphicViewerView.SnapJump;
+        } else if (resizeAfterRadio.isSelected()) {
+            snapresize = GraphicViewerView.SnapAfter;
+        }
+        myView.setSnapResize(snapresize);
         myView.getDocument().setPaperColor(myPaperColor);
         GraphicViewerText.setDefaultFontFaceName(fontName.getText());
         GraphicViewerText.setDefaultFontSize(Integer.parseInt(fontSize
@@ -356,118 +355,99 @@ public class GridOptionsDialog extends JDialog {
     }
 
     public void addNotify() {
-        Dimension dimension = getSize();
+        // Record the size of the window prior to calling parents addNotify
+        Dimension d = getSize();
+
         super.addNotify();
-        if (fComponentsAdjusted)
+
+        if (fComponentsAdjusted) {
             return;
-        Insets insets = getInsets();
-        setSize(insets.left + insets.right + dimension.width, insets.top
-                + insets.bottom + dimension.height);
-        Component acomponent[] = getComponents();
-        for (int i = 0; i < acomponent.length; i++) {
-            Point point = acomponent[i].getLocation();
-            point.translate(insets.left, insets.top);
-            acomponent[i].setLocation(point);
         }
 
+        // Adjust components according to the insets
+        Insets insets = getInsets();
+        setSize(insets.left + insets.right + d.width, insets.top
+                + insets.bottom + d.height);
+        Component components[] = getComponents();
+        for (int i = 0; i < components.length; i++) {
+            Point p = components[i].getLocation();
+            p.translate(insets.left, insets.top);
+            components[i].setLocation(p);
+        }
         fComponentsAdjusted = true;
     }
 
-    public void setVisible(boolean flag) {
-        if (flag) {
-            Rectangle rectangle = getParent().getBounds();
-            Rectangle rectangle1 = getBounds();
-            setLocation(rectangle.x + (rectangle.width - rectangle1.width) / 2,
-                    rectangle.y + (rectangle.height - rectangle1.height) / 2);
+    // Used for addNotify check
+    boolean fComponentsAdjusted = false;
+    JCheckBox hideDisabledScrollBars = new JCheckBox();
+    JCheckBox dragEnabled = new JCheckBox();
+    JCheckBox dragsSelectionImage = new JCheckBox();
+    JCheckBox dropEnabled = new JCheckBox();
+    JCheckBox dragsRealtime = new JCheckBox();
+    JCheckBox includeNegativeCoords = new JCheckBox();
+    JCheckBox mouseEnabled = new JCheckBox();
+    JCheckBox keyEnabled = new JCheckBox();
+
+    /**
+     * Shows or hides the component depending on the boolean flag b.
+     * @param b  if true, show the component; otherwise, hide the component.
+     * @see javax.swing.JComponent#isVisible
+     */
+    public void setVisible(boolean b) {
+        if (b) {
+            Rectangle bounds = getParent().getBounds();
+            Rectangle abounds = getBounds();
+
+            setLocation(bounds.x + (bounds.width - abounds.width) / 2, bounds.y
+                    + (bounds.height - abounds.height) / 2);
         }
-        super.setVisible(flag);
+        super.setVisible(b);
     }
 
-    void OKButton_actionPerformed(ActionEvent actionevent) {
+    void OKButton_actionPerformed(ActionEvent e) {
         OnOK();
     }
 
     void OnOK() {
         try {
             UpdateControl();
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
 
-    void CancelButton_actionPerformed(ActionEvent actionevent) {
+    void CancelButton_actionPerformed(ActionEvent e) {
         OnCancel();
     }
 
     void OnCancel() {
         try {
-            dispose();
+            this.dispose(); // Free system resources
         } catch (Exception e) {
-            ExceptionDialog.ignoreException(e);
         }
     }
 
-    void OKButton_keyPressed(KeyEvent keyevent) {
-        if (keyevent.getKeyCode() == 10)
+    void OKButton_keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             OnOK();
-        else if (keyevent.getKeyCode() == 27)
+        } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
             OnCancel();
+        }
     }
 
-    void CancelButton_keyPressed(KeyEvent keyevent) {
-        if (keyevent.getKeyCode() == 10)
+    void CancelButton_keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             OnCancel();
-        else if (keyevent.getKeyCode() == 27)
+        } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
             OnCancel();
+        }
     }
 
-    void paperColorButton_actionPerformed(ActionEvent actionevent) {
-        Color color = JColorChooser.showDialog(this, "Paper Color",
+    void paperColorButton_actionPerformed(ActionEvent e) {
+        Color newcolor = JColorChooser.showDialog(this, "Paper Color",
                 myPaperColor);
-        if (color != null)
-            myPaperColor = color;
+        if (newcolor != null) {
+            myPaperColor = newcolor;
+        }
     }
-
-    JPanel panel1;
-    JButton OKButton;
-    JButton CancelButton;
-    JLabel label4;
-    JTextField widthField;
-    JLabel label1;
-    JTextField heightField;
-    ButtonGroup gridStyleGroup;
-    JRadioButton gridInvisibleRadio;
-    JRadioButton gridDotsRadio;
-    JRadioButton gridCrossesRadio;
-    JRadioButton gridLinesRadio;
-    JLabel label2;
-    JLabel label3;
-    JButton paperColorButton;
-    ButtonGroup moveSnapGroup;
-    JRadioButton moveNoSnapRadio;
-    JRadioButton moveJumpRadio;
-    JRadioButton moveAfterRadio;
-    JLabel jLabel2;
-    ButtonGroup resizeSnapGroup;
-    JRadioButton resizeAfterRadio;
-    JRadioButton resizeJumpRadio;
-    JRadioButton resizeNoSnapRadio;
-    JLabel jLabel3;
-    JLabel label5;
-    JLabel label6;
-    JLabel label7;
-    JTextField fontName;
-    JTextField fontSize;
-    Color myPaperColor;
-    public GraphicViewerView myView;
-    boolean fComponentsAdjusted;
-    JCheckBox hideDisabledScrollBars;
-    JCheckBox dragEnabled;
-    JCheckBox dragsSelectionImage;
-    JCheckBox dropEnabled;
-    JCheckBox dragsRealtime;
-    JCheckBox includeNegativeCoords;
-    JCheckBox mouseEnabled;
-    JCheckBox keyEnabled;
 }

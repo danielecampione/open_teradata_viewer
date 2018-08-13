@@ -35,83 +35,82 @@ public class GraphicViewerCollection
 
     private static final long serialVersionUID = 3589279540531798916L;
 
+    private GraphicViewerObjList myObjects = new GraphicViewerObjList();
+
     public GraphicViewerCollection() {
-        by = new GraphicViewerObjList();
     }
 
     public GraphicViewerCollection(
             IGraphicViewerObjectSimpleCollection graphicviewerobjectsimplecollection) {
-        by = new GraphicViewerObjList();
         addCollection(graphicviewerobjectsimplecollection);
     }
 
     public GraphicViewerCollection(GraphicViewerObject agraphicviewerobject[]) {
-        by = new GraphicViewerObjList();
         addArray(agraphicviewerobject);
     }
 
     public int getNumObjects() {
-        return by.getNumObjects();
+        return myObjects.getNumObjects();
     }
 
     public boolean isEmpty() {
-        return by.isEmpty();
+        return myObjects.isEmpty();
     }
 
     public GraphicViewerListPosition getFirstObjectPos() {
-        return by.getFirstObjectPos();
+        return myObjects.getFirstObjectPos();
     }
 
     public GraphicViewerObject getObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return by.getObjectAtPos(graphicviewerlistposition);
+        return myObjects.getObjectAtPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getNextObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return by.getNextObjectPos(graphicviewerlistposition);
+        return myObjects.getNextObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getNextObjectPosAtTop(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return by.getNextObjectPos(graphicviewerlistposition);
+        return myObjects.getNextObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition getLastObjectPos() {
-        return by.getLastObjectPos();
+        return myObjects.getLastObjectPos();
     }
 
     public GraphicViewerListPosition getPrevObjectPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return by.getPrevObjectPos(graphicviewerlistposition);
+        return myObjects.getPrevObjectPos(graphicviewerlistposition);
     }
 
     public GraphicViewerListPosition findObject(
             GraphicViewerObject graphicviewerobject) {
-        return by.findObject(graphicviewerobject);
+        return myObjects.findObject(graphicviewerobject);
     }
 
     public GraphicViewerListPosition addObjectAtHead(
             GraphicViewerObject graphicviewerobject) {
-        return by.addObjectAtHead(graphicviewerobject);
+        return myObjects.addObjectAtHead(graphicviewerobject);
     }
 
     public GraphicViewerListPosition addObjectAtTail(
             GraphicViewerObject graphicviewerobject) {
-        return by.addObjectAtTail(graphicviewerobject);
+        return myObjects.addObjectAtTail(graphicviewerobject);
     }
 
     public GraphicViewerListPosition insertObjectBefore(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        return by.insertObjectBefore(graphicviewerlistposition,
+        return myObjects.insertObjectBefore(graphicviewerlistposition,
                 graphicviewerobject);
     }
 
     public GraphicViewerListPosition insertObjectAfter(
             GraphicViewerListPosition graphicviewerlistposition,
             GraphicViewerObject graphicviewerobject) {
-        return by.insertObjectAfter(graphicviewerlistposition,
+        return myObjects.insertObjectAfter(graphicviewerlistposition,
                 graphicviewerobject);
     }
 
@@ -119,8 +118,8 @@ public class GraphicViewerCollection
         if (getLastObject() == graphicviewerobject) {
             return;
         } else {
-            by.removeObject(graphicviewerobject);
-            by.addObjectAtTail(graphicviewerobject);
+            myObjects.removeObject(graphicviewerobject);
+            myObjects.addObjectAtTail(graphicviewerobject);
             return;
         }
     }
@@ -129,63 +128,66 @@ public class GraphicViewerCollection
         if (getFirstObject() == graphicviewerobject) {
             return;
         } else {
-            by.removeObject(graphicviewerobject);
-            by.addObjectAtHead(graphicviewerobject);
+            myObjects.removeObject(graphicviewerobject);
+            myObjects.addObjectAtHead(graphicviewerobject);
             return;
         }
     }
 
     public void removeObject(GraphicViewerObject graphicviewerobject) {
-        by.removeObject(graphicviewerobject);
+        myObjects.removeObject(graphicviewerobject);
     }
 
     public GraphicViewerObject removeObjectAtPos(
             GraphicViewerListPosition graphicviewerlistposition) {
-        return by.removeObjectAtPos(graphicviewerlistposition);
+        return myObjects.removeObjectAtPos(graphicviewerlistposition);
     }
 
     public GraphicViewerObject pickObject(Point point, boolean flag) {
-        for (GraphicViewerListPosition graphicviewerlistposition = by
-                .getLastObjectPos(); graphicviewerlistposition != null; graphicviewerlistposition = by
+        for (GraphicViewerListPosition graphicviewerlistposition = myObjects
+                .getLastObjectPos(); graphicviewerlistposition != null; graphicviewerlistposition = myObjects
                 .getPrevObjectPos(graphicviewerlistposition)) {
-            GraphicViewerObject graphicviewerobject = by
+            GraphicViewerObject graphicviewerobject = myObjects
                     .getObjectAtPos(graphicviewerlistposition);
             GraphicViewerObject graphicviewerobject1 = graphicviewerobject
                     .pick(point, flag);
-            if (graphicviewerobject1 != null)
+            if (graphicviewerobject1 != null) {
                 return graphicviewerobject1;
+            }
         }
 
         return null;
     }
 
     public GraphicViewerObject getFirstObject() {
-        GraphicViewerListPosition graphicviewerlistposition = by
+        GraphicViewerListPosition graphicviewerlistposition = myObjects
                 .getFirstObjectPos();
-        if (graphicviewerlistposition != null)
-            return by.getObjectAtPos(graphicviewerlistposition);
-        else
+        if (graphicviewerlistposition != null) {
+            return myObjects.getObjectAtPos(graphicviewerlistposition);
+        } else {
             return null;
+        }
     }
 
     public GraphicViewerObject getLastObject() {
-        GraphicViewerListPosition graphicviewerlistposition = by
+        GraphicViewerListPosition graphicviewerlistposition = myObjects
                 .getLastObjectPos();
-        if (graphicviewerlistposition != null)
-            return by.getObjectAtPos(graphicviewerlistposition);
-        else
+        if (graphicviewerlistposition != null) {
+            return myObjects.getObjectAtPos(graphicviewerlistposition);
+        } else {
             return null;
+        }
     }
 
     public GraphicViewerObject[] toArray() {
-        int i = by.getNumObjects();
+        int i = myObjects.getNumObjects();
         GraphicViewerObject agraphicviewerobject[] = new GraphicViewerObject[i];
         int j = 0;
-        for (GraphicViewerListPosition graphicviewerlistposition = by
+        for (GraphicViewerListPosition graphicviewerlistposition = myObjects
                 .getFirstObjectPos(); graphicviewerlistposition != null;) {
-            GraphicViewerObject graphicviewerobject = by
+            GraphicViewerObject graphicviewerobject = myObjects
                     .getObjectAtPos(graphicviewerlistposition);
-            graphicviewerlistposition = by
+            graphicviewerlistposition = myObjects
                     .getNextObjectPos(graphicviewerlistposition);
             agraphicviewerobject[j++] = graphicviewerobject;
         }
@@ -194,15 +196,15 @@ public class GraphicViewerCollection
     }
 
     public void addArray(GraphicViewerObject agraphicviewerobject[]) {
-        for (int i = 0; i < agraphicviewerobject.length; i++)
-            by.addObjectAtTail(agraphicviewerobject[i]);
-
+        for (int i = 0; i < agraphicviewerobject.length; i++) {
+            myObjects.addObjectAtTail(agraphicviewerobject[i]);
+        }
     }
 
-    public void addCollection(ArrayList<?> arraylist) {
-        for (int i = 0; i < arraylist.size(); i++)
-            by.addObjectAtTail((GraphicViewerObject) arraylist.get(i));
-
+    public void addCollection(ArrayList arraylist) {
+        for (int i = 0; i < arraylist.size(); i++) {
+            myObjects.addObjectAtTail((GraphicViewerObject) arraylist.get(i));
+        }
     }
 
     public void addCollection(
@@ -213,10 +215,7 @@ public class GraphicViewerCollection
                     .getObjectAtPos(graphicviewerlistposition);
             graphicviewerlistposition = graphicviewerobjectsimplecollection
                     .getNextObjectPos(graphicviewerlistposition);
-            by.addObjectAtTail(graphicviewerobject);
+            myObjects.addObjectAtTail(graphicviewerobject);
         }
-
     }
-
-    private GraphicViewerObjList by;
 }

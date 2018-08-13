@@ -33,21 +33,20 @@ public class GraphicViewer3DNoteRect extends GraphicViewerRectangle {
 
     private static final long serialVersionUID = 4965885360423863405L;
 
+    public static final int ChangedShadowSize = 401;
+    public static final int ChangedFlapSize = 402;
+    private int myShadowSize = 4;
+    private int myFlapSize = 8;
+
     public GraphicViewer3DNoteRect() {
-        dK = 4;
-        dJ = 8;
     }
 
     public GraphicViewer3DNoteRect(Rectangle rectangle) {
         super(rectangle);
-        dK = 4;
-        dJ = 8;
     }
 
     public GraphicViewer3DNoteRect(Point point, Dimension dimension) {
         super(point, dimension);
-        dK = 4;
-        dJ = 8;
     }
 
     public GraphicViewerObject copyObject(
@@ -55,26 +54,27 @@ public class GraphicViewer3DNoteRect extends GraphicViewerRectangle {
         GraphicViewer3DNoteRect graphicviewer3dnoterect = (GraphicViewer3DNoteRect) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewer3dnoterect != null) {
-            graphicviewer3dnoterect.dK = dK;
-            graphicviewer3dnoterect.dJ = dJ;
+            graphicviewer3dnoterect.myShadowSize = myShadowSize;
+            graphicviewer3dnoterect.myFlapSize = myFlapSize;
         }
         return graphicviewer3dnoterect;
     }
 
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         if (domdoc.GraphicViewerXMLOutputEnabled()) {
-            IDomElement domelement1 = domdoc.createGraphicViewerClassElement(
-                    "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer3DNoteRect",
-                    domelement);
-            domelement1.setAttribute("flapsize", Integer.toString(dJ));
-            domelement1.setAttribute("shadow", Integer.toString(dK));
+            IDomElement domelement1 = domdoc
+                    .createGraphicViewerClassElement(
+                            "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer3DNoteRect",
+                            domelement);
+            domelement1.setAttribute("flapsize", Integer.toString(myFlapSize));
+            domelement1.setAttribute("shadow", Integer.toString(myShadowSize));
         }
         super.SVGWriteObject(domdoc, domelement);
     }
 
     public IDomNode SVGReadObject(IDomDoc domdoc,
-            GraphicViewerDocument graphicviewerdocument, IDomElement domelement,
-            IDomElement domelement1) {
+            GraphicViewerDocument graphicviewerdocument,
+            IDomElement domelement, IDomElement domelement1) {
         if (domelement1 != null) {
             setFlapSize(Integer.parseInt(domelement1.getAttribute("flapsize")));
             setShadowSize(Integer.parseInt(domelement1.getAttribute("shadow")));
@@ -92,8 +92,8 @@ public class GraphicViewer3DNoteRect extends GraphicViewerRectangle {
         int l = rectangle.width - i;
         int i1 = rectangle.height - i;
         drawRect(graphics2d, j, k, l, i1);
-        int ai[] = graphicviewerview._mthdo(6);
-        int ai1[] = graphicviewerview._mthif(6);
+        int ai[] = graphicviewerview.getTempXs(6);
+        int ai1[] = graphicviewerview.getTempYs(6);
         ai[0] = j + l;
         ai1[0] = k;
         ai[1] = rectangle.x + rectangle.width;
@@ -118,25 +118,25 @@ public class GraphicViewer3DNoteRect extends GraphicViewerRectangle {
     }
 
     public int getShadowSize() {
-        return dK;
+        return myShadowSize;
     }
 
     public void setShadowSize(int i) {
-        int j = dK;
+        int j = myShadowSize;
         if (j != i) {
-            dK = Math.max(i, 0);
+            myShadowSize = Math.max(i, 0);
             update(401, j, null);
         }
     }
 
     public int getFlapSize() {
-        return dJ;
+        return myFlapSize;
     }
 
     public void setFlapSize(int i) {
-        int j = dJ;
+        int j = myFlapSize;
         if (j != i) {
-            dJ = Math.max(i, 0);
+            myFlapSize = Math.max(i, 0);
             update(402, j, null);
         }
     }
@@ -171,9 +171,4 @@ public class GraphicViewer3DNoteRect extends GraphicViewerRectangle {
         }
         super.changeValue(graphicviewerdocumentchangededit, flag);
     }
-
-    public static final int ChangedShadowSize = 401;
-    public static final int ChangedFlapSize = 402;
-    private int dK;
-    private int dJ;
 }

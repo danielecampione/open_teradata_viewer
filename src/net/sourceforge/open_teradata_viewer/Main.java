@@ -180,6 +180,10 @@ public class Main {
         }
         if (systemLaf || compatibleThirdPartyLaf) {
             ClassLoader cl = lafManager.getLAFClassLoader();
+            // Set these properties before instantiating WebLookAndFeel
+            if (WebLookAndFeelUtil.isWebLookAndFeel(lafName)) {
+                WebLookAndFeelUtil.installWebLookAndFeelProperties(cl);
+            }
             // Must set UIManager's ClassLoader before instantiating
             // the LAF. Substance is so high-maintenance
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);

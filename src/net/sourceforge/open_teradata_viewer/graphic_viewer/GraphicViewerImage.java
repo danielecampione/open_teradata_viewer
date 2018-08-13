@@ -26,7 +26,6 @@ import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.ImageObserver;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -45,30 +44,27 @@ public class GraphicViewerImage extends GraphicViewerObject
 
     private static final long serialVersionUID = -4747867706811080201L;
 
+    public static final int ChangedImage = 901;
+    public static final int ChangedTransparentColor = 903;
+    public static final int ChangedURL = 904;
+    public static final int ChangedFilename = 905;
+    private static URL myDefaultBase = null;
+    private static HashMap myImageMap = new HashMap();
+    private transient Image myImage = null;
+    private transient Dimension myNaturalSize = null;
+    private URL myURL = null;
+    private String myFilename = null;
+    private Color myTransparentColor = null;
+
     public GraphicViewerImage() {
-        b3 = null;
-        b7 = null;
-        b4 = null;
-        b8 = null;
-        b2 = null;
     }
 
     public GraphicViewerImage(Point point, Dimension dimension) {
         super(point, dimension);
-        b3 = null;
-        b7 = null;
-        b4 = null;
-        b8 = null;
-        b2 = null;
     }
 
     public GraphicViewerImage(Rectangle rectangle) {
         super(rectangle);
-        b3 = null;
-        b7 = null;
-        b4 = null;
-        b8 = null;
-        b2 = null;
     }
 
     public GraphicViewerObject copyObject(
@@ -76,12 +72,13 @@ public class GraphicViewerImage extends GraphicViewerObject
         GraphicViewerImage graphicviewerimage = (GraphicViewerImage) super
                 .copyObject(graphicviewercopyenvironment);
         if (graphicviewerimage != null) {
-            graphicviewerimage.b3 = b3;
-            if (b7 != null)
-                graphicviewerimage.b7 = new Dimension(b7);
-            graphicviewerimage.b4 = b4;
-            graphicviewerimage.b8 = b8;
-            graphicviewerimage.b2 = b2;
+            graphicviewerimage.myImage = myImage;
+            if (myNaturalSize != null) {
+                graphicviewerimage.myNaturalSize = new Dimension(myNaturalSize);
+            }
+            graphicviewerimage.myURL = myURL;
+            graphicviewerimage.myFilename = myFilename;
+            graphicviewerimage.myTransparentColor = myTransparentColor;
         }
         return graphicviewerimage;
     }
@@ -92,25 +89,29 @@ public class GraphicViewerImage extends GraphicViewerObject
     }
 
     public Image getImage(URL url) {
-        if (url == null)
+        if (url == null) {
             return null;
+        }
         Image image = (Image) getImageMap().get(url);
         if (image == null) {
             image = GraphicViewerGlobal.getToolkit().createImage(url);
-            if (image != null)
+            if (image != null) {
                 getImageMap().put(url, image);
+            }
         }
         return image;
     }
 
     public Image getImage(String s) {
-        if (s == null)
+        if (s == null) {
             return null;
+        }
         Image image = (Image) getImageMap().get(s);
         if (image == null) {
             image = GraphicViewerGlobal.getToolkit().createImage(s);
-            if (image != null)
+            if (image != null) {
                 getImageMap().put(s, image);
+            }
         }
         return image;
     }
@@ -127,11 +128,11 @@ public class GraphicViewerImage extends GraphicViewerObject
         getImageMap().clear();
     }
 
-    boolean _mthdo(boolean flag) {
+    boolean waitForImage(boolean flag) {
         if (flag) {
             MediaTracker mediatracker = new MediaTracker(
                     GraphicViewerGlobal.getComponent());
-            mediatracker.addImage(b3, 0);
+            mediatracker.addImage(myImage, 0);
             try {
                 mediatracker.waitForID(0);
             } catch (InterruptedException ie) {
@@ -144,31 +145,33 @@ public class GraphicViewerImage extends GraphicViewerObject
     }
 
     public boolean loadImage(URL url, boolean flag) {
-        URL url1 = b4;
-        String s = b8;
+        URL url1 = myURL;
+        String s = myFilename;
         if (url1 == null || !url1.equals(url)) {
-            b4 = url;
-            b8 = null;
-            if (url1 != null)
+            myURL = url;
+            myFilename = null;
+            if (url1 != null) {
                 update(904, 0, url1);
-            else
+            } else {
                 update(904, 0, s);
+            }
         }
-        b7 = null;
-        b3 = getImage(url);
-        return _mthdo(flag);
+        myNaturalSize = null;
+        myImage = getImage(url);
+        return waitForImage(flag);
     }
 
     public boolean loadImage(String s, boolean flag) {
-        URL url = b4;
-        String s1 = b8;
+        URL url = myURL;
+        String s1 = myFilename;
         if (s1 == null || !s1.equals(s)) {
-            b4 = null;
-            b8 = s;
-            if (s1 != null)
+            myURL = null;
+            myFilename = s;
+            if (s1 != null) {
                 update(905, 0, s1);
-            else
+            } else {
                 update(905, 0, url);
+            }
         }
         Image image = null;
         if (getDefaultBase() != null) {
@@ -178,61 +181,65 @@ public class GraphicViewerImage extends GraphicViewerObject
             } catch (Exception e) {
                 ExceptionDialog.ignoreException(e);
             }
-            if (url1 != null)
+            if (url1 != null) {
                 image = getImage(url1);
+            }
         }
-        if (image == null)
+        if (image == null) {
             image = getImage(s);
-        b7 = null;
-        b3 = image;
-        return _mthdo(flag);
+        }
+        myNaturalSize = null;
+        myImage = image;
+        return waitForImage(flag);
     }
 
     public void setImage(Image image) {
         Image image1 = getImage();
         if (image1 != image) {
-            b3 = image;
-            b7 = null;
+            myImage = image;
+            myNaturalSize = null;
             update(901, 0, image1);
         }
     }
 
     public Image getImage() {
-        return b3;
+        return myImage;
     }
 
     public URL getURL() {
-        return b4;
+        return myURL;
     }
 
     public String getFilename() {
-        return b8;
+        return myFilename;
     }
 
     public Dimension getNaturalSize() {
-        if (b7 == null)
-            b7 = new Dimension(-1, -1);
-        Image image = getImage();
-        if (image != null && (b7.width < 0 || b7.height < 0)) {
-            b7.width = image.getWidth(this);
-            b7.height = image.getHeight(this);
+        if (myNaturalSize == null) {
+            myNaturalSize = new Dimension(-1, -1);
         }
-        return b7;
+        Image image = getImage();
+        if (image != null
+                && (myNaturalSize.width < 0 || myNaturalSize.height < 0)) {
+            myNaturalSize.width = image.getWidth(this);
+            myNaturalSize.height = image.getHeight(this);
+        }
+        return myNaturalSize;
     }
 
     public Color getTransparentColor() {
-        return b2;
+        return myTransparentColor;
     }
 
     public void setTransparentColor(Color color) {
-        Color color1 = b2;
+        Color color1 = myTransparentColor;
         if (color1 == null) {
             if (color != null) {
-                b2 = color;
+                myTransparentColor = color;
                 update(903, 0, color1);
             }
         } else if (!color1.equals(color)) {
-            b2 = color;
+            myTransparentColor = color;
             update(903, 0, color1);
         }
     }
@@ -251,10 +258,11 @@ public class GraphicViewerImage extends GraphicViewerObject
 
             case 904 :
             case 905 :
-                if (getURL() != null)
+                if (getURL() != null) {
                     graphicviewerdocumentchangededit.setNewValue(getURL());
-                else
+                } else {
                     graphicviewerdocumentchangededit.setNewValue(getFilename());
+                }
                 return;
 
             case 902 :
@@ -281,26 +289,28 @@ public class GraphicViewerImage extends GraphicViewerObject
             case 904 :
             case 905 :
                 if (flag) {
-                    if (graphicviewerdocumentchangededit.getOldValue() instanceof URL)
+                    if (graphicviewerdocumentchangededit.getOldValue() instanceof URL) {
                         loadImage(
                                 (URL) graphicviewerdocumentchangededit
                                         .getOldValue(),
                                 false);
-                    else if (graphicviewerdocumentchangededit.getOldValue() instanceof String)
+                    } else if (graphicviewerdocumentchangededit.getOldValue() instanceof String) {
                         loadImage(
                                 (String) graphicviewerdocumentchangededit
                                         .getOldValue(),
                                 false);
-                } else if (graphicviewerdocumentchangededit.getNewValue() instanceof URL)
+                    }
+                } else if (graphicviewerdocumentchangededit.getNewValue() instanceof URL) {
                     loadImage(
                             (URL) graphicviewerdocumentchangededit
                                     .getNewValue(),
                             false);
-                else if (graphicviewerdocumentchangededit.getNewValue() instanceof String)
+                } else if (graphicviewerdocumentchangededit.getNewValue() instanceof String) {
                     loadImage(
                             (String) graphicviewerdocumentchangededit
                                     .getNewValue(),
                             false);
+                }
                 return;
 
             case 902 :
@@ -316,13 +326,16 @@ public class GraphicViewerImage extends GraphicViewerObject
                     .createGraphicViewerClassElement(
                             "net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerImage",
                             domelement);
-            if (getFilename() != null)
+            if (getFilename() != null) {
                 domelement1.setAttribute("imagefilename", getFilename());
-            if (getURL() != null)
+            }
+            if (getURL() != null) {
                 domelement1.setAttribute("imageurl", getURL().toString());
-            if (getTransparentColor() != null)
+            }
+            if (getTransparentColor() != null) {
                 domelement1.setAttribute("imagetransparentcolor",
                         Integer.toString(getTransparentColor().getRGB()));
+            }
         }
         if (domdoc.SVGOutputEnabled()) {
             IDomElement domelement2 = domdoc.createElement("image");
@@ -337,11 +350,13 @@ public class GraphicViewerImage extends GraphicViewerObject
             IDomElement domelement, IDomElement domelement1) {
         try {
             if (domelement1 != null) {
-                if (domelement1.getAttribute("imagefilename").length() > 0)
+                if (domelement1.getAttribute("imagefilename").length() > 0) {
                     loadImage(domelement1.getAttribute("imagefilename"), false);
-                if (domelement1.getAttribute("imageurl").length() > 0)
+                }
+                if (domelement1.getAttribute("imageurl").length() > 0) {
                     loadImage(new URL(domelement1.getAttribute("imageurl")),
                             false);
+                }
                 if (domelement1.getAttribute("imagetransparentcolor").length() > 0) {
                     int i = Integer.parseInt(domelement1
                             .getAttribute("imagetransparentcolor"));
@@ -349,8 +364,9 @@ public class GraphicViewerImage extends GraphicViewerObject
                 }
                 super.SVGReadObject(domdoc, graphicviewerdocument, domelement,
                         domelement1.getNextSiblingGraphicViewerClassElement());
-            } else if (domelement.getTagName().equalsIgnoreCase("image"))
+            } else if (domelement.getTagName().equalsIgnoreCase("image")) {
                 SVGReadAttributes(domelement);
+            }
         } catch (Exception e) {
             ExceptionDialog.ignoreException(e);
         }
@@ -363,9 +379,9 @@ public class GraphicViewerImage extends GraphicViewerObject
         domelement.setAttribute("y", Integer.toString(getTopLeft().y));
         domelement.setAttribute("width", Integer.toString(getWidth()));
         domelement.setAttribute("height", Integer.toString(getHeight()));
-        if (getURL() != null)
+        if (getURL() != null) {
             domelement.setAttribute("xlink:href", getURL().toString());
-        else if (getFilename() != null) {
+        } else if (getFilename() != null) {
             String s = getFilename();
             if (getDefaultBase() != null) {
                 String s1 = getDefaultBase().toString();
@@ -386,29 +402,33 @@ public class GraphicViewerImage extends GraphicViewerObject
         setWidth(Integer.parseInt(s2));
         setHeight(Integer.parseInt(s3));
         String s4 = domelement.getAttribute("xlink:href");
-        if (s4.length() > 0)
+        if (s4.length() > 0) {
             try {
                 loadImage(new URL(s4), false);
             } catch (MalformedURLException murle) {
                 ExceptionDialog.ignoreException(murle);
             }
+        }
     }
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
-        if (getImage() == null)
-            if (getURL() != null)
+        if (getImage() == null) {
+            if (getURL() != null) {
                 loadImage(getURL(), false);
-            else if (getFilename() != null)
+            } else if (getFilename() != null) {
                 loadImage(getFilename(), false);
+            }
+        }
         if (getImage() != null) {
             Rectangle rectangle = getBoundingRect();
-            if (getTransparentColor() == null)
+            if (getTransparentColor() == null) {
                 graphics2d.drawImage(getImage(), rectangle.x, rectangle.y,
                         rectangle.width, rectangle.height, this);
-            else
+            } else {
                 graphics2d.drawImage(getImage(), rectangle.x, rectangle.y,
                         rectangle.width, rectangle.height,
                         getTransparentColor(), this);
+            }
         }
     }
 
@@ -432,27 +452,14 @@ public class GraphicViewerImage extends GraphicViewerObject
     }
 
     public static URL getDefaultBase() {
-        return b5;
+        return myDefaultBase;
     }
 
     public static void setDefaultBase(URL url) {
-        b5 = url;
+        myDefaultBase = url;
     }
 
-    public static HashMap<Serializable, Image> getImageMap() {
-        return b6;
+    public static HashMap getImageMap() {
+        return myImageMap;
     }
-
-    public static final int ChangedImage = 901;
-    public static final int ChangedTransparentColor = 903;
-    public static final int ChangedURL = 904;
-    public static final int ChangedFilename = 905;
-    private static URL b5 = null;
-
-    private static HashMap<Serializable, Image> b6 = new HashMap<Serializable, Image>();
-    private transient Image b3;
-    private transient Dimension b7;
-    private URL b4;
-    private String b8;
-    private Color b2;
 }

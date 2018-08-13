@@ -120,7 +120,7 @@ public class UpdateChecker implements Runnable {
 
             DateFormat format = new SimpleDateFormat("(dd/MM/yyyy)");
             String localVersion = Config.getVersion();
-            String latestVersion = localVersion;
+            String latestVersion = null;
             try {
                 latestVersion = new BufferedReader(new InputStreamReader(
                         new URL(Config.JAVANET_MIRROR + "changes.txt")
@@ -133,6 +133,18 @@ public class UpdateChecker implements Runnable {
                         .getConsole()
                         .println(ioe.getMessage(),
                                 ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            } finally {
+                if (latestVersion == null) {
+                    ApplicationFrame
+                            .getInstance()
+                            .getConsole()
+                            .println(
+                                    "Unable to determine the latest version of the client by querying the official repository.\n"
+                                            + "Please visit the following URL to be sure you're using the latest version of the client:\n"
+                                            + Config.SOURCEFORGE_MIRROR,
+                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                    return;
+                }
             }
             int localVersionBracketIndex = localVersion.indexOf('('), latestVersionBracketIndex = latestVersion
                     .indexOf('(');

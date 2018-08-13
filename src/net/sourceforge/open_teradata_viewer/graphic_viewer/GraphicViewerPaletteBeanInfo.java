@@ -35,31 +35,30 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  */
 public class GraphicViewerPaletteBeanInfo extends SimpleBeanInfo {
 
-    public GraphicViewerPaletteBeanInfo() {
-        _fldint = GraphicViewerPalette.class;
-        _flddo = "icons/logo16.png";
-        _fldfor = "icons/logo32.png";
-        a = "icons/logo16.png";
-        _fldif = "icons/logo32.png";
-    }
+    Class beanClass = GraphicViewerPalette.class;
+    String iconColor16x16Filename = "icons/logo16.png";
+    String iconColor32x32Filename = "icons/logo32.png";
+    String iconMono16x16Filename = "icons/logo16.png";
+    String iconMono32x32Filename = "icons/logo32.png";
 
     public PropertyDescriptor[] getPropertyDescriptors() {
         PropertyDescriptor apropertydescriptor[] = null;
         PropertyDescriptor propertydescriptor;
         try {
-            propertydescriptor = new PropertyDescriptor("minimumSize", _fldint,
-                    "getMinimumSize", null);
+            propertydescriptor = new PropertyDescriptor("minimumSize",
+                    beanClass, "getMinimumSize", null);
             PropertyDescriptor propertydescriptor1 = new PropertyDescriptor(
-                    "orientation", _fldint, "getOrientation", "setOrientation");
+                    "orientation", beanClass, "getOrientation",
+                    "setOrientation");
             propertydescriptor1
                     .setPropertyEditorClass(GraphicViewerOrientationEditor.class);
             PropertyDescriptor propertydescriptor2 = new PropertyDescriptor(
-                    "preferredSize", _fldint, "getPreferredSize", null);
+                    "preferredSize", beanClass, "getPreferredSize", null);
             PropertyDescriptor propertydescriptor3 = new PropertyDescriptor(
-                    "showSampleItems", _fldint, "isShowSampleItems",
+                    "showSampleItems", beanClass, "isShowSampleItems",
                     "setShowSampleItems");
             PropertyDescriptor propertydescriptor4 = new PropertyDescriptor(
-                    "singleRowCol", _fldint, "getSingleRowCol",
+                    "singleRowCol", beanClass, "getSingleRowCol",
                     "setSingleRowCol");
             apropertydescriptor = (new PropertyDescriptor[]{propertydescriptor,
                     propertydescriptor1, propertydescriptor2,
@@ -73,23 +72,31 @@ public class GraphicViewerPaletteBeanInfo extends SimpleBeanInfo {
     public Image getIcon(int i) {
         switch (i) {
             case 1 : // '\001'
-                return _flddo == null ? null : loadImage(_flddo);
+                return iconColor16x16Filename == null
+                        ? null
+                        : loadImage(iconColor16x16Filename);
 
             case 2 : // '\002'
-                return _fldfor == null ? null : loadImage(_fldfor);
+                return iconColor32x32Filename == null
+                        ? null
+                        : loadImage(iconColor32x32Filename);
 
             case 3 : // '\003'
-                return a == null ? null : loadImage(a);
+                return iconMono16x16Filename == null
+                        ? null
+                        : loadImage(iconMono16x16Filename);
 
             case 4 : // '\004'
-                return _fldif == null ? null : loadImage(_fldif);
+                return iconMono32x32Filename == null
+                        ? null
+                        : loadImage(iconMono32x32Filename);
         }
         return null;
     }
 
     public BeanInfo[] getAdditionalBeanInfo() {
 
-        Class<?> class1 = _fldint.getSuperclass();
+        Class class1 = beanClass.getSuperclass();
         BeanInfo beaninfo = null;
         try {
             beaninfo = Introspector.getBeanInfo(class1);
@@ -98,11 +105,4 @@ public class GraphicViewerPaletteBeanInfo extends SimpleBeanInfo {
         }
         return (new BeanInfo[]{beaninfo});
     }
-
-    Class<GraphicViewerPalette> _fldint;
-
-    String _flddo;
-    String _fldfor;
-    String a;
-    String _fldif;
 }
