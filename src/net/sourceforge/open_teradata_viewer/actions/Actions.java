@@ -73,18 +73,6 @@ public final class Actions
     public static final CustomAction LOWER_SELECTION_CASE = new LowerSelectionCaseAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction FIND = new FindAction();
-    public static final CustomAction DEFAULT_THEME = new ThemeAction("Default",
-            "/res/themes/default.xml");
-    public static final CustomAction DEFAULT_ALT_THEME = new ThemeAction(
-            "Default (Alternative Version)", "/res/themes/default-alt.xml");
-    public static final CustomAction DARK_THEME = new ThemeAction("Dark",
-            "/res/themes/dark.xml");
-    public static final CustomAction ECLIPSE_THEME = new ThemeAction("Eclipse",
-            "/res/themes/eclipse.xml");
-    public static final CustomAction IDEA_THEME = new ThemeAction("Idea",
-            "/res/themes/idea.xml");
-    public static final CustomAction VISUAL_STUDIO_THEME = new ThemeAction(
-            "Visual Studio", "/res/themes/vs.xml");
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();

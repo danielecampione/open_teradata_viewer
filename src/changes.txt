@@ -1,6 +1,9 @@
+0.17b (23/05/2013)
+    - Various code editor fixes and performance improvements.
+
 0.17a (17/05/2013)
     - setBracketMatchingEnabled(boolean) now checks for brackets "to the right"
-      of the caret if one is not found "to the left."
+      of the caret if one is not found "to the left".
     - Added API to create custom hyperlinks in SyntaxTextArea.
     - Added "mark occurrences" support for XML. Currently just highlights the
       tag name at the current caret position and its match.

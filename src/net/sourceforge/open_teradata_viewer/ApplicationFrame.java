@@ -181,10 +181,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         getGlassPane().removeAnimatedAssistant(animatedAssistant);
     }
 
-    public GlassPane getGlassPane() {
-        return glassPane;
-    }
-
     public void installPlugins() {
         Drivers.setInitialized(false);
         try {
@@ -210,85 +206,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                     .next();
             IPluginEntry iPluginEntry = (IPluginEntry) pluginFactory
                     .getPluginEntry(entryDescriptor.getId());
-        }
-    }
-
-    /**
-     * Sets the Look and Feel for the opened application instance.
-     *
-     * @param lnfClassName The class name of the Look and Feel to set.
-     */
-    public void setLookAndFeel(String lnfClassName) {
-        // Only set the Look and Feel if we're not already using that Look.
-        // Compare against currently active one, not the one we want to change
-        // to on restart, seems more logical to the end-user
-        String current = UIManager.getLookAndFeel().getClass().getName();
-
-        if (lnfClassName != null && !current.equals(lnfClassName)) {
-            try {
-                // Use application's LaF class loader, not a system one, as it
-                // can access any additional 3rd-party LaF jars that weren't on
-                // the classpath when the application started. Also, don't
-                // necessarily trust UIDefaults.get("ClassLoader") to be this
-                // class loader, as on Windows if the user changes the UxTheme
-                // the LaF is updated outside of this call, and the property
-                // value is reset to null
-                ClassLoader cl = getLookAndFeelManager().getLAFClassLoader();
-                // Load the Look and Feel class. Note that we cannot simply use
-                // its name for some reason (Exceptions are thrown)
-                Class c = cl.loadClass(lnfClassName);
-                final LookAndFeel lnf = (LookAndFeel) c.newInstance();
-
-                // If we're changing to a LAF that supports window decorations
-                // and our current one doesn't, or vice versa, inform the user
-                // that this change will occur on restart. Substance seems to be
-                // the only troublemaker here (Metal, for example, supports
-                // window decorations, but works fine without special logic)
-                boolean curSubstance = SubstanceUtil.isSubstanceInstalled();
-                boolean nextSubstance = SubstanceUtil
-                        .isASubstanceLookAndFeel(lnf);
-                if (curSubstance != nextSubstance) {
-                    String startupLookAndFeelProperty = "startup_lookandfeel_class";
-                    try {
-                        Config.saveSetting(startupLookAndFeelProperty,
-                                lnfClassName);
-                    } catch (Exception e) {
-                        ExceptionDialog.ignoreException(e);
-                    }
-
-                    String message = "The Look And Feel will be loaded on next startup.";
-                    String title = "Look And Feel";
-                    UISupport.getDialogs().showInfoMessage(message, title);
-                    return;
-                }
-
-                UIManager.setLookAndFeel(lnf);
-                // Re-save the class loader BEFORE calling updateLookAndFeels(),
-                // as the UIManager.setLookAndFeel() call above resets this
-                // property to null, and we need this class loader to be set as
-                // it's the one that's aware of our 3rd party JARs. Swing uses
-                // this property (if non-null) to load classes from, and if we
-                // don't set it, exceptions will be thrown
-                UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-                UIUtil.installOsSpecificLafTweaks();
-                Runnable updateUIRunnable = new Runnable() {
-                    public void run() {
-                        updateLookAndFeel(lnf);
-                    }
-                };
-
-                // Ensure we update Look and Feels on event dispatch thread
-                SwingUtilities.invokeLater(updateUIRunnable);
-            } catch (Exception e) {
-                ExceptionDialog.showException(e);
-            }
-
-            String startupLookAndFeelProperty = "startup_lookandfeel_class";
-            try {
-                Config.saveSetting(startupLookAndFeelProperty, lnfClassName);
-            } catch (Exception e) {
-                ExceptionDialog.ignoreException(e);
-            }
         }
     }
 
@@ -333,6 +250,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     private OTVSyntaxTextArea createTextArea() {
         OTVSyntaxTextArea textArea = new OTVSyntaxTextArea();
+        textArea.setTabSize(4);
         textArea.setCaretPosition(0);
         textArea.requestFocusInWindow();
         textArea.setMarkOccurrences(true);
@@ -820,6 +738,89 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         return findWindowOpacityEnabled;
     }
 
+    public GlassPane getGlassPane() {
+        return glassPane;
+    }
+
+    /**
+     * Sets the Look and Feel for the opened application instance.
+     *
+     * @param lnfClassName The class name of the Look and Feel to set.
+     */
+    public void setLookAndFeel(String lnfClassName) {
+        // Only set the Look and Feel if we're not already using that Look.
+        // Compare against currently active one, not the one we want to change
+        // to on restart, seems more logical to the end-user
+        String current = UIManager.getLookAndFeel().getClass().getName();
+
+        if (lnfClassName != null && !current.equals(lnfClassName)) {
+            try {
+                // Use application's LaF class loader, not a system one, as it
+                // can access any additional 3rd-party LaF jars that weren't on
+                // the classpath when the application started. Also, don't
+                // necessarily trust UIDefaults.get("ClassLoader") to be this
+                // class loader, as on Windows if the user changes the UxTheme
+                // the LaF is updated outside of this call, and the property
+                // value is reset to null
+                ClassLoader cl = getLookAndFeelManager().getLAFClassLoader();
+                // Load the Look and Feel class. Note that we cannot simply use
+                // its name for some reason (Exceptions are thrown)
+                Class c = cl.loadClass(lnfClassName);
+                final LookAndFeel lnf = (LookAndFeel) c.newInstance();
+
+                // If we're changing to a LAF that supports window decorations
+                // and our current one doesn't, or vice versa, inform the user
+                // that this change will occur on restart. Substance seems to be
+                // the only troublemaker here (Metal, for example, supports
+                // window decorations, but works fine without special logic)
+                boolean curSubstance = SubstanceUtil.isSubstanceInstalled();
+                boolean nextSubstance = SubstanceUtil
+                        .isASubstanceLookAndFeel(lnf);
+                if (curSubstance != nextSubstance) {
+                    String startupLookAndFeelProperty = "startup_lookandfeel_class";
+                    try {
+                        Config.saveSetting(startupLookAndFeelProperty,
+                                lnfClassName);
+                    } catch (Exception e) {
+                        ExceptionDialog.ignoreException(e);
+                    }
+
+                    String message = "The Look And Feel will be loaded on next startup.";
+                    String title = "Look And Feel";
+                    UISupport.getDialogs().showInfoMessage(message, title);
+                    return;
+                }
+
+                UIManager.setLookAndFeel(lnf);
+                // Re-save the class loader BEFORE calling updateLookAndFeels(),
+                // as the UIManager.setLookAndFeel() call above resets this
+                // property to null, and we need this class loader to be set as
+                // it's the one that's aware of our 3rd party JARs. Swing uses
+                // this property (if non-null) to load classes from, and if we
+                // don't set it, exceptions will be thrown
+                UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
+                UIUtil.installOsSpecificLafTweaks();
+                Runnable updateUIRunnable = new Runnable() {
+                    public void run() {
+                        updateLookAndFeel(lnf);
+                    }
+                };
+
+                // Ensure we update Look and Feels on event dispatch thread
+                SwingUtilities.invokeLater(updateUIRunnable);
+            } catch (Exception e) {
+                ExceptionDialog.showException(e);
+            }
+
+            String startupLookAndFeelProperty = "startup_lookandfeel_class";
+            try {
+                Config.saveSetting(startupLookAndFeelProperty, lnfClassName);
+            } catch (Exception e) {
+                ExceptionDialog.ignoreException(e);
+            }
+        }
+    }
+
     /**
      * Returns the opacity with which to render unfocused child windows, if this
      * option is enabled.
@@ -1086,8 +1087,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
             splashScreen.updateStatus("Initializing the menu bar..", 85);
             setApplicationMenuBar(new ApplicationMenuBar());
-            Actions.DEFAULT_THEME
-                    .actionPerformed(new ActionEvent(this, 0, null));
 
             splashScreen.updateStatus("Installing the plugins..", 90);
             installPlugins();

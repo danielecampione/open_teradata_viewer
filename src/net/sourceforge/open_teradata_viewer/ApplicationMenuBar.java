@@ -37,6 +37,7 @@ import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
+import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
@@ -190,33 +191,20 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu(ApplicationFrame.LAF_MENU_LABEL);
         add(menu);
-        subMenu = new JMenu("Editor Theme");
-        JRadioButtonMenuItem radioButtonDefaultTheme = new JRadioButtonMenuItem(
-                Actions.DEFAULT_THEME);
-        radioButtonDefaultTheme.setSelected(true);
-        JRadioButtonMenuItem radioButtonDefaultAltTheme = new JRadioButtonMenuItem(
-                Actions.DEFAULT_ALT_THEME);
-        JRadioButtonMenuItem radioButtonDarkTheme = new JRadioButtonMenuItem(
-                Actions.DARK_THEME);
-        JRadioButtonMenuItem radioButtonEclipseTheme = new JRadioButtonMenuItem(
-                Actions.ECLIPSE_THEME);
-        JRadioButtonMenuItem radioButtonIdeaTheme = new JRadioButtonMenuItem(
-                Actions.IDEA_THEME);
-        JRadioButtonMenuItem radioButtonVisualStudioTheme = new JRadioButtonMenuItem(
-                Actions.VISUAL_STUDIO_THEME);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
-        buttonGroupEditorTheme.add(radioButtonDefaultTheme);
-        buttonGroupEditorTheme.add(radioButtonDefaultAltTheme);
-        buttonGroupEditorTheme.add(radioButtonDarkTheme);
-        buttonGroupEditorTheme.add(radioButtonEclipseTheme);
-        buttonGroupEditorTheme.add(radioButtonIdeaTheme);
-        buttonGroupEditorTheme.add(radioButtonVisualStudioTheme);
-        subMenu.add(radioButtonDefaultTheme);
-        subMenu.add(radioButtonDefaultAltTheme);
-        subMenu.add(radioButtonDarkTheme);
-        subMenu.add(radioButtonEclipseTheme);
-        subMenu.add(radioButtonIdeaTheme);
-        subMenu.add(radioButtonVisualStudioTheme);
+        subMenu = new JMenu("Editor Theme");
+        addThemeItem("Default", "/res/themes/default.xml",
+                buttonGroupEditorTheme, subMenu, true);
+        addThemeItem("Default (Alternative Version)",
+                "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme,
+                subMenu);
+        addThemeItem("Eclipse", "/res/themes/eclipse.xml",
+                buttonGroupEditorTheme, subMenu);
+        addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme,
+                subMenu);
+        addThemeItem("Visual Studio", "/res/themes/vs.xml",
+                buttonGroupEditorTheme, subMenu);
         menu.add(subMenu);
         menu.addSeparator();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager
@@ -349,5 +337,19 @@ public class ApplicationMenuBar extends JMenuBar {
                 .getTextComponent().getAnimateBracketMatching());
         cbPaintMatchedBracketPair.setSelected(ApplicationFrame.getInstance()
                 .getTextComponent().getPaintMatchedBracketPair());
+    }
+
+    private void addThemeItem(String name, String themeXml, ButtonGroup bg,
+            JMenu menu, boolean isSelected) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ThemeAction(
+                name, themeXml));
+        bg.add(item);
+        item.setSelected(isSelected);
+        menu.add(item);
+    }
+
+    private void addThemeItem(String name, String themeXml, ButtonGroup bg,
+            JMenu menu) {
+        addThemeItem(name, themeXml, bg, menu, false);
     }
 }

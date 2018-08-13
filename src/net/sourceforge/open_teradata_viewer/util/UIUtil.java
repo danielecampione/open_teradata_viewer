@@ -21,13 +21,20 @@ package net.sourceforge.open_teradata_viewer.util;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.ListCellRenderer;
+import javax.swing.Spring;
+import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.BorderUIResource;
@@ -42,6 +49,25 @@ import javax.swing.table.TableCellRenderer;
  * 
  */
 public class UIUtil {
+
+    /** A very common border that can be shared across many components. */
+    private static final Border EMPTY_5_BORDER = BorderFactory
+            .createEmptyBorder(5, 5, 5, 5);
+
+    /**
+     * Fixes the orientation of the renderer of a combo box. Swing standard LaFs
+     * don't handle this on their own.
+     *
+     * @param combo The combo box.
+     */
+    public static void fixComboOrientation(JComboBox combo) {
+        ListCellRenderer r = combo.getRenderer();
+        if (r instanceof Component) {
+            ComponentOrientation o = ComponentOrientation.getOrientation(Locale
+                    .getDefault());
+            ((Component) r).setComponentOrientation(o);
+        }
+    }
 
     /**
      * Fixes the orientation of the default JTable renderers (for Object, Number
@@ -81,6 +107,16 @@ public class UIUtil {
                 ((Component) r).applyComponentOrientation(o);
             }
         }
+    }
+
+    /**
+     * Returns an empty border of width 5 on all sides. Since this is a very
+     * common border in GUI's, the border returned is a singleton.
+     *
+     * @return The border.
+     */
+    public static Border getEmpty5Border() {
+        return EMPTY_5_BORDER;
     }
 
     /**
@@ -153,6 +189,92 @@ public class UIUtil {
     }
 
     /**
+     * Used by makeSpringCompactGrid. This is ripped off directly from
+     * <code>SpringUtilities.java</code> in the Sun Java Tutorial.
+     *
+     * @param parent The container whose layout must be an instance of
+     *        <code>SpringLayout</code>.
+     * @return The spring constraints for the specified component contained in
+     *         <code>parent</code>.
+     */
+    private static final SpringLayout.Constraints getConstraintsForCell(
+            int row, int col, Container parent, int cols) {
+        SpringLayout layout = (SpringLayout) parent.getLayout();
+        Component c = parent.getComponent(row * cols + col);
+        return layout.getConstraints(c);
+    }
+
+    /**
+     * This method is ripped off from <code>SpringUtilities.java</code> found on
+     * Sun's Java Tutorial pages. It takes a component whose layout is
+     * <code>SpringLayout</code> and organizes the components it contains into
+     * a nice grid.
+     * Aligns the first <code>rows</code> * <code>cols</code> components of
+     * <code>parent</code> in a grid. Each component in a column is as wide as
+     * the maximum preferred width of the components in that column; height is
+     * similarly determined for each row. The parent is made just big enough to
+     * fit them all.
+     *
+     * @param parent The container whose layout is <code>SpringLayout</code>.
+     * @param rows The number of rows of components to make in the container.
+     * @param cols The number of columns of components to make.
+     * @param initialX The x-location to start the grid at.
+     * @param initialY The y-location to start the grid at.
+     * @param xPad The x-padding between cells.
+     * @param yPad The y-padding between cells.
+     */
+    public static final void makeSpringCompactGrid(Container parent, int rows,
+            int cols, int initialX, int initialY, int xPad, int yPad) {
+        SpringLayout layout;
+        try {
+            layout = (SpringLayout) parent.getLayout();
+        } catch (ClassCastException cce) {
+            System.err.println("The first argument to makeCompactGrid "
+                    + "must use SpringLayout.");
+            return;
+        }
+
+        // Align all cells in each column and make them the same width
+        Spring x = Spring.constant(initialX);
+        for (int c = 0; c < cols; c++) {
+            Spring width = Spring.constant(0);
+            for (int r = 0; r < rows; r++) {
+                width = Spring.max(width,
+                        getConstraintsForCell(r, c, parent, cols).getWidth());
+            }
+            for (int r = 0; r < rows; r++) {
+                SpringLayout.Constraints constraints = getConstraintsForCell(r,
+                        c, parent, cols);
+                constraints.setX(x);
+                constraints.setWidth(width);
+            }
+            x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
+        }
+
+        // Align all cells in each row and make them the same height
+        Spring y = Spring.constant(initialY);
+        for (int r = 0; r < rows; r++) {
+            Spring height = Spring.constant(0);
+            for (int c = 0; c < cols; c++) {
+                height = Spring.max(height,
+                        getConstraintsForCell(r, c, parent, cols).getHeight());
+            }
+            for (int c = 0; c < cols; c++) {
+                SpringLayout.Constraints constraints = getConstraintsForCell(r,
+                        c, parent, cols);
+                constraints.setY(y);
+                constraints.setHeight(height);
+            }
+            y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
+        }
+
+        // Set the parent's size
+        SpringLayout.Constraints pCons = layout.getConstraints(parent);
+        pCons.setConstraint(SpringLayout.SOUTH, y);
+        pCons.setConstraint(SpringLayout.EAST, x);
+    }
+
+    /**
      * Make a table use the right grid color on Windows XP / Vista, when using
      * the Windows Look and Feel.
      *
@@ -192,5 +314,31 @@ public class UIUtil {
         }
 
         return old;
+    }
+
+    /**
+     * Returns a button with the specified text.
+     *
+     * @param text The label for the component.
+     * @return The button.
+     */
+    public static final JButton newButton(String text) {
+        JButton b = new JButton(text);
+        return b;
+    }
+
+    /**
+     * Returns an <code>JLabel</code> with the specified text.
+     *
+     * @param text The label for the component.
+     * @param labelFor The component the label is labeling.
+     * @return The <code>JLabel</code>.
+     */
+    public static final JLabel newLabel(String text, Component labelFor) {
+        JLabel label = new JLabel(text);
+        if (labelFor != null) {
+            label.setLabelFor(labelFor);
+        }
+        return label;
     }
 }
