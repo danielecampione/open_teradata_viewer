@@ -82,6 +82,7 @@ public class ShorthandCompletion extends BasicCompletion {
      *
      * @return The text the user must start to input.
      */
+    @Override
     public String getInputText() {
         return inputText;
     }
@@ -94,6 +95,7 @@ public class ShorthandCompletion extends BasicCompletion {
      *         inserted).
      * @see #getReplacementText()
      */
+    @Override
     public String getSummary() {
         String summary = super.getSummary();
         return summary != null ? summary : ("<html><body>" + getSummaryBody());

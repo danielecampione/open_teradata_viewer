@@ -70,8 +70,9 @@ public class OTVUndoManager extends UndoManager {
      */
     public void beginInternalAtomicEdit() {
         if (++internalAtomicEditDepth == 1) {
-            if (compoundEdit != null)
+            if (compoundEdit != null) {
                 compoundEdit.end();
+            }
             compoundEdit = new OTVCompoundEdit();
         }
     }
@@ -107,6 +108,7 @@ public class OTVUndoManager extends UndoManager {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void redo() throws CannotRedoException {
         super.redo();
         updateActions();
@@ -121,11 +123,13 @@ public class OTVUndoManager extends UndoManager {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void undo() throws CannotUndoException {
         super.undo();
         updateActions();
     }
 
+    @Override
     public void undoableEditHappened(UndoableEditEvent e) {
         // This happens when the first undoable edit occurs, and just after an
         // undo. So, we need to update our actions
@@ -208,21 +212,26 @@ public class OTVUndoManager extends UndoManager {
 
         private static final long serialVersionUID = -3457203341829617731L;
 
+        @Override
         public String getUndoPresentationName() {
             return UIManager.getString("AbstractUndoableEdit.undoText");
         }
 
+        @Override
         public String getRedoPresentationName() {
             return UIManager.getString("AbstractUndoableEdit.redoText");
         }
 
+        @Override
         public boolean isInProgress() {
             return false;
         }
 
+        @Override
         public void undo() throws CannotUndoException {
-            if (compoundEdit != null)
+            if (compoundEdit != null) {
                 compoundEdit.end();
+            }
             super.undo();
             compoundEdit = null;
         }

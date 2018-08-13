@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.editor.autocomplete;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.text.JTextComponent;
@@ -28,9 +29,10 @@ import javax.swing.text.JTextComponent;
 import net.sourceforge.open_teradata_viewer.editor.IToolTipSupplier;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
  * A completion provider for the C programming language (and other languages
@@ -59,8 +61,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
  * 
  */
 public class LanguageAwareCompletionProvider extends CompletionProviderBase
-        implements
-            IToolTipSupplier {
+        implements IToolTipSupplier {
 
     /**
      * The provider to use when no provider is assigned to a particular token
@@ -104,11 +105,13 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      * @throws UnsupportedOperationException Always.
      * @see #setParameterizedCompletionParams(char, String, char)
      */
+    @Override
     public void clearParameterizedCompletionParams() {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAlreadyEnteredText(JTextComponent comp) {
         if (!(comp instanceof OTVSyntaxTextArea)) {
             return EMPTY_STRING;
@@ -128,7 +131,8 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
     }
 
     /** {@inheritDoc} */
-    public List getCompletionsAt(JTextComponent tc, Point p) {
+    @Override
+    public List<ICompletion> getCompletionsAt(JTextComponent tc, Point p) {
         return defaultProvider == null ? null : defaultProvider
                 .getCompletionsAt(tc, p);
     }
@@ -140,14 +144,16 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      * @return The list of possible completions, or an empty list if there are
      *         none.
      */
-    protected List getCompletionsImpl(JTextComponent comp) {
-        if (!(comp instanceof OTVSyntaxTextArea)) {
-            return new ArrayList(0);
+    @Override
+    protected List<ICompletion> getCompletionsImpl(JTextComponent comp) {
+        if (!(comp instanceof SyntaxTextArea)) {
+            return new ArrayList<ICompletion>(0);
         }
         ICompletionProvider provider = getProviderFor(comp);
-        return provider != null
-                ? provider.getCompletions(comp)
-                : new ArrayList(0);
+        if (provider != null) {
+            return provider.getCompletions(comp);
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -172,7 +178,9 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
     }
 
     /** {@inheritDoc} */
-    public List getParameterizedCompletions(JTextComponent tc) {
+    @Override
+    public List<IParameterizedCompletion> getParameterizedCompletions(
+            JTextComponent tc) {
         // Parameterized completions can only come from the "code" completion
         // provider. We do not do function/method completions while editing
         // strings or comments
@@ -182,16 +190,19 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
     }
 
     /** {@inheritDoc} */
+    @Override
     public char getParameterListEnd() {
         return defaultProvider.getParameterListEnd();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getParameterListSeparator() {
         return defaultProvider.getParameterListSeparator();
     }
 
     /** {@inheritDoc} */
+    @Override
     public char getParameterListStart() {
         return defaultProvider.getParameterListStart();
     }
@@ -207,22 +218,22 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
         OTVSyntaxTextArea sta = (OTVSyntaxTextArea) comp;
         SyntaxDocument doc = (SyntaxDocument) sta.getDocument();
         int line = sta.getCaretLineNumber();
-        Token t = doc.getTokenListForLine(line);
+        IToken t = doc.getTokenListForLine(line);
         if (t == null) {
             return getDefaultCompletionProvider();
         }
 
         int dot = sta.getCaretPosition();
-        Token curToken = SyntaxUtilities.getTokenAtOffset(t, dot);
+        IToken curToken = SyntaxUtilities.getTokenAtOffset(t, dot);
 
         if (curToken == null) { // At end of the line
             int type = doc.getLastTokenTypeOnLine(line);
-            if (type == Token.NULL) {
-                Token temp = t.getLastPaintableToken();
+            if (type == IToken.NULL) {
+                IToken temp = t.getLastPaintableToken();
                 if (temp == null) {
                     return getDefaultCompletionProvider();
                 }
-                type = temp.type;
+                type = temp.getType();
             }
 
             // TokenMakers can use types < 0 for "internal types". This gives
@@ -233,42 +244,42 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
             }
 
             switch (type) {
-                case Token.ERROR_STRING_DOUBLE :
-                    return getStringCompletionProvider();
-                case Token.COMMENT_EOL :
-                case Token.COMMENT_MULTILINE :
-                    return getCommentCompletionProvider();
-                case Token.COMMENT_DOCUMENTATION :
-                    return getDocCommentCompletionProvider();
-                default :
-                    return getDefaultCompletionProvider();
+            case IToken.ERROR_STRING_DOUBLE:
+                return getStringCompletionProvider();
+            case IToken.COMMENT_EOL:
+            case IToken.COMMENT_MULTILINE:
+                return getCommentCompletionProvider();
+            case IToken.COMMENT_DOCUMENTATION:
+                return getDocCommentCompletionProvider();
+            default:
+                return getDefaultCompletionProvider();
             }
         }
 
-        if (dot == curToken.offset) { // At the very beginning of a new token
+        if (dot == curToken.getOffset()) { // At the very beginning of a new token
             // Need to check previous token for its type before deciding.
             // Previous token may also be on previous line
             return getDefaultCompletionProvider();
         }
 
-        switch (curToken.type) {
-            case Token.LITERAL_STRING_DOUBLE_QUOTE :
-            case Token.ERROR_STRING_DOUBLE :
-                return getStringCompletionProvider();
-            case Token.COMMENT_EOL :
-            case Token.COMMENT_MULTILINE :
-                return getCommentCompletionProvider();
-            case Token.COMMENT_DOCUMENTATION :
-                return getDocCommentCompletionProvider();
-            case Token.NULL :
-            case Token.WHITESPACE :
-            case Token.IDENTIFIER :
-            case Token.VARIABLE :
-            case Token.PREPROCESSOR :
-            case Token.DATA_TYPE :
-            case Token.FUNCTION :
-            case Token.OPERATOR :
-                return getDefaultCompletionProvider();
+        switch (curToken.getType()) {
+        case IToken.LITERAL_STRING_DOUBLE_QUOTE:
+        case IToken.ERROR_STRING_DOUBLE:
+            return getStringCompletionProvider();
+        case IToken.COMMENT_EOL:
+        case IToken.COMMENT_MULTILINE:
+            return getCommentCompletionProvider();
+        case IToken.COMMENT_DOCUMENTATION:
+            return getDocCommentCompletionProvider();
+        case IToken.NULL:
+        case IToken.WHITESPACE:
+        case IToken.IDENTIFIER:
+        case IToken.VARIABLE:
+        case IToken.PREPROCESSOR:
+        case IToken.DATA_TYPE:
+        case IToken.FUNCTION:
+        case IToken.OPERATOR:
+            return getDefaultCompletionProvider();
         }
 
         return null; // In a token type we can't auto-complete from
@@ -285,6 +296,7 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isAutoActivateOkay(JTextComponent tc) {
         ICompletionProvider provider = getProviderFor(tc);
         return provider != null ? provider.isAutoActivateOkay(tc) : false;
@@ -333,6 +345,7 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      * @throws UnsupportedOperationException Always.
      * @see #clearParameterizedCompletionParams()
      */
+    @Override
     public void setParameterizedCompletionParams(char listStart,
             String separator, char listEnd) {
         throw new UnsupportedOperationException();
@@ -362,13 +375,14 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      * @param e The mouse event.
      * @return The tool tip text, or <code>null</code> if none.
      */
+    @Override
     public String getToolTipText(TextArea textArea, MouseEvent e) {
         String tip = null;
 
-        List completions = getCompletionsAt(textArea, e.getPoint());
+        List<ICompletion> completions = getCompletionsAt(textArea, e.getPoint());
         if (completions != null && completions.size() > 0) {
             // Only ever one match for us in C..
-            ICompletion c = (ICompletion) completions.get(0);
+            ICompletion c = completions.get(0);
             tip = c.getToolTipText();
         }
 

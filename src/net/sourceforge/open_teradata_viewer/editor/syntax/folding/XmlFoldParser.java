@@ -24,8 +24,8 @@ import java.util.List;
 import javax.swing.text.BadLocationException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
  * Fold parser for XML. Any tags that span more than one line, as well as
@@ -37,11 +37,12 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
  */
 public class XmlFoldParser implements IFoldParser {
 
-    private static final char[] MARKUP_CLOSING_TAG_START = {'<', '/'};
-    private static final char[] MARKUP_SHORT_TAG_END = {'/', '>'};
-    private static final char[] MLC_END = {'-', '-', '>'};
+    private static final char[] MARKUP_CLOSING_TAG_START = { '<', '/' };
+    private static final char[] MARKUP_SHORT_TAG_END = { '/', '>' };
+    private static final char[] MLC_END = { '-', '-', '>' };
 
     /** {@inheritDoc} */
+    @Override
     public List<Fold> getFolds(SyntaxTextArea textArea) {
         List<Fold> folds = new ArrayList<Fold>();
 
@@ -52,7 +53,7 @@ public class XmlFoldParser implements IFoldParser {
 
         try {
             for (int line = 0; line < lineCount; line++) {
-                Token t = textArea.getTokenListForLine(line);
+                IToken t = textArea.getTokenListForLine(line);
 
                 while (t != null && t.isPaintable()) {
                     if (t.isComment()) {
@@ -60,7 +61,7 @@ public class XmlFoldParser implements IFoldParser {
                         if (inMLC) {
                             // Found the end of the MLC starting on a previous line..
                             if (t.endsWith(MLC_END)) {
-                                int mlcEnd = t.offset + t.textCount - 1;
+                                int mlcEnd = t.getEndOffset() - 1;
                                 if (currentFold == null) {
                                     currentFold = new Fold(IFoldType.COMMENT,
                                             textArea, mlcStart);
@@ -80,32 +81,32 @@ public class XmlFoldParser implements IFoldParser {
                             // another line
                         } else {
                             // If we're an MLC that ends on a later line..
-                            if (t.type == Token.COMMENT_MULTILINE
+                            if (t.getType() == IToken.COMMENT_MULTILINE
                                     && !t.endsWith(MLC_END)) {
                                 inMLC = true;
-                                mlcStart = t.offset;
+                                mlcStart = t.getOffset();
                             }
                         }
-                    } else if (t.isSingleChar(Token.MARKUP_TAG_DELIMITER, '<')) {
+                    } else if (t.isSingleChar(IToken.MARKUP_TAG_DELIMITER, '<')) {
                         if (currentFold == null) {
                             currentFold = new Fold(IFoldType.CODE, textArea,
-                                    t.offset);
+                                    t.getOffset());
                             folds.add(currentFold);
                         } else {
                             currentFold = currentFold.createChild(
-                                    IFoldType.CODE, t.offset);
+                                    IFoldType.CODE, t.getOffset());
                         }
-                    } else if (t.is(Token.MARKUP_TAG_DELIMITER,
+                    } else if (t.is(IToken.MARKUP_TAG_DELIMITER,
                             MARKUP_SHORT_TAG_END)) {
                         if (currentFold != null) {
                             Fold parentFold = currentFold.getParent();
                             removeFold(currentFold, folds);
                             currentFold = parentFold;
                         }
-                    } else if (t.is(Token.MARKUP_TAG_DELIMITER,
+                    } else if (t.is(IToken.MARKUP_TAG_DELIMITER,
                             MARKUP_CLOSING_TAG_START)) {
                         if (currentFold != null) {
-                            currentFold.setEndOffset(t.offset);
+                            currentFold.setEndOffset(t.getOffset());
                             Fold parentFold = currentFold.getParent();
                             // Don't add fold markers for single-line blocks
                             if (currentFold.isOnSingleLine()) {
@@ -133,7 +134,7 @@ public class XmlFoldParser implements IFoldParser {
      * @param fold The fold to remove.
      * @param folds The list of top-level folds.
      */
-    private static final void removeFold(Fold fold, List folds) {
+    private static final void removeFold(Fold fold, List<Fold> folds) {
         if (!fold.removeFromParent()) {
             folds.remove(folds.size() - 1);
         }

@@ -35,19 +35,20 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 class DefaultOccurrenceMarker implements IOccurrenceMarker {
 
     /** {@inheritDoc} */
-    public void markOccurrences(SyntaxDocument doc, Token t,
+    @Override
+    public void markOccurrences(SyntaxDocument doc, IToken t,
             SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p) {
         char[] lexeme = t.getLexeme().toCharArray();
-        int type = t.type;
+        int type = t.getType();
         int lineCount = doc.getDefaultRootElement().getElementCount();
 
         for (int i = 0; i < lineCount; i++) {
-            Token temp = doc.getTokenListForLine(i);
+            IToken temp = doc.getTokenListForLine(i);
             while (temp != null && temp.isPaintable()) {
                 if (temp.is(type, lexeme)) {
                     try {
-                        int end = temp.offset + temp.textCount;
-                        h.addMarkedOccurrenceHighlight(temp.offset, end, p);
+                        int end = temp.getEndOffset();
+                        h.addMarkedOccurrenceHighlight(temp.getOffset(), end, p);
                     } catch (BadLocationException ble) {
                         ExceptionDialog.hideException(ble); // Never happens
                     }
@@ -56,4 +57,5 @@ class DefaultOccurrenceMarker implements IOccurrenceMarker {
             }
         }
     }
+
 }

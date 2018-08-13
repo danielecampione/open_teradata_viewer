@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax iParser )
+ * Open Teradata Viewer ( editor syntax parser )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,20 +31,20 @@ import java.util.List;
  */
 public class DefaultParseResult implements IParseResult {
 
-    private IParser iParser;
+    private IParser parser;
     private int firstLineParsed;
     private int lastLineParsed;
     private List<IParserNotice> notices;
     private long parseTime;
     private Exception error;
 
-    public DefaultParseResult(IParser iParser) {
-        this.iParser = iParser;
+    public DefaultParseResult(IParser parser) {
+        this.parser = parser;
         notices = new ArrayList<IParserNotice>();
     }
 
     /**
-     * Adds a iParser notice.
+     * Adds a parser notice.
      *
      * @param notice The new notice.
      * @see #clearNotices()
@@ -54,7 +54,7 @@ public class DefaultParseResult implements IParseResult {
     }
 
     /**
-     * Clears any iParser notices in this result.
+     * Clears any parser notices in this result.
      *
      * @see #addNotice(IParserNotice)
      */
@@ -89,7 +89,7 @@ public class DefaultParseResult implements IParseResult {
 
     /** {@inheritDoc} */
     public IParser getParser() {
-        return iParser;
+        return parser;
     }
 
     /**
@@ -103,7 +103,7 @@ public class DefaultParseResult implements IParseResult {
     }
 
     /**
-     * Sets the amount of time it took for this iParser to parse the document.
+     * Sets the amount of time it took for this parser to parse the document.
      *
      * @param time The amount of time, in milliseconds.
      * @see #getParseTime()

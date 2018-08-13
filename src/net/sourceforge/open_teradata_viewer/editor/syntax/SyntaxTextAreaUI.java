@@ -66,15 +66,17 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * @param elem The element.
      * @return The view.
      */
+    @Override
     public View create(Element elem) {
         TextArea c = getTextArea();
         if (c instanceof SyntaxTextArea) {
             SyntaxTextArea area = (SyntaxTextArea) c;
             View v;
-            if (area.getLineWrap())
+            if (area.getLineWrap()) {
                 v = new WrappedSyntaxView(elem);
-            else
+            } else {
                 v = new SyntaxView(elem);
+            }
             return v;
         }
         return null;
@@ -85,6 +87,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      *
      * @return The highlighter.
      */
+    @Override
     protected Highlighter createHighlighter() {
         return new SyntaxTextAreaHighlighter();
     }
@@ -96,6 +99,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      *
      * @return The name of the cached action map.
      */
+    @Override
     protected String getActionMapName() {
         return SHARED_ACTION_MAP_NAME;
     }
@@ -107,6 +111,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * @return The editor capabilities.
      * @see javax.swing.plaf.TextUI#getEditorKit
      */
+    @Override
     public EditorKit getEditorKit(JTextComponent tc) {
         return defaultKit;
     }
@@ -120,6 +125,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * issue warnings that you are not actually overriding the original method
      * (since it is package-private).
      */
+    @Override
     protected InputMap getTextAreaInputMap() {
         InputMap map = new InputMapUIResource();
         InputMap shared = (InputMap) UIManager.get(SHARED_INPUT_MAP_NAME);
@@ -136,6 +142,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      *
      * @param g The graphics component on which to paint.
      */
+    @Override
     protected void paintBackground(Graphics g) {
         super.paintBackground(g);
         paintMatchedBracket(g);
@@ -191,6 +198,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      *
      * @param e The property change event.
      */
+    @Override
     protected void propertyChange(PropertyChangeEvent e) {
 
         String name = e.getPropertyName();
@@ -222,6 +230,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * <code>modelToView(int)</code> calls, as the entire bounding box isn't
      * computed.
      */
+    @Override
     public int yForLine(int line) throws BadLocationException {
         Rectangle alloc = getVisibleEditorRect();
         if (alloc != null) {
@@ -237,6 +246,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
      * This is faster than calling <code>modelToView(offs).y</code>, so it is
      * preferred if you do not need the actual bounding box.
      */
+    @Override
     public int yForLineContaining(int offs) throws BadLocationException {
         Rectangle alloc = getVisibleEditorRect();
         if (alloc != null) {

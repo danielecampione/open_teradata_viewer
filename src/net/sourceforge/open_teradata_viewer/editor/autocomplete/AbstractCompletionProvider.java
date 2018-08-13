@@ -41,10 +41,10 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
      * The completions this provider is aware of. Subclasses should ensure that
      * this list is sorted alphabetically (case-insensitively).
      */
-    protected List completions;
+    protected List<ICompletion> completions;
 
     /** Compares a {@link ICompletion} against a String. */
-    protected Comparator comparator;
+    protected CaseInsensitiveComparator comparator;
 
     /** Ctor. */
     public AbstractCompletionProvider() {
@@ -80,9 +80,8 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
      * @see #removeCompletion(ICompletion)
      * @see #clear()
      */
-    public void addCompletions(List completions) {
-        for (int i = 0; i < completions.size(); i++) {
-            ICompletion c = (ICompletion) completions.get(i);
+    public void addCompletions(List<ICompletion> completions) {
+        for (ICompletion c : completions) {
             checkProviderAndAdd(c);
         }
         Collections.sort(this.completions);
@@ -129,7 +128,8 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
      * @return A list of {@link ICompletion}s, or <code>null</code> if there are
      *         no matching <tt>ICompletion</tt>s.
      */
-    public List getCompletionByInputText(String inputText) {
+    @SuppressWarnings("unchecked")
+    public List<ICompletion> getCompletionByInputText(String inputText) {
         // Find any entry that matches this input text (there may be > 1)
         int end = Collections.binarySearch(completions, inputText, comparator);
         if (end < 0) {
@@ -144,14 +144,18 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
         }
         int count = completions.size();
         while (++end < count
-                && comparator.compare(completions.get(end), inputText) == 0);
+                && comparator.compare(completions.get(end), inputText) == 0) {
+            ;
+        }
 
         return completions.subList(start, end); // (inclusive, exclusive)
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
     protected List getCompletionsImpl(JTextComponent comp) {
-        List retVal = new ArrayList();
+        List<ICompletion> retVal = new ArrayList<ICompletion>();
         String text = getAlreadyEnteredText(comp);
 
         if (text != null) {
@@ -172,7 +176,7 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
             }
 
             while (index < completions.size()) {
-                ICompletion c = (ICompletion) completions.get(index);
+                ICompletion c = completions.get(index);
                 if (Util.startsWithIgnoreCase(c.getInputText(), text)) {
                     retVal.add(c);
                     index++;
@@ -213,13 +217,13 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
      * @author D. Campione
      * 
      */
-    private static class CaseInsensitiveComparator
-            implements
-                Comparator,
-                Serializable {
+    @SuppressWarnings("rawtypes")
+    protected static class CaseInsensitiveComparator implements Comparator,
+            Serializable {
 
         private static final long serialVersionUID = 5231161608905723621L;
 
+        @Override
         public int compare(Object o1, Object o2) {
             ICompletion c = (ICompletion) o1;
             // o2.toString() needed to help compile with 1.6+

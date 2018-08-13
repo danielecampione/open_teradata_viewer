@@ -44,7 +44,7 @@ public class FoldCollapser {
      * @see IFoldType
      */
     public FoldCollapser(int typeToCollapse) {
-        typesToCollapse = new ArrayList<Integer>();
+        typesToCollapse = new ArrayList<Integer>(3);
         addTypeToCollapse(typeToCollapse);
     }
 
@@ -54,7 +54,7 @@ public class FoldCollapser {
      * @param typeToCollapse The type of fold to collapse.
      */
     public void addTypeToCollapse(int typeToCollapse) {
-        typesToCollapse.add(new Integer(typeToCollapse));
+        typesToCollapse.add(Integer.valueOf(typeToCollapse));
     }
 
     /**
@@ -92,8 +92,8 @@ public class FoldCollapser {
      */
     public boolean getShouldCollapse(Fold fold) {
         int type = fold.getFoldType();
-        for (int i = 0; i < typesToCollapse.size(); i++) {
-            if (type == ((Integer) typesToCollapse.get(i)).intValue()) {
+        for (Integer typeToCollapse : typesToCollapse) {
+            if (type == typeToCollapse.intValue()) {
                 return true;
             }
         }

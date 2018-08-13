@@ -137,7 +137,7 @@ public class StaticCodeTemplate extends AbstractCodeTemplate {
     }
 
     /**
-     * Returns text with newlines indented by the specifed amount.
+     * Returns text with newlines indented by the specified amount.
      *
      * @param text The original text.
      * @param firstNewline The index of the first '\n' character.
@@ -150,7 +150,7 @@ public class StaticCodeTemplate extends AbstractCodeTemplate {
         }
         int pos = 0;
         int old = firstNewline + 1;
-        StringBuffer sb = new StringBuffer(text.substring(0, old));
+        StringBuilder sb = new StringBuilder(text.substring(0, old));
         sb.append(indent);
         while ((pos = text.indexOf('\n', old)) > -1) {
             sb.append(text.substring(old, pos + 1));
@@ -244,6 +244,7 @@ public class StaticCodeTemplate extends AbstractCodeTemplate {
      *
      * @return A string representation of this template.
      */
+    @Override
     public String toString() {
         return "[StaticCodeTemplate: id=" + getID() + ", text="
                 + getBeforeCaretText() + "|" + getAfterCaretText() + "]";

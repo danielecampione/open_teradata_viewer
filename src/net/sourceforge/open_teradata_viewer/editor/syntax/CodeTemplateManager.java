@@ -59,7 +59,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.templates.ICodeTemplat
 public class CodeTemplateManager {
 
     private int maxTemplateIDLength;
-    private List templates;
+    private List<ICodeTemplate> templates;
 
     private KeyStroke insertTrigger;
     private String insertTriggerString;
@@ -79,7 +79,7 @@ public class CodeTemplateManager {
 
         s = new Segment();
         comparator = new TemplateComparator();
-        templates = new ArrayList<Object>();
+        templates = new ArrayList<ICodeTemplate>();
     }
 
     /**
@@ -165,7 +165,7 @@ public class CodeTemplateManager {
      */
     public synchronized ICodeTemplate[] getTemplates() {
         ICodeTemplate[] temp = new ICodeTemplate[templates.size()];
-        return (ICodeTemplate[]) templates.toArray(temp);
+        return templates.toArray(temp);
     }
 
     /**
@@ -213,8 +213,8 @@ public class CodeTemplateManager {
             throw new IllegalArgumentException("id cannot be null");
         }
 
-        for (Iterator<Object> i = templates.iterator(); i.hasNext();) {
-            ICodeTemplate template = (ICodeTemplate) i.next();
+        for (Iterator<ICodeTemplate> i = templates.iterator(); i.hasNext();) {
+            ICodeTemplate template = i.next();
             if (id.equals(template.getID())) {
                 i.remove();
                 return template;
@@ -246,16 +246,19 @@ public class CodeTemplateManager {
      * @return Whether or not the save was successful.
      */
     public synchronized boolean saveTemplates() {
-        if (templates == null)
+        if (templates == null) {
             return true;
-        if (directory == null || !directory.isDirectory())
+        }
+        if (directory == null || !directory.isDirectory()) {
             return false;
+        }
 
         // Blow away all old XML files to start anew, as some might be from
         // templates we're removed from the template manager
         File[] oldXMLFiles = directory.listFiles(new XMLFileFilter());
-        if (oldXMLFiles == null)
+        if (oldXMLFiles == null) {
             return false; // Either an IOException or it isn't a directory
+        }
         int count = oldXMLFiles.length;
         for (int i = 0; i < count; i++) {
             oldXMLFiles[i].delete();
@@ -263,8 +266,7 @@ public class CodeTemplateManager {
 
         // Save all current templates as XML
         boolean wasSuccessful = true;
-        for (Iterator<Object> i = templates.iterator(); i.hasNext();) {
-            ICodeTemplate template = (ICodeTemplate) i.next();
+        for (ICodeTemplate template : templates) {
             File xmlFile = new File(directory, template.getID() + ".xml");
             try {
                 XMLEncoder e = new XMLEncoder(new BufferedOutputStream(
@@ -318,7 +320,8 @@ public class CodeTemplateManager {
             int newCount = files == null ? 0 : files.length;
             int oldCount = templates.size();
 
-            ArrayList<Object> temp = new ArrayList<Object>(oldCount + newCount);
+            List<ICodeTemplate> temp = new ArrayList<ICodeTemplate>(oldCount
+                    + newCount);
             temp.addAll(templates);
 
             for (int i = 0; i < newCount; i++) {
@@ -331,7 +334,7 @@ public class CodeTemplateManager {
                         throw new IOException("Not a ICodeTemplate: "
                                 + files[i].getAbsolutePath());
                     }
-                    temp.add(obj);
+                    temp.add((ICodeTemplate) obj);
                     d.close();
                 } catch (/*IO, NoSuchElement*/Exception e) {
                     // NoSuchElementException can be thrown when reading an XML
@@ -359,8 +362,8 @@ public class CodeTemplateManager {
 
         // Remove any null entries (should only happen because of IOExceptions,
         // etc. when loading from files), and sort the remaining list.
-        for (Iterator<Object> i = templates.iterator(); i.hasNext();) {
-            ICodeTemplate temp = (ICodeTemplate) i.next();
+        for (Iterator<ICodeTemplate> i = templates.iterator(); i.hasNext();) {
+            ICodeTemplate temp = i.next();
             if (temp == null || temp.getID() == null) {
                 i.remove();
             } else {
@@ -380,15 +383,13 @@ public class CodeTemplateManager {
      * @author D. Campione
      * 
      */
-    private static class TemplateComparator
-            implements
-                Comparator<Object>,
-                Serializable {
+    @SuppressWarnings("rawtypes")
+    private static class TemplateComparator implements Comparator, Serializable {
 
         private static final long serialVersionUID = 8919403953778641908L;
 
+        @Override
         public int compare(Object template, Object segment) {
-
             // Get template start index (0) and length.
             ICodeTemplate t = (ICodeTemplate) template;
             final char[] templateArray = t.getID().toCharArray();
@@ -411,8 +412,9 @@ public class CodeTemplateManager {
             while (n-- != 0) {
                 char c1 = templateArray[i++];
                 char c2 = segArray[j++];
-                if (c1 != c2)
+                if (c1 != c2) {
                     return c1 - c2;
+                }
             }
             return len1 - len2;
 
@@ -428,6 +430,7 @@ public class CodeTemplateManager {
      * 
      */
     private static class XMLFileFilter implements FileFilter {
+        @Override
         public boolean accept(File f) {
             return f.getName().toLowerCase().endsWith(".xml");
         }

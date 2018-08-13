@@ -74,13 +74,14 @@ public class SearchEngineTest extends TestCase {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void setUp() throws Exception {
         // setUp() is called once per test, each with a new instantiation of
         // SearchEngineTest, so check a static variable to ensure that
         // initialization is only done once
 
         if (text == null || text.length() <= 0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             InputStream in = getClass().getResourceAsStream(
                     "/res/testfiles/editor/text.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in));

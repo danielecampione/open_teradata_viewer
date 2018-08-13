@@ -160,7 +160,7 @@ abstract class TextAreaBase extends JTextArea {
      * Adds listeners that listen for changes to the current line, so we can
      * update our "current line highlight".
      */
-    protected void addCurrentLineHighlightListeners() {
+    private void addCurrentLineHighlightListeners() {
         boolean add = true;
         MouseMotionListener[] mouseMotionListeners = getMouseMotionListeners();
         for (int i = 0; i < mouseMotionListeners.length; i++) {
@@ -196,8 +196,9 @@ abstract class TextAreaBase extends JTextArea {
         int caretPosition = getCaretPosition();
         int tabSize = getTabSize();
         String tabInSpaces = "";
-        for (int i = 0; i < tabSize; i++)
+        for (int i = 0; i < tabSize; i++) {
             tabInSpaces += " ";
+        }
         String text = getText();
         setText(text.replaceAll(tabInSpaces, "\t"));
         int newDocumentLength = getDocument().getLength();
@@ -221,9 +222,10 @@ abstract class TextAreaBase extends JTextArea {
     public void convertTabsToSpaces() {
         int caretPosition = getCaretPosition();
         int tabSize = getTabSize();
-        StringBuffer tabInSpaces = new StringBuffer();
-        for (int i = 0; i < tabSize; i++)
+        StringBuilder tabInSpaces = new StringBuilder();
+        for (int i = 0; i < tabSize; i++) {
             tabInSpaces.append(' ');
+        }
         String text = getText();
         setText(text.replaceAll("\t", tabInSpaces.toString()));
 
@@ -274,6 +276,7 @@ abstract class TextAreaBase extends JTextArea {
      * @return The current background color, or <code>null</code> if an image is
      *         currently the background.
      */
+    @Override
     public final Color getBackground() {
         Object bg = getBackgroundObject();
         return (bg instanceof Color) ? (Color) bg : null;
@@ -303,11 +306,11 @@ abstract class TextAreaBase extends JTextArea {
      * @see #setBackgroundObject(Object newBackground)
      */
     public final Object getBackgroundObject() {
-        if (backgroundPainter == null)
+        if (backgroundPainter == null) {
             return null;
-        return (backgroundPainter instanceof ImageBackgroundPainterStrategy)
-                ? (Object) ((ImageBackgroundPainterStrategy) backgroundPainter)
-                        .getMasterImage()
+        }
+        return (backgroundPainter instanceof ImageBackgroundPainterStrategy) ? (Object) ((ImageBackgroundPainterStrategy) backgroundPainter)
+                .getMasterImage()
                 : (Object) ((ColorBackgroundPainterStrategy) backgroundPainter)
                         .getColor();
     }
@@ -582,6 +585,7 @@ abstract class TextAreaBase extends JTextArea {
      *
      * @param g The graphics context with which to paint.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         backgroundPainter.paint(g, getVisibleRect());
 
@@ -647,6 +651,7 @@ abstract class TextAreaBase extends JTextArea {
      * @param e The component event about to be sent to all registered
      *          <code>ComponentListener</code>s.
      */
+    @Override
     protected void processComponentEvent(ComponentEvent e) {
         // In line wrap mode, resizing the text area means that the caret's
         // "line" could change - not to a different logical line, but a
@@ -675,6 +680,7 @@ abstract class TextAreaBase extends JTextArea {
      *
      * @param bg The color to use as the background color.
      */
+    @Override
     public void setBackground(Color bg) {
         Object oldBG = getBackgroundObject();
         if (oldBG instanceof Color) { // Just change color of strategy
@@ -786,6 +792,7 @@ abstract class TextAreaBase extends JTextArea {
      *
      * @param font The font to use for this text component.
      */
+    @Override
     public void setFont(Font font) {
         super.setFont(font);
         updateMarginLineX();
@@ -818,6 +825,7 @@ abstract class TextAreaBase extends JTextArea {
      *
      * @param wrap Whether or not word wrap should be enabled.
      */
+    @Override
     public void setLineWrap(boolean wrap) {
         super.setLineWrap(wrap);
         forceCurrentLineHighlightRepaint();
@@ -933,6 +941,7 @@ abstract class TextAreaBase extends JTextArea {
      *
      * @param size Number of characters to expand to.
      */
+    @Override
     public void setTabSize(int size) {
         super.setTabSize(size);
         boolean b = getLineWrap();
@@ -984,11 +993,8 @@ abstract class TextAreaBase extends JTextArea {
      * @author D. Campione
      * 
      */
-    protected class TAMouseListener extends CaretEvent
-            implements
-                MouseListener,
-                MouseMotionListener,
-                FocusListener {
+    protected class TAMouseListener extends CaretEvent implements
+            MouseListener, MouseMotionListener, FocusListener {
 
         private static final long serialVersionUID = -6346308896782464836L;
 
@@ -996,37 +1002,48 @@ abstract class TextAreaBase extends JTextArea {
             super(textArea);
         }
 
+        @Override
         public void focusGained(FocusEvent e) {
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
         }
 
+        @Override
         public void mouseMoved(MouseEvent e) {
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
         }
 
+        @Override
         public void mouseEntered(MouseEvent e) {
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
         }
 
+        @Override
         public int getDot() {
             return dot;
         }
 
+        @Override
         public int getMark() {
             return mark;
         }

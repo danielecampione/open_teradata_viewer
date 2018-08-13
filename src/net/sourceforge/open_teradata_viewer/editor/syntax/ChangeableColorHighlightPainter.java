@@ -52,6 +52,7 @@ class ChangeableColorHighlightPainter extends DefaultHighlightPainter {
      * @return The color.
      * @see #setColor(Color)
      */
+    @Override
     public Color getColor() {
         return color;
     }

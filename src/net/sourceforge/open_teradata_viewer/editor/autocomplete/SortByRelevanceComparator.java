@@ -27,11 +27,10 @@ import java.util.Comparator;
  * @author D. Campione
  * 
  */
-public class SortByRelevanceComparator implements Comparator {
+public class SortByRelevanceComparator implements Comparator<ICompletion> {
 
-    public int compare(Object o1, Object o2) {
-        ICompletion c1 = (ICompletion) o1;
-        ICompletion c2 = (ICompletion) o2;
+    @Override
+    public int compare(ICompletion c1, ICompletion c2) {
         int rel1 = c1.getRelevance();
         int rel2 = c2.getRelevance();
         int diff = rel2 - rel1;//rel1 - rel2;

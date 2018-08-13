@@ -25,7 +25,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * highlighting.<p>
  *
  * @author D. Campione
- * @see Token
+ * @see IToken
  * 
  */
 public abstract class AbstractTokenMaker extends TokenMakerBase {
@@ -33,7 +33,7 @@ public abstract class AbstractTokenMaker extends TokenMakerBase {
     /**
      * Hash table of words to highlight and what token type they are. The keys
      * are the words to highlight, and their values are the token types, for
-     * example, <code>Token.RESERVED_WORD</code> or <code>Token.FUNCTION</code>.
+     * example, <code>IToken.RESERVED_WORD</code> or <code>IToken.FUNCTION</code>.
      */
     protected TokenMap wordsToHighlight;
 

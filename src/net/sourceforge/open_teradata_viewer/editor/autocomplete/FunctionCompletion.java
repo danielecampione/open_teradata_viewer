@@ -33,12 +33,11 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  * 
  */
-public class FunctionCompletion extends VariableCompletion
-        implements
-            IParameterizedCompletion {
+public class FunctionCompletion extends VariableCompletion implements
+        IParameterizedCompletion {
 
     /** Parameters to the function. */
-    private List params;
+    private List<Parameter> params;
 
     /** A description of the return value of this function. */
     private String returnValDesc;
@@ -55,7 +54,8 @@ public class FunctionCompletion extends VariableCompletion
         super(provider, name, returnType);
     }
 
-    protected void addDefinitionString(StringBuffer sb) {
+    @Override
+    protected void addDefinitionString(StringBuilder sb) {
         sb.append("<html><b>");
         sb.append(getDefinitionString());
         sb.append("</b>");
@@ -66,7 +66,7 @@ public class FunctionCompletion extends VariableCompletion
      *
      * @param sb The buffer to append to.
      */
-    protected void addParameters(StringBuffer sb) {
+    protected void addParameters(StringBuilder sb) {
         int paramCount = getParamCount();
         if (paramCount > 0) {
             sb.append("<b>Parameters:</b><br>");
@@ -100,8 +100,9 @@ public class FunctionCompletion extends VariableCompletion
      * 
      * @return The definition string.
      */
+    @Override
     public String getDefinitionString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         // Add the return type if applicable (C macros like NULL have no type)
         String type = getType();
@@ -143,11 +144,12 @@ public class FunctionCompletion extends VariableCompletion
         return sb.toString();
     }
 
+    @Override
     public ParameterizedCompletionInsertionInfo getInsertionInfo(
             JTextComponent tc, boolean replaceTabsWithSpaces) {
         ParameterizedCompletionInsertionInfo info = new ParameterizedCompletionInsertionInfo();
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         char paramListStart = getProvider().getParameterListStart();
         if (paramListStart != '\0') {
             sb.append(paramListStart);
@@ -200,8 +202,9 @@ public class FunctionCompletion extends VariableCompletion
     }
 
     /** {@inheritDoc} */
+    @Override
     public Parameter getParam(int index) {
-        return (Parameter) params.get(index);
+        return params.get(index);
     }
 
     /**
@@ -210,11 +213,13 @@ public class FunctionCompletion extends VariableCompletion
      * @return The number of parameters to this function.
      * @see #getParam(int)
      */
+    @Override
     public int getParamCount() {
         return params == null ? 0 : params.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getShowParameterToolTip() {
         return true;
     }
@@ -247,8 +252,9 @@ public class FunctionCompletion extends VariableCompletion
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getSummary() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         addDefinitionString(sb);
         if (!possiblyAddDescription(sb)) {
             sb.append("<br><br><br>");
@@ -259,6 +265,7 @@ public class FunctionCompletion extends VariableCompletion
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getToolTipText() {
         String text = getSummary();
         if (text == null) {
@@ -275,10 +282,10 @@ public class FunctionCompletion extends VariableCompletion
      * @see #getParam(int)
      * @see #getParamCount()
      */
-    public void setParams(List params) {
+    public void setParams(List<Parameter> params) {
         if (params != null) {
             // Deep copy so parsing can re-use its array
-            this.params = new ArrayList(params);
+            this.params = new ArrayList<Parameter>(params);
         }
     }
 

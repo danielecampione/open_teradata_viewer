@@ -115,7 +115,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             new PossiblyInsertTemplateAction(),
             new PreviousWordAction(previousWordAction, false),
             new PreviousWordAction(selectionPreviousWordAction, true),
-            new SelectWordAction(), new ToggleCommentAction(),};
+            new SelectWordAction(), new ToggleCommentAction(), };
 
     /** Ctor. */
     public SyntaxTextAreaEditorKit() {
@@ -126,6 +126,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      *
      * @return The document.
      */
+    @Override
     public Document createDefaultDocument() {
         return new SyntaxDocument(ISyntaxConstants.SYNTAX_STYLE_NONE);
     }
@@ -136,6 +137,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @param textArea The text area.
      * @return The icon row header.
      */
+    @Override
     public IconRowHeader createIconRowHeader(TextArea textArea) {
         return new FoldingAwareIconRowHeader((SyntaxTextArea) textArea);
     }
@@ -146,6 +148,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      *
      * @return the command list
      */
+    @Override
     public Action[] getActions() {
         return TextAction.augmentList(super.getActions(),
                 SyntaxTextAreaEditorKit.defaultActions);
@@ -159,9 +162,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    protected static class BeginWordAction
-            extends
-                TextAreaEditorKit.BeginWordAction {
+    protected static class BeginWordAction extends
+            TextAreaEditorKit.BeginWordAction {
 
         private static final long serialVersionUID = 9158506996459873455L;
         private Segment seg;
@@ -171,6 +173,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             seg = new Segment();
         }
 
+        @Override
         protected int getWordStart(TextArea textArea, int offs)
                 throws BadLocationException {
             if (offs == 0) {
@@ -216,7 +219,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
 
             // Otherwise, the "word" a single "something else" char (operator,
-            // etc.)
+            // etc..)
 
             offs -= firstIndex - seg.getIndex() + 1;
             if (ch != Segment.DONE && nextCh != '\n') {
@@ -227,7 +230,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         }
     }
 
-    /** Expands or collapses the nearest fold. */
+    /**
+     * Expands or collapses the nearest fold.
+     * 
+     * @author D. Campione
+     * 
+     */
     public static class ChangeFoldStateAction extends FoldRelatedAction {
 
         private static final long serialVersionUID = 5409538978475562168L;
@@ -244,6 +252,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             if (sta.isCodeFoldingEnabled()) {
@@ -257,6 +266,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return getName();
         }
@@ -281,6 +291,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             seg = new Segment();
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             SyntaxDocument doc = (SyntaxDocument) sta.getDocument();
@@ -342,6 +353,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staCloseCurlyBraceAction;
         }
@@ -361,6 +373,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(staCloseMarkupTagAction);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
@@ -383,11 +396,11 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // Check actual char before token type, since it's quicker
                     char ch = doc.charAt(dot - 2);
                     if (ch == '<' || ch == '[') {
-
-                        Token t = doc.getTokenListForLine(sta
+                        IToken t = doc.getTokenListForLine(sta
                                 .getCaretLineNumber());
                         t = SyntaxUtilities.getTokenAtOffset(t, dot - 1);
-                        if (t != null && t.type == Token.MARKUP_TAG_DELIMITER) {
+                        if (t != null
+                                && t.getType() == IToken.MARKUP_TAG_DELIMITER) {
                             String tagName = discoverTagName(doc, dot);
                             if (tagName != null) {
                                 sta.replaceSelection(tagName + (char) (ch + 2));
@@ -419,38 +432,36 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             int curLine = root.getElementIndex(dot);
 
             for (int i = 0; i <= curLine; i++) {
-                Token t = doc.getTokenListForLine(i);
+                IToken t = doc.getTokenListForLine(i);
                 while (t != null && t.isPaintable()) {
-
-                    if (t.type == Token.MARKUP_TAG_DELIMITER) {
+                    if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
                         if (t.isSingleChar('<') || t.isSingleChar('[')) {
                             t = t.getNextToken();
                             while (t != null && t.isPaintable()) {
-                                if (t.type == Token.MARKUP_TAG_NAME ||
+                                if (t.getType() == IToken.MARKUP_TAG_NAME ||
                                 // Being lenient here and also checking for
                                 // attributes, in case they (incorrectly) have
                                 // whitespace between the '<' char and the
-                                // element name.
-                                        t.type == Token.MARKUP_TAG_ATTRIBUTE) {
+                                // element name
+                                        t.getType() == IToken.MARKUP_TAG_ATTRIBUTE) {
                                     stack.push(t.getLexeme());
                                     break;
                                 }
                                 t = t.getNextToken();
                             }
-                        } else if (t.textCount == 2
-                                && t.text[t.textOffset] == '/'
-                                && (t.text[t.textOffset + 1] == '>' || t.text[t.textOffset + 1] == ']')) {
+                        } else if (t.length() == 2 && t.charAt(0) == '/'
+                                && (t.charAt(1) == '>' || t.charAt(1) == ']')) {
                             if (!stack.isEmpty()) { // Always true for valid XML
                                 stack.pop();
                             }
-                        } else if (t.textCount == 2
-                                && (t.text[t.textOffset] == '<' || t.text[t.textOffset] == '[')
-                                && t.text[t.textOffset + 1] == '/') {
+                        } else if (t.length() == 2
+                                && (t.charAt(0) == '<' || t.charAt(0) == '[')
+                                && t.charAt(1) == '/') {
                             String tagName = null;
                             if (!stack.isEmpty()) { // Always true for valid XML
-                                tagName = (String) stack.pop();
+                                tagName = stack.pop();
                             }
-                            if (t.offset + t.textCount >= dot) {
+                            if (t.getEndOffset() >= dot) {
                                 return tagName;
                             }
                         }
@@ -463,12 +474,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             return null; // Should never happen
         }
 
+        @Override
         public String getMacroID() {
             return getName();
         }
     }
 
-    /** Collapses all comment folds. */
+    /**
+     * Collapses all comment folds.
+     * 
+     * @author D. Campione
+     * 
+     */
     public static class CollapseAllCommentFoldsAction extends FoldRelatedAction {
 
         private static final long serialVersionUID = 5756304038608483906L;
@@ -485,6 +502,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             if (sta.isCodeFoldingEnabled()) {
@@ -496,12 +514,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staCollapseAllCommentFoldsAction;
         }
     }
 
-    /** Collapses all folds. */
+    /**
+     * Collapses all folds.
+     * 
+     * @author D. Campione
+     * 
+     */
     public static class CollapseAllFoldsAction extends FoldRelatedAction {
 
         private static final long serialVersionUID = -5847113039699771731L;
@@ -518,10 +542,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             if (sta.isCodeFoldingEnabled()) {
                 FoldCollapser collapser = new FoldCollapser() {
+                    @Override
                     public boolean getShouldCollapse(Fold fold) {
                         return true;
                     }
@@ -533,6 +559,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staCollapseAllFoldsAction;
         }
@@ -557,11 +584,13 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             ((SyntaxTextArea) textArea).copyAsRtf();
             textArea.requestFocusInWindow();
         }
 
+        @Override
         public final String getMacroID() {
             return getName();
         }
@@ -573,9 +602,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class DecreaseFontSizeAction
-            extends
-                TextAreaEditorKit.DecreaseFontSizeAction {
+    public static class DecreaseFontSizeAction extends
+            TextAreaEditorKit.DecreaseFontSizeAction {
 
         private static final long serialVersionUID = -8170319818124509819L;
 
@@ -588,6 +616,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             SyntaxScheme scheme = sta.getSyntaxScheme();
@@ -653,8 +682,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                         parent.repaint();
                     }
                 }
-            } else
+            } else {
                 UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
         }
     }
 
@@ -680,6 +710,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             s = new Segment();
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
@@ -733,6 +764,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
         }
 
+        @Override
         public final String getMacroID() {
             return staDecreaseIndentAction;
         }
@@ -785,14 +817,14 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class DeletePrevWordAction
-            extends
-                TextAreaEditorKit.DeletePrevWordAction {
+    public static class DeletePrevWordAction extends
+            TextAreaEditorKit.DeletePrevWordAction {
 
         private static final long serialVersionUID = -3722509041510238421L;
 
         private Segment seg = new Segment();
 
+        @Override
         protected int getPreviousWordStart(TextArea textArea, int offs)
                 throws BadLocationException {
 
@@ -865,6 +897,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, select);
         }
 
+        @Override
         protected int getVisibleEnd(TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             return sta.getLastVisibleOffset();
@@ -878,9 +911,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    protected static class EndWordAction
-            extends
-                TextAreaEditorKit.EndWordAction {
+    protected static class EndWordAction extends
+            TextAreaEditorKit.EndWordAction {
 
         private static final long serialVersionUID = -3860390771911403912L;
 
@@ -891,6 +923,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             seg = new Segment();
         }
 
+        @Override
         protected int getWordEnd(TextArea textArea, int offs)
                 throws BadLocationException {
 
@@ -936,7 +969,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         }
     }
 
-    /** Expands all folds. */
+    /**
+     * Expands all folds.
+     * 
+     * @author D. Campione
+     * 
+     */
     public static class ExpandAllFoldsAction extends FoldRelatedAction {
 
         private static final long serialVersionUID = -2098243894401554680L;
@@ -953,6 +991,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             if (sta.isCodeFoldingEnabled()) {
@@ -973,12 +1012,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staExpandAllFoldsAction;
         }
     }
 
-    /** Base class for folding-related actions. */
+    /**
+     * Base class for folding-related actions.
+     *
+     * @author D. Campione
+     * 
+     */
     static abstract class FoldRelatedAction extends RecordableTextAction {
 
         private static final long serialVersionUID = 1326629144290057256L;
@@ -1038,6 +1083,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             bracketInfo = SyntaxUtilities.getMatchingBracketPosition(sta,
@@ -1051,6 +1097,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staGoToMatchingBracketAction;
         }
@@ -1062,9 +1109,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class IncreaseFontSizeAction
-            extends
-                TextAreaEditorKit.IncreaseFontSizeAction {
+    public static class IncreaseFontSizeAction extends
+            TextAreaEditorKit.IncreaseFontSizeAction {
 
         private static final long serialVersionUID = -4731681872750673857L;
 
@@ -1077,8 +1123,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
-
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             SyntaxScheme scheme = sta.getSyntaxScheme();
 
@@ -1086,7 +1132,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             // then call setSyntaxHighlightingColorScheme with the same scheme
             // already being used. This relies on the fact that that method does
             // not check whether the new scheme is different from the old scheme
-            // before updating.
+            // before updating
 
             boolean changed = false;
             int count = scheme.getStyleCount();
@@ -1139,8 +1185,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                         parent.repaint();
                     }
                 }
-            } else
+            } else {
                 UIManager.getLookAndFeel().provideErrorFeedback(sta);
+            }
         }
     }
 
@@ -1151,14 +1198,13 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class InsertBreakAction
-            extends
-                TextAreaEditorKit.InsertBreakAction {
+    public static class InsertBreakAction extends
+            TextAreaEditorKit.InsertBreakAction {
 
         private static final long serialVersionUID = 4504481252627624845L;
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
-
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                 return;
@@ -1180,7 +1226,6 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             if (!handled) {
                 handleInsertBreak(sta, noSelection);
             }
-
         }
 
         /**
@@ -1191,8 +1236,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
          */
         private static final int atEndOfLine(int pos, String s, int sLen) {
             for (int i = pos; i < sLen; i++) {
-                if (!SyntaxUtilities.isWhitespace(s.charAt(i)))
+                if (!SyntaxUtilities.isWhitespace(s.charAt(i))) {
                     return i;
+                }
             }
             return -1;
         }
@@ -1202,10 +1248,10 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             Element root = doc.getDefaultRootElement();
             int lineCount = root.getElementCount();
             for (int i = 0; i < lineCount; i++) {
-                Token t = doc.getTokenListForLine(i);
+                IToken t = doc.getTokenListForLine(i);
                 while (t != null && t.isPaintable()) {
-                    if (t.type == Token.SEPARATOR && t.textCount == 1) {
-                        char ch = t.text[t.textOffset];
+                    if (t.getType() == IToken.SEPARATOR && t.length() == 1) {
+                        char ch = t.charAt(0);
                         if (ch == '{') {
                             openCount++;
                         } else if (ch == '}') {
@@ -1254,7 +1300,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 // endWS is the end of the leading whitespace of the current
                 // line
                 String leadingWS = SyntaxUtilities.getLeadingWhitespace(s);
-                StringBuffer sb = new StringBuffer("\n");
+                StringBuilder sb = new StringBuilder("\n");
                 sb.append(leadingWS);
 
                 // If there is only whitespace between the caret and the EOL,
@@ -1304,13 +1350,13 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     && doc.getCurlyBracesDenoteCodeBlocks()) {
 
                 int line = textArea.getCaretLineNumber();
-                Token t = doc.getTokenListForLine(line - 1);
+                IToken t = doc.getTokenListForLine(line - 1);
                 t = t.getLastNonCommentNonWhitespaceToken();
 
                 if (t != null && t.isLeftCurly()) {
 
                     if (getOpenBraceCount(doc) > 0) {
-                        StringBuffer sb = new StringBuffer();
+                        StringBuilder sb = new StringBuilder();
                         if (line == textArea.getLineCount() - 1) {
                             sb.append('\n');
                         }
@@ -1351,6 +1397,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
@@ -1377,7 +1424,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 // soft tab behavior provided by TextArea.replaceSelection()
                 String replacement = "\t";
                 if (textArea.getTabsEmulated()) {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     int temp = textArea.getTabSize();
                     for (int i = 0; i < temp; i++) {
                         sb.append(' ');
@@ -1412,6 +1459,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return insertTabAction;
         }
@@ -1437,6 +1485,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         }
 
         /** Overridden to do better with skipping "words" in code. */
+        @Override
         protected int getNextWord(TextArea textArea, int offs)
                 throws BadLocationException {
             SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
@@ -1452,7 +1501,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 if (sta.isCodeFoldingEnabled()) { // Start of next visible line
                     FoldManager fm = sta.getFoldManager();
                     int lineCount = root.getElementCount();
-                    while (++line < lineCount && fm.isLineHidden(line));
+                    while (++line < lineCount && fm.isLineHidden(line)) {
+                        ;
+                    }
                     if (line < lineCount) { // Found a lower visible line
                         offs = root.getElement(line).getStartOffset();
                     }
@@ -1502,9 +1553,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class PossiblyInsertTemplateAction
-            extends
-                RecordableTextAction {
+    public static class PossiblyInsertTemplateAction extends
+            RecordableTextAction {
 
         private static final long serialVersionUID = 1288772638117428457L;
 
@@ -1512,9 +1562,11 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(staPossiblyInsertTemplateAction);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
-            if (!textArea.isEditable() || !textArea.isEnabled())
+            if (!textArea.isEditable() || !textArea.isEnabled()) {
                 return;
+            }
 
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
 
@@ -1524,8 +1576,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     try {
                         CodeTemplateManager manager = SyntaxTextArea
                                 .getCodeTemplateManager();
-                        ICodeTemplate template = manager == null
-                                ? null
+                        ICodeTemplate template = manager == null ? null
                                 : manager.getTemplate(sta);
 
                         // A non-null template means modify the text to insert
@@ -1554,6 +1605,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             textArea.replaceSelection(" ");
         }
 
+        @Override
         public final String getMacroID() {
             return staPossiblyInsertTemplateAction;
         }
@@ -1567,9 +1619,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class PreviousWordAction
-            extends
-                TextAreaEditorKit.PreviousWordAction {
+    public static class PreviousWordAction extends
+            TextAreaEditorKit.PreviousWordAction {
 
         private static final long serialVersionUID = 8745518206677338482L;
 
@@ -1581,6 +1632,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         }
 
         /** Overridden to do better with skipping "words" in code. */
+        @Override
         protected int getPreviousWord(TextArea textArea, int offs)
                 throws BadLocationException {
             if (offs == 0) {
@@ -1595,7 +1647,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 SyntaxTextArea sta = (SyntaxTextArea) textArea;
                 if (sta.isCodeFoldingEnabled()) { // End of next visible line
                     FoldManager fm = sta.getFoldManager();
-                    while (--line >= 0 && fm.isLineHidden(line));
+                    while (--line >= 0 && fm.isLineHidden(line)) {
+                        ;
+                    }
                     if (line >= 0) { // Found an earlier visible line
                         offs = root.getElement(line).getEndOffset() - 1;
                     }
@@ -1648,12 +1702,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      * 
      */
-    public static class SelectWordAction
-            extends
-                TextAreaEditorKit.SelectWordAction {
+    public static class SelectWordAction extends
+            TextAreaEditorKit.SelectWordAction {
 
         private static final long serialVersionUID = -6969112358471092026L;
 
+        @Override
         protected void createActions() {
             start = new BeginWordAction("pigdog", false);
             end = new EndWordAction("pigdog", true);
@@ -1663,6 +1717,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action that toggles whether the currently selected lines are
      * commented.
+     * 
+     * @author D. Campione
+     * 
      */
     public static class ToggleCommentAction extends RecordableTextAction {
 
@@ -1672,6 +1729,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(staToggleCommentAction);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
@@ -1754,12 +1812,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staToggleCommentAction;
         }
     }
 
-    /** Toggles the fold at the current caret position or line. */
+    /**
+     * Toggles the fold at the current caret position or line.
+     * 
+     * @author D. Campione
+     * 
+     */
     public static class ToggleCurrentFoldAction extends FoldRelatedAction {
 
         private static final long serialVersionUID = -7653537898747779090L;
@@ -1776,6 +1840,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             super(name, icon, desc, mnemonic, accelerator);
         }
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             if (sta.isCodeFoldingEnabled()) {
@@ -1789,6 +1854,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
         }
 
+        @Override
         public final String getMacroID() {
             return staToggleCurrentFoldAction;
         }

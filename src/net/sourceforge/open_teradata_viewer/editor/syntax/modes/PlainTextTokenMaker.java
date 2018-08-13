@@ -26,7 +26,8 @@ import javax.swing.text.Segment;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.AbstractJFlexTokenMaker;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
+import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
 
 /**
  * Scanner for plain text files.
@@ -101,9 +102,9 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
         while (i < l) {
             int count = packed.charAt(i++);
             int value = packed.charAt(i++);
-            do
+            do {
                 result[j++] = value;
-            while (--count > 0);
+            } while (--count > 0);
         }
         return j;
     }
@@ -167,9 +168,9 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
             int count = packed.charAt(i++);
             int value = packed.charAt(i++);
             value--;
-            do
+            do {
                 result[j++] = value;
-            while (--count > 0);
+            } while (--count > 0);
         }
         return j;
     }
@@ -182,7 +183,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
     // Error messages for the codes above
     private static final String ZZ_ERROR_MSG[] = {
             "Unkown internal scanner error", "Error: could not match input",
-            "Error: pushback value was too large"};
+            "Error: pushback value was too large" };
 
     /**
      * ZZ_ATTRIBUTE[aState] contains the attributes of state <code>aState</code>
@@ -205,9 +206,9 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
         while (i < l) {
             int count = packed.charAt(i++);
             int value = packed.charAt(i++);
-            do
+            do {
                 result[j++] = value;
-            while (--count > 0);
+            } while (--count > 0);
         }
         return j;
     }
@@ -270,17 +271,18 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
     }
 
     /**
-     * Always returns <code>Token.NULL</code>, as there are no multiline tokens
+     * Always returns <code>IToken.NULL</code>, as there are no multiline tokens
      * in properties files.
      *
      * @param text The line of tokens to examine.
      * @param initialTokenType The token type to start with (i.e., the value of
      *                         <code>getLastTokenTypeOnLine</code> for the line
      *                         before <code>text</code>).
-     * @return <code>Token.NULL</code>.
+     * @return <code>IToken.NULL</code>.
      */
+    @Override
     public int getLastTokenTypeOnLine(Segment text, int initialTokenType) {
-        return Token.NULL;
+        return IToken.NULL;
     }
 
     /**
@@ -289,6 +291,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return <code>null</code>, as there are no comments in plain text.
      */
+    @Override
     public String[] getLineCommentStartAndEnd() {
         return null;
     }
@@ -301,6 +304,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      * @return Whether tokens of this type should have "mark occurrences"
      *         enabled.
      */
+    @Override
     public boolean getMarkOccurrencesOfTokenType(int type) {
         return false;
     }
@@ -314,10 +318,11 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      * @param initialTokenType The token type we should start with.
      * @param startOffset The offset into the document at which
      *                    <code>text</code> starts.
-     * @return The first <code>Token</code> in a linked list representing the
+     * @return The first <code>IToken</code> in a linked list representing the
      *         syntax highlighted text.
      */
-    public Token getTokenList(Segment text, int initialTokenType,
+    @Override
+    public IToken getTokenList(Segment text, int initialTokenType,
             int startOffset) {
         resetTokenList();
         this.offsetShift = -text.offset + startOffset;
@@ -330,7 +335,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
             return yylex();
         } catch (IOException ioe) {
             ExceptionDialog.notifyException(ioe);
-            return new Token();
+            return new TokenImpl();
         }
     }
 
@@ -411,8 +416,9 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
         zzAtEOF = true; // Indicate end of file
         zzEndRead = zzStartRead; // Invalidate buffer
 
-        if (zzReader != null)
+        if (zzReader != null) {
             zzReader.close();
+        }
     }
 
     /** Returns the current lexical state. */
@@ -425,6 +431,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @param newState the new lexical state.
      */
+    @Override
     public final void yybegin(int newState) {
         zzLexicalState = newState;
     }
@@ -485,8 +492,9 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      *                This number must not be greater than yylength()!
      */
     public void yypushback(int number) {
-        if (number > yylength())
+        if (number > yylength()) {
             zzScanError(ZZ_PUSHBACK_2BIG);
+        }
 
         zzMarkedPos -= number;
     }
@@ -498,7 +506,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      * @return      the next token
      * @exception   java.io.IOException  if any I/O-Error occurs
      */
-    public Token yylex() throws IOException {
+    public IToken yylex() throws IOException {
         int zzInput;
         int zzAction;
 
@@ -518,11 +526,11 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
             zzAction = -1;
             zzCurrentPosL = zzCurrentPos = zzStartRead = zzMarkedPosL;
             zzState = zzLexicalState;
-            zzForAction : {
+            zzForAction: {
                 while (true) {
-                    if (zzCurrentPosL < zzEndReadL)
+                    if (zzCurrentPosL < zzEndReadL) {
                         zzInput = zzBufferL[zzCurrentPosL++];
-                    else if (zzAtEOF) {
+                    } else if (zzAtEOF) {
                         zzInput = YYEOF;
                         break zzForAction;
                     } else {
@@ -543,16 +551,18 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
                         }
                     }
                     int zzNext = zzTransL[zzRowMapL[zzState] + zzCMapL[zzInput]];
-                    if (zzNext == -1)
+                    if (zzNext == -1) {
                         break zzForAction;
+                    }
                     zzState = zzNext;
 
                     int zzAttributes = zzAttrL[zzState];
                     if ((zzAttributes & 1) == 1) {
                         zzAction = zzState;
                         zzMarkedPosL = zzCurrentPosL;
-                        if ((zzAttributes & 8) == 8)
+                        if ((zzAttributes & 8) == 8) {
                             break zzForAction;
+                        }
                     }
                 }
             }
@@ -561,43 +571,43 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
             zzMarkedPos = zzMarkedPosL;
 
             switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-                case 3 : {
-                    addToken(Token.WHITESPACE, false);
-                }
-                case 5 :
-                    break;
-                case 2 : {
-                    addNullToken();
-                    return firstToken;
-                }
-                case 6 :
-                    break;
-                case 4 : {
-                    addToken(Token.IDENTIFIER, true);
-                }
-                case 7 :
-                    break;
-                case 1 : {
-                    addToken(Token.IDENTIFIER, false);
-                }
-                case 8 :
-                    break;
-                default :
-                    if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
-                        zzAtEOF = true;
-                        switch (zzLexicalState) {
-                            case YYINITIAL : {
-                                addNullToken();
-                                return firstToken;
-                            }
-                            case 22 :
-                                break;
-                            default :
-                                return null;
-                        }
-                    } else {
-                        zzScanError(ZZ_NO_MATCH);
+            case 3: {
+                addToken(IToken.WHITESPACE, false);
+            }
+            case 5:
+                break;
+            case 2: {
+                addNullToken();
+                return firstToken;
+            }
+            case 6:
+                break;
+            case 4: {
+                addToken(IToken.IDENTIFIER, true);
+            }
+            case 7:
+                break;
+            case 1: {
+                addToken(IToken.IDENTIFIER, false);
+            }
+            case 8:
+                break;
+            default:
+                if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
+                    zzAtEOF = true;
+                    switch (zzLexicalState) {
+                    case YYINITIAL: {
+                        addNullToken();
+                        return firstToken;
                     }
+                    case 22:
+                        break;
+                    default:
+                        return null;
+                    }
+                } else {
+                    zzScanError(ZZ_NO_MATCH);
+                }
             }
         }
     }

@@ -61,6 +61,8 @@ public class FoldParserManager implements ISyntaxConstants {
 
     /**
      * Creates the syntax style-to-fold parser mapping for built-in languages.
+     * 
+     * @return The style-to-fold parser mapping.
      */
     private Map<String, IFoldParser> createFoldParserMap() {
         Map<String, IFoldParser> map = new HashMap<String, IFoldParser>();
@@ -88,6 +90,6 @@ public class FoldParserManager implements ISyntaxConstants {
      *         for the language.
      */
     public IFoldParser getFoldParser(String syntaxStyle) {
-        return (IFoldParser) foldParserMap.get(syntaxStyle);
+        return foldParserMap.get(syntaxStyle);
     }
 }

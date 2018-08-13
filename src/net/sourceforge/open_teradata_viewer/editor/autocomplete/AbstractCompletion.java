@@ -24,8 +24,8 @@ import javax.swing.text.JTextComponent;
 /**
  * Base class for possible completions. Most, if not all, {@link ICompletion}
  * implementations can extend this class. It remembers the
- * <tt>ICompletionProvider</tt> that returns this completion, and also implements
- * <tt>Comparable</tt>, allowing such completions to be compared
+ * <tt>ICompletionProvider</tt> that returns this completion, and also
+ * implements <tt>Comparable</tt>, allowing such completions to be compared
  * lexicographically (ignoring case).<p>
  *
  * This implementation assumes the input text and replacement text are the same
@@ -60,17 +60,18 @@ public abstract class AbstractCompletion implements ICompletion {
     }
 
     /** {@inheritDoc} */
-    public int compareTo(Object o) {
-        if (o == this) {
+    @Override
+    public int compareTo(ICompletion c2) {
+        if (c2 == this) {
             return 0;
-        } else if (o instanceof ICompletion) {
-            ICompletion c2 = (ICompletion) o;
+        } else if (c2 != null) {
             return toString().compareToIgnoreCase(c2.toString());
         }
         return -1;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAlreadyEntered(JTextComponent comp) {
         return provider.getAlreadyEnteredText(comp);
     }
@@ -81,6 +82,7 @@ public abstract class AbstractCompletion implements ICompletion {
      *
      * @return The icon for this completion.
      */
+    @Override
     public Icon getIcon() {
         return null;
     }
@@ -93,16 +95,19 @@ public abstract class AbstractCompletion implements ICompletion {
      * @return The text the user has to (start) typing for this completion.
      * @see #getReplacementText()
      */
+    @Override
     public String getInputText() {
         return getReplacementText();
     }
 
     /** {@inheritDoc} */
+    @Override
     public ICompletionProvider getProvider() {
         return provider;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getRelevance() {
         return relevance;
     }
@@ -113,6 +118,7 @@ public abstract class AbstractCompletion implements ICompletion {
      *
      * @return The tool tip text.
      */
+    @Override
     public String getToolTipText() {
         return null;
     }
@@ -133,6 +139,7 @@ public abstract class AbstractCompletion implements ICompletion {
      *
      * @return A string representation of this completion.
      */
+    @Override
     public String toString() {
         return getInputText();
     }

@@ -28,6 +28,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Segment;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.OTVDocument;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.AbstractMarkupTokenMaker;
@@ -83,7 +84,18 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      */
     protected transient DynamicIntArray lastTokensOnLines;
 
+    private transient int lastLine = -1;
+    private transient IToken cachedTokenList;
+    private transient int useCacheCount = 0;
+    private transient int tokenRetrievalCount = 0;
+
     private transient Segment s;
+
+    /**
+     * If this is set to <code>true</code>, debug information about how much
+     * token caching is helping is printed to stdout.
+     */
+    private static final boolean DEBUG_TOKEN_CACHING = false;
 
     /**
      * Constructs a plain text document. A default root element is created, and
@@ -104,9 +116,9 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @param syntaxStyle The syntax highlighting scheme to use.
      */
     public SyntaxDocument(TokenMakerFactory tmf, String syntaxStyle) {
-        putProperty(tabSizeAttribute, new Integer(5));
+        putProperty(tabSizeAttribute, Integer.valueOf(5));
         lastTokensOnLines = new DynamicIntArray(400);
-        lastTokensOnLines.add(Token.NULL); // Initial (empty) line
+        lastTokensOnLines.add(IToken.NULL); // Initial (empty) line
         s = new Segment();
         setTokenMakerFactory(tmf);
         setSyntaxStyle(syntaxStyle);
@@ -121,7 +133,10 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      *
      * @param e The change.
      */
+    @Override
     protected void fireInsertUpdate(DocumentEvent e) {
+        cachedTokenList = null;
+
         /*
          * Now that the text is actually inserted into the content and element
          * structure, we can update our token elements and "last tokens on
@@ -136,9 +151,9 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         int line = lineMap.getElementIndex(e.getOffset());
         int previousLine = line - 1;
         int previousTokenType = (previousLine > -1 ? lastTokensOnLines
-                .get(previousLine) : Token.NULL);
+                .get(previousLine) : IToken.NULL);
 
-        // If entire lines were added...
+        // If entire lines were added..
         if (added != null && added.length > 0) {
 
             Element[] removed = change.getChildrenRemoved();
@@ -183,7 +198,9 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @param chng The change that occurred.
      * @see #removeUpdate
      */
+    @Override
     protected void fireRemoveUpdate(DocumentEvent chng) {
+        cachedTokenList = null;
         Element lineMap = getDefaultRootElement();
         int numLines = lineMap.getElementCount();
 
@@ -195,7 +212,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
             int line = change.getIndex(); // First line entirely removed
             int previousLine = line - 1; // Line before that
             int previousTokenType = (previousLine > -1 ? lastTokensOnLines
-                    .get(previousLine) : Token.NULL);
+                    .get(previousLine) : IToken.NULL);
 
             Element[] added = change.getChildrenAdded();
             int numAdded = added == null ? 0 : added.length;
@@ -210,12 +227,13 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         } // End of if (removed!=null && removed.size()>0)
         else { // Otherwise, text was removed from just one line..
             int line = lineMap.getElementIndex(chng.getOffset());
-            if (line >= lastTokensOnLines.getSize())
+            if (line >= lastTokensOnLines.getSize()) {
                 return; // If we're editing the last line in a document..
+            }
 
             int previousLine = line - 1;
             int previousTokenType = (previousLine > -1 ? lastTokensOnLines
-                    .get(previousLine) : Token.NULL);
+                    .get(previousLine) : IToken.NULL);
             // Update last tokens for lines below until they've stopped changing
             updateLastTokensBelow(line, numLines, previousTokenType);
         }
@@ -320,7 +338,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @return Whether an extra indentation should be done.
      */
     public boolean getShouldIndentNextLine(int line) {
-        Token t = getTokenListForLine(line);
+        IToken t = getTokenListForLine(line);
         t = t.getLastNonCommentNonWhitespaceToken();
         return tokenMaker.getShouldIndentNextLineAfter(t);
     }
@@ -334,7 +352,24 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @param line The line number of <code>text</code> in the document, >= 0.
      * @return A token list representing the specified line.
      */
-    public final Token getTokenListForLine(int line) {
+    public final IToken getTokenListForLine(int line) {
+        tokenRetrievalCount++;
+        if (line == lastLine && cachedTokenList != null) {
+            if (DEBUG_TOKEN_CACHING) {
+                useCacheCount++;
+                ApplicationFrame
+                        .getInstance()
+                        .getConsole()
+                        .println(
+                                "--- Using cached line; ratio now: "
+                                        + useCacheCount + "/"
+                                        + tokenRetrievalCount,
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            }
+            return cachedTokenList;
+        }
+        lastLine = line;
+
         Element map = getDefaultRootElement();
         Element elem = map.getElement(line);
         int startOffset = elem.getStartOffset();
@@ -345,10 +380,12 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
             ExceptionDialog.notifyException(ble);
             return null;
         }
-        int initialTokenType = line == 0
-                ? Token.NULL
+        int initialTokenType = line == 0 ? IToken.NULL
                 : getLastTokenTypeOnLine(line - 1);
-        return tokenMaker.getTokenList(s, initialTokenType, startOffset);
+
+        cachedTokenList = tokenMaker.getTokenList(s, initialTokenType,
+                startOffset);
+        return cachedTokenList;
     }
 
     boolean insertBreakSpecialHandling(ActionEvent e) {
@@ -394,8 +431,9 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         Element map = getDefaultRootElement();
 
         Element element = map.getElement(line);
-        if (element == null)
+        if (element == null) {
             throw new InternalError("Invalid line number: " + line);
+        }
         int startOffset = element.getStartOffset();
         int endOffset = element.getEndOffset() - 1;
         try {
@@ -518,7 +556,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         // the same
         Element map = getDefaultRootElement();
         int numLines = map.getElementCount();
-        int lastTokenType = Token.NULL;
+        int lastTokenType = IToken.NULL;
         for (int i = 0; i < numLines; i++) {
             setSharedSegment(i);
             lastTokenType = tokenMaker.getLastTokenTypeOnLine(s, lastTokenType);

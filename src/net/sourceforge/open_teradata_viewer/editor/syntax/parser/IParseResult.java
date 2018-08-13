@@ -63,7 +63,7 @@ public interface IParseResult {
      *
      * @return A list of {@link IParserNotice}s.
      */
-    public List<?> getNotices();
+    public List<IParserNotice> getNotices();
 
     /**
      * Returns the parser that generated these notices.

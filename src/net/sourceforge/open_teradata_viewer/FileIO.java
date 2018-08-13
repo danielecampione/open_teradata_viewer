@@ -32,7 +32,8 @@ import java.io.PrintWriter;
 import javax.swing.JFileChooser;
 
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -136,7 +137,7 @@ public class FileIO {
     }
 
     private static void writeFileAsWebPage(String path) throws IOException {
-        String[] styles = new String[Token.NUM_TOKEN_TYPES];
+        String[] styles = new String[ITokenTypes.DEFAULT_NUM_TOKEN_TYPES];
         StringBuffer temp = new StringBuffer();
         StringBuffer sb = new StringBuffer();
 
@@ -153,12 +154,12 @@ public class FileIO {
                 .getTextComponent();
         int lineCount = textArea.getLineCount();
         for (int i = 0; i < lineCount; i++) {
-            Token token = textArea.getTokenListForLine(i);
+            IToken token = textArea.getTokenListForLine(i);
             while (token != null && token.isPaintable()) {
-                if (styles[token.type] == null) {
+                if (styles[token.getType()] == null) {
                     temp.setLength(0);
-                    temp.append(".s").append(token.type).append(" {\n");
-                    Font font = textArea.getFontForTokenType(token.type);
+                    temp.append(".s").append(token.getType()).append(" {\n");
+                    Font font = textArea.getFontForTokenType(token.getType());
                     if (font.isBold()) {
                         temp.append("font-weight: bold;\n");
                     }
@@ -170,9 +171,9 @@ public class FileIO {
                             .append(UIUtil.getHTMLFormatForColor(c))
                             .append(";\n");
                     temp.append("}");
-                    styles[token.type] = temp.toString();
+                    styles[token.getType()] = temp.toString();
                 }
-                sb.append("<span class=\"s" + token.type + "\">");
+                sb.append("<span class=\"s" + token.getType() + "\">");
                 sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n",
                         true));
                 sb.append("</span>");

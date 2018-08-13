@@ -40,6 +40,7 @@ import javax.swing.text.Position;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaHighlighter.IHighlightInfo;
 import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.FocusableTip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParseResult;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
@@ -52,14 +53,11 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  * @author D. Campione
  * 
  */
-class ParserManager
-        implements
-            DocumentListener,
-            ActionListener,
-            HyperlinkListener {
+class ParserManager implements DocumentListener, ActionListener,
+        HyperlinkListener {
 
     private SyntaxTextArea textArea;
-    private List<IParser> iParsers;
+    private List<IParser> parsers;
     private Timer timer;
     private boolean running;
     private IParser parserForTip;
@@ -68,7 +66,7 @@ class ParserManager
 
     /**
      * Mapping of notices to their highlights in the editor. Can't use a Map
-     * since iParsers could return two <code>IParserNotice</code>s that compare
+     * since parsers could return two <code>IParserNotice</code>s that compare
      * equally via <code>equals()</code>. Real-world example: The Perl compiler
      * will return 2+ identical error messages if the same error is committed in
      * a single line more than once.
@@ -85,7 +83,7 @@ class ParserManager
      */
     private static final String PROPERTY_DEBUG_PARSING = "sta.debugParsing";
 
-    /** Whether to print debug messages while running iParsers. */
+    /** Whether to print debug messages while running parsers. */
     private static final boolean DEBUG_PARSING;
 
     /**
@@ -113,7 +111,7 @@ class ParserManager
     public ParserManager(int delay, SyntaxTextArea textArea) {
         this.textArea = textArea;
         textArea.getDocument().addDocumentListener(this);
-        iParsers = new ArrayList<IParser>(1); // Usually small
+        parsers = new ArrayList<IParser>(1); // Usually small
         timer = new Timer(delay, this);
         timer.setRepeats(false);
         running = true;
@@ -124,6 +122,7 @@ class ParserManager
      * 
      * @param e The event.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         // Sanity check - should have >1 parser if event is fired
         int parserCount = getParserCount();
@@ -141,8 +140,7 @@ class ParserManager
         Element root = doc.getDefaultRootElement();
         int firstLine = firstOffsetModded == null ? 0 : root
                 .getElementIndex(firstOffsetModded.getOffset());
-        int lastLine = lastOffsetModded == null
-                ? root.getElementCount() - 1
+        int lastLine = lastOffsetModded == null ? root.getElementCount() - 1
                 : root.getElementIndex(lastOffsetModded.getOffset());
         firstOffsetModded = lastOffsetModded = null;
         if (DEBUG_PARSING) {
@@ -158,12 +156,12 @@ class ParserManager
         doc.readLock();
         try {
             for (int i = 0; i < parserCount; i++) {
-                IParser iParser = getParser(i);
-                if (iParser.isEnabled()) {
-                    IParseResult res = iParser.parse(doc, style);
+                IParser parser = getParser(i);
+                if (parser.isEnabled()) {
+                    IParseResult res = parser.parse(doc, style);
                     addParserNoticeHighlights(res);
                 } else {
-                    clearParserNoticeHighlights(iParser);
+                    clearParserNoticeHighlights(parser);
                 }
             }
             textArea.fireParserNoticesChange();
@@ -182,18 +180,18 @@ class ParserManager
     /**
      * Adds a parser for the text area.
      *
-     * @param iParser The new parser. If this is <code>null</code>, nothing
+     * @param parser The new parser. If this is <code>null</code>, nothing
      *                happens.
      * @see #getParser(int)
      * @see #removeParser(IParser)
      */
-    public void addParser(IParser iParser) {
-        if (iParser != null && !iParsers.contains(iParser)) {
+    public void addParser(IParser parser) {
+        if (parser != null && !parsers.contains(parser)) {
             if (running) {
                 timer.stop();
             }
-            iParsers.add(iParser);
-            if (iParsers.size() == 1) {
+            parsers.add(parser);
+            if (parsers.size() == 1) {
                 // Okay to call more than once
                 ToolTipManager.sharedInstance().registerComponent(textArea);
             }
@@ -232,19 +230,18 @@ class ParserManager
 
         removeParserNotices(res);
 
-        List<?> notices = res.getNotices();
+        List<IParserNotice> notices = res.getNotices();
         if (notices.size() > 0) { // Guaranteed non-null
             SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                     .getHighlighter();
 
-            for (Iterator<?> i = notices.iterator(); i.hasNext();) {
-                IParserNotice notice = (IParserNotice) i.next();
+            for (IParserNotice notice : notices) {
                 if (DEBUG_PARSING) {
                     ApplicationFrame.getInstance().getConsole()
                             .println("[DEBUG]: ... adding: " + notice + ".");
                 }
                 try {
-                    Object highlight = null;
+                    IHighlightInfo highlight = null;
                     if (notice.getShowInEditor()) {
                         highlight = h.addParserHighlight(notice,
                                 parserErrorHighlightPainter);
@@ -272,6 +269,7 @@ class ParserManager
      *
      * @param e The document event.
      */
+    @Override
     public void changedUpdate(DocumentEvent e) {
     }
 
@@ -289,19 +287,19 @@ class ParserManager
     /**
      * Removes all parser notice highlights for a specific parser.
      *
-     * @param iParser The parser whose highlights to remove.
+     * @param parser The parser whose highlights to remove.
      */
-    private void clearParserNoticeHighlights(IParser iParser) {
+    private void clearParserNoticeHighlights(IParser parser) {
         SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                 .getHighlighter();
         if (h != null) {
-            h.clearParserHighlights(iParser);
+            h.clearParserHighlights(parser);
         }
         if (noticeHighlightPairs != null) {
             for (Iterator<NoticeHighlightPair> i = noticeHighlightPairs
                     .iterator(); i.hasNext();) {
-                NoticeHighlightPair pair = (NoticeHighlightPair) i.next();
-                if (pair.notice.getParser() == iParser) {
+                NoticeHighlightPair pair = i.next();
+                if (pair.notice.getParser() == parser) {
                     i.remove();
                 }
             }
@@ -309,14 +307,14 @@ class ParserManager
     }
 
     /**
-     * Removes all iParsers and any highlights they have created.
+     * Removes all parsers and any highlights they have created.
      *
      * @see #addParser(IParser)
      */
     public void clearParsers() {
         timer.stop();
         clearParserNoticeHighlights();
-        iParsers.clear();
+        parsers.clear();
         textArea.fireParserNoticesChange();
     }
 
@@ -372,12 +370,12 @@ class ParserManager
      * @see #removeParser(IParser)
      */
     public IParser getParser(int index) {
-        return (IParser) iParsers.get(index);
+        return parsers.get(index);
     }
 
-    /** @return The number of registered iParsers. */
+    /** @return The number of registered parsers. */
     public int getParserCount() {
-        return iParsers.size();
+        return parsers.size();
     }
 
     /**
@@ -390,9 +388,7 @@ class ParserManager
     public List<IParserNotice> getParserNotices() {
         List<IParserNotice> notices = new ArrayList<IParserNotice>();
         if (noticeHighlightPairs != null) {
-            for (Iterator<NoticeHighlightPair> i = noticeHighlightPairs
-                    .iterator(); i.hasNext();) {
-                NoticeHighlightPair pair = (NoticeHighlightPair) i.next();
+            for (NoticeHighlightPair pair : noticeHighlightPairs) {
                 notices.add(pair.notice);
             }
         }
@@ -416,9 +412,7 @@ class ParserManager
 
         int pos = textArea.viewToModel(e.getPoint());
         if (noticeHighlightPairs != null) {
-            for (int j = 0; j < noticeHighlightPairs.size(); j++) {
-                NoticeHighlightPair pair = (NoticeHighlightPair) noticeHighlightPairs
-                        .get(j);
+            for (NoticeHighlightPair pair : noticeHighlightPairs) {
                 IParserNotice notice = pair.notice;
                 if (notice.containsPosition(pos)) {
                     tip = notice.getToolTipText();
@@ -442,7 +436,7 @@ class ParserManager
      * @param e The document event.
      */
     public void handleDocumentEvent(DocumentEvent e) {
-        if (running && iParsers.size() > 0) {
+        if (running && parsers.size() > 0) {
             timer.restart();
         }
     }
@@ -452,6 +446,7 @@ class ParserManager
      *
      * @param e The event.
      */
+    @Override
     public void hyperlinkUpdate(HyperlinkEvent e) {
         if (parserForTip != null && parserForTip.getHyperlinkListener() != null) {
             parserForTip.getHyperlinkListener().linkClicked(textArea, e);
@@ -463,8 +458,9 @@ class ParserManager
      *
      * @param e The document event.
      */
+    @Override
     public void insertUpdate(DocumentEvent e) {
-        // Keep track of the first and last offset modified. Some iParsers are
+        // Keep track of the first and last offset modified. Some parsers are
         // smart and will only re-parse this section of the file
         try {
             int offs = e.getOffset();
@@ -486,14 +482,14 @@ class ParserManager
     /**
      * Removes a parser.
      *
-     * @param iParser The parser to remove.
+     * @param parser The parser to remove.
      * @return Whether the parser was found.
      * @see #addParser(IParser)
      * @see #getParser(int)
      */
-    public boolean removeParser(IParser iParser) {
-        removeParserNotices(iParser);
-        boolean removed = iParsers.remove(iParser);
+    public boolean removeParser(IParser parser) {
+        removeParserNotices(parser);
+        boolean removed = parsers.remove(parser);
         if (removed) {
             textArea.fireParserNoticesChange();
         }
@@ -504,17 +500,16 @@ class ParserManager
      * Removes all parser notices (and clears highlights in the editor) from a
      * particular parser.
      *
-     * @param iParser The parser.
+     * @param parser The parser.
      */
-    private void removeParserNotices(IParser iParser) {
+    private void removeParserNotices(IParser parser) {
         if (noticeHighlightPairs != null) {
             SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                     .getHighlighter();
             for (Iterator<NoticeHighlightPair> i = noticeHighlightPairs
                     .iterator(); i.hasNext();) {
-                NoticeHighlightPair pair = (NoticeHighlightPair) i.next();
-                if (pair.notice.getParser() == iParser
-                        && pair.highlight != null) {
+                NoticeHighlightPair pair = i.next();
+                if (pair.notice.getParser() == parser && pair.highlight != null) {
                     h.removeParserHighlight(pair.highlight);
                     i.remove();
                 }
@@ -535,7 +530,7 @@ class ParserManager
                     .getHighlighter();
             for (Iterator<NoticeHighlightPair> i = noticeHighlightPairs
                     .iterator(); i.hasNext();) {
-                NoticeHighlightPair pair = (NoticeHighlightPair) i.next();
+                NoticeHighlightPair pair = i.next();
                 boolean removed = false;
                 if (shouldRemoveNotice(pair.notice, res)) {
                     if (pair.highlight != null) {
@@ -545,8 +540,7 @@ class ParserManager
                     removed = true;
                 }
                 if (DEBUG_PARSING) {
-                    String text = removed
-                            ? "[DEBUG]: ... notice removed: "
+                    String text = removed ? "[DEBUG]: ... notice removed: "
                             : "[DEBUG]: ... notice not removed: ";
                     ApplicationFrame.getInstance().getConsole()
                             .println(text + pair.notice + ".");
@@ -560,8 +554,9 @@ class ParserManager
      *
      * @param e The document event.
      */
+    @Override
     public void removeUpdate(DocumentEvent e) {
-        // Keep track of the first and last offset modified. Some iParsers are
+        // Keep track of the first and last offset modified. Some parsers are
         // smart and will only re-parse this section of the file. Note that for
         // removals, only the line at the removal start needs to be re-parsed.
         try {
@@ -657,9 +652,10 @@ class ParserManager
      */
     private static class NoticeHighlightPair {
         public IParserNotice notice;
-        public Object highlight;
+        public IHighlightInfo highlight;
 
-        public NoticeHighlightPair(IParserNotice notice, Object highlight) {
+        public NoticeHighlightPair(IParserNotice notice,
+                IHighlightInfo highlight) {
             this.notice = notice;
             this.highlight = highlight;
         }

@@ -176,6 +176,7 @@ public class ConfigurableCaret extends DefaultCaret {
      *
      * @param r The current location of the caret.
      */
+    @Override
     protected synchronized void damage(Rectangle r) {
         if (r != null) {
             validateWidth(r); // Check for "0" or "1" caret width
@@ -196,9 +197,11 @@ public class ConfigurableCaret extends DefaultCaret {
      *          <code>Exception</code> will be thrown.
      * @see Caret#deinstall
      */
+    @Override
     public void deinstall(JTextComponent c) {
-        if (!(c instanceof TextArea))
+        if (!(c instanceof TextArea)) {
             throw new IllegalArgumentException("c must be instance of TextArea");
+        }
         super.deinstall(c);
         c.setNavigationFilter(null);
     }
@@ -229,6 +232,7 @@ public class ConfigurableCaret extends DefaultCaret {
      *
      * @return The painter.
      */
+    @Override
     protected Highlighter.HighlightPainter getSelectionPainter() {
         return selectionPainter;
     }
@@ -250,9 +254,11 @@ public class ConfigurableCaret extends DefaultCaret {
      *          <code>Exception</code> will be thrown.
      * @see Caret#install
      */
+    @Override
     public void install(JTextComponent c) {
-        if (!(c instanceof TextArea))
+        if (!(c instanceof TextArea)) {
             throw new IllegalArgumentException("c must be instance of TextArea");
+        }
         super.install(c);
         c.setNavigationFilter(new FoldAwareNavigationFilter());
     }
@@ -265,6 +271,7 @@ public class ConfigurableCaret extends DefaultCaret {
      * @param e the mouse event
      * @see MouseListener#mouseClicked
      */
+    @Override
     public void mouseClicked(MouseEvent e) {
         if (!e.isConsumed()) {
             TextArea textArea = getTextArea();
@@ -274,24 +281,25 @@ public class ConfigurableCaret extends DefaultCaret {
                 if (nclicks > 2) {
                     nclicks %= 2; // Alternate selecting word/line
                     switch (nclicks) {
-                        case 0 :
-                            selectWord(e);
-                            selectedWordEvent = null;
-                            break;
-                        case 1 :
-                            Action a = null;
-                            ActionMap map = textArea.getActionMap();
-                            if (map != null)
-                                a = map.get(TextAreaEditorKit.selectLineAction);
-                            if (a == null) {
-                                if (selectLine == null) {
-                                    selectLine = new TextAreaEditorKit.SelectLineAction();
-                                }
-                                a = selectLine;
+                    case 0:
+                        selectWord(e);
+                        selectedWordEvent = null;
+                        break;
+                    case 1:
+                        Action a = null;
+                        ActionMap map = textArea.getActionMap();
+                        if (map != null) {
+                            a = map.get(TextAreaEditorKit.selectLineAction);
+                        }
+                        if (a == null) {
+                            if (selectLine == null) {
+                                selectLine = new TextAreaEditorKit.SelectLineAction();
                             }
-                            a.actionPerformed(new ActionEvent(textArea,
-                                    ActionEvent.ACTION_PERFORMED, null, e
-                                            .getWhen(), e.getModifiers()));
+                            a = selectLine;
+                        }
+                        a.actionPerformed(new ActionEvent(textArea,
+                                ActionEvent.ACTION_PERFORMED, null,
+                                e.getWhen(), e.getModifiers()));
                     }
                 }
             } else if (SwingUtilities.isMiddleMouseButton(e)) {
@@ -315,8 +323,9 @@ public class ConfigurableCaret extends DefaultCaret {
                                 if (th != null) {
                                     Transferable trans = buffer
                                             .getContents(null);
-                                    if (trans != null)
+                                    if (trans != null) {
                                         th.importData(c, trans);
+                                    }
                                 }
                                 adjustFocus(true);
                             }
@@ -340,6 +349,7 @@ public class ConfigurableCaret extends DefaultCaret {
      *
      * @param e The mouse event.
      */
+    @Override
     public void mousePressed(MouseEvent e) {
         super.mousePressed(e);
         if (!e.isConsumed() && SwingUtilities.isRightMouseButton(e)) {
@@ -355,6 +365,7 @@ public class ConfigurableCaret extends DefaultCaret {
      *
      * @param g The graphics context in which to paint.
      */
+    @Override
     public void paint(Graphics g) {
         // If the cursor is currently visible..
         if (isVisible()) {
@@ -398,45 +409,45 @@ public class ConfigurableCaret extends DefaultCaret {
 
                 switch (style) {
                 // Draw a big rectangle, and xor the foreground color
-                    case BLOCK_STYLE :
-                        Color textAreaBg = textArea.getBackground();
-                        if (textAreaBg == null) {
-                            textAreaBg = Color.white;
-                        }
-                        g.setXORMode(textAreaBg);
-                        // Fills x==r.x to x==(r.x+(r.width)-1), inclusive
-                        g.fillRect(r.x, r.y, r.width, r.height);
-                        break;
+                case BLOCK_STYLE:
+                    Color textAreaBg = textArea.getBackground();
+                    if (textAreaBg == null) {
+                        textAreaBg = Color.white;
+                    }
+                    g.setXORMode(textAreaBg);
+                    // Fills x==r.x to x==(r.x+(r.width)-1), inclusive
+                    g.fillRect(r.x, r.y, r.width, r.height);
+                    break;
 
-                    // Draw a rectangular border
-                    case BLOCK_BORDER_STYLE :
-                        // fills x==r.x to x==(r.x+(r.width-1)), inclusive.
-                        g.drawRect(r.x, r.y, r.width - 1, r.height);
-                        break;
+                // Draw a rectangular border
+                case BLOCK_BORDER_STYLE:
+                    // fills x==r.x to x==(r.x+(r.width-1)), inclusive.
+                    g.drawRect(r.x, r.y, r.width - 1, r.height);
+                    break;
 
-                    // Draw an "underline" below the current position
-                    case UNDERLINE_STYLE :
-                        textAreaBg = textArea.getBackground();
-                        if (textAreaBg == null) {
-                            textAreaBg = Color.white;
-                        }
-                        g.setXORMode(textAreaBg);
-                        int y = r.y + r.height;
-                        g.drawLine(r.x, y, r.x + r.width - 1, y);
-                        break;
+                // Draw an "underline" below the current position
+                case UNDERLINE_STYLE:
+                    textAreaBg = textArea.getBackground();
+                    if (textAreaBg == null) {
+                        textAreaBg = Color.white;
+                    }
+                    g.setXORMode(textAreaBg);
+                    int y = r.y + r.height;
+                    g.drawLine(r.x, y, r.x + r.width - 1, y);
+                    break;
 
-                    // Draw a vertical line
-                    default :
-                    case VERTICAL_LINE_STYLE :
-                        g.drawLine(r.x, r.y, r.x, r.y + r.height);
-                        break;
+                // Draw a vertical line
+                default:
+                case VERTICAL_LINE_STYLE:
+                    g.drawLine(r.x, r.y, r.x, r.y + r.height);
+                    break;
 
-                    // A thicker vertical line
-                    case THICK_VERTICAL_LINE_STYLE :
-                        g.drawLine(r.x, r.y, r.x, r.y + r.height);
-                        r.x++;
-                        g.drawLine(r.x, r.y, r.x, r.y + r.height);
-                        break;
+                // A thicker vertical line
+                case THICK_VERTICAL_LINE_STYLE:
+                    g.drawLine(r.x, r.y, r.x, r.y + r.height);
+                    r.x++;
+                    g.drawLine(r.x, r.y, r.x, r.y + r.height);
+                    break;
 
                 } // End of switch (style)
 
@@ -503,6 +514,7 @@ public class ConfigurableCaret extends DefaultCaret {
      * @param visible Whether the selection should be visible. This parameter is
      *                ignored.
      */
+    @Override
     public void setSelectionVisible(boolean visible) {
         super.setSelectionVisible(true);
     }
@@ -517,8 +529,9 @@ public class ConfigurableCaret extends DefaultCaret {
      * @see #getStyle()
      */
     public void setStyle(int style) {
-        if (style < MIN_STYLE || style > MAX_STYLE)
+        if (style < MIN_STYLE || style > MAX_STYLE) {
             style = VERTICAL_LINE_STYLE;
+        }
         this.style = style;
         repaint();
     }
@@ -606,6 +619,7 @@ public class ConfigurableCaret extends DefaultCaret {
      */
     private class FoldAwareNavigationFilter extends NavigationFilter {
 
+        @Override
         public void setDot(FilterBypass fb, int dot, Position.Bias bias) {
             TextArea textArea = getTextArea();
             if (textArea instanceof SyntaxTextArea) {
@@ -625,7 +639,9 @@ public class ConfigurableCaret extends DefaultCaret {
                             if (dot > lastDot) { // Moving to further line
                                 int lineCount = textArea.getLineCount();
                                 while (++line < lineCount
-                                        && fm.isLineHidden(line));
+                                        && fm.isLineHidden(line)) {
+                                    ;
+                                }
                                 if (line < lineCount) {
                                     dot = textArea.getLineStartOffset(line);
                                 } else { // No lower lines visible 
@@ -634,7 +650,9 @@ public class ConfigurableCaret extends DefaultCaret {
                                     return;
                                 }
                             } else if (dot < lastDot) { // Moving to earlier line
-                                while (--line >= 0 && fm.isLineHidden(line));
+                                while (--line >= 0 && fm.isLineHidden(line)) {
+                                    ;
+                                }
                                 if (line >= 0) {
                                     dot = textArea.getLineEndOffset(line) - 1;
                                 }
@@ -650,6 +668,7 @@ public class ConfigurableCaret extends DefaultCaret {
             super.setDot(fb, dot, bias);
         }
 
+        @Override
         public void moveDot(FilterBypass fb, int dot, Position.Bias bias) {
             super.moveDot(fb, dot, bias);
         }

@@ -41,7 +41,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class CompletionXMLParser extends DefaultHandler {
 
     /** The completions found after parsing the XML. */
-    private List completions;
+    private List<ICompletion> completions;
 
     /** The provider we're getting completions for. */
     private ICompletionProvider provider;
@@ -55,12 +55,12 @@ public class CompletionXMLParser extends DefaultHandler {
     private String name;
     private String type;
     private String returnType;
-    private StringBuffer returnValDesc;
-    private StringBuffer desc;
+    private StringBuilder returnValDesc;
+    private StringBuilder desc;
     private String paramName;
     private String paramType;
-    private StringBuffer paramDesc;
-    private List params;
+    private StringBuilder paramDesc;
+    private List<IParameterizedCompletion.Parameter> params;
     private String definedIn;
     private boolean doingKeywords;
     private boolean inKeyword;
@@ -113,19 +113,20 @@ public class CompletionXMLParser extends DefaultHandler {
         this.provider = provider;
         this.completionCL = cl;
         if (completionCL == null) {
-            // May also be null
+            // May also be null, but that's okay
             completionCL = DEFAULT_COMPLETION_CLASS_LOADER;
         }
-        completions = new ArrayList();
-        params = new ArrayList(1);
-        desc = new StringBuffer();
-        paramDesc = new StringBuffer();
-        returnValDesc = new StringBuffer();
+        completions = new ArrayList<ICompletion>();
+        params = new ArrayList<IParameterizedCompletion.Parameter>(1);
+        desc = new StringBuilder();
+        paramDesc = new StringBuilder();
+        returnValDesc = new StringBuilder();
         paramStartChar = paramEndChar = 0;
         paramSeparator = null;
     }
 
     /** Called when character data inside an element is found. */
+    @Override
     public void characters(char[] ch, int start, int length) {
         if (gettingDesc) {
             desc.append(ch, start, length);
@@ -140,18 +141,17 @@ public class CompletionXMLParser extends DefaultHandler {
         FunctionCompletion fc = null;
         if (funcCompletionType != null) {
             try {
-                Class clazz = null;
+                Class<?> clazz = null;
                 if (completionCL != null) {
                     clazz = Class.forName(funcCompletionType, true,
                             completionCL);
                 } else {
                     clazz = Class.forName(funcCompletionType);
                 }
-                Class[] paramTypes = {ICompletionProvider.class, String.class,
-                        String.class};
-                Constructor c = clazz.getDeclaredConstructor(paramTypes);
-                fc = (FunctionCompletion) c.newInstance(new Object[]{provider,
-                        name, returnType});
+                Constructor<?> c = clazz.getDeclaredConstructor(
+                        ICompletionProvider.class, String.class, String.class);
+                fc = (FunctionCompletion) c.newInstance(provider, name,
+                        returnType);
             } catch (RuntimeException re) {
                 throw re;
             } catch (Exception e) {
@@ -209,6 +209,7 @@ public class CompletionXMLParser extends DefaultHandler {
     }
 
     /** Called when an element is closed. */
+    @Override
     public void endElement(String uri, String localName, String qName) {
         if ("keywords".equals(qName)) {
             doingKeywords = false;
@@ -259,6 +260,7 @@ public class CompletionXMLParser extends DefaultHandler {
         }
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         throw e;
     }
@@ -268,7 +270,7 @@ public class CompletionXMLParser extends DefaultHandler {
      *
      * @return The completions.
      */
-    public List getCompletions() {
+    public List<ICompletion> getCompletions() {
         return completions;
     }
 
@@ -316,6 +318,7 @@ public class CompletionXMLParser extends DefaultHandler {
         paramSeparator = null;
     }
 
+    @Override
     public InputSource resolveEntity(String publicID, String systemID)
             throws SAXException {
         return new InputSource(getClass().getResourceAsStream(
@@ -337,6 +340,7 @@ public class CompletionXMLParser extends DefaultHandler {
     }
 
     /** Called when an element starts. */
+    @Override
     public void startElement(String uri, String localName, String qName,
             Attributes attrs) {
         if ("keywords".equals(qName)) {
@@ -382,6 +386,7 @@ public class CompletionXMLParser extends DefaultHandler {
         }
     }
 
+    @Override
     public void warning(SAXParseException e) throws SAXException {
         throw e;
     }

@@ -53,8 +53,8 @@ import net.sourceforge.open_teradata_viewer.editor.TextArea;
 public class RtfGenerator {
 
     private List<Font> fontList;
-    private List<Object> colorList;
-    private StringBuffer document;
+    private List<Color> colorList;
+    private StringBuilder document;
     private boolean lastWasControlWord;
     private int lastFontIndex;
     private int lastFGIndex;
@@ -76,8 +76,8 @@ public class RtfGenerator {
     /** Ctor. */
     public RtfGenerator() {
         fontList = new ArrayList<Font>(1); // Usually only 1
-        colorList = new ArrayList<Object>(1); // Usually only 1
-        document = new StringBuffer();
+        colorList = new ArrayList<Color>(1); // Usually only 1
+        document = new StringBuilder();
         reset();
     }
 
@@ -211,7 +211,7 @@ public class RtfGenerator {
             if (setFG) {
                 int fgIndex = 0;
                 if (fg != null) { // null => fg color index 0
-                    fgIndex = getIndex(colorList, fg) + 1;
+                    fgIndex = getColorIndex(colorList, fg) + 1;
                 }
                 if (fgIndex != lastFGIndex) {
                     document.append("\\cf").append(fgIndex);
@@ -222,7 +222,7 @@ public class RtfGenerator {
 
             // Set the background color
             if (bg != null) {
-                int pos = getIndex(colorList, bg);
+                int pos = getColorIndex(colorList, bg);
                 document.append("\\highlight").append(pos + 1);
                 lastWasControlWord = true;
             }
@@ -257,31 +257,31 @@ public class RtfGenerator {
      * @param text The text to append (with tab chars substituted).
      * @param sb The buffer to append to.
      */
-    private final void escapeAndAdd(StringBuffer sb, String text) {
+    private final void escapeAndAdd(StringBuilder sb, String text) {
         int count = text.length();
         for (int i = 0; i < count; i++) {
             char ch = text.charAt(i);
             switch (ch) {
-                case '\t' :
-                    // Micro-optimization: for syntax highlighting with tab
-                    // indentation, there are often multiple tabs back-to-back
-                    // at the start of lines, so don't put spaces between each
-                    // "\tab".
+            case '\t':
+                // Micro-optimization: for syntax highlighting with tab
+                // indentation, there are often multiple tabs back-to-back
+                // at the start of lines, so don't put spaces between each
+                // "\tab".
+                sb.append("\\tab");
+                while ((++i < count) && text.charAt(i) == '\t') {
                     sb.append("\\tab");
-                    while ((++i < count) && text.charAt(i) == '\t') {
-                        sb.append("\\tab");
-                    }
-                    sb.append(' ');
-                    i--; // We read one too far
-                    break;
-                case '\\' :
-                case '{' :
-                case '}' :
-                    sb.append('\\').append(ch);
-                    break;
-                default :
-                    sb.append(ch);
-                    break;
+                }
+                sb.append(' ');
+                i--; // We read one too far
+                break;
+            case '\\':
+            case '{':
+            case '}':
+                sb.append('\\').append(ch);
+                break;
+            default:
+                sb.append(ch);
+                break;
             }
         }
     }
@@ -306,15 +306,31 @@ public class RtfGenerator {
         return (int) pointSize;
     }
 
+    /**
+     * Returns the index of the specified item in a list. If the item
+     * is not in the list, it is added, and its new index is returned.
+     *
+     * @param list The list (possibly) containing the item.
+     * @param item The item to get the index of.
+     * @return The index of the item.
+     */
+    private static int getColorIndex(List<Color> list, Color item) {
+        int pos = list.indexOf(item);
+        if (pos == -1) {
+            list.add(item);
+            pos = list.size() - 1;
+        }
+        return pos;
+    }
+
     private String getColorTableRtf() {
         // Example:
         // "{\\colortbl ;\\red255\\green0\\blue0;\\red0\\green0\\blue255; }"
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         sb.append("{\\colortbl ;");
-        for (int i = 0; i < colorList.size(); i++) {
-            Color c = (Color) colorList.get(i);
+        for (Color c : colorList) {
             sb.append("\\red").append(c.getRed());
             sb.append("\\green").append(c.getGreen());
             sb.append("\\blue").append(c.getBlue());
@@ -340,7 +356,7 @@ public class RtfGenerator {
     private static int getFontIndex(List<Font> list, Font font) {
         String fontName = font.getFamily();
         for (int i = 0; i < list.size(); i++) {
-            Font font2 = (Font) list.get(i);
+            Font font2 = list.get(i);
             if (font2.getFamily().equals(fontName)) {
                 return i;
             }
@@ -353,7 +369,7 @@ public class RtfGenerator {
         // Example:
         // "{\\fonttbl{\\f0\\fmodern\\fcharset0 Courier;}}"
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         // Workaround for text areas using the Java logical font "Monospaced" by
         // default. There's no way to know what it's mapped to, so we just
@@ -362,7 +378,7 @@ public class RtfGenerator {
 
         sb.append("{\\fonttbl{\\f0\\fnil\\fcharset0 " + monoFamilyName + ";}");
         for (int i = 0; i < fontList.size(); i++) {
-            Font f = (Font) fontList.get(i);
+            Font f = fontList.get(i);
             String familyName = f.getFamily();
             if (familyName.equals("Monospaced")) {
                 familyName = monoFamilyName;
@@ -374,23 +390,6 @@ public class RtfGenerator {
 
         return sb.toString();
 
-    }
-
-    /**
-     * Returns the index of the specified item in a list. If the item is not in
-     * the list, it is added, and its new index is returned.
-     *
-     * @param list The list (possibly) containing the item.
-     * @param item The item to get the index of.
-     * @return The index of the item.
-     */
-    private static int getIndex(List<Object> list, Object item) {
-        int pos = list.indexOf(item);
-        if (pos == -1) {
-            list.add(item);
-            pos = list.size() - 1;
-        }
-        return pos;
     }
 
     /**
@@ -413,7 +412,7 @@ public class RtfGenerator {
      * @return The RTF document, as a <code>String</code>.
      */
     public String getRtf() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
 
         // Header

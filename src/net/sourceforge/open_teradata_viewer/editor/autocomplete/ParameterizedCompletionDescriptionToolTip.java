@@ -149,7 +149,7 @@ class ParameterizedCompletionDescriptionToolTip {
      * @return Whether the text needed to be updated.
      */
     public boolean updateText(int selectedParam) {
-        StringBuffer sb = new StringBuffer("<html>");
+        StringBuilder sb = new StringBuilder("<html>");
         int paramCount = pc.getParamCount();
         for (int i = 0; i < paramCount; i++) {
             if (i == selectedParam) {

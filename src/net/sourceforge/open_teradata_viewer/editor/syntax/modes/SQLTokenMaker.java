@@ -27,7 +27,8 @@ import javax.swing.text.Segment;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.AbstractJFlexTokenMaker;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
+import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
 
 /**
  * This class generates tokens representing a text stream as SQL.<p>
@@ -3321,7 +3322,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
     // Error messages for the codes above
     private static final String ZZ_ERROR_MSG[] = {
             "Unkown internal scanner error", "Error: could not match input",
-            "Error: pushback value was too large"};
+            "Error: pushback value was too large" };
 
     /**
      * ZZ_ATTRIBUTE[aState] contains the attributes of state
@@ -3464,6 +3465,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      * @param startOffset The offset in the document at which this token occurs.
      * @param hyperlink Whether this token is a hyperlink.
      */
+    @Override
     public void addToken(char[] array, int start, int end, int tokenType,
             int startOffset, boolean hyperlink) {
         super.addToken(array, start, end, tokenType, startOffset, hyperlink);
@@ -3476,8 +3478,9 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return The start and end strings to add to a line to "comment" it out.
      */
+    @Override
     public String[] getLineCommentStartAndEnd() {
-        return new String[]{"--", null};
+        return new String[] { "--", null };
     }
 
     /**
@@ -3489,25 +3492,26 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      * @param initialTokenType The token type we should start with.
      * @param startOffset The offset into the document at which
      *        <code>text</code> starts.
-     * @return The first <code>Token</code> in a linked list representing the
+     * @return The first <code>IToken</code> in a linked list representing the
      *         syntax highlighted text.
      */
-    public Token getTokenList(Segment text, int initialTokenType,
+    @Override
+    public IToken getTokenList(Segment text, int initialTokenType,
             int startOffset) {
         resetTokenList();
         this.offsetShift = -text.offset + startOffset;
 
         // Start off in the proper state
-        int state = Token.NULL;
+        int state = IToken.NULL;
         switch (initialTokenType) {
-            case Token.COMMENT_MULTILINE :
-                state = MLC;
-                start = text.offset;
-                break;
+        case IToken.COMMENT_MULTILINE:
+            state = MLC;
+            start = text.offset;
+            break;
 
-            // No documentation comments
-            default :
-                state = Token.NULL;
+        // No documentation comments
+        default:
+            state = IToken.NULL;
         }
 
         s = text;
@@ -3517,7 +3521,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
             return yylex();
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
-            return new Token();
+            return new TokenImpl();
         }
     }
 
@@ -3608,6 +3612,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @param newState the new lexical state.
      */
+    @Override
     public final void yybegin(int newState) {
         zzLexicalState = newState;
     }
@@ -3683,7 +3688,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      * @return      the next token
      * @exception   IOException  if any I/O-Error occurs
      */
-    public Token yylex() throws IOException {
+    public IToken yylex() throws IOException {
         int zzInput;
         int zzAction;
 
@@ -3707,11 +3712,11 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
 
             zzState = zzLexicalState;
 
-            zzForAction : {
+            zzForAction: {
                 while (true) {
-                    if (zzCurrentPosL < zzEndReadL)
+                    if (zzCurrentPosL < zzEndReadL) {
                         zzInput = zzBufferL[zzCurrentPosL++];
-                    else if (zzAtEOF) {
+                    } else if (zzAtEOF) {
                         zzInput = YYEOF;
                         break zzForAction;
                     } else {
@@ -3752,185 +3757,183 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
             zzMarkedPos = zzMarkedPosL;
 
             switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-                case 4 : {
-                    addNullToken();
-                    return firstToken;
-                }
-                case 27 :
-                    break;
-                case 23 : {
-                    addToken(Token.LITERAL_CHAR);
-                }
-                case 28 :
-                    break;
-                case 16 : {
-                    start = zzMarkedPos - 2;
-                    yybegin(MLC);
-                }
-                case 29 :
-                    break;
-                case 6 : {
-                    addToken(Token.WHITESPACE);
-                }
-                case 30 :
-                    break;
-                case 22 : {
-                    addToken(Token.LITERAL_NUMBER_HEXADECIMAL);
-                }
-                case 31 :
-                    break;
-                case 24 : {
-                    addToken(Token.ERROR_STRING_DOUBLE);
-                }
-                case 32 :
-                    break;
-                case 18 : {
-                    addToken(Token.LITERAL_NUMBER_FLOAT);
-                }
-                case 33 :
-                    break;
-                case 13 : {
-                    addToken(Token.RESERVED_WORD);
-                }
-                case 34 :
-                    break;
-                case 8 : {
-                    addToken(Token.SEPARATOR);
-                }
-                case 35 :
-                    break;
-                case 1 : {
-                    addToken(Token.IDENTIFIER);
-                }
-                case 36 :
-                    break;
-                case 11 : {
-                    addToken(start, zzStartRead - 1, Token.COMMENT_EOL);
-                    addNullToken();
-                    return firstToken;
-                }
-                case 37 :
-                    break;
-                case 17 : {
-                    start = zzMarkedPos - 2;
-                    yybegin(EOL_COMMENT);
-                }
-                case 38 :
-                    break;
-                case 20 : {
-                    addToken(Token.FUNCTION);
-                }
-                case 39 :
-                    break;
-                case 3 : {
-                    addToken(Token.ERROR_CHAR);
-                    addNullToken();
-                    return firstToken;
-                }
-                case 40 :
-                    break;
-                case 5 : {
-                    addToken(Token.ERROR_STRING_DOUBLE);
-                    addNullToken();
-                    return firstToken;
-                }
-                case 41 :
-                    break;
-                case 19 : {
-                    addToken(Token.DATA_TYPE);
-                }
-                case 42 :
-                    break;
-                case 21 : {
-                    yybegin(YYINITIAL);
-                    addToken(start, zzStartRead + 2 - 1,
-                            Token.COMMENT_MULTILINE);
-                }
-                case 43 :
-                    break;
-                case 14 : {
-                    addToken(Token.ERROR_CHAR);
-                }
-                case 44 :
-                    break;
-                case 15 : {
-                    addToken(Token.LITERAL_STRING_DOUBLE_QUOTE);
-                }
-                case 45 :
-                    break;
-                case 26 : {
-                    int temp = zzStartRead;
-                    addToken(start, zzStartRead - 1, Token.COMMENT_EOL);
-                    addHyperlinkToken(temp, zzMarkedPos - 1, Token.COMMENT_EOL);
-                    start = zzMarkedPos;
-                }
-                case 46 :
-                    break;
-                case 25 : {
-                    int temp = zzStartRead;
-                    addToken(start, zzStartRead - 1, Token.COMMENT_MULTILINE);
-                    addHyperlinkToken(temp, zzMarkedPos - 1,
-                            Token.COMMENT_MULTILINE);
-                    start = zzMarkedPos;
-                }
-                case 47 :
-                    break;
-                case 12 : {
-                    addToken(Token.ERROR_NUMBER_FORMAT);
-                }
-                case 48 :
-                    break;
-                case 2 : {
-                    addToken(Token.LITERAL_NUMBER_DECIMAL_INT);
-                }
-                case 49 :
-                    break;
-                case 7 : {
-                    addToken(Token.OPERATOR);
-                }
-                case 50 :
-                    break;
-                case 9 : {
-                }
-                case 51 :
-                    break;
-                case 10 : {
-                    addToken(start, zzStartRead - 1, Token.COMMENT_MULTILINE);
-                    return firstToken;
-                }
-                case 52 :
-                    break;
-                default :
-                    if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
-                        zzAtEOF = true;
-                        switch (zzLexicalState) {
-                            case EOL_COMMENT : {
-                                addToken(start, zzStartRead - 1,
-                                        Token.COMMENT_EOL);
-                                addNullToken();
-                                return firstToken;
-                            }
-                            case 1126 :
-                                break;
-                            case YYINITIAL : {
-                                addNullToken();
-                                return firstToken;
-                            }
-                            case 1127 :
-                                break;
-                            case MLC : {
-                                addToken(start, zzStartRead - 1,
-                                        Token.COMMENT_MULTILINE);
-                                return firstToken;
-                            }
-                            case 1128 :
-                                break;
-                            default :
-                                return null;
-                        }
-                    } else {
-                        zzScanError(ZZ_NO_MATCH);
+            case 4: {
+                addNullToken();
+                return firstToken;
+            }
+            case 27:
+                break;
+            case 23: {
+                addToken(IToken.LITERAL_CHAR);
+            }
+            case 28:
+                break;
+            case 16: {
+                start = zzMarkedPos - 2;
+                yybegin(MLC);
+            }
+            case 29:
+                break;
+            case 6: {
+                addToken(IToken.WHITESPACE);
+            }
+            case 30:
+                break;
+            case 22: {
+                addToken(IToken.LITERAL_NUMBER_HEXADECIMAL);
+            }
+            case 31:
+                break;
+            case 24: {
+                addToken(IToken.ERROR_STRING_DOUBLE);
+            }
+            case 32:
+                break;
+            case 18: {
+                addToken(IToken.LITERAL_NUMBER_FLOAT);
+            }
+            case 33:
+                break;
+            case 13: {
+                addToken(IToken.RESERVED_WORD);
+            }
+            case 34:
+                break;
+            case 8: {
+                addToken(IToken.SEPARATOR);
+            }
+            case 35:
+                break;
+            case 1: {
+                addToken(IToken.IDENTIFIER);
+            }
+            case 36:
+                break;
+            case 11: {
+                addToken(start, zzStartRead - 1, IToken.COMMENT_EOL);
+                addNullToken();
+                return firstToken;
+            }
+            case 37:
+                break;
+            case 17: {
+                start = zzMarkedPos - 2;
+                yybegin(EOL_COMMENT);
+            }
+            case 38:
+                break;
+            case 20: {
+                addToken(IToken.FUNCTION);
+            }
+            case 39:
+                break;
+            case 3: {
+                addToken(IToken.ERROR_CHAR);
+                addNullToken();
+                return firstToken;
+            }
+            case 40:
+                break;
+            case 5: {
+                addToken(IToken.ERROR_STRING_DOUBLE);
+                addNullToken();
+                return firstToken;
+            }
+            case 41:
+                break;
+            case 19: {
+                addToken(IToken.DATA_TYPE);
+            }
+            case 42:
+                break;
+            case 21: {
+                yybegin(YYINITIAL);
+                addToken(start, zzStartRead + 2 - 1, IToken.COMMENT_MULTILINE);
+            }
+            case 43:
+                break;
+            case 14: {
+                addToken(IToken.ERROR_CHAR);
+            }
+            case 44:
+                break;
+            case 15: {
+                addToken(IToken.LITERAL_STRING_DOUBLE_QUOTE);
+            }
+            case 45:
+                break;
+            case 26: {
+                int temp = zzStartRead;
+                addToken(start, zzStartRead - 1, IToken.COMMENT_EOL);
+                addHyperlinkToken(temp, zzMarkedPos - 1, IToken.COMMENT_EOL);
+                start = zzMarkedPos;
+            }
+            case 46:
+                break;
+            case 25: {
+                int temp = zzStartRead;
+                addToken(start, zzStartRead - 1, IToken.COMMENT_MULTILINE);
+                addHyperlinkToken(temp, zzMarkedPos - 1,
+                        IToken.COMMENT_MULTILINE);
+                start = zzMarkedPos;
+            }
+            case 47:
+                break;
+            case 12: {
+                addToken(IToken.ERROR_NUMBER_FORMAT);
+            }
+            case 48:
+                break;
+            case 2: {
+                addToken(IToken.LITERAL_NUMBER_DECIMAL_INT);
+            }
+            case 49:
+                break;
+            case 7: {
+                addToken(IToken.OPERATOR);
+            }
+            case 50:
+                break;
+            case 9: {
+            }
+            case 51:
+                break;
+            case 10: {
+                addToken(start, zzStartRead - 1, IToken.COMMENT_MULTILINE);
+                return firstToken;
+            }
+            case 52:
+                break;
+            default:
+                if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
+                    zzAtEOF = true;
+                    switch (zzLexicalState) {
+                    case EOL_COMMENT: {
+                        addToken(start, zzStartRead - 1, IToken.COMMENT_EOL);
+                        addNullToken();
+                        return firstToken;
                     }
+                    case 1126:
+                        break;
+                    case YYINITIAL: {
+                        addNullToken();
+                        return firstToken;
+                    }
+                    case 1127:
+                        break;
+                    case MLC: {
+                        addToken(start, zzStartRead - 1,
+                                IToken.COMMENT_MULTILINE);
+                        return firstToken;
+                    }
+                    case 1128:
+                        break;
+                    default:
+                        return null;
+                    }
+                } else {
+                    zzScanError(ZZ_NO_MATCH);
+                }
             }
         }
     }

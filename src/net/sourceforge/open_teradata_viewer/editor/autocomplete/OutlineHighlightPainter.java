@@ -46,9 +46,8 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * one char too long (one char earlier than where it should really start), but
  * only paint the Highlight from the 2nd char on.
  */
-class OutlineHighlightPainter
-        extends
-            DefaultHighlighter.DefaultHighlightPainter {
+class OutlineHighlightPainter extends
+        DefaultHighlighter.DefaultHighlightPainter {
 
     /**
      * DefaultHighlightPainter doesn't allow changing color, so we must cache
@@ -73,11 +72,13 @@ class OutlineHighlightPainter
      * @return The color.
      * @see #setColor(Color)
      */
+    @Override
     public Color getColor() {
         return color;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Shape paintLayer(Graphics g, int p0, int p1, Shape viewBounds,
             JTextComponent c, View view) {
         g.setColor(getColor());
@@ -118,8 +119,7 @@ class OutlineHighlightPainter
             // --- determine locations ---
             Shape shape = view.modelToView(p0, Position.Bias.Forward, p1,
                     Position.Bias.Backward, viewBounds);
-            Rectangle r = (shape instanceof Rectangle)
-                    ? (Rectangle) shape
+            Rectangle r = (shape instanceof Rectangle) ? (Rectangle) shape
                     : shape.getBounds();
             g.drawRect(r.x, r.y, r.width - 1, r.height - 1);
             return r;

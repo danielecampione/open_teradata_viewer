@@ -40,9 +40,8 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  * 
  */
-public class SquiggleUnderlineHighlightPainter
-        extends
-            ChangeableColorHighlightPainter {
+public class SquiggleUnderlineHighlightPainter extends
+        ChangeableColorHighlightPainter {
 
     private static final int AMT = 2;
 
@@ -68,6 +67,7 @@ public class SquiggleUnderlineHighlightPainter
      * @param view View painting for
      * @return region drawing occurred in
      */
+    @Override
     public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds,
             JTextComponent c, View view) {
         g.setColor(getColor());
@@ -75,10 +75,11 @@ public class SquiggleUnderlineHighlightPainter
         if (offs0 == view.getStartOffset() && offs1 == view.getEndOffset()) {
             // Contained in view, can just use bounds
             Rectangle alloc;
-            if (bounds instanceof Rectangle)
+            if (bounds instanceof Rectangle) {
                 alloc = (Rectangle) bounds;
-            else
+            } else {
                 alloc = bounds.getBounds();
+            }
             paintSquiggle(g, alloc);
             return alloc;
         }
@@ -88,8 +89,7 @@ public class SquiggleUnderlineHighlightPainter
             // Determine locations
             Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1,
                     Position.Bias.Backward, bounds);
-            Rectangle r = (shape instanceof Rectangle)
-                    ? (Rectangle) shape
+            Rectangle r = (shape instanceof Rectangle) ? (Rectangle) shape
                     : shape.getBounds();
             paintSquiggle(g, r);
             return r;

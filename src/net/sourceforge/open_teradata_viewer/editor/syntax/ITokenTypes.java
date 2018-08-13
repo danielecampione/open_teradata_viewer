@@ -89,5 +89,5 @@ public interface ITokenTypes {
     public static final int ERROR_STRING_DOUBLE = 37;
     public static final int ERROR_CHAR = 38;
 
-    public static final int NUM_TOKEN_TYPES = 39;
+    public static final int DEFAULT_NUM_TOKEN_TYPES = 39;
 }

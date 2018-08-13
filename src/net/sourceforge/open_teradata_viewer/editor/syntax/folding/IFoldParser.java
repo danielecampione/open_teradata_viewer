@@ -43,6 +43,6 @@ public interface IFoldParser {
      * @return The list of folds.  If this method returns <code>null</code>, it
      *         is treated as if no folds were found.
      */
-    public List<?> getFolds(SyntaxTextArea textArea);
+    public List<Fold> getFolds(SyntaxTextArea textArea);
 
 }

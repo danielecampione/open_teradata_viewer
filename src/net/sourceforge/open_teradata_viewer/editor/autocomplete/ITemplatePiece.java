@@ -43,10 +43,12 @@ interface ITemplatePiece {
             this.text = text;
         }
 
+        @Override
         public String getText() {
             return text;
         }
 
+        @Override
         public String toString() {
             return "[ITemplatePiece.Text: text=" + text + "]";
         }
@@ -67,10 +69,12 @@ interface ITemplatePiece {
             this.text = text;
         }
 
+        @Override
         public String getText() {
             return text;
         }
 
+        @Override
         public String toString() {
             return "[ITemplatePiece.Param: param=" + text + "]";
         }
@@ -91,10 +95,12 @@ interface ITemplatePiece {
             this.text = text;
         }
 
+        @Override
         public String getText() {
             return text;
         }
 
+        @Override
         public String toString() {
             return "[ITemplatePiece.ParamCopy: param=" + text + "]";
         }

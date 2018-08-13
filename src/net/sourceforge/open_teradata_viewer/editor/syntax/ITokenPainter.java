@@ -43,7 +43,7 @@ interface ITokenPainter {
      * @param e How to expand tabs.
      * @return The x-coordinate representing the end of the painted text.
      */
-    public float paint(Token token, Graphics2D g, float x, float y,
+    public float paint(IToken token, Graphics2D g, float x, float y,
             SyntaxTextArea host, TabExpander e);
 
     /**
@@ -60,7 +60,7 @@ interface ITokenPainter {
      *        paint when this token is "to the left" of the clip rectangle.
      * @return The x-coordinate representing the end of the painted text.
      */
-    public float paint(Token token, Graphics2D g, float x, float y,
+    public float paint(IToken token, Graphics2D g, float x, float y,
             SyntaxTextArea host, TabExpander e, float clipStart);
 
     /**
@@ -76,7 +76,7 @@ interface ITokenPainter {
      * @param e How to expand tabs.
      * @return The x-coordinate representing the end of the painted text.
      */
-    public float paintSelected(Token token, Graphics2D g, float x, float y,
+    public float paintSelected(IToken token, Graphics2D g, float x, float y,
             SyntaxTextArea host, TabExpander e);
 
     /**
@@ -95,6 +95,6 @@ interface ITokenPainter {
      *        this token is "to the left" of the clip rectangle.
      * @return The x-coordinate representing the end of the painted text.
      */
-    public float paintSelected(Token token, Graphics2D g, float x, float y,
+    public float paintSelected(IToken token, Graphics2D g, float x, float y,
             SyntaxTextArea host, TabExpander e, float clipStart);
 }

@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax iParser )
+ * Open Teradata Viewer ( editor syntax parser )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import java.awt.Color;
  */
 public class DefaultParserNotice implements IParserNotice {
 
-    private IParser iParser;
+    private IParser parser;
     private int level;
     private int line;
     private int offset;
@@ -48,18 +48,18 @@ public class DefaultParserNotice implements IParserNotice {
     /**
      * Ctor.
      *
-     * @param iParser The iParser that created this notice.
+     * @param parser The parser that created this notice.
      * @param msg The text of the message.
      * @param line The line number for the message.
      */
-    public DefaultParserNotice(IParser iParser, String msg, int line) {
-        this(iParser, msg, line, -1, -1);
+    public DefaultParserNotice(IParser parser, String msg, int line) {
+        this(parser, msg, line, -1, -1);
     }
 
     /**
      * Ctor.
      *
-     * @param iParser The iParser that created this notice.
+     * @param parser The parser that created this notice.
      * @param message The message.
      * @param line The line number corresponding to the message.
      * @param offset The offset in the input stream of the code the
@@ -67,9 +67,9 @@ public class DefaultParserNotice implements IParserNotice {
      * @param length The length of the code the message is concerned with,
      *        or <code>-1</code> if unknown.
      */
-    public DefaultParserNotice(IParser iParser, String message, int line,
+    public DefaultParserNotice(IParser parser, String message, int line,
             int offset, int length) {
-        this.iParser = iParser;
+        this.parser = parser;
         this.message = message;
         this.line = line;
         this.offset = offset;
@@ -79,21 +79,20 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /**
-     * Compares this iParser notice to another.
+     * Compares this parser notice to another.
      *
-     * @param obj Another iParser notice.
-     * @return How the two iParser notices should be sorted relative to one
+     * @param other Another parser notice.
+     * @return How the two parser notices should be sorted relative to one
      *         another.
      */
-    public int compareTo(Object obj) {
+    public int compareTo(IParserNotice other) {
         int diff = -1;
-        if (obj instanceof IParserNotice) {
-            IParserNotice p2 = (IParserNotice) obj;
-            diff = level - p2.getLevel();
+        if (other != null) {
+            diff = level - other.getLevel();
             if (diff == 0) {
-                diff = line - p2.getLine();
+                diff = line - other.getLine();
                 if (diff == 0) {
-                    diff = message.compareTo(p2.getMessage());
+                    diff = message.compareTo(other.getMessage());
                 }
             }
         }
@@ -106,13 +105,17 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /**
-     * Returns whether this iParser notice is equal to another one.
+     * Returns whether this parser notice is equal to another one.
      *
-     * @param obj Another iParser notice.
+     * @param obj Another parser notice.
      * @return Whether the two notices are equal.
      */
+    @Override
     public boolean equals(Object obj) {
-        return compareTo(obj) == 0;
+        if (!(obj instanceof IParserNotice)) {
+            return false;
+        }
+        return compareTo((IParserNotice) obj) == 0;
     }
 
     /** {@inheritDoc} */
@@ -151,7 +154,7 @@ public class DefaultParserNotice implements IParserNotice {
 
     /** {@inheritDoc} */
     public IParser getParser() {
-        return iParser;
+        return parser;
     }
 
     /** {@inheritDoc} */
@@ -169,6 +172,7 @@ public class DefaultParserNotice implements IParserNotice {
      *
      * @return The hash code.
      */
+    @Override
     public int hashCode() {
         return (line << 16) | offset;
     }
@@ -222,10 +226,11 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /**
-     * Returns a string representation of this iParser notice.
+     * Returns a string representation of this parser notice.
      *
-     * @return This iParser notice as a string.
+     * @return This parser notice as a string.
      */
+    @Override
     public String toString() {
         return "Line " + getLine() + ": " + getMessage();
     }

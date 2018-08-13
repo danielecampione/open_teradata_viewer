@@ -27,7 +27,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -95,9 +94,9 @@ class ParameterizedCompletionContext {
     private Highlighter.HighlightPainter paramCopyP;
 
     /** The tags for the highlights around parameters. */
-    private List tags;
+    private List<Object> tags;
 
-    private List paramCopyInfos;
+    private List<ParamCopyInfo> paramCopyInfos;
 
     private transient boolean ignoringDocumentEvents;
 
@@ -171,8 +170,8 @@ class ParameterizedCompletionContext {
         endingP = new OutlineHighlightPainter(
                 sc.getParameterizedCompletionCursorPositionColor());
         paramCopyP = new ChangeableHighlightPainter(sc.getParameterCopyColor());
-        tags = new ArrayList(1); // Usually small
-        paramCopyInfos = new ArrayList(1);
+        tags = new ArrayList<Object>(1); // Usually small
+        paramCopyInfos = new ArrayList<ParamCopyInfo>(1);
     }
 
     /**
@@ -259,12 +258,11 @@ class ParameterizedCompletionContext {
      *         <code>null</code> if the offset is not in a parameter.
      */
     public String getArgumentText(int offs) {
-        List paramHighlights = getParameterHighlights();
+        List<Highlight> paramHighlights = getParameterHighlights();
         if (paramHighlights == null || paramHighlights.size() == 0) {
             return null;
         }
-        for (int i = 0; i < paramHighlights.size(); i++) {
-            Highlight h = (Highlight) paramHighlights.get(i);
+        for (Highlight h : paramHighlights) {
             if (offs >= h.getStartOffset() && offs <= h.getEndOffset()) {
                 int start = h.getStartOffset() + 1;
                 int len = h.getEndOffset() - start;
@@ -296,9 +294,8 @@ class ParameterizedCompletionContext {
             dot--; // Workaround for Java Highlight issues
         }
 
-        List paramHighlights = getParameterHighlights();
-        for (int i = 0; i < paramHighlights.size(); i++) {
-            Highlight h = (Highlight) paramHighlights.get(i);
+        List<Highlight> paramHighlights = getParameterHighlights();
+        for (Highlight h : paramHighlights) {
             if (dot >= h.getStartOffset() && dot < h.getEndOffset()) {
                 return h;
             }
@@ -314,9 +311,9 @@ class ParameterizedCompletionContext {
             dot--; // Workaround for Java Highlight issues
         }
 
-        List paramHighlights = getParameterHighlights();
+        List<Highlight> paramHighlights = getParameterHighlights();
         for (int i = 0; i < paramHighlights.size(); i++) {
-            Highlight h = (Highlight) paramHighlights.get(i);
+            Highlight h = paramHighlights.get(i);
             if (dot >= h.getStartOffset() && dot < h.getEndOffset()) {
                 return i;
             }
@@ -347,11 +344,11 @@ class ParameterizedCompletionContext {
      * @return The highlight that comes first in the document.
      * @see #getLastHighlight(List)
      */
-    private static final int getFirstHighlight(List highlights) {
+    private static final int getFirstHighlight(List<Highlight> highlights) {
         int first = -1;
         Highlight firstH = null;
         for (int i = 0; i < highlights.size(); i++) {
-            Highlight h = (Highlight) highlights.get(i);
+            Highlight h = highlights.get(i);
             if (firstH == null || h.getStartOffset() < firstH.getStartOffset()) {
                 firstH = h;
                 first = i;
@@ -370,11 +367,11 @@ class ParameterizedCompletionContext {
      * @return The highlight that comes last in the document.
      * @see #getFirstHighlight(List)
      */
-    private static final int getLastHighlight(List highlights) {
+    private static final int getLastHighlight(List<Highlight> highlights) {
         int last = -1;
         Highlight lastH = null;
         for (int i = highlights.size() - 1; i >= 0; i--) {
-            Highlight h = (Highlight) highlights.get(i);
+            Highlight h = highlights.get(i);
             if (lastH == null || h.getStartOffset() > lastH.getStartOffset()) {
                 lastH = h;
                 last = i;
@@ -383,8 +380,8 @@ class ParameterizedCompletionContext {
         return last;
     }
 
-    public List getParameterHighlights() {
-        List paramHighlights = new ArrayList(2);
+    public List<Highlight> getParameterHighlights() {
+        List<Highlight> paramHighlights = new ArrayList<Highlight>(2);
         JTextComponent tc = ac.getTextComponent();
         Highlight[] highlights = tc.getHighlighter().getHighlights();
         for (int i = 0; i < highlights.length; i++) {
@@ -499,9 +496,9 @@ class ParameterizedCompletionContext {
 
         Highlight currentNext = null;
         int pos = -1;
-        List highlights = getParameterHighlights();
+        List<Highlight> highlights = getParameterHighlights();
         for (int i = 0; i < highlights.size(); i++) {
-            Highlight hl = (Highlight) highlights.get(i);
+            Highlight hl = highlights.get(i);
             // Check "< dot", not "<= dot" as OutlineHighlightPainter paints
             // starting at one char AFTER the highlight starts, to work around
             // Java issue
@@ -517,7 +514,7 @@ class ParameterizedCompletionContext {
         // No params after caret - go to first one
         if (currentNext.getStartOffset() + 1 <= dot) {
             int nextIndex = getFirstHighlight(highlights);
-            currentNext = (Highlight) highlights.get(nextIndex);
+            currentNext = highlights.get(nextIndex);
             pos = 0;
         }
 
@@ -545,10 +542,10 @@ class ParameterizedCompletionContext {
         int selStart = tc.getSelectionStart() - 1; // Workaround for Java Highlight issues
         Highlight currentPrev = null;
         int pos = 0;
-        List highlights = getParameterHighlights();
+        List<Highlight> highlights = getParameterHighlights();
 
         for (int i = 0; i < highlights.size(); i++) {
-            Highlight h = (Highlight) highlights.get(i);
+            Highlight h = highlights.get(i);
             if (currentPrev == null
                     || currentPrev.getStartOffset() >= dot
                     || (h.getStartOffset() < selStart && (h.getStartOffset() > currentPrev
@@ -563,7 +560,7 @@ class ParameterizedCompletionContext {
         if (pos == firstIndex && lastSelectedParam == firstIndex
                 && highlights.size() > 1) {
             pos = getLastHighlight(highlights);
-            currentPrev = (Highlight) highlights.get(pos);
+            currentPrev = highlights.get(pos);
             // "+1" is a workaround for Java Highlight issues
             tc.setSelectionStart(currentPrev.getStartOffset() + 1);
             tc.setSelectionEnd(currentPrev.getEndOffset());
@@ -591,8 +588,8 @@ class ParameterizedCompletionContext {
             }
 
             // Get the current value of the current parameter
-            List paramHighlights = getParameterHighlights();
-            Highlight h = (Highlight) paramHighlights.get(index);
+            List<Highlight> paramHighlights = getParameterHighlights();
+            Highlight h = paramHighlights.get(index);
             int start = h.getStartOffset() + 1; // param offsets are offset (!) by 1
             int len = h.getEndOffset() - start;
             String replacement = null;
@@ -604,8 +601,7 @@ class ParameterizedCompletionContext {
 
             // Replace any param copies tracking this parameter with the value
             // of this parameter
-            for (Iterator i = paramCopyInfos.iterator(); i.hasNext();) {
-                ParamCopyInfo pci = (ParamCopyInfo) i.next();
+            for (ParamCopyInfo pci : paramCopyInfos) {
                 if (pci.paramName.equals(param.getName())) {
                     pci.h = replaceHighlightedText(doc, pci.h, replacement);
                 }
@@ -651,8 +647,7 @@ class ParameterizedCompletionContext {
             h.removeHighlight(tags.get(i));
         }
         tags.clear();
-        for (int i = 0; i < paramCopyInfos.size(); i++) {
-            ParamCopyInfo pci = (ParamCopyInfo) paramCopyInfos.get(i);
+        for (ParamCopyInfo pci : paramCopyInfos) {
             h.removeHighlight(pci.h);
         }
         paramCopyInfos.clear();
@@ -754,9 +749,9 @@ class ParameterizedCompletionContext {
         int index = -1;
         String paramPrefix = null;
 
-        List paramHighlights = getParameterHighlights();
+        List<Highlight> paramHighlights = getParameterHighlights();
         for (int i = 0; i < paramHighlights.size(); i++) {
-            Highlight h = (Highlight) paramHighlights.get(i);
+            Highlight h = paramHighlights.get(i);
             // "+1" because of param hack - see OutlineHighlightPainter
             int start = h.getStartOffset() + 1;
             if (dot >= start && dot <= h.getEndOffset()) {
@@ -810,6 +805,7 @@ class ParameterizedCompletionContext {
 
         private static final long serialVersionUID = 391733903175928623L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             // If the param choices window is visible and something is chosen,
             // replace the parameter with it and move to the next one
@@ -853,6 +849,7 @@ class ParameterizedCompletionContext {
 
         private static final long serialVersionUID = 3860390544806243061L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             JTextComponent tc = ac.getTextComponent();
             int dot = tc.getCaretPosition();
@@ -907,6 +904,7 @@ class ParameterizedCompletionContext {
 
         private static final long serialVersionUID = -8611392046235259594L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             // On first escape press, if the param choices window is visible,
             // just remove it, but keep ability to tab through params. If param
@@ -929,11 +927,8 @@ class ParameterizedCompletionContext {
      * @author D. Campione
      * 
      */
-    private class Listener
-            implements
-                FocusListener,
-                CaretListener,
-                DocumentListener {
+    private class Listener implements FocusListener, CaretListener,
+            DocumentListener {
 
         private boolean markOccurrencesEnabled;
 
@@ -942,6 +937,7 @@ class ParameterizedCompletionContext {
          *
          * @param e The event.
          */
+        @Override
         public void caretUpdate(CaretEvent e) {
             if (maxPos == null) { // Sanity check
                 deactivate();
@@ -958,6 +954,7 @@ class ParameterizedCompletionContext {
             }
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
         }
 
@@ -966,6 +963,7 @@ class ParameterizedCompletionContext {
          *
          * @param e The event.
          */
+        @Override
         public void focusGained(FocusEvent e) {
             // Do nothing.
         }
@@ -975,6 +973,7 @@ class ParameterizedCompletionContext {
          *
          * @param e The event.
          */
+        @Override
         public void focusLost(FocusEvent e) {
             deactivate();
         }
@@ -983,6 +982,7 @@ class ParameterizedCompletionContext {
             if (!ignoringDocumentEvents) {
                 ignoringDocumentEvents = true;
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         possiblyUpdateParamCopies(e.getDocument());
                         ignoringDocumentEvents = false;
@@ -991,6 +991,7 @@ class ParameterizedCompletionContext {
             }
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             handleDocumentEvent(e);
         }
@@ -1022,8 +1023,7 @@ class ParameterizedCompletionContext {
                 final int replacementCount = info.getReplacementCount();
                 for (int i = 0; i < replacementCount; i++) {
                     DocumentRange dr = info.getReplacementLocation(i);
-                    HighlightPainter painter = i < replacementCount - 1
-                            ? p
+                    HighlightPainter painter = i < replacementCount - 1 ? p
                             : endingP;
                     // "-1" is a workaround for Java Highlight issues
                     tags.add(h.addHighlight(dr.getStartOffset() - 1,
@@ -1063,6 +1063,7 @@ class ParameterizedCompletionContext {
             installKeyBindings();
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             handleDocumentEvent(e);
         }
@@ -1106,6 +1107,7 @@ class ParameterizedCompletionContext {
             this.oldAction = oldAction;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (paramChoicesWindow != null && paramChoicesWindow.isVisible()) {
                 paramChoicesWindow.incSelection(amount);
@@ -1127,6 +1129,7 @@ class ParameterizedCompletionContext {
 
         private static final long serialVersionUID = -974855984759038834L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             moveToNextParam();
         }
@@ -1159,6 +1162,7 @@ class ParameterizedCompletionContext {
 
         private static final long serialVersionUID = -5570691465291481621L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             moveToPreviousParam();
         }

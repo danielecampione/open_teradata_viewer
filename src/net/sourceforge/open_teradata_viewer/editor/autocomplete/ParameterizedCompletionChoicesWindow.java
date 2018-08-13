@@ -27,7 +27,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -63,7 +62,7 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
     private DefaultListModel model;
 
     /** A list of lists of choices for each parameter. */
-    private List choicesListList;
+    private List<List<ICompletion>> choicesListList;
 
     /** The scroll pane containing the list. */
     private JScrollPane sp;
@@ -72,7 +71,7 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
      * Comparator used to sort completions by their relevance before sorting
      * them lexicographically.
      */
-    private static final Comparator sortByRelevanceComparator = new SortByRelevanceComparator();
+    private static final Comparator<ICompletion> sortByRelevanceComparator = new SortByRelevanceComparator();
 
     /**
      * Ctor.
@@ -93,6 +92,7 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
             list.setCellRenderer(ac.getParamChoicesRenderer());
         }
         list.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     context.insertSelectedChoice();
@@ -156,12 +156,12 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
         }
 
         int paramCount = pc.getParamCount();
-        choicesListList = new ArrayList(paramCount);
+        choicesListList = new ArrayList<List<ICompletion>>(paramCount);
         JTextComponent tc = ac.getTextComponent();
 
         for (int i = 0; i < paramCount; i++) {
             IParameterizedCompletion.Parameter param = pc.getParam(i);
-            List choices = pcp.getParameterChoices(tc, param);
+            List<ICompletion> choices = pcp.getParameterChoices(tc, param);
             choicesListList.add(choices);
         }
     }
@@ -206,14 +206,13 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
      */
     public void setParameter(int param, String prefix) {
         model.clear();
-        List temp = new ArrayList();
+        List<ICompletion> temp = new ArrayList<ICompletion>();
 
         if (choicesListList != null && param >= 0
                 && param < choicesListList.size()) {
-            List choices = (List) choicesListList.get(param);
+            List<ICompletion> choices = choicesListList.get(param);
             if (choices != null) {
-                for (Iterator i = choices.iterator(); i.hasNext();) {
-                    ICompletion c = (ICompletion) i.next();
+                for (ICompletion c : choices) {
                     String choice = c.getReplacementText();
                     if (prefix == null
                             || Util.startsWithIgnoreCase(choice, prefix)) {
@@ -223,7 +222,7 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
             }
 
             // Sort completions appropriately
-            Comparator c = null;
+            Comparator<ICompletion> c = null;
             if (/*sortByRelevance*/true) {
                 c = sortByRelevanceComparator;
             }
@@ -269,6 +268,7 @@ public class ParameterizedCompletionChoicesWindow extends JWindow {
      *
      * @param visible Whether this window should be visible.
      */
+    @Override
     public void setVisible(boolean visible) {
         if (visible != isVisible()) {
             // i.e. if no possibilities matched what's been typed

@@ -50,9 +50,10 @@ public abstract class AbstractCodeTemplate implements ICodeTemplate {
      *
      * @return A deep copy of this template.
      */
+    @Override
     public Object clone() {
         // This method can't be abstract as compilers don't like concrete
-        // subclassses calling super.clone() on an abstract super.
+        // subclassses calling super.clone() on an abstract super
         try {
             return super.clone();
         } catch (CloneNotSupportedException cnse) {
@@ -71,23 +72,23 @@ public abstract class AbstractCodeTemplate implements ICodeTemplate {
      * @throws ClassCastException If <code>o</code> is not an instance of
      *         <code>ICodeTemplate</code>.
      */
-    public int compareTo(Object o) {
-        if (!(o instanceof ICodeTemplate)) {
+    public int compareTo(ICodeTemplate o) {
+        if (o == null) {
             return -1;
         }
-        ICodeTemplate t2 = (ICodeTemplate) o;
-        return getID().compareTo(t2.getID());
+        return getID().compareTo(o.getID());
     }
 
     /**
-     * Overridden to return "<code>true</code>" iff {@link #compareTo(Object)}
-     * returns <code>0</code>.
+     * Overridden to return "<code>true</code>" if
+     * {@link #compareTo(ICodeTemplate)} returns <code>0</code>.
      *
      * @return Whether this code template is equal to another.
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ICodeTemplate) {
-            return compareTo(obj) == 0;
+            return compareTo(((ICodeTemplate) obj)) == 0;
         }
         return false;
     }
@@ -103,6 +104,7 @@ public abstract class AbstractCodeTemplate implements ICodeTemplate {
     }
 
     /** @return The hash code for this template. */
+    @Override
     public int hashCode() {
         return id.hashCode();
     }

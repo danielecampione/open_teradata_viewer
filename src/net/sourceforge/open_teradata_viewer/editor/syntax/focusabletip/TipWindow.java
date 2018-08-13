@@ -117,6 +117,7 @@ class TipWindow extends JWindow implements ActionListener {
         // InputMap/ActionMap combo doesn't work for JWindows (even when using
         // the JWindow's JRootPane), so we'll resort to KeyListener
         KeyAdapter ka = new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     TipWindow.this.ft.possiblyDisposeOfTipWindow();
@@ -144,6 +145,7 @@ class TipWindow extends JWindow implements ActionListener {
             textArea.removeMouseListener(tipListener);
             pack();
             addWindowFocusListener(new WindowAdapter() {
+                @Override
                 public void windowLostFocus(WindowEvent e) {
                     ft.possiblyDisposeOfTipWindow();
                 }
@@ -156,6 +158,7 @@ class TipWindow extends JWindow implements ActionListener {
     }
 
     /** Disposes of this window. */
+    @Override
     public void dispose() {
         Container cp = getContentPane();
         for (int i = 0; i < cp.getComponentCount(); i++) {
@@ -217,6 +220,7 @@ class TipWindow extends JWindow implements ActionListener {
             panel.add(sg, BorderLayout.LINE_END);
             MouseInputAdapter adapter = new MouseInputAdapter() {
                 private Point lastPoint;
+                @Override
                 public void mouseDragged(MouseEvent e) {
                     Point p = e.getPoint();
                     SwingUtilities.convertPointToScreen(p, panel);
@@ -229,6 +233,7 @@ class TipWindow extends JWindow implements ActionListener {
                         lastPoint = p;
                     }
                 }
+                @Override
                 public void mousePressed(MouseEvent e) {
                     lastPoint = e.getPoint();
                     SwingUtilities.convertPointToScreen(lastPoint, panel);
@@ -305,10 +310,12 @@ class TipWindow extends JWindow implements ActionListener {
         public TipListener() {
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             actionPerformed(null); // Manually create "real" window
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
             // Since we registered this listener on the child components of
             // the JWindow, not the JWindow iteself, we have to be careful

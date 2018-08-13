@@ -53,9 +53,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * @author D. Campione
  * 
  */
-public class LineNumberList extends AbstractGutterComponent
-        implements
-            MouseInputListener {
+public class LineNumberList extends AbstractGutterComponent implements
+        MouseInputListener {
 
     private static final long serialVersionUID = -2611736346700889874L;
 
@@ -149,6 +148,7 @@ public class LineNumberList extends AbstractGutterComponent
      * displayed (as keying off of the TextArea gives us (0,0) when it isn't yet
      * displayed.
      */
+    @Override
     public void addNotify() {
         super.addNotify();
         if (textArea != null) {
@@ -182,6 +182,7 @@ public class LineNumberList extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     public Dimension getPreferredSize() {
         int h = textArea != null ? textArea.getHeight() : 100; // Arbitrary
         return new Dimension(cellWidth, h);
@@ -204,6 +205,7 @@ public class LineNumberList extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     void handleDocumentEvent(DocumentEvent e) {
         int newLastLine = calculateLastVisibleLineNumber();
         if (newLastLine != lastVisibleLine) {
@@ -217,13 +219,16 @@ public class LineNumberList extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     void lineHeightsChanged() {
         updateCellHeights();
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         if (mouseDragStartOffset > -1) {
             int pos = textArea.viewToModel(new Point(0, e.getY()));
@@ -234,15 +239,19 @@ public class LineNumberList extends AbstractGutterComponent
         }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         if (textArea == null) {
             return;
@@ -258,6 +267,7 @@ public class LineNumberList extends AbstractGutterComponent
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
     }
 
@@ -266,6 +276,7 @@ public class LineNumberList extends AbstractGutterComponent
      *
      * @param g The graphics context.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         if (textArea == null) {
             return;
@@ -464,6 +475,7 @@ public class LineNumberList extends AbstractGutterComponent
     }
 
     /** Called when this component is removed from the view hierarchy. */
+    @Override
     public void removeNotify() {
         super.removeNotify();
         if (textArea != null) {
@@ -488,6 +500,7 @@ public class LineNumberList extends AbstractGutterComponent
      *
      * @param font The new font to use for line numbers.
      */
+    @Override
     public void setFont(Font font) {
         super.setFont(font);
         updateCellWidths();
@@ -515,6 +528,7 @@ public class LineNumberList extends AbstractGutterComponent
      *
      * @param textArea The text area.
      */
+    @Override
     public void setTextArea(TextArea textArea) {
         if (l == null) {
             l = new Listener();
@@ -589,6 +603,7 @@ public class LineNumberList extends AbstractGutterComponent
 
         private boolean installed;
 
+        @Override
         public void caretUpdate(CaretEvent e) {
             int dot = textArea.getCaretPosition();
 
@@ -632,6 +647,7 @@ public class LineNumberList extends AbstractGutterComponent
             }
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
             String name = e.getPropertyName();
 

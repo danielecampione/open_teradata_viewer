@@ -23,11 +23,11 @@ import javax.swing.text.Segment;
 
 /**
  * An implementation of <code>ITokenMaker</code> is a class that turns text into
- * a linked list of <code>Token</code>s for syntax highlighting in a particular
+ * a linked list of <code>IToken</code>s for syntax highlighting in a particular
  * language.
  *
  * @author D. Campione
- * @see Token
+ * @see IToken
  * @see AbstractTokenMaker
  * 
  */
@@ -137,7 +137,7 @@ public interface ITokenMaker {
      * @param token The token the previous line ends with.
      * @return Whether the next line should be indented.
      */
-    public boolean getShouldIndentNextLineAfter(Token token);
+    public boolean getShouldIndentNextLineAfter(IToken token);
 
     /**
      * Returns the first token in the linked list of tokens generated from
@@ -148,10 +148,10 @@ public interface ITokenMaker {
      * @param initialTokenType The token type we should start with.
      * @param startOffset The offset into the document at which
      *                    <code>text</code> starts.
-     * @return The first <code>Token</code> in a linked list representing
+     * @return The first <code>IToken</code> in a linked list representing
      *         the syntax highlighted text.
      */
-    public Token getTokenList(Segment text, int initialTokenType,
+    public IToken getTokenList(Segment text, int initialTokenType,
             int startOffset);
 
     /** @return Whether this language is a markup language */

@@ -39,7 +39,7 @@ public interface IOccurrenceMarker {
      * @param h The highlighter to add the highlights to.
      * @param p The painter for the highlights.
      */
-    public void markOccurrences(SyntaxDocument doc, Token t,
+    public void markOccurrences(SyntaxDocument doc, IToken t,
             SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p);
 
 }

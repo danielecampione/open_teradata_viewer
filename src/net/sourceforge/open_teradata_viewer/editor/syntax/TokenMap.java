@@ -136,7 +136,7 @@ public class TokenMap {
 
         // If matches are case-sensitive (C, C++, Java, etc..)
         if (ignoreCase == false) {
-            mainLoop : while (token != null) {
+            mainLoop: while (token != null) {
                 if (token.length == length1) {
                     array2 = token.text;
                     offset2 = token.offset;
@@ -158,7 +158,7 @@ public class TokenMap {
         // Note that all tokens saved in this map were converted to
         // lower-case already
         else {
-            mainLoop2 : while (token != null) {
+            mainLoop2: while (token != null) {
                 if (token.length == length1) {
                     array2 = token.text;
                     offset2 = token.offset;
@@ -212,10 +212,11 @@ public class TokenMap {
      * @param tokenType The type of token the string is.
      */
     public void put(final String string, final int tokenType) {
-        if (isIgnoringCase())
+        if (isIgnoringCase()) {
             put(string.toLowerCase().toCharArray(), tokenType);
-        else
+        } else {
             put(string.toCharArray(), tokenType);
+        }
     }
 
     /**
@@ -256,6 +257,7 @@ public class TokenMap {
             this.tokenType = tokenType;
         }
 
+        @Override
         public String toString() {
             return "[TokenMapToken: " + new String(text, offset, length) + "]";
         }

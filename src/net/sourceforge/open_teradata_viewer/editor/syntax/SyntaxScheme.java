@@ -39,9 +39,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * The set of colors and styles used by an <code>SyntaxTextArea</code> to color
- * tokens. You can use this class to programmatically set the fonts and colors
- * used in an SyntaxTextArea, but for more powerful, externalized control,
- * consider using {@link Theme}s instead.
+ * tokens.<p>
+ * You can use this class to programmatically set the fonts and colors used in
+ * an SyntaxTextArea, but for more powerful, externalized control, consider
+ * using {@link Theme}s instead.
  *
  * @author D. Campione
  * @see Theme
@@ -62,7 +63,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *                    be initially <code>null</code>.
      */
     public SyntaxScheme(boolean useDefaults) {
-        styles = new Style[NUM_TOKEN_TYPES];
+        styles = new Style[DEFAULT_NUM_TOKEN_TYPES];
         if (useDefaults) {
             restoreDefaults(null);
         }
@@ -89,7 +90,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *                   (vs. all tokens using a plain font).
      */
     public SyntaxScheme(Font baseFont, boolean fontStyles) {
-        styles = new Style[NUM_TOKEN_TYPES];
+        styles = new Style[DEFAULT_NUM_TOKEN_TYPES];
         restoreDefaults(baseFont, fontStyles);
     }
 
@@ -125,6 +126,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *
      * @return The copy.
      */
+    @Override
     public Object clone() {
         SyntaxScheme shcs = null;
         try {
@@ -133,8 +135,8 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
             ExceptionDialog.notifyException(cnse);
             return null;
         }
-        shcs.styles = new Style[NUM_TOKEN_TYPES];
-        for (int i = 0; i < NUM_TOKEN_TYPES; i++) {
+        shcs.styles = new Style[styles.length];
+        for (int i = 0; i < styles.length; i++) {
             Style s = styles[i];
             if (s != null) {
                 shcs.styles[i] = (Style) s.clone();
@@ -151,6 +153,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *         <code>otherScheme</code> are the same scheme;
      *         <code>false</code> otherwise.
      */
+    @Override
     public boolean equals(Object otherScheme) {
         // No need for null check; instanceof takes care of this for us, i.e.
         // "if (!(null instanceof Foo))" evaluates to "true"
@@ -207,10 +210,26 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
     }
 
     /**
+     * Can be used by third party implementors. Most applications do not need to
+     * call this method.
+     * <p>
+     * Note that the returned array is not a copy of the style data; editing the
+     * array will modify the styles used by any <code>SyntaxTextArea</code>
+     * using this scheme.
+     *
+     * @return The style array.
+     * @see #setStyles(Style[])
+     */
+    public Style[] getStyles() {
+        return styles;
+    }
+
+    /**
      * This is implemented to be consistent with {@link #equals(Object)}.
      *
      * @return The hash code for this object.
      */
+    @Override
     public int hashCode() {
         // Keep me fast. Iterating over *all* syntax schemes contained is
         // probably much slower than a "bad" hash code here
@@ -244,7 +263,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
         if (baseFont == null) {
             baseFont = SyntaxTextArea.getDefaultFont();
         }
-        return XmlParser.load(baseFont, in);
+        return SyntaxSchemeLoader.load(baseFont, in);
     }
 
     /**
@@ -257,8 +276,31 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *
      * @param string A string generated from {@link #toCommaSeparatedString()}.
      * @return A color scheme.
+     * @see #toCommaSeparatedString()
      */
     public static SyntaxScheme loadFromString(String string) {
+        return loadFromString(string, DEFAULT_NUM_TOKEN_TYPES);
+    }
+
+    /**
+     * Loads a syntax highlighting color scheme from a string created from
+     * <code>toCommaSeparatedString</code>. This method is useful for saving
+     * and restoring color schemes.<p>
+     * 
+     * Consider using the {@link Theme} class for saving and loading STA styles
+     * rather than using this API.
+     *
+     * @param string A string generated from {@link #toCommaSeparatedString()}.
+     * @param tokenTypeCount The number of token types saved in this string.
+     *        This should be the number of token types saved by your custom
+     *        SyntaxScheme subclass,
+     *        or {@link ITokenTypes#DEFAULT_NUM_TOKEN_TYPES} if you used the
+     *        standard implementation (which most people will).
+     * @return A color scheme.
+     * @see #loadFromString(String)
+     * @see #toCommaSeparatedString()
+     */
+    public static SyntaxScheme loadFromString(String string, int tokenTypeCount) {
         SyntaxScheme scheme = new SyntaxScheme(true);
 
         try {
@@ -270,7 +312,6 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
                     return scheme; // Still set to defaults
                 }
 
-                int tokenTypeCount = NUM_TOKEN_TYPES;
                 int tokenCount = tokenTypeCount * 7 + 1; // Version string
                 if (tokens.length != tokenCount) {
                     throw new Exception(
@@ -287,9 +328,10 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
                 for (int i = 0; i < tokenTypeCount; i++) {
                     int pos = i * 7 + 1;
                     int integer = Integer.parseInt(tokens[pos]); // == i
-                    if (integer != i)
+                    if (integer != i) {
                         throw new Exception("Expected " + i + ", found "
                                 + integer);
+                    }
 
                     Color fg = null;
                     String temp = tokens[pos + 1];
@@ -306,9 +348,10 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
                     // accidentally suck in an int representing the next packed
                     // color, and any string != "true" means false
                     temp = tokens[pos + 3];
-                    if (!"t".equals(temp) && !"f".equals(temp))
+                    if (!"t".equals(temp) && !"f".equals(temp)) {
                         throw new Exception("Expected 't' or 'f', found "
                                 + temp);
+                    }
                     boolean underline = "t".equals(temp);
 
                     Font font = null;
@@ -446,6 +489,21 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
     }
 
     /**
+     * Can be used by third party implementors. Most applications do not need to
+     * call this method; individual styles can be set via {@link #setStyle(int,
+     * Style)}.
+     *
+     * @param styles The new array of styles to use. Note that this should have
+     *        length of at least
+     *        {@link ITokenTypes#DEFAULT_NUM_TOKEN_TYPES}.
+     * @see #setStyle(int, Style)
+     * @see #getStyles()
+     */
+    public void setStyles(Style[] styles) {
+        this.styles = styles;
+    }
+
+    /**
      * Returns the color represented by a string. If the first char in the
      * string is '<code>$</code>', it is assumed to be in hex, otherwise it is
      * assumed to be decimal. So, for example, both of these:
@@ -490,12 +548,13 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      * </ul>
      *
      * @return A string representing the rgb values of the colors.
+     * @see #loadFromString(String)
      */
     public String toCommaSeparatedString() {
-        StringBuffer sb = new StringBuffer(VERSION);
+        StringBuilder sb = new StringBuilder(VERSION);
         sb.append(',');
 
-        for (int i = 0; i < NUM_TOKEN_TYPES; i++) {
+        for (int i = 0; i < styles.length; i++) {
             sb.append(i).append(',');
 
             Style ss = styles[i];
@@ -529,44 +588,25 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      * @author D. Campione
      * 
      */
-    private static class XmlParser extends DefaultHandler {
+    private static class SyntaxSchemeLoader extends DefaultHandler {
 
         private Font baseFont;
         private SyntaxScheme scheme;
 
-        public XmlParser(Font baseFont) {
+        public SyntaxSchemeLoader(Font baseFont) {
             scheme = new SyntaxScheme(baseFont);
-        }
-
-        /**
-         * Creates the XML reader to use.
-         *
-         * @return The XML reader to use.
-         */
-        private static XMLReader createReader() throws IOException {
-            XMLReader reader = null;
-            try {
-                reader = XMLReaderFactory.createXMLReader();
-            } catch (SAXException saxe) {
-                try {
-                    reader = XMLReaderFactory
-                            .createXMLReader("org.apache.crimson.parser.XMLReaderImpl");
-                } catch (SAXException saxe1) {
-                    throw new IOException(saxe1.toString());
-                }
-            }
-            return reader;
         }
 
         public static SyntaxScheme load(Font baseFont, InputStream in)
                 throws IOException {
-            XMLReader reader = createReader();
-            XmlParser parser = new XmlParser(baseFont);
-            parser.baseFont = baseFont;
-            reader.setContentHandler(parser);
-            InputSource is = new InputSource(in);
-            is.setEncoding("UTF-8");
+            SyntaxSchemeLoader parser = null;
             try {
+                XMLReader reader = XMLReaderFactory.createXMLReader();
+                parser = new SyntaxSchemeLoader(baseFont);
+                parser.baseFont = baseFont;
+                reader.setContentHandler(parser);
+                InputSource is = new InputSource(in);
+                is.setEncoding("UTF-8");
                 reader.parse(is);
             } catch (SAXException saxe) {
                 throw new IOException(saxe.toString());
@@ -574,13 +614,14 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
             return parser.scheme;
         }
 
+        @Override
         public void startElement(String uri, String localName, String qName,
                 Attributes attrs) {
             if ("style".equals(qName)) {
                 String type = attrs.getValue("token");
                 Field field = null;
                 try {
-                    field = Token.class.getField(type);
+                    field = IToken.class.getField(type);
                 } catch (RuntimeException re) {
                     throw re;
                 } catch (Exception e) {

@@ -54,8 +54,8 @@ public class BasicCompletion extends AbstractCompletion {
      * @param shortDesc A short description of the completion. This will be
      *        displayed in the completion list. This may be <code>null</code>.
      */
-    public BasicCompletion(ICompletionProvider provider, String replacementText,
-            String shortDesc) {
+    public BasicCompletion(ICompletionProvider provider,
+            String replacementText, String shortDesc) {
         this(provider, replacementText, shortDesc, null);
     }
 
@@ -69,8 +69,8 @@ public class BasicCompletion extends AbstractCompletion {
      * @param summary The summary of this completion. This should be HTML. This
      *        may be <code>null</code>.
      */
-    public BasicCompletion(ICompletionProvider provider, String replacementText,
-            String shortDesc, String summary) {
+    public BasicCompletion(ICompletionProvider provider,
+            String replacementText, String shortDesc, String summary) {
         super(provider);
         this.replacementText = replacementText;
         this.shortDesc = shortDesc;
@@ -78,6 +78,7 @@ public class BasicCompletion extends AbstractCompletion {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getReplacementText() {
         return replacementText;
     }
@@ -94,6 +95,7 @@ public class BasicCompletion extends AbstractCompletion {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getSummary() {
         return summary;
     }
@@ -128,6 +130,7 @@ public class BasicCompletion extends AbstractCompletion {
      *
      * @return A string representation of this completion.
      */
+    @Override
     public String toString() {
         if (shortDesc == null) {
             return getInputText();

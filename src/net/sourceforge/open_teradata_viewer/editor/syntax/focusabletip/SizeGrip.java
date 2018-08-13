@@ -67,6 +67,7 @@ public class SizeGrip extends JPanel {
      *
      * @param o The new orientation.
      */
+    @Override
     public void applyComponentOrientation(ComponentOrientation o) {
         possiblyFixCursor(o.isLeftToRight());
         super.applyComponentOrientation(o);
@@ -110,6 +111,7 @@ public class SizeGrip extends JPanel {
      *
      * @param g The graphics context.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -176,9 +178,10 @@ public class SizeGrip extends JPanel {
         }
     }
 
+    @Override
     public void updateUI() {
         super.updateUI();
-        if (System.getProperty("os.name").indexOf("OS X") > -1) {
+        if (System.getProperty("os.name").contains("OS X")) {
             if (osxSizeGrip == null) {
                 osxSizeGrip = createOSXSizeGrip();
             }
@@ -204,6 +207,7 @@ public class SizeGrip extends JPanel {
 
         private Point origPos;
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             Point newPos = e.getPoint();
             SwingUtilities.convertPointToScreen(newPos, SizeGrip.this);
@@ -232,11 +236,13 @@ public class SizeGrip extends JPanel {
             origPos.setLocation(newPos);
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             origPos = e.getPoint();
             SwingUtilities.convertPointToScreen(origPos, SizeGrip.this);
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
             origPos = null;
         }

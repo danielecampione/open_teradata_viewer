@@ -55,11 +55,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * @author D. Campione
  * 
  */
-public class SyntaxView extends View
-        implements
-            TabExpander,
-            ITokenOrientedView,
-            ISTAView {
+public class SyntaxView extends View implements TabExpander,
+        ITokenOrientedView, ISTAView {
 
     /**
      * The default font used by the text area. If this changes we need to
@@ -91,7 +88,13 @@ public class SyntaxView extends View
     private int ascent;
     private int clipStart;
     private int clipEnd;
-    private Token tempToken;
+
+    /**
+     * Temporary token used when we need to "modify" tokens for rendering
+     * purposes. Since tokens returned from SyntaxDocuments are treated as
+     * immutable, we use this temporary token to do that work.
+     */
+    private TokenImpl tempToken;
 
     /**
      * Constructs a new <code>SyntaxView</code> wrapped around an element.
@@ -100,7 +103,7 @@ public class SyntaxView extends View
      */
     public SyntaxView(Element elem) {
         super(elem);
-        tempToken = new Token();
+        tempToken = new TokenImpl();
     }
 
     /**
@@ -136,6 +139,7 @@ public class SyntaxView extends View
      * @param f the factory to use to rebuild if the view has children
      * @see View#changedUpdate
      */
+    @Override
     public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
         updateDamage(changes, a, f);
     }
@@ -157,8 +161,9 @@ public class SyntaxView extends View
             if ((area0 != null) && (area1 != null)) {
                 Rectangle dmg = area0.union(area1); // Damage
                 host.repaint(dmg.x, dmg.y, dmg.width, dmg.height);
-            } else
+            } else {
                 host.repaint();
+            }
         }
     }
 
@@ -174,7 +179,7 @@ public class SyntaxView extends View
      * @param y The y-coordinate at which to draw.
      * @return The x-coordinate representing the end of the painted text.
      */
-    private float drawLine(ITokenPainter painter, Token token, Graphics2D g,
+    private float drawLine(ITokenPainter painter, IToken token, Graphics2D g,
             float x, float y) {
         float nextX = x; // The x-value at the end of our text
 
@@ -184,8 +189,8 @@ public class SyntaxView extends View
         }
 
         if (host.getEOLMarkersVisible()) {
-            g.setColor(host.getForegroundForTokenType(Token.WHITESPACE));
-            g.setFont(host.getFontForTokenType(Token.WHITESPACE));
+            g.setColor(host.getForegroundForTokenType(IToken.WHITESPACE));
+            g.setFont(host.getFontForTokenType(IToken.WHITESPACE));
             g.drawString("\u00B6", nextX, y);
         }
 
@@ -207,23 +212,28 @@ public class SyntaxView extends View
      * @param selEnd The end of the selection.
      * @return The x-coordinate representing the end of the painted text.
      */
-    private float drawLineWithSelection(ITokenPainter painter, Token token,
+    private float drawLineWithSelection(ITokenPainter painter, IToken token,
             Graphics2D g, float x, float y, int selStart, int selEnd) {
         float nextX = x; // The x-value at the end of our text
 
         while (token != null && token.isPaintable() && nextX < clipEnd) {
             // Selection starts in this token
             if (token.containsPosition(selStart)) {
-                if (selStart > token.offset) {
+                if (selStart > token.getOffset()) {
                     tempToken.copyFrom(token);
-                    tempToken.textCount = selStart - tempToken.offset;
+                    tempToken.textCount = selStart - tempToken.getOffset();
                     nextX = painter.paint(tempToken, g, nextX, y, host, this,
                             clipStart);
-                    token.makeStartAt(selStart);
+                    tempToken.textCount = token.length();
+                    tempToken.makeStartAt(selStart);
+                    // Clone required since token and tempToken must be
+                    // different tokens for else statement below
+                    token = new TokenImpl(tempToken);
                 }
 
-                int selCount = Math.min(token.textCount, selEnd - token.offset);
-                if (selCount == token.textCount) {
+                int tokenLen = token.length();
+                int selCount = Math.min(tokenLen, selEnd - token.getOffset());
+                if (selCount == tokenLen) {
                     nextX = painter.paintSelected(token, g, nextX, y, host,
                             this, clipStart);
                 } else {
@@ -231,7 +241,9 @@ public class SyntaxView extends View
                     tempToken.textCount = selCount;
                     nextX = painter.paintSelected(tempToken, g, nextX, y, host,
                             this, clipStart);
-                    token.makeStartAt(token.offset + selCount);
+                    tempToken.textCount = token.length();
+                    tempToken.makeStartAt(token.getOffset() + selCount);
+                    token = tempToken;
                     nextX = painter.paint(token, g, nextX, y, host, this,
                             clipStart);
                 }
@@ -239,16 +251,18 @@ public class SyntaxView extends View
             // Selection ends in this token
             else if (token.containsPosition(selEnd)) {
                 tempToken.copyFrom(token);
-                tempToken.textCount = selEnd - tempToken.offset;
+                tempToken.textCount = selEnd - tempToken.getOffset();
                 nextX = painter.paintSelected(tempToken, g, nextX, y, host,
                         this, clipStart);
-                token.makeStartAt(selEnd);
+                tempToken.textCount = token.length();
+                tempToken.makeStartAt(selEnd);
+                token = tempToken;
                 nextX = painter
                         .paint(token, g, nextX, y, host, this, clipStart);
             }
             // This token is entirely selected
-            else if (token.offset >= selStart
-                    && (token.offset + token.textCount) <= selEnd) {
+            else if (token.getOffset() >= selStart
+                    && token.getEndOffset() <= selEnd) {
                 nextX = painter.paintSelected(token, g, nextX, y, host, this,
                         clipStart);
             }
@@ -262,8 +276,8 @@ public class SyntaxView extends View
         }
 
         if (host.getEOLMarkersVisible()) {
-            g.setColor(host.getForegroundForTokenType(Token.WHITESPACE));
-            g.setFont(host.getFontForTokenType(Token.WHITESPACE));
+            g.setColor(host.getForegroundForTokenType(IToken.WHITESPACE));
+            g.setFont(host.getFontForTokenType(IToken.WHITESPACE));
             g.drawString("\u00B6", nextX, y);
         }
 
@@ -279,7 +293,7 @@ public class SyntaxView extends View
      * @return The width of the line.
      */
     private float getLineWidth(int lineNumber) {
-        Token tokenList = ((SyntaxDocument) getDocument())
+        IToken tokenList = ((SyntaxDocument) getDocument())
                 .getTokenListForLine(lineNumber);
         return SyntaxUtilities.getTokenListWidth(tokenList,
                 (SyntaxTextArea) getContainer(), this);
@@ -303,6 +317,7 @@ public class SyntaxView extends View
      * @exception BadLocationException
      * @exception IllegalArgumentException for an invalid direction
      */
+    @Override
     public int getNextVisualPositionFrom(int pos, Position.Bias b, Shape a,
             int direction, Position.Bias[] biasRet) throws BadLocationException {
         return SyntaxUtilities.getNextVisualPositionFrom(pos, b, a, direction,
@@ -319,28 +334,28 @@ public class SyntaxView extends View
      *         or break the view.
      * @exception IllegalArgumentException for an invalid axis
      */
+    @Override
     public float getPreferredSpan(int axis) {
         updateMetrics();
         switch (axis) {
-            case View.X_AXIS :
-                float span = longLineWidth + 10; // "fudge factor"
-                if (host.getEOLMarkersVisible()) {
-                    span += metrics.charWidth('\u00B6');
-                }
-                return span;
-            case View.Y_AXIS :
-                // We update lineHeight here as when this method is first
-                // called, lineHeight isn't initialized. If we don't do it here,
-                // we get no vertical scrollbar (as lineHeight==0)
-                lineHeight = host != null ? host.getLineHeight() : lineHeight;
-                int visibleLineCount = getElement().getElementCount();
-                if (host.isCodeFoldingEnabled()) {
-                    visibleLineCount -= host.getFoldManager()
-                            .getHiddenLineCount();
-                }
-                return visibleLineCount * lineHeight;
-            default :
-                throw new IllegalArgumentException("Invalid axis: " + axis);
+        case View.X_AXIS:
+            float span = longLineWidth + 10; // "fudge factor"
+            if (host.getEOLMarkersVisible()) {
+                span += metrics.charWidth('\u00B6');
+            }
+            return span;
+        case View.Y_AXIS:
+            // We update lineHeight here as when this method is first
+            // called, lineHeight isn't initialized. If we don't do it here,
+            // we get no vertical scrollbar (as lineHeight==0)
+            lineHeight = host != null ? host.getLineHeight() : lineHeight;
+            int visibleLineCount = getElement().getElementCount();
+            if (host.isCodeFoldingEnabled()) {
+                visibleLineCount -= host.getFoldManager().getHiddenLineCount();
+            }
+            return visibleLineCount * lineHeight;
+        default:
+            throw new IllegalArgumentException("Invalid axis: " + axis);
         }
     }
 
@@ -368,7 +383,8 @@ public class SyntaxView extends View
      *         before this one. If <code>offset</code> is in the first line in
      *         the document, <code>null</code> is returned.
      */
-    public Token getTokenListForPhysicalLineAbove(int offset) {
+    @Override
+    public IToken getTokenListForPhysicalLineAbove(int offset) {
         SyntaxDocument document = (SyntaxDocument) getDocument();
         Element map = document.getDefaultRootElement();
         int line = map.getElementIndex(offset);
@@ -399,7 +415,8 @@ public class SyntaxView extends View
      *         after this one. If <code>offset</code> is in the last physical
      *         line in the document, <code>null</code> is returned.
      */
-    public Token getTokenListForPhysicalLineBelow(int offset) {
+    @Override
+    public IToken getTokenListForPhysicalLineBelow(int offset) {
         SyntaxDocument document = (SyntaxDocument) getDocument();
         Element map = document.getDefaultRootElement();
         int lineCount = map.getElementCount();
@@ -426,6 +443,7 @@ public class SyntaxView extends View
      * @param a The current allocation of the view.
      * @param f The factory to use to rebuild if the view has children.
      */
+    @Override
     public void insertUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
         updateDamage(changes, a, f);
     }
@@ -468,13 +486,14 @@ public class SyntaxView extends View
      *            a valid location in the associated document
      * @see View#modelToView
      */
+    @Override
     public Shape modelToView(int pos, Shape a, Position.Bias b)
             throws BadLocationException {
         // Line coordinates
         Element map = getElement();
         SyntaxDocument doc = (SyntaxDocument) getDocument();
         int lineIndex = map.getElementIndex(pos);
-        Token tokenList = doc.getTokenListForLine(lineIndex);
+        IToken tokenList = doc.getTokenListForLine(lineIndex);
         Rectangle lineArea = lineToRect(a, lineIndex);
         tabBase = lineArea.x; // Used by listOffsetToView()
 
@@ -521,6 +540,7 @@ public class SyntaxView extends View
      *            listed above.
      * @see View#viewToModel
      */
+    @Override
     public Shape modelToView(int p0, Position.Bias b0, int p1,
             Position.Bias b1, Shape a) throws BadLocationException {
         Shape s0 = modelToView(p0, a, b0);
@@ -560,8 +580,9 @@ public class SyntaxView extends View
         // get the area to "highlight", and if we don't do this, one character
         // too many is highlighted thanks to our modelToView() implementation
         // returning the actual width of the character requested
-        if (p1 > p0)
+        if (p1 > p0) {
             r0.width -= r1.width;
+        }
 
         return r0;
     }
@@ -576,9 +597,11 @@ public class SyntaxView extends View
      *                  occurred at >= 0.
      * @return the tab stop, measured in points >= 0.
      */
+    @Override
     public float nextTabStop(float x, int tabOffset) {
-        if (tabSize == 0)
+        if (tabSize == 0) {
             return x;
+        }
         int ntabs = (((int) x) - tabBase) / tabSize;
         return tabBase + ((ntabs + 1) * tabSize);
     }
@@ -590,6 +613,7 @@ public class SyntaxView extends View
      * @param g The graphics context with which to paint.
      * @param a The allocated region in which to render.
      */
+    @Override
     public void paint(Graphics g, Shape a) {
         SyntaxDocument document = (SyntaxDocument) getDocument();
 
@@ -627,11 +651,11 @@ public class SyntaxView extends View
                 .getHighlighter();
 
         Graphics2D g2d = (Graphics2D) g;
-        Token token;
+        IToken token;
 
         ITokenPainter painter = host.getTokenPainter();
         int line = linesAbove;
-        while (y < clip.y + clip.height + lineHeight && line < lineCount) {
+        while (y < clip.y + clip.height + ascent && line < lineCount) {
             Fold fold = fm.getFoldForLine(line);
             Element lineElement = map.getElement(line);
             int startOffset = lineElement.getStartOffset();
@@ -701,10 +725,12 @@ public class SyntaxView extends View
      * @param a the current allocation of the view
      * @param f the factory to use to rebuild if the view has children
      */
+    @Override
     public void removeUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
         updateDamage(changes, a, f);
     }
 
+    @Override
     public void setSize(float width, float height) {
         super.setSize(width, height);
         updateMetrics();
@@ -728,8 +754,9 @@ public class SyntaxView extends View
             // Lines were added or removed..
             if (added != null) {
                 int addedAt = ec.getIndex();
-                for (int i = 0; i < added.length; i++)
+                for (int i = 0; i < added.length; i++) {
                     possiblyUpdateLongLine(added[i], addedAt + i);
+                }
             }
             if (removed != null) {
                 for (int i = 0; i < removed.length; i++) {
@@ -766,8 +793,9 @@ public class SyntaxView extends View
                     preferenceChanged(null, true, false);
                 } else {
                     // If long line gets updated, update the status bars too
-                    if (possiblyUpdateLongLine(e, line))
+                    if (possiblyUpdateLongLine(e, line)) {
                         preferenceChanged(null, true, false);
+                    }
                 }
             } else if (changes.getType() == DocumentEvent.EventType.REMOVE) {
                 if (map.getElement(line) == longLine) {
@@ -801,6 +829,7 @@ public class SyntaxView extends View
      * @return the location within the model that best represents the
      *         given point in the view >= 0.
      */
+    @Override
     public int viewToModel(float fx, float fy, Shape a, Position.Bias[] bias) {
         bias[0] = Position.Bias.Forward;
 
@@ -846,7 +875,7 @@ public class SyntaxView extends View
             } else {
                 // Determine the offset into the text
                 int p0 = line.getStartOffset();
-                Token tokenList = doc.getTokenListForLine(lineIndex);
+                IToken tokenList = doc.getTokenListForLine(lineIndex);
                 tabBase = alloc.x;
                 int offs = tokenList.getListOffset(
                         (SyntaxTextArea) getContainer(), this, tabBase, x);
@@ -856,6 +885,7 @@ public class SyntaxView extends View
     }
 
     /** {@inheritDoc} */
+    @Override
     public int yForLine(Rectangle alloc, int line) throws BadLocationException {
         updateMetrics();
         if (metrics != null) {
@@ -874,6 +904,7 @@ public class SyntaxView extends View
     }
 
     /** {@inheritDoc} */
+    @Override
     public int yForLineContaining(Rectangle alloc, int offs)
             throws BadLocationException {
         Element map = getElement();

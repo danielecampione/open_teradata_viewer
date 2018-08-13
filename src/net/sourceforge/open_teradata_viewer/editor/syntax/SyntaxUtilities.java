@@ -44,6 +44,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
+import net.sourceforge.open_teradata_viewer.editor.syntax.TokenUtils.TokenSubList;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
 
 /**
@@ -86,8 +87,8 @@ public class SyntaxUtilities implements SwingConstants {
      * <code>Character.isWhitespace</code> because we know we are dealing with
      * ASCII chars and so don't have to worry about code planes, etc.
      */
-    private static final int[] dataTable = {0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
-            0, 0, 0, 0, // 0-15
+    private static final int[] dataTable = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
+            0, 0, 0, 0, 0, // 0-15
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 16-31
             4, 128, 0, 0, 0, 128, 128, 0, 64, 64, 128, 128, 0, 128, 0, 128, // 32-47
             49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 128, 0, 128, 128, 128, 128, // 48-63
@@ -108,9 +109,12 @@ public class SyntaxUtilities implements SwingConstants {
     /** Used in bracket matching methods. */
     private static Segment charSegment = new Segment();
 
+    /** Used in token list manipulation methods. */
+    private static final TokenImpl tempToken = new TokenImpl();
+
     /** Used internally. */
-    private static final char[] JS_KEYWORD_RETURN = {'r', 'e', 't', 'u', 'r',
-            'n'};
+    private static final char[] JS_KEYWORD_RETURN = { 'r', 'e', 't', 'u', 'r',
+            'n' };
 
     /** Used internally. */
     private static final String BRACKETS = "{([})]";
@@ -141,43 +145,43 @@ public class SyntaxUtilities implements SwingConstants {
         final String tabString = "   ";
         boolean lastWasSpace = false;
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
-                case ' ' :
-                    if (inPreBlock || !lastWasSpace) {
-                        sb.append(' ');
-                    } else {
-                        sb.append("&nbsp;");
-                    }
-                    lastWasSpace = true;
-                    break;
-                case '\n' :
-                    sb.append(newlineReplacement);
-                    lastWasSpace = false;
-                    break;
-                case '&' :
-                    sb.append("&amp;");
-                    lastWasSpace = false;
-                    break;
-                case '\t' :
-                    sb.append(tabString);
-                    lastWasSpace = false;
-                    break;
-                case '<' :
-                    sb.append("&lt;");
-                    lastWasSpace = false;
-                    break;
-                case '>' :
-                    sb.append("&gt;");
-                    lastWasSpace = false;
-                    break;
-                default :
-                    sb.append(ch);
-                    lastWasSpace = false;
-                    break;
+            case ' ':
+                if (inPreBlock || !lastWasSpace) {
+                    sb.append(' ');
+                } else {
+                    sb.append("&nbsp;");
+                }
+                lastWasSpace = true;
+                break;
+            case '\n':
+                sb.append(newlineReplacement);
+                lastWasSpace = false;
+                break;
+            case '&':
+                sb.append("&amp;");
+                lastWasSpace = false;
+                break;
+            case '\t':
+                sb.append(tabString);
+                lastWasSpace = false;
+                break;
+            case '<':
+                sb.append("&lt;");
+                lastWasSpace = false;
+                break;
+            case '>':
+                sb.append("&gt;");
+                lastWasSpace = false;
+                break;
+            default:
+                sb.append(ch);
+                lastWasSpace = false;
+                break;
             }
         }
 
@@ -191,7 +195,7 @@ public class SyntaxUtilities implements SwingConstants {
      * @return The rendering hints, or <code>null</code> if they cannot be
      *         determined.
      */
-    public static Map getDesktopAntiAliasHints() {
+    public static Map<?, ?> getDesktopAntiAliasHints() {
         return (Map<?, ?>) Toolkit.getDefaultToolkit().getDesktopProperty(
                 "awt.font.desktophints");
     }
@@ -313,10 +317,11 @@ public class SyntaxUtilities implements SwingConstants {
         SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
 
         // Ensure p0 and p1 are valid document positions
-        if (p0 < 0)
+        if (p0 < 0) {
             throw new BadLocationException("Invalid document position", p0);
-        else if (p1 > doc.getLength())
+        } else if (p1 > doc.getLength()) {
             throw new BadLocationException("Invalid document position", p1);
+        }
 
         // Ensure p0 and p1 are in the same line, and get the start/end offsets
         // for that line
@@ -324,17 +329,20 @@ public class SyntaxUtilities implements SwingConstants {
         int lineNum = map.getElementIndex(p0);
         // We do ">1" because p1 might be the first position on the next line or
         // the last position on the previous one
-        if (Math.abs(lineNum - map.getElementIndex(p1)) > 1)
+        if (Math.abs(lineNum - map.getElementIndex(p1)) > 1) {
             throw new IllegalArgumentException("p0 and p1 are not on the "
                     + "same line (" + p0 + ", " + p1 + ").");
+        }
 
         // Get the token list
-        Token t = doc.getTokenListForLine(lineNum);
+        IToken t = doc.getTokenListForLine(lineNum);
 
         // Modify the token list 't' to begin at p0 (but still have correct
-        // token types, etc.), and get the x-location (in pixels) of the
+        // token types, etc..), and get the x-location (in pixels) of the
         // beginning of this new token list
-        makeTokenListStartAt(t, p0, e, textArea, 0);
+        TokenSubList subList = TokenUtils.getSubTokenList(t, p0, e, textArea,
+                0, tempToken);
+        t = subList.tokenList;
 
         rect = t.listOffsetToView(textArea, e, p1, x0, rect);
         return rect;
@@ -397,10 +405,10 @@ public class SyntaxUtilities implements SwingConstants {
             Element line = map.getElement(curLine);
             int start = line.getStartOffset();
             int end = line.getEndOffset();
-            Token token = doc.getTokenListForLine(curLine);
+            IToken token = doc.getTokenListForLine(curLine);
             token = SyntaxUtilities.getTokenAtOffset(token, caretPosition);
             // All brackets are always returned as "separators."
-            if (token.type != Token.SEPARATOR) {
+            if (token.getType() != IToken.SEPARATOR) {
                 return input;
             }
             if (index < 3) { // One of "{[("
@@ -435,8 +443,9 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             token = SyntaxUtilities.getTokenAtOffset(token,
                                     offset);
-                            if (token.type == Token.SEPARATOR)
+                            if (token.getType() == IToken.SEPARATOR) {
                                 numEmbedded++;
+                            }
                         }
 
                         else if (ch == bracketMatch) {
@@ -447,7 +456,7 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             token = SyntaxUtilities.getTokenAtOffset(token,
                                     offset);
-                            if (token.type == Token.SEPARATOR) {
+                            if (token.getType() == IToken.SEPARATOR) {
                                 if (numEmbedded == 0) {
                                     if (textArea.isCodeFoldingEnabled()
                                             && textArea.getFoldManager()
@@ -485,7 +494,7 @@ public class SyntaxUtilities implements SwingConstants {
                 end = caretPosition;
                 int numEmbedded = 0;
                 boolean haveTokenList = false;
-                Token t2;
+                IToken t2;
 
                 while (true) {
                     doc.getText(start, end - start, charSegment);
@@ -503,8 +512,9 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             t2 = SyntaxUtilities
                                     .getTokenAtOffset(token, offset);
-                            if (t2.type == Token.SEPARATOR)
+                            if (t2.getType() == IToken.SEPARATOR) {
                                 numEmbedded++;
+                            }
                         }
 
                         else if (ch == bracketMatch) {
@@ -515,7 +525,7 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             t2 = SyntaxUtilities
                                     .getTokenAtOffset(token, offset);
-                            if (t2.type == Token.SEPARATOR) {
+                            if (t2.getType() == IToken.SEPARATOR) {
                                 if (numEmbedded == 0) {
                                     input.setLocation(caretPosition, offset);
                                     return input;
@@ -556,7 +566,7 @@ public class SyntaxUtilities implements SwingConstants {
      *         if there isn't one.
      * @see #getPreviousImportantToken(SyntaxTextArea, int)
      */
-    public static final Token getNextImportantToken(Token t,
+    public static final IToken getNextImportantToken(IToken t,
             SyntaxTextArea textArea, int line) {
         while (t != null && t.isPaintable() && t.isCommentOrWhitespace()) {
             t = t.getNextToken();
@@ -605,80 +615,84 @@ public class SyntaxUtilities implements SwingConstants {
 
         // Do we want the "next position" above, below, to the left or right?
         switch (direction) {
-            case NORTH :
-            case SOUTH :
-                if (pos == -1) {
-                    pos = (direction == NORTH) ? Math.max(0,
-                            view.getEndOffset() - 1) : view.getStartOffset();
-                    break;
-                }
-                Caret c = (target != null) ? target.getCaret() : null;
-                // Ideally, the x location from the magic caret position would
-                // be passed in
-                Point mcp;
-                if (c != null)
-                    mcp = c.getMagicCaretPosition();
-                else
-                    mcp = null;
-                int x;
-                if (mcp == null) {
-                    Rectangle loc = target.modelToView(pos);
-                    x = (loc == null) ? 0 : loc.x;
-                } else {
-                    x = mcp.x;
-                }
-                if (direction == NORTH)
-                    pos = getPositionAbove(target, pos, x, (TabExpander) view);
-                else
-                    pos = getPositionBelow(target, pos, x, (TabExpander) view);
+        case NORTH:
+        case SOUTH:
+            if (pos == -1) {
+                pos = (direction == NORTH) ? Math.max(0,
+                        view.getEndOffset() - 1) : view.getStartOffset();
                 break;
+            }
+            Caret c = (target != null) ? target.getCaret() : null;
+            // Ideally, the x location from the magic caret position would
+            // be passed in
+            Point mcp;
+            if (c != null) {
+                mcp = c.getMagicCaretPosition();
+            } else {
+                mcp = null;
+            }
+            int x;
+            if (mcp == null) {
+                Rectangle loc = target.modelToView(pos);
+                x = (loc == null) ? 0 : loc.x;
+            } else {
+                x = mcp.x;
+            }
+            if (direction == NORTH) {
+                pos = getPositionAbove(target, pos, x, (TabExpander) view);
+            } else {
+                pos = getPositionBelow(target, pos, x, (TabExpander) view);
+            }
+            break;
 
-            case WEST :
-                if (pos == -1) {
-                    pos = Math.max(0, view.getEndOffset() - 1);
-                } else {
-                    pos = Math.max(0, pos - 1);
-                    if (target.isCodeFoldingEnabled()) {
-                        int last = target.getLineOfOffset(pos + 1);
-                        int current = target.getLineOfOffset(pos);
-                        if (last != current) { // If moving up a line...
-                            FoldManager fm = target.getFoldManager();
-                            if (fm.isLineHidden(current)) {
-                                while (--current > 0
-                                        && fm.isLineHidden(current));
-                                pos = target.getLineEndOffset(current) - 1;
+        case WEST:
+            if (pos == -1) {
+                pos = Math.max(0, view.getEndOffset() - 1);
+            } else {
+                pos = Math.max(0, pos - 1);
+                if (target.isCodeFoldingEnabled()) {
+                    int last = target.getLineOfOffset(pos + 1);
+                    int current = target.getLineOfOffset(pos);
+                    if (last != current) { // If moving up a line...
+                        FoldManager fm = target.getFoldManager();
+                        if (fm.isLineHidden(current)) {
+                            while (--current > 0 && fm.isLineHidden(current)) {
+                                ;
                             }
+                            pos = target.getLineEndOffset(current) - 1;
                         }
                     }
                 }
-                break;
+            }
+            break;
 
-            case EAST :
-                if (pos == -1) {
-                    pos = view.getStartOffset();
-                } else {
-                    pos = Math.min(pos + 1, view.getDocument().getLength());
-                    if (target.isCodeFoldingEnabled()) {
-                        int last = target.getLineOfOffset(pos - 1);
-                        int current = target.getLineOfOffset(pos);
-                        if (last != current) { // If moving down a line...
-                            FoldManager fm = target.getFoldManager();
-                            if (fm.isLineHidden(current)) {
-                                int lineCount = target.getLineCount();
-                                while (++current < lineCount
-                                        && fm.isLineHidden(current));
-                                pos = current == lineCount ? target
-                                        .getLineEndOffset(last) - 1 : // Was the last visible line
-                                        target.getLineStartOffset(current);
+        case EAST:
+            if (pos == -1) {
+                pos = view.getStartOffset();
+            } else {
+                pos = Math.min(pos + 1, view.getDocument().getLength());
+                if (target.isCodeFoldingEnabled()) {
+                    int last = target.getLineOfOffset(pos - 1);
+                    int current = target.getLineOfOffset(pos);
+                    if (last != current) { // If moving down a line...
+                        FoldManager fm = target.getFoldManager();
+                        if (fm.isLineHidden(current)) {
+                            int lineCount = target.getLineCount();
+                            while (++current < lineCount
+                                    && fm.isLineHidden(current)) {
+                                ;
                             }
+                            pos = current == lineCount ? target
+                                    .getLineEndOffset(last) - 1 : // Was the last visible line
+                                    target.getLineStartOffset(current);
                         }
                     }
                 }
-                break;
+            }
+            break;
 
-            default :
-                throw new IllegalArgumentException("Bad direction: "
-                        + direction);
+        default:
+            throw new IllegalArgumentException("Bad direction: " + direction);
         }
 
         return pos;
@@ -700,10 +714,12 @@ public class SyntaxUtilities implements SwingConstants {
     public static final int getPositionAbove(SyntaxTextArea c, int offs,
             float x, TabExpander e) throws BadLocationException {
         ITokenOrientedView tov = (ITokenOrientedView) e;
-        Token token = tov.getTokenListForPhysicalLineAbove(offs);
+        IToken token = tov.getTokenListForPhysicalLineAbove(offs);
         if (token == null) {
             return -1;
-        } else if (token.type == Token.NULL) { // A line containing only Token.NULL is an empty line
+        }
+        // A line containing only IToken.NULL is an empty line
+        else if (token.getType() == IToken.NULL) {
             int line = c.getLineOfOffset(offs);
             return c.getLineStartOffset(line - 1);
         } else {
@@ -727,12 +743,10 @@ public class SyntaxUtilities implements SwingConstants {
     public static final int getPositionBelow(SyntaxTextArea c, int offs,
             float x, TabExpander e) throws BadLocationException {
         ITokenOrientedView tov = (ITokenOrientedView) e;
-        Token token = tov.getTokenListForPhysicalLineBelow(offs);
-        if (token == null)
+        IToken token = tov.getTokenListForPhysicalLineBelow(offs);
+        if (token == null) {
             return -1;
-
-        // A line containing only Token.NULL is an empty line
-        else if (token.type == Token.NULL) {
+        } else if (token.getType() == IToken.NULL) {
             int line = c.getLineOfOffset(offs);
             FoldManager fm = c.getFoldManager();
             line = fm.getVisibleLineBelow(line);
@@ -750,14 +764,14 @@ public class SyntaxUtilities implements SwingConstants {
      * @param line The line at which to start looking.
      * @return The last non-whitespace, non-comment token, or <code>null</code>
      *         if there isn't one.
-     * @see #getNextImportantToken(Token, SyntaxTextArea, int)
+     * @see #getNextImportantToken(IToken, SyntaxTextArea, int)
      */
-    public static final Token getPreviousImportantToken(
+    public static final IToken getPreviousImportantToken(
             SyntaxTextArea textArea, int line) {
         if (line < 0) {
             return null;
         }
-        Token t = textArea.getTokenListForLine(line);
+        IToken t = textArea.getTokenListForLine(line);
         if (t != null) {
             t = t.getLastNonCommentNonWhitespaceToken();
             if (t != null) {
@@ -778,11 +792,12 @@ public class SyntaxUtilities implements SwingConstants {
      * @return The token at <code>offset</code>, or <code>null</code> if
      *         none of the tokens are at that offset.
      */
-    public static final Token getTokenAtOffset(Token tokenList, int offset) {
-        for (Token t = tokenList; t != null && t.isPaintable(); t = t
+    public static final IToken getTokenAtOffset(IToken tokenList, int offset) {
+        for (IToken t = tokenList; t != null && t.isPaintable(); t = t
                 .getNextToken()) {
-            if (t.containsPosition(offset))
+            if (t.containsPosition(offset)) {
                 return t;
+            }
         }
         return null;
     }
@@ -811,9 +826,13 @@ public class SyntaxUtilities implements SwingConstants {
             int count = s.length();
             char ch = s.charAt(i);
             if (Character.isWhitespace(ch)) {
-                while (i < count && Character.isWhitespace(s.charAt(i++)));
+                while (i < count && Character.isWhitespace(s.charAt(i++))) {
+                    ;
+                }
             } else if (Character.isLetterOrDigit(ch)) {
-                while (i < count && Character.isLetterOrDigit(s.charAt(i++)));
+                while (i < count && Character.isLetterOrDigit(s.charAt(i++))) {
+                    ;
+                }
             } else {
                 i = 2;
             }
@@ -880,7 +899,7 @@ public class SyntaxUtilities implements SwingConstants {
      * @param e The tab expander.  This value cannot be <code>null</code>.
      * @return The width of the token list, in pixels.
      */
-    public static final float getTokenListWidth(Token tokenList,
+    public static final float getTokenListWidth(IToken tokenList,
             SyntaxTextArea textArea, TabExpander e) {
         return getTokenListWidth(tokenList, textArea, e, 0);
     }
@@ -897,10 +916,10 @@ public class SyntaxUtilities implements SwingConstants {
      * @return The width of the token list, in pixels.
      * @see #getTokenListWidthUpTo
      */
-    public static final float getTokenListWidth(final Token tokenList,
+    public static final float getTokenListWidth(final IToken tokenList,
             SyntaxTextArea textArea, TabExpander e, float x0) {
         float width = x0;
-        for (Token t = tokenList; t != null && t.isPaintable(); t = t
+        for (IToken t = tokenList; t != null && t.isPaintable(); t = t
                 .getNextToken()) {
             width += t.getWidth(textArea, e, width);
         }
@@ -924,14 +943,14 @@ public class SyntaxUtilities implements SwingConstants {
      *         including, the character at position <code>upTo</code>.
      * @see #getTokenListWidth
      */
-    public static final float getTokenListWidthUpTo(final Token tokenList,
+    public static final float getTokenListWidthUpTo(final IToken tokenList,
             SyntaxTextArea textArea, TabExpander e, float x0, int upTo) {
         float width = 0;
-        for (Token t = tokenList; t != null && t.isPaintable(); t = t
+        for (IToken t = tokenList; t != null && t.isPaintable(); t = t
                 .getNextToken()) {
             if (t.containsPosition(upTo)) {
                 return width
-                        + t.getWidthUpTo(upTo - t.offset, textArea, e, x0
+                        + t.getWidthUpTo(upTo - t.getOffset(), textArea, e, x0
                                 + width);
             }
             width += t.getWidth(textArea, e, x0 + width);
@@ -1034,73 +1053,6 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
-     * Modifies the passed-in token list to start at the specified offset. For
-     * example, if the token list covered positions 20-60 in the document
-     * (inclusive) like so:
-     * <pre>
-     *   [token1] -> [token2] -> [token3] -> [token4]
-     *   20     30   31     40   41     50   51     60
-     * </pre>
-     * and you used this method to make the token list start at position 44,
-     * then the token list would be modified to be the following:
-     * <pre>
-     *   [part-of-old-token3] -> [token4]
-     *   44                 50   51     60
-     * </pre>
-     * Tokens that come before the specified position are forever lost, and the
-     * token containing that position is made to begin at that position if
-     * necessary. All token types remain the same as they were originally.<p>
-     *
-     * This method can be useful if you are only interested in part of a token
-     * list (i.e., the line it represents), but you don't want to modify the
-     * token list yourself.
-     *
-     * @param tokenList The list to make start at the specified position. This
-     *        parameter is modified.
-     * @param pos The position at which the new token list is to start. If this
-     *        position is not in the passed-in token list, returned token list
-     *        will either be <code>null</code> or the unpaintable token(s) at
-     *        the end of the passed-in token list.
-     * @param e How to expand tabs.
-     * @param textArea The text area from which the token list came.
-     * @param x0 The initial x-pixel position of the old token list.
-     * @return The width, in pixels, of the part of the token list "removed
-     *         from the front."  This way, you know the x-offset of the "new"
-     *         token list.
-     */
-    public static float makeTokenListStartAt(Token tokenList, int pos,
-            TabExpander e, final SyntaxTextArea textArea, float x0) {
-        Token t = tokenList;
-
-        // Loop through the token list until you find the one that contains pos.
-        // Remember the cumulative width of all of these tokens
-        while (t != null && t.isPaintable() && !t.containsPosition(pos)) {
-            x0 += t.getWidth(textArea, e, x0);
-            t = t.getNextToken();
-        }
-
-        // Make the token that contains pos start at pos
-        if (t != null && t.isPaintable() && t.offset != pos) {
-            // Number of chars between p0 and token start
-            int difference = pos - t.offset;
-            x0 += t.getWidthUpTo(t.textCount - difference + 1, textArea, e, x0);
-            t.makeStartAt(pos);
-        }
-
-        // Make the passed-in token list point to the proper place.
-        // t can be null, for example, if line ends with unended MLC
-        if (t != null && t.isPaintable())
-            tokenList.copyFrom(t);
-        else
-            tokenList = null;
-        t = null;
-
-        // Return the x-offset (in pixels) of the newly-modified t
-        return x0;
-
-    }
-
-    /**
      * Returns whether a regular expression token can follow the specified token
      * in JavaScript.
      *
@@ -1108,18 +1060,17 @@ public class SyntaxUtilities implements SwingConstants {
      * @return Whether a regular expression token may follow this one in
      *         JavaScript.
      */
-    public static boolean regexCanFollowInJavaScript(Token t) {
+    public static boolean regexCanFollowInJavaScript(IToken t) {
         char ch;
         // We basically try to mimic Eclipse's JS editor's behavior here
         return t == null
-                || (t.textCount == 1 && ((ch = t.text[t.textOffset]) == '='
-                        || ch == '(' || ch == ',' || ch == '?' || ch == ':'
-                        || ch == '[' || ch == '!' || ch == '&'))
+                || (t.length() == 1 && ((ch = t.charAt(0)) == '=' || ch == '('
+                        || ch == ',' || ch == '?' || ch == ':' || ch == '['
+                        || ch == '!' || ch == '&'))
                 ||
                 /* Operators "==", "===", "!=", "!==" */
-                (t.type == Token.OPERATOR && t.text[t.textOffset + t.textCount
-                        - 1] == '=')
-                || t.is(Token.RESERVED_WORD, JS_KEYWORD_RETURN);
+                (t.getType() == IToken.OPERATOR && t.charAt(t.length() - 1) == '=')
+                || t.is(IToken.RESERVED_WORD_2, JS_KEYWORD_RETURN);
     }
 
     /**
@@ -1138,8 +1089,9 @@ public class SyntaxUtilities implements SwingConstants {
         // need to do two conditions anyway (first to check that ch<255 so it
         // can index into our table, then whether that table position has the
         // upper-case mask)
-        if (ch >= 'A' && ch <= 'Z')
+        if (ch >= 'A' && ch <= 'Z') {
             return (char) (ch | 0x20);
+        }
         return ch;
     }
 
@@ -1198,39 +1150,39 @@ public class SyntaxUtilities implements SwingConstants {
             flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < wildcard.length(); i++) {
             char ch = wildcard.charAt(i);
             switch (ch) {
-                case '*' :
-                    sb.append(".*");
-                    break;
-                case '?' :
-                    sb.append('.');
-                    break;
-                case '^' :
-                    if (i > 0 || escapeStartChar) {
-                        sb.append('\\');
-                    }
-                    sb.append('^');
-                    break;
-                case '\\' :
-                case '.' :
-                case '|' :
-                case '+' :
-                case '-' :
-                case '$' :
-                case '[' :
-                case ']' :
-                case '{' :
-                case '}' :
-                case '(' :
-                case ')' :
-                    sb.append('\\').append(ch);
-                    break;
-                default :
-                    sb.append(ch);
-                    break;
+            case '*':
+                sb.append(".*");
+                break;
+            case '?':
+                sb.append('.');
+                break;
+            case '^':
+                if (i > 0 || escapeStartChar) {
+                    sb.append('\\');
+                }
+                sb.append('^');
+                break;
+            case '\\':
+            case '.':
+            case '|':
+            case '+':
+            case '-':
+            case '$':
+            case '[':
+            case ']':
+            case '{':
+            case '}':
+            case '(':
+            case ')':
+                sb.append('\\').append(ch);
+                break;
+            default:
+                sb.append(ch);
+                break;
             }
         }
 

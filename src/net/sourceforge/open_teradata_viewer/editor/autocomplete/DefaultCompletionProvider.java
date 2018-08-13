@@ -63,7 +63,7 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
      * mouse while a tool tip is displayed, this method gets repeatedly called.
      * It can be costly so we try to speed it up a tad).
      */
-    private List lastParameterizedCompletionsAt;
+    private List<ICompletion> lastParameterizedCompletionsAt;
 
     /**
      * Ctor. The returned provider will not be aware of any completions.
@@ -96,6 +96,7 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
      *
      * {@inheritDoc}
      */
+    @Override
     public String getAlreadyEnteredText(JTextComponent comp) {
         Document doc = comp.getDocument();
 
@@ -124,7 +125,8 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
     }
 
     /** {@inheritDoc} */
-    public List getCompletionsAt(JTextComponent tc, Point p) {
+    @Override
+    public List<ICompletion> getCompletionsAt(JTextComponent tc, Point p) {
         int offset = tc.viewToModel(p);
         if (offset < 0 || offset >= tc.getDocument().getLength()) {
             lastCompletionsAtText = null;
@@ -166,7 +168,7 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
             }
 
             // Get a list of all completions matching the text
-            List list = getCompletionByInputText(text);
+            List<ICompletion> list = getCompletionByInputText(text);
             lastCompletionsAtText = text;
             return lastParameterizedCompletionsAt = list;
 
@@ -179,8 +181,10 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
     }
 
     /** {@inheritDoc} */
-    public List getParameterizedCompletions(JTextComponent tc) {
-        List list = null;
+    @Override
+    public List<IParameterizedCompletion> getParameterizedCompletions(
+            JTextComponent tc) {
+        List<IParameterizedCompletion> list = null;
 
         // If this provider doesn't support parameterized completions, bail out
         // now
@@ -219,15 +223,15 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
 
             // Get a list of all completions matching the text, but then narrow
             // it down to just the ParameterizedCompletions
-            List l = getCompletionByInputText(text);
+            List<ICompletion> l = getCompletionByInputText(text);
             if (l != null && !l.isEmpty()) {
                 for (int i = 0; i < l.size(); i++) {
                     Object o = l.get(i);
                     if (o instanceof IParameterizedCompletion) {
                         if (list == null) {
-                            list = new ArrayList(1);
+                            list = new ArrayList<IParameterizedCompletion>(1);
                         }
-                        list.add(o);
+                        list.add((IParameterizedCompletion) o);
                     }
                 }
             }
@@ -240,7 +244,7 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
 
     /** Initializes this completion provider. */
     protected void init() {
-        completions = new ArrayList();
+        completions = new ArrayList<ICompletion>();
         seg = new Segment();
     }
 
@@ -304,7 +308,7 @@ public class DefaultCompletionProvider extends AbstractCompletionProvider {
         try {
             SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(bin, handler);
-            List completions = handler.getCompletions();
+            List<ICompletion> completions = handler.getCompletions();
             addCompletions(completions);
             char startChar = handler.getParamStartChar();
             if (startChar != 0) {

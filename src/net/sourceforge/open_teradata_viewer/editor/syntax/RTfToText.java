@@ -40,8 +40,8 @@ import java.io.StringReader;
 class RtfToText {
 
     private Reader r;
-    private StringBuffer sb;
-    private StringBuffer controlWord;
+    private StringBuilder sb;
+    private StringBuilder controlWord;
     private int blockCount;
     private boolean inControlWord;
 
@@ -52,8 +52,8 @@ class RtfToText {
      */
     private RtfToText(Reader r) {
         this.r = r;
-        sb = new StringBuffer();
-        controlWord = new StringBuffer();
+        sb = new StringBuilder();
+        controlWord = new StringBuilder();
         blockCount = 0;
         inControlWord = false;
     }
@@ -76,67 +76,67 @@ class RtfToText {
         while ((i = r.read()) != -1) {
             char ch = (char) i;
             switch (ch) {
-                case '{' :
-                    if (inControlWord && controlWord.length() == 0) { // "\{"
-                        sb.append('{');
-                        controlWord.setLength(0);
-                        inControlWord = false;
-                    } else {
-                        blockCount++;
-                    }
-                    break;
-                case '}' :
-                    if (inControlWord && controlWord.length() == 0) { // "\}"
-                        sb.append('}');
-                        controlWord.setLength(0);
-                        inControlWord = false;
-                    } else {
-                        blockCount--;
-                    }
-                    break;
-                case '\\' :
-                    if (blockCount == 0) {
-                        if (inControlWord) {
-                            if (controlWord.length() == 0) { // "\\"
-                                sb.append('\\');
-                                controlWord.setLength(0);
-                                inControlWord = false;
-                            } else {
-                                endControlWord();
-                                inControlWord = true;
-                            }
+            case '{':
+                if (inControlWord && controlWord.length() == 0) { // "\{"
+                    sb.append('{');
+                    controlWord.setLength(0);
+                    inControlWord = false;
+                } else {
+                    blockCount++;
+                }
+                break;
+            case '}':
+                if (inControlWord && controlWord.length() == 0) { // "\}"
+                    sb.append('}');
+                    controlWord.setLength(0);
+                    inControlWord = false;
+                } else {
+                    blockCount--;
+                }
+                break;
+            case '\\':
+                if (blockCount == 0) {
+                    if (inControlWord) {
+                        if (controlWord.length() == 0) { // "\\"
+                            sb.append('\\');
+                            controlWord.setLength(0);
+                            inControlWord = false;
                         } else {
+                            endControlWord();
                             inControlWord = true;
                         }
+                    } else {
+                        inControlWord = true;
                     }
-                    break;
-                case ' ' :
-                    if (blockCount == 0) {
-                        if (inControlWord) {
-                            endControlWord();
-                        } else {
-                            sb.append(' ');
-                        }
+                }
+                break;
+            case ' ':
+                if (blockCount == 0) {
+                    if (inControlWord) {
+                        endControlWord();
+                    } else {
+                        sb.append(' ');
                     }
-                    break;
-                case '\r' :
-                case '\n' :
-                    if (blockCount == 0) {
-                        if (inControlWord) {
-                            endControlWord();
-                        }
-                        // Otherwise, ignore
+                }
+                break;
+            case '\r':
+            case '\n':
+                if (blockCount == 0) {
+                    if (inControlWord) {
+                        endControlWord();
                     }
-                    break;
-                default :
-                    if (blockCount == 0) {
-                        if (inControlWord) {
-                            controlWord.append(ch);
-                        } else {
-                            sb.append(ch);
-                        }
+                    // Otherwise, ignore
+                }
+                break;
+            default:
+                if (blockCount == 0) {
+                    if (inControlWord) {
+                        controlWord.append(ch);
+                    } else {
+                        sb.append(ch);
                     }
-                    break;
+                }
+                break;
             }
         }
 
@@ -186,7 +186,8 @@ class RtfToText {
      * Converts the contents of the specified input stream to plain text. The
      * input stream will be closed when this method returns.
      *
-     * @param in The input stream to convert.
+     * @param in The input stream to convert. This will be closed when this
+     *        method returns.
      * @return The contents of the stream, in plain text.
      * @throws IOException If an IO error occurs.
      */
@@ -197,7 +198,8 @@ class RtfToText {
     /**
      * Converts the contents of the specified <code>Reader</code> to plain text.
      *
-     * @param r The <code>Reader</code>.
+     * @param r The <code>Reader</code>. This will be closed when this method
+     *        returns.
      * @return The contents of the <code>Reader</code>, in plain text.
      * @throws IOException If an IO error occurs.
      */

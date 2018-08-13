@@ -79,6 +79,7 @@ public abstract class RecordableTextAction extends TextAction {
      * @param e The action being performed.
      * @see #actionPerformedImpl
      */
+    @Override
     public final void actionPerformed(ActionEvent e) {
         JTextComponent textComponent = getTextComponent(e);
         if (textComponent instanceof TextArea) {
@@ -177,7 +178,7 @@ public abstract class RecordableTextAction extends TextAction {
      * macro.
      *
      * @return Whether or not this action will be recorded and replayed.
-     * @see #setRecordable
+     * @see #setRecordable(boolean)
      */
     public boolean isRecordable() {
         return isRecordable;
@@ -201,7 +202,7 @@ public abstract class RecordableTextAction extends TextAction {
      * @see #getMnemonic()
      */
     public void setMnemonic(char mnemonic) {
-        setMnemonic(new Integer(mnemonic));
+        setMnemonic(Integer.valueOf(mnemonic));
     }
 
     /**
@@ -230,7 +231,7 @@ public abstract class RecordableTextAction extends TextAction {
      *
      * @param recordable Whether or not this action should be recorded and
      *                   replayed.
-     * @see #isRecordable
+     * @see #isRecordable()
      */
     public void setRecordable(boolean recordable) {
         isRecordable = recordable;

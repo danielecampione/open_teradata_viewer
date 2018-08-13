@@ -166,36 +166,26 @@ public class XmlParser extends AbstractParser {
             result.addNotice(pn);
         }
 
+        @Override
         public void error(SAXParseException e) {
             doError(e, IParserNotice.ERROR);
         }
 
+        @Override
         public void fatalError(SAXParseException e) {
             doError(e, IParserNotice.ERROR);
         }
 
-        /*
-         * NOTE: If you compile with Java 4-, you must remove IOException to the
-         * throws clause of this method. The "official" release is built with
-         * Java 7.
-         */
+        @Override
         public InputSource resolveEntity(String publicId, String systemId)
-                throws SAXException {
+                throws IOException, SAXException {
             if (entityResolver != null) {
-                try {
-                    return entityResolver.resolveEntity(publicId, systemId);
-                } catch (IOException ioe) {
-                    ExceptionDialog.hideException(ioe);
-                }
+                return entityResolver.resolveEntity(publicId, systemId);
             }
-            try {
-                return super.resolveEntity(publicId, systemId);
-            } catch (IOException ioe) {
-                ExceptionDialog.hideException(ioe);
-                return null;
-            }
+            return super.resolveEntity(publicId, systemId);
         }
 
+        @Override
         public void warning(SAXParseException e) {
             doError(e, IParserNotice.WARNING);
         }

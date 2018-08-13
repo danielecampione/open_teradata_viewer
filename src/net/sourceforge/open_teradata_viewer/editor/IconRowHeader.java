@@ -66,9 +66,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.FoldingAwareIconRowHea
  * @see FoldingAwareIconRowHeader
  * 
  */
-public class IconRowHeader extends AbstractGutterComponent
-        implements
-            MouseListener {
+public class IconRowHeader extends AbstractGutterComponent implements
+        MouseListener {
 
     private static final long serialVersionUID = 5280152174654788021L;
 
@@ -215,7 +214,7 @@ public class IconRowHeader extends AbstractGutterComponent
      *         returned.
      */
     public IGutterIconInfo[] getBookmarks() {
-        List<GutterIconImpl> retVal = new ArrayList<GutterIconImpl>(1);
+        List<IGutterIconInfo> retVal = new ArrayList<IGutterIconInfo>(1);
 
         if (trackingIcons != null) {
             for (int i = 0; i < trackingIcons.size(); i++) {
@@ -227,10 +226,11 @@ public class IconRowHeader extends AbstractGutterComponent
         }
 
         IGutterIconInfo[] array = new IGutterIconInfo[retVal.size()];
-        return (IGutterIconInfo[]) retVal.toArray(array);
+        return retVal.toArray(array);
     }
 
     /** {@inheritDoc} */
+    @Override
     void handleDocumentEvent(DocumentEvent e) {
         int newLineCount = textArea.getLineCount();
         if (newLineCount != currentLineCount) {
@@ -240,6 +240,7 @@ public class IconRowHeader extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     public Dimension getPreferredSize() {
         int h = textArea != null ? textArea.getHeight() : 100; // Arbitrary
         return new Dimension(width, h);
@@ -250,6 +251,7 @@ public class IconRowHeader extends AbstractGutterComponent
      *
      * @param e The location the mouse is hovering over.
      */
+    @Override
     public String getToolTipText(MouseEvent e) {
         try {
             int line = viewToModelLine(e.getPoint());
@@ -266,7 +268,7 @@ public class IconRowHeader extends AbstractGutterComponent
     }
 
     protected GutterIconImpl getTrackingIcon(int index) {
-        return (GutterIconImpl) trackingIcons.get(index);
+        return trackingIcons.get(index);
     }
 
     /**
@@ -279,7 +281,7 @@ public class IconRowHeader extends AbstractGutterComponent
      */
     public IGutterIconInfo[] getTrackingIcons(int line)
             throws BadLocationException {
-        List<GutterIconImpl> retVal = new ArrayList<GutterIconImpl>(1);
+        List<IGutterIconInfo> retVal = new ArrayList<IGutterIconInfo>(1);
 
         if (trackingIcons != null) {
             int start = textArea.getLineStartOffset(line);
@@ -299,7 +301,7 @@ public class IconRowHeader extends AbstractGutterComponent
         }
 
         IGutterIconInfo[] array = new IGutterIconInfo[retVal.size()];
-        return (IGutterIconInfo[]) retVal.toArray(array);
+        return retVal.toArray(array);
     }
 
     /**
@@ -311,19 +313,24 @@ public class IconRowHeader extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     void lineHeightsChanged() {
         repaint();
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         if (bookmarkingEnabled && bookmarkIcon != null) {
             try {
@@ -337,10 +344,12 @@ public class IconRowHeader extends AbstractGutterComponent
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void paintComponent(Graphics g) {
         if (textArea == null) {
             return;
@@ -581,7 +590,7 @@ public class IconRowHeader extends AbstractGutterComponent
         if (trackingIcons != null) {
             for (Iterator<GutterIconImpl> i = trackingIcons.iterator(); i
                     .hasNext();) {
-                GutterIconImpl ti = (GutterIconImpl) i.next();
+                GutterIconImpl ti = i.next();
                 if (ti.getIcon() == bookmarkIcon) {
                     i.remove();
                 }
@@ -663,6 +672,7 @@ public class IconRowHeader extends AbstractGutterComponent
      *
      * @param textArea The text area.
      */
+    @Override
     public void setTextArea(TextArea textArea) {
         removeAllTrackingIcons();
         super.setTextArea(textArea);
@@ -724,6 +734,7 @@ public class IconRowHeader extends AbstractGutterComponent
     }
 
     /** {@inheritDoc} */
+    @Override
     public void updateUI() {
         super.updateUI(); // Does nothing
         updateBackground();
@@ -747,10 +758,8 @@ public class IconRowHeader extends AbstractGutterComponent
      * @author D. Campione
      * 
      */
-    private static class GutterIconImpl
-            implements
-                IGutterIconInfo,
-                Comparable<Object> {
+    private static class GutterIconImpl implements IGutterIconInfo,
+            Comparable<IGutterIconInfo> {
 
         private Icon icon;
         private Position pos;
@@ -762,30 +771,35 @@ public class IconRowHeader extends AbstractGutterComponent
             this.toolTip = toolTip;
         }
 
-        public int compareTo(Object o) {
-            if (o instanceof IGutterIconInfo) {
-                return pos.getOffset()
-                        - ((IGutterIconInfo) o).getMarkedOffset();
+        @Override
+        public int compareTo(IGutterIconInfo other) {
+            if (other != null) {
+                return pos.getOffset() - other.getMarkedOffset();
             }
             return -1;
         }
 
+        @Override
         public boolean equals(Object o) {
             return o == this;
         }
 
+        @Override
         public Icon getIcon() {
             return icon;
         }
 
+        @Override
         public int getMarkedOffset() {
             return pos.getOffset();
         }
 
+        @Override
         public String getToolTip() {
             return toolTip;
         }
 
+        @Override
         public int hashCode() {
             return icon.hashCode();
         }

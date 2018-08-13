@@ -33,17 +33,18 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  */
 public class XmlOccurrenceMarker implements IOccurrenceMarker {
 
-    private static final char[] CLOSE_TAG_START = {'<', '/'};
-    private static final char[] TAG_SELF_CLOSE = {'/', '>'};
+    private static final char[] CLOSE_TAG_START = { '<', '/' };
+    private static final char[] TAG_SELF_CLOSE = { '/', '>' };
 
     /** {@inheritDoc} */
-    public void markOccurrences(SyntaxDocument doc, Token t,
+    @Override
+    public void markOccurrences(SyntaxDocument doc, IToken t,
             SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p) {
         char[] lexeme = t.getLexeme().toCharArray();
-        int tokenOffs = t.offset;
+        int tokenOffs = t.getOffset();
         Element root = doc.getDefaultRootElement();
         int lineCount = root.getElementCount();
-        int curLine = root.getElementIndex(t.offset);
+        int curLine = root.getElementIndex(t.getOffset());
 
         // We only check for tags on the current line. Tags spanning multiple
         // lines aren't common anyway
@@ -51,11 +52,12 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
         boolean forward = true;
         t = doc.getTokenListForLine(curLine);
         while (t != null && t.isPaintable()) {
-            if (t.type == Token.MARKUP_TAG_DELIMITER) {
-                if (t.isSingleChar('<') && t.offset + 1 == tokenOffs) {
+            if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
+                if (t.isSingleChar('<') && t.getOffset() + 1 == tokenOffs) {
                     found = true;
                     break;
-                } else if (t.is(CLOSE_TAG_START) && t.offset + 2 == tokenOffs) {
+                } else if (t.is(CLOSE_TAG_START)
+                        && t.getOffset() + 2 == tokenOffs) {
                     found = true;
                     forward = false;
                     break;
@@ -74,7 +76,7 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
 
             do {
                 while (t != null && t.isPaintable()) {
-                    if (t.type == Token.MARKUP_TAG_DELIMITER) {
+                    if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
                         if (t.isSingleChar('<')) {
                             depth++;
                         } else if (t.is(TAG_SELF_CLOSE)) {
@@ -87,14 +89,14 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                             if (depth > 0) {
                                 depth--;
                             } else {
-                                Token match = t.getNextToken();
+                                IToken match = t.getNextToken();
                                 if (match != null && match.is(lexeme)) {
                                     try {
-                                        int end = match.offset
-                                                + match.textCount;
+                                        int end = match.getOffset()
+                                                + match.length();
                                         h.addMarkedOccurrenceHighlight(
-                                                match.offset, end, p);
-                                        end = tokenOffs + match.textCount;
+                                                match.getOffset(), end, p);
+                                        end = tokenOffs + match.length();
                                         h.addMarkedOccurrenceHighlight(
                                                 tokenOffs, end, p);
                                     } catch (BadLocationException ble) {
@@ -113,16 +115,17 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                 }
             } while (curLine < lineCount);
         } else { // !forward
-            Stack matches = new Stack();
+            Stack<IToken> matches = new Stack<IToken>();
             boolean inPossibleMatch = false;
             t = doc.getTokenListForLine(curLine);
             final int endBefore = tokenOffs - 2; // Stop before "</"
 
             do {
-                while (t != null && t.offset < endBefore && t.isPaintable()) {
-                    if (t.type == Token.MARKUP_TAG_DELIMITER) {
+                while (t != null && t.getOffset() < endBefore
+                        && t.isPaintable()) {
+                    if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
                         if (t.isSingleChar('<')) {
-                            Token next = t.getNextToken();
+                            IToken next = t.getNextToken();
                             if (next != null) {
                                 if (next.is(lexeme)) {
                                     matches.push(next);
@@ -137,7 +140,7 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                         } else if (inPossibleMatch && t.is(TAG_SELF_CLOSE)) {
                             matches.pop();
                         } else if (t.is(CLOSE_TAG_START)) {
-                            Token next = t.getNextToken();
+                            IToken next = t.getNextToken();
                             if (next != null) {
                                 // Invalid XML might not have a match
                                 if (next.is(lexeme) && !matches.isEmpty()) {
@@ -152,10 +155,11 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
 
                 if (!matches.isEmpty()) {
                     try {
-                        Token match = (Token) matches.pop();
-                        int end = match.offset + match.textCount;
-                        h.addMarkedOccurrenceHighlight(match.offset, end, p);
-                        end = tokenOffs + match.textCount;
+                        IToken match = matches.pop();
+                        int end = match.getOffset() + match.length();
+                        h.addMarkedOccurrenceHighlight(match.getOffset(), end,
+                                p);
+                        end = tokenOffs + match.length();
                         h.addMarkedOccurrenceHighlight(tokenOffs, end, p);
                     } catch (BadLocationException ble) {
                         ExceptionDialog.hideException(ble); // Never happens

@@ -18,13 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.editor;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -47,7 +45,31 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * A macro as recorded/played back by an <code>TextArea</code>.
+ * A macro as recorded/played back by an {@link TextArea}.<p>
+ * 
+ * <code>Macro</code>s are static; when a Macro is loaded, it can be run by any
+ * instance of <code>TextArea</code> in the application. To activate and play
+ * back a macro, use the following methods:
+ * 
+ * <ul>
+ *    <li>{@link TextArea#loadMacro(Macro)}
+ *    <li>{@link TextArea#playbackLastMacro()}
+ * </ul>
+ *
+ * To record and save a new macro, you'd use the following methods:
+ * 
+ * <ul>
+ *    <li>{@link TextArea#beginRecordingMacro()} (this discards the previous
+ *        "current" macro, if any)
+ *    <li>{@link TextArea#endRecordingMacro()} (at this point, you could call
+ *        <code>playbackLastMacro()</code> to play this macro immediately if
+ *        desired)
+ *    <li>{@link TextArea#getCurrentMacro()}.{@link #saveToFile(File)}
+ * </ul>
+ * 
+ * As <code>Macro</code>s save themselves as XML files, a common technique is to
+ * save all macros in files named "<code>{@link #getName()}.xml</code>", and
+ * place them all in a common directory.
  *
  * @author D. Campione
  * 
@@ -75,16 +97,14 @@ public class Macro {
      * Loads a macro from a file on disk.
      *
      * @param file The file from which to load the macro.
-     * @throws java.io.EOFException If an EOF is reached unexpectedly (i.e., the
-     *         file is corrupt).
      * @throws FileNotFoundException If the specified file does not exist, is a
      *         directory instead of a regular file, or otherwise cannot be
      *         opened.
      * @throws IOException If an I/O exception occurs while reading the file.
-     * @see #saveToFile
+     * @see #saveToFile(String)
+     * @see #saveToFile(File)
      */
-    public Macro(File file) throws EOFException, FileNotFoundException,
-            IOException {
+    public Macro(File file) throws FileNotFoundException, IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = null;
         Document doc = null;
@@ -130,14 +150,12 @@ public class Macro {
      * @param name The name of the macro.
      * @param records The initial records of the macro.
      */
-    public Macro(String name, List<?> records) {
+    public Macro(String name, List<MacroRecord> records) {
         this.name = name;
 
         if (records != null) {
             macroRecords = new ArrayList<MacroRecord>(records.size());
-            Iterator<?> i = records.iterator();
-            while (i.hasNext()) {
-                MacroRecord record = (MacroRecord) i.next();
+            for (MacroRecord record : records) {
                 macroRecords.add(record);
             }
         } else {
@@ -152,8 +170,9 @@ public class Macro {
      * @see #getMacroRecords
      */
     public void addMacroRecord(MacroRecord record) {
-        if (record != null)
+        if (record != null) {
             macroRecords.add(record);
+        }
     }
 
     /**
@@ -167,17 +186,19 @@ public class Macro {
     }
 
     /**
-     * Returns the name of this macro.
+     * Returns the name of this macro. A macro's name is simply something to
+     * identify it with in a UI; it has nothing to do with the name of the file
+     * to save the macro to.
      *
      * @return The macro's name.
-     * @see #setName
+     * @see #setName(String)
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Used in parsing an XML document containing a macro.  This method
+     * Used in parsing an XML document containing a macro. This method
      * initializes this macro with the data contained in the passed-in node.
      *
      * @param node The root node of the parsed XML document.
@@ -206,52 +227,53 @@ public class Macro {
             int type = node.getNodeType();
             switch (type) {
             // Handle element nodes
-                case Node.ELEMENT_NODE :
-                    String nodeName = node.getNodeName();
+            case Node.ELEMENT_NODE:
+                String nodeName = node.getNodeName();
 
-                    if (nodeName.equals(MACRO_NAME)) {
-                        NodeList childNodes2 = node.getChildNodes();
-                        name = UNTITLED_MACRO_NAME;
-                        if (childNodes2.getLength() > 0) {
-                            node = childNodes2.item(0);
-                            int type2 = node.getNodeType();
-                            if (type2 != Node.CDATA_SECTION_NODE
-                                    && type2 != Node.TEXT_NODE) {
-                                return false;
-                            }
-                            name = node.getNodeValue().trim();
-                        }
-                    } else if (nodeName.equals(ACTION)) {
-                        NamedNodeMap attributes = node.getAttributes();
-                        if (attributes == null || attributes.getLength() != 1)
-                            return false;
-                        Node node2 = attributes.item(0);
-                        MacroRecord macroRecord = new MacroRecord();
-                        if (!node2.getNodeName().equals(ID)) {
+                if (nodeName.equals(MACRO_NAME)) {
+                    NodeList childNodes2 = node.getChildNodes();
+                    name = UNTITLED_MACRO_NAME;
+                    if (childNodes2.getLength() > 0) {
+                        node = childNodes2.item(0);
+                        int type2 = node.getNodeType();
+                        if (type2 != Node.CDATA_SECTION_NODE
+                                && type2 != Node.TEXT_NODE) {
                             return false;
                         }
-                        macroRecord.id = node2.getNodeValue();
-                        NodeList childNodes2 = node.getChildNodes();
-                        int length = childNodes2.getLength();
-                        if (length == 0) { // Could be empty "" command
-                            macroRecord.actionCommand = "";
-                            macroRecords.add(macroRecord);
-                            break;
-                        } else {
-                            node = childNodes2.item(0);
-                            int type2 = node.getNodeType();
-                            if (type2 != Node.CDATA_SECTION_NODE
-                                    && type2 != Node.TEXT_NODE) {
-                                return false;
-                            }
-                            macroRecord.actionCommand = node.getNodeValue();
-                            macroRecords.add(macroRecord);
-                        }
+                        name = node.getNodeValue().trim();
                     }
-                    break;
+                } else if (nodeName.equals(ACTION)) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    if (attributes == null || attributes.getLength() != 1) {
+                        return false;
+                    }
+                    Node node2 = attributes.item(0);
+                    MacroRecord macroRecord = new MacroRecord();
+                    if (!node2.getNodeName().equals(ID)) {
+                        return false;
+                    }
+                    macroRecord.id = node2.getNodeValue();
+                    NodeList childNodes2 = node.getChildNodes();
+                    int length = childNodes2.getLength();
+                    if (length == 0) { // Could be empty "" command
+                        macroRecord.actionCommand = "";
+                        macroRecords.add(macroRecord);
+                        break;
+                    } else {
+                        node = childNodes2.item(0);
+                        int type2 = node.getNodeType();
+                        if (type2 != Node.CDATA_SECTION_NODE
+                                && type2 != Node.TEXT_NODE) {
+                            return false;
+                        }
+                        macroRecord.actionCommand = node.getNodeValue();
+                        macroRecords.add(macroRecord);
+                    }
+                }
+                break;
 
-                default :
-                    break; // Skip whitespace nodes, etc..
+            default:
+                break; // Skip whitespace nodes, etc..
             }
         }
 
@@ -260,13 +282,28 @@ public class Macro {
     }
 
     /**
-     * Saves this macro to a text file. This file can later be read in by the
+     * Saves this macro to an XML file. This file can later be read in by the
+     * constructor taking a <code>File</code> parameter; this is the mechanism
+     * for saving macros.
+     *
+     * @param file The file in which to save the macro.
+     * @throws IOException If an error occurs while generating the XML for
+     *         the output file.
+     * @see #saveToFile(String)
+     */
+    public void saveToFile(File file) throws IOException {
+        saveToFile(file.getAbsolutePath());
+    }
+
+    /**
+     * Saves this macro to a file. This file can later be read in by the
      * constructor taking a <code>File</code> parameter; this is the mechanism
      * for saving macros.
      *
      * @param fileName The name of the file in which to save the macro.
-     * @throws IOException If an error occurs while generating the XML for the
-     *         output file.
+     * @throws IOException If an error occurs while generating the XML for
+     *         the output file.
+     * @see #saveToFile(File)
      */
     public void saveToFile(String fileName) throws IOException {
         /*
@@ -294,10 +331,8 @@ public class Macro {
             Element nameElement = doc.createElement(MACRO_NAME);
             rootElement.appendChild(nameElement);
 
-            // Write all actions in the macro
-            int numActions = macroRecords.size();
-            for (int i = 0; i < numActions; i++) {
-                MacroRecord record = (MacroRecord) macroRecords.get(i);
+            // Write all actions (the meat) in the macro
+            for (MacroRecord record : macroRecords) {
                 Element actionElement = doc.createElement(ACTION);
                 actionElement.setAttribute(ID, record.id);
                 if (record.actionCommand != null
@@ -307,8 +342,9 @@ public class Macro {
                     for (int j = 0; j < command.length(); j++) {
                         if (command.charAt(j) < 32) {
                             command = command.substring(0, j);
-                            if (j < command.length() - 1)
+                            if (j < command.length() - 1) {
                                 command += command.substring(j + 1);
+                            }
                         }
                     }
                     Node n = doc.createCDATASection(command);
@@ -333,10 +369,12 @@ public class Macro {
     }
 
     /**
-     * Sets the name of this macro.
+     * Sets the name of this macro. A macro's name is simply something to
+     * identify it with in a UI; it has nothing to do with the name of the file
+     * to save the macro to.
      *
      * @param name The new name for the macro.
-     * @see #getName
+     * @see #getName()
      */
     public void setName(String name) {
         this.name = name;

@@ -27,7 +27,7 @@ import java.awt.Color;
  * @see DefaultParserNotice
  * 
  */
-public interface IParserNotice extends Comparable<Object> {
+public interface IParserNotice extends Comparable<IParserNotice> {
 
     /** Indicates an info notice. */
     public static final int INFO = 2;

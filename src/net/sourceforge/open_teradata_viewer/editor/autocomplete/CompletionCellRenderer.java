@@ -152,7 +152,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      * @see #setDelegateRenderer(DefaultListCellRenderer)
      */
     public void delegateToSubstanceRenderer() throws Exception {
-        Class clazz = Class.forName(SUBSTANCE_RENDERER_CLASS_NAME);
+        Class<?> clazz = Class.forName(SUBSTANCE_RENDERER_CLASS_NAME);
         DefaultListCellRenderer delegate = (DefaultListCellRenderer) clazz
                 .newInstance();
         setDelegateRenderer(delegate);
@@ -199,6 +199,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      * @param selected Whether the item is selected.
      * @param hasFocus Whether the item has focus.
      */
+    @Override
     public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean selected, boolean hasFocus) {
         super.getListCellRendererComponent(list, value, index, selected,
@@ -264,6 +265,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
         paintTextR = new Rectangle();
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         g.setColor(realBG);
         int iconW = 0;
@@ -313,7 +315,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     protected void prepareForFunctionCompletion(JList list,
             FunctionCompletion fc, int index, boolean selected, boolean hasFocus) {
-        StringBuffer sb = new StringBuffer(PREFIX);
+        StringBuilder sb = new StringBuilder(PREFIX);
         sb.append(fc.getName());
 
         char paramListStart = fc.getProvider().getParameterListStart();
@@ -377,7 +379,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
     protected void prepareForMarkupTagCompletion(JList list,
             MarkupTagCompletion mc, int index, boolean selected,
             boolean hasFocus) {
-        StringBuffer sb = new StringBuffer(PREFIX);
+        StringBuilder sb = new StringBuilder(PREFIX);
         sb.append(mc.getName());
 
         setText(sb.toString());
@@ -395,7 +397,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     protected void prepareForOtherCompletion(JList list, ICompletion c,
             int index, boolean selected, boolean hasFocus) {
-        StringBuffer sb = new StringBuffer(PREFIX);
+        StringBuilder sb = new StringBuilder(PREFIX);
         sb.append(c.getInputText());
 
         if (c instanceof BasicCompletion) {
@@ -426,7 +428,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     protected void prepareForTemplateCompletion(JList list,
             TemplateCompletion tc, int index, boolean selected, boolean hasFocus) {
-        StringBuffer sb = new StringBuffer(PREFIX);
+        StringBuilder sb = new StringBuilder(PREFIX);
         sb.append(tc.getInputText());
 
         String definition = tc.getShortDescription();
@@ -455,7 +457,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     protected void prepareForVariableCompletion(JList list,
             VariableCompletion vc, int index, boolean selected, boolean hasFocus) {
-        StringBuffer sb = new StringBuffer(PREFIX);
+        StringBuilder sb = new StringBuilder(PREFIX);
         sb.append(vc.getName());
 
         if (getShowTypes() && vc.getType() != null) {
@@ -563,6 +565,7 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
     }
 
     /** Overridden to update our delegate, if necessary. */
+    @Override
     public void updateUI() {
         super.updateUI();
         if (delegate != null) {

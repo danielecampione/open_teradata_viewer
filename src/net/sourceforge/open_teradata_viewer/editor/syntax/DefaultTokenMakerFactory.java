@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
-
 /**
  * The default implementation of <code>TokenMakerFactory</code>. This factory
  * can create {@link ITokenMaker}s for all languages known to {@link
@@ -27,15 +26,16 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * @author D. Campione
  * 
  */
-class DefaultTokenMakerFactory extends AbstractTokenMakerFactory
-        implements
-            ISyntaxConstants {
+class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
+        ISyntaxConstants {
 
     /** {@inheritDoc} */
+    @Override
     protected void initTokenMakerMap() {
         String pkg = "net.sourceforge.open_teradata_viewer.editor.syntax.modes.";
 
         putMapping(SYNTAX_STYLE_NONE, pkg + "PlainTextTokenMaker");
         putMapping(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
     }
+
 }

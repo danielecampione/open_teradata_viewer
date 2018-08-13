@@ -57,13 +57,13 @@ import net.sourceforge.open_teradata_viewer.util.UIUtil;
  * <pre>
  * OTVGoToDialog dialog = new OTVGoToDialog(window);
  * dialog.setMaxLineNumberAllowed(textArea.getLineCount());
- * dialog.setVisible(true);
+ * UISupport.showDialog(dialog);
  * int line = dialog.getLineNumber();
  * if (line>0) {
  *    try {
  *       textArea.setCaretPosition(textArea.getLineStartOffset(line-1));
  *    } catch (BadLocationException ble) {
- *       ble.printStackTrace(); // Never happens
+ *       ExceptionDialog.hideException(ble); // Never happens
  *    }
  * }
  * </pre>
@@ -148,6 +148,7 @@ public class OTVGoToDialog extends EscapableDialog {
         setLocationRelativeTo(getParent());
 
     }
+
     /**
      * Called when they've clicked OK or pressed Enter; check the line number
      * they entered for validity and if it's okay, close this dialog. If it
@@ -209,6 +210,7 @@ public class OTVGoToDialog extends EscapableDialog {
      * Called when the user clicks Cancel or hits the Escape key. This hides the
      * dialog.
      */
+    @Override
     protected void escapePressed() {
         lineNumber = -1;
         super.escapePressed();
@@ -274,11 +276,13 @@ public class OTVGoToDialog extends EscapableDialog {
      * Overrides <code>JDialog</code>'s <code>setVisible</code> method; decides
      * whether or not buttons are enabled if the user is enabling the dialog.
      */
+    @Override
     public void setVisible(boolean visible) {
         if (visible) {
             lineNumber = -1;
             okButton.setEnabled(lineNumberField.getDocument().getLength() > 0);
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     lineNumberField.requestFocusInWindow();
                     lineNumberField.selectAll();
@@ -291,6 +295,7 @@ public class OTVGoToDialog extends EscapableDialog {
     /** Listens for events in this dialog. */
     private class Listener implements ActionListener, DocumentListener {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
             if (okButton == source) {
@@ -300,13 +305,16 @@ public class OTVGoToDialog extends EscapableDialog {
             }
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             okButton.setEnabled(lineNumberField.getDocument().getLength() > 0);
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             okButton.setEnabled(lineNumberField.getDocument().getLength() > 0);
         }
@@ -332,11 +340,13 @@ public class OTVGoToDialog extends EscapableDialog {
             return str;
         }
 
+        @Override
         public void insertString(FilterBypass fb, int offset, String string,
                 AttributeSet attr) throws BadLocationException {
             fb.insertString(offset, fix(string), attr);
         }
 
+        @Override
         public void replace(DocumentFilter.FilterBypass fb, int offset,
                 int length, String text, AttributeSet attr)
                 throws BadLocationException {

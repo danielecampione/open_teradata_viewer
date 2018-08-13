@@ -475,6 +475,7 @@ public class Gutter extends JPanel {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setComponentOrientation(ComponentOrientation o) {
         // Reuse the border to preserve its color
         if (o.isLeftToRight()) {
@@ -692,6 +693,7 @@ public class Gutter extends JPanel {
         return iconArea.toggleBookmark(line);
     }
 
+    @Override
     public void setBorder(Border border) {
         if (border instanceof GutterBorder) {
             super.setBorder(border);
@@ -721,6 +723,7 @@ public class Gutter extends JPanel {
             return color;
         }
 
+        @Override
         public void paintBorder(Component c, Graphics g, int x, int y,
                 int width, int height) {
             visibleRect = g.getClipBounds(visibleRect);
@@ -763,11 +766,8 @@ public class Gutter extends JPanel {
      * on its new size, thus we cannot resize properly. We listen instead for
      * ComponentEvents so we change size after the text area has resized
      */
-    private class TextAreaListener extends ComponentAdapter
-            implements
-                DocumentListener,
-                PropertyChangeListener,
-                IActiveLineRangeListener {
+    private class TextAreaListener extends ComponentAdapter implements
+            DocumentListener, PropertyChangeListener, IActiveLineRangeListener {
 
         private boolean installed;
 
@@ -776,6 +776,7 @@ public class Gutter extends JPanel {
          *
          * @param e Information about the new "active line range".
          */
+        @Override
         public void activeLineRangeChanged(ActiveLineRangeEvent e) {
             if (e.getMin() == -1) {
                 clearActiveLineRange();
@@ -784,9 +785,11 @@ public class Gutter extends JPanel {
             }
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
         }
 
+        @Override
         public void componentResized(ComponentEvent e) {
             revalidate();
         }
@@ -798,6 +801,7 @@ public class Gutter extends JPanel {
             }
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             handleDocumentEvent(e);
         }
@@ -817,6 +821,7 @@ public class Gutter extends JPanel {
             installed = true;
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
             String name = e.getPropertyName();
 
@@ -846,6 +851,7 @@ public class Gutter extends JPanel {
             }
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             handleDocumentEvent(e);
         }

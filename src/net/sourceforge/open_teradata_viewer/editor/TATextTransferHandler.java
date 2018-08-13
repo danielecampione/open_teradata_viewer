@@ -111,49 +111,50 @@ public class TATextTransferHandler extends TransferHandler {
         int nch;
         boolean lastWasCR = false;
         int last;
-        StringBuffer sbuff = null;
+        StringBuilder sbuff = null;
 
         // Read in a block at a time, mapping \r\n to \n, as well as single \r
         // to \n
         while ((nch = in.read(buff, 0, buff.length)) != -1) {
             if (sbuff == null) {
-                sbuff = new StringBuffer(nch);
+                sbuff = new StringBuilder(nch);
             }
             last = 0;
 
             for (int counter = 0; counter < nch; counter++) {
                 switch (buff[counter]) {
-                    case '\r' :
-                        if (lastWasCR) {
-                            if (counter == 0)
-                                sbuff.append('\n');
-                            else
-                                buff[counter - 1] = '\n';
-                        } else
-                            lastWasCR = true;
-                        break;
-                    case '\n' :
-                        if (lastWasCR) {
-                            if (counter > (last + 1)) {
-                                sbuff.append(buff, last, counter - last - 1);
-                            }
-                            // Else nothing to do, can skip \r, next write will
-                            // write \n
-                            lastWasCR = false;
-                            last = counter;
+                case '\r':
+                    if (lastWasCR) {
+                        if (counter == 0) {
+                            sbuff.append('\n');
+                        } else {
+                            buff[counter - 1] = '\n';
                         }
-                        break;
-                    default :
-                        if (lastWasCR) {
-                            if (counter == 0) {
-                                sbuff.append('\n');
-                            } else {
-                                buff[counter - 1] = '\n';
-                            }
-                            lastWasCR = false;
+                    } else {
+                        lastWasCR = true;
+                    }
+                    break;
+                case '\n':
+                    if (lastWasCR) {
+                        if (counter > (last + 1)) {
+                            sbuff.append(buff, last, counter - last - 1);
                         }
-                        break;
-
+                        // Else nothing to do, can skip \r, next write will
+                        // write \n
+                        lastWasCR = false;
+                        last = counter;
+                    }
+                    break;
+                default:
+                    if (lastWasCR) {
+                        if (counter == 0) {
+                            sbuff.append('\n');
+                        } else {
+                            buff[counter - 1] = '\n';
+                        }
+                        lastWasCR = false;
+                    }
+                    break;
                 } // End fo switch (buff[counter])
             } // End of for (int counter = 0; counter < nch; counter++)
 
@@ -189,6 +190,7 @@ public class TATextTransferHandler extends TransferHandler {
      * @return If the text component is editable, COPY_OR_MOVE is returned,
      *         otherwise just COPY is allowed.
      */
+    @Override
     public int getSourceActions(JComponent c) {
         if (((JTextComponent) c).isEditable()) {
             return COPY_OR_MOVE;
@@ -206,6 +208,7 @@ public class TATextTransferHandler extends TransferHandler {
      * @return The representation of the data to be transfered. 
      *  
      */
+    @Override
     protected Transferable createTransferable(JComponent comp) {
         exportComp = (JTextComponent) comp;
         shouldRemove = true;
@@ -223,6 +226,7 @@ public class TATextTransferHandler extends TransferHandler {
      *             is <code>NONE</code>.
      * @param action The actual action that was performed.  
      */
+    @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
         // Only remove the text if shouldRemove has not been set to false by
         // importData and only if the action is a move
@@ -248,6 +252,7 @@ public class TATextTransferHandler extends TransferHandler {
      * @param t The data to import
      * @return <code>true</code> iff the data was inserted into the component.
      */
+    @Override
     public boolean importData(JComponent comp, Transferable t) {
         JTextComponent c = (JTextComponent) comp;
         withinSameComponent = c == exportComp;
@@ -267,8 +272,9 @@ public class TATextTransferHandler extends TransferHandler {
         if (importFlavor != null) {
             try {
                 InputContext ic = c.getInputContext();
-                if (ic != null)
+                if (ic != null) {
                     ic.endComposition();
+                }
                 Reader r = importFlavor.getReaderForText(t);
                 handleReaderImport(r, c);
                 imported = true;
@@ -294,6 +300,7 @@ public class TATextTransferHandler extends TransferHandler {
      * @param flavors The data formats available.
      * @return <code>true</code> iff the data can be inserted.
      */
+    @Override
     public boolean canImport(JComponent comp, DataFlavor[] flavors) {
         JTextComponent c = (JTextComponent) comp;
         if (!(c.isEditable() && c.isEnabled())) {
@@ -348,6 +355,7 @@ public class TATextTransferHandler extends TransferHandler {
          * @exception UnsupportedFlavorException if the requested data flavor is
          *            not supported.
          */
+        @Override
         public Object getTransferData(DataFlavor flavor)
                 throws UnsupportedFlavorException, IOException {
             if (isPlainFlavor(flavor)) {
@@ -379,6 +387,7 @@ public class TATextTransferHandler extends TransferHandler {
          * @return an array of data flavors in which this data can be
          *         transferred
          */
+        @Override
         public DataFlavor[] getTransferDataFlavors() {
             int plainCount = (isPlainSupported()) ? plainFlavors.length : 0;
             int stringCount = (isPlainSupported()) ? stringFlavors.length : 0;
@@ -406,11 +415,13 @@ public class TATextTransferHandler extends TransferHandler {
          * @return boolean indicating whether or not the data flavor is
          *         supported.
          */
+        @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
             DataFlavor[] flavors = getTransferDataFlavors();
             for (int i = 0; i < flavors.length; i++) {
-                if (flavors[i].equals(flavor))
+                if (flavors[i].equals(flavor)) {
                     return true;
+                }
             }
             return false;
         }
@@ -426,8 +437,9 @@ public class TATextTransferHandler extends TransferHandler {
         protected boolean isPlainFlavor(DataFlavor flavor) {
             DataFlavor[] flavors = plainFlavors;
             for (int i = 0; i < flavors.length; i++) {
-                if (flavors[i].equals(flavor))
+                if (flavors[i].equals(flavor)) {
                     return true;
+                }
             }
             return false;
         }
@@ -451,8 +463,9 @@ public class TATextTransferHandler extends TransferHandler {
         protected boolean isStringFlavor(DataFlavor flavor) {
             DataFlavor[] flavors = stringFlavors;
             for (int i = 0; i < flavors.length; i++) {
-                if (flavors[i].equals(flavor))
+                if (flavors[i].equals(flavor)) {
                     return true;
+                }
             }
             return false;
         }

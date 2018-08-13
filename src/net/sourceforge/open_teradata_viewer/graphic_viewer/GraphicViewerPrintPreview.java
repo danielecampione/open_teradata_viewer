@@ -87,8 +87,10 @@ public class GraphicViewerPrintPreview extends JDialog {
         JToolBar localJToolBar = new JToolBar();
         JButton localJButton = new JButton("Print");
         Object localObject = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
                 Thread local1 = new Thread() {
+                    @Override
                     public void run() {
                         try {
                             PrinterJob localPrinterJob = PrinterJob
@@ -109,7 +111,8 @@ public class GraphicViewerPrintPreview extends JDialog {
                                     .getPredefinedCursor(0));
                             GraphicViewerPrintPreview.this.dispose();
                         } catch (PrinterException localPrinterException) {
-                            localPrinterException.printStackTrace();
+                            ExceptionDialog
+                                    .hideException(localPrinterException);
                             System.err.println("Printing error: "
                                     + localPrinterException.toString());
                         }
@@ -124,6 +127,7 @@ public class GraphicViewerPrintPreview extends JDialog {
         localJToolBar.add(localJButton);
         localJButton = new JButton("Close");
         localObject = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
                 try {
                     GraphicViewerPrintPreview.this.dispose();
@@ -135,12 +139,14 @@ public class GraphicViewerPrintPreview extends JDialog {
         localJButton.setAlignmentY(0.5F);
         localJButton.setMargin(new Insets(4, 6, 4, 6));
         localJToolBar.add(localJButton);
-        String[] arrayOfString = {"10 %", "25 %", "50 %", "100 %"};
+        String[] arrayOfString = { "10 %", "25 %", "50 %", "100 %" };
         m_cbScale = new JComboBox(arrayOfString);
         m_cbScale.setSelectedIndex(1);
         localObject = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
                 Thread local1 = new Thread() {
+                    @Override
                     public void run() {
                         String str = GraphicViewerPrintPreview.this.m_cbScale
                                 .getSelectedItem().toString();
@@ -240,20 +246,24 @@ public class GraphicViewerPrintPreview extends JDialog {
             repaint();
         }
 
+        @Override
         public Dimension getPreferredSize() {
             Insets insets = getInsets();
             return new Dimension(m_w + insets.left + insets.right, m_h
                     + insets.top + insets.bottom);
         }
 
+        @Override
         public Dimension getMaximumSize() {
             return getPreferredSize();
         }
 
+        @Override
         public Dimension getMinimumSize() {
             return getPreferredSize();
         }
 
+        @Override
         public void paintComponent(Graphics g) {
             Graphics g1 = g.create();
             if (g1 instanceof Graphics2D) {
@@ -297,6 +307,7 @@ public class GraphicViewerPrintPreview extends JDialog {
             V_GAP = 10;
         }
 
+        @Override
         public Dimension getPreferredSize() {
             int i = getComponentCount();
             if (i == 0) {
@@ -319,14 +330,17 @@ public class GraphicViewerPrintPreview extends JDialog {
                     + insets.top + insets.bottom);
         }
 
+        @Override
         public Dimension getMaximumSize() {
             return getPreferredSize();
         }
 
+        @Override
         public Dimension getMinimumSize() {
             return getPreferredSize();
         }
 
+        @Override
         public void doLayout() {
             Insets insets = getInsets();
             int i = insets.left + H_GAP;

@@ -46,7 +46,7 @@ public interface ITokenOrientedView {
      *         before this one. If no physical line is above the one containing
      *         <code>offset</code>, <code>null</code> is returned.
      */
-    public Token getTokenListForPhysicalLineAbove(int offset);
+    public IToken getTokenListForPhysicalLineAbove(int offset);
 
     /**
      * Returns a token list for the <i>physical</i> line below the physical line
@@ -61,5 +61,5 @@ public interface ITokenOrientedView {
      *         after this one. If no physical line is after the one containing
      *         <code>offset</code>, <code>null</code> is returned.
      */
-    public Token getTokenListForPhysicalLineBelow(int offset);
+    public IToken getTokenListForPhysicalLineBelow(int offset);
 }

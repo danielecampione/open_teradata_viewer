@@ -31,7 +31,6 @@ import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -137,6 +136,7 @@ public class ErrorStrip extends JComponent {
      * Overridden so we only start listening for parser notices when this
      * component (and presumably the text area) are visible.
      */
+    @Override
     public void addNotify() {
         super.addNotify();
         textArea.addCaretListener(listener);
@@ -150,6 +150,7 @@ public class ErrorStrip extends JComponent {
     }
 
     /** Manually manages layout since this component uses no layout manager. */
+    @Override
     public void doLayout() {
         for (int i = 0; i < getComponentCount(); i++) {
             Marker m = (Marker) getComponent(i);
@@ -168,7 +169,7 @@ public class ErrorStrip extends JComponent {
         if (brighterColors == null) {
             brighterColors = new HashMap<Color, Color>(5); // Usually small
         }
-        Color brighter = (Color) brighterColors.get(c);
+        Color brighter = brighterColors.get(c);
         if (brighter == null) {
             // Don't use c.brighter() as it doesn't work well for blue, and also
             // doesn't return something brighter "enough"
@@ -200,6 +201,7 @@ public class ErrorStrip extends JComponent {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Dimension getPreferredSize() {
         int height = textArea.getPreferredScrollableViewportSize().height;
         return new Dimension(PREFERRED_WIDTH, height);
@@ -226,13 +228,13 @@ public class ErrorStrip extends JComponent {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getToolTipText(MouseEvent e) {
         String text = null;
         int line = yToLine(e.getY());
         if (line > -1) {
             text = "Line: {0}";
-            text = MessageFormat.format(text,
-                    new Object[]{new Integer(line + 1)});
+            text = MessageFormat.format(text, Integer.valueOf(line + 1));
         }
         return text;
     }
@@ -256,6 +258,7 @@ public class ErrorStrip extends JComponent {
      *
      * @param g The graphics context.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (caretLineY > -1) {
@@ -282,13 +285,12 @@ public class ErrorStrip extends JComponent {
         removeAll(); // Listener is removed in Marker.removeNotify()
         Map<Integer, Marker> markerMap = new HashMap<Integer, Marker>();
 
-        List<?> notices = textArea.getParserNotices();
-        for (Iterator<?> i = notices.iterator(); i.hasNext();) {
-            IParserNotice notice = (IParserNotice) i.next();
+        List<IParserNotice> notices = textArea.getParserNotices();
+        for (IParserNotice notice : notices) {
             if (notice.getLevel() <= levelThreshold
                     || (notice instanceof TaskNotice)) {
-                Integer key = new Integer(notice.getLine());
-                Marker m = (Marker) markerMap.get(key);
+                Integer key = Integer.valueOf(notice.getLine());
+                Marker m = markerMap.get(key);
                 if (m == null) {
                     m = new Marker(notice);
                     m.addMouseListener(listener);
@@ -301,9 +303,8 @@ public class ErrorStrip extends JComponent {
         }
 
         if (getShowMarkedOccurrences() && textArea.getMarkOccurrences()) {
-            List<?> occurrences = textArea.getMarkedOccurrences();
-            for (Iterator<?> i = occurrences.iterator(); i.hasNext();) {
-                DocumentRange range = (DocumentRange) i.next();
+            List<DocumentRange> occurrences = textArea.getMarkedOccurrences();
+            for (DocumentRange range : occurrences) {
                 int line = 0;
                 try {
                     line = textArea.getLineOfOffset(range.getStartOffset());
@@ -311,8 +312,8 @@ public class ErrorStrip extends JComponent {
                     continue;
                 }
                 IParserNotice notice = new MarkedOccurrenceNotice(range);
-                Integer key = new Integer(line);
-                Marker m = (Marker) markerMap.get(key);
+                Integer key = Integer.valueOf(line);
+                Marker m = markerMap.get(key);
                 if (m == null) {
                     m = new Marker(notice);
                     m.addMouseListener(listener);
@@ -331,6 +332,7 @@ public class ErrorStrip extends JComponent {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeNotify() {
         super.removeNotify();
         textArea.removeCaretListener(listener);
@@ -429,13 +431,12 @@ public class ErrorStrip extends JComponent {
      * @author D. Campione
      * 
      */
-    private class Listener extends MouseAdapter
-            implements
-                PropertyChangeListener,
-                CaretListener {
+    private class Listener extends MouseAdapter implements
+            PropertyChangeListener, CaretListener {
 
         private Rectangle visibleRect = new Rectangle();
 
+        @Override
         public void caretUpdate(CaretEvent e) {
             if (getFollowCaret()) {
                 int line = textArea.getCaretLineNumber();
@@ -450,6 +451,7 @@ public class ErrorStrip extends JComponent {
             }
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             Component source = (Component) e.getSource();
             if (source instanceof Marker) {
@@ -469,6 +471,7 @@ public class ErrorStrip extends JComponent {
 
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
             String propName = e.getPropertyName();
 
@@ -504,30 +507,40 @@ public class ErrorStrip extends JComponent {
             this.range = range;
         }
 
-        public int compareTo(Object o) {
+        @Override
+        public int compareTo(IParserNotice other) {
             return 0;
         }
 
+        @Override
         public boolean containsPosition(int pos) {
             return pos >= range.getStartOffset() && pos < range.getEndOffset();
         }
 
+        @Override
         public boolean equals(Object o) {
-            return compareTo(o) == 0;
+            if (!(o instanceof IParserNotice)) {
+                return false;
+            }
+            return compareTo((IParserNotice) o) == 0;
         }
 
+        @Override
         public Color getColor() {
             return COLOR;
         }
 
+        @Override
         public int getLength() {
             return range.getEndOffset() - range.getStartOffset();
         }
 
+        @Override
         public int getLevel() {
             return INFO;
         }
 
+        @Override
         public int getLine() {
             try {
                 return textArea.getLineOfOffset(range.getStartOffset());
@@ -536,35 +549,41 @@ public class ErrorStrip extends JComponent {
             }
         }
 
+        @Override
         public String getMessage() {
             String text = null;
             try {
                 String word = textArea.getText(range.getStartOffset(),
                         getLength());
                 text = "Occurrence of \"{0}\"";
-                text = MessageFormat.format(text, new Object[]{word});
+                text = MessageFormat.format(text, word);
             } catch (BadLocationException ble) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
             }
             return text;
         }
 
+        @Override
         public int getOffset() {
             return range.getStartOffset();
         }
 
+        @Override
         public IParser getParser() {
             return null;
         }
 
+        @Override
         public boolean getShowInEditor() {
             return false;
         }
 
+        @Override
         public String getToolTipText() {
             return null;
         }
 
+        @Override
         public int hashCode() {
             return 0;
         }
@@ -610,8 +629,7 @@ public class ErrorStrip extends JComponent {
             // Return the color for the highest-level parser
             Color c = null;
             int lowestLevel = Integer.MAX_VALUE; // ERROR is 0
-            for (Iterator<IParserNotice> i = notices.iterator(); i.hasNext();) {
-                IParserNotice notice = (IParserNotice) i.next();
+            for (IParserNotice notice : notices) {
                 if (notice.getLevel() < lowestLevel) {
                     lowestLevel = notice.getLevel();
                     c = notice.getColor();
@@ -620,22 +638,24 @@ public class ErrorStrip extends JComponent {
             return c;
         }
 
+        @Override
         public Dimension getPreferredSize() {
             int w = PREFERRED_WIDTH - 4; // 2-pixel empty border
             return new Dimension(w, 5);
         }
 
+        @Override
         public String getToolTipText() {
             String text = null;
 
             if (notices.size() == 1) {
-                text = ((IParserNotice) notices.get(0)).getMessage();
-            } else {
-                StringBuffer sb = new StringBuffer("<html>");
+                text = notices.get(0).getMessage();
+            } else { // > 1
+                StringBuilder sb = new StringBuilder("<html>");
                 sb.append("Multiple markers at this line:");
                 sb.append("<br>");
                 for (int i = 0; i < notices.size(); i++) {
-                    IParserNotice pn = (IParserNotice) notices.get(i);
+                    IParserNotice pn = notices.get(i);
                     sb.append("&nbsp;&nbsp;&nbsp;- ");
                     sb.append(pn.getMessage());
                     sb.append("<br>");
@@ -647,7 +667,7 @@ public class ErrorStrip extends JComponent {
         }
 
         protected void mouseClicked(MouseEvent e) {
-            IParserNotice pn = (IParserNotice) notices.get(0);
+            IParserNotice pn = notices.get(0);
             int offs = pn.getOffset();
             int len = pn.getLength();
             if (offs > -1 && len > -1) { // These values are optional
@@ -664,6 +684,7 @@ public class ErrorStrip extends JComponent {
             }
         }
 
+        @Override
         protected void paintComponent(Graphics g) {
             Color borderColor = getColor();
             if (borderColor == null) {
@@ -681,6 +702,7 @@ public class ErrorStrip extends JComponent {
             g.drawRect(0, 0, w - 1, h - 1);
         }
 
+        @Override
         public void removeNotify() {
             super.removeNotify();
             ToolTipManager.sharedInstance().unregisterComponent(this);
@@ -688,7 +710,7 @@ public class ErrorStrip extends JComponent {
         }
 
         public void updateLocation() {
-            int line = ((IParserNotice) notices.get(0)).getLine();
+            int line = notices.get(0).getLine();
             int y = lineToY(line);
             setLocation(2, y);
         }

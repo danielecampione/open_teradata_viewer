@@ -747,12 +747,14 @@ public class Utilities {
         int current = rs.getRow();
         rs.last();
         int count = rs.getRow();
-        if (count == -1)
+        if (count == -1) {
             count = 0;
-        if (current == 0)
+        }
+        if (current == 0) {
             rs.beforeFirst();
-        else
+        } else {
             rs.absolute(current);
+        }
         return count;
     }
 
@@ -995,7 +997,7 @@ public class Utilities {
         // Don't assume 0xff alpha
         //return "#" + Integer.toHexString(c.getRGB()&0xffffff).substring(2);
 
-        StringBuffer sb = new StringBuffer("#");
+        StringBuilder sb = new StringBuilder("#");
         int r = c.getRed();
         if (r < 16) {
             sb.append('0');
@@ -1081,5 +1083,11 @@ public class Utilities {
             return text;
         }
         return TAG_PATTERN.matcher(text).replaceAll("");
+    }
+    
+    public static void removeFile(File file) {
+    	if (file != null && file.exists()) {
+            file.delete();
+        }
     }
 }

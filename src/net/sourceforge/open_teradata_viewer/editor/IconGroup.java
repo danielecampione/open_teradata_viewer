@@ -124,14 +124,16 @@ public class IconGroup {
      * @return Whether <code>o2</code> represents the same icons as this icon
      *         group.
      */
+    @Override
     public boolean equals(Object o2) {
         if (o2 != null && o2 instanceof IconGroup) {
             IconGroup ig2 = (IconGroup) o2;
             if (ig2.getName().equals(getName())
                     && separateLargeIcons == ig2.hasSeparateLargeIcons()) {
                 if (separateLargeIcons) {
-                    if (!largeIconSubDir.equals(ig2.largeIconSubDir))
+                    if (!largeIconSubDir.equals(ig2.largeIconSubDir)) {
                         return false;
+                    }
                 }
                 return path.equals(ig2.path);
             }
@@ -176,8 +178,9 @@ public class IconGroup {
             if (jarFile == null) {
                 // First see if it's on our classpath
                 URL url = getClass().getClassLoader().getResource(iconFullPath);
-                if (url != null)
+                if (url != null) {
                     return new ImageIcon(url);
+                }
                 // If not, see if it's a plain file on disk
                 BufferedImage image = ImageIO.read(new File(iconFullPath));
                 return image != null ? new ImageIcon(image) : null;
@@ -233,6 +236,7 @@ public class IconGroup {
      * Overridden since we also override {@link #equals(Object)}, to honor the
      * invariant that equal objects must have equal hashcodes.
      */
+    @Override
     public int hashCode() {
         return getName().hashCode();
     }

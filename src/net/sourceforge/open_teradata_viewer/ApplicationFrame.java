@@ -408,52 +408,20 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     }
 
     private void deleteHelpFiles() {
-        String directoryPath = Utilities.conformizePath(System
+        String tmpDir = Utilities.conformizePath(System
                 .getProperty("java.io.tmpdir"));
+        String dirToDelete[] = {
+                tmpDir + "help" + File.separator + "images" + File.separator,
+                tmpDir + "help" + File.separator };
 
-        File file = new File(directoryPath + "help" + File.separator
-                + "manual.html");
-        if (file.exists()) {
-            file.delete();
-        }
-        file = new File(directoryPath + File.separator + "help"
-                + File.separator + "FAQ.html");
-        if (file.exists()) {
-            file.delete();
-        }
-        file = new File(directoryPath + File.separator + "help"
-                + File.separator + "license.html");
-        if (file.exists()) {
-            file.delete();
-        }
-        file = new File(directoryPath + File.separator + "help"
-                + File.separator + "changes.html");
-        if (file.exists()) {
-            file.delete();
-        }
-
-        directoryPath = Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"))
-                + "help"
-                + File.separator
-                + "manual_file" + File.separator;
-        File[] files = Utilities.listFiles(new File(directoryPath));
-        if (files != null) {
-            for (int i = 0; i < files.length; i++) {
-                file = files[i];
-                if (file.exists()) {
-                    file.delete();
+        for (String element : dirToDelete) {
+            File[] files = Utilities.listFiles(new File(element));
+            if (files != null) {
+                for (File file : files) {
+                    Utilities.removeFile(file);
                 }
+                Utilities.removeFile(new File(element));
             }
-        }
-        file = new File(directoryPath);
-        if (file.exists()) {
-            file.delete();
-        }
-        file = new File(Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir")) + "help");
-        if (file.exists()) {
-            file.delete();
         }
     }
 
@@ -480,8 +448,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                         schemaBrowser.addMouseListener(schemaBrowserAction);
                     }
                     rightComponent = new JScrollPane(schemaBrowser);
-                    schemaBrowser.expand(new String[]{connectionData.getName(),
-                            "username", "TABLES"});
+                    schemaBrowser.expand(new String[] {
+                            connectionData.getName(), "username", "TABLES" });
                     Actions.SCHEMA_BROWSER.setEnabled(true);
                 } catch (IllegalStateException ise) {
                     // Ignore: connection has been closed
@@ -670,8 +638,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
     }
 
     public String getText() {
-        return textArea.getSelectedText() != null
-                ? textArea.getSelectedText()
+        return textArea.getSelectedText() != null ? textArea.getSelectedText()
                 : textArea.getText();
     }
 
@@ -736,6 +703,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         return findWindowOpacityEnabled;
     }
 
+    @Override
     public GlassPane getGlassPane() {
         return glassPane;
     }
@@ -804,6 +772,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
                 UIUtil.installOsSpecificLafTweaks();
                 Runnable updateUIRunnable = new Runnable() {
+                    @Override
                     public void run() {
                         updateLookAndFeel(lnf);
                     }
@@ -869,8 +838,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
      * @see #initLookAndFeelManager(ThirdPartyLookAndFeelManager)
      */
     public ExtendedLookAndFeelInfo[] get3rdPartyLookAndFeelInfo() {
-        return lafManager != null
-                ? lafManager.get3rdPartyLookAndFeelInfo()
+        return lafManager != null ? lafManager.get3rdPartyLookAndFeelInfo()
                 : null;
     }
 
@@ -993,6 +961,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             this.splashScreen = splashScreen;
         }
 
+        @Override
         public void run() {
             splashScreen.updateStatus(
                     "The LookAndFeel has been installed successfully.", 10);

@@ -43,9 +43,8 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @see net.sourceforge.open_teradata_viewer.editor.BufferedImageBackgroundPainterStrategy
  * 
  */
-public class VolatileImageBackgroundPainterStrategy
-        extends
-            ImageBackgroundPainterStrategy {
+public class VolatileImageBackgroundPainterStrategy extends
+        ImageBackgroundPainterStrategy {
 
     private VolatileImage bgImage;
 
@@ -66,6 +65,7 @@ public class VolatileImageBackgroundPainterStrategy
      * @param x The x-coordinate at which to paint.
      * @param y The y-coordinate at which to paint.
      */
+    @Override
     protected void paintImage(Graphics g, int x, int y) {
         if (bgImage != null) {
             do {
@@ -127,9 +127,11 @@ public class VolatileImageBackgroundPainterStrategy
      * @param height The new height of the image.
      * @param hint The scaling hint to use.
      */
+    @Override
     protected void rescaleImage(int width, int height, int hint) {
         bgImage = getTextAreaBase().createVolatileImage(width, height);
-        if (bgImage != null)
+        if (bgImage != null) {
             renderImage(width, height, hint);
+        }
     }
 }

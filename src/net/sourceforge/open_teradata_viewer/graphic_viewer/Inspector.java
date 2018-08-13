@@ -66,6 +66,7 @@ public class Inspector {
                 myTable.setPreferredScrollableViewportSize(new Dimension(300,
                         500));
                 myTable.addMouseListener(new MouseAdapter() {
+                    @Override
                     public void mouseClicked(MouseEvent evt) {
                         myModel.mouseClicked(evt.getClickCount(),
                                 myTable.rowAtPoint(evt.getPoint()),
@@ -123,6 +124,7 @@ public class Inspector {
             fireTableChanged(new TableModelEvent(this));
         }
 
+        @Override
         public String getColumnName(int col) {
             if (col == 0) {
                 return "Property";
@@ -131,21 +133,24 @@ public class Inspector {
             }
         }
 
+        @Override
         public int getColumnCount() {
             return 2;
         }
 
+        @Override
         public int getRowCount() {
             return myGetters.size();
         }
 
+        @Override
         public Object getValueAt(int row, int col) {
             Method m = (Method) myGetters.get(row);
             if (col == 0) {
                 return getPropertyName(m);
             } else {
                 try {
-                    Object val = m.invoke(myObject, new Object[]{});
+                    Object val = m.invoke(myObject, new Object[] {});
                     if (val instanceof Point) {
                         Point p = (Point) val;
                         return Integer.toString(p.x) + ","
@@ -168,6 +173,7 @@ public class Inspector {
             }
         }
 
+        @Override
         public boolean isCellEditable(int row, int col) {
             if (col == 1 && mySetters.get(row) != null) {
                 Class type = myObject.getClass();
@@ -180,6 +186,7 @@ public class Inspector {
             return false;
         }
 
+        @Override
         public void setValueAt(Object value, int row, int col) {
             Method setter = (Method) mySetters.get(row);
             if (setter == null) {
@@ -290,7 +297,7 @@ public class Inspector {
                 doc.startTransaction();
             }
             try {
-                setter.invoke(myObject, new Object[]{newval});
+                setter.invoke(myObject, new Object[] { newval });
             } catch (Exception x) {
                 UISupport.getDialogs().showErrorMessage(x.toString());
             }
@@ -340,7 +347,7 @@ public class Inspector {
                     String setname = "set" + getPropertyName(m);
                     try {
                         Method setter = myObject.getClass().getMethod(setname,
-                                new Class[]{m.getReturnType()});
+                                new Class[] { m.getReturnType() });
                         mySetters.add(setter);
                     } catch (Exception x) {
                         mySetters.add(null);

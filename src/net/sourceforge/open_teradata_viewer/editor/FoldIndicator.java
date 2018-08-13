@@ -40,8 +40,8 @@ import javax.swing.text.Element;
 import javax.swing.text.View;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.TipUtil;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.Fold;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
@@ -120,6 +120,7 @@ public class FoldIndicator extends AbstractGutterComponent {
      *
      * @return The tool tip.
      */
+    @Override
     public JToolTip createToolTip() {
         JToolTip tip = super.createToolTip();
         Color textAreaBG = textArea.getBackground();
@@ -170,6 +171,7 @@ public class FoldIndicator extends AbstractGutterComponent {
         return foldIconBackground;
     }
 
+    @Override
     public Dimension getPreferredSize() {
         int h = textArea != null ? textArea.getHeight() : 100; // Arbitrary
         return new Dimension(WIDTH, h);
@@ -193,6 +195,7 @@ public class FoldIndicator extends AbstractGutterComponent {
      *
      * @param e The mouse location.
      */
+    @Override
     public Point getToolTipLocation(MouseEvent e) {
         // ToolTipManager requires both location and text to be null to hide a
         // currently-visible tool tip window. If text is null but location has
@@ -221,6 +224,7 @@ public class FoldIndicator extends AbstractGutterComponent {
      *
      * @param e The mouse location.
      */
+    @Override
     public String getToolTipText(MouseEvent e) {
         String text = null;
 
@@ -244,9 +248,9 @@ public class FoldIndicator extends AbstractGutterComponent {
                         endLine = fold.getStartLine() + 25;
                     }
 
-                    StringBuffer sb = new StringBuffer("<html><nobr>");
+                    StringBuilder sb = new StringBuilder("<html><nobr>");
                     while (line <= endLine && line < sta.getLineCount()) { // Sanity
-                        Token t = sta.getTokenListForLine(line);
+                        IToken t = sta.getTokenListForLine(line);
                         while (t != null && t.isPaintable()) {
                             t.appendHTMLRepresentation(sb, sta, true, true);
                             t = t.getNextToken();
@@ -263,6 +267,7 @@ public class FoldIndicator extends AbstractGutterComponent {
         return text;
     }
 
+    @Override
     void handleDocumentEvent(DocumentEvent e) {
         int newLineCount = textArea.getLineCount();
         if (newLineCount != currentLineCount) {
@@ -271,9 +276,11 @@ public class FoldIndicator extends AbstractGutterComponent {
         }
     }
 
+    @Override
     void lineHeightsChanged() {
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         if (textArea == null) {
             return;
@@ -536,6 +543,7 @@ public class FoldIndicator extends AbstractGutterComponent {
     }
 
     /** Overridden so we can track when code folding is enabled/disabled. */
+    @Override
     public void setTextArea(TextArea textArea) {
         if (this.textArea != null) {
             this.textArea.removePropertyChangeListener(
@@ -561,14 +569,17 @@ public class FoldIndicator extends AbstractGutterComponent {
             this.collapsed = collapsed;
         }
 
+        @Override
         public int getIconHeight() {
             return 8;
         }
 
+        @Override
         public int getIconWidth() {
             return 8;
         }
 
+        @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
             g.setColor(foldIconBackground);
             g.fillRect(x, y, 8, 8);
@@ -587,15 +598,15 @@ public class FoldIndicator extends AbstractGutterComponent {
      * @author D. Campione
      * 
      */
-    private class Listener extends MouseInputAdapter
-            implements
-                PropertyChangeListener {
+    private class Listener extends MouseInputAdapter implements
+            PropertyChangeListener {
 
         public Listener(FoldIndicator fgc) {
             fgc.addMouseListener(this);
             fgc.addMouseMotionListener(this);
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             Point p = e.getPoint();
             int line = rowAtPoint(p);
@@ -611,6 +622,7 @@ public class FoldIndicator extends AbstractGutterComponent {
             }
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
             if (foldWithOutlineShowing != null) {
                 foldWithOutlineShowing = null;
@@ -618,6 +630,7 @@ public class FoldIndicator extends AbstractGutterComponent {
             }
         }
 
+        @Override
         public void mouseMoved(MouseEvent e) {
             Fold newSelectedFold = findOpenFoldClosestTo(e.getPoint());
             if (newSelectedFold != foldWithOutlineShowing
@@ -628,6 +641,7 @@ public class FoldIndicator extends AbstractGutterComponent {
             }
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
             // Whether folding is enabled in the editor has changed
             repaint();

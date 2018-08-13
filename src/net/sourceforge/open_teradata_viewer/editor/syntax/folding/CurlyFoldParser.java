@@ -24,9 +24,9 @@ import java.util.List;
 import javax.swing.text.BadLocationException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
  * A basic fold parser that can be used for languages such as C, that use
@@ -102,6 +102,7 @@ public class CurlyFoldParser implements IFoldParser {
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<Fold> getFolds(SyntaxTextArea textArea) {
         List<Fold> folds = new ArrayList<Fold>();
 
@@ -116,7 +117,7 @@ public class CurlyFoldParser implements IFoldParser {
 
         try {
             for (int line = 0; line < lineCount; line++) {
-                Token t = textArea.getTokenListForLine(line);
+                IToken t = textArea.getTokenListForLine(line);
                 while (t != null && t.isPaintable()) {
                     if (getFoldableMultiLineComments() && t.isComment()) {
                         // Java-specific stuff
@@ -147,7 +148,7 @@ public class CurlyFoldParser implements IFoldParser {
                             // If we found the end of an MLC that started on
                             // a previous line..
                             if (t.endsWith(C_MLC_END)) {
-                                int mlcEnd = t.offset + t.textCount - 1;
+                                int mlcEnd = t.getEndOffset() - 1;
                                 if (currentFold == null) {
                                     currentFold = new Fold(IFoldType.COMMENT,
                                             textArea, mlcStart);
@@ -167,10 +168,10 @@ public class CurlyFoldParser implements IFoldParser {
                             // another line
                         } else {
                             // If we're an MLC that ends on a later line..
-                            if (t.type != Token.COMMENT_EOL
+                            if (t.getType() != IToken.COMMENT_EOL
                                     && !t.endsWith(C_MLC_END)) {
                                 inMLC = true;
-                                mlcStart = t.offset;
+                                mlcStart = t.getOffset();
                             }
                         }
                     } else if (isLeftCurly(t)) {
@@ -200,15 +201,15 @@ public class CurlyFoldParser implements IFoldParser {
 
                         if (currentFold == null) {
                             currentFold = new Fold(IFoldType.CODE, textArea,
-                                    t.offset);
+                                    t.getOffset());
                             folds.add(currentFold);
                         } else {
                             currentFold = currentFold.createChild(
-                                    IFoldType.CODE, t.offset);
+                                    IFoldType.CODE, t.getOffset());
                         }
                     } else if (isRightCurly(t)) {
                         if (currentFold != null) {
-                            currentFold.setEndOffset(t.offset);
+                            currentFold.setEndOffset(t.getOffset());
                             Fold parentFold = currentFold.getParent();
                             // Don't add fold markers for single-line blocks
                             if (currentFold.isOnSingleLine()) {
@@ -221,16 +222,16 @@ public class CurlyFoldParser implements IFoldParser {
                     }
                     // Java-specific folding rules
                     else if (java) {
-                        if (t.is(Token.RESERVED_WORD, KEYWORD_IMPORT)) {
+                        if (t.is(IToken.RESERVED_WORD, KEYWORD_IMPORT)) {
                             if (importStartLine == -1) {
                                 importStartLine = line;
-                                importGroupStartOffs = t.offset;
-                                importGroupEndOffs = t.offset;
+                                importGroupStartOffs = t.getOffset();
+                                importGroupEndOffs = t.getOffset();
                             }
                             lastSeenImportLine = line;
                         } else if (importStartLine > -1 && t.isIdentifier() && //SEPARATOR &&
                                 t.isSingleChar(';')) {
-                            importGroupEndOffs = t.offset;
+                            importGroupEndOffs = t.getOffset();
                         }
                     }
 
@@ -250,9 +251,9 @@ public class CurlyFoldParser implements IFoldParser {
      *
      * @param t The token.
      * @return Whether it is a left curly brace.
-     * @see #isRightCurly(Token)
+     * @see #isRightCurly(IToken)
      */
-    public boolean isLeftCurly(Token t) {
+    public boolean isLeftCurly(IToken t) {
         return t.isLeftCurly();
     }
 
@@ -262,9 +263,9 @@ public class CurlyFoldParser implements IFoldParser {
      *
      * @param t The token.
      * @return Whether it is a right curly brace.
-     * @see #isLeftCurly(Token)
+     * @see #isLeftCurly(IToken)
      */
-    public boolean isRightCurly(Token t) {
+    public boolean isRightCurly(IToken t) {
         return t.isRightCurly();
     }
 

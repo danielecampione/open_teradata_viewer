@@ -32,13 +32,13 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 abstract class TokenMakerBase implements ITokenMaker {
 
     /** The first token in the returned linked list. */
-    protected Token firstToken;
+    protected TokenImpl firstToken;
 
     /** Used in the creation of the linked list. */
-    protected Token currentToken;
+    protected TokenImpl currentToken;
 
     /** Used in the creation of the linked list. */
-    protected Token previousToken;
+    protected TokenImpl previousToken;
 
     /** The factory that gives us our tokens to use. */
     private ITokenFactory tokenFactory;
@@ -66,14 +66,16 @@ abstract class TokenMakerBase implements ITokenMaker {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addNullToken() {
         if (firstToken == null) {
             firstToken = tokenFactory.createToken();
             currentToken = firstToken;
         } else {
-            currentToken.setNextToken(tokenFactory.createToken());
+            TokenImpl next = tokenFactory.createToken();
+            currentToken.setNextToken(next);
             previousToken = currentToken;
-            currentToken = currentToken.getNextToken();
+            currentToken = next;
         }
     }
 
@@ -92,6 +94,7 @@ abstract class TokenMakerBase implements ITokenMaker {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addToken(char[] array, int start, int end, int tokenType,
             int startOffset) {
         addToken(array, start, end, tokenType, startOffset, false);
@@ -114,10 +117,11 @@ abstract class TokenMakerBase implements ITokenMaker {
                     startOffset, tokenType);
             currentToken = firstToken; // Previous token is still null
         } else {
-            currentToken.setNextToken(tokenFactory.createToken(array, start,
-                    end, startOffset, tokenType));
+            TokenImpl next = tokenFactory.createToken(array, start, end,
+                    startOffset, tokenType);
+            currentToken.setNextToken(next);
             previousToken = currentToken;
-            currentToken = currentToken.getNextToken();
+            currentToken = next;
         }
 
         currentToken.setLanguageIndex(languageIndex);
@@ -149,6 +153,7 @@ abstract class TokenMakerBase implements ITokenMaker {
      * @param type The token type.
      * @return The closest "standard" token type.
      */
+    @Override
     public int getClosestStandardTokenTypeForInternalType(int type) {
         return type;
     }
@@ -162,6 +167,7 @@ abstract class TokenMakerBase implements ITokenMaker {
      *
      * @return Whether curly braces denote code blocks.
      */
+    @Override
     public boolean getCurlyBracesDenoteCodeBlocks() {
         return false;
     }
@@ -173,22 +179,26 @@ abstract class TokenMakerBase implements ITokenMaker {
      *
      * @return The default implementation always returns <code>null</code>.
      */
+    @Override
     public Action getInsertBreakAction() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getLastTokenTypeOnLine(Segment text, int initialTokenType) {
         // Last parameter doesn't matter if we're not painting
-        Token t = getTokenList(text, initialTokenType, 0);
+        IToken t = getTokenList(text, initialTokenType, 0);
 
-        while (t.getNextToken() != null)
+        while (t.getNextToken() != null) {
             t = t.getNextToken();
+        }
 
-        return t.type;
+        return t.getType();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String[] getLineCommentStartAndEnd() {
         return null;
     }
@@ -204,11 +214,13 @@ abstract class TokenMakerBase implements ITokenMaker {
      * @return Whether tokens of this type should have "mark occurrences"
      *         enabled.
      */
+    @Override
     public boolean getMarkOccurrencesOfTokenType(int type) {
-        return type == Token.IDENTIFIER;
+        return type == IToken.IDENTIFIER;
     }
 
     /** {@inheritDoc} */
+    @Override
     public IOccurrenceMarker getOccurrenceMarker() {
         if (occurrenceMarker == null) {
             occurrenceMarker = createOccurrenceMarker();
@@ -223,7 +235,8 @@ abstract class TokenMakerBase implements ITokenMaker {
      * @param token The token the previous line ends with.
      * @return Whether the next line should be indented.
      */
-    public boolean getShouldIndentNextLineAfter(Token token) {
+    @Override
+    public boolean getShouldIndentNextLineAfter(IToken token) {
         return false;
     }
 
@@ -234,6 +247,7 @@ abstract class TokenMakerBase implements ITokenMaker {
      *
      * @return <code>false</code> always.
      */
+    @Override
     public boolean isMarkupLanguage() {
         return false;
     }

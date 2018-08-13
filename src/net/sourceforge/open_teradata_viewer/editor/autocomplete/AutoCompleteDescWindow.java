@@ -62,10 +62,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.TipUtil;
  * @author D. Campione
  * 
  */
-class AutoCompleteDescWindow extends JWindow
-        implements
-            HyperlinkListener,
-            IDescWindowCallback {
+class AutoCompleteDescWindow extends JWindow implements HyperlinkListener,
+        IDescWindowCallback {
 
     private static final long serialVersionUID = -7449528294359920484L;
 
@@ -91,7 +89,7 @@ class AutoCompleteDescWindow extends JWindow
     private Action forwardAction;
 
     /** History of descriptions displayed. */
-    private List history;
+    private List<HistoryEntry> history;
 
     /** The current position in {@link #history}. */
     private int historyPos;
@@ -152,10 +150,12 @@ class AutoCompleteDescWindow extends JWindow
 
             private static final long serialVersionUID = -1490683351325977645L;
 
+            @Override
             public Insets getBorderInsets(Component c) {
                 return new Insets(1, 0, 0, 0);
             }
 
+            @Override
             public void paintBorder(Component c, Graphics g, int x, int y,
                     int w, int h) {
                 g.setColor(UIManager.getColor("controlDkShadow"));
@@ -180,7 +180,7 @@ class AutoCompleteDescWindow extends JWindow
             }
         }
 
-        history = new ArrayList(1); // Usually small
+        history = new ArrayList<HistoryEntry>(1); // Usually small
         historyPos = -1;
 
         timerAction = new TimerAction();
@@ -236,6 +236,7 @@ class AutoCompleteDescWindow extends JWindow
      *
      * @param e The event.
      */
+    @Override
     public void hyperlinkUpdate(HyperlinkEvent e) {
         HyperlinkEvent.EventType type = e.getEventType();
         if (!type.equals(HyperlinkEvent.EventType.ACTIVATED)) {
@@ -259,7 +260,7 @@ class AutoCompleteDescWindow extends JWindow
         // Custom hyperlink handler for this completion type
         IExternalURLHandler handler = ac.getExternalURLHandler();
         if (handler != null) {
-            HistoryEntry current = (HistoryEntry) history.get(historyPos);
+            HistoryEntry current = history.get(historyPos);
             handler.urlClicked(e, current.completion, this);
             return;
         }
@@ -278,11 +279,11 @@ class AutoCompleteDescWindow extends JWindow
             ICompletionProvider p = parent.getSelection().getProvider();
             if (p instanceof AbstractCompletionProvider) {
                 String name = e.getDescription();
-                List l = ((AbstractCompletionProvider) p)
+                List<ICompletion> l = ((AbstractCompletionProvider) p)
                         .getCompletionByInputText(name);
                 if (l != null && !l.isEmpty()) {
                     // Just use the 1st one if there's more than 1
-                    ICompletion c = (ICompletion) l.get(0);
+                    ICompletion c = l.get(0);
                     setDescriptionFor(c, true);
                 } else {
                     UIManager.getLookAndFeel().provideErrorFeedback(descArea);
@@ -355,6 +356,7 @@ class AutoCompleteDescWindow extends JWindow
         descArea.setText(desc);
         if (anchor != null) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     descArea.scrollToReference(anchor);
                 }
@@ -372,6 +374,7 @@ class AutoCompleteDescWindow extends JWindow
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setVisible(boolean visible) {
         if (!visible) {
             clearHistory();
@@ -386,6 +389,7 @@ class AutoCompleteDescWindow extends JWindow
      * @param anchor The anchor in the HTML to jump to, or <code>null</code>
      *        if none.
      */
+    @Override
     public void showSummaryFor(ICompletion completion, String anchor) {
         setDescriptionFor(completion, anchor, true);
     }
@@ -427,6 +431,7 @@ class AutoCompleteDescWindow extends JWindow
          *
          * @return A string representation of this history entry.
          */
+        @Override
         public String toString() {
             return completion.getInputText();
         }
@@ -447,6 +452,7 @@ class AutoCompleteDescWindow extends JWindow
         private boolean addToHistory;
 
         /** Called when the timer is fired. */
+        @Override
         public void actionPerformed(ActionEvent e) {
             setDisplayedDesc(completion, anchor, addToHistory);
         }
@@ -475,9 +481,10 @@ class AutoCompleteDescWindow extends JWindow
             putValue(Action.SMALL_ICON, icon);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (historyPos > 0) {
-                HistoryEntry pair = (HistoryEntry) history.get(--historyPos);
+                HistoryEntry pair = history.get(--historyPos);
                 descArea.setText(pair.summary);
                 if (pair.anchor != null) {
                     descArea.scrollToReference(pair.anchor);
@@ -505,9 +512,10 @@ class AutoCompleteDescWindow extends JWindow
             putValue(Action.SMALL_ICON, icon);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (history != null && historyPos < history.size() - 1) {
-                HistoryEntry pair = (HistoryEntry) history.get(++historyPos);
+                HistoryEntry pair = history.get(++historyPos);
                 descArea.setText(pair.summary);
                 if (pair.anchor != null) {
                     descArea.scrollToReference(pair.anchor);

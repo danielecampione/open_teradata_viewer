@@ -42,6 +42,7 @@ public abstract class AbstractMarkupTokenMaker extends AbstractJFlexTokenMaker {
      * @return The start and end strings to add to a line to "comment" it
      *         out.
      */
+    @Override
     public String[] getLineCommentStartAndEnd() {
         return new String[]{"<!--", "-->"};
     }
@@ -51,6 +52,7 @@ public abstract class AbstractMarkupTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return <code>true</code> always.
      */
+    @Override
     public final boolean isMarkupLanguage() {
         return true;
     }

@@ -29,7 +29,7 @@ import javax.swing.text.Segment;
 interface ITokenFactory {
 
     /** @return A null token. */
-    public Token createToken();
+    public TokenImpl createToken();
 
     /**
      * Returns a token.
@@ -41,8 +41,8 @@ interface ITokenFactory {
      * @param type The type of token.
      * @return The token.
      */
-    public Token createToken(final Segment line, final int beg, final int end,
-            final int startOffset, final int type);
+    public TokenImpl createToken(final Segment line, final int beg,
+            final int end, final int startOffset, final int type);
 
     /**
      * Returns a token.
@@ -54,8 +54,8 @@ interface ITokenFactory {
      * @param type The type of token.
      * @return The token.
      */
-    public Token createToken(final char[] line, final int beg, final int end,
-            final int startOffset, final int type);
+    public TokenImpl createToken(final char[] line, final int beg,
+            final int end, final int startOffset, final int type);
 
     /**
      * Resets the state of this token maker. This method should be called by the

@@ -85,8 +85,8 @@ public class HelpAction extends CustomAction {
                 continue;
             }
             try {
-                Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                        + File.separator + (String) sl.get(i));
+            	Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                        + File.separator + "images"  + File.separator + (String) sl.get(i));
             } catch (Throwable ex) {
                 ApplicationFrame
                         .getInstance()
@@ -97,6 +97,8 @@ public class HelpAction extends CustomAction {
             }
         }
 
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
+                + File.separator + "style.css");
         Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
                 + File.separator + "license.html");
         Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder

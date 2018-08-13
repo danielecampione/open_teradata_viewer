@@ -91,8 +91,7 @@ class LineHighlightManager {
 
             try {
                 for (int i = 0; i < count; i++) {
-                    LineHighlightInfo lhi = (LineHighlightInfo) lineHighlights
-                            .get(i);
+                    LineHighlightInfo lhi = lineHighlights.get(i);
                     int offs = lhi.getOffset();
                     if (offs >= 0 && offs <= docLen) {
                         int y = textArea.yForLineContaining(offs);
@@ -165,7 +164,8 @@ class LineHighlightManager {
      * @author D. Campione
      * 
      */
-    private static class LineHighlightInfo implements Comparable<Object> {
+    private static class LineHighlightInfo implements
+            Comparable<LineHighlightInfo> {
         private Position offs;
         private Color color;
 
@@ -174,13 +174,15 @@ class LineHighlightManager {
             this.color = c;
         }
 
-        public int compareTo(Object o) {
-            if (o instanceof LineHighlightInfo) {
-                return offs.getOffset() - ((LineHighlightInfo) o).getOffset();
+        @Override
+        public int compareTo(LineHighlightInfo o) {
+            if (o != null) {
+                return offs.getOffset() - o.getOffset();
             }
             return -1;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
@@ -199,6 +201,7 @@ class LineHighlightManager {
             return offs.getOffset();
         }
 
+        @Override
         public int hashCode() {
             return getOffset();
         }

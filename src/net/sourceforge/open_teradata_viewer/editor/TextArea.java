@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -87,7 +86,7 @@ import net.sourceforge.open_teradata_viewer.util.PrintUtil;
  * @author D. Campione
  * 
  */
-public class TextArea extends TextAreaBase implements Printable, Serializable {
+public class TextArea extends TextAreaBase implements Printable {
 
     private static final long serialVersionUID = -3254029091444336977L;
 
@@ -353,8 +352,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         Highlighter h = getHighlighter();
         if (h != null && markAllHighlights != null) {
             int count = markAllHighlights.size();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++) {
                 h.removeHighlight(markAllHighlights.get(i));
+            }
             markAllHighlights.clear();
         }
         markedWord = null;
@@ -398,6 +398,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @return The default document.
      */
+    @Override
     protected Document createDefaultModel() {
         return new OTVDocument();
     }
@@ -407,6 +408,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @return The caret event/mouse listener.
      */
+    @Override
     protected TAMouseListener createMouseListener() {
         return new TextAreaMutableCaretEvent(this);
     }
@@ -498,6 +500,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
 
             private static final long serialVersionUID = -4208634810979973210L;
 
+            @Override
             public void setToolTipText(String text) {
                 // Ignore. Actions (e.g. undo/redo) set this when changing their
                 // text due to changing enabled state
@@ -512,6 +515,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @return The UI.
      */
+    @Override
     protected TextAreaUI createTextAreaUI() {
         return new TextAreaUI(this);
     }
@@ -523,7 +527,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @return The string of spaces.
      */
     private final String createSpacer(int size) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < size; i++) {
             sb.append(' ');
         }
@@ -579,6 +583,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @param e The caret event.
      */
+    @Override
     protected void fireCaretUpdate(CaretEvent e) {
         // Decide whether we need to repaint the current line background
         possiblyUpdateCurrentLineHighlightLocation();
@@ -637,20 +642,20 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             return null;
         }
         switch (action) {
-            case COPY_ACTION :
-                return copyAction;
-            case CUT_ACTION :
-                return cutAction;
-            case DELETE_ACTION :
-                return deleteAction;
-            case PASTE_ACTION :
-                return pasteAction;
-            case REDO_ACTION :
-                return redoAction;
-            case SELECT_ALL_ACTION :
-                return selectAllAction;
-            case UNDO_ACTION :
-                return undoAction;
+        case COPY_ACTION:
+            return copyAction;
+        case CUT_ACTION:
+            return cutAction;
+        case DELETE_ACTION:
+            return deleteAction;
+        case PASTE_ACTION:
+            return pasteAction;
+        case REDO_ACTION:
+            return redoAction;
+        case SELECT_ALL_ACTION:
+            return selectAllAction;
+        case UNDO_ACTION:
+            return undoAction;
         }
         return null;
     }
@@ -779,6 +784,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @see #getToolTipSupplier()
      * @see #setToolTipSupplier(IToolTipSupplier)
      */
+    @Override
     public String getToolTipText(MouseEvent e) {
         String tip = null;
         if (getToolTipSupplier() != null) {
@@ -876,7 +882,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             if (markAllHighlights != null) {
                 clearMarkAllHighlights();
             } else {
-                markAllHighlights = new ArrayList<Object>(10);
+                markAllHighlights = new ArrayList<Object>();
             }
             int caretPos = getCaretPosition();
             markedWord = toMark;
@@ -907,6 +913,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void paste() {
         // Treat paste operations as atomic, otherwise the removal and insertion
         // are treated as two separate undo-able operations
@@ -921,21 +928,18 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
     /** "Plays back" the last recorded macro in this text area. */
     public synchronized void playbackLastMacro() {
         if (currentMacro != null) {
-            Action[] actions = getActions();
-            int numActions = actions.length;
-            List<?> macroRecords = currentMacro.getMacroRecords();
-            int num = macroRecords.size();
-            if (num > 0) {
+            List<MacroRecord> macroRecords = currentMacro.getMacroRecords();
+            if (!macroRecords.isEmpty()) {
+                Action[] actions = getActions();
                 undoManager.beginInternalAtomicEdit();
                 try {
-                    for (int i = 0; i < num; i++) {
-                        MacroRecord record = (MacroRecord) macroRecords.get(i);
-                        for (int j = 0; j < numActions; j++) {
-                            if ((actions[j] instanceof RecordableTextAction)
+                    for (MacroRecord record : macroRecords) {
+                        for (int i = 0; i < actions.length; i++) {
+                            if ((actions[i] instanceof RecordableTextAction)
                                     && record.id
-                                            .equals(((RecordableTextAction) actions[j])
+                                            .equals(((RecordableTextAction) actions[i])
                                                     .getMacroID())) {
-                                actions[j].actionPerformed(new ActionEvent(
+                                actions[i].actionPerformed(new ActionEvent(
                                         this, ActionEvent.ACTION_PERFORMED,
                                         record.actionCommand));
                                 break;
@@ -957,6 +961,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @param pageFormat The size and orientation of the page being drawn.
      * @param pageIndex The zero based index of the page to be drawn.
      */
+    @Override
     public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
         return PrintUtil.printDocumentWordWrap(g, this, getFont(), pageIndex,
                 pageFormat, getTabSize());
@@ -967,12 +972,14 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * new <code>Document</code>, thus requiring us to re-attach our Undo
      * manager. With this version we just replace the text.
      */
+    @Override
     public void read(Reader in, Object desc) throws IOException {
         TextAreaEditorKit kit = (TextAreaEditorKit) getUI().getEditorKit(this);
         setText(null);
         Document doc = getDocument();
-        if (desc != null)
+        if (desc != null) {
             doc.putProperty(Document.StreamDescriptionProperty, desc);
+        }
         try {
             // NOTE: Resets the "line separator" property
             kit.read(in, doc, 0);
@@ -1007,8 +1014,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      */
     public void redoLastAction() {
         try {
-            if (undoManager.canRedo())
+            if (undoManager.canRedo()) {
                 undoManager.redo();
+            }
         } catch (CannotRedoException cre) {
             ExceptionDialog.notifyException(cre);
         }
@@ -1056,9 +1064,11 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @see #insert(String, int)
      * @see #replaceRange(String, int, int)
      */
+    @Override
     public void replaceRange(String str, int start, int end) {
-        if (end < start)
+        if (end < start) {
             throw new IllegalArgumentException("end before start");
+        }
         Document doc = getDocument();
         if (doc != null) {
             try {
@@ -1085,6 +1095,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @param text The content to replace the selection with.
      */
+    @Override
     public void replaceSelection(String text) {
         // It's legal for null to be used here..
         if (text == null) {
@@ -1119,12 +1130,13 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
                 // in front of them)
                 int curLineEnd = getLineEndOffset(curLine);
                 if (caretPos == caret.getMark() && caretPos != curLineEnd) {
-                    if (curLine == lastLine)
+                    if (curLine == lastLine) {
                         caretPos = Math.min(caretPos + text.length(),
                                 curLineEnd);
-                    else
+                    } else {
                         caretPos = Math.min(caretPos + text.length(),
                                 curLineEnd - 1);
+                    }
                     caret.moveDot(caretPos);
                 }
             } catch (BadLocationException ble) { // Never happens
@@ -1139,7 +1151,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         handleReplaceSelection(text);
     }
 
-    private static StringBuffer repTabsSB;
+    private static StringBuilder repTabsSB;
     private static Segment repTabsSeg = new Segment();
 
     /**
@@ -1193,7 +1205,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         // Otherwise, there may be more than one tab
 
         if (repTabsSB == null) {
-            repTabsSB = new StringBuffer();
+            repTabsSB = new StringBuilder();
         }
         repTabsSB.setLength(0);
         char[] array = text.toCharArray();
@@ -1202,21 +1214,21 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         for (int pos = firstTab; pos < array.length; pos++) {
             char ch = array[pos];
             switch (ch) {
-                case '\t' :
-                    if (pos > lastPos) {
-                        repTabsSB.append(array, lastPos, pos - lastPos);
-                    }
-                    int thisTabSize = tabSize - (offsInLine % tabSize);
-                    repTabsSB.append(createSpacer(thisTabSize));
-                    lastPos = pos + 1;
-                    offsInLine = 0;
-                    break;
-                case '\n' :
-                    offsInLine = 0;
-                    break;
-                default :
-                    offsInLine++;
-                    break;
+            case '\t':
+                if (pos > lastPos) {
+                    repTabsSB.append(array, lastPos, pos - lastPos);
+                }
+                int thisTabSize = tabSize - (offsInLine % tabSize);
+                repTabsSB.append(createSpacer(thisTabSize));
+                lastPos = pos + 1;
+                offsInLine = 0;
+                break;
+            case '\n':
+                offsInLine = 0;
+                break;
+            default:
+                offsInLine++;
+                break;
             }
         }
         if (lastPos < array.length) {
@@ -1236,7 +1248,8 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      */
     public static void setActionProperties(int action, String name,
             char mnemonic, KeyStroke accelerator) {
-        setActionProperties(action, name, new Integer(mnemonic), accelerator);
+        setActionProperties(action, name, Integer.valueOf(mnemonic),
+                accelerator);
     }
 
     /**
@@ -1252,25 +1265,25 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         Action tempAction = null;
 
         switch (action) {
-            case CUT_ACTION :
-                tempAction = cutAction;
-                break;
-            case COPY_ACTION :
-                tempAction = copyAction;
-                break;
-            case PASTE_ACTION :
-                tempAction = pasteAction;
-                break;
-            case DELETE_ACTION :
-                tempAction = deleteAction;
-                break;
-            case SELECT_ALL_ACTION :
-                tempAction = selectAllAction;
-                break;
-            case UNDO_ACTION :
-            case REDO_ACTION :
-            default :
-                return;
+        case CUT_ACTION:
+            tempAction = cutAction;
+            break;
+        case COPY_ACTION:
+            tempAction = copyAction;
+            break;
+        case PASTE_ACTION:
+            tempAction = pasteAction;
+            break;
+        case DELETE_ACTION:
+            tempAction = deleteAction;
+            break;
+        case SELECT_ALL_ACTION:
+            tempAction = selectAllAction;
+            break;
+        case UNDO_ACTION:
+        case REDO_ACTION:
+        default:
+            return;
         }
 
         tempAction.putValue(Action.NAME, name);
@@ -1291,6 +1304,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *         <code>ConfigurableCaret</code>.
      * @see #setCaretStyle(int, int)
      */
+    @Override
     public void setCaret(Caret caret) {
         super.setCaret(caret);
         if (carets != null && // Called by setUI() before carets is initialized
@@ -1309,8 +1323,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      */
     public void setCaretStyle(int mode, int style) {
         style = (style >= ConfigurableCaret.MIN_STYLE
-                && style <= ConfigurableCaret.MAX_STYLE
-                ? style
+                && style <= ConfigurableCaret.MAX_STYLE ? style
                 : ConfigurableCaret.THICK_VERTICAL_LINE_STYLE);
         carets[mode] = style;
         if (mode == getTextMode() && getCaret() instanceof ConfigurableCaret) {
@@ -1326,6 +1339,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @throws IllegalArgumentException If the document is not an instance of
      *         {@link OTVDocument}.
      */
+    @Override
     public void setDocument(Document document) {
         if (!(document instanceof OTVDocument)) {
             throw new IllegalArgumentException("TextArea requires "
@@ -1392,8 +1406,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
         Color old = (Color) markAllHighlightPainter.getPaint();
         if (old != null && !old.equals(color)) {
             markAllHighlightPainter.setPaint(color);
-            if (markedWord != null)
+            if (markedWord != null) {
                 repaint(); // Repaint if words are highlighted
+            }
             firePropertyChange(MARK_ALL_COLOR_PROPERTY, old, color);
         }
     }
@@ -1416,6 +1431,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRoundedSelectionEdges(boolean rounded) {
         if (getRoundedSelectionEdges() != rounded) {
             markAllHighlightPainter.setRoundedEdges(rounded);
@@ -1450,8 +1466,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      * @see #getTextMode()
      */
     public void setTextMode(int mode) {
-        if (mode != INSERT_MODE && mode != OVERWRITE_MODE)
+        if (mode != INSERT_MODE && mode != OVERWRITE_MODE) {
             mode = INSERT_MODE;
+        }
 
         if (textMode != mode) {
             Caret caret = getCaret();
@@ -1483,6 +1500,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      *
      * @param ui This parameter is ignored.
      */
+    @Override
     public final void setUI(TextUI ui) {
         // Update the popup menu's UI
         if (popupMenu != null) {
@@ -1504,8 +1522,9 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
      */
     public void undoLastAction() {
         try {
-            if (undoManager.canUndo())
+            if (undoManager.canUndo()) {
                 undoManager.undo();
+            }
         } catch (CannotUndoException cue) {
             ExceptionDialog.notifyException(cue);
         }
@@ -1542,6 +1561,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             super(textArea);
         }
 
+        @Override
         public void focusGained(FocusEvent e) {
             Caret c = getCaret();
             boolean enabled = c.getDot() != c.getMark();
@@ -1550,9 +1570,11 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             undoManager.updateActions(); // To reflect this text area
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
                 Caret caret = getCaret();
@@ -1562,6 +1584,7 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             }
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             // WORKAROUND: Since JTextComponent only updates the caret location
             // on mouse clicked and released, we'll do it on dragged events when
@@ -1574,9 +1597,11 @@ public class TextArea extends TextAreaBase implements Printable, Serializable {
             }
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
-            if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0)
+            if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
                 showPopup(e);
+            }
         }
 
         /**

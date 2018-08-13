@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.autocomplete;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.AbstractListModel;
 
@@ -35,11 +36,11 @@ class CompletionListModel extends AbstractListModel {
     private static final long serialVersionUID = -6775318186968991795L;
 
     /** Container for items in this model. */
-    private ArrayList delegate;
+    private List<ICompletion> delegate;
 
     /** Ctor. */
     public CompletionListModel() {
-        delegate = new ArrayList();
+        delegate = new ArrayList<ICompletion>();
     }
 
     /**
@@ -57,11 +58,13 @@ class CompletionListModel extends AbstractListModel {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getElementAt(int index) {
         return delegate.get(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getSize() {
         return delegate.size();
     }
@@ -71,7 +74,7 @@ class CompletionListModel extends AbstractListModel {
      *
      * @param contents The new contents of this model.
      */
-    public void setContents(Collection contents) {
+    public void setContents(Collection<ICompletion> contents) {
         clear();
         if (contents.size() > 0) {
             delegate.addAll(contents);

@@ -64,11 +64,8 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  * 
  */
-class AutoCompletePopupWindow extends JWindow
-        implements
-            CaretListener,
-            ListSelectionListener,
-            MouseListener {
+class AutoCompletePopupWindow extends JWindow implements CaretListener,
+        ListSelectionListener, MouseListener {
 
     private static final long serialVersionUID = -5837857638318646330L;
 
@@ -159,8 +156,7 @@ class AutoCompletePopupWindow extends JWindow
 
         JPanel corner = new SizeGrip();
         boolean isLeftToRight = o.isLeftToRight();
-        String str = isLeftToRight
-                ? JScrollPane.LOWER_RIGHT_CORNER
+        String str = isLeftToRight ? JScrollPane.LOWER_RIGHT_CORNER
                 : JScrollPane.LOWER_LEFT_CORNER;
         sp.setCorner(str, corner);
 
@@ -183,6 +179,7 @@ class AutoCompletePopupWindow extends JWindow
         lastLine = -1;
     }
 
+    @Override
     public void caretUpdate(CaretEvent e) {
         if (isVisible()) { // Should always be true
             int line = ac.getLineOfCaret();
@@ -278,8 +275,7 @@ class AutoCompletePopupWindow extends JWindow
      * @return The selected value.
      */
     public ICompletion getSelection() {
-        return isShowing()
-                ? (ICompletion) list.getSelectedValue()
+        return isShowing() ? (ICompletion) list.getSelectedValue()
                 : lastSelection;
     }
 
@@ -340,21 +336,26 @@ class AutoCompletePopupWindow extends JWindow
         comp.addCaretListener(this);
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
             insertSelectedCompletion();
         }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
     }
 
@@ -509,18 +510,18 @@ class AutoCompletePopupWindow extends JWindow
     private void selectPreviousItem() {
         int index = list.getSelectedIndex();
         switch (index) {
-            case 0 :
-                index = list.getModel().getSize() - 1;
-                break;
-            case -1 : // Check for an empty list (would be an error)
-                index = list.getModel().getSize() - 1;
-                if (index == -1) {
-                    return;
-                }
-                break;
-            default :
-                index = index - 1;
-                break;
+        case 0:
+            index = list.getModel().getSize() - 1;
+            break;
+        case -1: // Check for an empty list (would be an error)
+            index = list.getModel().getSize() - 1;
+            if (index == -1) {
+                return;
+            }
+            break;
+        default:
+            index = index - 1;
+            break;
         }
         list.setSelectedIndex(index);
         list.ensureIndexIsVisible(index);
@@ -532,7 +533,7 @@ class AutoCompletePopupWindow extends JWindow
      *
      * @param completions The completions to display.
      */
-    public void setCompletions(List completions) {
+    public void setCompletions(List<ICompletion> completions) {
         model.setContents(completions);
         selectFirstItem();
     }
@@ -619,6 +620,7 @@ class AutoCompletePopupWindow extends JWindow
      *
      * @param visible Whether this window should be visible.
      */
+    @Override
     public void setVisible(boolean visible) {
         if (visible != isVisible()) {
             if (visible) {
@@ -673,7 +675,7 @@ class AutoCompletePopupWindow extends JWindow
      *
      * @see #installKeyBindings()
      */
-    public void uninstallKeyBindings() {
+    private void uninstallKeyBindings() {
         if (AutoCompletion.getDebug()) {
             ApplicationFrame.getInstance().getConsole()
                     .println("PopupWindow: Removing keybindings");
@@ -719,6 +721,7 @@ class AutoCompletePopupWindow extends JWindow
      *
      * @param e The event.
      */
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             Object value = list.getSelectedValue();
@@ -739,6 +742,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 2336112833039588035L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             boolean doNormalCopy = false;
             if (descWindow != null && descWindow.isVisible()) {
@@ -760,6 +764,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = -9133118458164297182L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectNextItem();
@@ -777,6 +782,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 8750415837852868313L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectLastItem();
@@ -794,6 +800,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = -4238065115131914595L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 insertSelectedCompletion();
@@ -811,6 +818,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 7758725740424041354L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 setVisible(false);
@@ -828,6 +836,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 1515439613863880718L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectFirstItem();
@@ -865,6 +874,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = -9179740981295239317L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 JTextComponent comp = ac.getTextComponent();
@@ -894,6 +904,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = -8912740349382113626L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectPageDownItem();
@@ -911,6 +922,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = -211861503498236284L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectPageUpItem();
@@ -932,6 +944,7 @@ class AutoCompletePopupWindow extends JWindow
             super(model);
         }
 
+        @Override
         public void setUI(ListUI ui) {
             if (Utilities.getUseSubstanceRenderers()
                     && SUBSTANCE_LIST_UI.equals(ui.getClass().getName())) {
@@ -963,6 +976,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 867069533272682694L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 JTextComponent comp = ac.getTextComponent();
@@ -992,6 +1006,7 @@ class AutoCompletePopupWindow extends JWindow
 
         private static final long serialVersionUID = 3402215720137484155L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isVisible()) {
                 selectPreviousItem();

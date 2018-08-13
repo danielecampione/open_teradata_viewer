@@ -46,6 +46,7 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return <code>true</code> always.
      */
+    @Override
     public boolean getCurlyBracesDenoteCodeBlocks() {
         return true;
     }
@@ -57,19 +58,22 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return The action.
      */
+    @Override
     public Action getInsertBreakAction() {
         return INSERT_BREAK_ACTION;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getMarkOccurrencesOfTokenType(int type) {
-        return type == Token.IDENTIFIER || type == Token.FUNCTION;
+        return type == IToken.IDENTIFIER || type == IToken.FUNCTION;
     }
 
     /** {@inheritDoc} */
-    public boolean getShouldIndentNextLineAfter(Token t) {
-        if (t != null && t.textCount == 1) {
-            char ch = t.text[t.textOffset];
+    @Override
+    public boolean getShouldIndentNextLineAfter(IToken t) {
+        if (t != null && t.length() == 1) {
+            char ch = t.charAt(0);
             return ch == '{' || ch == '(';
         }
         return false;
@@ -82,15 +86,15 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
      * @author D. Campione
      * 
      */
-    private static class InsertBreakAction
-            extends
-                SyntaxTextAreaEditorKit.InsertBreakAction {
+    private static class InsertBreakAction extends
+            SyntaxTextAreaEditorKit.InsertBreakAction {
 
         private static final long serialVersionUID = 7740382686532033128L;
 
         private static final Pattern p = Pattern
                 .compile("([ \\t]*)(/?[\\*]+)([ \\t]*)");
 
+        @Override
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             if (!textArea.isEditable() || !textArea.isEnabled()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
@@ -107,8 +111,8 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
             }
 
             // Only in MLC's should we try this
-            if (type == Token.COMMENT_DOCUMENTATION
-                    || type == Token.COMMENT_MULTILINE) {
+            if (type == IToken.COMMENT_DOCUMENTATION
+                    || type == IToken.COMMENT_MULTILINE) {
                 insertBreakInMLC(e, sta, line);
             } else {
                 handleInsertBreak(sta, true);
@@ -132,7 +136,7 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
             final int firstLine = line; // Remember the line we start at
 
             while (line < textArea.getLineCount()) {
-                Token t = textArea.getTokenListForLine(line);
+                IToken t = textArea.getTokenListForLine(line);
                 int i = 0;
                 // If examining the first line, start at offs
                 if (line++ == firstLine) {
@@ -142,10 +146,12 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
                     }
                     i = t.documentToToken(offs);
                 } else {
-                    i = t.textOffset;
+                    i = t.getTextOffset();
                 }
-                while (i < t.textOffset + t.textCount - 1) {
-                    if (t.text[i] == '/' && t.text[i + 1] == '*') {
+                int textOffset = t.getTextOffset();
+                while (i < textOffset + t.length() - 1) {
+                    if (t.charAt(i - textOffset) == '/'
+                            && t.charAt(i - textOffset + 1) == '*') {
                         return true;
                     }
                     i++;

@@ -89,6 +89,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      *
      * @param e The event.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         // Don't do anything if they are selecting text
         Caret c = textArea.getCaret();
@@ -105,9 +106,9 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
             try {
                 // Get the token at the caret position
                 int line = textArea.getCaretLineNumber();
-                Token tokenList = textArea.getTokenListForLine(line);
+                IToken tokenList = textArea.getTokenListForLine(line);
                 int dot = c.getDot();
-                Token t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
+                IToken t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
                 if (t == null /* EOL */|| !isValidType(t) || isNonWordChar(t)) {
                     // Try to the "left" of the caret
                     dot--;
@@ -144,6 +145,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      *
      * @param e The event.
      */
+    @Override
     public void caretUpdate(CaretEvent e) {
         timer.restart();
     }
@@ -206,9 +208,8 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      * @param t The token to check. This cannot be <tt>null</tt>.
      * @return Whether the token is a single non-word char.
      */
-    private static final boolean isNonWordChar(Token t) {
-        return t.textCount == 1
-                && !SyntaxUtilities.isLetter(t.text[t.textOffset]);
+    private static final boolean isNonWordChar(IToken t) {
+        return t.length() == 1 && !SyntaxUtilities.isLetter(t.charAt(0));
     }
 
     /**
@@ -218,8 +219,8 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      * @param t The token.
      * @return Whether we should mark all occurrences of this token.
      */
-    private boolean isValidType(Token t) {
-        return textArea.getMarkOccurrencesOfTokenType(t.type);
+    private boolean isValidType(IToken t) {
+        return textArea.getMarkOccurrencesOfTokenType(t.getType());
     }
 
     /** Removes all highlights added to the text area by this listener. */

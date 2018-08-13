@@ -40,7 +40,7 @@ class DefaultTokenFactory implements ITokenFactory {
 
     private int size;
     private int increment;
-    private Token[] tokenList;
+    private TokenImpl[] tokenList;
     private int currentFreeToken;
 
     protected static final int DEFAULT_START_SIZE = 30;
@@ -64,9 +64,9 @@ class DefaultTokenFactory implements ITokenFactory {
         this.currentFreeToken = 0;
 
         // Give us some tokens to initially work with
-        tokenList = new Token[size];
+        tokenList = new TokenImpl[size];
         for (int i = 0; i < size; i++) {
-            tokenList[i] = new Token();
+            tokenList[i] = new TokenImpl();
         }
     }
 
@@ -75,42 +75,47 @@ class DefaultTokenFactory implements ITokenFactory {
      * is made and no more tokens are available.
      */
     private final void augmentTokenList() {
-        Token[] temp = new Token[size + increment];
+        TokenImpl[] temp = new TokenImpl[size + increment];
         System.arraycopy(tokenList, 0, temp, 0, size);
         size += increment;
         tokenList = temp;
         for (int i = 0; i < increment; i++) {
-            tokenList[size - i - 1] = new Token();
+            tokenList[size - i - 1] = new TokenImpl();
         }
     }
 
     /** {@inheritDoc} */
-    public Token createToken() {
-        Token token = tokenList[currentFreeToken];
+    @Override
+    public TokenImpl createToken() {
+        TokenImpl token = tokenList[currentFreeToken];
         token.text = null;
-        token.type = Token.NULL;
-        token.offset = -1;
+        token.setType(IToken.NULL);
+        token.setOffset(-1);
         token.setNextToken(null);
         currentFreeToken++;
-        if (currentFreeToken == size)
+        if (currentFreeToken == size) {
             augmentTokenList();
+        }
         return token;
     }
 
     /** {@inheritDoc} */
-    public Token createToken(final Segment line, final int beg, final int end,
-            final int startOffset, final int type) {
+    @Override
+    public TokenImpl createToken(final Segment line, final int beg,
+            final int end, final int startOffset, final int type) {
         return createToken(line.array, beg, end, startOffset, type);
     }
 
     /** {@inheritDoc} */
-    public Token createToken(final char[] line, final int beg, final int end,
-            final int startOffset, final int type) {
-        Token token = tokenList[currentFreeToken];
+    @Override
+    public TokenImpl createToken(final char[] line, final int beg,
+            final int end, final int startOffset, final int type) {
+        TokenImpl token = tokenList[currentFreeToken];
         token.set(line, beg, end, startOffset, type);
         currentFreeToken++;
-        if (currentFreeToken == size)
+        if (currentFreeToken == size) {
             augmentTokenList();
+        }
         return token;
     }
 
@@ -119,6 +124,7 @@ class DefaultTokenFactory implements ITokenFactory {
      * <code>ITokenMaker</code> every time a token list is generated for a new
      * line so the tokens can be reused.
      */
+    @Override
     public void resetAllTokens() {
         currentFreeToken = 0;
     }

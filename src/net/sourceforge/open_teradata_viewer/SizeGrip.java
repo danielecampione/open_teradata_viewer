@@ -39,7 +39,7 @@ import javax.swing.event.MouseInputAdapter;
  * @author D. Campione
  * 
  */
-class SizeGrip extends StatusBarPanel {
+public class SizeGrip extends StatusBarPanel {
 
     private static final long serialVersionUID = 9015344617609968566L;
 
@@ -70,14 +70,17 @@ class SizeGrip extends StatusBarPanel {
             long prevTime;
             boolean isLastResize;
 
+            @Override
             public void componentResized(ComponentEvent e) {
                 checkMaximize(true);
             }
 
+            @Override
             public void componentMoved(ComponentEvent e) {
                 checkMaximize(false);
             }
 
+            @Override
             public void componentShown(ComponentEvent e) {
                 // Must do this to display size grip on first display
                 checkMaximize(!isLastResize);
@@ -100,6 +103,7 @@ class SizeGrip extends StatusBarPanel {
      * so we can add a component listener to the parent window to know when it
      * is maximized/de-maximized.
      */
+    @Override
     public void addNotify() {
         super.addNotify();
         window = (Window) SwingUtilities.getRoot(this);
@@ -112,15 +116,18 @@ class SizeGrip extends StatusBarPanel {
      *
      * @param o The new orientation.
      */
+    @Override
     public void applyComponentOrientation(ComponentOrientation o) {
         possiblyFixCursor(o);
         super.applyComponentOrientation(o);
     }
 
+    @Override
     public Dimension getMinimumSize() {
         return new Dimension(20, 20);
     }
 
+    @Override
     public Dimension getPreferredSize() {
         return getMinimumSize();
     }
@@ -130,8 +137,9 @@ class SizeGrip extends StatusBarPanel {
         Dimension dim = getToolkit().getScreenSize();
         if ((rect.x == rect.y) && (rect.x <= 0) && (rect.x > -20)
                 && (dim.width - 20 < rect.width)
-                && (dim.width + 20 > rect.width))
+                && (dim.width + 20 > rect.width)) {
             return false;
+        }
         return true;
     }
 
@@ -144,6 +152,7 @@ class SizeGrip extends StatusBarPanel {
      *
      * @param g The graphics context.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         // If the window isn't maximized, paint the grip part
@@ -172,6 +181,7 @@ class SizeGrip extends StatusBarPanel {
      * Called when this component loses its parent. This method is overridden so
      * we can remove the component listener we added to the parent.
      */
+    @Override
     public void removeNotify() {
         super.removeNotify();
         window.removeComponentListener(maximizeWindow);
@@ -194,6 +204,7 @@ class SizeGrip extends StatusBarPanel {
 
         private Point origPos;
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             if (origPos == null) {
                 // Happens, for example, when a menu is open, and the user then
@@ -234,11 +245,13 @@ class SizeGrip extends StatusBarPanel {
             origPos.setLocation(newPos);
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             origPos = e.getPoint();
             SwingUtilities.convertPointToScreen(origPos, SizeGrip.this);
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
             origPos = null;
         }

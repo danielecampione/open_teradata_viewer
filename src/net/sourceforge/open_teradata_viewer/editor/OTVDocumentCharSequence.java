@@ -61,6 +61,7 @@ public class OTVDocumentCharSequence implements CharSequence {
     }
 
     /** {@inheritDoc} */
+    @Override
     public char charAt(int index) {
         if (index < 0 || index >= length()) {
             throw new IndexOutOfBoundsException("Index " + index
@@ -74,11 +75,13 @@ public class OTVDocumentCharSequence implements CharSequence {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int length() {
         return end - start;
     }
 
     /** {@inheritDoc} */
+    @Override
     public CharSequence subSequence(int start, int end) {
         if (start < 0) {
             throw new IndexOutOfBoundsException("start must be >= 0 (" + start
@@ -99,6 +102,7 @@ public class OTVDocumentCharSequence implements CharSequence {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         try {
             return doc.getText(start, length());

@@ -205,6 +205,7 @@ public class TextScrollPane extends JScrollPane {
      * @param view The new view.
      * @see #getTextArea()
      */
+    @Override
     public void setViewportView(Component view) {
         if (!(view instanceof TextArea)) {
             throw new IllegalArgumentException("view must be an TextArea");

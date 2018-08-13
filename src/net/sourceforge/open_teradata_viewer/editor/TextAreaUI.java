@@ -50,7 +50,6 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import javax.swing.text.PlainView;
 import javax.swing.text.View;
-import javax.swing.text.ViewFactory;
 import javax.swing.text.WrappedPlainView;
 
 /**
@@ -62,7 +61,7 @@ import javax.swing.text.WrappedPlainView;
  * @author D. Campione
  * 
  */
-public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
+public class TextAreaUI extends BasicTextAreaUI {
 
     private static final String SHARED_ACTION_MAP_NAME = "TextAreaUI.actionMap";
     private static final String SHARED_INPUT_MAP_NAME = "TextAreaUI.inputMap";
@@ -177,6 +176,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
      * @param elem The element.
      * @return The view.
      */
+    @Override
     public View create(Element elem) {
         if (textArea.getLineWrap()) {
             return new WrappedPlainView(elem, textArea.getWrapStyleWord());
@@ -191,6 +191,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
      *
      * @return The caret.
      */
+    @Override
     protected Caret createCaret() {
         Caret caret = new ConfigurableCaret();
         caret.setBlinkRate(500);
@@ -205,6 +206,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
      *
      * @return The keymap.
      */
+    @Override
     protected Keymap createKeymap() {
         // Load the keymap we'll be using (it's saved by
         // JTextComponent.addKeymap)
@@ -269,6 +271,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
      * @return the editor capabilities.
      * @see TextUI#getEditorKit.
      */
+    @Override
     public EditorKit getEditorKit(JTextComponent tc) {
         return defaultKit;
     }
@@ -340,6 +343,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
      *
      * @return the bounding box for the root view
      */
+    @Override
     protected Rectangle getVisibleEditorRect() {
         Rectangle alloc = textArea.getBounds();
         if ((alloc.width > 0) && (alloc.height > 0)) {
@@ -354,6 +358,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
         return null;
     }
 
+    @Override
     protected void installDefaults() {
         super.installDefaults();
 
@@ -368,6 +373,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void installKeyboardActions() {
         // NOTE: Don't call super.installKeyboardActions(), as that causes
         // JTextAreas to stop responding to certain keystrokes if an TextArea is
@@ -395,6 +401,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
     }
 
     /** Installs this UI to the given text component. */
+    @Override
     public void installUI(JComponent c) {
         if (!(c instanceof TextArea)) {
             throw new Error("TextAreaUI needs an instance of TextArea!");
@@ -402,6 +409,7 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
         super.installUI(c);
     }
 
+    @Override
     protected void paintBackground(Graphics g) {
         // Only fill in the background if an image isn't being used
         Color bg = textArea.getBackground();
@@ -542,10 +550,12 @@ public class TextAreaUI extends BasicTextAreaUI implements ViewFactory {
 
         private static final long serialVersionUID = -3898391799242008836L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             textArea.requestFocus();
         }
 
+        @Override
         public boolean isEnabled() {
             return textArea.isEditable();
         }

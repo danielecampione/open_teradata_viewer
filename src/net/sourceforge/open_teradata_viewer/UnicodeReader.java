@@ -148,6 +148,7 @@ public class UnicodeReader extends Reader {
     }
 
     /** Closes this reader. */
+    @Override
     public void close() throws IOException {
         internalIn.close();
     }
@@ -207,10 +208,11 @@ public class UnicodeReader extends Reader {
             unread = n;
         }
 
-        if (unread > 0)
+        if (unread > 0) {
             tempIn.unread(bom, (n - unread), unread);
-        else if (unread < -1)
+        } else if (unread < -1) {
             tempIn.unread(bom, 0, 0);
+        }
 
         // Use given encoding
         if (encoding == null) {
@@ -233,6 +235,7 @@ public class UnicodeReader extends Reader {
      * @return The number of characters read, or <code>-1</code> if the end of
      *         the stream has been reached.
      */
+    @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
         return internalIn.read(cbuf, off, len);
     }

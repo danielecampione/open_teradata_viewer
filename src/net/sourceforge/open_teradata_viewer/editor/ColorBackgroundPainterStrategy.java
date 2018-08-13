@@ -31,9 +31,8 @@ import java.awt.Rectangle;
  * @see net.sourceforge.open_teradata_viewer.editor.ImageBackgroundPainterStrategy
  * 
  */
-public class ColorBackgroundPainterStrategy
-        implements
-            IBackgroundPainterStrategy {
+public class ColorBackgroundPainterStrategy implements
+        IBackgroundPainterStrategy {
 
     private Color color;
 
@@ -54,6 +53,7 @@ public class ColorBackgroundPainterStrategy
      *         <code>ColorBackgroundPainterStrategy</code> representing the same
      *         color as this one.
      */
+    @Override
     public boolean equals(Object o2) {
         return o2 != null
                 && (o2 instanceof ColorBackgroundPainterStrategy)
@@ -78,6 +78,7 @@ public class ColorBackgroundPainterStrategy
      *
      * @return The hash code.
      */
+    @Override
     public int hashCode() {
         return color.hashCode();
     }
@@ -88,6 +89,7 @@ public class ColorBackgroundPainterStrategy
      * @param g The graphics context.
      * @param bounds The bounds of the object whose backgrouns we're painting.
      */
+    @Override
     public void paint(Graphics g, Rectangle bounds) {
         Color temp = g.getColor();
         g.setColor(color);

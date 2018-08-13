@@ -43,7 +43,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * @author D. Campione
  * 
  */
-public class Fold implements Comparable<Object> {
+public class Fold implements Comparable<Fold> {
 
     private int type;
     private SyntaxTextArea textArea;
@@ -93,11 +93,10 @@ public class Fold implements Comparable<Object> {
      * @param otherFold Another fold to compare this one to.
      * @return How this fold compares to the other.
      */
-    public int compareTo(Object otherFold) {
+    public int compareTo(Fold otherFold) {
         int result = -1;
-        if (otherFold instanceof Fold) {
-            result = startOffs.getOffset()
-                    - ((Fold) otherFold).startOffs.getOffset();
+        if (otherFold != null) {
+            result = startOffs.getOffset() - otherFold.startOffs.getOffset();
         }
         return result;
     }
@@ -154,10 +153,11 @@ public class Fold implements Comparable<Object> {
      *
      * @param otherFold Another fold to compare this one to.
      * @return Whether the two folds are equal.
-     * @see #compareTo(Object)
+     * @see #compareTo(Fold)
      */
+    @Override
     public boolean equals(Object otherFold) {
-        return compareTo(otherFold) == 0;
+        return otherFold instanceof Fold && compareTo((Fold) otherFold) == 0;
     }
 
     /**
@@ -168,7 +168,7 @@ public class Fold implements Comparable<Object> {
      * @see #getChildCount()
      */
     public Fold getChild(int index) {
-        return (Fold) children.get(index);
+        return children.get(index);
     }
 
     /**
@@ -387,6 +387,7 @@ public class Fold implements Comparable<Object> {
         return startOffs.getOffset();
     }
 
+    @Override
     public int hashCode() {
         return getStartLine();
     }
@@ -516,6 +517,7 @@ public class Fold implements Comparable<Object> {
      *
      * @return A string representation of this <code>Fold</code>.
      */
+    @Override
     public String toString() {
         return "[Fold: " + "startOffs=" + getStartOffset() + ", endOffs="
                 + getEndOffset() + ", collapsed=" + collapsed + "]";

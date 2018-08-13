@@ -667,7 +667,8 @@ public class AutoCompletion {
             }
         }
 
-        final List completions = provider.getCompletions(textComponent);
+        final List<ICompletion> completions = provider
+                .getCompletions(textComponent);
         int count = completions.size();
 
         if (count > 1 || (count == 1 && (isPopupVisible() || textLen == 0))
@@ -711,8 +712,9 @@ public class AutoCompletion {
             }
         } else if (count == 1) { // !isPopupVisible && autoCompleteSingleChoices
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
-                    insertCompletion((ICompletion) completions.get(0));
+                    insertCompletion(completions.get(0));
                 }
             });
         } else {
@@ -1041,11 +1043,8 @@ public class AutoCompletion {
      * @author D. Campione
      * 
      */
-    private class AutoActivationListener extends FocusAdapter
-            implements
-                DocumentListener,
-                CaretListener,
-                ActionListener {
+    private class AutoActivationListener extends FocusAdapter implements
+            DocumentListener, CaretListener, ActionListener {
 
         private Timer timer;
         private boolean justInserted;
@@ -1055,6 +1054,7 @@ public class AutoCompletion {
             timer.setRepeats(false);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             doCompletion();
         }
@@ -1065,6 +1065,7 @@ public class AutoCompletion {
             tc.addCaretListener(this);
         }
 
+        @Override
         public void caretUpdate(CaretEvent e) {
             if (justInserted) {
                 justInserted = false;
@@ -1073,15 +1074,18 @@ public class AutoCompletion {
             }
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
             // Ignore.
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
             timer.stop();
             //hideChildWindows(); Other listener will do this
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             justInserted = false;
             if (isAutoCompleteEnabled() && isAutoActivationEnabled()
@@ -1105,6 +1109,7 @@ public class AutoCompletion {
             justInserted = false;
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             timer.stop();
         }
@@ -1121,6 +1126,7 @@ public class AutoCompletion {
 
         private static final long serialVersionUID = -5057273693917033633L;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isAutoCompleteEnabled()) {
                 refreshPopupWindow();
@@ -1139,6 +1145,7 @@ public class AutoCompletion {
      */
     private class LookAndFeelChangeListener implements PropertyChangeListener {
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
             String name = e.getPropertyName();
             if ("lookAndFeel".equals(name)) {
@@ -1164,6 +1171,7 @@ public class AutoCompletion {
             this.start = Character.toString(ch);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             // Prevents keystrokes from messing up
             boolean wasVisible = hidePopupWindow();
@@ -1189,23 +1197,25 @@ public class AutoCompletion {
      * @author D. Campione
      * 
      */
-    private class ParentWindowListener extends ComponentAdapter
-            implements
-                WindowFocusListener {
+    private class ParentWindowListener extends ComponentAdapter implements
+            WindowFocusListener {
 
         public void addTo(Window w) {
             w.addComponentListener(this);
             w.addWindowFocusListener(this);
         }
 
+        @Override
         public void componentHidden(ComponentEvent e) {
             hideChildWindows();
         }
 
+        @Override
         public void componentMoved(ComponentEvent e) {
             hideChildWindows();
         }
 
+        @Override
         public void componentResized(ComponentEvent e) {
             hideChildWindows();
         }
@@ -1215,9 +1225,11 @@ public class AutoCompletion {
             w.removeWindowFocusListener(this);
         }
 
+        @Override
         public void windowGainedFocus(WindowEvent e) {
         }
 
+        @Override
         public void windowLostFocus(WindowEvent e) {
             hideChildWindows();
         }
@@ -1229,9 +1241,8 @@ public class AutoCompletion {
      * @author D. Campione
      * 
      */
-    private class TextComponentListener extends FocusAdapter
-            implements
-                HierarchyListener {
+    private class TextComponentListener extends FocusAdapter implements
+            HierarchyListener {
 
         void addTo(JTextComponent tc) {
             tc.addFocusListener(this);
@@ -1241,6 +1252,7 @@ public class AutoCompletion {
         /**
          * Hide the auto-completion windows when the text component loses focus.
          */
+        @Override
         public void focusLost(FocusEvent e) {
             hideChildWindows();
         }
@@ -1252,6 +1264,7 @@ public class AutoCompletion {
          *
          * @param e The event.
          */
+        @Override
         public void hierarchyChanged(HierarchyEvent e) {
             Window oldParentWindow = parentWindow;
             parentWindow = SwingUtilities.getWindowAncestor(textComponent);

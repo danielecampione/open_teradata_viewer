@@ -63,6 +63,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Shape paintLayer(Graphics g, int p0, int p1, Shape viewBounds,
             JTextComponent c, View view) {
         g.setColor(getColor());
@@ -103,8 +104,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
             // Determine locations
             Shape shape = view.modelToView(p0, Position.Bias.Forward, p1,
                     Position.Bias.Backward, viewBounds);
-            Rectangle r = (shape instanceof Rectangle)
-                    ? (Rectangle) shape
+            Rectangle r = (shape instanceof Rectangle) ? (Rectangle) shape
                     : shape.getBounds();
             g.fillRect(r.x, r.y, r.width, r.height);
             if (paintBorder) {
@@ -120,6 +120,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setColor(Color c) {
         super.setColor(c);
         borderColor = c.darker();

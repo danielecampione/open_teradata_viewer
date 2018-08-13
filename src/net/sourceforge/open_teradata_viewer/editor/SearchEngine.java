@@ -204,8 +204,9 @@ public class SearchEngine {
      *         an invalid group (less than zero or greater than the number of
      *         groups matched).
      */
-    private static List<Object> getMatches(Matcher m, String replaceStr) {
-        ArrayList<Object> matches = new ArrayList<Object>();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static List getMatches(Matcher m, String replaceStr) {
+        ArrayList matches = new ArrayList();
         while (m.find()) {
             Point loc = new Point(m.start(), m.end());
             if (replaceStr == null) { // Find, not replace
@@ -273,10 +274,11 @@ public class SearchEngine {
             int temp = goForward ? 0 : searchIn.length();
             int tempChange = goForward ? 1 : -1;
             while (true) {
-                if (goForward)
+                if (goForward) {
                     temp = searchIn.indexOf(searchFor, temp);
-                else
+                } else {
                     temp = searchIn.lastIndexOf(searchFor, temp);
+                }
                 if (temp != -1) {
                     if (isWholeWord(searchIn, temp, len)) {
                         return temp;
@@ -360,8 +362,7 @@ public class SearchEngine {
 
         // Make a pattern that takes into account whether or not to match case
         int flags = Pattern.MULTILINE; // '^' and '$' are done per line
-        flags |= matchCase
-                ? 0
+        flags |= matchCase ? 0
                 : (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         Pattern pattern = Pattern.compile(regEx, flags);
 
@@ -379,7 +380,7 @@ public class SearchEngine {
                         getReplacementText(m, replaceStr));
             }
         } else { // Search backwards
-            List<Object> matches = getMatches(m, replaceStr);
+            List<?> matches = getMatches(m, replaceStr);
             if (!matches.isEmpty()) {
                 return matches.get(matches.size() - 1);
             }
@@ -447,7 +448,7 @@ public class SearchEngine {
     public static String getReplacementText(Matcher m, CharSequence template) {
         // Process substitution string to replace group references with groups
         int cursor = 0;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         while (cursor < template.length()) {
             char nextChar = template.charAt(cursor);
@@ -455,12 +456,12 @@ public class SearchEngine {
             if (nextChar == '\\') { // Escape character
                 nextChar = template.charAt(++cursor);
                 switch (nextChar) { // Special cases
-                    case 'n' :
-                        nextChar = '\n';
-                        break;
-                    case 't' :
-                        nextChar = '\t';
-                        break;
+                case 'n':
+                    nextChar = '\n';
+                    break;
+                case 't':
+                    nextChar = '\t';
+                    break;
                 }
                 result.append(nextChar);
                 cursor++;
@@ -579,8 +580,9 @@ public class SearchEngine {
         int start = makeMarkAndDotEqual(textArea, forward);
 
         CharSequence findIn = getFindInCharSequence(textArea, start, forward);
-        if (findIn == null)
+        if (findIn == null) {
             return false;
+        }
 
         // Find the next location of the text we're searching for
         RegExReplaceInfo info = getRegExReplaceInfo(findIn, context);

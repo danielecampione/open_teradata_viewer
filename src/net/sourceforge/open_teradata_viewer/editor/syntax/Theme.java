@@ -205,11 +205,9 @@ public class Theme {
             gutter.setBackground(bgColor);
             gutter.setBorderColor(gutterBorderColor);
             gutter.setLineNumberColor(lineNumberColor);
-            String fontName = lineNumberFont != null
-                    ? lineNumberFont
+            String fontName = lineNumberFont != null ? lineNumberFont
                     : baseFont.getFamily();
-            int fontSize = lineNumberFontSize > 0
-                    ? lineNumberFontSize
+            int fontSize = lineNumberFontSize > 0 ? lineNumberFontSize
                     : baseFont.getSize();
             Font font = getFont(fontName, Font.PLAIN, fontSize);
             gutter.setLineNumberFont(font);
@@ -422,8 +420,7 @@ public class Theme {
                 Color color = secondaryLanguages[i];
                 Element elem2 = doc.createElement("language");
                 elem2.setAttribute("index", Integer.toString(i + 1));
-                elem2.setAttribute("bg", color == null
-                        ? ""
+                elem2.setAttribute("bg", color == null ? ""
                         : colorToString(color));
             }
 
@@ -452,7 +449,7 @@ public class Theme {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 int value = field.getInt(null);
-                if (value != ITokenTypes.NUM_TOKEN_TYPES) {
+                if (value != ITokenTypes.DEFAULT_NUM_TOKEN_TYPES) {
                     Style style = scheme.getStyle(value);
                     if (style != null) {
                         Element elem2 = doc.createElement("style");
@@ -570,10 +567,12 @@ public class Theme {
 
         private Theme theme;
 
+        @Override
         public void error(SAXParseException saxpe) throws SAXException {
             throw saxpe;
         }
 
+        @Override
         public void fatalError(SAXParseException saxpe) throws SAXException {
             throw saxpe;
         }
@@ -612,12 +611,14 @@ public class Theme {
             return value;
         }
 
+        @Override
         public InputSource resolveEntity(String publicID, String systemID)
                 throws SAXException {
             return new InputSource(getClass().getResourceAsStream(
                     "/res/theme.dtd"));
         }
 
+        @Override
         public void startElement(String uri, String localName, String qName,
                 Attributes attrs) {
             if ("background".equals(qName)) {
@@ -718,7 +719,7 @@ public class Theme {
                 String type = attrs.getValue("token");
                 Field field = null;
                 try {
-                    field = Token.class.getField(type);
+                    field = IToken.class.getField(type);
                 } catch (RuntimeException re) {
                     throw re;
                 } catch (Exception e) {
@@ -805,6 +806,7 @@ public class Theme {
             }
         }
 
+        @Override
         public void warning(SAXParseException saxpe) throws SAXException {
             throw saxpe;
         }

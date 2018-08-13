@@ -89,11 +89,13 @@ class URLFileLocation extends FileLocation {
      * @return The last time this file was modified. This will always be {@link
      *         TextEditorPane#LAST_MODIFIED_UNKNOWN} for URL's.
      */
+    @Override
     protected long getActualLastModified() {
         return TextEditorPane.LAST_MODIFIED_UNKNOWN;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getFileFullPath() {
         return fileFullPath;
     }
@@ -101,6 +103,7 @@ class URLFileLocation extends FileLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFileName() {
         return fileName;
     }
@@ -108,6 +111,7 @@ class URLFileLocation extends FileLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected InputStream getInputStream() throws IOException {
         return url.openStream();
     }
@@ -115,6 +119,7 @@ class URLFileLocation extends FileLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected OutputStream getOutputStream() throws IOException {
         return url.openConnection().getOutputStream();
     }
@@ -125,6 +130,7 @@ class URLFileLocation extends FileLocation {
      * @return Whether this is a local file.
      * @see #isLocalAndExists()
      */
+    @Override
     public boolean isLocal() {
         return "file".equalsIgnoreCase(url.getProtocol());
     }
@@ -137,6 +143,7 @@ class URLFileLocation extends FileLocation {
      * @return <code>false</code> always.
      * @see #isLocal()
      */
+    @Override
     public boolean isLocalAndExists() {
         return false;
     }

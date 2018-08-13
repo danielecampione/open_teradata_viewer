@@ -177,6 +177,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      *
      * @param e The document event.
      */
+    @Override
     public void changedUpdate(DocumentEvent e) {
     }
 
@@ -186,9 +187,9 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      * @return The default encoding.
      */
     private static final String getDefaultEncoding() {
-        // NOTE: The "file.encoding" property is not guaranteed to be set by the
-        // spec, so we cannot rely on it
-        String encoding = System.getProperty("file.encoding");
+        // NOTE: The "file.encoding" system property is not guaranteed to be set
+        // by the spec, so we cannot rely on it
+        String encoding = Charset.defaultCharset().name();
         if (encoding == null) {
             try {
                 File f = File.createTempFile("sta", null);
@@ -305,6 +306,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      *
      * @param e Information on the insertion.
      */
+    @Override
     public void insertUpdate(DocumentEvent e) {
         if (!dirty) {
             setDirty(true);
@@ -374,8 +376,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
     public void load(FileLocation loc, String defaultEnc) throws IOException {
         // For new local files, just go with it
         if (loc.isLocal() && !loc.isLocalAndExists()) {
-            this.charSet = defaultEnc != null
-                    ? defaultEnc
+            this.charSet = defaultEnc != null ? defaultEnc
                     : getDefaultEncoding();
             this.loc = loc;
             setText(null);
@@ -447,6 +448,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      *
      * @param e The document event.
      */
+    @Override
     public void removeUpdate(DocumentEvent e) {
         if (!dirty) {
             setDirty(true);
@@ -533,6 +535,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
      *
      * @param doc The new document.
      */
+    @Override
     public void setDocument(Document doc) {
         Document old = getDocument();
         if (old != null) {

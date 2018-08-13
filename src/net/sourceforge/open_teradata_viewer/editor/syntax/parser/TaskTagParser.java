@@ -27,8 +27,8 @@ import javax.swing.text.Element;
 
 import net.sourceforge.open_teradata_viewer.editor.syntax.ErrorStrip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
  * IParser that identifies "task tags," such as "<code>TODO</code>",
@@ -67,6 +67,7 @@ public class TaskTagParser extends AbstractParser {
         return taskPattern == null ? null : taskPattern.pattern();
     }
 
+    @Override
     public IParseResult parse(SyntaxDocument doc, String style) {
         Element root = doc.getDefaultRootElement();
         int lineCount = root.getElementCount();
@@ -82,14 +83,14 @@ public class TaskTagParser extends AbstractParser {
         result.setParsedLines(0, lineCount - 1);
 
         for (int line = 0; line < lineCount; line++) {
-            Token t = doc.getTokenListForLine(line);
+            IToken t = doc.getTokenListForLine(line);
             int offs = -1;
             int start = -1;
             String text = null;
 
             while (t != null && t.isPaintable()) {
                 if (t.isComment()) {
-                    offs = t.offset;
+                    offs = t.getOffset();
                     text = t.getLexeme();
 
                     Matcher m = taskPattern.matcher(text);
@@ -145,9 +146,9 @@ public class TaskTagParser extends AbstractParser {
      */
     public static class TaskNotice extends DefaultParserNotice {
 
-        public TaskNotice(IParser iParser, String message, int line, int offs,
+        public TaskNotice(IParser parser, String message, int line, int offs,
                 int length) {
-            super(iParser, message, line, offs, length);
+            super(parser, message, line, offs, length);
         }
 
     }

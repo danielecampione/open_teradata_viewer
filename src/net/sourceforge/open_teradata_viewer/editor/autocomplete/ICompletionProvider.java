@@ -65,7 +65,7 @@ public interface ICompletionProvider {
      * @return The list of {@link ICompletion}s. If no completions are
      *         available, this may be <code>null</code>.
      */
-    public List getCompletions(JTextComponent comp);
+    public List<ICompletion> getCompletions(JTextComponent comp);
 
     /**
      * Returns the completions that have been entered at the specified visual
@@ -76,7 +76,7 @@ public interface ICompletionProvider {
      * @param p The position, usually from a <tt>MouseEvent</tt>.
      * @return The completions, or an empty list if there are none.
      */
-    public List getCompletionsAt(JTextComponent comp, Point p);
+    public List<ICompletion> getCompletionsAt(JTextComponent comp, Point p);
 
     /**
      * Returns the cell renderer for completions returned from this provider.
@@ -107,7 +107,8 @@ public interface ICompletionProvider {
      * @return The list of {@link IParameterizedCompletion}s. If no completions
      *         are available, this may be <code>null</code>.
      */
-    public List getParameterizedCompletions(JTextComponent tc);
+    public List<IParameterizedCompletion> getParameterizedCompletions(
+            JTextComponent tc);
 
     /**
      * Returns the text that marks the end of a list of parameters to a function

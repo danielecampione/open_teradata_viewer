@@ -56,8 +56,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * 
  */
 public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
-        implements
-            Serializable {
+        implements Serializable {
 
     private static final long serialVersionUID = -7214425523071330073L;
 
@@ -152,9 +151,10 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
      * @return The alpha composite.
      */
     private AlphaComposite getAlphaComposite() {
-        if (alphaComposite == null)
+        if (alphaComposite == null) {
             alphaComposite = AlphaComposite.getInstance(
                     AlphaComposite.SRC_OVER, alpha);
+        }
         return alphaComposite;
     }
 
@@ -189,6 +189,7 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
      * @param bounds The bounding box for the highlight.
      * @param c The editor.
      */
+    @Override
     public void paint(Graphics g, int offs0, int offs1, Shape bounds,
             JTextComponent c) {
         Rectangle alloc = bounds.getBounds();
@@ -249,6 +250,7 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
      * @param view View painting for.
      * @return region drawing occurred in.
      */
+    @Override
     public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds,
             JTextComponent c, View view) {
         // Set up translucency if necessary
@@ -306,8 +308,7 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
             try {
                 Shape shape = view.modelToView(offs0, Position.Bias.Forward,
                         offs1, Position.Bias.Backward, bounds);
-                Rectangle r = (shape instanceof Rectangle)
-                        ? (Rectangle) shape
+                Rectangle r = (shape instanceof Rectangle) ? (Rectangle) shape
                         : shape.getBounds();
                 if (roundedEdges) {
                     g2d.fillRoundRect(r.x, r.y, r.width, r.height, ARCWIDTH,
@@ -405,8 +406,7 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
         if (paint != null) {
             // NOTE: We cheat and always serialize the Paint as a Color. This is
             // (practically) always the case anyway
-            Color c = (paint instanceof Color)
-                    ? ((Color) paint)
+            Color c = (paint instanceof Color) ? ((Color) paint)
                     : SystemColor.textHighlight;
             rgb = c.getRGB();
         }

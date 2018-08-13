@@ -105,16 +105,16 @@ public class PortPropsDialog extends JDialog {
     // Used for addNotify check
     boolean fComponentsAdjusted = false;
     JLabel jLabel1 = new JLabel();
-    String[] sPortStyles = {"Hidden", "GraphicViewerObject", "Ellipse",
-            "Triangle", "Rectangle", "Diamond"};
+    String[] sPortStyles = { "Hidden", "GraphicViewerObject", "Ellipse",
+            "Triangle", "Rectangle", "Diamond" };
     JComboBox portStyleComboBox = new JComboBox(sPortStyles);
     JCheckBox validDestinationCheckBox = new JCheckBox();
     JCheckBox validSourceCheckBox = new JCheckBox();
     JCheckBox validDuplicateLinksCheckBox = new JCheckBox();
     JCheckBox validSelfNodeCheckBox = new JCheckBox();
-    String[] sSpots = {"Center", "Top-Left", "Top-Center", "Top-Right",
+    String[] sSpots = { "Center", "Top-Left", "Top-Center", "Top-Right",
             "Right-Center", "Bottom-Right", "Bottom-Center", "Bottom-Left",
-            "Left-Center", "No-Spot"};
+            "Left-Center", "No-Spot" };
     JComboBox fromSpotCombo = new JComboBox(sSpots);
     JComboBox toSpotCombo = new JComboBox(sSpots);
     JLabel jLabel2 = new JLabel();
@@ -150,36 +150,42 @@ public class PortPropsDialog extends JDialog {
         panel1.setPreferredSize(new Dimension(416, 450));
         OKButton.addActionListener(new java.awt.event.ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 OKButton_actionPerformed(e);
             }
         });
         CancelButton.addActionListener(new java.awt.event.ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 CancelButton_actionPerformed(e);
             }
         });
         penColorButton.addActionListener(new java.awt.event.ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 penColorButton_actionPerformed(e);
             }
         });
         brushColorButton.addActionListener(new java.awt.event.ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 brushColorButton_actionPerformed(e);
             }
         });
         OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
+            @Override
             public void keyPressed(KeyEvent e) {
                 OKButton_keyPressed(e);
             }
         });
         CancelButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
+            @Override
             public void keyPressed(KeyEvent e) {
                 CancelButton_keyPressed(e);
             }
@@ -396,7 +402,7 @@ public class PortPropsDialog extends JDialog {
             if (myObject.getBrush().getPaint() instanceof Color) {
                 myBrushColor = (Color) myObject.getBrush().getPaint();
             } else {
-                myBrushColor = Color.black; // ??? need different kinds of editors
+                myBrushColor = Color.black; // Need different kinds of editors
             }
         } else {
             solidBrushBox.setSelected(false);
@@ -495,6 +501,7 @@ public class PortPropsDialog extends JDialog {
                 .getText()));
     }
 
+    @Override
     public void addNotify() {
         // Record the size of the window prior to calling parents addNotify.
         Dimension d = getSize();
@@ -523,6 +530,7 @@ public class PortPropsDialog extends JDialog {
      * @param b  if true, show the component; otherwise, hide the component.
      * @see javax.swing.JComponent#isVisible
      */
+    @Override
     public void setVisible(boolean b) {
         if (b) {
             Rectangle bounds = getParent().getBounds();

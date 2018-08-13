@@ -39,11 +39,11 @@ public abstract class AbstractTokenMakerFactory extends TokenMakerFactory {
      * defined in this map, a <code>ITokenMaker</code> of the corresponding type
      * is returned.
      */
-    private Map tokenMakerMap;
+    private Map<String, Object> tokenMakerMap;
 
     /** Ctor. */
     protected AbstractTokenMakerFactory() {
-        tokenMakerMap = new HashMap();
+        tokenMakerMap = new HashMap<String, Object>();
         initTokenMakerMap();
     }
 
@@ -54,6 +54,7 @@ public abstract class AbstractTokenMakerFactory extends TokenMakerFactory {
      * @return The corresponding <code>ITokenMaker</code>, or <code>null</code>
      *         if none matches the specified key.
      */
+    @Override
     protected ITokenMaker getTokenMakerImpl(String key) {
         TokenMakerCreator tmc = (TokenMakerCreator) tokenMakerMap.get(key);
         if (tmc != null) {
@@ -80,6 +81,7 @@ public abstract class AbstractTokenMakerFactory extends TokenMakerFactory {
     protected abstract void initTokenMakerMap();
 
     /** {@inheritDoc} */
+    @Override
     public Set<String> keySet() {
         return tokenMakerMap.keySet();
     }

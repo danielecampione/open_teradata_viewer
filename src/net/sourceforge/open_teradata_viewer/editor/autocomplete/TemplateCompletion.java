@@ -66,11 +66,10 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * @author D. Campione
  * 
  */
-public class TemplateCompletion extends AbstractCompletion
-        implements
-            IParameterizedCompletion {
+public class TemplateCompletion extends AbstractCompletion implements
+        IParameterizedCompletion {
 
-    private List pieces;
+    private List<ITemplatePiece> pieces;
 
     private String inputText;
 
@@ -81,7 +80,7 @@ public class TemplateCompletion extends AbstractCompletion
     private String summary;
 
     /** The template's parameters. */
-    private List params;
+    private List<Parameter> params;
 
     public TemplateCompletion(ICompletionProvider provider, String inputText,
             String definitionString, String template) {
@@ -96,8 +95,8 @@ public class TemplateCompletion extends AbstractCompletion
         this.definitionString = definitionString;
         this.shortDescription = shortDescription;
         this.summary = summary;
-        pieces = new ArrayList(3);
-        params = new ArrayList(3);
+        pieces = new ArrayList<ITemplatePiece>(3);
+        params = new ArrayList<Parameter>(3);
         parse(template);
     }
 
@@ -110,12 +109,13 @@ public class TemplateCompletion extends AbstractCompletion
         }
     }
 
+    @Override
     public String getInputText() {
         return inputText;
     }
 
     private String getPieceText(int index, String leadingWS) {
-        ITemplatePiece piece = (ITemplatePiece) pieces.get(index);
+        ITemplatePiece piece = pieces.get(index);
         String text = piece.getText();
         if (text.indexOf('\n') > -1) {
             text = text.replaceAll("\n", "\n" + leadingWS);
@@ -129,14 +129,17 @@ public class TemplateCompletion extends AbstractCompletion
      *
      * @return <code>null</code> always.
      */
+    @Override
     public String getReplacementText() {
         return null;
     }
 
+    @Override
     public String getSummary() {
         return summary;
     }
 
+    @Override
     public String getDefinitionString() {
         return definitionString;
     }
@@ -146,15 +149,17 @@ public class TemplateCompletion extends AbstractCompletion
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getShowParameterToolTip() {
         return false;
     }
 
+    @Override
     public ParameterizedCompletionInsertionInfo getInsertionInfo(
             JTextComponent tc, boolean replaceTabsWithSpaces) {
         ParameterizedCompletionInsertionInfo info = new ParameterizedCompletionInsertionInfo();
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int dot = tc.getCaretPosition();
 
         // Get the range in which the caret can move before we hide this tool
@@ -184,7 +189,7 @@ public class TemplateCompletion extends AbstractCompletion
         // simplicity of undo/redo)
         int start = dot;
         for (int i = 0; i < pieces.size(); i++) {
-            ITemplatePiece piece = (ITemplatePiece) pieces.get(i);
+            ITemplatePiece piece = pieces.get(i);
             String text = getPieceText(i, leadingWS);
             if (piece instanceof Text) {
                 if (replaceTabsWithSpaces) {
@@ -231,11 +236,13 @@ public class TemplateCompletion extends AbstractCompletion
     }
 
     /** {@inheritDoc} */
+    @Override
     public Parameter getParam(int index) {
-        return (Parameter) params.get(index);
+        return params.get(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getParamCount() {
         return params == null ? 0 : params.size();
     }
@@ -269,28 +276,25 @@ public class TemplateCompletion extends AbstractCompletion
                 && offs < template.length() - 1) {
             char next = template.charAt(offs + 1);
             switch (next) {
-                case '$' : // "$$" => escaped single dollar sign
+            case '$': // "$$" => escaped single dollar sign
+                addTemplatePiece(new ITemplatePiece.Text(template.substring(
+                        lastOffs, offs + 1)));
+                lastOffs = offs += 2;
+                break;
+            case '{': // "${...}" => variable
+                int closingCurly = template.indexOf('}', offs + 2);
+                if (closingCurly > -1) {
                     addTemplatePiece(new ITemplatePiece.Text(
-                            template.substring(lastOffs, offs + 1)));
-                    lastOffs = offs += 2;
-                    break;
-                case '{' : // "${...}" => variable
-                    int closingCurly = template.indexOf('}', offs + 2);
-                    if (closingCurly > -1) {
-                        addTemplatePiece(new ITemplatePiece.Text(
-                                template.substring(lastOffs, offs)));
-                        String varName = template.substring(offs + 2,
-                                closingCurly);
-                        if (!"cursor".equals(varName)
-                                && isParamDefined(varName)) {
-                            addTemplatePiece(new ITemplatePiece.ParamCopy(
-                                    varName));
-                        } else {
-                            addTemplatePiece(new ITemplatePiece.Param(varName));
-                        }
-                        lastOffs = offs = closingCurly + 1;
+                            template.substring(lastOffs, offs)));
+                    String varName = template.substring(offs + 2, closingCurly);
+                    if (!"cursor".equals(varName) && isParamDefined(varName)) {
+                        addTemplatePiece(new ITemplatePiece.ParamCopy(varName));
+                    } else {
+                        addTemplatePiece(new ITemplatePiece.Param(varName));
                     }
-                    break;
+                    lastOffs = offs = closingCurly + 1;
+                }
+                break;
             }
         }
 
@@ -300,7 +304,7 @@ public class TemplateCompletion extends AbstractCompletion
         }
     }
 
-    private int possiblyReplaceTabsWithSpaces(StringBuffer sb, String text,
+    private int possiblyReplaceTabsWithSpaces(StringBuilder sb, String text,
             JTextComponent tc, int start) {
         int tab = text.indexOf('\t');
         if (tab > -1) {
@@ -337,6 +341,7 @@ public class TemplateCompletion extends AbstractCompletion
         return start;
     }
 
+    @Override
     public String toString() {
         return getDefinitionString();
     }

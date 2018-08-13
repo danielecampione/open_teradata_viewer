@@ -54,7 +54,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 public interface ICodeTemplate
         extends
             Cloneable,
-            Comparable<Object>,
+            Comparable<ICodeTemplate>,
             Serializable {
 
     /**

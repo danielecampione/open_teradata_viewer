@@ -27,8 +27,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.RenderingHints.Key;
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -69,6 +67,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.Focusable
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.Fold;
 import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
+import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
 
 /**
@@ -247,9 +246,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     /** Whether the "selected text" color should be used with selected text. */
     private boolean useSelectedTextColor;
 
-    /** Used during "Copy as RTF" operations. */
-    private RtfGenerator rtfGenerator;
-
     /** Handles "mark occurrences" support. */
     private MarkOccurrencesSupport markOccurrencesSupport;
 
@@ -285,7 +281,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     private FocusableTip focusableTip;
 
     /** Cached desktop anti-aliasing hints, if anti-aliasing is enabled. */
-    private Map aaHints;
+    private Map<?, ?> aaHints;
 
     /** Renders tokens. */
     private ITokenPainter tokenPainter;
@@ -395,6 +391,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /** Updates the font metrics the first time we're displayed. */
+    @Override
     public void addNotify() {
         super.addNotify();
 
@@ -414,17 +411,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * be anything from a spell checker to a "compiler" that verifies source
      * code.
      *
-     * @param iParser The new parser.  A value of <code>null</code> will do
+     * @param parser The new parser.  A value of <code>null</code> will do
      *                nothing.
      * @see #getParser(int)
      * @see #getParserCount()
      * @see #removeParser(IParser)
      */
-    public void addParser(IParser iParser) {
+    public void addParser(IParser parser) {
         if (parserManager == null) {
             parserManager = new ParserManager(this);
         }
-        parserManager.addParser(iParser);
+        parserManager.addParser(parser);
     }
 
     /**
@@ -457,11 +454,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             if (ss != null && ss.font != null) {
                 FontMetrics fm = getFontMetrics(ss.font);
                 int height = fm.getHeight();
-                if (height > lineHeight)
+                if (height > lineHeight) {
                     lineHeight = height;
+                }
                 int ascent = fm.getMaxAscent();
-                if (ascent > maxAscent)
+                if (ascent > maxAscent) {
                     maxAscent = ascent;
+                }
             }
         }
 
@@ -496,18 +495,16 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param t The token list to clone.
      * @return The clone of the token list.
      */
-    private Token cloneTokenList(Token t) {
+    private TokenImpl cloneTokenList(IToken t) {
         if (t == null) {
             return null;
         }
 
-        Token clone = new Token();
-        clone.copyFrom(t);
-        Token cloneEnd = clone;
+        TokenImpl clone = new TokenImpl(t);
+        TokenImpl cloneEnd = clone;
 
         while ((t = t.getNextToken()) != null) {
-            Token temp = new Token();
-            temp.copyFrom(t);
+            TokenImpl temp = new TokenImpl(t);
             cloneEnd.setNextToken(temp);
             cloneEnd = temp;
         }
@@ -527,6 +524,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @see #createPopupMenu()
      * @see #setPopupMenu(JPopupMenu)
      */
+    @Override
     protected void configurePopupMenu(JPopupMenu popupMenu) {
         super.configurePopupMenu(popupMenu);
 
@@ -560,17 +558,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 return;
             }
         }
-        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Clipboard cb = getToolkit().getSystemClipboard();
 
-        // Create the RTF selection.
-        RtfGenerator gen = getRTFGenerator();
-        Token tokenList = getTokenListFor(selStart, selEnd);
-        for (Token t = tokenList; t != null; t = t.getNextToken()) {
+        // Create the RTF selection
+        RtfGenerator gen = new RtfGenerator();
+        IToken tokenList = getTokenListFor(selStart, selEnd);
+        for (IToken t = tokenList; t != null; t = t.getNextToken()) {
             if (t.isPaintable()) {
-                if (t.textCount == 1 && t.text[t.textOffset] == '\n') {
+                if (t.length() == 1 && t.charAt(0) == '\n') {
                     gen.appendNewline();
                 } else {
-                    Font font = getFontForTokenType(t.type);
+                    Font font = getFontForTokenType(t.getType());
                     Color bg = getBackgroundForToken(t);
                     boolean underline = getUnderlineForToken(t);
                     // Small optimization - don't print fg color if this is a
@@ -601,6 +599,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The document.
      */
+    @Override
     protected Document createDefaultModel() {
         return new SyntaxDocument(SYNTAX_STYLE_NONE);
     }
@@ -610,6 +609,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The caret event/mouse listener.
      */
+    @Override
     protected TAMouseListener createMouseListener() {
         return new SyntaxTextAreaMutableCaretEvent(this);
     }
@@ -620,6 +620,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The popup menu.
      * @see #appendFoldingMenu(JPopupMenu)
      */
+    @Override
     protected JPopupMenu createPopupMenu() {
         JPopupMenu popup = super.createPopupMenu();
         appendFoldingMenu(popup);
@@ -656,6 +657,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The UI.
      */
+    @Override
     protected TextAreaUI createTextAreaUI() {
         return new SyntaxTextAreaUI(this);
     }
@@ -713,6 +715,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @param e The caret event.
      */
+    @Override
     protected void fireCaretUpdate(CaretEvent e) {
         super.fireCaretUpdate(e);
         if (isBracketMatchingEnabled()) {
@@ -815,14 +818,14 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * Forces re-parsing with a specific parser. Note that if this parser is not
      * installed on this text area, nothing will happen.
      *
-     * @param iParser The parser that should re-parse this text area's contents.
-     *                This should be installed on this text area.
+     * @param parser The parser that should re-parse this text area's contents.
+     *               This should be installed on this text area.
      * @return Whether the parser was installed on this text area.
      * @see #forceReparsing(int)
      */
-    public boolean forceReparsing(IParser iParser) {
+    public boolean forceReparsing(IParser parser) {
         for (int i = 0; i < getParserCount(); i++) {
-            if (getParser(i) == iParser) {
+            if (getParser(i) == parser) {
                 forceReparsing(i);
                 return true;
             }
@@ -858,9 +861,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The background color to use for that token. If this value is
      *         <code>null</code> then this token has no special background
      *         color.
-     * @see #getForegroundForToken(Token)
+     * @see #getForegroundForToken(IToken)
      */
-    public Color getBackgroundForToken(Token token) {
+    public Color getBackgroundForToken(IToken token) {
         Color c = null;
         if (getHighlightSecondaryLanguages()) {
             // 1-indexed, since 0 == main language
@@ -871,7 +874,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             }
         }
         if (c == null) {
-            c = syntaxScheme.getStyle(token.type).background;
+            c = syntaxScheme.getStyle(token.getType()).background;
         }
         // Don't default to this.getBackground(), as Tokens simply don't paint a
         // background if they get a null Color
@@ -1014,12 +1017,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *         <code>null</code>.
      * @see #getBackgroundForToken(Token)
      */
-    public Color getForegroundForToken(Token t) {
-        if (getHyperlinksEnabled() && hoveredOverLinkOffset == t.offset
+    public Color getForegroundForToken(IToken t) {
+        if (getHyperlinksEnabled() && hoveredOverLinkOffset == t.getOffset()
                 && (t.isHyperlink() || linkGeneratorResult != null)) {
             return hyperlinkFG;
         }
-        return getForegroundForTokenType(t.type);
+        return getForegroundForTokenType(t.getType());
     }
 
     /**
@@ -1128,6 +1131,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The height of a line of text in this text area.
      */
+    @Override
     public int getLineHeight() {
         return lineHeight;
     }
@@ -1142,7 +1146,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The list of marked occurrences.
      */
-    public List getMarkedOccurrences() {
+    public List<DocumentRange> getMarkedOccurrences() {
         return ((SyntaxTextAreaHighlighter) getHighlighter())
                 .getMarkedOccurrences();
     }
@@ -1233,6 +1237,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @return The max ascent value.
      */
+    @Override
     public int getMaxAscent() {
         return maxAscent;
     }
@@ -1293,24 +1298,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The list of notices. This will be an empty list if there are
      *         none.
      */
-    public List<?> getParserNotices() {
-        return parserManager == null ? Collections.EMPTY_LIST : parserManager
-                .getParserNotices();
-    }
-
-    /**
-     * Returns the RTF generator for this text area, lazily creating it if
-     * necessary.
-     *
-     * @return The RTF generator.
-     */
-    private RtfGenerator getRTFGenerator() {
-        if (rtfGenerator == null) {
-            rtfGenerator = new RtfGenerator();
-        } else {
-            rtfGenerator.reset();
+    public List<IParserNotice> getParserNotices() {
+        if (parserManager == null) {
+            return Collections.emptyList();
         }
-        return rtfGenerator;
+        return parserManager.getParserNotices();
     }
 
     /**
@@ -1431,16 +1423,16 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param endOffs The end offset in the document.
      * @return The first token in the token list.
      */
-    private Token getTokenListFor(int startOffs, int endOffs) {
-        Token tokenList = null;
-        Token lastToken = null;
+    private IToken getTokenListFor(int startOffs, int endOffs) {
+        TokenImpl tokenList = null;
+        TokenImpl lastToken = null;
 
         Element map = getDocument().getDefaultRootElement();
         int startLine = map.getElementIndex(startOffs);
         int endLine = map.getElementIndex(endOffs);
 
         for (int line = startLine; line <= endLine; line++) {
-            Token t = getTokenListForLine(line);
+            TokenImpl t = (TokenImpl) getTokenListForLine(line);
             t = cloneTokenList(t);
             if (tokenList == null) {
                 tokenList = t;
@@ -1450,13 +1442,14 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             }
             while (lastToken.getNextToken() != null
                     && lastToken.getNextToken().isPaintable()) {
-                lastToken = lastToken.getNextToken();
+                lastToken = (TokenImpl) lastToken.getNextToken();
             }
             if (line < endLine) {
                 // Document offset MUST be correct to prevent exceptions in
                 // getTokenListFor()
                 int docOffs = map.getElement(line).getEndOffset() - 1;
-                t = new Token(new char[]{'\n'}, 0, 0, docOffs, Token.WHITESPACE);
+                t = new TokenImpl(new char[] { '\n' }, 0, 0, docOffs,
+                        IToken.WHITESPACE);
                 lastToken.setNextToken(t);
                 lastToken = t;
             }
@@ -1471,21 +1464,21 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         // returned for that line will be null, so the first token in the final
         // token list will be from the next line and have a starting offset >
         // startOffs?)
-        if (startOffs >= tokenList.offset) {
+        if (startOffs >= tokenList.getOffset()) {
             while (!tokenList.containsPosition(startOffs)) {
-                tokenList = tokenList.getNextToken();
+                tokenList = (TokenImpl) tokenList.getNextToken();
             }
             tokenList.makeStartAt(startOffs);
         }
 
-        Token temp = tokenList;
+        TokenImpl temp = tokenList;
         // Be careful to check temp for null here. It is possible that no token
         // contains endOffs, if endOffs is at the end of a line
         while (temp != null && !temp.containsPosition(endOffs)) {
-            temp = temp.getNextToken();
+            temp = (TokenImpl) temp.getNextToken();
         }
         if (temp != null) {
-            temp.textCount = endOffs - temp.offset;
+            temp.textCount = endOffs - temp.getOffset();
             temp.setNextToken(null);
         }
 
@@ -1498,7 +1491,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param line The line number to get tokens for.
      * @return A linked list of tokens representing the line's text.
      */
-    public Token getTokenListForLine(int line) {
+    public IToken getTokenListForLine(int line) {
         return ((SyntaxDocument) getDocument()).getTokenListForLine(line);
     }
 
@@ -1515,6 +1508,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * @param e The mouse event.
      */
+    @Override
     public String getToolTipText(MouseEvent e) {
         // Check parsers for tool tips first
         String text = null;
@@ -1558,10 +1552,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param t The token.
      * @return Whether the specified token should be underlined.
      */
-    public boolean getUnderlineForToken(Token t) {
+    public boolean getUnderlineForToken(IToken t) {
         return (getHyperlinksEnabled() && (t.isHyperlink() || (linkGeneratorResult != null && linkGeneratorResult
-                .getSourceOffset() == t.offset)))
-                || syntaxScheme.getStyle(t.type).underline;
+                .getSourceOffset() == t.getOffset())))
+                || syntaxScheme.getStyle(t.getType()).underline;
     }
 
     /**
@@ -1702,11 +1696,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The token, or <code>null</code> if no token is at that position.
      * @see #viewToToken(Point)
      */
-    public Token modelToToken(int offs) {
+    public IToken modelToToken(int offs) {
         if (offs >= 0) {
             try {
                 int line = getLineOfOffset(offs);
-                Token t = getTokenListForLine(line);
+                IToken t = getTokenListForLine(line);
                 return SyntaxUtilities.getTokenAtOffset(t, offs);
             } catch (BadLocationException ble) {
                 ExceptionDialog.notifyException(ble); // Never happens
@@ -1719,6 +1713,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * The <code>paintComponent</code> method is overridden so we apply any
      * necessary rendering hints to the Graphics object.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(getGraphics2D(g));
     }
@@ -1756,6 +1751,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /** Overridden so we stop this text area's parsers, if any. */
+    @Override
     public void removeNotify() {
         if (parserManager != null) {
             parserManager.stopParsing();
@@ -1766,16 +1762,16 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     /**
      * Removes a parser from this text area.
      *
-     * @param iParser The {@link IParser} to remove.
+     * @param parser The {@link IParser} to remove.
      * @return Whether the parser was found and removed.
      * @see #clearParsers()
      * @see #addParser(IParser)
      * @see #getParser(int)
      */
-    public boolean removeParser(IParser iParser) {
+    public boolean removeParser(IParser parser) {
         boolean removed = false;
         if (parserManager != null) {
-            removed = parserManager.removeParser(iParser);
+            removed = parserManager.removeParser(parser);
         }
         return removed;
     }
@@ -1870,9 +1866,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 // as what would be used if the getDesktopAntiAliasHints() call
                 // worked
                 if (aaHints == null) {
-                    aaHints = new HashMap<Key, Object>();
-                    aaHints.put(RenderingHints.KEY_TEXT_ANTIALIASING,
+                    Map<RenderingHints.Key, Object> temp = new HashMap<RenderingHints.Key, Object>();
+                    temp.put(RenderingHints.KEY_TEXT_ANTIALIASING,
                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                    aaHints = temp;
                 }
             } else {
                 aaHints = null;
@@ -1989,7 +1986,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
-     * Sets anti-aliasing to whatever the user's desktop vaule is.
+     * Sets anti-aliasing to whatever the user's desktop value is.
      *
      * @see #getAntiAliasingEnabled()
      */
@@ -1997,7 +1994,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         // Most accurate technique, but not available on all OSes
         aaHints = SyntaxUtilities.getDesktopAntiAliasHints();
         if (aaHints == null) {
-            aaHints = new HashMap();
+            Map<RenderingHints.Key, Object> temp = new HashMap<RenderingHints.Key, Object>();
 
             // In Java 6+, you can figure out what text AA hint Swing uses for
             // JComponents..
@@ -2005,12 +2002,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             FontMetrics fm = label.getFontMetrics(label.getFont());
             Object hint = null;
             try {
-                Method m = FontMetrics.class.getMethod("getFontRenderContext",
-                        null);
-                FontRenderContext frc = (FontRenderContext) m.invoke(fm, null);
-                m = FontRenderContext.class.getMethod("getAntiAliasingHint",
-                        null);
-                hint = m.invoke(frc, null);
+                Method m = FontMetrics.class.getMethod("getFontRenderContext");
+                FontRenderContext frc = (FontRenderContext) m.invoke(fm);
+                m = FontRenderContext.class.getMethod("getAntiAliasingHint");
+                hint = m.invoke(frc);
             } catch (RuntimeException re) {
                 throw re;
             } catch (Exception e) {
@@ -2023,13 +2018,15 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             // rendering hints you give it, so this is a moot point there
             if (hint == null) {
                 String os = System.getProperty("os.name").toLowerCase();
-                if (os.indexOf("windows") > -1) {
+                if (os.contains("windows")) {
                     hint = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
                 } else {
                     hint = RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
                 }
             }
-            aaHints.put(RenderingHints.KEY_TEXT_ANTIALIASING, hint);
+            temp.put(RenderingHints.KEY_TEXT_ANTIALIASING, hint);
+
+            aaHints = temp;
         }
 
         // We must be connected to a screen resource for our graphics to be
@@ -2049,11 +2046,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @throws IllegalArgumentException If the document is not an
      *         <code>SyntaxDocument</code>.
      */
+    @Override
     public void setDocument(Document document) {
-        if (!(document instanceof SyntaxDocument))
+        if (!(document instanceof SyntaxDocument)) {
             throw new IllegalArgumentException("Documents for "
                     + "SyntaxTextArea must be instances of "
                     + "SyntaxDocument.");
+        }
         super.setDocument(document);
     }
 
@@ -2082,6 +2081,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @param font The font.
      * @see SyntaxScheme#getStyle(int)
      */
+    @Override
     public void setFont(Font font) {
         Font old = super.getFont();
         super.setFont(font); // Do this first
@@ -2138,6 +2138,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @throws IllegalArgumentException If <code>h</code> is not an instance of
      *         {@link SyntaxTextAreaHighlighter}.
      */
+    @Override
     public void setHighlighter(Highlighter h) {
         if (!(h instanceof SyntaxTextAreaHighlighter)) {
             throw new IllegalArgumentException("SyntaxTextArea requires "
@@ -2152,8 +2153,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * performance penalty. This method fires a property change event of type
      * {@link #HIGHLIGHT_SECONDARY_LANGUAGES_PROPERTY}.
      *
-     * @return Whether secondary languages have their backgrounds colored
-     *         differently.
      * @see #getHighlightSecondaryLanguages()
      * @see #setSecondaryLanguageBackground(int, Color)
      * @see #getSecondaryLanguageCount()
@@ -2557,8 +2556,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     public void setWhitespaceVisible(boolean visible) {
         if (whitespaceVisible != visible) {
             this.whitespaceVisible = visible;
-            tokenPainter = visible
-                    ? new VisibleWhitespaceTokenPainter()
+            tokenPainter = visible ? new VisibleWhitespaceTokenPainter()
                     : (ITokenPainter) new DefaultTokenPainter();
             repaint();
             firePropertyChange(VISIBLE_WHITESPACE_PROPERTY, !visible, visible);
@@ -2589,7 +2587,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The token, or <code>null</code> if no token is at that position.
      * @see #modelToToken(int)
      */
-    public Token viewToToken(Point p) {
+    public IToken viewToToken(Point p) {
         return modelToToken(viewToModel(p));
     }
 
@@ -2610,6 +2608,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             setCoalesce(false);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isBracketMatchingEnabled()) {
                 if (match != null) {
@@ -2632,6 +2631,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             r.height -= 6; // So animation can "grow" match
         }
 
+        @Override
         public void start() {
             init(match);
             if (dotRect != null && getPaintMatchedBracketPair()) {
@@ -2664,9 +2664,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @author D. Campione
      * 
      */
-    private class SyntaxTextAreaMutableCaretEvent
-            extends
-                TextAreaMutableCaretEvent {
+    private class SyntaxTextAreaMutableCaretEvent extends
+            TextAreaMutableCaretEvent {
 
         private static final long serialVersionUID = 6206194038047121719L;
 
@@ -2680,7 +2679,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 he = linkGeneratorResult.execute();
                 linkGeneratorResult = null;
             } else {
-                Token t = modelToToken(hoveredOverLinkOffset);
+                IToken t = modelToToken(hoveredOverLinkOffset);
                 URL url = null;
                 String desc = null;
                 try {
@@ -2704,6 +2703,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             return e1.getSourceOffset() == e2.getSourceOffset();
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             if (getHyperlinksEnabled() && isScanningForLinks
                     && hoveredOverLinkOffset > -1) {
@@ -2715,15 +2715,21 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             }
         }
 
+        @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
             if (getHyperlinksEnabled()) {
                 if ((e.getModifiersEx() & linkScanningMask) != 0) {
                     isScanningForLinks = true;
-                    Token t = viewToToken(e.getPoint());
+                    IToken t = viewToToken(e.getPoint());
+                    if (t != null) {
+                        // Copy token, viewToModel() unfortunately modifies
+                        // IToken
+                        t = new TokenImpl(t);
+                    }
                     Cursor c2 = null;
                     if (t != null && t.isHyperlink()) {
-                        hoveredOverLinkOffset = t.offset;
+                        hoveredOverLinkOffset = t.getOffset();
                         c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
                     } else if (t != null && linkGenerator != null) {
                         int offs = viewToModel(e.getPoint());
@@ -2736,7 +2742,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                                 repaint();
                             }
                             linkGeneratorResult = newResult;
-                            hoveredOverLinkOffset = t.offset;
+                            hoveredOverLinkOffset = t.getOffset();
                             c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
                         } else {
                             // Repaint if we've moved off of a link

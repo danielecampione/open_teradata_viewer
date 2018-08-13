@@ -78,17 +78,19 @@ public abstract class CompletionProviderBase implements ICompletionProvider {
      * Comparator used to sort completions by their relevance before sorting
      * them lexicographically.
      */
-    private static final Comparator sortByRelevanceComparator = new SortByRelevanceComparator();
+    private static final Comparator<ICompletion> sortByRelevanceComparator = new SortByRelevanceComparator();
 
     /** {@inheritDoc} */
+    @Override
     public void clearParameterizedCompletionParams() {
         paramListEnd = paramListStart = 0;
         paramListSeparator = null;
     }
 
     /** {@inheritDoc} */
-    public List getCompletions(JTextComponent comp) {
-        List completions = getCompletionsImpl(comp);
+    @Override
+    public List<ICompletion> getCompletions(JTextComponent comp) {
+        List<ICompletion> completions = getCompletionsImpl(comp);
         if (parent != null) {
             completions.addAll(parent.getCompletions(comp));
             Collections.sort(completions);
@@ -111,39 +113,46 @@ public abstract class CompletionProviderBase implements ICompletionProvider {
      * @return The list of possible completions, or an empty list if there
      *         are none.
      */
-    protected abstract List getCompletionsImpl(JTextComponent comp);
+    protected abstract List<ICompletion> getCompletionsImpl(JTextComponent comp);
 
     /** {@inheritDoc} */
+    @Override
     public ListCellRenderer getListCellRenderer() {
         return listCellRenderer;
     }
 
     /** {@inheritDoc} */
+    @Override
     public IParameterChoicesProvider getParameterChoicesProvider() {
         return paramChoicesProvider;
     }
 
     /** {@inheritDoc} */
+    @Override
     public char getParameterListEnd() {
         return paramListEnd;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getParameterListSeparator() {
         return paramListSeparator;
     }
 
     /** {@inheritDoc} */
+    @Override
     public char getParameterListStart() {
         return paramListStart;
     }
 
     /** {@inheritDoc} */
+    @Override
     public ICompletionProvider getParent() {
         return parent;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isAutoActivateOkay(JTextComponent tc) {
         Document doc = tc.getDocument();
         char ch = 0;
@@ -185,11 +194,13 @@ public abstract class CompletionProviderBase implements ICompletionProvider {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setListCellRenderer(ListCellRenderer r) {
         listCellRenderer = r;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setParameterizedCompletionParams(char listStart,
             String separator, char listEnd) {
         if (listStart < 0x20 || listStart == 0x7F) {
@@ -207,6 +218,7 @@ public abstract class CompletionProviderBase implements ICompletionProvider {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setParent(ICompletionProvider parent) {
         this.parent = parent;
     }

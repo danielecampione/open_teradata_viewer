@@ -67,8 +67,8 @@ public class Util {
             if (desktop != null) {
                 try {
                     Method m = desktop.getClass().getDeclaredMethod("browse",
-                            new Class[]{URI.class});
-                    m.invoke(desktop, new Object[]{uri});
+                            new Class[] { URI.class });
+                    m.invoke(desktop, new Object[] { uri });
                     success = true;
                 } catch (RuntimeException re) {
                     throw re;
@@ -94,17 +94,16 @@ public class Util {
                 desktopCreationAttempted = true;
 
                 try {
-                    Class desktopClazz = Class.forName("java.awt.Desktop");
-                    Method m = desktopClazz.getDeclaredMethod(
-                            "isDesktopSupported", null);
+                    Class<?> desktopClazz = Class.forName("java.awt.Desktop");
+                    Method m = desktopClazz
+                            .getDeclaredMethod("isDesktopSupported");
 
-                    boolean supported = ((Boolean) m.invoke(null, null))
+                    boolean supported = ((Boolean) m.invoke(null))
                             .booleanValue();
                     if (supported) {
-                        m = desktopClazz.getDeclaredMethod("getDesktop", null);
-                        desktop = m.invoke(null, null);
+                        m = desktopClazz.getDeclaredMethod("getDesktop");
+                        desktop = m.invoke(null);
                     }
-
                 } catch (RuntimeException re) {
                     throw re;
                 } catch (Exception e) {
@@ -131,7 +130,7 @@ public class Util {
         // Don't assume 0xff alpha
         //return "#" + Integer.toHexString(c.getRGB()&0xffffff).substring(2);
 
-        StringBuffer sb = new StringBuffer("#");
+        StringBuilder sb = new StringBuilder("#");
         int r = c.getRed();
         if (r < 16) {
             sb.append('0');
