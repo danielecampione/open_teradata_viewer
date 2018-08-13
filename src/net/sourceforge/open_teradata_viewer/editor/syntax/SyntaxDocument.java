@@ -21,7 +21,6 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import javax.swing.Action;
 import javax.swing.event.DocumentEvent;
@@ -69,7 +68,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
     private transient TokenMakerFactory tokenMakerFactory;
 
     /** Splits text into tokens for the current programming language. */
-    private transient ITokenMaker iTokenMaker;
+    private transient ITokenMaker tokenMaker;
 
     /**
      * The current syntax style. Only cached to keep this class serializable.
@@ -150,7 +149,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
 
                 setSharedSegment(i); // Loads line i's text into s
 
-                int tokenType = iTokenMaker.getLastTokenTypeOnLine(s,
+                int tokenType = tokenMaker.getLastTokenTypeOnLine(s,
                         previousTokenType);
                 lastTokensOnLines.add(i, tokenType);
 
@@ -226,6 +225,18 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
     }
 
     /**
+     * Returns the closest {@link ITokenTypes "standard" token type} for a given
+     * "internal" token type (e.g. one whose value is <code>&lt; 0</code>).
+     *
+     * @param type The token type.
+     * @return The closest "standard" token type. If a mapping is not defined
+     *         for this language, then <code>type</code> is returned.
+     */
+    public int getClosestStandardTokenTypeForInternalType(int type) {
+        return tokenMaker.getClosestStandardTokenTypeForInternalType(type);
+    }
+
+    /**
      * Returns whether closing markup tags should be automatically completed.
      * This method only returns <code>true</code> if {@link
      * #getLanguageIsMarkup()} also returns <code>true</code>.
@@ -235,7 +246,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      */
     public boolean getCompleteMarkupCloseTags() {
         return getLanguageIsMarkup()
-                && ((AbstractMarkupTokenMaker) iTokenMaker)
+                && ((AbstractMarkupTokenMaker) tokenMaker)
                         .getCompleteCloseTags();
     }
 
@@ -246,7 +257,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @return Whether curly braces denote code blocks.
      */
     public boolean getCurlyBracesDenoteCodeBlocks() {
-        return iTokenMaker.getCurlyBracesDenoteCodeBlocks();
+        return tokenMaker.getCurlyBracesDenoteCodeBlocks();
     }
 
     /**
@@ -256,7 +267,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @return Whether the current language is a markup language.
      */
     public boolean getLanguageIsMarkup() {
-        return iTokenMaker.isMarkupLanguage();
+        return tokenMaker.isMarkupLanguage();
     }
 
     /**
@@ -281,7 +292,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      *         lines.
      */
     public String[] getLineCommentStartAndEnd() {
-        return iTokenMaker.getLineCommentStartAndEnd();
+        return tokenMaker.getLineCommentStartAndEnd();
     }
 
     /**
@@ -293,7 +304,12 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      *         enabled.
      */
     boolean getMarkOccurrencesOfTokenType(int type) {
-        return iTokenMaker.getMarkOccurrencesOfTokenType(type);
+        return tokenMaker.getMarkOccurrencesOfTokenType(type);
+    }
+
+    /** @return The occurrence marker for the current language. */
+    IOccurrenceMarker getOccurrenceMarker() {
+        return tokenMaker.getOccurrenceMarker();
     }
 
     /**
@@ -306,13 +322,13 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
     public boolean getShouldIndentNextLine(int line) {
         Token t = getTokenListForLine(line);
         t = t.getLastNonCommentNonWhitespaceToken();
-        return iTokenMaker.getShouldIndentNextLineAfter(t);
+        return tokenMaker.getShouldIndentNextLineAfter(t);
     }
 
     /**
      * Returns a token list for the specified segment of text representing the
      * specified line number. This method is basically a wrapper for
-     * <code>iTokenMaker.getTokenList</code> that takes into account the last
+     * <code>ITokenMaker.getTokenList</code> that takes into account the last
      * token on the previous line to assure token accuracy.
      *
      * @param line The line number of <code>text</code> in the document, >= 0.
@@ -332,26 +348,16 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         int initialTokenType = line == 0
                 ? Token.NULL
                 : getLastTokenTypeOnLine(line - 1);
-        return iTokenMaker.getTokenList(s, initialTokenType, startOffset);
+        return tokenMaker.getTokenList(s, initialTokenType, startOffset);
     }
 
     boolean insertBreakSpecialHandling(ActionEvent e) {
-        Action a = iTokenMaker.getInsertBreakAction();
+        Action a = tokenMaker.getInsertBreakAction();
         if (a != null) {
             a.actionPerformed(e);
             return true;
         }
         return false;
-    }
-
-    /**
-     * Returns whether whitespace is visible.
-     *
-     * @return Whether whitespace is visible.
-     * @see #setWhitespaceVisible(boolean)
-     */
-    public boolean isWhitespaceVisible() {
-        return iTokenMaker == null ? false : iTokenMaker.isWhitespaceVisible();
     }
 
     /**
@@ -375,7 +381,6 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         int lineCount = getDefaultRootElement().getElementCount();
         lastTokensOnLines = new DynamicIntArray(lineCount);
         setSyntaxStyle(syntaxStyle); // Actually install (transient) TokenMaker
-        setWhitespaceVisible(in.readBoolean()); // Do after setSyntaxStyle()
     }
 
     /**
@@ -410,11 +415,10 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * @param styleKey The new style to use. If this style is not known or
      *        supported by this document, then {@link
      *        ISyntaxConstants#SYNTAX_STYLE_NONE} is used.
+     * @see #setSyntaxStyle(ITokenMaker)
      */
     public void setSyntaxStyle(String styleKey) {
-        boolean wsVisible = isWhitespaceVisible();
-        iTokenMaker = tokenMakerFactory.getTokenMaker(styleKey);
-        iTokenMaker.setWhitespaceVisible(wsVisible);
+        tokenMaker = tokenMakerFactory.getTokenMaker(styleKey);
         updateSyntaxHighlightingInformation();
         this.syntaxStyle = styleKey;
     }
@@ -425,11 +429,11 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
      * maker for a language not normally supported by
      * <code>SyntaxTextArea</code>.
      *
-     * @param iTokenMaker The new token maker to use.
+     * @param tokenMaker The new token maker to use.
+     * @see #setSyntaxStyle(String)
      */
-    public void setSyntaxStyle(ITokenMaker iTokenMaker) {
-        iTokenMaker.setWhitespaceVisible(isWhitespaceVisible());
-        this.iTokenMaker = iTokenMaker;
+    public void setSyntaxStyle(ITokenMaker tokenMaker) {
+        this.tokenMaker = tokenMaker;
         updateSyntaxHighlightingInformation();
     }
 
@@ -442,18 +446,6 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
     public void setTokenMakerFactory(TokenMakerFactory tmf) {
         tokenMakerFactory = tmf != null ? tmf : TokenMakerFactory
                 .getDefaultInstance();
-    }
-
-    /**
-     * Sets whether whitespace is visible. This property is actually setting
-     * whether the tokens generated from this document "paint" something when
-     * they represent whitespace.
-     *
-     * @param visible Whether whitespace should be visible.
-     * @see #isWhitespaceVisible()
-     */
-    public void setWhitespaceVisible(boolean visible) {
-        iTokenMaker.setWhitespaceVisible(visible);
     }
 
     /**
@@ -481,7 +473,7 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
             setSharedSegment(line); // Sets s's text to that of line 'line' in the document
 
             int oldTokenType = lastTokensOnLines.get(line);
-            int newTokenType = iTokenMaker.getLastTokenTypeOnLine(s,
+            int newTokenType = tokenMaker.getLastTokenTypeOnLine(s,
                     previousTokenType);
 
             // If this line's end-token value didn't change, stop here. Note
@@ -529,24 +521,12 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
         int lastTokenType = Token.NULL;
         for (int i = 0; i < numLines; i++) {
             setSharedSegment(i);
-            lastTokenType = iTokenMaker
-                    .getLastTokenTypeOnLine(s, lastTokenType);
+            lastTokenType = tokenMaker.getLastTokenTypeOnLine(s, lastTokenType);
             lastTokensOnLines.set(i, lastTokenType);
         }
 
         // Let everybody know that syntax styles have (probably) changed
         fireChangedUpdate(new DefaultDocumentEvent(0, numLines - 1,
                 DocumentEvent.EventType.CHANGE));
-    }
-
-    /**
-     * Overridden for custom serialization purposes.
-     *
-     * @param out The stream to write to.
-     * @throws IOException If an IO error occurs.
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeBoolean(isWhitespaceVisible());
     }
 }

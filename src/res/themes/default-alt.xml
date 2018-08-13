@@ -2,7 +2,7 @@
 <!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-    OTVSyntaxTextArea's default theme.
+    OTVSyntaxTextArea's default theme, using the "standard" selection style.
     See theme.dtd and net.sourceforge.open_teradata_viewer.editor.syntax.Theme
     for more information.
 -->
@@ -14,7 +14,7 @@
    <!--  General editor colors. -->
    <background color="ffffff"/>
    <caret color="ff0000"/>
-   <selection fg="default" useFG="false" bg="c8c8ff"/>
+   <selection fg="default" bg="default"/>
    <currentLineHighlight color="ffffaa" fade="false"/>
    <marginLine fg="b0b4b9"/>
    <markAllHighlight color="6b8189"/>
@@ -70,10 +70,10 @@
       <style token="VARIABLE" fg="ee8800" bold="true"/>
       <style token="WHITESPACE" fg="000000"/>
       
-      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffffff"/>
-      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffffff"/>
-      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffffff"/>
-      <style token="ERROR_CHAR" fg="dc009c" bg="ffffff"/>
+      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_CHAR" fg="000000" bg="ffcccc"/>
    </tokenStyles>
 
 </SyntaxTheme>

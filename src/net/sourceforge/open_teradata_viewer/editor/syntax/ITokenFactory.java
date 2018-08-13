@@ -57,6 +57,10 @@ interface ITokenFactory {
     public Token createToken(final char[] line, final int beg, final int end,
             final int startOffset, final int type);
 
-    /** Resets the state of this token maker, if necessary. */
+    /**
+     * Resets the state of this token maker. This method should be called by the
+     * <code>ITokenMaker</code> every time a token list is generated for a new
+     * line so the tokens can be reused.
+     */
     public void resetAllTokens();
 }

@@ -41,7 +41,13 @@ abstract class TokenMakerBase implements ITokenMaker {
     protected Token previousToken;
 
     /** The factory that gives us our tokens to use. */
-    private ITokenFactory iTokenFactory;
+    private ITokenFactory tokenFactory;
+
+    /**
+     * Highlights occurrences of the current token in the editor, if it is
+     * relevant.
+     */
+    private IOccurrenceMarker occurrenceMarker;
 
     /**
      * "0" implies this is the "main" language being highlighted. Positive
@@ -56,16 +62,16 @@ abstract class TokenMakerBase implements ITokenMaker {
     /** Ctor. */
     public TokenMakerBase() {
         firstToken = currentToken = previousToken = null;
-        iTokenFactory = new DefaultTokenFactory();
+        tokenFactory = new DefaultTokenFactory();
     }
 
     /** {@inheritDoc} */
     public void addNullToken() {
         if (firstToken == null) {
-            firstToken = iTokenFactory.createToken();
+            firstToken = tokenFactory.createToken();
             currentToken = firstToken;
         } else {
-            currentToken.setNextToken(iTokenFactory.createToken());
+            currentToken.setNextToken(tokenFactory.createToken());
             previousToken = currentToken;
             currentToken = currentToken.getNextToken();
         }
@@ -104,11 +110,11 @@ abstract class TokenMakerBase implements ITokenMaker {
     public void addToken(char[] array, int start, int end, int tokenType,
             int startOffset, boolean hyperlink) {
         if (firstToken == null) {
-            firstToken = iTokenFactory.createToken(array, start, end,
+            firstToken = tokenFactory.createToken(array, start, end,
                     startOffset, tokenType);
             currentToken = firstToken; // Previous token is still null
         } else {
-            currentToken.setNextToken(iTokenFactory.createToken(array, start,
+            currentToken.setNextToken(tokenFactory.createToken(array, start,
                     end, startOffset, tokenType));
             previousToken = currentToken;
             currentToken = currentToken.getNextToken();
@@ -120,6 +126,31 @@ abstract class TokenMakerBase implements ITokenMaker {
         } catch (Throwable t) {
             ExceptionDialog.ignoreException(t);
         }
+    }
+
+    /**
+     * Returns the occurrence marker to use for this token maker. Subclasses can
+     * override to use different implementations.
+     *
+     * @return The occurrence marker to use.
+     */
+    protected IOccurrenceMarker createOccurrenceMarker() {
+        return new DefaultOccurrenceMarker();
+    }
+
+    /**
+     * Returns the closest {@link ITokenTypes "standard" token type} for a given
+     * "internal" token type (e.g. one whose value is <code>&lt; 0</code>).<p>
+     * 
+     * The default implementation returns <code>type</code> always, which
+     * denotes that a mapping from internal token types to standard token types
+     * is not defined; subclasses can override.
+     *
+     * @param type The token type.
+     * @return The closest "standard" token type.
+     */
+    public int getClosestStandardTokenTypeForInternalType(int type) {
+        return type;
     }
 
     /**
@@ -177,6 +208,14 @@ abstract class TokenMakerBase implements ITokenMaker {
         return type == Token.IDENTIFIER;
     }
 
+    /** {@inheritDoc} */
+    public IOccurrenceMarker getOccurrenceMarker() {
+        if (occurrenceMarker == null) {
+            occurrenceMarker = createOccurrenceMarker();
+        }
+        return occurrenceMarker;
+    }
+
     /**
      * The default implementation returns <code>false</code> always. Languages
      * that wish to better support auto-indentation can override this method.
@@ -199,11 +238,6 @@ abstract class TokenMakerBase implements ITokenMaker {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public boolean isWhitespaceVisible() {
-        return iTokenFactory instanceof VisibleWhitespaceTokenFactory;
-    }
-
     /**
      * Deletes the linked list of tokens so we can begin anew. This should never
      * have to be called by the programmer, as it is automatically called
@@ -212,7 +246,7 @@ abstract class TokenMakerBase implements ITokenMaker {
      */
     protected void resetTokenList() {
         firstToken = currentToken = previousToken = null;
-        iTokenFactory.resetAllTokens();
+        tokenFactory.resetAllTokens();
     }
 
     /**
@@ -227,12 +261,5 @@ abstract class TokenMakerBase implements ITokenMaker {
      */
     public void setLanguageIndex(int languageIndex) {
         this.languageIndex = Math.max(0, languageIndex);
-    }
-
-    /** {@inheritDoc} */
-    public void setWhitespaceVisible(boolean visible) {
-        iTokenFactory = visible
-                ? new VisibleWhitespaceTokenFactory()
-                : new DefaultTokenFactory();
     }
 }

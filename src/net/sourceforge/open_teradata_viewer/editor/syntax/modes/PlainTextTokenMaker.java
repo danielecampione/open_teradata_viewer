@@ -26,7 +26,6 @@ import javax.swing.text.Segment;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.AbstractJFlexTokenMaker;
-import net.sourceforge.open_teradata_viewer.editor.syntax.DefaultToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.Token;
 
 /**
@@ -331,7 +330,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
             return yylex();
         } catch (IOException ioe) {
             ExceptionDialog.notifyException(ioe);
-            return new DefaultToken();
+            return new Token();
         }
     }
 

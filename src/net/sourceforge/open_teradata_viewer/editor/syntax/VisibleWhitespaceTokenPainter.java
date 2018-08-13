@@ -21,14 +21,11 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
 
-import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 
 /**
- * This token class paints spaces and tabs with special symbols so the user can
- * see the whitespace in his document. Rendering hints are honored.<p>
+ * A token painter that visibly renders whitespace (spaces and tabs).<p>
  *
  * The current implementation paints as follows:
  * <ul>
@@ -51,101 +48,51 @@ import javax.swing.text.TabExpander;
  * token) will not necessarily be painted at the proper x-coordinate (as
  * FontMetrics.charsWidth() returns an <code>int</code> and not a
  * <code>float</code>). The way around this would be to calculate the token's
- * width in such a way that a float is returned.
+ * width in such a way that a float is returned (Font.getStringBounds()?).
  *
  * @author D. Campione
- * @see Token
- * @see DefaultToken
  * 
  */
-public class VisibleWhitespaceToken extends DefaultToken {
+class VisibleWhitespaceTokenPainter extends DefaultTokenPainter {
 
-    private Rectangle2D.Float dotRect;
-
-    /**
-     * Creates a "null token". The token itself is not null; rather, it
-     * signifies that it is the last token in a linked list of tokens and that
-     * it is not part of a "multi-line token".
-     */
-    public VisibleWhitespaceToken() {
-        super();
-        dotRect = new Rectangle2D.Float(0, 0, 1, 1);
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param line The segment from which to get the token.
-     * @param beg The first character's position in <code>line</code>.
-     * @param end The last character's position in <code>line</code>.
-     * @param startOffset The offset into the document at which this token
-     *                    begins.
-     * @param type A token type listed as "generic" above.
-     */
-    public VisibleWhitespaceToken(final Segment line, final int beg,
-            final int end, final int startOffset, final int type) {
-        this(line.array, beg, end, startOffset, type);
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param line The segment from which to get the token.
-     * @param beg The first character's position in <code>line</code>.
-     * @param end The last character's position in <code>line</code>.
-     * @param startOffset The offset into the document at which this
-     *                    token begins.
-     * @param type A token type listed as "generic" above.
-     */
-    public VisibleWhitespaceToken(final char[] line, final int beg,
-            final int end, final int startOffset, final int type) {
-        super(line, beg, end, startOffset, type);
-    }
-
-    /**
-     * Paints this token, using special symbols for whitespace characters.
-     *
-     * @param g The graphics context in which to paint.
-     * @param x The x-coordinate at which to paint.
-     * @param y The y-coordinate at which to paint.
-     * @param host The text area this token is in.
-     * @param e How to expand tabs.
-     * @param clipStart The left boundary of the clip rectangle in which we're
-     *                  painting. This optimizes painting by allowing us to not
-     *                  paint not paint when this token is "to the left" of the
-     *                  clip rectangle.
-     * @return The x-coordinate representing the end of the painted text.
-     */
-    public final float paint(Graphics2D g, float x, float y,
-            SyntaxTextArea host, TabExpander e, float clipStart) {
+    /** {@inheritDoc} */
+    protected float paintImpl(Token token, Graphics2D g, float x, float y,
+            SyntaxTextArea host, TabExpander e, float clipStart,
+            boolean selected) {
         int origX = (int) x;
-        int end = textOffset + textCount;
+        int end = token.textOffset + token.textCount;
         float nextX = x;
         int flushLen = 0;
-        int flushIndex = textOffset;
-        Color fg = host.getForegroundForToken(this);
-        Color bg = host.getBackgroundForToken(this);
-        g.setFont(host.getFontForTokenType(type));
-        FontMetrics fm = host.getFontMetricsForTokenType(type);
+        int flushIndex = token.textOffset;
+        Color fg, bg;
+        if (selected) {
+            fg = host.getSelectedTextColor();
+            bg = null;
+        } else {
+            fg = host.getForegroundForToken(token);
+            bg = host.getBackgroundForToken(token);
+        }
+        g.setFont(host.getFontForTokenType(token.type));
+        FontMetrics fm = host.getFontMetricsForTokenType(token.type);
 
         int ascent = fm.getAscent();
         int height = fm.getHeight();
 
-        for (int i = textOffset; i < end; i++) {
-            switch (text[i]) {
+        for (int i = token.textOffset; i < end; i++) {
+            switch (token.text[i]) {
                 case '\t' :
                     // Fill in background
-                    nextX = x + fm.charsWidth(text, flushIndex, flushLen);
+                    nextX = x + fm.charsWidth(token.text, flushIndex, flushLen);
                     float nextNextX = e.nextTabStop(nextX, 0);
                     if (bg != null) {
                         paintBackground(x, y, nextNextX - x, height, g, ascent,
-                                host, bg);
+                                host, bg, !selected);
                     }
                     g.setColor(fg);
 
                     // Paint chars cached before the tab
                     if (flushLen > 0) {
-                        g.drawChars(text, flushIndex, flushLen, (int) x,
+                        g.drawChars(token.text, flushIndex, flushLen, (int) x,
                                 (int) y);
                         flushLen = 0;
                     }
@@ -165,42 +112,45 @@ public class VisibleWhitespaceToken extends DefaultToken {
                     break;
 
                 case ' ' :
-                    // NOTE:  There is a little bit of a "fudge factor" here
-                    // when "smooth text" is enabled, as "width" below may well
-                    // not be the width given to the space by fm.charsWidth()
-                    // (it depends on how it places the space with respect to
-                    // the preceding character). But, we assume the
-                    // approximation is close enough for our drawing a dot for
-                    // the space
+                    // NOTE: There is a little bit of a "fudge factor" here when
+                    // "smooth text" is enabled, as "width" below may well not
+                    // be the width given to the space by fm.charsWidth() (it
+                    // depends on how it places the space with respect to the
+                    // preceding character).
+                    // But, we assume the approximation is close enough for our
+                    // drawing a dot for the space
 
                     // "flushLen+1" ensures text is aligned correctly (or,
                     // aligned the same as in getWidth())
-                    nextX = x + fm.charsWidth(text, flushIndex, flushLen + 1);
+                    nextX = x
+                            + fm.charsWidth(token.text, flushIndex,
+                                    flushLen + 1);
                     int width = fm.charWidth(' ');
 
                     // Paint background
                     if (bg != null) {
                         paintBackground(x, y, nextX - x, height, g, ascent,
-                                host, bg);
+                                host, bg, !selected);
                     }
                     g.setColor(fg);
 
                     // Paint chars before space
                     if (flushLen > 0) {
-                        g.drawChars(text, flushIndex, flushLen, (int) x,
+                        g.drawChars(token.text, flushIndex, flushLen, (int) x,
                                 (int) y);
                         flushLen = 0;
                     }
 
                     // Paint a dot representing the space
-                    dotRect.x = nextX - width / 2.0f;
-                    dotRect.y = y - ascent + height / 2.0f; // Ditto
-                    g.fill(dotRect);
+                    int dotX = (int) (nextX - width / 2f);
+                    int dotY = (int) (y - ascent + height / 2f);
+                    g.drawLine(dotX, dotY, dotX, dotY);
                     flushIndex = i + 1;
                     x = nextX;
                     break;
 
                 case '\f' :
+                    // Fall-through
 
                 default :
                     flushLen += 1;
@@ -208,17 +158,18 @@ public class VisibleWhitespaceToken extends DefaultToken {
             }
         }
 
-        nextX = x + fm.charsWidth(text, flushIndex, flushLen);
+        nextX = x + fm.charsWidth(token.text, flushIndex, flushLen);
 
         if (flushLen > 0 && nextX >= clipStart) {
             if (bg != null) {
-                paintBackground(x, y, nextX - x, height, g, ascent, host, bg);
+                paintBackground(x, y, nextX - x, height, g, ascent, host, bg,
+                        !selected);
             }
             g.setColor(fg);
-            g.drawChars(text, flushIndex, flushLen, (int) x, (int) y);
+            g.drawChars(token.text, flushIndex, flushLen, (int) x, (int) y);
         }
 
-        if (host.getUnderlineForToken(this)) {
+        if (host.getUnderlineForToken(token)) {
             g.setColor(fg);
             int y2 = (int) (y + 1);
             g.drawLine(origX, y2, (int) nextX, y2);
@@ -227,12 +178,10 @@ public class VisibleWhitespaceToken extends DefaultToken {
         // Don't check if it's whitespace - some TokenMakers may return types
         // other than Token.WHITESPACE for spaces (such as Token.IDENTIFIER).
         // This also allows us to paint tab lines for MLC's
-        if (host.getPaintTabLines() && origX == host.getMargin().left) {
-            paintTabLines(origX, (int) y, (int) nextX, g, e, host);
+        if (host.getPaintTabLines() && origX == host.getMargin().left) {// && isWhitespace()) {
+            paintTabLines(token, origX, (int) y, (int) nextX, g, e, host);
         }
 
         return nextX;
-
     }
-
 }

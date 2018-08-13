@@ -228,6 +228,7 @@ public class PluginFactory {
                         plugins.put(key, entryDescriptor);
                     }
                 }
+                jarFile.close();
             }
         } catch (IOException ioe) {
             ExceptionDialog.notifyException(ioe);

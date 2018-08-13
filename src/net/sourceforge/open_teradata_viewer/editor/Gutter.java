@@ -25,13 +25,16 @@ import java.awt.ComponentOrientation;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -689,6 +692,12 @@ public class Gutter extends JPanel {
         return iconArea.toggleBookmark(line);
     }
 
+    public void setBorder(Border border) {
+        if (border instanceof GutterBorder) {
+            super.setBorder(border);
+        }
+    }
+
     /**
      * The border used by the gutter.
      * 
@@ -700,10 +709,12 @@ public class Gutter extends JPanel {
         private static final long serialVersionUID = 4508773552231820960L;
 
         private Color color;
+        private Rectangle visibleRect;
 
         public GutterBorder(int top, int left, int bottom, int right) {
             super(top, left, bottom, right);
             color = new Color(221, 221, 221);
+            visibleRect = new Rectangle();
         }
 
         public Color getColor() {
@@ -712,11 +723,17 @@ public class Gutter extends JPanel {
 
         public void paintBorder(Component c, Graphics g, int x, int y,
                 int width, int height) {
+            visibleRect = g.getClipBounds(visibleRect);
+            if (visibleRect == null) {
+                visibleRect = ((JComponent) c).getVisibleRect();
+            }
             g.setColor(color);
             if (left == 1) {
-                g.drawLine(0, 0, 0, height);
+                g.drawLine(0, visibleRect.y, 0, visibleRect.y
+                        + visibleRect.height);
             } else {
-                g.drawLine(width - 1, 0, width - 1, height);
+                g.drawLine(width - 1, visibleRect.y, width - 1, visibleRect.y
+                        + visibleRect.height);
             }
         }
 

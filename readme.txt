@@ -1,6 +1,6 @@
-Teradata JDBC Driver 14.00.00.30
+Teradata JDBC Driver 14.10.00.17
 
-Part of the Teradata Tools and Utilities 14.00 product suite
+Part of the Teradata Tools and Utilities 14.10 product suite
 
 
 Get the Latest Software
@@ -24,7 +24,7 @@ Note that IBM WebSphere Application Server 5.0 is not supported, because
 WebSphere 5.0 uses JDK 1.3.1.
 
 This release of the Teradata JDBC Driver supports Teradata Database
-V2R6.2, 12.00, 13.00, 13.10, and 14.00.
+12.00, 13.00, 13.10, 14.00, and 14.10.
 
 
 Release Notes
@@ -34,7 +34,34 @@ This section highlights issues that you should be aware of when upgrading to thi
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
 
-This release includes changes to address the following DRs:
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.37:
+
+DR 164718 EON support for DatabaseMetaData getMax...NameLength methods
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.35:
+
+DR 163466 Translate new JDBC 14.10 error messages into Japanese
+DR 163807 Updatable ResultSet exception "No value has been set for parameter" with unique column
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.33:
+
+DR 153317 Provide ClientAttributes COPSuffixHostName and Client/Server IPAddresses/Ports
+DR 162211 Implement Connection.getClientInfo to return query band values
+DR 163421 Improve logging of LCC activity
+DR 163501 Support PreparedStatement setAsciiStream setBinaryStream setCharacterStream with long length
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.31:
+
+DR 160663 Support JDBC FastLoad CSV as an application server data source
+DR 160795 Support new JDBC 4.0 PreparedStatement.setAsciiStream methods for JDBC FastLoad CSV
+DR 161123 Bypass JDBC FastExport for unsupported ResultSet scrollability, concurrency, or holdability
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.30:
 
 DR 162982 Support LDAP password containing space character
 DR 163164 Correct DatabaseMetaData getNumericFunctions getStringFunctions getSystemFunctions getTimeDateFunctions
@@ -137,11 +164,6 @@ This release includes changes to address the following DRs, originally included
 in release 14.00.00.08:
 
 DR 156036 Add connection parameter FINALIZE_AUTO_CLOSE=ON/OFF (default OFF) to control finalize method auto-closing JDBC objects
-
-This release includes changes to address the following DRs, originally included
-in release 14.00.00.07:
-
-DR 155666 Accommodate more rows from the Teradata Database than the Activity Count indicates
 
 This release includes changes to address the following DRs, originally included
 in release 14.00.00.05:
@@ -289,6 +311,22 @@ in release 13.10.00.03:
 
 DR 139067 DatabaseMetaData getSQLKeywords method to query SYSLIB.SQLRestrictedWords
 DR 140609 Additional support for DISTINCT user-defined types
+
+This release includes changes to address the following DRs, originally included
+in release 13.00.00.32:
+
+DR 164292 Provide correct SQLException error codes to distinguish logon vs non-logon communication failure
+
+This release includes changes to address the following DRs, originally included
+in release 13.00.00.31:
+
+DR 155666 Accommodate more rows from the Teradata Database than the Activity Count indicates
+
+This release includes changes to address the following DRs, originally included
+in release 13.00.00.30:
+
+DR 163433 ResultSet.close and Statement.close may not always close response spools spanning multiple messages
+DR 163530 Support JDBC 4.0 API Service Provider mechanism for automatic class loading
 
 This release includes changes to address the following DRs, originally included
 in release 13.00.00.29:
@@ -1039,7 +1077,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.00.00.30.zip and TeraJDBC__indep_indep.14.00.00.30.tar
+TeraJDBC__indep_indep.14.10.00.17.zip and TeraJDBC__indep_indep.14.10.00.17.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

@@ -112,6 +112,9 @@ public class SyntaxUtilities implements SwingConstants {
     private static final char[] JS_KEYWORD_RETURN = {'r', 'e', 't', 'u', 'r',
             'n'};
 
+    /** Used internally. */
+    private static final String BRACKETS = "{([})]";
+
     /**
      * Returns a string with characters that are special to HTML (such as
      * <code>&lt;</code>, <code>&gt;</code> and <code>&amp;</code>) replaced by
@@ -342,212 +345,228 @@ public class SyntaxUtilities implements SwingConstants {
      * caret position.
      *
      * @param textArea The text area.
-     * @return The location of the matching bracket in the document, or
-     *         <code>-1</code> if there isn't a matching bracket (or the caret
-     *         isn't on a bracket).
+     * @param input A point to use as the return value. If this is
+     *        <code>null</code>, a new object is created and returned.
+     * @return A point representing the matched bracket info. The "x" field is
+     *         the offset of the bracket at the caret position (either just
+     *         before or just after the caret), and the "y" field is the offset
+     *         of the matched bracket. Both "x" and "y" will be <code>-1</code>
+     *         if there isn't a matching bracket (or the caret isn't on a
+     *         bracket).
      */
-    public static int getMatchingBracketPosition(SyntaxTextArea textArea) {
+    public static Point getMatchingBracketPosition(SyntaxTextArea textArea,
+            Point input) {
+        if (input == null) {
+            input = new Point();
+        }
+        input.setLocation(-1, -1);
+
         try {
             // Actually position just BEFORE caret
             int caretPosition = textArea.getCaretPosition() - 1;
-            if (caretPosition > -1) {
-                // Some variables that will be used later
-                Token token;
-                Element map;
-                int curLine;
-                Element line;
-                int start, end;
-                SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
-                char bracket = doc.charAt(caretPosition);
+            SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+            char bracket = 0;
 
-                // First, see if the previous char was a bracket
-                // ('{', '}', '(', ')', '[', ']').
-                // If it was, then make sure this bracket isn't sitting in
-                // the middle of a comment or string. If it isn't, then
-                // initialize some stuff so we can continue on
-                char bracketMatch;
-                boolean goForward;
-                switch (bracket) {
-                    case '{' :
-                    case '(' :
-                    case '[' :
+            // If the caret was at offset 0, we can't check "to its left"
+            if (caretPosition >= 0) {
+                bracket = doc.charAt(caretPosition);
+            }
 
-                        // Ensure this bracket isn't in a comment
-                        map = doc.getDefaultRootElement();
-                        curLine = map.getElementIndex(caretPosition);
-                        line = map.getElement(curLine);
-                        start = line.getStartOffset();
-                        end = line.getEndOffset();
-                        token = doc.getTokenListForLine(curLine);
-                        token = SyntaxUtilities.getTokenAtOffset(token,
-                                caretPosition);
-                        // All brackets are always returned as "separators"
-                        if (token.type != Token.SEPARATOR) {
-                            return -1;
-                        }
-                        bracketMatch = bracket == '{' ? '}' : (bracket == '('
-                                ? ')'
-                                : ']');
-                        goForward = true;
-                        break;
+            // Try to match a bracket "to the right" of the caret if one
+            // was not found on the left
+            int index = BRACKETS.indexOf(bracket);
+            if (index == -1 && caretPosition < doc.getLength() - 1) {
+                bracket = doc.charAt(++caretPosition);
+            }
 
-                    case '}' :
-                    case ')' :
-                    case ']' :
-                        // Ensure this bracket isn't in a comment
-                        map = doc.getDefaultRootElement();
-                        curLine = map.getElementIndex(caretPosition);
-                        line = map.getElement(curLine);
-                        start = line.getStartOffset();
-                        end = line.getEndOffset();
-                        token = doc.getTokenListForLine(curLine);
-                        token = SyntaxUtilities.getTokenAtOffset(token,
-                                caretPosition);
-                        // All brackets are always returned as "separators"
-                        if (token.type != Token.SEPARATOR) {
-                            return -1;
-                        }
-                        bracketMatch = bracket == '}' ? '{' : (bracket == ')'
-                                ? '('
-                                : '[');
-                        goForward = false;
-                        break;
-
-                    default :
-                        return -1;
-
+            // First, see if the char was a bracket (one of "{[()]}")
+            if (index == -1) {
+                index = BRACKETS.indexOf(bracket);
+                if (index == -1) {
+                    return input;
                 }
+            }
 
-                if (goForward) {
-                    int lastLine = map.getElementCount();
+            // If it was, then make sure this bracket isn't sitting in the
+            // middle of a comment or string. If it isn't, then initialize some
+            // stuff so we can continue on
+            char bracketMatch;
+            boolean goForward;
+            Element map = doc.getDefaultRootElement();
+            int curLine = map.getElementIndex(caretPosition);
+            Element line = map.getElement(curLine);
+            int start = line.getStartOffset();
+            int end = line.getEndOffset();
+            Token token = doc.getTokenListForLine(curLine);
+            token = SyntaxUtilities.getTokenAtOffset(token, caretPosition);
+            // All brackets are always returned as "separators."
+            if (token.type != Token.SEPARATOR) {
+                return input;
+            }
+            if (index < 3) { // One of "{[("
+                goForward = true;
+                bracketMatch = BRACKETS.charAt(index + 3);
+            } else { // One of ")]}"
+                goForward = false;
+                bracketMatch = BRACKETS.charAt(index - 3);
+            }
 
-                    // Start just after the found bracket since we're sure we're
-                    // not in a comment
-                    start = caretPosition + 1;
-                    int numEmbedded = 0;
-                    boolean haveTokenList = false;
+            if (goForward) {
+                int lastLine = map.getElementCount();
 
-                    while (true) {
-                        doc.getText(start, end - start, charSegment);
-                        int segOffset = charSegment.offset;
+                // Start just after the found bracket since we're sure we're
+                // not in a comment
+                start = caretPosition + 1;
+                int numEmbedded = 0;
+                boolean haveTokenList = false;
 
-                        for (int i = segOffset; i < segOffset
-                                + charSegment.count; i++) {
-                            char ch = charSegment.array[i];
+                while (true) {
+                    doc.getText(start, end - start, charSegment);
+                    int segOffset = charSegment.offset;
 
-                            if (ch == bracket) {
-                                if (haveTokenList == false) {
-                                    token = doc.getTokenListForLine(curLine);
-                                    haveTokenList = true;
-                                }
-                                int offset = start + (i - segOffset);
-                                token = SyntaxUtilities.getTokenAtOffset(token,
-                                        offset);
-                                if (token.type == Token.SEPARATOR)
-                                    numEmbedded++;
+                    for (int i = segOffset; i < segOffset + charSegment.count; i++) {
+                        char ch = charSegment.array[i];
+
+                        if (ch == bracket) {
+                            if (haveTokenList == false) {
+                                token = doc.getTokenListForLine(curLine);
+                                haveTokenList = true;
                             }
+                            int offset = start + (i - segOffset);
+                            token = SyntaxUtilities.getTokenAtOffset(token,
+                                    offset);
+                            if (token.type == Token.SEPARATOR)
+                                numEmbedded++;
+                        }
 
-                            else if (ch == bracketMatch) {
-                                if (haveTokenList == false) {
-                                    token = doc.getTokenListForLine(curLine);
-                                    haveTokenList = true;
-                                }
-                                int offset = start + (i - segOffset);
-                                token = SyntaxUtilities.getTokenAtOffset(token,
-                                        offset);
-                                if (token.type == Token.SEPARATOR) {
-                                    if (numEmbedded == 0) {
-                                        if (textArea.isCodeFoldingEnabled()
-                                                && textArea.getFoldManager()
-                                                        .isLineHidden(curLine)) {
-                                            return -1; // Match hidden in a fold
-                                        }
-                                        return offset;
+                        else if (ch == bracketMatch) {
+                            if (haveTokenList == false) {
+                                token = doc.getTokenListForLine(curLine);
+                                haveTokenList = true;
+                            }
+                            int offset = start + (i - segOffset);
+                            token = SyntaxUtilities.getTokenAtOffset(token,
+                                    offset);
+                            if (token.type == Token.SEPARATOR) {
+                                if (numEmbedded == 0) {
+                                    if (textArea.isCodeFoldingEnabled()
+                                            && textArea.getFoldManager()
+                                                    .isLineHidden(curLine)) {
+                                        return input; // Match hidden in a fold
                                     }
-                                    numEmbedded--;
+                                    input.setLocation(caretPosition, offset);
+                                    return input;
                                 }
-                            }
-
-                        } // End of for (int i=segOffset; i<segOffset+charSegment.count; i++)
-
-                        // Bail out if we've gone through all lines and haven't
-                        // found the match
-                        if (++curLine == lastLine)
-                            return -1;
-
-                        // Otherwise, go through the next line
-                        haveTokenList = false;
-                        line = map.getElement(curLine);
-                        start = line.getStartOffset();
-                        end = line.getEndOffset();
-                    } // End of while (true)
-                } // End of if (goForward)
-
-                // Otherwise, we're going backward through the file (since we
-                // found '}', ')' or ']')
-                else {
-                    // End just before the found bracket since we're sure we're
-                    // not in a comment
-                    end = caretPosition;
-                    int numEmbedded = 0;
-                    boolean haveTokenList = false;
-                    Token t2;
-
-                    while (true) {
-                        doc.getText(start, end - start, charSegment);
-                        int segOffset = charSegment.offset;
-                        int iStart = segOffset + charSegment.count - 1;
-
-                        for (int i = iStart; i >= segOffset; i--) {
-                            char ch = charSegment.array[i];
-
-                            if (ch == bracket) {
-                                if (haveTokenList == false) {
-                                    token = doc.getTokenListForLine(curLine);
-                                    haveTokenList = true;
-                                }
-                                int offset = start + (i - segOffset);
-                                t2 = SyntaxUtilities.getTokenAtOffset(token,
-                                        offset);
-                                if (t2.type == Token.SEPARATOR)
-                                    numEmbedded++;
-                            }
-
-                            else if (ch == bracketMatch) {
-                                if (haveTokenList == false) {
-                                    token = doc.getTokenListForLine(curLine);
-                                    haveTokenList = true;
-                                }
-                                int offset = start + (i - segOffset);
-                                t2 = SyntaxUtilities.getTokenAtOffset(token,
-                                        offset);
-                                if (t2.type == Token.SEPARATOR) {
-                                    if (numEmbedded == 0)
-                                        return offset;
-                                    numEmbedded--;
-                                }
+                                numEmbedded--;
                             }
                         }
 
-                        // Bail out if we've gone through all lines and haven't
-                        // found the match
-                        if (--curLine == -1)
-                            return -1;
+                    } // End of for (int i=segOffset; i<segOffset+charSegment.count; i++)
 
-                        // Otherwise, get ready for going through the next line
-                        haveTokenList = false;
-                        line = map.getElement(curLine);
-                        start = line.getStartOffset();
-                        end = line.getEndOffset();
-                    } // End of while (true)
-                } // End of else
-            } // End of if (caretPosition>-1)
+                    // Bail out if we've gone through all lines and haven't
+                    // found the match
+                    if (++curLine == lastLine) {
+                        return input;
+                    }
+
+                    // Otherwise, go through the next line
+                    haveTokenList = false;
+                    line = map.getElement(curLine);
+                    start = line.getStartOffset();
+                    end = line.getEndOffset();
+                } // End of while (true)
+            } // End of if (goForward)
+
+            // Otherwise, we're going backward through the file (since we
+            // found '}', ')' or ']')
+            else {
+                // End just before the found bracket since we're sure we're
+                // not in a comment
+                end = caretPosition;
+                int numEmbedded = 0;
+                boolean haveTokenList = false;
+                Token t2;
+
+                while (true) {
+                    doc.getText(start, end - start, charSegment);
+                    int segOffset = charSegment.offset;
+                    int iStart = segOffset + charSegment.count - 1;
+
+                    for (int i = iStart; i >= segOffset; i--) {
+                        char ch = charSegment.array[i];
+
+                        if (ch == bracket) {
+                            if (haveTokenList == false) {
+                                token = doc.getTokenListForLine(curLine);
+                                haveTokenList = true;
+                            }
+                            int offset = start + (i - segOffset);
+                            t2 = SyntaxUtilities
+                                    .getTokenAtOffset(token, offset);
+                            if (t2.type == Token.SEPARATOR)
+                                numEmbedded++;
+                        }
+
+                        else if (ch == bracketMatch) {
+                            if (haveTokenList == false) {
+                                token = doc.getTokenListForLine(curLine);
+                                haveTokenList = true;
+                            }
+                            int offset = start + (i - segOffset);
+                            t2 = SyntaxUtilities
+                                    .getTokenAtOffset(token, offset);
+                            if (t2.type == Token.SEPARATOR) {
+                                if (numEmbedded == 0) {
+                                    input.setLocation(caretPosition, offset);
+                                    return input;
+                                }
+                                numEmbedded--;
+                            }
+                        }
+                    }
+
+                    // Bail out if we've gone through all lines and haven't
+                    // found the match
+                    if (--curLine == -1) {
+                        return input;
+                    }
+
+                    // Otherwise, get ready for going through the next line
+                    haveTokenList = false;
+                    line = map.getElement(curLine);
+                    start = line.getStartOffset();
+                    end = line.getEndOffset();
+                } // End of while (true)
+            } // End of else
         } catch (BadLocationException ble) {
             ExceptionDialog.notifyException(ble); // Shouldn't ever happen
         }
 
         // Something went wrong..
-        return -1;
+        return input;
+    }
+
+    /**
+     * Returns the next non-whitespace, non-comment token in a text area.
+     *
+     * @param t The next token in this line's token list.
+     * @param textArea The text area.
+     * @param line The current line index (the line index of <code>t</code>).
+     * @return The next non-whitespace, non-comment token, or <code>null</code>
+     *         if there isn't one.
+     * @see #getPreviousImportantToken(SyntaxTextArea, int)
+     */
+    public static final Token getNextImportantToken(Token t,
+            SyntaxTextArea textArea, int line) {
+        while (t != null && t.isPaintable() && t.isCommentOrWhitespace()) {
+            t = t.getNextToken();
+        }
+        if ((t == null || !t.isPaintable())
+                && line < textArea.getLineCount() - 1) {
+            t = textArea.getTokenListForLine(++line);
+            return getNextImportantToken(t, textArea, line);
+        }
+        return t;
     }
 
     /**
@@ -724,6 +743,31 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
+     * Returns the last non-whitespace, non-comment token, starting with the
+     * specified line.
+     *
+     * @param textArea The text area.
+     * @param line The line at which to start looking.
+     * @return The last non-whitespace, non-comment token, or <code>null</code>
+     *         if there isn't one.
+     * @see #getNextImportantToken(Token, SyntaxTextArea, int)
+     */
+    public static final Token getPreviousImportantToken(
+            SyntaxTextArea textArea, int line) {
+        if (line < 0) {
+            return null;
+        }
+        Token t = textArea.getTokenListForLine(line);
+        if (t != null) {
+            t = t.getLastNonCommentNonWhitespaceToken();
+            if (t != null) {
+                return t;
+            }
+        }
+        return getPreviousImportantToken(textArea, line - 1);
+    }
+
+    /**
      * Returns the token at the specified index, or <code>null</code> if the
      * given offset isn't in this token list's range.<br> Note that this method
      * does NOT check to see if <code>tokenList</code> is null; callers should
@@ -735,7 +779,8 @@ public class SyntaxUtilities implements SwingConstants {
      *         none of the tokens are at that offset.
      */
     public static final Token getTokenAtOffset(Token tokenList, int offset) {
-        for (Token t = tokenList; t != null; t = t.getNextToken()) {
+        for (Token t = tokenList; t != null && t.isPaintable(); t = t
+                .getNextToken()) {
             if (t.containsPosition(offset))
                 return t;
         }

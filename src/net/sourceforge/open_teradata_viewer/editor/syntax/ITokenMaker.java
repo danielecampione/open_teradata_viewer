@@ -54,6 +54,16 @@ public interface ITokenMaker {
             int startOffset);
 
     /**
+     * Returns the closest {@link ITokenTypes "standard" token type} for a given
+     * "internal" token type (e.g. one whose value is <code>&lt; 0</code>).
+     *
+     * @param type The token type.
+     * @return The closest "standard" token type. If a mapping is not defined
+     *         for this language, then <code>type</code> is returned.
+     */
+    public int getClosestStandardTokenTypeForInternalType(int type);
+
+    /**
      * Returns whether this programming language uses curly braces ('<tt>{</tt>'
      * and '<tt>}</tt>') to denote code blocks.
      *
@@ -110,6 +120,17 @@ public interface ITokenMaker {
     public boolean getMarkOccurrencesOfTokenType(int type);
 
     /**
+     * Returns the object in charge of marking all occurrences of the token at
+     * the current caret position, if it is a relevant token. If
+     * <code>null</code> is returned, a default
+     * <code>IOccurrenceMarker</code> is used.
+     *
+     * @return The occurrence marker for this language, or <code>null</code> for
+     *         none.
+     */
+    public IOccurrenceMarker getOccurrenceMarker();
+
+    /**
      * If a line ends in the specified token, this method returns whether a new
      * line inserted after that line should be indented.
      *
@@ -135,18 +156,4 @@ public interface ITokenMaker {
 
     /** @return Whether this language is a markup language */
     public boolean isMarkupLanguage();
-
-    /**
-     * @return Whether whitespace is visible.
-     * @see #setWhitespaceVisible(boolean)
-     */
-    public boolean isWhitespaceVisible();
-
-    /**
-     * Sets whether tokens are generated that "show" whitespace.
-     *
-     * @param visible Whether whitespace should be visible.
-     * @see #isWhitespaceVisible()
-     */
-    public void setWhitespaceVisible(boolean visible);
 }

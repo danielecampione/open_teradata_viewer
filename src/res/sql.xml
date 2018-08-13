@@ -105,9 +105,9 @@ more versatile.]]>
                         <![CDATA[The number to get the absolute value
 of.<br/><br/>
 If the argument is not numeric, it is converted to a numeric value, based on
-implicit type conversion rules. If arg is a character string, it is converted to
-a numeric value of the FLOAT data type. If the argument cannot be converted, an
-error is reported.<br/>
+implicit type conversion rules. If <em>arg</em> is a character string, it is
+converted to a numeric value of the FLOAT data type. If the argument cannot be
+converted, an error is reported.<br/>
 ABS cannot be applied to an argument of type BYTE, VARBYTE, CHARACTER or VARCHAR
 if the server character set is GRAPHIC.]]>
                     </desc>
@@ -345,9 +345,9 @@ if the server character set is GRAPHIC.]]>
                     <desc>
                         <![CDATA[A numeric argument.<br/><br/>
 If the argument is not numeric, it is converted to a numeric value, based on
-implicit type conversion rules. If arg is a character string, it is converted to
-a numeric value of FLOAT data type. If the argument cannot be converted, an
-error is reported.<br/>
+implicit type conversion rules. If <em>arg</em> is a character string, it is
+converted to a numeric value of FLOAT data type. If the argument cannot be
+converted, an error is reported.<br/>
 NULLIFZERO cannot be applied to an argument of type BYTE, VARBYTE, or CHARACTER
 or VARCHAR if the server character set is GRAPHIC.]]>
                     </desc>
@@ -736,8 +736,8 @@ following:
 <pre>RANGE_N(test_expression                                                                                                                                      
               BETWEEN range [, range]...                                                                                                                        
               [, NO RANGE [OR UNKNOWN]] [, UNKNOWN])</pre>
-where <em>test_expression</em> is an expression that results in a BYTEINT, SMALLINT,
-INTEGER, or DATE data type.<br/><br/>
+where <em>test_expression</em> is an expression that results in a BYTEINT,
+SMALLINT, INTEGER, or DATE data type.<br/><br/>
 The start_expression consists of a constant or constant expression that defines
 the starting boundary of a range.<br/>
 The data type of start_expression must be the same as the data type of
@@ -1463,7 +1463,7 @@ INTEGER.<br/><br/>
     <tr>
         <td>
             <b>
-                IF the value of arg is..
+                IF the value of <em>arg</em> is..
             </b>
         </td>
         <td>

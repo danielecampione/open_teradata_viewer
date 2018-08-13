@@ -5,7 +5,26 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.16c (04/02/2013)
+<PRE>0.17a (17/05/2013)
+    - setBracketMatchingEnabled(boolean) now checks for brackets "to the right"
+      of the caret if one is not found "to the left."
+    - Added API to create custom hyperlinks in SyntaxTextArea.
+    - Added "mark occurrences" support for XML. Currently just highlights the
+      tag name at the current caret position and its match.
+    - Fixed issue when auto-inserting spaces for tabs.
+    - Major refactoring of rendering code.
+    - "Traditional" selection rendering is now supported; that is, selected text
+      can now be rendered as syntax highlighted tokens with a "selection"
+      background (as it was previously), or as text as a single color with the
+      "selection" background (as standard text components do). See
+      SyntaxTextArea.setUseSelectedTextColor(boolean).
+    - Fixed performance issue in FoldingAwareIconRowHeader when it paints
+      "active regions."
+    - Added some new token types to better differentiate markup tokens from
+      "regular" language tokens. This allows for better syntax highlighting.
+    - Upgraded Teradata JDBC driver 14.00.00.30 -> 14.10.00.17
+
+0.16c (04/02/2013)
     - Fixed an issue with SQLTokenMaker: the ZEROIFNULL keyword has been
       categorized as a function.
     - Upgraded Teradata JDBC driver 14.00.00.21 -> 14.00.00.30
@@ -261,7 +280,7 @@
     - Added support for plug-ins.
 
 0.02b (21/06/2011)
-    - Added the historicizing of queries.
+    - Added the historicization of the queries.
 
 0.02a (20/06/2011)
     - The driver is dynamically installed.
@@ -277,10 +296,10 @@
 
 0.01b (16/06/2011)
     - The user manual has been updated with the added capabilities.
-    - Added "Write File" function. The "Save File" command can be found in the
-      "File" menu.
-    - Added "Open File" function. The "Open File" command can be found in the
-      "File" menu.
+    - Added the "Write File" function. The "Save File" command can be found in
+      the "File" menu.
+    - Added the "Open File" function. The "Open File" command can be found in
+      the "File" menu.
 
 0.01a (14/06/2011)
     - First release.

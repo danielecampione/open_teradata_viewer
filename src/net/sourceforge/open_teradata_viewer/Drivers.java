@@ -129,11 +129,13 @@ public class Drivers {
                     stringBuilder.append("\n");
                 } catch (ClassNotFoundException cnfe) {
                     initialized = false;
+                    scanner.close();
                     throw cnfe;
                 }
             }
         }
         Config.saveDrivers(stringBuilder.toString());
+        scanner.close();
     }
 
     public static int editDrivers() throws Exception {

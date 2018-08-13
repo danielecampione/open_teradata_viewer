@@ -91,6 +91,7 @@ public class SyntaxView extends View
     private int ascent;
     private int clipStart;
     private int clipEnd;
+    private Token tempToken;
 
     /**
      * Constructs a new <code>SyntaxView</code> wrapped around an element.
@@ -99,6 +100,7 @@ public class SyntaxView extends View
      */
     public SyntaxView(Element elem) {
         super(elem);
+        tempToken = new Token();
     }
 
     /**
@@ -162,25 +164,103 @@ public class SyntaxView extends View
 
     /**
      * Draws the passed-in text using syntax highlighting for the current
-     * language. The tokens used to decide how to paint the syntax highlighting
-     * are grabbed from the text area's document.
+     * language. It is assumed that the entire line is either not in a selected
+     * region, or painting with a selection-foreground color is turned off.
      *
+     * @param painter The painter to render the tokens.
      * @param token The list of tokens to draw.
      * @param g The graphics context in which to draw.
      * @param x The x-coordinate at which to draw.
      * @param y The y-coordinate at which to draw.
      * @return The x-coordinate representing the end of the painted text.
      */
-    public float drawLine(Token token, Graphics2D g, float x, float y) {
+    private float drawLine(ITokenPainter painter, Token token, Graphics2D g,
+            float x, float y) {
         float nextX = x; // The x-value at the end of our text
 
         while (token != null && token.isPaintable() && nextX < clipEnd) {
-            nextX = token.paint(g, nextX, y, host, this, clipStart);
+            nextX = painter.paint(token, g, nextX, y, host, this, clipStart);
             token = token.getNextToken();
         }
 
-        // NOTE: We should re-use code from Token (paintBackground()) here, but
-        // don't because I'm just too lazy
+        if (host.getEOLMarkersVisible()) {
+            g.setColor(host.getForegroundForTokenType(Token.WHITESPACE));
+            g.setFont(host.getFontForTokenType(Token.WHITESPACE));
+            g.drawString("\u00B6", nextX, y);
+        }
+
+        // Return the x-coordinate at the end of the painted text.
+        return nextX;
+    }
+
+    /**
+     * Draws the passed-in text using syntax highlighting for the current
+     * language. Tokens are checked for being in a selected region, and are
+     * rendered appropriately if they are.
+     *
+     * @param painter The painter to render the tokens.
+     * @param token The list of tokens to draw.
+     * @param g The graphics context in which to draw.
+     * @param x The x-coordinate at which to draw.
+     * @param y The y-coordinate at which to draw.
+     * @param selStart The start of the selection.
+     * @param selEnd The end of the selection.
+     * @return The x-coordinate representing the end of the painted text.
+     */
+    private float drawLineWithSelection(ITokenPainter painter, Token token,
+            Graphics2D g, float x, float y, int selStart, int selEnd) {
+        float nextX = x; // The x-value at the end of our text
+
+        while (token != null && token.isPaintable() && nextX < clipEnd) {
+            // Selection starts in this token
+            if (token.containsPosition(selStart)) {
+                if (selStart > token.offset) {
+                    tempToken.copyFrom(token);
+                    tempToken.textCount = selStart - tempToken.offset;
+                    nextX = painter.paint(tempToken, g, nextX, y, host, this,
+                            clipStart);
+                    token.makeStartAt(selStart);
+                }
+
+                int selCount = Math.min(token.textCount, selEnd - token.offset);
+                if (selCount == token.textCount) {
+                    nextX = painter.paintSelected(token, g, nextX, y, host,
+                            this, clipStart);
+                } else {
+                    tempToken.copyFrom(token);
+                    tempToken.textCount = selCount;
+                    nextX = painter.paintSelected(tempToken, g, nextX, y, host,
+                            this, clipStart);
+                    token.makeStartAt(token.offset + selCount);
+                    nextX = painter.paint(token, g, nextX, y, host, this,
+                            clipStart);
+                }
+            }
+            // Selection ends in this token
+            else if (token.containsPosition(selEnd)) {
+                tempToken.copyFrom(token);
+                tempToken.textCount = selEnd - tempToken.offset;
+                nextX = painter.paintSelected(tempToken, g, nextX, y, host,
+                        this, clipStart);
+                token.makeStartAt(selEnd);
+                nextX = painter
+                        .paint(token, g, nextX, y, host, this, clipStart);
+            }
+            // This token is entirely selected
+            else if (token.offset >= selStart
+                    && (token.offset + token.textCount) <= selEnd) {
+                nextX = painter.paintSelected(token, g, nextX, y, host, this,
+                        clipStart);
+            }
+            // This token is entirely unselected
+            else {
+                nextX = painter
+                        .paint(token, g, nextX, y, host, this, clipStart);
+            }
+
+            token = token.getNextToken();
+        }
+
         if (host.getEOLMarkersVisible()) {
             g.setColor(host.getForegroundForTokenType(Token.WHITESPACE));
             g.setFont(host.getFontForTokenType(Token.WHITESPACE));
@@ -509,7 +589,6 @@ public class SyntaxView extends View
      *
      * @param g The graphics context with which to paint.
      * @param a The allocated region in which to render.
-     * @see #drawLine
      */
     public void paint(Graphics g, Shape a) {
         SyntaxDocument document = (SyntaxDocument) getDocument();
@@ -521,9 +600,8 @@ public class SyntaxView extends View
 
         Rectangle clip = g.getClipBounds();
         // An attempt to speed things up for files with long lines. Note that
-        // this will actually slow things down a tad for the common case of
-        // regular-length lines, but I don't think it'll make a difference
-        // visually.  We'll see..
+        // this will actually slow things down a bit for the common case of
+        // regular-length lines, but it doesn't make a perceivable difference
         clipStart = clip.x;
         clipEnd = clipStart + clip.width;
 
@@ -540,12 +618,18 @@ public class SyntaxView extends View
         Element map = getElement();
         int lineCount = map.getElementCount();
 
+        // Whether token styles should always be painted, even in selections
+        int selStart = host.getSelectionStart();
+        int selEnd = host.getSelectionEnd();
+        boolean useSelectedTextColor = host.getUseSelectedTextColor();
+
         SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) host
                 .getHighlighter();
 
         Graphics2D g2d = (Graphics2D) g;
         Token token;
 
+        ITokenPainter painter = host.getTokenPainter();
         int line = linesAbove;
         while (y < clip.y + clip.height + lineHeight && line < lineCount) {
             Fold fold = fm.getFoldForLine(line);
@@ -556,7 +640,13 @@ public class SyntaxView extends View
 
             // Paint a line of text
             token = document.getTokenListForLine(line);
-            drawLine(token, g2d, x, y);
+            if (!useSelectedTextColor || selStart == selEnd
+                    || (startOffset >= selEnd || endOffset < selStart)) {
+                drawLine(painter, token, g2d, x, y);
+            } else {
+                drawLineWithSelection(painter, token, g2d, x, y, selStart,
+                        selEnd);
+            }
 
             if (fold != null && fold.isCollapsed()) {
                 // Visible indicator of collapsed lines

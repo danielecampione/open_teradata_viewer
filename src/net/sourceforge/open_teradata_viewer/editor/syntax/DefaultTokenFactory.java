@@ -65,9 +65,9 @@ class DefaultTokenFactory implements ITokenFactory {
 
         // Give us some tokens to initially work with
         tokenList = new Token[size];
-        for (int i = 0; i < size; i++)
-            tokenList[i] = createInternalUseOnlyToken();
-
+        for (int i = 0; i < size; i++) {
+            tokenList[i] = new Token();
+        }
     }
 
     /**
@@ -80,25 +80,11 @@ class DefaultTokenFactory implements ITokenFactory {
         size += increment;
         tokenList = temp;
         for (int i = 0; i < increment; i++) {
-            tokenList[size - i - 1] = createInternalUseOnlyToken();
+            tokenList[size - i - 1] = new Token();
         }
     }
 
-    /**
-     * Creates a token for use internally by this token factory. This method
-     * should NOT be called externally; only by this class and possibly
-     * subclasses.
-     *
-     * @return A token to add to this token factory's internal stack. If a
-     *         subclass wants to produce a stack of a token other than
-     *         {@link DefaultToken}, then this method can be overridden to
-     *         return a new instance of the desired token type.
-     */
-    protected Token createInternalUseOnlyToken() {
-        return new DefaultToken();
-    }
-
-    /** @return A null token. */
+    /** {@inheritDoc} */
     public Token createToken() {
         Token token = tokenList[currentFreeToken];
         token.text = null;
@@ -111,31 +97,13 @@ class DefaultTokenFactory implements ITokenFactory {
         return token;
     }
 
-    /**
-     * Returns a token.
-     *
-     * @param line The segment from which to get the token's text.
-     * @param beg The starting offset of the token's text in the segment.
-     * @param end The ending offset of the token's text in the segment.
-     * @param startOffset The offset in the document of the token.
-     * @param type The type of token.
-     * @return The token.
-     */
+    /** {@inheritDoc} */
     public Token createToken(final Segment line, final int beg, final int end,
             final int startOffset, final int type) {
         return createToken(line.array, beg, end, startOffset, type);
     }
 
-    /**
-     * Returns a token.
-     *
-     * @param line The segment from which to get the token's text.
-     * @param beg The starting offset of the token's text in the segment.
-     * @param end The ending offset of the token's text in the segment.
-     * @param startOffset The offset in the document of the token.
-     * @param type The type of token.
-     * @return The token.
-     */
+    /** {@inheritDoc} */
     public Token createToken(final char[] line, final int beg, final int end,
             final int startOffset, final int type) {
         Token token = tokenList[currentFreeToken];

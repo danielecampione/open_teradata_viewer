@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.util.Stack;
 
@@ -272,6 +273,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
         private static final long serialVersionUID = 2906527566500477427L;
 
+        private Point bracketInfo;
         private Segment seg;
 
         public CloseCurlyBraceAction() {
@@ -320,11 +322,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // Locate the matching '{' bracket, and replace the leading
                     // whitespace for the '}' to match that of the '{' char's
                     // line
-                    int match = SyntaxUtilities.getMatchingBracketPosition(sta);
-                    if (match > -1) {
+                    bracketInfo = SyntaxUtilities.getMatchingBracketPosition(
+                            sta, bracketInfo);
+                    if (bracketInfo.y > -1) {
                         try {
                             String ws = SyntaxUtilities.getLeadingWhitespace(
-                                    doc, match);
+                                    doc, bracketInfo.y);
                             sta.replaceRange(ws, start, dot);
                         } catch (BadLocationException ble) {
                             ExceptionDialog.hideException(ble);
@@ -1024,6 +1027,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
         private static final long serialVersionUID = 8112036198256912568L;
 
+        private Point bracketInfo;
+
         public GoToMatchingBracketAction() {
             super(staGoToMatchingBracketAction);
         }
@@ -1035,11 +1040,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
-            int pos = SyntaxUtilities.getMatchingBracketPosition(sta);
-            if (pos > -1) {
+            bracketInfo = SyntaxUtilities.getMatchingBracketPosition(sta,
+                    bracketInfo);
+            if (bracketInfo.y > -1) {
                 // Go to the position AFTER the bracket so the previous bracket
                 // (which we were just on) is highlighted
-                sta.setCaretPosition(pos + 1);
+                sta.setCaretPosition(bracketInfo.y + 1);
             } else {
                 UIManager.getLookAndFeel().provideErrorFeedback(sta);
             }

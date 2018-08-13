@@ -19,7 +19,6 @@
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -36,6 +35,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * identifier.
  *
  * @author D. Campione
+ * @see IOccurrenceMarker
  * 
  */
 class MarkOccurrencesSupport implements CaretListener, ActionListener {
@@ -97,56 +97,46 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         }
 
         SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
-        doc.readLock();
-        try {
-            // Get the token at the caret position
-            int line = textArea.getCaretLineNumber();
-            Token tokenList = textArea.getTokenListForLine(line);
-            int dot = c.getDot();
-            Token t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
-            if (t == null /* EOL */|| !isValidType(t) || isNonWordChar(t)) {
-                // Try to the "left" of the caret
-                dot--;
-                try {
-                    if (dot >= textArea.getLineStartOffset(line)) {
-                        t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
-                    }
-                } catch (BadLocationException ble) {
-                    ExceptionDialog.notifyException(ble); // Never happens
-                }
-            }
+        IOccurrenceMarker occurrenceMarker = doc.getOccurrenceMarker();
+        boolean occurrencesChanged = false;
 
-            // Add new highlights if an identifier is selected
-            if (t != null && isValidType(t) && !isNonWordChar(t)) {
-                removeHighlights();
-                SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
-                        .getHighlighter();
-
-                char[] lexeme = t.getLexeme().toCharArray();
-                int type = t.type;
-                for (int i = 0; i < textArea.getLineCount(); i++) {
-                    Token temp = textArea.getTokenListForLine(i);
-                    while (temp != null && temp.isPaintable()) {
-                        if (temp.is(type, lexeme)) {
-                            try {
-                                int end = temp.offset + temp.textCount;
-                                h.addMarkedOccurrenceHighlight(temp.offset,
-                                        end, p);
-                            } catch (BadLocationException ble) {
-                                ExceptionDialog.notifyException(ble); // Never happens
-                            }
+        if (occurrenceMarker != null) {
+            doc.readLock();
+            try {
+                // Get the token at the caret position
+                int line = textArea.getCaretLineNumber();
+                Token tokenList = textArea.getTokenListForLine(line);
+                int dot = c.getDot();
+                Token t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
+                if (t == null /* EOL */|| !isValidType(t) || isNonWordChar(t)) {
+                    // Try to the "left" of the caret
+                    dot--;
+                    try {
+                        if (dot >= textArea.getLineStartOffset(line)) {
+                            t = SyntaxUtilities
+                                    .getTokenAtOffset(tokenList, dot);
                         }
-                        temp = temp.getNextToken();
+                    } catch (BadLocationException ble) {
+                        ExceptionDialog.notifyException(ble); // Never happens
                     }
                 }
-            }
 
-        } finally {
-            doc.readUnlock();
+                if (t != null && isValidType(t) && !isNonWordChar(t)) {
+                    removeHighlights();
+                    SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
+                            .getHighlighter();
+
+                    occurrenceMarker.markOccurrences(doc, t, h, p);
+                    occurrencesChanged = true;
+                }
+            } finally {
+                doc.readUnlock();
+            }
         }
 
-        textArea.fireMarkedOccurrencesChanged();
-
+        if (occurrencesChanged) {
+            textArea.fireMarkedOccurrencesChanged();
+        }
     }
 
     /**
@@ -162,7 +152,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      * Returns the color being used to mark occurrences.
      *
      * @return The color being used.
-     * @see #setColor(Paint)
+     * @see #setColor(Color)
      */
     public Color getColor() {
         return p.getColor();

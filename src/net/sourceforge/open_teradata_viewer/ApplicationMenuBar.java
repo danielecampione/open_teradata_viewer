@@ -194,20 +194,28 @@ public class ApplicationMenuBar extends JMenuBar {
         JRadioButtonMenuItem radioButtonDefaultTheme = new JRadioButtonMenuItem(
                 Actions.DEFAULT_THEME);
         radioButtonDefaultTheme.setSelected(true);
+        JRadioButtonMenuItem radioButtonDefaultAltTheme = new JRadioButtonMenuItem(
+                Actions.DEFAULT_ALT_THEME);
         JRadioButtonMenuItem radioButtonDarkTheme = new JRadioButtonMenuItem(
                 Actions.DARK_THEME);
         JRadioButtonMenuItem radioButtonEclipseTheme = new JRadioButtonMenuItem(
                 Actions.ECLIPSE_THEME);
+        JRadioButtonMenuItem radioButtonIdeaTheme = new JRadioButtonMenuItem(
+                Actions.IDEA_THEME);
         JRadioButtonMenuItem radioButtonVisualStudioTheme = new JRadioButtonMenuItem(
                 Actions.VISUAL_STUDIO_THEME);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
         buttonGroupEditorTheme.add(radioButtonDefaultTheme);
+        buttonGroupEditorTheme.add(radioButtonDefaultAltTheme);
         buttonGroupEditorTheme.add(radioButtonDarkTheme);
         buttonGroupEditorTheme.add(radioButtonEclipseTheme);
+        buttonGroupEditorTheme.add(radioButtonIdeaTheme);
         buttonGroupEditorTheme.add(radioButtonVisualStudioTheme);
         subMenu.add(radioButtonDefaultTheme);
+        subMenu.add(radioButtonDefaultAltTheme);
         subMenu.add(radioButtonDarkTheme);
         subMenu.add(radioButtonEclipseTheme);
+        subMenu.add(radioButtonIdeaTheme);
         subMenu.add(radioButtonVisualStudioTheme);
         menu.add(subMenu);
         menu.addSeparator();

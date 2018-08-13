@@ -103,13 +103,22 @@ public class FoldingAwareIconRowHeader extends IconRowHeader {
             Color activeLineRangeColor = getActiveLineRangeColor();
             g.setColor(activeLineRangeColor);
             try {
-                int y1 = sta.yForLine(activeLineRangeStart);
-                if (y1 > -1) { // Not in a collapsed fold..
+                int realY1 = sta.yForLine(activeLineRangeStart);
+                if (realY1 > -1) { // Not in a collapsed fold..
+                    int y1 = realY1;
+
                     int y2 = sta.yForLine(activeLineRangeEnd);
                     if (y2 == -1) { // In a collapsed fold
                         y2 = y1;
                     }
                     y2 += cellHeight - 1;
+
+                    if (y2 < visibleRect.y
+                            || y1 > visibleRect.y + visibleRect.height) {
+                        return;
+                    }
+                    y1 = Math.max(y, realY1);
+                    y2 = Math.min(y2, visibleRect.y + visibleRect.height);
 
                     int j = y1;
                     while (j <= y2) {
@@ -126,10 +135,11 @@ public class FoldingAwareIconRowHeader extends IconRowHeader {
                         i += 2;
                     }
 
-                    if (y1 >= y && y1 < y + visibleRect.height) {
-                        g.drawLine(0, y1, getWidth(), y1);
+                    if (realY1 >= y
+                            && realY1 < visibleRect.y + visibleRect.height) {
+                        g.drawLine(0, realY1, getWidth(), realY1);
                     }
-                    if (y2 >= y && y2 < y + visibleRect.height) {
+                    if (y2 >= y && y2 < visibleRect.y + visibleRect.height) {
                         g.drawLine(0, y2, getWidth(), y2);
                     }
                 }

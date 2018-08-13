@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.SystemColor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.StyleContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,6 +46,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UnicodeWriter;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
+import net.sourceforge.open_teradata_viewer.editor.TextArea;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -78,6 +82,8 @@ public class Theme {
     private Font baseFont;
     private Color bgColor;
     private Color caretColor;
+    private boolean useSelctionFG;
+    private Color selectionFG;
     private Color selectionBG;
     private boolean selectionRoundedEdges;
     private Color currentLineHighlight;
@@ -102,8 +108,15 @@ public class Theme {
     private Color foldIndicatorFG;
     private Color foldBG;
 
-    /** Private constructor, used when loading from a stream. */
-    private Theme() {
+    /**
+     * Private constructor, used when loading from a stream.
+     * 
+     * @param baseFont The default font to use for any "base font" properties
+     *        not specified in the theme XML. If this is <code>null</code>, a
+     *        default monospaced font will be used.
+     */
+    private Theme(Font baseFont) {
+        this.baseFont = baseFont != null ? baseFont : TextArea.getDefaultFont();
         secondaryLanguages = new Color[3];
     }
 
@@ -117,6 +130,8 @@ public class Theme {
         baseFont = textArea.getFont();
         bgColor = textArea.getBackground();
         caretColor = textArea.getCaretColor();
+        useSelctionFG = textArea.getUseSelectedTextColor();
+        selectionFG = textArea.getSelectedTextColor();
         selectionBG = textArea.getSelectionColor();
         selectionRoundedEdges = textArea.getRoundedSelectionEdges();
         currentLineHighlight = textArea.getCurrentLineHighlightColor();
@@ -161,6 +176,8 @@ public class Theme {
         textArea.setFont(baseFont);
         textArea.setBackground(bgColor);
         textArea.setCaretColor(caretColor);
+        textArea.setUseSelectedTextColor(useSelctionFG);
+        textArea.setSelectedTextColor(selectionFG);
         textArea.setSelectionColor(selectionBG);
         textArea.setRoundedSelectionEdges(selectionRoundedEdges);
         textArea.setCurrentLineHighlightColor(currentLineHighlight);
@@ -211,6 +228,70 @@ public class Theme {
     }
 
     /**
+     * Returns the default selection background color to use if "default" is
+     * specified in a theme.
+     *
+     * @return The default selection background to use.
+     * @see #getDefaultSelectionFG()
+     */
+    private static final Color getDefaultBG() {
+        Color c = UIManager.getColor("nimbusLightBackground");
+        if (c == null) {
+            // Don't search for "text", as Nimbus defines that as the text
+            // component "text" color, but Basic LAFs use it for text component
+            // backgrounds. Nimbus also defines TextArea.background as too dark,
+            // not what it actually uses for text area backgrounds
+            c = UIManager.getColor("TextArea.background");
+            if (c == null) {
+                c = new ColorUIResource(SystemColor.text);
+            }
+        }
+        return c;
+    }
+
+    /**
+     * Returns the default selection background color to use if "default" is
+     * specified in a theme.
+     *
+     * @return The default selection background to use.
+     * @see #getDefaultSelectionFG()
+     */
+    private static final Color getDefaultSelectionBG() {
+        Color c = UIManager.getColor("TextArea.selectionBackground");
+        if (c == null) {
+            c = UIManager.getColor("textHighlight");
+            if (c == null) {
+                c = UIManager.getColor("nimbusSelectionBackground");
+                if (c == null) {
+                    c = new ColorUIResource(SystemColor.textHighlight);
+                }
+            }
+        }
+        return c;
+    }
+
+    /**
+     * Returns the default "selected text" color to use if "default" is
+     * specified in a theme.
+     *
+     * @return The default selection foreground color to use.
+     * @see #getDefaultSelectionBG()
+     */
+    private static Color getDefaultSelectionFG() {
+        Color c = UIManager.getColor("TextArea.selectionForeground");
+        if (c == null) {
+            c = UIManager.getColor("textHighlightText");
+            if (c == null) {
+                c = UIManager.getColor("nimbusSelectedText");
+                if (c == null) {
+                    c = new ColorUIResource(SystemColor.textHighlightText);
+                }
+            }
+        }
+        return c;
+    }
+
+    /**
      * Returns the specified font.
      *
      * @param family The font family.
@@ -234,7 +315,23 @@ public class Theme {
      * @see #save(OutputStream)
      */
     public static Theme load(InputStream in) throws IOException {
-        Theme theme = new Theme();
+        return load(in, null);
+    }
+
+    /**
+     * Loads a theme.
+     *
+     * @param in The input stream to read from. This will be closed when this
+     *        method returns.
+     * @param baseFont The default font to use for any "base font" properties
+     *        not specified in the theme XML. If this is <code>null</code>, a
+     *        default monospaced font will be used.
+     * @return The theme.
+     * @throws IOException If an IO error occurs.
+     * @see #save(OutputStream)
+     */
+    public static Theme load(InputStream in, Font baseFont) throws IOException {
+        Theme theme = new Theme(baseFont);
 
         BufferedInputStream bin = new BufferedInputStream(in);
         try {
@@ -281,6 +378,8 @@ public class Theme {
             root.appendChild(elem);
 
             elem = doc.createElement("selection");
+            elem.setAttribute("useFG", Boolean.toString(useSelctionFG));
+            elem.setAttribute("fg", colorToString(selectionFG));
             elem.setAttribute("bg", colorToString(selectionBG));
             elem.setAttribute("roundedEdges",
                     Boolean.toString(selectionRoundedEdges));
@@ -430,7 +529,29 @@ public class Theme {
      * @return The color.
      */
     private static final Color stringToColor(String s) {
-        if (s != null && (s.length() == 6 || s.length() == 7)) {
+        return stringToColor(s, null);
+    }
+
+    /**
+     * Returns the color represented by a string. The input is expected to be a
+     * 6-digit hex string, optionally prefixed by a '$'.  For example, either of
+     * the following:
+     * <pre>
+     * "$00ff00"
+     * "00ff00"
+     * </pre>
+     * will return <code>new Color(0, 255, 0)</code>.
+     *
+     * @param s The string to evaluate.
+     * @param defaultVal The color to use if <code>s</code> is
+     *        "<code>default</code>".
+     * @return The color.
+     */
+    private static final Color stringToColor(String s, Color defaultVal) {
+        if (s == null || "default".equalsIgnoreCase(s)) {
+            return defaultVal;
+        }
+        if (s.length() == 6 || s.length() == 7) {
             if (s.charAt(0) == '$') {
                 s = s.substring(1);
             }
@@ -503,7 +624,7 @@ public class Theme {
 
                 String color = attrs.getValue("color");
                 if (color != null) {
-                    theme.bgColor = stringToColor(color);
+                    theme.bgColor = stringToColor(color, getDefaultBG());
                 } else {
                     String img = attrs.getValue("image");
                     if (img != null) {
@@ -512,12 +633,16 @@ public class Theme {
                     }
                 }
             } else if ("baseFont".equals(qName)) { // The base font to use in the editor
+                int size = theme.baseFont.getSize();
+                String sizeStr = attrs.getValue("size");
+                if (sizeStr != null) {
+                    size = Integer.parseInt(sizeStr);
+                }
                 String family = attrs.getValue("family");
-                int size = Integer.parseInt(attrs.getValue("size"));
                 if (family != null) {
                     theme.baseFont = getFont(family, Font.PLAIN, size);
-                } else {
-                    theme.baseFont = SyntaxTextArea.getDefaultFont();
+                } else if (sizeStr != null) {
+                    // No family specified, keep original family
                     theme.baseFont = theme.baseFont.deriveFont(size * 1f);
                 }
             } else if ("caret".equals(qName)) {
@@ -576,8 +701,14 @@ public class Theme {
                     theme.secondaryLanguages[index] = bg;
                 }
             } else if ("selection".equals(qName)) {
-                String color = attrs.getValue("bg");
-                theme.selectionBG = stringToColor(color);
+                String useStr = attrs.getValue("useFG");
+                theme.useSelctionFG = Boolean.valueOf(useStr).booleanValue();
+                String color = attrs.getValue("fg");
+                theme.selectionFG = stringToColor(color,
+                        getDefaultSelectionFG());
+                color = attrs.getValue("bg");
+                theme.selectionBG = stringToColor(color,
+                        getDefaultSelectionBG());
                 String roundedStr = attrs.getValue("roundedEdges");
                 theme.selectionRoundedEdges = Boolean.valueOf(roundedStr)
                         .booleanValue();

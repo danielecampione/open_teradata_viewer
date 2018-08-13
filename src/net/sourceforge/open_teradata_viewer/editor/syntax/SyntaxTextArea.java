@@ -34,7 +34,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.font.FontRenderContext;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -42,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.Timer;
@@ -101,6 +104,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *
  * @author D. Campione
  * @see TextEditorPane
+ * 
  */
 public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
@@ -127,6 +131,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     public static final String SYNTAX_STYLE_PROPERTY = "STA.syntaxStyle";
     public static final String TAB_LINE_COLOR_PROPERTY = "STA.tabLineColor";
     public static final String TAB_LINES_PROPERTY = "STA.tabLines";
+    public static final String USE_SELECTED_TEXT_COLOR_PROPERTY = "STA.useSelectedTextColor";
     public static final String VISIBLE_WHITESPACE_PROPERTY = "STA.visibleWhitespace";
 
     private static final Color DEFAULT_BRACKET_MATCH_BG_COLOR = new Color(234,
@@ -165,6 +170,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * "match both brackets" are enabled.
      */
     private Rectangle dotRect;
+
+    /**
+     * Used to store the location of the bracket at the caret position (either
+     * just before or just after it) and the location of its match.
+     */
+    private Point bracketInfo;
 
     /** Colors used for the "matched bracket" if bracket matching is enabled. */
     private Color matchedBracketBGColor;
@@ -233,6 +244,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     /** Whether secondary languages have their backgrounds colored. */
     private boolean highlightSecondaryLanguages;
 
+    /** Whether the "selected text" color should be used with selected text. */
+    private boolean useSelectedTextColor;
+
     /** Used during "Copy as RTF" operations. */
     private RtfGenerator rtfGenerator;
 
@@ -259,6 +273,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     private int hoveredOverLinkOffset;
 
+    private ILinkGenerator linkGenerator;
+    private ILinkGeneratorResult linkGeneratorResult;
+
     private FoldManager foldManager;
 
     /** Whether "focusable" tool tips are used instead of standard ones. */
@@ -268,7 +285,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     private FocusableTip focusableTip;
 
     /** Cached desktop anti-aliasing hints, if anti-aliasing is enabled. */
-    private Map<Key, Object> aaHints;
+    private Map aaHints;
+
+    /** Renders tokens. */
+    private ITokenPainter tokenPainter;
 
     private int lineHeight; // Height of a line of text; same for default, bold & italic
     private int maxAscent;
@@ -408,6 +428,23 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Appends a submenu with code folding options to this text component's
+     * popup menu.
+     *
+     * @param popup The popup menu to append to.
+     * @see #createPopupMenu()
+     */
+    protected void appendFoldingMenu(JPopupMenu popup) {
+        popup.addSeparator();
+        foldingMenu = new JMenu("Folding");
+        foldingMenu.add(createPopupMenuItem(toggleCurrentFoldAction));
+        foldingMenu.add(createPopupMenuItem(collapseAllCommentFoldsAction));
+        foldingMenu.add(createPopupMenuItem(collapseAllFoldsAction));
+        foldingMenu.add(createPopupMenuItem(expandAllFoldsAction));
+        popup.add(foldingMenu);
+    }
+
+    /**
      * Recalculates the height of a line in this text area and the maximum
      * ascent of all fonts displayed.
      */
@@ -464,12 +501,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             return null;
         }
 
-        Token clone = new DefaultToken();
+        Token clone = new Token();
         clone.copyFrom(t);
         Token cloneEnd = clone;
 
         while ((t = t.getNextToken()) != null) {
-            Token temp = new DefaultToken();
+            Token temp = new Token();
             temp.copyFrom(t);
             cloneEnd.setNextToken(temp);
             cloneEnd = temp;
@@ -581,17 +618,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * Overridden to add menu items related to cold comment.
      *
      * @return The popup menu.
+     * @see #appendFoldingMenu(JPopupMenu)
      */
     protected JPopupMenu createPopupMenu() {
         JPopupMenu popup = super.createPopupMenu();
-        popup.addSeparator();
-
-        foldingMenu = new JMenu("Folding");
-        foldingMenu.add(createPopupMenuItem(toggleCurrentFoldAction));
-        foldingMenu.add(createPopupMenuItem(collapseAllCommentFoldsAction));
-        foldingMenu.add(createPopupMenuItem(collapseAllFoldsAction));
-        foldingMenu.add(createPopupMenuItem(expandAllFoldsAction));
-        popup.add(foldingMenu);
+        appendFoldingMenu(popup);
         popup.addSeparator();
 
         popup.add(createPopupMenuItem(Actions.FORMAT_SQL));
@@ -644,13 +675,16 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         }
 
         // If a matching bracket is found, get its bounds and paint it
-        int pos = SyntaxUtilities.getMatchingBracketPosition(this);
-        if (pos > -1 && pos != lastBracketMatchPos) {
+        int lastCaretBracketPos = bracketInfo == null ? -1 : bracketInfo.x;
+        bracketInfo = SyntaxUtilities.getMatchingBracketPosition(this,
+                bracketInfo);
+        if (bracketInfo.y > -1
+                && (bracketInfo.y != lastBracketMatchPos || bracketInfo.x != lastCaretBracketPos)) {
             try {
-                match = modelToView(pos);
+                match = modelToView(bracketInfo.y);
                 if (match != null) { // Happens if we're not yet visible
                     if (getPaintMatchedBracketPair()) {
-                        dotRect = modelToView(getCaretPosition() - 1);
+                        dotRect = modelToView(bracketInfo.x);
                     } else {
                         dotRect = null;
                     }
@@ -665,14 +699,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             } catch (BadLocationException ble) {
                 ExceptionDialog.notifyException(ble); // Shouldn't happen
             }
-        } else if (pos == -1) {
+        } else if (bracketInfo.y == -1) {
             // Set match to null so the old value isn't still repainted
             match = null;
             dotRect = null;
             bracketRepaintTimer.stop();
         }
-        lastBracketMatchPos = pos;
-
+        lastBracketMatchPos = bracketInfo.y;
     }
 
     /**
@@ -982,8 +1015,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @see #getBackgroundForToken(Token)
      */
     public Color getForegroundForToken(Token t) {
-        if (getHyperlinksEnabled() && t.isHyperlink()
-                && hoveredOverLinkOffset == t.offset) {
+        if (getHyperlinksEnabled() && hoveredOverLinkOffset == t.offset
+                && (t.isHyperlink() || linkGeneratorResult != null)) {
             return hyperlinkFG;
         }
         return getForegroundForTokenType(t.type);
@@ -1099,13 +1132,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         return lineHeight;
     }
 
+    public ILinkGenerator getLinkGenerator() {
+        return linkGenerator;
+    }
+
     /**
      * Returns a list of "marked occurrences" in the text area. If there are no
      * marked occurrences, this will be an empty list.
      *
      * @return The list of marked occurrences.
      */
-    public List<?> getMarkedOccurrences() {
+    public List getMarkedOccurrences() {
         return ((SyntaxTextAreaHighlighter) getHighlighter())
                 .getMarkedOccurrences();
     }
@@ -1419,8 +1456,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 // Document offset MUST be correct to prevent exceptions in
                 // getTokenListFor()
                 int docOffs = map.getElement(line).getEndOffset() - 1;
-                t = new DefaultToken(new char[]{'\n'}, 0, 0, docOffs,
-                        Token.WHITESPACE);
+                t = new Token(new char[]{'\n'}, 0, 0, docOffs, Token.WHITESPACE);
                 lastToken.setNextToken(t);
                 lastToken = t;
             }
@@ -1464,6 +1500,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public Token getTokenListForLine(int line) {
         return ((SyntaxDocument) getDocument()).getTokenListForLine(line);
+    }
+
+    /** @return The painter to use for rendering tokens. */
+    ITokenPainter getTokenPainter() {
+        return tokenPainter;
     }
 
     /**
@@ -1518,7 +1559,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return Whether the specified token should be underlined.
      */
     public boolean getUnderlineForToken(Token t) {
-        return (t.isHyperlink() && getHyperlinksEnabled())
+        return (getHyperlinksEnabled() && (t.isHyperlink() || (linkGeneratorResult != null && linkGeneratorResult
+                .getSourceOffset() == t.offset)))
                 || syntaxScheme.getStyle(t.type).underline;
     }
 
@@ -1536,10 +1578,27 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Returns whether selected text should use the "selected text color"
+     * property set via {@link #setSelectedTextColor(Color)}. This is the
+     * typical behavior of text components. By default, SyntaxTextArea does not
+     * do this, so that token styles are visible even in selected regions of
+     * text.
+     *
+     * @return Whether the "selected text" color is used when painting text in
+     *         selected regions.
+     * @see #setUseSelectedTextColor(boolean)
+     */
+    public boolean getUseSelectedTextColor() {
+        return useSelectedTextColor;
+    }
+
+    /**
      * Called by constructors to initialize common properties of the text
      * editor.
      */
     protected void init() {
+        tokenPainter = new DefaultTokenPainter();
+
         // NOTE: Our actions are created here instead of in a static block so
         // they are only created when the first TextArea is instantiated, not
         // before. There have been reports of users calling static getters (e.g.
@@ -1574,7 +1633,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         isScanningForLinks = false;
         setUseFocusableTips(true);
 
-        setAntiAliasingEnabled(true);
+        setDefaultAntiAliasingState();
         restoreDefaultSyntaxScheme();
 
         setHighlightSecondaryLanguages(true);
@@ -1643,17 +1702,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The token, or <code>null</code> if no token is at that position.
      * @see #viewToToken(Point)
      */
-    private Token modelToToken(int offs) {
+    public Token modelToToken(int offs) {
         if (offs >= 0) {
             try {
                 int line = getLineOfOffset(offs);
                 Token t = getTokenListForLine(line);
-                while (t != null && t.isPaintable()) {
-                    if (t.containsPosition(offs)) {
-                        return t;
-                    }
-                    t = t.getNextToken();
-                }
+                return SyntaxUtilities.getTokenAtOffset(t, offs);
             } catch (BadLocationException ble) {
                 ExceptionDialog.notifyException(ble); // Never happens
             }
@@ -1935,6 +1989,58 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Sets anti-aliasing to whatever the user's desktop vaule is.
+     *
+     * @see #getAntiAliasingEnabled()
+     */
+    private final void setDefaultAntiAliasingState() {
+        // Most accurate technique, but not available on all OSes
+        aaHints = SyntaxUtilities.getDesktopAntiAliasHints();
+        if (aaHints == null) {
+            aaHints = new HashMap();
+
+            // In Java 6+, you can figure out what text AA hint Swing uses for
+            // JComponents..
+            JLabel label = new JLabel();
+            FontMetrics fm = label.getFontMetrics(label.getFont());
+            Object hint = null;
+            try {
+                Method m = FontMetrics.class.getMethod("getFontRenderContext",
+                        null);
+                FontRenderContext frc = (FontRenderContext) m.invoke(fm, null);
+                m = FontRenderContext.class.getMethod("getAntiAliasingHint",
+                        null);
+                hint = m.invoke(frc, null);
+            } catch (RuntimeException re) {
+                throw re;
+            } catch (Exception e) {
+                // Incompatible Java version or running in an applet
+            }
+
+            // If not running Java 6+, default to AA enabled on Windows where
+            // the software AA is pretty fast, and default (e.g. disabled) on
+            // non-Windows. Note that OS X always uses AA no matter what
+            // rendering hints you give it, so this is a moot point there
+            if (hint == null) {
+                String os = System.getProperty("os.name").toLowerCase();
+                if (os.indexOf("windows") > -1) {
+                    hint = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+                } else {
+                    hint = RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
+                }
+            }
+            aaHints.put(RenderingHints.KEY_TEXT_ANTIALIASING, hint);
+        }
+
+        // We must be connected to a screen resource for our graphics to be
+        // non-null
+        if (isDisplayable()) {
+            refreshFontMetrics(getGraphics2D(getGraphics()));
+        }
+        repaint();
+    }
+
+    /**
      * Sets the document used by this text area. This is overridden so that only
      * instances of {@link SyntaxDocument} are accepted; for all others, an
      * exception will be thrown.
@@ -2089,6 +2195,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             repaint();
             firePropertyChange(HYPERLINKS_ENABLED_PROPERTY, !enabled, enabled);
         }
+    }
+
+    public void setLinkGenerator(ILinkGenerator generator) {
+        this.linkGenerator = generator;
     }
 
     /**
@@ -2419,16 +2529,37 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Sets whether selected text should use the "selected text color" property
+     * (set via {@link #setSelectedTextColor(Color)}). This is the typical
+     * behavior of text components. By default, SyntaxTextArea does not do this,
+     * so that token styles are visible even in selected regions of text. This
+     * method fires a property change event of type {@link
+     * #USE_SELECTED_TEXT_COLOR_PROPERTY}.
+     *
+     * @param use Whether to use the "selected text" color when painting text in
+     *        selected regions.
+     * @see #getUseSelectedTextColor()
+     */
+    public void setUseSelectedTextColor(boolean use) {
+        if (use != useSelectedTextColor) {
+            useSelectedTextColor = use;
+            firePropertyChange(USE_SELECTED_TEXT_COLOR_PROPERTY, !use, use);
+        }
+    }
+
+    /**
      * Sets whether whitespace is visible. This method fires a property change
      * of type {@link #VISIBLE_WHITESPACE_PROPERTY}.
      *
      * @param visible Whether whitespace should be visible.
-     * @see #isWhitespaceVisible
+     * @see #isWhitespaceVisible()
      */
     public void setWhitespaceVisible(boolean visible) {
         if (whitespaceVisible != visible) {
-            whitespaceVisible = visible;
-            ((SyntaxDocument) getDocument()).setWhitespaceVisible(visible);
+            this.whitespaceVisible = visible;
+            tokenPainter = visible
+                    ? new VisibleWhitespaceTokenPainter()
+                    : (ITokenPainter) new DefaultTokenPainter();
             repaint();
             firePropertyChange(VISIBLE_WHITESPACE_PROPERTY, !visible, visible);
         }
@@ -2442,6 +2573,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         if (isScanningForLinks) {
             Cursor c = getCursor();
             isScanningForLinks = false;
+            linkGeneratorResult = null;
             hoveredOverLinkOffset = -1;
             if (c != null && c.getType() == Cursor.HAND_CURSOR) {
                 setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -2457,7 +2589,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return The token, or <code>null</code> if no token is at that position.
      * @see #modelToToken(int)
      */
-    private Token viewToToken(Point p) {
+    public Token viewToToken(Point p) {
         return modelToToken(viewToModel(p));
     }
 
@@ -2542,9 +2674,12 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             super(textArea);
         }
 
-        public void mouseClicked(MouseEvent e) {
-            if (getHyperlinksEnabled() && isScanningForLinks
-                    && hoveredOverLinkOffset > -1) {
+        private HyperlinkEvent createHyperlinkEvent() {
+            HyperlinkEvent he = null;
+            if (linkGeneratorResult != null) {
+                he = linkGeneratorResult.execute();
+                linkGeneratorResult = null;
+            } else {
                 Token t = modelToToken(hoveredOverLinkOffset);
                 URL url = null;
                 String desc = null;
@@ -2558,9 +2693,24 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 } catch (MalformedURLException murle) {
                     desc = murle.getMessage();
                 }
-                HyperlinkEvent he = new HyperlinkEvent(this,
+                he = new HyperlinkEvent(SyntaxTextArea.this,
                         HyperlinkEvent.EventType.ACTIVATED, url, desc);
-                fireHyperlinkUpdate(he);
+            }
+            return he;
+        }
+
+        private final boolean equal(ILinkGeneratorResult e1,
+                ILinkGeneratorResult e2) {
+            return e1.getSourceOffset() == e2.getSourceOffset();
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            if (getHyperlinksEnabled() && isScanningForLinks
+                    && hoveredOverLinkOffset > -1) {
+                HyperlinkEvent he = createHyperlinkEvent();
+                if (he != null) {
+                    fireHyperlinkUpdate(he);
+                }
                 stopScanningForLinks();
             }
         }
@@ -2575,9 +2725,32 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     if (t != null && t.isHyperlink()) {
                         hoveredOverLinkOffset = t.offset;
                         c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+                    } else if (t != null && linkGenerator != null) {
+                        int offs = viewToModel(e.getPoint());
+                        ILinkGeneratorResult newResult = linkGenerator
+                                .isLinkAtOffset(SyntaxTextArea.this, offs);
+                        if (newResult != null) {
+                            // Repaint if we're at a new link now
+                            if (linkGeneratorResult == null
+                                    || !equal(newResult, linkGeneratorResult)) {
+                                repaint();
+                            }
+                            linkGeneratorResult = newResult;
+                            hoveredOverLinkOffset = t.offset;
+                            c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+                        } else {
+                            // Repaint if we've moved off of a link
+                            if (linkGeneratorResult != null) {
+                                repaint();
+                            }
+                            c2 = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
+                            hoveredOverLinkOffset = -1;
+                            linkGeneratorResult = null;
+                        }
                     } else {
                         c2 = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
                         hoveredOverLinkOffset = -1;
+                        linkGeneratorResult = null;
                     }
                     if (getCursor() != c2) {
                         setCursor(c2);
