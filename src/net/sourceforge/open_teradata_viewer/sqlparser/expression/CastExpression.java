@@ -30,7 +30,7 @@ public class CastExpression implements IExpression {
 
     private IExpression leftExpression;
     private ColDataType type;
-    private boolean useCastKeyword;
+    private boolean useCastKeyword = true;
 
     public ColDataType getType() {
         return type;

@@ -69,52 +69,64 @@ public class UpdateChecker implements Runnable {
                     || result == JOptionPane.CANCEL_OPTION) {
                 return;
             }
-            String proxyHostKey = "proxy_host", proxyPortKey = "proxy_port";
-            System.setProperty("java.net.useSystemProxies",
-                    ((result == JOptionPane.NO_OPTION) ? "true" : "false"));
+
+            System.setProperty("java.net.useSystemProxies", new Boolean(
+                    result == JOptionPane.NO_OPTION).toString());
+
             if (result == JOptionPane.YES_OPTION) {
-                String proxyHost, proxyPort;
+                String proxyHostKey = "proxy_host", proxyPortKey = "proxy_port";
+                String proxyRememberConfigurationKey = "proxy_remember_configuration";
 
                 final JTextField proxyHostField = new JTextField();
-                try {
-                    proxyHostField.setText(Config.getSetting(proxyHostKey));
-                } catch (Exception e) {
-                    ExceptionDialog.ignoreException(e);
-                }
-
                 final JTextField proxyPortField = new JTextField();
-                try {
-                    proxyPortField.setText(Config.getSetting(proxyPortKey));
-                } catch (Exception e) {
-                    ExceptionDialog.ignoreException(e);
-                }
+                String proxyHost = "", proxyPort = "";
 
-                JOptionPane proxyPane = new JOptionPane(new Object[]{
-                        new JLabel("host"), proxyHostField, new JLabel("port"),
-                        proxyPortField}, JOptionPane.QUESTION_MESSAGE,
-                        JOptionPane.OK_CANCEL_OPTION);
-                JDialog dialog = proxyPane.createDialog("Server proxy");
-                UISupport.showDialog(dialog);
-                Integer objResult = (Integer) proxyPane.getValue();
-                result = JOptionPane.CANCEL_OPTION;
-                if (objResult != null) {
-                    result = objResult;
-                }
-                dialog.dispose();
-                if (result == JOptionPane.OK_OPTION) {
-                    proxyHost = new String(proxyHostField.getText());
-                    proxyPort = new String(proxyPortField.getText());
+                boolean proxyRememberConfiguration = Config
+                        .getSetting(proxyRememberConfigurationKey).trim()
+                        .equalsIgnoreCase("true");
+                proxyHost = Config.getSetting(proxyHostKey);
+                proxyPort = Config.getSetting(proxyPortKey);
 
-                    Config.saveSetting(proxyHostKey, proxyHost);
-                    Config.saveSetting(proxyPortKey, proxyPort);
+                if (!proxyRememberConfiguration) {
+                    proxyHostField.setText(proxyHost);
+                    proxyPortField.setText(proxyPort);
 
-                    System.setProperty("proxyHost", proxyHost.trim());
-                    System.setProperty("proxyPort", proxyPort.trim());
+                    JOptionPane proxyPane = new JOptionPane(new Object[] {
+                            new JLabel("host"), proxyHostField,
+                            new JLabel("port"), proxyPortField },
+                            JOptionPane.QUESTION_MESSAGE,
+                            JOptionPane.OK_CANCEL_OPTION);
+                    JDialog dialog = proxyPane.createDialog("Server proxy");
+                    UISupport.showDialog(dialog);
 
-                    HTTPAuthProxy httpAuthProxy = new HTTPAuthProxy();
-                    if (httpAuthProxy.isAuthenticationNecessary()) {
-                        Authenticator.setDefault(httpAuthProxy);
+                    Integer objResult = (Integer) proxyPane.getValue();
+                    result = JOptionPane.CANCEL_OPTION;
+                    if (objResult != null) {
+                        result = objResult;
                     }
+                    dialog.dispose();
+
+                    if (result == JOptionPane.OK_OPTION) {
+                        proxyHost = proxyHostField.getText().trim();
+                        proxyPort = proxyPortField.getText().trim();
+
+                        Config.saveSetting(proxyHostKey, proxyHost);
+                        Config.saveSetting(proxyPortKey, proxyPort);
+                        Config.saveSetting(proxyRememberConfigurationKey,
+                                new Boolean(proxyRememberConfiguration)
+                                        .toString());
+                    } else {
+                        return;
+                    }
+                }
+
+                System.setProperty("proxyHost", proxyHost);
+                System.setProperty("proxyPort", proxyPort);
+
+                HTTPAuthProxy httpAuthProxy = new HTTPAuthProxy(
+                        proxyRememberConfiguration);
+                if (httpAuthProxy.isAuthenticationNecessary()) {
+                    Authenticator.setDefault(httpAuthProxy);
                 }
             }
 

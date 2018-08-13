@@ -1,3 +1,7 @@
+0.18c (07/10/2013)
+    - Added support for Teradata truncate function to the SQL parser.
+    - Added support for Teradata type **character varying** to the SQL parser.
+
 0.18b (26/09/2013)
     - Painting performance improvements.
     - Pretty major API changes; "Token" changed from a class to an interface

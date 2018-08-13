@@ -187,27 +187,31 @@ public interface CCSqlParserConstants {
   /** RegularExpression Id. */
   int K_REFERENCES = 83;
   /** RegularExpression Id. */
-  int S_DOUBLE = 84;
+  int K_CHARACTER = 84;
   /** RegularExpression Id. */
-  int S_INTEGER = 85;
+  int K_VARYING = 85;
   /** RegularExpression Id. */
-  int DIGIT = 86;
+  int S_DOUBLE = 86;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 87;
+  int S_INTEGER = 87;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 88;
+  int DIGIT = 88;
   /** RegularExpression Id. */
-  int S_IDENTIFIER = 89;
+  int LINE_COMMENT = 89;
   /** RegularExpression Id. */
-  int LETTER = 90;
+  int MULTI_LINE_COMMENT = 90;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 91;
+  int S_IDENTIFIER = 91;
   /** RegularExpression Id. */
-  int S_CHAR_LITERAL = 92;
+  int LETTER = 92;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 93;
+  int SPECIAL_CHARS = 93;
   /** RegularExpression Id. */
-  int ADDITIONAL_LETTERS = 94;
+  int S_CHAR_LITERAL = 94;
+  /** RegularExpression Id. */
+  int S_QUOTED_IDENTIFIER = 95;
+  /** RegularExpression Id. */
+  int ADDITIONAL_LETTERS = 96;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -298,6 +302,8 @@ public interface CCSqlParserConstants {
     "\"FOREIGN\"",
     "\"CONSTRAINT\"",
     "\"REFERENCES\"",
+    "\"CHARACTER\"",
+    "\"VARYING\"",
     "<S_DOUBLE>",
     "<S_INTEGER>",
     "<DIGIT>",

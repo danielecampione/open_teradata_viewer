@@ -38,6 +38,7 @@ import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
+import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
@@ -105,6 +106,9 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.COPY_AS_RTF);
         menu.add(Actions.PASTE);
         menu.addSeparator();
+        menu.add(TextArea.getAction(TextArea.DELETE_ACTION));
+        menu.add(TextArea.getAction(TextArea.SELECT_ALL_ACTION));
+        menu.addSeparator();
         menu.add(Actions.DATE_TIME);
         menu.addSeparator();
         subMenu = new JMenu("Folding");
@@ -116,17 +120,19 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
         menu.addSeparator();
-        menu.add(cbViewLineHighlight);
-        menu.add(cbFadeCurrentLineHighlight);
-        menu.add(cbViewLineNumbers);
-        menu.add(cbBookmarks);
-        menu.add(cbWordWrap);
-        menu.add(cbAntialiasing);
-        menu.add(cbMarkOccurrences);
-        menu.add(cbRightToLeft);
-        menu.add(cbTabLines);
-        menu.add(cbAnimateBracketMatching);
-        menu.add(cbPaintMatchedBracketPair);
+        subMenu = new JMenu("View");
+        menu.add(subMenu);
+        subMenu.add(cbViewLineHighlight);
+        subMenu.add(cbFadeCurrentLineHighlight);
+        subMenu.add(cbViewLineNumbers);
+        subMenu.add(cbBookmarks);
+        subMenu.add(cbWordWrap);
+        subMenu.add(cbAntialiasing);
+        subMenu.add(cbMarkOccurrences);
+        subMenu.add(cbRightToLeft);
+        subMenu.add(cbTabLines);
+        subMenu.add(cbAnimateBracketMatching);
+        subMenu.add(cbPaintMatchedBracketPair);
         menu.addSeparator();
         subMenu = new JMenu("Text");
         menu.add(subMenu);
@@ -296,6 +302,7 @@ public class ApplicationMenuBar extends JMenuBar {
 
         setMnemonics(this);
     }
+
     private void setMnemonics(MenuElement menuElement) {
         Set<Character> used = new HashSet<Character>();
         MenuElement[] subElements = menuElement.getSubElements();

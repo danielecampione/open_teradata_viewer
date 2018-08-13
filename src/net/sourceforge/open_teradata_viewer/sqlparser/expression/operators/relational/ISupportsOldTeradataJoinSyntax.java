@@ -26,11 +26,11 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.rela
  */
 public interface ISupportsOldTeradataJoinSyntax {
 
-    public static final int NO_TERADATA_JOIN = 0;
-    public static final int TERADATA_JOIN_RIGHT = 1;
-    public static final int TERADATA_JOIN_LEFT = 2;
+    static final int NO_TERADATA_JOIN = 0;
+    static final int TERADATA_JOIN_RIGHT = 1;
+    static final int TERADATA_JOIN_LEFT = 2;
 
-    public int getOldTeradataJoinSyntax();
+    int getOldTeradataJoinSyntax();
 
-    public void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax);
+    void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax);
 }
