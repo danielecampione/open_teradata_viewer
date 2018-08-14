@@ -118,8 +118,11 @@ public class ExplainRequestAction extends CustomAction {
             ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
-        resultSet = statement.executeQuery();
-        waitingDialog.hide();
+        try {
+            resultSet = statement.executeQuery();
+        } finally {
+            waitingDialog.hide();
+        }
         ApplicationFrame
                 .getInstance()
                 .getConsole()

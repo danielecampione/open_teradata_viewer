@@ -271,7 +271,7 @@ public class ApplicationMenuBar extends JMenuBar {
         add(menu);
         cbCellRendering
                 .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
-                        .isFancyCellRenderingActived());
+                        .isFancyCellRenderingActivated());
         menu.add(cbCellRendering);
         cbShowDescriptionWindow
                 .setSelected(((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW)
@@ -286,7 +286,7 @@ public class ApplicationMenuBar extends JMenuBar {
                 Actions.ANIMATED_ASSISTANT);
         mniAnimatedAssistant
                 .setSelected(((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                        .isAnimatedAssistantActived());
+                        .isAnimatedAssistantActivated());
         menu.add(mniAnimatedAssistant);
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
                 Actions.FULL_SCREEN);

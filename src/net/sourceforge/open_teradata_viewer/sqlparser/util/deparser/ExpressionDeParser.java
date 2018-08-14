@@ -40,6 +40,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause;
@@ -82,10 +83,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  * @author D. Campione
  * 
  */
-public class ExpressionDeParser
-        implements
-            IExpressionVisitor,
-            IItemsListVisitor {
+public class ExpressionDeParser implements IExpressionVisitor,
+        IItemsListVisitor {
 
     private StringBuilder buffer;
     private ISelectVisitor selectVisitor;
@@ -537,5 +536,10 @@ public class ExpressionDeParser
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
         buffer.append(jdbcNamedParameter.toString());
+    }
+
+    @Override
+    public void visit(TeradataHierarchicalExpression texpr) {
+        buffer.append(texpr.toString());
     }
 }

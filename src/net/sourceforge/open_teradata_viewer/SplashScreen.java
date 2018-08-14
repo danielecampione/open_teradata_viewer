@@ -134,6 +134,9 @@ public class SplashScreen extends JWindow {
      *   <li>Configure the progress "fill in" color, even make it a gradient
      *   <li>Set the status text and its color
      * </ul>
+     * 
+     * @author D. Campione
+     * 
      */
     private static class ProgressBar extends JPanel {
 
@@ -156,10 +159,12 @@ public class SplashScreen extends JWindow {
             update(text, percentComplete);
         }
 
+        @Override
         public Dimension getPreferredSize() {
             return preferredSize;
         }
 
+        @Override
         public void paintComponent(Graphics g) {
             // Fill in background
             super.paintComponent(g);

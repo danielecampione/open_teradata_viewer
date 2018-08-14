@@ -36,7 +36,7 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
 
     private static final long serialVersionUID = -4623999245908017490L;
 
-    private boolean animatedAssistantActived;
+    private boolean animatedAssistantActivated;
 
     protected AnimatedAssistantAction() {
         super("Animated assistant", null, null,
@@ -47,11 +47,11 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        animatedAssistantActived = !animatedAssistantActived;
+        animatedAssistantActivated = !animatedAssistantActivated;
 
-        String animatedAssistantProperty = "animated_assistant_actived";
+        String animatedAssistantProperty = "animated_assistant_activated";
         Config.saveSetting(animatedAssistantProperty,
-                String.format("%b", animatedAssistantActived));
+                String.format("%b", animatedAssistantActivated));
     }
 
     @Override
@@ -76,12 +76,14 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
     }
+
     @Override
     public void run() {
         try {
             while (true) {
                 Thread.sleep(200L);
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         ApplicationFrame.getInstance().repaint();
                     }
@@ -92,10 +94,11 @@ public class AnimatedAssistantAction extends CustomAction implements Runnable {
         }
     }
 
-    public void setAnimatedAssistantActived(boolean animatedAssistantActived) {
-        this.animatedAssistantActived = animatedAssistantActived;
+    public void setAnimatedAssistantActivated(boolean animatedAssistantActivated) {
+        this.animatedAssistantActivated = animatedAssistantActivated;
     }
-    public boolean isAnimatedAssistantActived() {
-        return animatedAssistantActived;
+
+    public boolean isAnimatedAssistantActivated() {
+        return animatedAssistantActivated;
     }
 }

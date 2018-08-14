@@ -1037,16 +1037,16 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
                 splashScreen.updateStatus(
                         "Initializing the animated assistant..", 75);
-                String animatedAssistantProperty = "animated_assistant_actived";
-                String strAnimatedAssistantActived = Config
+                String animatedAssistantProperty = "animated_assistant_activated";
+                String strAnimatedAssistantActivated = Config
                         .getSetting(animatedAssistantProperty);
-                if (StringUtil.isEmpty(strAnimatedAssistantActived)) {
+                if (StringUtil.isEmpty(strAnimatedAssistantActivated)) {
                     Config.saveSetting(animatedAssistantProperty, "false");
                     ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                            .setAnimatedAssistantActived(false);
+                            .setAnimatedAssistantActivated(false);
                 } else {
                     ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                            .setAnimatedAssistantActived(strAnimatedAssistantActived
+                            .setAnimatedAssistantActivated(strAnimatedAssistantActivated
                                     .equalsIgnoreCase("true"));
                 }
             } catch (Exception e) {

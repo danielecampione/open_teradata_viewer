@@ -41,6 +41,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause;
@@ -94,12 +95,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
  * @author D. Campione
  * 
  */
-public class TablesNamesFinder
-        implements
-            ISelectVisitor,
-            IFromItemVisitor,
-            IExpressionVisitor,
-            IItemsListVisitor {
+public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
+        IExpressionVisitor, IItemsListVisitor {
 
     private List<String> tables;
     /**
@@ -481,5 +478,9 @@ public class TablesNamesFinder
 
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
+    }
+
+    @Override
+    public void visit(TeradataHierarchicalExpression texpr) {
     }
 }

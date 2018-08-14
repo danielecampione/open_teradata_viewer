@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( sql parser )
+ * Open Teradata Viewer ( kernel )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,29 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational;
+package net.sourceforge.open_teradata_viewer;
 
 /**
+ * One of the partecipants belonging to the factory method that has been adopted
+ * to implement the initialization of the columns name discoverer statement; the
+ * class represents the ConcreteCreator of the specified design pattern.<p/>
  * 
+ * It redefines the factory method to return an instance of ConcreteProduct
+ * type (the column name discoverer appropriate to the Teradata syntax).
  * 
  * @author D. Campione
  *
  */
-public interface ISupportsOldTeradataJoinSyntax {
+public class TeradataColumnsNameDiscovererHandler extends
+        ColumnsNameDiscovererHandlerFactoryMethod {
 
-    final int NO_TERADATA_JOIN = 0;
-    final int TERADATA_JOIN_RIGHT = 1;
-    final int TERADATA_JOIN_LEFT = 2;
+    @Override
+    public IColumnsNameDiscovererElement newElement() {
+        return new TeradataColumnsNameDiscoverer();
+    }
 
-    int getOldTeradataJoinSyntax();
-
-    void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax);
-
-    final int NO_TERADATA_PRIOR = 0;
-    final int TERADATA_PRIOR_START = 1;
-    final int TERADATA_PRIOR_END = 2;
-
-    int getTeradataPriorPosition();
-
-    void setTeradataPriorPosition(int priorPosition);
 }

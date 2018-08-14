@@ -27,10 +27,11 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpressio
  *
  */
 public abstract class OldTeradataJoinBinaryExpression extends BinaryExpression
-        implements
-            ISupportsOldTeradataJoinSyntax {
+        implements ISupportsOldTeradataJoinSyntax {
 
     private int oldTeradataJoinSyntax = NO_TERADATA_JOIN;
+
+    private int teradataPriorPosition = NO_TERADATA_PRIOR;
 
     @Override
     public void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax) {
@@ -44,14 +45,28 @@ public abstract class OldTeradataJoinBinaryExpression extends BinaryExpression
 
     @Override
     public String toString() {
-        return (isNot() ? "NOT " : "") + getLeftExpression()
+        return (isNot() ? "NOT " : "")
+                + (teradataPriorPosition == TERADATA_PRIOR_START ? "PRIOR "
+                        : "") + getLeftExpression()
                 + (oldTeradataJoinSyntax == TERADATA_JOIN_RIGHT ? "(+)" : "")
-                + " " + getStringExpression() + " " + getRightExpression()
+                + " " + getStringExpression() + " "
+                + (teradataPriorPosition == TERADATA_PRIOR_END ? "PRIOR " : "")
+                + getRightExpression()
                 + (oldTeradataJoinSyntax == TERADATA_JOIN_LEFT ? "(+)" : "");
     }
 
     @Override
     public int getOldTeradataJoinSyntax() {
         return oldTeradataJoinSyntax;
+    }
+
+    @Override
+    public int getTeradataPriorPosition() {
+        return teradataPriorPosition;
+    }
+
+    @Override
+    public void setTeradataPriorPosition(int teradataPriorPosition) {
+        this.teradataPriorPosition = teradataPriorPosition;
     }
 }

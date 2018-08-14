@@ -56,13 +56,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
  * @author D. Campione
  * 
  */
-public class SelectDeParser
-        implements
-            ISelectVisitor,
-            IOrderByVisitor,
-            ISelectItemVisitor,
-            IFromItemVisitor,
-            IPivotVisitor {
+public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
+        ISelectItemVisitor, IFromItemVisitor, IPivotVisitor {
 
     private StringBuilder buffer;
     private IExpressionVisitor expressionVisitor;
@@ -125,6 +120,10 @@ public class SelectDeParser
             }
         }
 
+        if (plainSelect.getTeradataHierarchical() != null) {
+            plainSelect.getTeradataHierarchical().accept(expressionVisitor);
+        }
+
         if (plainSelect.getWhere() != null) {
             buffer.append(" WHERE ");
             plainSelect.getWhere().accept(expressionVisitor);
@@ -148,7 +147,8 @@ public class SelectDeParser
         }
 
         if (plainSelect.getOrderByElements() != null) {
-            deparseOrderBy(plainSelect.getOrderByElements());
+            deparseOrderBy(plainSelect.isTeradataSiblings(),
+                    plainSelect.getOrderByElements());
         }
 
         if (plainSelect.getLimit() != null) {
@@ -245,7 +245,16 @@ public class SelectDeParser
     }
 
     public void deparseOrderBy(List<OrderByElement> orderByElements) {
-        buffer.append(" ORDER BY ");
+        deparseOrderBy(false, orderByElements);
+    }
+
+    public void deparseOrderBy(boolean teradataSiblings,
+            List<OrderByElement> orderByElements) {
+        if (teradataSiblings) {
+            buffer.append(" ORDER SIBLINGS BY ");
+        } else {
+            buffer.append(" ORDER BY ");
+        }
         for (Iterator<OrderByElement> iter = orderByElements.iterator(); iter
                 .hasNext();) {
             OrderByElement orderByElement = iter.next();

@@ -141,4 +141,6 @@ public interface IExpressionVisitor {
     void visit(ExtractExpression eexpr);
 
     void visit(IntervalExpression iexpr);
+
+    void visit(TeradataHierarchicalExpression texpr);
 }

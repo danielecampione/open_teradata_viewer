@@ -20,18 +20,15 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
+import net.sourceforge.open_teradata_viewer.CustomSelectFromStatement;
 import net.sourceforge.open_teradata_viewer.Dialog;
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
-import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.GenericSelectFromStatement;
+import net.sourceforge.open_teradata_viewer.SelectFromStatementTemplateMethod;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -47,34 +44,20 @@ public class SelectFromAction extends CustomAction {
     protected SelectFromAction() {
         super("SELECT * FROM ..", null, KeyStroke.getKeyStroke(KeyEvent.VK_S,
                 KeyEvent.CTRL_DOWN_MASK), null);
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        setEnabled(isConnected);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        // The "select from" process can be performed altough other processes
-        // are running
-        new ThreadedAction() {
-            @Override
-            protected void execute() throws Exception {
-                performThreaded(e);
-            }
-        };
+        setEnabled(true);
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            return;
-        }
+        SelectFromStatementTemplateMethod selectFromStatement = isConnected ? new CustomSelectFromStatement(
+                promptRelationName()) : new GenericSelectFromStatement();
+        ApplicationFrame.getInstance().getTextComponent()
+                .setText(selectFromStatement.returnSQLQuery());
+        Actions.FORMAT_SQL.actionPerformed(new ActionEvent(this, 0, null));
+    }
 
+    private String promptRelationName() {
         String relationName = null;
         boolean firstIteration = true;
         while (relationName == null) {
@@ -87,57 +70,14 @@ public class SelectFromAction extends CustomAction {
                 relationName = Dialog
                         .showInputDialog("Insert the table name: ");
                 if (relationName == null) {
-                    return;
+                    return relationName;
                 }
             }
             if (!Utilities.canBeATeradataObjectName(relationName)) {
                 relationName = null;
             }
         }
-
         relationName = relationName.toUpperCase();
-        String sqlQuery = "HELP TABLE " + relationName;
-        ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData()
-                .getConnection();
-        final PreparedStatement statement = connection
-                .prepareStatement(sqlQuery);
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
-                }
-            }
-        };
-        WaitingDialog waitingDialog = null;
-        try {
-            waitingDialog = new WaitingDialog(onCancel);
-        } catch (InterruptedException ie) {
-            ExceptionDialog.ignoreException(ie);
-        }
-        waitingDialog.setText("Executing statement..");
-        resultSet = statement.executeQuery();
-        waitingDialog.hide();
-        String text = "SELECT ";
-        while (resultSet.next()) {
-            String columnName = resultSet.getString(1);
-            if (Utilities.isEmpty(columnName)
-                    || columnName.trim().length() == 0) {
-                columnName = "";
-            }
-            text += columnName.toUpperCase().trim();
-            if (!resultSet.isLast()) {
-                text += ", ";
-            }
-        }
-        text += " FROM " + relationName;
-        // Do not use the ApplicationFrame.setText(String s) method 
-        ApplicationFrame.getInstance().getTextComponent().setText(text);
-        statement.close();
-        resultSet.close();
-        Actions.FORMAT_SQL.actionPerformed(new ActionEvent(this, 0, null));
+        return relationName;
     }
 }

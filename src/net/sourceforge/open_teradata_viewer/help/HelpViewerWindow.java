@@ -83,7 +83,7 @@ public class HelpViewerWindow extends JFrame {
      * Factory for creating FileWrappers which insulate the application from
      * direct reference to File.
      */
-    private IFileWrapperFactory iFileWrapperFactory = new FileWrapperFactoryImpl();
+    private IFileWrapperFactory fileWrapperFactory = new FileWrapperFactoryImpl();
 
     /**
      * A IFileWrapper-enhanced version of HelpFiles that removes direct
@@ -102,11 +102,11 @@ public class HelpViewerWindow extends JFrame {
         createGUI();
     }
 
-    /** @param iFileWrapperFactory the iFileWrapperFactory to set. */
-    public void setFileWrapperFactory(IFileWrapperFactory iFileWrapperFactory) {
-        Utilities.checkNull("setFileWrapperFactory", "iFileWrapperFactory",
-                iFileWrapperFactory);
-        this.iFileWrapperFactory = iFileWrapperFactory;
+    /** @param fileWrapperFactory the fileWrapperFactory to set. */
+    public void setFileWrapperFactory(IFileWrapperFactory fileWrapperFactory) {
+        Utilities.checkNull("setFileWrapperFactory", "fileWrapperFactory",
+                fileWrapperFactory);
+        this.fileWrapperFactory = fileWrapperFactory;
     }
 
     /** @param helpFiles the helpFiles to set. */
@@ -175,6 +175,7 @@ public class HelpViewerWindow extends JFrame {
         setLocationRelativeTo(null);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 _detailPnl.setHomeURL(_homeURL);
                 _tree.expandRow(0);
@@ -184,9 +185,12 @@ public class HelpViewerWindow extends JFrame {
         });
 
         _detailPnl.addListener(new IHtmlViewerPanelListener() {
+            @Override
             public void currentURLHasChanged(HtmlViewerPanelListenerEvent evt) {
                 selectTreeNodeForURL(evt.getHtmlViewerPanel().getURL());
             }
+
+            @Override
             public void homeURLHasChanged(HtmlViewerPanelListenerEvent evt) {
                 // Nothing to do
             }
@@ -303,6 +307,7 @@ public class HelpViewerWindow extends JFrame {
 
         return sp;
     }
+
     HtmlViewerPanel createDetailsPanel() {
         _detailPnl = new HtmlViewerPanel(null);
         return _detailPnl;
@@ -355,12 +360,13 @@ public class HelpViewerWindow extends JFrame {
 
         FolderNode(String title) throws IOException {
             super(title, true);
-            _contentsFile = iFileWrapperFactory.createTempFile("otvhelp",
-                    "html");
+            _contentsFile = fileWrapperFactory
+                    .createTempFile("otvhelp", "html");
             _contentsFile.deleteOnExit();
             setFile(_contentsFile);
         }
 
+        @Override
         public void add(MutableTreeNode node) {
             super.add(node);
             if (node instanceof DocumentNode) {
@@ -376,6 +382,7 @@ public class HelpViewerWindow extends JFrame {
                 }
             }
         }
+
         synchronized void generateContentsFile() {
             try {
                 final PrintWriter pw = new PrintWriter(
@@ -415,9 +422,10 @@ public class HelpViewerWindow extends JFrame {
      * @author D. Campione
      * 
      */
-    private final class ObjectTreeSelectionListener
-            implements
-                TreeSelectionListener {
+    private final class ObjectTreeSelectionListener implements
+            TreeSelectionListener {
+
+        @Override
         public void valueChanged(TreeSelectionEvent evt) {
             final TreePath path = evt.getNewLeadSelectionPath();
             if (path != null) {
@@ -427,5 +435,6 @@ public class HelpViewerWindow extends JFrame {
                 }
             }
         }
+
     }
 }

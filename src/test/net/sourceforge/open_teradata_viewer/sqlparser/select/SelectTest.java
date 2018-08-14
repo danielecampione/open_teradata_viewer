@@ -1292,4 +1292,19 @@ public class SelectTest extends TestCase {
         String stmt = "(SELECT 'abc-' || coalesce(mytab.a::varchar, '') AS a, mytab.b, mytab.c AS st, mytab.d, mytab.e FROM mytab WHERE mytab.del = 0) UNION (SELECT 'cde-' || coalesce(mytab2.a::varchar, '') AS a, mytab2.b, mytab2.bezeichnung AS c, 0 AS d, 0 AS e FROM mytab2 WHERE mytab2.del = 0)";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
+
+    public void testTeradataHierarchicalQuery() throws SQLParserException {
+        String stmt = "SELECT last_name, employee_id, manager_id FROM employees CONNECT BY employee_id = manager_id ORDER BY last_name";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testTeradataHierarchicalQuery2() throws SQLParserException {
+        String stmt = "SELECT employee_id, last_name, manager_id FROM employees CONNECT BY PRIOR employee_id = manager_id";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testTeradataHierarchicalQuery3() throws SQLParserException {
+        String stmt = "SELECT last_name, employee_id, manager_id, LEVEL FROM employees START WITH employee_id = 100 CONNECT BY PRIOR employee_id = manager_id ORDER SIBLINGS BY last_name";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
 }

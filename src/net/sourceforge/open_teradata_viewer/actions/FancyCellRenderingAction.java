@@ -63,7 +63,7 @@ public class FancyCellRenderingAction extends CustomAction {
                 fancy ? new SQLCellRenderer() : null);
     }
 
-    public boolean isFancyCellRenderingActived() {
+    public boolean isFancyCellRenderingActivated() {
         boolean fancy = (ApplicationFrame.getInstance().getAutoCompletion()
                 .getListCellRenderer() != null);
         return fancy;

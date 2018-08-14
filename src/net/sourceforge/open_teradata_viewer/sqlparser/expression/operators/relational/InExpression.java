@@ -27,10 +27,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * @author D. Campione
  *
  */
-public class InExpression
-        implements
-            IExpression,
-            ISupportsOldTeradataJoinSyntax {
+public class InExpression implements IExpression,
+        ISupportsOldTeradataJoinSyntax {
 
     private IExpression leftExpression;
     private IItemsList leftItemsList;
@@ -47,6 +45,7 @@ public class InExpression
         setRightItemsList(iItemsList);
     }
 
+    @Override
     public void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax) {
         this.oldTeradataJoinSyntax = oldTeradataJoinSyntax;
         if (oldTeradataJoinSyntax < 0 || oldTeradataJoinSyntax > 1) {
@@ -56,6 +55,7 @@ public class InExpression
         }
     }
 
+    @Override
     public int getOldTeradataJoinSyntax() {
         return oldTeradataJoinSyntax;
     }
@@ -104,11 +104,23 @@ public class InExpression
 
     @Override
     public String toString() {
-        return (leftExpression == null
-                ? leftItemsList
+        return (leftExpression == null ? leftItemsList
                 : getLeftExpressionString())
                 + " "
                 + ((not) ? "NOT " : "")
                 + "IN " + rightItemsList + "";
+    }
+
+    @Override
+    public int getTeradataPriorPosition() {
+        return ISupportsOldTeradataJoinSyntax.NO_TERADATA_PRIOR;
+    }
+
+    @Override
+    public void setTeradataPriorPosition(int priorPosition) {
+        if (priorPosition != ISupportsOldTeradataJoinSyntax.NO_TERADATA_PRIOR) {
+            throw new IllegalArgumentException(
+                    "unexpected prior for Teradata found");
+        }
     }
 }

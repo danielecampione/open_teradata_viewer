@@ -37,10 +37,8 @@ import net.sourceforge.open_teradata_viewer.ResultSetTable;
  * @author D. Campione
  * 
  */
-public final class Actions
-        implements
-            ListSelectionListener,
-            TableColumnModelListener {
+public final class Actions implements ListSelectionListener,
+        TableColumnModelListener {
 
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
@@ -165,7 +163,6 @@ public final class Actions
         ROLLBACK.setEnabled(isConnected);
         RUN.setEnabled(isConnected);
         RUN_SCRIPT.setEnabled(isConnected);
-        SELECT_FROM.setEnabled(isConnected);
         SHOW_PROCEDURE.setEnabled(isConnected);
         SHOW_MACRO.setEnabled(isConnected);
         SHOW_VIEW.setEnabled(isConnected);

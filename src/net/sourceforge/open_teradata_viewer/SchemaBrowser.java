@@ -115,8 +115,11 @@ public class SchemaBrowser extends JTree {
                         ExceptionDialog.ignoreException(ie);
                     }
                     waitingDialog.setText("Executing statement..");
-                    resultSet = statement.executeQuery();
-                    waitingDialog.hide();
+                    try {
+                        resultSet = statement.executeQuery();
+                    } finally {
+                        waitingDialog.hide();
+                    }
 
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(1).trim();
@@ -136,115 +139,106 @@ public class SchemaBrowser extends JTree {
 
         private void addChildren() throws SQLException {
             switch (getLevel()) {
-                case 0 :
-                    if (connectionData.getConnection().getMetaData()
-                            .supportsSchemasInTableDefinitions()) {
-                        addQuery(connectionData.getConnection().getMetaData()
-                                .getSchemas(), true, 1);
-                    } else if (connectionData.getConnection().getMetaData()
-                            .supportsCatalogsInTableDefinitions()) {
-                        addQuery(connectionData.getConnection().getMetaData()
-                                .getCatalogs(), true, 1);
-                    } else {
-                        add("Schema", true);
-                    }
-                    break;
-                case 1 :
-                    add("TABLES", true);
-                    add("VIEWS", true);
-                    add("PROCEDURES", true);
-                    break;
-                case 2 :
-                    String owner = getParent().toString();
-                    String type = toString();
-                    if ("TABLES".equals(type)) {
-                        if (connectionData.getConnection().getMetaData()
-                                .supportsCatalogsInTableDefinitions()) {
-                            addQuery(
-                                    connectionData
-                                            .getConnection()
-                                            .getMetaData()
-                                            .getTables(
-                                                    owner,
-                                                    null,
-                                                    null,
-                                                    new String[]{"TABLE",
-                                                            "SYSTEM TABLE"}),
-                                    true, 3);
-                        } else {
-                            addQuery(
-                                    connectionData
-                                            .getConnection()
-                                            .getMetaData()
-                                            .getTables(
-                                                    null,
-                                                    owner,
-                                                    null,
-                                                    new String[]{"TABLE",
-                                                            "SYSTEM TABLE"}),
-                                    true, 3);
-                        }
-                    } else if ("VIEWS".equals(type)) {
-                        if (connectionData.getConnection().getMetaData()
-                                .supportsCatalogsInTableDefinitions()) {
-                            addQuery(
-                                    connectionData
-                                            .getConnection()
-                                            .getMetaData()
-                                            .getTables(owner, null, null,
-                                                    new String[]{"VIEW"}),
-                                    true, 3);
-                        } else {
-                            addQuery(
-                                    connectionData
-                                            .getConnection()
-                                            .getMetaData()
-                                            .getTables(null, owner, null,
-                                                    new String[]{"VIEW"}),
-                                    true, 3);
-                        }
-                    } else if ("PROCEDURES".equals(type)) {
-                        if (connectionData.getConnection().getMetaData()
-                                .supportsCatalogsInTableDefinitions()) {
-                            addQuery(
-                                    connectionData.getConnection()
-                                            .getMetaData()
-                                            .getProcedures(owner, null, null),
-                                    true, 3);
-                        } else {
-                            addQuery(
-                                    connectionData.getConnection()
-                                            .getMetaData()
-                                            .getProcedures(null, owner, null),
-                                    true, 3);
-                        }
-                    }
-                    break;
-                case 3 :
-                    String table = toString();
+            case 0:
+                if (connectionData.getConnection().getMetaData()
+                        .supportsSchemasInTableDefinitions()) {
+                    addQuery(connectionData.getConnection().getMetaData()
+                            .getSchemas(), true, 1);
+                } else if (connectionData.getConnection().getMetaData()
+                        .supportsCatalogsInTableDefinitions()) {
+                    addQuery(connectionData.getConnection().getMetaData()
+                            .getCatalogs(), true, 1);
+                } else {
+                    add("Schema", true);
+                }
+                break;
+            case 1:
+                add("TABLES", true);
+                add("VIEWS", true);
+                add("PROCEDURES", true);
+                break;
+            case 2:
+                String owner = getParent().toString();
+                String type = toString();
+                if ("TABLES".equals(type)) {
                     if (connectionData.getConnection().getMetaData()
                             .supportsCatalogsInTableDefinitions()) {
                         addQuery(
                                 connectionData
                                         .getConnection()
                                         .getMetaData()
-                                        .getColumns(
-                                                getParent().getParent()
-                                                        .toString(), null,
-                                                table, null), false, 4);
-                    } else {
-                        addQuery(
-                                connectionData
-                                        .getConnection()
-                                        .getMetaData()
-                                        .getColumns(
+                                        .getTables(
+                                                owner,
                                                 null,
-                                                getParent().getParent()
-                                                        .toString(), table,
-                                                null), false, 4);
+                                                null,
+                                                new String[] { "TABLE",
+                                                        "SYSTEM TABLE" }),
+                                true, 3);
+                    } else {
+                        addQuery(
+                                connectionData
+                                        .getConnection()
+                                        .getMetaData()
+                                        .getTables(
+                                                null,
+                                                owner,
+                                                null,
+                                                new String[] { "TABLE",
+                                                        "SYSTEM TABLE" }),
+                                true, 3);
                     }
-                    break;
-                default :
+                } else if ("VIEWS".equals(type)) {
+                    if (connectionData.getConnection().getMetaData()
+                            .supportsCatalogsInTableDefinitions()) {
+                        addQuery(
+                                connectionData
+                                        .getConnection()
+                                        .getMetaData()
+                                        .getTables(owner, null, null,
+                                                new String[] { "VIEW" }), true,
+                                3);
+                    } else {
+                        addQuery(
+                                connectionData
+                                        .getConnection()
+                                        .getMetaData()
+                                        .getTables(null, owner, null,
+                                                new String[] { "VIEW" }), true,
+                                3);
+                    }
+                } else if ("PROCEDURES".equals(type)) {
+                    if (connectionData.getConnection().getMetaData()
+                            .supportsCatalogsInTableDefinitions()) {
+                        addQuery(connectionData.getConnection().getMetaData()
+                                .getProcedures(owner, null, null), true, 3);
+                    } else {
+                        addQuery(connectionData.getConnection().getMetaData()
+                                .getProcedures(null, owner, null), true, 3);
+                    }
+                }
+                break;
+            case 3:
+                String table = toString();
+                if (connectionData.getConnection().getMetaData()
+                        .supportsCatalogsInTableDefinitions()) {
+                    addQuery(
+                            connectionData
+                                    .getConnection()
+                                    .getMetaData()
+                                    .getColumns(
+                                            getParent().getParent().toString(),
+                                            null, table, null), false, 4);
+                } else {
+                    addQuery(
+                            connectionData
+                                    .getConnection()
+                                    .getMetaData()
+                                    .getColumns(null,
+                                            getParent().getParent().toString(),
+                                            table, null), false, 4);
+                }
+                break;
+            default:
             }
         }
 

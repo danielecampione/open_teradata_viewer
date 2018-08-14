@@ -85,20 +85,20 @@ public class ShowProcedureAction extends ShowObjectAction {
         procedureName = procedureName.trim().toUpperCase();
         int lastTokenIndex = procedureName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
-            databaseName = procedureName.substring(
-                    procedureName.lastIndexOf(".", lastTokenIndex - 1) == -1
-                            ? 0
-                            : procedureName
-                                    .lastIndexOf(".", lastTokenIndex - 1),
-                    lastTokenIndex);
+            databaseName = procedureName
+                    .substring(
+                            procedureName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
+                                    : procedureName.lastIndexOf(".",
+                                            lastTokenIndex - 1), lastTokenIndex);
             procedureName = procedureName.substring(lastTokenIndex + 1,
                     procedureName.length());
         }
         String sqlQuery = getSQLQueryToShowObject(
                 new ShowProcedureValidationStrategy(),
-                ((databaseName != null && databaseName.trim().length() > 0)
-                        ? databaseName + "."
-                        : "") + procedureName);
+                ((databaseName != null && databaseName.trim().length() > 0) ? databaseName
+                        + "."
+                        : "")
+                        + procedureName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -121,8 +121,11 @@ public class ShowProcedureAction extends ShowObjectAction {
             ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
-        resultSet = statement.executeQuery();
-        waitingDialog.hide();
+        try {
+            resultSet = statement.executeQuery();
+        } finally {
+            waitingDialog.hide();
+        }
         String procedureBody = "";
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);

@@ -85,8 +85,7 @@ public class ShowMacroAction extends ShowObjectAction {
         int lastTokenIndex = macroName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
             databaseName = macroName.substring(
-                    macroName.lastIndexOf(".", lastTokenIndex - 1) == -1
-                            ? 0
+                    macroName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
                             : macroName.lastIndexOf(".", lastTokenIndex - 1),
                     lastTokenIndex);
             macroName = macroName.substring(lastTokenIndex + 1,
@@ -94,9 +93,10 @@ public class ShowMacroAction extends ShowObjectAction {
         }
         String sqlQuery = getSQLQueryToShowObject(
                 new ShowMacroValidationStrategy(),
-                ((databaseName != null && databaseName.trim().length() > 0)
-                        ? databaseName + "."
-                        : "") + macroName);
+                ((databaseName != null && databaseName.trim().length() > 0) ? databaseName
+                        + "."
+                        : "")
+                        + macroName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -119,8 +119,11 @@ public class ShowMacroAction extends ShowObjectAction {
             ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
-        resultSet = statement.executeQuery();
-        waitingDialog.hide();
+        try {
+            resultSet = statement.executeQuery();
+        } finally {
+            waitingDialog.hide();
+        }
         String macroBody = "";
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);

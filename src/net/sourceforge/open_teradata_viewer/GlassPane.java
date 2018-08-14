@@ -72,8 +72,9 @@ public class GlassPane extends JComponent {
             sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream(
                     "/res/anim.list")));
             for (int i = 0; i < sl.size(); i++) {
-                if (StringUtil.isEmpty((String) sl.get(i)))
+                if (StringUtil.isEmpty((String) sl.get(i))) {
                     continue;
+                }
                 try {
                     this.animatedAssistantImageList.add(ImageManager.getImage(
                             "/icons/anim/" + (String) sl.get(i)).getImage());
@@ -92,10 +93,12 @@ public class GlassPane extends JComponent {
         this.animatedAssistantList = new ArrayList<AnimatedAssistant>();
         setComponent(this);
         this.animatedAssistantTimer = new Timer(100L) {
+            @Override
             public void run() {
                 if (GlassPane.this.animatedAssistantRendererOn) {
                     if (!GlassPane.this.repainting) {
                         EventQueue.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 Rectangle rect = getRenderBounds();
                                 if (rect != null) {
@@ -113,6 +116,7 @@ public class GlassPane extends JComponent {
         };
         TimerManager.getGlobal().add(this.animatedAssistantTimer);
     }
+
     public void beginProcess() {
         this.indexAnim = new Random().nextInt(this.animatedAssistantImageList
                 .size());
@@ -132,7 +136,7 @@ public class GlassPane extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         if (((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                .isAnimatedAssistantActived()) {
+                .isAnimatedAssistantActivated()) {
             Graphics2D g2 = (Graphics2D) g;
 
             Toolkit.getDefaultToolkit().sync();
@@ -197,6 +201,7 @@ public class GlassPane extends JComponent {
         }
     }
 
+    @Override
     public void setVisible(boolean aFlag) {
         if (aFlag) {
             if (this.visibleCount == 0) {
@@ -205,8 +210,9 @@ public class GlassPane extends JComponent {
             this.visibleCount += 1;
         } else if (this.visibleCount > 0) {
             this.visibleCount -= 1;
-            if (this.visibleCount == 0)
+            if (this.visibleCount == 0) {
                 super.setVisible(false);
+            }
         }
     }
 
@@ -217,6 +223,7 @@ public class GlassPane extends JComponent {
     public void addAnimatedAssistant(AnimatedAssistant animatedAssistant,
             String animatedAssistantRendererId) {
         EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 GlassPane.this.setVisible(true);
             }
@@ -229,7 +236,7 @@ public class GlassPane extends JComponent {
                         this.animatedAssistantRendererOn = true;
                     } else {
                         this.animatedAssistantRendererOn = ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                                .isAnimatedAssistantActived();
+                                .isAnimatedAssistantActivated();
                     }
                     beginProcess();
                 }
@@ -261,6 +268,7 @@ public class GlassPane extends JComponent {
                 if (this.animatedAssistantList.size() == 0) {
                     repaint();
                     EventQueue.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             GlassPane.this.setVisible(false);
                         }
@@ -271,6 +279,7 @@ public class GlassPane extends JComponent {
         }
     }
 
+    @Override
     public boolean contains(int x, int y) {
         if ((getMouseListeners().length == 0)
                 && (getMouseMotionListeners().length == 0)

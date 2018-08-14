@@ -130,7 +130,7 @@ public class HTTPAuthProxy extends Authenticator {
                     JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
                     null, options, options[0]);
             optionPane.setOptionType(JOptionPane.OK_OPTION);
-            final JDialog dialog = optionPane.createDialog("System proxy");
+            final JDialog dialog = optionPane.createDialog("Server proxy");
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             button.addActionListener(new ActionListener() {
                 @Override

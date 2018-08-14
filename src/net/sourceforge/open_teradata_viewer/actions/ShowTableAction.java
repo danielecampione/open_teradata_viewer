@@ -85,8 +85,7 @@ public class ShowTableAction extends ShowObjectAction {
         int lastTokenIndex = tableName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
             databaseName = tableName.substring(
-                    tableName.lastIndexOf(".", lastTokenIndex - 1) == -1
-                            ? 0
+                    tableName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
                             : tableName.lastIndexOf(".", lastTokenIndex - 1),
                     lastTokenIndex);
             tableName = tableName.substring(lastTokenIndex + 1,
@@ -94,9 +93,10 @@ public class ShowTableAction extends ShowObjectAction {
         }
         String sqlQuery = getSQLQueryToShowObject(
                 new ShowTableValidationStrategy(),
-                ((databaseName != null && databaseName.trim().length() > 0)
-                        ? databaseName + "."
-                        : "") + tableName);
+                ((databaseName != null && databaseName.trim().length() > 0) ? databaseName
+                        + "."
+                        : "")
+                        + tableName);
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData()
                 .getConnection();
@@ -119,8 +119,11 @@ public class ShowTableAction extends ShowObjectAction {
             ExceptionDialog.ignoreException(ie);
         }
         waitingDialog.setText("Executing statement..");
-        resultSet = statement.executeQuery();
-        waitingDialog.hide();
+        try {
+            resultSet = statement.executeQuery();
+        } finally {
+            waitingDialog.hide();
+        }
         String tableBody = "";
         while (resultSet.next()) {
             Object obj = resultSet.getString(1);

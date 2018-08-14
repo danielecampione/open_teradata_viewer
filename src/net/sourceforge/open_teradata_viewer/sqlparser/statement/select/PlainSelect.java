@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 
 /**
@@ -43,6 +44,8 @@ public class PlainSelect implements ISelectBody {
     private IExpression having;
     private Limit limit;
     private Top top;
+    private TeradataHierarchicalExpression teradataHierarchical = null;
+    private boolean teradataSiblings = false;
 
     /**
      * The {@link IFromItem} in this query.
@@ -155,6 +158,23 @@ public class PlainSelect implements ISelectBody {
         groupByColumnReferences = list;
     }
 
+    public TeradataHierarchicalExpression getTeradataHierarchical() {
+        return teradataHierarchical;
+    }
+
+    public void setTeradataHierarchical(
+            TeradataHierarchicalExpression teradataHierarchical) {
+        this.teradataHierarchical = teradataHierarchical;
+    }
+
+    public boolean isTeradataSiblings() {
+        return teradataSiblings;
+    }
+
+    public void setTeradataSiblings(boolean teradataSiblings) {
+        this.teradataSiblings = teradataSiblings;
+    }
+
     @Override
     public String toString() {
         StringBuilder sql = new StringBuilder("SELECT ");
@@ -181,11 +201,14 @@ public class PlainSelect implements ISelectBody {
             if (where != null) {
                 sql.append(" WHERE ").append(where);
             }
+            if (teradataHierarchical != null) {
+                sql.append(teradataHierarchical.toString());
+            }
             sql.append(getFormatedList(groupByColumnReferences, "GROUP BY"));
             if (having != null) {
                 sql.append(" HAVING ").append(having);
             }
-            sql.append(orderByToString(orderByElements));
+            sql.append(orderByToString(teradataSiblings, orderByElements));
             if (limit != null) {
                 sql.append(limit);
             }
@@ -194,7 +217,13 @@ public class PlainSelect implements ISelectBody {
     }
 
     public static String orderByToString(List<OrderByElement> orderByElements) {
-        return getFormatedList(orderByElements, "ORDER BY");
+        return orderByToString(false, orderByElements);
+    }
+
+    public static String orderByToString(boolean teradataSiblings,
+            List<OrderByElement> orderByElements) {
+        return getFormatedList(orderByElements,
+                teradataSiblings ? "ORDER SIBLINGS BY" : "ORDER BY");
     }
 
     public static String getFormatedList(List<?> list, String expression) {
