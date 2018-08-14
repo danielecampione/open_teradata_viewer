@@ -18,16 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
-import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.ReplaceDialog;
 
@@ -35,23 +31,22 @@ import net.sourceforge.open_teradata_viewer.editor.search.ReplaceDialog;
  * 
  * 
  * @author D. Campione
- * 
+ *
  */
-public class GoToLineAction extends CustomAction {
+public class ShowReplaceDialogAction extends CustomAction {
 
-    private static final long serialVersionUID = 7902153669933142665L;
+    private static final long serialVersionUID = 391179936674248531L;
 
-    protected GoToLineAction() {
-        super("Go To..", null, KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), null);
+    public ShowReplaceDialogAction() {
+        super("Replace..", "find.png", null, null);
         setEnabled(true);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "goto line" process can be performed altough other processes are
-        // running. No ThreadAction object must be instantiated because the
-        // focus must still remains on the "goto line" frame
+        // The "show replace dialog" process can be performed altough other
+        // processes are running. No ThreadAction object must be instantiated
+        // because the focus must go to the replace dialog
         try {
             performThreaded(e);
         } catch (Throwable t) {
@@ -64,7 +59,6 @@ public class GoToLineAction extends CustomAction {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
         FindDialog findDialog = applicationFrame.getFindDialog();
         ReplaceDialog replaceDialog = applicationFrame.getReplaceDialog();
-        OTVSyntaxTextArea textArea = applicationFrame.getTextComponent();
         CollapsibleSectionPanel csp = applicationFrame
                 .getCollapsibleSectionPanel();
 
@@ -72,10 +66,6 @@ public class GoToLineAction extends CustomAction {
         if (findDialog.isVisible()) {
             findDialog.setVisible(false);
         }
-        if (replaceDialog.isVisible()) {
-            replaceDialog.setVisible(false);
-        }
-
-        textArea.showGoToLineDialog(e);
+        UISupport.showDialog(replaceDialog);
     }
 }

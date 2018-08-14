@@ -760,4 +760,16 @@ public class StringUtil {
         }
         return sbuf.toString();
     }
+
+    public static StringBuilder replace(StringBuilder buf, int start, int end,
+            String text) {
+        int len = text.length();
+        char[] ch = new char[buf.length() + len - (end - start)];
+        buf.getChars(0, start, ch, 0);
+        text.getChars(0, len, ch, start);
+        buf.getChars(end, buf.length(), ch, start + len);
+        buf.setLength(0);
+        buf.append(ch);
+        return buf;
+    }
 }

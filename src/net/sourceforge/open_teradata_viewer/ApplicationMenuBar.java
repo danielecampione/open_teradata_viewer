@@ -37,6 +37,7 @@ import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
+import net.sourceforge.open_teradata_viewer.actions.ChangeSyntaxStyleAction;
 import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
@@ -46,6 +47,7 @@ import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
@@ -160,7 +162,21 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.INCREASE_FONT_SIZES);
         menu.add(Actions.DECREASE_FONT_SIZES);
         menu.addSeparator();
-        menu.add(Actions.GO_TO_LINE);
+        JCheckBoxMenuItem cbItemToggleSpellingParser = new JCheckBoxMenuItem(
+                Actions.TOGGLE_SPELLING_PARSER);
+        cbItemToggleSpellingParser.setSelected(true);
+        menu.add(cbItemToggleSpellingParser);
+        menu.addSeparator();
+        menu.add(Actions.HISTORY_PREVIOUS);
+        menu.add(Actions.HISTORY_NEXT);
+
+        refreshEditOptions();
+
+        menu = new JMenu("Search");
+        add(menu);
+        menu.add(Actions.SHOW_FIND_DIALOG);
+        menu.add(Actions.SHOW_REPLACE_DIALOG);
+        menu.addSeparator();
         int default_modifier = getToolkit().getMenuShortcutKeyMask();
         KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
         Action a = csp
@@ -172,10 +188,7 @@ public class ApplicationMenuBar extends JMenuBar {
         a.putValue(Action.NAME, "Show Replace Search Bar");
         menu.add(new JMenuItem(a));
         menu.addSeparator();
-        menu.add(Actions.HISTORY_PREVIOUS);
-        menu.add(Actions.HISTORY_NEXT);
-
-        refreshEditOptions();
+        menu.add(Actions.GO_TO_LINE);
 
         menu = new JMenu("Schema Browser");
         add(menu);
@@ -289,6 +302,16 @@ public class ApplicationMenuBar extends JMenuBar {
 
         menu = new JMenu("View");
         add(menu);
+        subMenu = new JMenu("View As (Highlighting File Type)");
+        ButtonGroup bg = new ButtonGroup();
+        addSyntaxItem("SQL", ISyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
+        addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
+                subMenu);
+        addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
+                bg, subMenu);
+        subMenu.getItem(0).setSelected(true);
+        menu.add(subMenu);
+        menu.addSeparator();
         cbCellRendering
                 .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
                         .isFancyCellRenderingActivated());
@@ -377,5 +400,13 @@ public class ApplicationMenuBar extends JMenuBar {
     private void addThemeItem(String name, String themeXml, ButtonGroup bg,
             JMenu menu) {
         addThemeItem(name, themeXml, bg, menu, false);
+    }
+
+    private void addSyntaxItem(String name, String style, ButtonGroup bg,
+            JMenu menu) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(
+                new ChangeSyntaxStyleAction(name, style));
+        bg.add(item);
+        menu.add(item);
     }
 }

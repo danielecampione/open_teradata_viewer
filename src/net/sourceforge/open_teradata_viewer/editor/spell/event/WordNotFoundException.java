@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax )
+ * Open Teradata Viewer ( editor spell event )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.editor.syntax;
+package net.sourceforge.open_teradata_viewer.editor.spell.event;
 
 /**
- * The default implementation of <code>TokenMakerFactory</code>. This factory
- * can create {@link ITokenMaker}s for all languages known to {@link
- * SyntaxTextArea}.
- *
+ * An exception to indicate that there not enough words as expected.
+ * 
  * @author D. Campione
  * 
  */
-class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
-        ISyntaxConstants {
+public class WordNotFoundException extends RuntimeException {
 
-    /** {@inheritDoc} */
-    @Override
-    protected void initTokenMakerMap() {
-        String pkg = "net.sourceforge.open_teradata_viewer.editor.syntax.modes.";
+    private static final long serialVersionUID = -5043183865809643733L;
 
-        putMapping(SYNTAX_STYLE_NONE, pkg + "PlainTextTokenMaker");
-        putMapping(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
-        putMapping(SYNTAX_STYLE_CLOJURE, pkg + "ClojureTokenMaker");
+    //~ Constructors ............................................................
+
+    /** Creates a new WordNotFoundException object. */
+    public WordNotFoundException() {
+        super();
     }
 
+    /**
+     * Creates a new WordNotFoundException object.
+     *
+     * @param s A message.
+     */
+    public WordNotFoundException(String s) {
+        super(s);
+    }
 }

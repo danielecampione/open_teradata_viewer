@@ -102,17 +102,17 @@ public class AbstractSearchDialog extends EscapableDialog implements
         String command = e.getActionCommand();
 
         // They check/uncheck the "Match Case" checkbox on the Find dialog
-        if (command.equals("FlipMatchCase")) {
+        if (command.equals("Match Case")) {
             boolean matchCase = caseCheckBox.isSelected();
             context.setMatchCase(matchCase);
         }
         // They check/uncheck the "Whole word" checkbox on the Find dialog
-        else if (command.equals("FlipWholeWord")) {
+        else if (command.equals("Whole Word")) {
             boolean wholeWord = wholeWordCheckBox.isSelected();
             context.setWholeWord(wholeWord);
         }
         // They check/uncheck the "Regular expression" checkbox
-        else if (command.equals("FlipRegEx")) {
+        else if (command.equals("RegEx")) {
             boolean useRegEx = regexCheckBox.isSelected();
             context.setRegularExpression(useRegEx);
         }
@@ -314,10 +314,13 @@ public class AbstractSearchDialog extends EscapableDialog implements
         searchConditionsPanel.setLayout(new BoxLayout(searchConditionsPanel,
                 BoxLayout.Y_AXIS));
         caseCheckBox = new JCheckBox("Match Case");
+        caseCheckBox.addActionListener(this);
         searchConditionsPanel.add(caseCheckBox);
         wholeWordCheckBox = new JCheckBox("Whole Word");
+        wholeWordCheckBox.addActionListener(this);
         searchConditionsPanel.add(wholeWordCheckBox);
         regexCheckBox = new JCheckBox("RegEx");
+        regexCheckBox.addActionListener(this);
         searchConditionsPanel.add(regexCheckBox);
 
         // Initialize any text fields

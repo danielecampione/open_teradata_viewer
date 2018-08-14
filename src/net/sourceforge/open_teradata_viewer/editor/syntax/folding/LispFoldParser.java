@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax )
+ * Open Teradata Viewer ( editor syntax folding )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.editor.syntax;
+package net.sourceforge.open_teradata_viewer.editor.syntax.folding;
+
+import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 
 /**
- * The default implementation of <code>TokenMakerFactory</code>. This factory
- * can create {@link ITokenMaker}s for all languages known to {@link
- * SyntaxTextArea}.
+ * Fold parser for Lisp and related languages.
  *
  * @author D. Campione
  * 
  */
-class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
-        ISyntaxConstants {
+public class LispFoldParser extends CurlyFoldParser {
 
-    /** {@inheritDoc} */
     @Override
-    protected void initTokenMakerMap() {
-        String pkg = "net.sourceforge.open_teradata_viewer.editor.syntax.modes.";
-
-        putMapping(SYNTAX_STYLE_NONE, pkg + "PlainTextTokenMaker");
-        putMapping(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
-        putMapping(SYNTAX_STYLE_CLOJURE, pkg + "ClojureTokenMaker");
+    public boolean isLeftCurly(IToken t) {
+        return t.isSingleChar(IToken.SEPARATOR, '(');
     }
 
+    @Override
+    public boolean isRightCurly(IToken t) {
+        return t.isSingleChar(IToken.SEPARATOR, ')');
+    }
 }

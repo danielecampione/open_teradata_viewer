@@ -31,6 +31,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -44,6 +45,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.DefaultCaret;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
@@ -68,8 +71,11 @@ import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.FindToolBar;
 import net.sourceforge.open_teradata_viewer.editor.search.ISearchListener;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
+import net.sourceforge.open_teradata_viewer.editor.search.ReplaceDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.ReplaceToolBar;
 import net.sourceforge.open_teradata_viewer.editor.search.SearchEvent;
+import net.sourceforge.open_teradata_viewer.editor.spell.SpellingParser;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ErrorStrip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
@@ -91,7 +97,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  *
  */
 public class ApplicationFrame extends JFrame implements ISyntaxConstants,
-        ISearchListener {
+        ISearchListener, HyperlinkListener {
 
     private static final long serialVersionUID = -8572855678886323789L;
 
@@ -129,6 +135,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     private GlassPane glassPane;
 
     private FindDialog findDialog;
+    private ReplaceDialog replaceDialog;
     private OTVGoToDialog _OTVGoToDialog;
     private CaretListenerLabel caretListenerLabel;
     private CollapsibleSectionPanel csp;
@@ -137,6 +144,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
 
     /** Used to dynamically load 3rd-party LookAndFeels. */
     private ThirdPartyLookAndFeelManager lafManager;
+
+    private SpellingParser spellingParser;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -243,6 +252,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
 
     private JPanel createQueryEditor() {
         JPanel globalQueryEditorPanel = new JPanel(new BorderLayout());
+        JPanel contentPane = new JPanel(new BorderLayout());
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         Actions.SCHEMA_BROWSER.setEnabled(isConnected);
         setToolbar(new ApplicationToolBar(schemaBrowserToggleButton));
@@ -256,7 +266,11 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         textScrollPane
                 .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         csp.add(textScrollPane);
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, csp, null);
+        ErrorStrip errorStrip = new ErrorStrip(textArea);
+        contentPane.add(csp, BorderLayout.CENTER);
+        contentPane.add(errorStrip, BorderLayout.LINE_END);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, contentPane,
+                null);
 
         globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
 
@@ -273,11 +287,15 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         return globalQueryEditorPanel;
     }
 
-    /** Creates our Find and Replace toolbars. */
-    public void initSearchToolBars() {
-        findDialog = new FindDialog(this, this);
+    /** Creates our Find and Replace dialogs. */
+    public void initSearchDialogs() {
+        setFindDialog(new FindDialog(this, this));
+        setReplaceDialog(new ReplaceDialog(this, this));
 
+        // This ties the properties of the two dialogs together (match case,
+        // regex, etc..)
         SearchContext context = findDialog.getSearchContext();
+        replaceDialog.setSearchContext(context);
 
         // Create tool bars and tie their search contexts together also
         setFindToolBar(new FindToolBar(this));
@@ -356,6 +374,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
 
         textArea.setToolTipSupplier((IToolTipSupplier) provider);
         ToolTipManager.sharedInstance().registerComponent(textArea);
+
+        textArea.addHyperlinkListener(this);
     }
 
     private JScrollPane createQueryTable() {
@@ -384,12 +404,19 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         if (replaceToolBar != null) {
             setReplaceToolBar(null);
         }
+        if (replaceDialog != null) {
+            if (replaceDialog.isVisible()) {
+                replaceDialog.setVisible(false);
+            }
+            replaceDialog.dispose();
+            setReplaceDialog(null);
+        }
         if (findDialog != null) {
             if (findDialog.isVisible()) {
                 findDialog.setVisible(false);
             }
             findDialog.dispose();
-            findDialog = null;
+            setFindDialog(null);
         }
         if (_OTVGoToDialog != null) {
             _OTVGoToDialog.dispose();
@@ -666,6 +693,69 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         }
     }
 
+    /**
+     * Starts a thread to load the spell checker when the app is made visible,
+     * since the dictionary is somewhat large (takes 0.9 seconds to load on
+     * a 3.0 GHz Core 2 Duo).<p/>
+     *
+     * This assumes the application will only be made visible once, which is certainly
+     * true for our program.
+     */
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        new Thread() {
+            @Override
+            public void run() {
+                spellingParser = createSpellingParser();
+                if (spellingParser != null) {
+                    try {
+                        File userDict = File
+                                .createTempFile("spellDemo", ".txt");
+                        spellingParser.setUserDictionary(userDict);
+                        System.out.println("User dictionary: "
+                                + userDict.getAbsolutePath());
+                    } catch (IOException ioe) { // Applets, IO errors
+                        System.err.println("Can't open user dictionary: "
+                                + ioe.getMessage());
+                    } catch (SecurityException se) { // Applets
+                        System.err.println("Can't open user dictionary: "
+                                + se.getMessage());
+                    }
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            textArea.addParser(spellingParser);
+                            Actions.TOGGLE_SPELLING_PARSER.setEnabled(true);
+                        }
+                    });
+                }
+            }
+        }.start();
+    }
+
+    private SpellingParser createSpellingParser() {
+        File zip = new File("english_dic.zip");
+        try {
+            return SpellingParser.createEnglishSpellingParser(zip, true);
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
+        return null;
+    }
+
+    @Override
+    public void hyperlinkUpdate(HyperlinkEvent e) {
+        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            URL url = e.getURL();
+            if (url == null) {
+                UIManager.getLookAndFeel().provideErrorFeedback(null);
+            } else {
+                Utilities.openURLWithDefaultBrowser(url.toString());
+            }
+        }
+    }
+
     public static ApplicationFrame getInstance() {
         return APPLICATION_FRAME;
     }
@@ -920,6 +1010,30 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         this.replaceToolBar = replaceToolBar;
     }
 
+    public FindDialog getFindDialog() {
+        return findDialog;
+    }
+
+    private void setFindDialog(FindDialog findDialog) {
+        this.findDialog = findDialog;
+    }
+
+    public ReplaceDialog getReplaceDialog() {
+        return replaceDialog;
+    }
+
+    private void setReplaceDialog(ReplaceDialog replaceDialog) {
+        this.replaceDialog = replaceDialog;
+    }
+
+    public SpellingParser getSpellingParser() {
+        return spellingParser;
+    }
+
+    private void setSpellingParser(SpellingParser spellingParser) {
+        this.spellingParser = spellingParser;
+    }
+
     /**
      * Actually creates the GUI. This is called after the splash screen is
      * displayed via <code>SwingUtilities#invokeLater()</code>.
@@ -947,15 +1061,14 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             getContentPane().setLayout(new BorderLayout());
             UISupport.setMainFrame(getInstance());
 
-            splashScreen
-                    .updateStatus(
-                            "Initializing the goto dialog and the find tool bars..",
-                            25);
+            splashScreen.updateStatus("Initializing the goto dialog..", 25);
             setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
-            initSearchToolBars();
+            splashScreen
+                    .updateStatus("Initializing the search tool bars..", 35);
+            initSearchDialogs();
             setCollapsibleSectionPanel(new CollapsibleSectionPanel());
 
-            splashScreen.updateStatus("Initializing the work area..", 30);
+            splashScreen.updateStatus("Initializing the work area..", 40);
             JPanel globalPanel = new JPanel(new BorderLayout());
             globalPanel.add(createWorkArea(), BorderLayout.CENTER);
             addWindowListener(new WindowAdapter() {
@@ -971,7 +1084,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             });
 
             // Create the console and configure it
-            splashScreen.updateStatus("Initializing the console..", 40);
+            splashScreen.updateStatus("Initializing the console..", 45);
             setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
             getConsole().setEditable(true);
             getConsole().setCaretPosition(

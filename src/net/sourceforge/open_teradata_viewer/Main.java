@@ -63,7 +63,7 @@ public class Main {
         }
 
         // Setting this property makes the menu appear on top of the screen on
-        // Apple Mac OS X systems. It is ignored by all other other Java
+        // Apple Mac OS X systems. It is ignored by all other Java
         // implementations
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 

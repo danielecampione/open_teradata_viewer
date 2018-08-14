@@ -68,6 +68,7 @@ public class FoldParserManager implements ISyntaxConstants {
         Map<String, IFoldParser> map = new HashMap<String, IFoldParser>();
 
         map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));
+        map.put(SYNTAX_STYLE_CLOJURE, new LispFoldParser());
 
         return map;
     }

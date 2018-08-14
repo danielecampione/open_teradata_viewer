@@ -41,4 +41,7 @@ public interface ISyntaxConstants {
 
     /** Style for highlighting SQL. */
     public static final String SYNTAX_STYLE_SQL = "text/sql";
+
+    /** Style for highlighting Clojure. */
+    public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
 }

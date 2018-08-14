@@ -69,6 +69,9 @@ public final class Actions implements ListSelectionListener,
     public static final CustomAction INVERT_SELECTION_CASE = new InvertSelectionCaseAction();
     public static final CustomAction UPPER_SELECTION_CASE = new UpperSelectionCaseAction();
     public static final CustomAction LOWER_SELECTION_CASE = new LowerSelectionCaseAction();
+    public static final CustomAction TOGGLE_SPELLING_PARSER = new ToggleSpellCheckingAction();
+    public static final CustomAction SHOW_FIND_DIALOG = new ShowFindDialogAction();
+    public static final CustomAction SHOW_REPLACE_DIALOG = new ShowReplaceDialogAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
