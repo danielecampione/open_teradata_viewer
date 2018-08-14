@@ -29,6 +29,7 @@ import javax.swing.text.Position;
 import javax.swing.text.View;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.ChangeableHighlightPainter;
 
 /**
  * Highlight painter that paints a squiggly underline underneath text, similar
@@ -41,7 +42,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * 
  */
 public class SquiggleUnderlineHighlightPainter extends
-        ChangeableColorHighlightPainter {
+        ChangeableHighlightPainter {
 
     private static final int AMT = 2;
 
@@ -52,7 +53,7 @@ public class SquiggleUnderlineHighlightPainter extends
      */
     public SquiggleUnderlineHighlightPainter(Color color) {
         super(color);
-        setColor(color);
+        setPaint(color);
     }
 
     /**
@@ -70,7 +71,7 @@ public class SquiggleUnderlineHighlightPainter extends
     @Override
     public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds,
             JTextComponent c, View view) {
-        g.setColor(getColor());
+        g.setColor((Color) getPaint());
 
         if (offs0 == view.getStartOffset() && offs1 == view.getEndOffset()) {
             // Contained in view, can just use bounds
@@ -109,7 +110,7 @@ public class SquiggleUnderlineHighlightPainter extends
      */
     protected void paintSquiggle(Graphics g, Rectangle r) {
         int x = r.x;
-        int y = r.y + r.height - 1;
+        int y = r.y + r.height - AMT;
         int delta = -AMT;
         while (x < r.x + r.width) {
             g.drawLine(x, y, x + AMT, y + delta);

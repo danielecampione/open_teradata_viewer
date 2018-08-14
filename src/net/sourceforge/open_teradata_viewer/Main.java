@@ -72,6 +72,7 @@ public class Main {
 
         // Swing stuff should always be done on the EDT..
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 String lafName = UIManager.getSystemLookAndFeelClassName();
 
@@ -187,7 +188,7 @@ public class Main {
             // Must set UIManager's ClassLoader before instantiating
             // the LAF. Substance is so high-maintenance
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-            Class clazz = null;
+            Class<?> clazz = null;
             try {
                 clazz = cl.loadClass(lafName);
             } catch (UnsupportedClassVersionError ucve) {

@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -36,8 +37,8 @@ public class CopyAction extends CustomAction {
     private static final long serialVersionUID = 5565500041379706945L;
 
     protected CopyAction() {
-        super("Copy", "copy.png", KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                KeyEvent.CTRL_DOWN_MASK), null);
+        super("Copy", "copy.png", KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit
+                .getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
     }
 

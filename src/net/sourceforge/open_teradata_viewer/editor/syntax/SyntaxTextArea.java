@@ -24,6 +24,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -45,6 +46,7 @@ import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.event.CaretEvent;
@@ -272,6 +274,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     private ILinkGenerator linkGenerator;
     private ILinkGeneratorResult linkGeneratorResult;
 
+    private int rhsCorrection;
+
     private FoldManager foldManager;
 
     /** Whether "focusable" tool tips are used instead of standard ones. */
@@ -294,7 +298,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /** Ctor. */
     public SyntaxTextArea() {
-        init();
     }
 
     /**
@@ -304,7 +307,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(SyntaxDocument doc) {
         super(doc);
-        init();
     }
 
     /**
@@ -314,7 +316,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(String text) {
         super(text);
-        init();
     }
 
     /**
@@ -327,7 +328,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(int rows, int cols) {
         super(rows, cols);
-        init();
     }
 
     /**
@@ -341,7 +341,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(String text, int rows, int cols) {
         super(text, rows, cols);
-        init();
     }
 
     /**
@@ -356,7 +355,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(SyntaxDocument doc, String text, int rows, int cols) {
         super(doc, text, rows, cols);
-        init();
     }
 
     /**
@@ -367,7 +365,6 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(int textMode) {
         super(textMode);
-        init();
     }
 
     /**
@@ -792,7 +789,19 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     public void foldToggled(Fold fold) {
         match = null;
         dotRect = null;
-        possiblyUpdateCurrentLineHighlightLocation();
+        if (getLineWrap()) {
+            // NOTE: Without doing this later, the caret position is out of sync
+            // with the Element structure when word wrap is enabled, and causes
+            // BadLocationExceptions when an entire folded region is deleted
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    possiblyUpdateCurrentLineHighlightLocation();
+                }
+            });
+        } else {
+            possiblyUpdateCurrentLineHighlightLocation();
+        }
         revalidate();
         repaint();
     }
@@ -1141,6 +1150,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Returns a list of "mark all" highlights in the text area. If there are no
+     * such highlights, this will be an empty list.
+     *
+     * @return The list of "mark all" highlight ranges.
+     */
+    public List<DocumentRange> getMarkAllHighlightRanges() {
+        return ((SyntaxTextAreaHighlighter) getHighlighter())
+                .getMarkAllHighlightRanges();
+    }
+
+    /**
      * Returns a list of "marked occurrences" in the text area. If there are no
      * marked occurrences, this will be an empty list.
      *
@@ -1303,6 +1323,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             return Collections.emptyList();
         }
         return parserManager.getParserNotices();
+    }
+
+    /**
+     * Workaround for JTextComponents allowing the caret to be rendered entirely
+     * off-screen if the entire "previous" character fit entirely.
+     *
+     * @return The amount of space to add to the x-axis preferred span.
+     * @see #setRightHandSideCorrection(int)
+     */
+    public int getRightHandSideCorrection() {
+        return rhsCorrection;
     }
 
     /**
@@ -1590,7 +1621,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * Called by constructors to initialize common properties of the text
      * editor.
      */
+    @Override
     protected void init() {
+        super.init();
+
         tokenPainter = new DefaultTokenPainter();
 
         // NOTE: Our actions are created here instead of in a static block so
@@ -1635,6 +1669,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         secondaryLanguageBackgrounds[0] = new Color(0xfff0cc);
         secondaryLanguageBackgrounds[1] = new Color(0xdafeda);
         secondaryLanguageBackgrounds[2] = new Color(0xffe0f0);
+
+        setRightHandSideCorrection(0);
     }
 
     /**
@@ -2202,21 +2238,25 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Sets the mask for the key used to toggle whether we are scanning for
-     * hyperlinks with mouse hovering.
+     * hyperlinks with mouse hovering. The default value is
+     * <code>CTRL_DOWN_MASK</code>.
      *
-     * @param mask The mask to use. This should be a value such as {@link
-     *             InputEvent#CTRL_DOWN_MASK} or {@link
-     *             InputEvent#META_DOWN_MASK}. For invalid values, behavior is
-     *             undefined.
+     * @param mask The mask to use. This should be some bitwise combination of
+     *        {@link InputEvent#CTRL_DOWN_MASK},
+     *        {@link InputEvent#ALT_DOWN_MASK},
+     *        {@link InputEvent#SHIFT_DOWN_MASK} or
+     *        {@link InputEvent#META_DOWN_MASK}.
+     *        For invalid values, behavior is undefined.
      * @see InputEvent
      */
     public void setLinkScanningMask(int mask) {
-        if (mask == InputEvent.CTRL_DOWN_MASK
-                || mask == InputEvent.META_DOWN_MASK
-                || mask == InputEvent.ALT_DOWN_MASK
-                || mask == InputEvent.SHIFT_DOWN_MASK) {
-            linkScanningMask = mask;
+        mask &= (InputEvent.CTRL_DOWN_MASK | InputEvent.META_DOWN_MASK
+                | InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+        if (mask == 0) {
+            throw new IllegalArgumentException("mask argument should be "
+                    + "some combination of InputEvent.*_DOWN_MASK fields");
         }
+        linkScanningMask = mask;
     }
 
     /**
@@ -2339,6 +2379,27 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             paintTabLines = paint;
             repaint();
             firePropertyChange(TAB_LINES_PROPERTY, !paint, paint);
+        }
+    }
+
+    /**
+     * Applications typically have no need to modify this value.<p>
+     *
+     * Workaround for JTextComponents allowing the caret to be rendered
+     * entirely off-screen if the entire "previous" character fit entirely.
+     *
+     * @param rhsCorrection The amount of space to add to the x-axis preferred
+     *        span. This should be non-negative.
+     * @see #getRightHandSideCorrection()
+     */
+    public void setRightHandSideCorrection(int rhsCorrection) {
+        if (rhsCorrection < 0) {
+            throw new IllegalArgumentException("correction should be > 0");
+        }
+        if (rhsCorrection != this.rhsCorrection) {
+            this.rhsCorrection = rhsCorrection;
+            revalidate();
+            repaint();
         }
     }
 
@@ -2669,8 +2730,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
         private static final long serialVersionUID = 6206194038047121719L;
 
+        private Insets insets;
+
         protected SyntaxTextAreaMutableCaretEvent(TextArea textArea) {
             super(textArea);
+            insets = new Insets(0, 0, 0, 0);
         }
 
         private HyperlinkEvent createHyperlinkEvent() {
@@ -2718,54 +2782,75 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
-            if (getHyperlinksEnabled()) {
-                if ((e.getModifiersEx() & linkScanningMask) != 0) {
-                    isScanningForLinks = true;
-                    IToken t = viewToToken(e.getPoint());
-                    if (t != null) {
-                        // Copy token, viewToModel() unfortunately modifies
-                        // IToken
-                        t = new TokenImpl(t);
+
+            if (!getHyperlinksEnabled()) {
+                return;
+            }
+
+            // If our link scanning mask is pressed..
+            if ((e.getModifiersEx() & linkScanningMask) == linkScanningMask) {
+                // Links identified at "edges" of editor should not be activated
+                // if mouse is in margin insets
+                insets = getInsets(insets);
+                if (insets != null) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    if (x <= insets.left || y < insets.top) {
+                        if (isScanningForLinks) {
+                            stopScanningForLinks();
+                        }
+                        return;
                     }
-                    Cursor c2 = null;
-                    if (t != null && t.isHyperlink()) {
+                }
+
+                isScanningForLinks = true;
+                IToken t = viewToToken(e.getPoint());
+                if (t != null) {
+                    // Copy token, viewToModel() unfortunately modifies IToken
+                    t = new TokenImpl(t);
+                }
+                Cursor c2 = null;
+                if (t != null && t.isHyperlink()) {
+                    if (hoveredOverLinkOffset == -1
+                            || hoveredOverLinkOffset != t.getOffset()) {
+                        hoveredOverLinkOffset = t.getOffset();
+                        repaint();
+                    }
+                    c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+                } else if (t != null && linkGenerator != null) {
+                    int offs = viewToModel(e.getPoint());
+                    ILinkGeneratorResult newResult = linkGenerator
+                            .isLinkAtOffset(SyntaxTextArea.this, offs);
+                    if (newResult != null) {
+                        // Repaint if we're at a new link now
+                        if (linkGeneratorResult == null
+                                || !equal(newResult, linkGeneratorResult)) {
+                            repaint();
+                        }
+                        linkGeneratorResult = newResult;
                         hoveredOverLinkOffset = t.getOffset();
                         c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-                    } else if (t != null && linkGenerator != null) {
-                        int offs = viewToModel(e.getPoint());
-                        ILinkGeneratorResult newResult = linkGenerator
-                                .isLinkAtOffset(SyntaxTextArea.this, offs);
-                        if (newResult != null) {
-                            // Repaint if we're at a new link now
-                            if (linkGeneratorResult == null
-                                    || !equal(newResult, linkGeneratorResult)) {
-                                repaint();
-                            }
-                            linkGeneratorResult = newResult;
-                            hoveredOverLinkOffset = t.getOffset();
-                            c2 = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-                        } else {
-                            // Repaint if we've moved off of a link
-                            if (linkGeneratorResult != null) {
-                                repaint();
-                            }
-                            c2 = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
-                            hoveredOverLinkOffset = -1;
-                            linkGeneratorResult = null;
-                        }
                     } else {
+                        // Repaint if we've moved off of a link
+                        if (linkGeneratorResult != null) {
+                            repaint();
+                        }
                         c2 = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
                         hoveredOverLinkOffset = -1;
                         linkGeneratorResult = null;
                     }
-                    if (getCursor() != c2) {
-                        setCursor(c2);
-                        repaint(); // Link either left or went into
-                    }
                 } else {
-                    if (isScanningForLinks) {
-                        stopScanningForLinks();
-                    }
+                    c2 = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
+                    hoveredOverLinkOffset = -1;
+                    linkGeneratorResult = null;
+                }
+                if (getCursor() != c2) {
+                    setCursor(c2);
+                    repaint(); // Link either left or went into
+                }
+            } else {
+                if (isScanningForLinks) {
+                    stopScanningForLinks();
                 }
             }
         }

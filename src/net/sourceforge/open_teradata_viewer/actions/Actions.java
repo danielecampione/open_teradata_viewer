@@ -70,7 +70,6 @@ public final class Actions implements ListSelectionListener,
     public static final CustomAction UPPER_SELECTION_CASE = new UpperSelectionCaseAction();
     public static final CustomAction LOWER_SELECTION_CASE = new LowerSelectionCaseAction();
     public static final CustomAction GO_TO_LINE = new GoToLineAction();
-    public static final CustomAction FIND = new FindAction();
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();

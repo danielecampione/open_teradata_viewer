@@ -18,16 +18,20 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.awt.event.KeyEvent;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
 
@@ -38,7 +42,10 @@ import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
+import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
+import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
+import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
@@ -81,6 +88,10 @@ public class ApplicationMenuBar extends JMenuBar {
     public ApplicationMenuBar() {
         JMenu menu;
         JMenu subMenu;
+
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        CollapsibleSectionPanel csp = applicationFrame
+                .getCollapsibleSectionPanel();
 
         menu = new JMenu("Connection");
         add(menu);
@@ -150,7 +161,16 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.DECREASE_FONT_SIZES);
         menu.addSeparator();
         menu.add(Actions.GO_TO_LINE);
-        menu.add(Actions.FIND);
+        int default_modifier = getToolkit().getMenuShortcutKeyMask();
+        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
+        Action a = csp
+                .addBottomComponent(ks, applicationFrame.getFindToolBar());
+        a.putValue(Action.NAME, "Show Find Search Bar");
+        menu.add(new JMenuItem(a));
+        ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, default_modifier);
+        a = csp.addBottomComponent(ks, applicationFrame.getReplaceToolBar());
+        a.putValue(Action.NAME, "Show Replace Search Bar");
+        menu.add(new JMenuItem(a));
         menu.addSeparator();
         menu.add(Actions.HISTORY_PREVIOUS);
         menu.add(Actions.HISTORY_NEXT);
@@ -236,7 +256,7 @@ public class ApplicationMenuBar extends JMenuBar {
         }
 
         // Add any 3rd party Look and Feels in the installation directory
-        ExtendedLookAndFeelInfo[] info = ApplicationFrame.getInstance()
+        ExtendedLookAndFeelInfo[] info = applicationFrame
                 .get3rdPartyLookAndFeelInfo();
         if (info != null) {
             for (int i = 0; i < info.length; i++) {
@@ -322,28 +342,27 @@ public class ApplicationMenuBar extends JMenuBar {
     }
 
     public void refreshEditOptions() {
-        cbViewLineHighlight.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getHighlightCurrentLine());
-        cbFadeCurrentLineHighlight.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getFadeCurrentLineHighlight());
-        cbViewLineNumbers.setSelected(ApplicationFrame.getInstance()
-                .getTextScrollPane().getLineNumbersEnabled());
-        cbBookmarks.setSelected(ApplicationFrame.getInstance()
-                .getTextScrollPane().isIconRowHeaderEnabled());
-        cbWordWrap.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getLineWrap());
-        cbAntialiasing.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getAntiAliasingEnabled());
-        cbMarkOccurrences.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getMarkOccurrences());
-        cbRightToLeft.setSelected(!ApplicationFrame.getInstance()
-                .getTextScrollPane().getComponentOrientation().isLeftToRight());
-        cbTabLines.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getPaintTabLines());
-        cbAnimateBracketMatching.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getAnimateBracketMatching());
-        cbPaintMatchedBracketPair.setSelected(ApplicationFrame.getInstance()
-                .getTextComponent().getPaintMatchedBracketPair());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        OTVSyntaxTextArea _OTVSyntaxTextArea = applicationFrame
+                .getTextComponent();
+        TextScrollPane textScrollPane = applicationFrame.getTextScrollPane();
+
+        cbViewLineHighlight.setSelected(_OTVSyntaxTextArea
+                .getHighlightCurrentLine());
+        cbFadeCurrentLineHighlight.setSelected(_OTVSyntaxTextArea
+                .getFadeCurrentLineHighlight());
+        cbViewLineNumbers.setSelected(textScrollPane.getLineNumbersEnabled());
+        cbBookmarks.setSelected(textScrollPane.isIconRowHeaderEnabled());
+        cbWordWrap.setSelected(_OTVSyntaxTextArea.getLineWrap());
+        cbAntialiasing.setSelected(_OTVSyntaxTextArea.getAntiAliasingEnabled());
+        cbMarkOccurrences.setSelected(_OTVSyntaxTextArea.getMarkOccurrences());
+        cbRightToLeft.setSelected(!textScrollPane.getComponentOrientation()
+                .isLeftToRight());
+        cbTabLines.setSelected(_OTVSyntaxTextArea.getPaintTabLines());
+        cbAnimateBracketMatching.setSelected(_OTVSyntaxTextArea
+                .getAnimateBracketMatching());
+        cbPaintMatchedBracketPair.setSelected(_OTVSyntaxTextArea
+                .getPaintMatchedBracketPair());
     }
 
     private void addThemeItem(String name, String themeXml, ButtonGroup bg,

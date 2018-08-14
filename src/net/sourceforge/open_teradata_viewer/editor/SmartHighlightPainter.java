@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( editor syntax )
+ * Open Teradata Viewer ( editor )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.editor.syntax;
+package net.sourceforge.open_teradata_viewer.editor;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
@@ -31,24 +32,40 @@ import javax.swing.text.View;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
 /**
- * Highlight painter that renders "mark occurrences."
+ * A "smart" highlight painter designed for use in SyntaxTextArea. Adds the
+ * following features:
+ * 
+ * <ul>
+ *    <li>Rendered highlights don't "grow" when users append text to the "end"
+ *        of them. This is implemented by assuming that the highlights
+ *        themselves specify their end offset as one offset "too short". This
+ *        behavior is baked into various STA highlights (mark all, mark
+ *        occurrences, etc..).
+ *    <li>Ability to paint a border line around highlights.
+ * </ul>
  *
  * @author D. Campione
  * 
  */
-/*
- * NOTE: This implementation is a "hack" so typing at the "end" of the highlight
- * does not extend it to include the newly-typed chars, which is the standard
- * behavior of Swing Highlights.
- */
-class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
+public class SmartHighlightPainter extends ChangeableHighlightPainter {
+
+    private static final long serialVersionUID = -2264634995786004000L;
 
     private Color borderColor;
     private boolean paintBorder;
 
     /** Creates a highlight painter that defaults to blue. */
-    public MarkOccurrencesHighlightPainter() {
+    public SmartHighlightPainter() {
         super(Color.BLUE);
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param paint The color or paint to use for this painter.
+     */
+    public SmartHighlightPainter(Paint paint) {
+        super(paint);
     }
 
     /**
@@ -56,7 +73,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
      *
      * @return Whether a border is painted.
      * @see #setPaintBorder(boolean)
-     * @see #getColor()
+     * @see #getPaint()
      */
     public boolean getPaintBorder() {
         return paintBorder;
@@ -66,8 +83,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
     @Override
     public Shape paintLayer(Graphics g, int p0, int p1, Shape viewBounds,
             JTextComponent c, View view) {
-        g.setColor(getColor());
-        p1++; // Workaround for Java Highlight issues
+        g.setColor((Color) getPaint());
 
         // This special case isn't needed for most standard Swing Views (which
         // always return a width of 1 for modelToView() calls), but it is needed
@@ -81,8 +97,8 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
                 Rectangle r = s.getBounds();
                 g.drawLine(r.x, r.y, r.x, r.y + r.height);
                 return r;
-            } catch (BadLocationException ble) {
-                ExceptionDialog.notifyException(ble); // Never happens
+            } catch (BadLocationException ble) { // Never happens
+                ExceptionDialog.hideException(ble);
                 return null;
             }
         }
@@ -101,7 +117,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
 
         // Should only render part of View
         try {
-            // Determine locations
+            // --- determine locations ---
             Shape shape = view.modelToView(p0, Position.Bias.Forward, p1,
                     Position.Bias.Backward, viewBounds);
             Rectangle r = (shape instanceof Rectangle) ? (Rectangle) shape
@@ -112,18 +128,19 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
                 g.drawRect(r.x, r.y, r.width - 1, r.height - 1);
             }
             return r;
-        } catch (BadLocationException ble) { // Never happens
-            ExceptionDialog.notifyException(ble);
+        } catch (BadLocationException e) { // Never happens
+            ExceptionDialog.hideException(e);
             return null;
         }
-
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setColor(Color c) {
-        super.setColor(c);
-        borderColor = c.darker();
+    public void setPaint(Paint paint) {
+        super.setPaint(paint);
+        if (paint instanceof Color) {
+            borderColor = ((Color) paint).darker();
+        }
     }
 
     /**
@@ -131,7 +148,7 @@ class MarkOccurrencesHighlightPainter extends ChangeableColorHighlightPainter {
      *
      * @param paint Whether to paint a border.
      * @see #getPaintBorder()
-     * @see #setColor(Color)
+     * @see #setPaint(Paint)
      */
     public void setPaintBorder(boolean paint) {
         this.paintBorder = paint;

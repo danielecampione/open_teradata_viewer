@@ -40,6 +40,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.BorderUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.JTextComponent;
 
 /**
  * Utility methods for <code>net.sourceforge.open_teradata_viewer</code> GUI
@@ -132,7 +133,7 @@ public class UIUtil {
             return "#000000";
         }
 
-        StringBuffer sb = new StringBuffer("#");
+        StringBuilder sb = new StringBuilder("#");
         int r = color.getRed();
         if (r < 16) {
             sb.append('0');
@@ -340,5 +341,31 @@ public class UIUtil {
             label.setLabelFor(labelFor);
         }
         return label;
+    }
+
+    /**
+     * Returns the text editor component for the specified combo box.
+     *
+     * @param combo The combo box.
+     * @return The text component.
+     */
+    public static final JTextComponent getTextComponent(JComboBox combo) {
+        return (JTextComponent) combo.getEditor().getEditorComponent();
+    }
+
+    /**
+     * Returns a color to use for "error" text in a text field. This will
+     * pick red for dark-text-on-light-background LookAndFeels, and a
+     * brighter color for light-text-on-dark-background LookAndFeels.
+     *
+     * @return The color to use.
+     */
+    public static final Color getErrorTextForeground() {
+        Color defaultFG = UIManager.getColor("TextField.foreground");
+        if (defaultFG.getRed() >= 160 && defaultFG.getGreen() >= 160
+                && defaultFG.getBlue() >= 160) {
+            return new Color(255, 160, 160);
+        }
+        return Color.red;
     }
 }

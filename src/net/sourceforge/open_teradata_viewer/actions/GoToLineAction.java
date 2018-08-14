@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -38,8 +39,8 @@ public class GoToLineAction extends CustomAction {
     private static final long serialVersionUID = 7902153669933142665L;
 
     protected GoToLineAction() {
-        super("Go To..", null, KeyStroke.getKeyStroke(KeyEvent.VK_G,
-                KeyEvent.CTRL_DOWN_MASK), null);
+        super("Go To..", null, KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit
+                .getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
     }
 

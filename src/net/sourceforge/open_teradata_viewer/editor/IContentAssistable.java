@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( util )
+ * Open Teradata Viewer ( editor )
  * Copyright (C) 2013, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,35 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.util;
-
-import java.awt.Window;
+package net.sourceforge.open_teradata_viewer.editor;
 
 /**
- * Returned when a system does not support translucency.
+ * A component (such as a text field) that supports content assist.
+ * Implementations will fire a property change event of type
+ * {@link #ASSISTANCE_IMAGE} when content assist is enabled or disabled.
  *
  * @author D. Campione
  * 
  */
-class DummyTranslucencyUtil extends TranslucencyUtil {
+public interface IContentAssistable {
 
-    /** {@inheritDoc} */
-    public float getOpacity(Window w) {
-        return 1f;
-    }
+    /**
+     * Property event fired when the image to use when the component is focused
+     * changes. This will either be <code>null</code> for "no image," or a
+     * <code>java.awt.Image</code>.
+     */
+    public static final String ASSISTANCE_IMAGE = "AssistanceImage";
 
-    /** {@inheritDoc} */
-    public boolean isTranslucencySupported(boolean perPixel) {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    public boolean setOpacity(Window w, float value) {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    public boolean setOpaque(Window w, boolean opaque) {
-        return false;
-    }
 }

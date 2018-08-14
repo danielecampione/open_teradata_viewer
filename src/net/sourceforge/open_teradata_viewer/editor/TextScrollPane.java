@@ -20,13 +20,17 @@ package net.sourceforge.open_teradata_viewer.editor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
+import java.util.Arrays;
+import java.util.Stack;
 
 import javax.swing.JScrollPane;
 
 /**
- * An extension of <code>javax.swing.JScrollPane</code> that will only take
- * <code>TextArea</code>s for its view. This class has the ability to show:
+ * An extension of <code>JScrollPane</code> that will only take
+ * <code>TextArea</code>s (or <code>javax.swing.JLayer</code>s decorating
+ * <code>TextArea</code>s) for its view. This class has the ability to show:
  * <ul>
  *    <li>Line numbers
  *    <li>Per-line icons (for bookmarks, debugging breakpoints, error markers,
@@ -46,7 +50,6 @@ public class TextScrollPane extends JScrollPane {
 
     private static final long serialVersionUID = -1501799895052465321L;
 
-    private TextArea textArea;
     private Gutter gutter;
 
     /**
@@ -62,41 +65,53 @@ public class TextScrollPane extends JScrollPane {
      * Creates a scroll pane. A default value will be used for line number color
      * (gray), and the current line's line number will be highlighted.
      *
-     * @param textArea The text area this scroll pane will contain.
+     * @param comp The component this scroll pane should display. This should be
+     *        an instance of {@link TextArea},
+     *        <code>javax.swing.JLayer</code> (or the older
+     *        <code>org.jdesktop.jxlayer.JXLayer</code>), or <code>null</code>.
+     *        If this argument is <code>null</code>, you must call {@link
+     *        #setViewportView(Component)}, passing in an instance of one of the
+     *        types above.
      */
-    public TextScrollPane(TextArea textArea) {
-        this(textArea, true);
+    public TextScrollPane(Component comp) {
+        this(comp, true);
     }
 
     /**
      * Creates a scroll pane. A default value will be used for line number color
      * (gray), and the current line's line number will be highlighted.
      *
-     * @param textArea The text area this scroll pane will contain. If this is
-     *                 <code>null</code>, you must call {@link
-     *                 #setViewportView(Component)}, passing in an {@link
-     *                 TextArea}.
+     * @param comp The component this scroll pane should display. This should be
+     *        an instance of {@link TextArea},
+     *        <code>javax.swing.JLayer</code> (or the older
+     *        <code>org.jdesktop.jxlayer.JXLayer</code>), or <code>null</code>.
+     *        If this argument is <code>null</code>, you must call {@link
+     *        #setViewportView(Component)}, passing in an instance of one of the
+     *        types above.
      * @param lineNumbers Whether line numbers should be enabled.
      */
-    public TextScrollPane(TextArea textArea, boolean lineNumbers) {
-        this(textArea, lineNumbers, Color.GRAY);
+    public TextScrollPane(Component comp, boolean lineNumbers) {
+        this(comp, lineNumbers, Color.GRAY);
     }
 
     /**
-     * Creates a scroll pane with preferred size (width, height).
+     * Creates a scroll pane.
      *
-     * @param area The text area this scroll pane will contain. If this is
-     *             <code>null</code>, you must call {@link
-     *             #setViewportView(Component)}, passing in an {@link TextArea}.
+     * @param comp The component this scroll pane should display. This should be
+     *        an instance of {@link TextArea},
+     *        <code>javax.swing.JLayer</code> (or the older
+     *        <code>org.jdesktop.jxlayer.JXLayer</code>), or <code>null</code>.
+     *        If this argument is <code>null</code>, you must call {@link
+     *        #setViewportView(Component)}, passing in an instance of one of the
+     *        types above.
      * @param lineNumbers Whether line numbers are initially enabled.
      * @param lineNumberColor The color to use for line numbers.
      */
-    public TextScrollPane(TextArea area, boolean lineNumbers,
+    public TextScrollPane(Component comp, boolean lineNumbers,
             Color lineNumberColor) {
-        super(area);
+        super(comp);
 
-        // Create the text area and set it inside this scroll bar area
-        textArea = area;
+        TextArea textArea = getFirstTextAreaDescendant(comp);
 
         // Create the gutter for this document
         Font defaultFont = new Font("Monospaced", Font.PLAIN, 12);
@@ -207,13 +222,45 @@ public class TextScrollPane extends JScrollPane {
      */
     @Override
     public void setViewportView(Component view) {
+        TextArea taCandidate = null;
+
         if (!(view instanceof TextArea)) {
-            throw new IllegalArgumentException("view must be an TextArea");
+            taCandidate = getFirstTextAreaDescendant(view);
+            if (taCandidate == null) {
+                throw new IllegalArgumentException(
+                        "view must be either an TextArea or a JLayer wrapping one");
+            }
+        } else {
+            taCandidate = (TextArea) view;
         }
         super.setViewportView(view);
-        textArea = (TextArea) view;
         if (gutter != null) {
-            gutter.setTextArea(textArea);
+            gutter.setTextArea(taCandidate);
         }
+    }
+
+    /**
+     * Returns the first descendant of a component that is an
+     * <code>TextArea</code>. This is primarily here to support
+     * <code>javax.swing.JLayer</code>s that wrap <code>TextArea</code>s.
+     * 
+     * @param comp The component to recursively look through.
+     * @return The first descendant text area, or <code>null</code> if none is
+     *         found.
+     */
+    private static final TextArea getFirstTextAreaDescendant(Component comp) {
+        Stack<Component> stack = new Stack<Component>();
+        stack.add(comp);
+        while (!stack.isEmpty()) {
+            Component current = stack.pop();
+            if (current instanceof TextArea) {
+                return (TextArea) current;
+            }
+            if (current instanceof Container) {
+                Container container = (Container) current;
+                stack.addAll(Arrays.asList(container.getComponents()));
+            }
+        }
+        return null;
     }
 }

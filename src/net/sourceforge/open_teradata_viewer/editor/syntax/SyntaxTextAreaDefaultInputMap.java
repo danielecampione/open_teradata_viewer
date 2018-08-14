@@ -44,6 +44,7 @@ public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
     public SyntaxTextAreaDefaultInputMap() {
         int defaultMod = getDefaultModifier();
         int shift = InputEvent.SHIFT_MASK;
+        int defaultShift = defaultMod | shift;
 
         put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, shift),
                 SyntaxTextAreaEditorKit.staDecreaseIndentAction);
@@ -84,7 +85,7 @@ public class SyntaxTextAreaDefaultInputMap extends TADefaultInputMap {
         // NOTE: no modifiers => mapped to keyTyped. If we had "0" as a second
         // parameter, we'd get the template action (keyPressed) AND the default
         // space action (keyTyped)
-        put(CodeTemplateManager.TEMPLATE_KEYSTROKE,
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, defaultShift),
                 SyntaxTextAreaEditorKit.staPossiblyInsertTemplateAction);
     }
 }

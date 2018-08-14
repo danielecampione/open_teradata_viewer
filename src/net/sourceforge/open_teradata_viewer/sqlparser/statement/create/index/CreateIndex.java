@@ -36,6 +36,7 @@ public class CreateIndex implements IStatement {
     private Table table;
     private Index index;
 
+    @Override
     public void accept(IStatementVisitor statementVisitor) {
         statementVisitor.visit(this);
     }
@@ -58,8 +59,9 @@ public class CreateIndex implements IStatement {
         this.table = table;
     }
 
+    @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         buffer.append("CREATE ");
 

@@ -1763,7 +1763,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                 }
             }
             SearchContext context = new SearchContext(selectedText);
-            if (!SearchEngine.search(textArea, context)) {
+            if (!SearchEngine.find(textArea, context).wasFound()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
             }
             TextArea.setSelectedOccurrenceText(selectedText);
@@ -2078,7 +2078,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
             }
             SearchContext context = new SearchContext(selectedText);
             context.setSearchForward(false);
-            if (!SearchEngine.search(textArea, context)) {
+            if (!SearchEngine.find(textArea, context).wasFound()) {
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
             }
             TextArea.setSelectedOccurrenceText(selectedText);

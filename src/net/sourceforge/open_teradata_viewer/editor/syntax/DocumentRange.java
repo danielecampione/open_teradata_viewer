@@ -24,14 +24,57 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * @author D. Campione
  * 
  */
-public class DocumentRange {
+public class DocumentRange implements Comparable<DocumentRange> {
 
     private int startOffs;
     private int endOffs;
 
+    /**
+     * Ctor.
+     *
+     * @param startOffs The starting offset in the document, inclusive.
+     * @param endOffs The ending offset in the document, exclusive.
+     * @throws IllegalArgumentException If <code>endOffs</code> is less than
+     *         <code>startOffs</code>, or either argument is less than zero.
+     */
     public DocumentRange(int startOffs, int endOffs) {
-        this.startOffs = startOffs;
-        this.endOffs = endOffs;
+        set(startOffs, endOffs);
+    }
+
+    /**
+     * Compares this document range to another.
+     *
+     * @param other Another document range.
+     * @return How the two should be sorted relative to each other.
+     */
+    @Override
+    public int compareTo(DocumentRange other) {
+        if (other == null) {
+            return 1;
+        }
+        int diff = startOffs - other.startOffs;
+        if (diff != 0) {
+            return diff;
+        }
+        return endOffs - other.endOffs;
+    }
+
+    /**
+     * Returns whether this document range is equal to another one.
+     *
+     * @param other Another object, presumably a document range.
+     * @return Whether <code>other</code> is also a document range, and equal to
+     *         this one.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (other instanceof DocumentRange) {
+            return this.compareTo((DocumentRange) other) == 0;
+        }
+        return false;
     }
 
     /**
@@ -54,9 +97,52 @@ public class DocumentRange {
         return startOffs;
     }
 
+    /**
+     * Overridden simply as a best practice, since {@link #equals(Object)} is
+     * overridden.
+     *
+     * @return The hash code for this object.
+     */
+    @Override
+    public int hashCode() {
+        return startOffs + endOffs;
+    }
+
+    /**
+     * Sets the document range.
+     *
+     * @param start The new start value, inclusive.
+     * @param end The new end value, exclusive.
+     * @throws IllegalArgumentException If <code>end</code> is less than
+     *         <code>start</code>, or either argument is less than zero.
+     */
+    public void set(int start, int end) {
+        if (start < 0 || end < 0) {
+            throw new IllegalArgumentException("start and end must be >= 0");
+        }
+        if (end < start) {
+            throw new IllegalArgumentException(
+                    "'end' cannot be less than 'start'");
+        }
+        this.startOffs = start;
+        this.endOffs = end;
+    }
+
     /** @return A string representation of this object. */
     @Override
     public String toString() {
         return "[DocumentRange: " + startOffs + "-" + endOffs + "]";
+    }
+
+    /**
+     * Translates this document range by a given amount.
+     *
+     * @param amount The amount to translate this range by.
+     * @return This (modified) range.
+     */
+    public DocumentRange translate(int amount) {
+        startOffs += amount;
+        endOffs += amount;
+        return this;
     }
 }

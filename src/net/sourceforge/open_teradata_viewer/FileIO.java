@@ -33,7 +33,6 @@ import javax.swing.JFileChooser;
 
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
-import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -137,9 +136,9 @@ public class FileIO {
     }
 
     private static void writeFileAsWebPage(String path) throws IOException {
-        String[] styles = new String[ITokenTypes.DEFAULT_NUM_TOKEN_TYPES];
-        StringBuffer temp = new StringBuffer();
-        StringBuffer sb = new StringBuffer();
+        String[] styles = new String[IToken.DEFAULT_NUM_TOKEN_TYPES];
+        StringBuilder temp = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         PrintWriter out = new PrintWriter(new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(path), "UTF-8")));

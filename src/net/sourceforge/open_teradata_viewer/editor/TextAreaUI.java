@@ -439,8 +439,8 @@ public class TextAreaUI extends BasicTextAreaUI {
                 Color highlight = textArea.getCurrentLineHighlightColor();
                 // NOTE: We use the getLineHeight() method below instead of
                 // currentCaretRect.height because of a bug where
-                // currentCaretRect.height is incorrect when an SyntaxTextArea
-                // is first displayed (it is initialized with the text area's
+                // currentCaretRect.height is incorrect when an SyntaxTextArea is
+                // first displayed (it is initialized with the text area's
                 // font.getHeight() (via TextArea), but isn't changed to account
                 // for the syntax styles before it is displayed)
                 int height = textArea.getLineHeight();
@@ -459,8 +459,8 @@ public class TextAreaUI extends BasicTextAreaUI {
                     g.fillRect(visibleRect.x, textArea.currentCaretY,
                             visibleRect.width, height);
                 }
-            } // End of if (caret.getDot()==caret.getMark())
-        } // End of if (textArea.isCurrentLineHighlightEnabled()..
+            }
+        }
     }
 
     /**

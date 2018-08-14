@@ -77,7 +77,7 @@ public class CommentAction extends CustomAction {
 
         String[] lines = textToComment.split("\n");
 
-        StringBuffer commentedLines = new StringBuffer();
+        StringBuilder commentedLines = new StringBuilder();
 
         for (int i = 0; i < lines.length; i++) {
             if (bounds[0] + commentedLines.length() <= caretPosition) {

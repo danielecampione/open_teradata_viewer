@@ -81,6 +81,7 @@ public class BasicFormatterImpl implements IFormatter {
     static final String indentString = "    ";
     static final String initial = "";
 
+    @Override
     public String format(String source) {
         return new FormatProcess(source).perform();
     }
@@ -106,7 +107,7 @@ public class BasicFormatterImpl implements IFormatter {
 
         int indent = 1;
 
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         StringTokenizer tokens;
         String lastToken;
         String token;

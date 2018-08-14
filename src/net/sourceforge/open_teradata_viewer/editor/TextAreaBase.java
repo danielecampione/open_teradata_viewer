@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
@@ -110,8 +111,8 @@ abstract class TextAreaBase extends JTextArea {
      * @param text The initial text to display.
      */
     public TextAreaBase(String text) {
-        super(text);
         init();
+        setText(text);
     }
 
     /**
@@ -137,8 +138,9 @@ abstract class TextAreaBase extends JTextArea {
      *         <code>cols</code> is negative.
      */
     public TextAreaBase(String text, int rows, int cols) {
-        super(text, rows, cols);
+        super(rows, cols);
         init();
+        setText(text);
     }
 
     /**
@@ -152,8 +154,9 @@ abstract class TextAreaBase extends JTextArea {
      *         <code>cols</code> is negative.
      */
     public TextAreaBase(AbstractDocument doc, String text, int rows, int cols) {
-        super(doc, text, rows, cols);
+        super(doc, null, rows, cols);
         init();
+        setText(text);
     }
 
     /**
@@ -539,7 +542,7 @@ abstract class TextAreaBase extends JTextArea {
     }
 
     /** Initializes this text area. */
-    private void init() {
+    protected void init() {
         // Sets the UI. Note that setUI() is overridden in TextArea to only
         // update the popup menu; this method must be called to set the real UI.
         // This is done because the look and feel of an TextArea is independent
@@ -711,10 +714,10 @@ abstract class TextAreaBase extends JTextArea {
     public void setBackgroundImage(Image image) {
         Object oldBG = getBackgroundObject();
         if (oldBG instanceof Image) { // Just change image being displayed
-            ((BufferedImageBackgroundPainterStrategy) backgroundPainter)
+            ((ImageBackgroundPainterStrategy) backgroundPainter)
                     .setImage(image);
         } else { // Was a color strategy..
-            BufferedImageBackgroundPainterStrategy strategy = new BufferedImageBackgroundPainterStrategy(
+            ImageBackgroundPainterStrategy strategy = new BufferedImageBackgroundPainterStrategy(
                     this);
             strategy.setImage(image);
             backgroundPainter = strategy;
@@ -829,6 +832,24 @@ abstract class TextAreaBase extends JTextArea {
     public void setLineWrap(boolean wrap) {
         super.setLineWrap(wrap);
         forceCurrentLineHighlightRepaint();
+    }
+
+    /**
+     * Overridden to update the current line highlight location.
+     *
+     * @param insets The new insets.
+     */
+    @Override
+    public void setMargin(Insets insets) {
+        Insets old = getInsets();
+        int oldTop = old != null ? old.top : 0;
+        int newTop = insets != null ? insets.top : 0;
+        if (oldTop != newTop) {
+            // The entire editor will be automatically repainted if it is
+            // visible, so no need to call repaint() or forceCurrentLine..()
+            previousCaretY = currentCaretY = newTop;
+        }
+        super.setMargin(insets);
     }
 
     /**

@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -36,8 +37,8 @@ public class CutAction extends CustomAction {
     private static final long serialVersionUID = -4230682183565962640L;
 
     protected CutAction() {
-        super("Cut", "cut.png", KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                KeyEvent.CTRL_DOWN_MASK), null);
+        super("Cut", "cut.png", KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit
+                .getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
     }
 

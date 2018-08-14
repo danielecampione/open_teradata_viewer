@@ -33,6 +33,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.html.HTMLDocument;
 
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -159,7 +160,7 @@ public class TipUtil {
 
         // Always add link foreground rule. Unfortunately these CSS rules stack
         // each time the LaF is changed
-        Color linkFG = Utilities.getHyperlinkForeground();
+        Color linkFG = SyntaxUtilities.getHyperlinkForeground();
         doc.getStyleSheet().addRule(
                 "a { color: " + Utilities.getHexString(linkFG) + "; }");
 

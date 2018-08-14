@@ -219,106 +219,105 @@ public final class Variant implements Cloneable, Comparable<Object> {
         }
         dop.writeByte(valueType);
         switch (valueType) {
-            case VariantType.varByte :
-                dop.writeByte(((Byte) value).byteValue());
-                break;
-            case VariantType.varShort :
-                dop.writeShort(((Short) value).shortValue());
-                break;
-            case VariantType.varInteger :
-                dop.writeInt(((Integer) value).intValue());
-                break;
-            case VariantType.varLong :
-                dop.writeLong(((Long) value).longValue());
-                break;
-            case VariantType.varDate :
-                dop.writeLong(((Date) value).getTime());
-                break;
-            case VariantType.varTime :
-                dop.writeLong(((Time) value).getTime());
-                break;
-            case VariantType.varTimestamp :
-                dop.writeLong(((Timestamp) value).getTime());
-                break;
-            case VariantType.varBoolean :
-                dop.writeBoolean(((Boolean) value).booleanValue());
-                break;
-            case VariantType.varFloat :
-                dop.writeFloat(((Float) value).floatValue());
-                break;
-            case VariantType.varDouble :
-                dop.writeDouble(((Double) value).doubleValue());
-                break;
-            case VariantType.varBigInteger :
-                writeByteArray(dop, ((BigInteger) value).toByteArray());
-                break;
-            case VariantType.varBigDecimal :
-                dop.writeInt(((BigDecimal) value).scale());
-                writeByteArray(dop, ((BigDecimal) value).unscaledValue()
-                        .toByteArray());
-                break;
-            case VariantType.varVariant :
-                ((Variant) value).write(dop);
-                break;
-            case VariantType.varString :
-                writeString(dop, (String) value);
-                break;
-            case VariantType.varBinary :
+        case VariantType.varByte:
+            dop.writeByte(((Byte) value).byteValue());
+            break;
+        case VariantType.varShort:
+            dop.writeShort(((Short) value).shortValue());
+            break;
+        case VariantType.varInteger:
+            dop.writeInt(((Integer) value).intValue());
+            break;
+        case VariantType.varLong:
+            dop.writeLong(((Long) value).longValue());
+            break;
+        case VariantType.varDate:
+            dop.writeLong(((Date) value).getTime());
+            break;
+        case VariantType.varTime:
+            dop.writeLong(((Time) value).getTime());
+            break;
+        case VariantType.varTimestamp:
+            dop.writeLong(((Timestamp) value).getTime());
+            break;
+        case VariantType.varBoolean:
+            dop.writeBoolean(((Boolean) value).booleanValue());
+            break;
+        case VariantType.varFloat:
+            dop.writeFloat(((Float) value).floatValue());
+            break;
+        case VariantType.varDouble:
+            dop.writeDouble(((Double) value).doubleValue());
+            break;
+        case VariantType.varBigInteger:
+            writeByteArray(dop, ((BigInteger) value).toByteArray());
+            break;
+        case VariantType.varBigDecimal:
+            dop.writeInt(((BigDecimal) value).scale());
+            writeByteArray(dop, ((BigDecimal) value).unscaledValue()
+                    .toByteArray());
+            break;
+        case VariantType.varVariant:
+            ((Variant) value).write(dop);
+            break;
+        case VariantType.varString:
+            writeString(dop, (String) value);
+            break;
+        case VariantType.varBinary:
+            dop.writeInt(size);
+            dop.write(binaryData, 0, size);
+            break;
+        case VariantType.varJavaObject: {
+            if (value instanceof IVariantConnectable) {
+                dop.writeInt(VariantType.varSubConnectable);
+                Long id = registeredIds.get(((IVariantConnectable) value)
+                        .getClass());
+                dop.writeLong(id);
                 dop.writeInt(size);
-                dop.write(binaryData, 0, size);
-                break;
-            case VariantType.varJavaObject : {
-                if (value instanceof IVariantConnectable) {
-                    dop.writeInt(VariantType.varSubConnectable);
-                    Long id = registeredIds.get(((IVariantConnectable) value)
-                            .getClass());
-                    dop.writeLong(id);
-                    dop.writeInt(size);
-                    ((IVariantConnectable) value).write(dop);
-                } else if (value instanceof Serializable) {
-                    dop.writeInt(VariantType.varSubSerializable);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(value);
-                    size = baos.size();
-                    dop.writeInt(size);
-                    dop.write(baos.toByteArray(), 0, size);
-                    oos.close();
-                } else {
-                    writeThrow(value.getClass().getName());
-                }
-                break;
-            }
-            case VariantType.varList : {
-                AbstractCollection<?> ac = (AbstractCollection<?>) value;
-                dop.writeLong(ac.size());
-                writeString(dop, ac.getClass().getName());
-                Iterator<?> i = ac.iterator();
-                while (i.hasNext()) {
-                    Object o = i.next();
-                    if (!(o instanceof Variant)) {
-                        if (o instanceof Serializable) {
-                            dop.writeInt(VariantType.varSubSerializable);
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            ObjectOutputStream oos = new ObjectOutputStream(
-                                    baos);
-                            oos.writeObject(o);
-                            size = baos.size();
-                            dop.writeInt(size);
-                            dop.write(baos.toByteArray(), 0, size);
-                            oos.close();
-                        } else {
-                            writeThrow(o.getClass().getName());
-                        }
-                    } else {
-                        dop.writeInt(VariantType.varSubVariant);
-                        ((Variant) o).write(dop);
-                    }
-                }
-                break;
-            }
-            default :
+                ((IVariantConnectable) value).write(dop);
+            } else if (value instanceof Serializable) {
+                dop.writeInt(VariantType.varSubSerializable);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(value);
+                size = baos.size();
+                dop.writeInt(size);
+                dop.write(baos.toByteArray(), 0, size);
+                oos.close();
+            } else {
                 writeThrow(value.getClass().getName());
+            }
+            break;
+        }
+        case VariantType.varList: {
+            AbstractCollection<?> ac = (AbstractCollection<?>) value;
+            dop.writeLong(ac.size());
+            writeString(dop, ac.getClass().getName());
+            Iterator<?> i = ac.iterator();
+            while (i.hasNext()) {
+                Object o = i.next();
+                if (!(o instanceof Variant)) {
+                    if (o instanceof Serializable) {
+                        dop.writeInt(VariantType.varSubSerializable);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ObjectOutputStream oos = new ObjectOutputStream(baos);
+                        oos.writeObject(o);
+                        size = baos.size();
+                        dop.writeInt(size);
+                        dop.write(baos.toByteArray(), 0, size);
+                        oos.close();
+                    } else {
+                        writeThrow(o.getClass().getName());
+                    }
+                } else {
+                    dop.writeInt(VariantType.varSubVariant);
+                    ((Variant) o).write(dop);
+                }
+            }
+            break;
+        }
+        default:
+            writeThrow(value.getClass().getName());
         }
     }
 
@@ -335,158 +334,157 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Variant read(DataInput dip) throws VariantException, IOException {
         int vt = dip.readByte();
         switch (vt) {
-            case VariantType.varNull :
-                setNull();
-                break;
-            case VariantType.varByte :
-                setByte(dip.readByte());
-                break;
-            case VariantType.varShort :
-                setShort(dip.readShort());
-                break;
-            case VariantType.varInteger :
-                setInteger(dip.readInt());
-                break;
-            case VariantType.varLong :
-                setLong(dip.readLong());
-                break;
-            case VariantType.varDate :
-                setDate(new Date(dip.readLong()));
-                break;
-            case VariantType.varTime :
-                setDate(new Time(dip.readLong()));
-                break;
-            case VariantType.varTimestamp :
-                setDate(new Timestamp(dip.readLong()));
-                break;
-            case VariantType.varBoolean :
-                setBoolean(dip.readBoolean());
-                break;
-            case VariantType.varFloat :
-                setFloat(dip.readFloat());
-                break;
-            case VariantType.varDouble :
-                setDouble(dip.readDouble());
-                break;
-            case VariantType.varBigInteger :
-                setBigInteger(new BigInteger(readByteArray(dip)));
-                break;
-            case VariantType.varBigDecimal : {
-                int scale = dip.readInt();
-                setBigDecimal(new BigDecimal(
-                        new BigInteger(readByteArray(dip)), scale));
-                break;
-            }
-            case VariantType.varVariant :
-                setVariant(new Variant());
-                ((Variant) value).read(dip);
-                break;
-            case VariantType.varString :
-                setString(readString(dip));
-                break;
-            case VariantType.varBinary :
-                readBinary(dip, dip.readInt());
-                break;
-            case VariantType.varJavaObject : {
-                int subType = dip.readInt();
-                if (subType == VariantType.varSubConnectable) {
-                    long id = dip.readLong();
-                    size = dip.readInt();
-                    if (value instanceof IVariantConnectable) {
-                        ((IVariantConnectable) value).read(dip);
+        case VariantType.varNull:
+            setNull();
+            break;
+        case VariantType.varByte:
+            setByte(dip.readByte());
+            break;
+        case VariantType.varShort:
+            setShort(dip.readShort());
+            break;
+        case VariantType.varInteger:
+            setInteger(dip.readInt());
+            break;
+        case VariantType.varLong:
+            setLong(dip.readLong());
+            break;
+        case VariantType.varDate:
+            setDate(new Date(dip.readLong()));
+            break;
+        case VariantType.varTime:
+            setDate(new Time(dip.readLong()));
+            break;
+        case VariantType.varTimestamp:
+            setDate(new Timestamp(dip.readLong()));
+            break;
+        case VariantType.varBoolean:
+            setBoolean(dip.readBoolean());
+            break;
+        case VariantType.varFloat:
+            setFloat(dip.readFloat());
+            break;
+        case VariantType.varDouble:
+            setDouble(dip.readDouble());
+            break;
+        case VariantType.varBigInteger:
+            setBigInteger(new BigInteger(readByteArray(dip)));
+            break;
+        case VariantType.varBigDecimal: {
+            int scale = dip.readInt();
+            setBigDecimal(new BigDecimal(new BigInteger(readByteArray(dip)),
+                    scale));
+            break;
+        }
+        case VariantType.varVariant:
+            setVariant(new Variant());
+            ((Variant) value).read(dip);
+            break;
+        case VariantType.varString:
+            setString(readString(dip));
+            break;
+        case VariantType.varBinary:
+            readBinary(dip, dip.readInt());
+            break;
+        case VariantType.varJavaObject: {
+            int subType = dip.readInt();
+            if (subType == VariantType.varSubConnectable) {
+                long id = dip.readLong();
+                size = dip.readInt();
+                if (value instanceof IVariantConnectable) {
+                    ((IVariantConnectable) value).read(dip);
+                } else {
+                    Class<?> clazz = registeredClasses.get(id);
+                    if (clazz == null) {
+                        readBinary(dip, size);
                     } else {
-                        Class<?> clazz = registeredClasses.get(id);
-                        if (clazz == null) {
+                        try {
+                            value = clazz.newInstance();
+                            ((IVariantConnectable) value).read(dip);
+                        } catch (InstantiationException ie) {
                             readBinary(dip, size);
-                        } else {
-                            try {
-                                value = clazz.newInstance();
-                                ((IVariantConnectable) value).read(dip);
-                            } catch (InstantiationException ie) {
-                                readBinary(dip, size);
-                            } catch (IllegalAccessException iae) {
-                                readBinary(dip, size);
-                            }
+                        } catch (IllegalAccessException iae) {
+                            readBinary(dip, size);
                         }
                     }
-                } else if (subType == VariantType.varSubSerializable) {
+                }
+            } else if (subType == VariantType.varSubSerializable) {
+                size = dip.readInt();
+                byte[] buffer = new byte[size];
+                dip.readFully(buffer, 0, buffer.length);
+                ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+                ObjectInputStream ois = new ObjectInputStream(bais);
+                try {
+                    setObject(ois.readObject());
+                } catch (ClassNotFoundException cnfe) {
+                    ExceptionDialog.ignoreException(cnfe);
+                }
+                ois.close();
+            }
+            break;
+        }
+        case VariantType.varList: {
+            long count = dip.readLong();
+            String className = readString(dip);
+            AbstractCollection<Object> ac;
+            try {
+                ac = (AbstractCollection<Object>) (Class.forName(className)
+                        .newInstance());
+            } catch (InstantiationException ie) {
+                throw new VariantException(
+                        VariantException.ERR_02005_READ_ARRAY_PROBLEM,
+                        new Object[] { ie.getMessage() });
+            } catch (IllegalAccessException iae) {
+                throw new VariantException(
+                        VariantException.ERR_02005_READ_ARRAY_PROBLEM,
+                        new Object[] { iae.getMessage() });
+            } catch (ClassNotFoundException cnfe) {
+                throw new VariantException(
+                        VariantException.ERR_02005_READ_ARRAY_PROBLEM,
+                        new Object[] { cnfe.getMessage() });
+            }
+            for (int i = 0; i < count; i++) {
+                int subType = dip.readInt();
+                if (subType == VariantType.varSubSerializable) {
                     size = dip.readInt();
                     byte[] buffer = new byte[size];
                     dip.readFully(buffer, 0, buffer.length);
                     ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     try {
-                        setObject(ois.readObject());
+                        ac.add(ois.readObject());
                     } catch (ClassNotFoundException cnfe) {
                         ExceptionDialog.ignoreException(cnfe);
                     }
                     ois.close();
+                } else if (subType == VariantType.varSubVariant) {
+                    Variant value = new Variant();
+                    value.read(dip);
+                    ac.add(value);
                 }
-                break;
             }
-            case VariantType.varList : {
-                long count = dip.readLong();
-                String className = readString(dip);
-                AbstractCollection<Object> ac;
-                try {
-                    ac = (AbstractCollection<Object>) (Class.forName(className)
-                            .newInstance());
-                } catch (InstantiationException ie) {
-                    throw new VariantException(
-                            VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{ie.getMessage()});
-                } catch (IllegalAccessException iae) {
-                    throw new VariantException(
-                            VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{iae.getMessage()});
-                } catch (ClassNotFoundException cnfe) {
-                    throw new VariantException(
-                            VariantException.ERR_02005_READ_ARRAY_PROBLEM,
-                            new Object[]{cnfe.getMessage()});
-                }
-                for (int i = 0; i < count; i++) {
-                    int subType = dip.readInt();
-                    if (subType == VariantType.varSubSerializable) {
-                        size = dip.readInt();
-                        byte[] buffer = new byte[size];
-                        dip.readFully(buffer, 0, buffer.length);
-                        ByteArrayInputStream bais = new ByteArrayInputStream(
-                                buffer);
-                        ObjectInputStream ois = new ObjectInputStream(bais);
-                        try {
-                            ac.add(ois.readObject());
-                        } catch (ClassNotFoundException cnfe) {
-                            ExceptionDialog.ignoreException(cnfe);
-                        }
-                        ois.close();
-                    } else if (subType == VariantType.varSubVariant) {
-                        Variant value = new Variant();
-                        value.read(dip);
-                        ac.add(value);
-                    }
-                }
-                setList(ac);
-                break;
-            }
-            default :
-                readThrow(vt);
+            setList(ac);
+            break;
+        }
+        default:
+            readThrow(vt);
         }
         return this;
     }
 
     private void writeThrow(String type) throws VariantException {
         throw new VariantException(VariantException.ERR_02001_CANT_WRITE,
-                new Object[]{type});
+                new Object[] { type });
     }
 
     private void readThrow(int type) throws VariantException {
         throw new VariantException(VariantException.ERR_02002_CANT_READ,
-                new Object[]{(Integer.valueOf(type)).toString()});
+                new Object[] { (Integer.valueOf(type)).toString() });
     }
 
     private void noCastThrow(String from, String to) throws VariantException {
         throw new VariantException(VariantException.ERR_02003_CANT_CONVERT,
-                new Object[]{from, to});
+                new Object[] { from, to });
     }
 
     private void nullThrow(String to) throws VariantException {
@@ -495,46 +493,46 @@ public final class Variant implements Cloneable, Comparable<Object> {
 
     private int resolveSize() {
         switch (this.valueType) {
-            case VariantType.varNull :
-            case VariantType.varUnassigned :
-                return 0;
-            case VariantType.varByte :
-                return Byte.SIZE / 8;
-            case VariantType.varShort :
-                return Short.SIZE / 8;
-            case VariantType.varInteger :
-                return Integer.SIZE / 8;
-            case VariantType.varLong :
-                return Long.SIZE / 8;
-            case VariantType.varDate :
-                return Long.SIZE / 8;
-            case VariantType.varTime :
-                return Long.SIZE / 8;
-            case VariantType.varTimestamp :
-                return Long.SIZE / 8;
-            case VariantType.varBoolean :
-                return Byte.SIZE / 8;
-            case VariantType.varFloat :
-                return Float.SIZE / 8;
-            case VariantType.varDouble :
-                return Double.SIZE / 8;
-            case VariantType.varBigDecimal :
-            case VariantType.varBigInteger :
-                return value == null ? 0 : value.toString().length();
-            case VariantType.varString :
-                return value.toString().length();
-            case VariantType.varVariant :
-                return ((Variant) value).getSize();
-            case VariantType.varBinary :
-                return binaryData == null ? 0 : binaryData.length;
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return ((IVariantConnectable) value).getSize();
-                } else {
-                    return size;
-                }
-            default :
+        case VariantType.varNull:
+        case VariantType.varUnassigned:
+            return 0;
+        case VariantType.varByte:
+            return Byte.SIZE / 8;
+        case VariantType.varShort:
+            return Short.SIZE / 8;
+        case VariantType.varInteger:
+            return Integer.SIZE / 8;
+        case VariantType.varLong:
+            return Long.SIZE / 8;
+        case VariantType.varDate:
+            return Long.SIZE / 8;
+        case VariantType.varTime:
+            return Long.SIZE / 8;
+        case VariantType.varTimestamp:
+            return Long.SIZE / 8;
+        case VariantType.varBoolean:
+            return Byte.SIZE / 8;
+        case VariantType.varFloat:
+            return Float.SIZE / 8;
+        case VariantType.varDouble:
+            return Double.SIZE / 8;
+        case VariantType.varBigDecimal:
+        case VariantType.varBigInteger:
+            return value == null ? 0 : value.toString().length();
+        case VariantType.varString:
+            return value.toString().length();
+        case VariantType.varVariant:
+            return ((Variant) value).getSize();
+        case VariantType.varBinary:
+            return binaryData == null ? 0 : binaryData.length;
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return ((IVariantConnectable) value).getSize();
+            } else {
                 return size;
+            }
+        default:
+            return size;
         }
     }
 
@@ -642,43 +640,43 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public byte getByte() throws VariantException {
         checkNull("byte");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).byteValue();
-            case VariantType.varShort :
-                return ((Short) value).byteValue();
-            case VariantType.varInteger :
-                return ((Integer) value).byteValue();
-            case VariantType.varLong :
-                return ((Long) value).byteValue();
-            case VariantType.varDate :
-                return Long.valueOf(((Date) value).getTime()).byteValue();
-            case VariantType.varTime :
-                return Long.valueOf(((Time) value).getTime()).byteValue();
-            case VariantType.varTimestamp :
-                return Long.valueOf(((Timestamp) value).getTime()).byteValue();
-            case VariantType.varBoolean :
-                return (byte) (((Boolean) value).booleanValue() ? 1 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).byteValue();
-            case VariantType.varDouble :
-                return ((Double) value).byteValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).byteValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).byteValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getByte();
-            case VariantType.varString :
-                return Byte.parseByte((String) value);
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Byte) ((IVariantConnectable) value)
-                            .castTo(VariantType.varByte);
-                } else {
-                    noCastThrow(value.getClass().getName(), "byte");
-                }
-            default :
+        case VariantType.varByte:
+            return ((Byte) value).byteValue();
+        case VariantType.varShort:
+            return ((Short) value).byteValue();
+        case VariantType.varInteger:
+            return ((Integer) value).byteValue();
+        case VariantType.varLong:
+            return ((Long) value).byteValue();
+        case VariantType.varDate:
+            return Long.valueOf(((Date) value).getTime()).byteValue();
+        case VariantType.varTime:
+            return Long.valueOf(((Time) value).getTime()).byteValue();
+        case VariantType.varTimestamp:
+            return Long.valueOf(((Timestamp) value).getTime()).byteValue();
+        case VariantType.varBoolean:
+            return (byte) (((Boolean) value).booleanValue() ? 1 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).byteValue();
+        case VariantType.varDouble:
+            return ((Double) value).byteValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).byteValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).byteValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getByte();
+        case VariantType.varString:
+            return Byte.parseByte((String) value);
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Byte) ((IVariantConnectable) value)
+                        .castTo(VariantType.varByte);
+            } else {
                 noCastThrow(value.getClass().getName(), "byte");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "byte");
         }
         return 0;
     }
@@ -693,43 +691,43 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public short getShort() throws VariantException {
         checkNull("short");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).shortValue();
-            case VariantType.varShort :
-                return ((Short) value).shortValue();
-            case VariantType.varInteger :
-                return ((Integer) value).shortValue();
-            case VariantType.varLong :
-                return ((Long) value).shortValue();
-            case VariantType.varDate :
-                return Long.valueOf(((Date) value).getTime()).shortValue();
-            case VariantType.varTime :
-                return Long.valueOf(((Time) value).getTime()).shortValue();
-            case VariantType.varTimestamp :
-                return Long.valueOf(((Timestamp) value).getTime()).shortValue();
-            case VariantType.varBoolean :
-                return (short) (((Boolean) value).booleanValue() ? 1 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).shortValue();
-            case VariantType.varDouble :
-                return ((Double) value).shortValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).shortValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).shortValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getShort();
-            case VariantType.varString :
-                return Short.parseShort((String) value);
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Short) ((IVariantConnectable) value)
-                            .castTo(VariantType.varShort);
-                } else {
-                    noCastThrow(value.getClass().getName(), "short");
-                }
-            default :
+        case VariantType.varByte:
+            return ((Byte) value).shortValue();
+        case VariantType.varShort:
+            return ((Short) value).shortValue();
+        case VariantType.varInteger:
+            return ((Integer) value).shortValue();
+        case VariantType.varLong:
+            return ((Long) value).shortValue();
+        case VariantType.varDate:
+            return Long.valueOf(((Date) value).getTime()).shortValue();
+        case VariantType.varTime:
+            return Long.valueOf(((Time) value).getTime()).shortValue();
+        case VariantType.varTimestamp:
+            return Long.valueOf(((Timestamp) value).getTime()).shortValue();
+        case VariantType.varBoolean:
+            return (short) (((Boolean) value).booleanValue() ? 1 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).shortValue();
+        case VariantType.varDouble:
+            return ((Double) value).shortValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).shortValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).shortValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getShort();
+        case VariantType.varString:
+            return Short.parseShort((String) value);
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Short) ((IVariantConnectable) value)
+                        .castTo(VariantType.varShort);
+            } else {
                 noCastThrow(value.getClass().getName(), "short");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "short");
         }
         return 0;
     }
@@ -744,43 +742,43 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public int getInteger() throws VariantException {
         checkNull("int");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).intValue();
-            case VariantType.varShort :
-                return ((Short) value).intValue();
-            case VariantType.varInteger :
-                return ((Integer) value).intValue();
-            case VariantType.varLong :
-                return ((Long) value).intValue();
-            case VariantType.varDate :
-                return Long.valueOf(((Date) value).getTime()).intValue();
-            case VariantType.varTime :
-                return Long.valueOf(((Time) value).getTime()).intValue();
-            case VariantType.varTimestamp :
-                return Long.valueOf(((Timestamp) value).getTime()).intValue();
-            case VariantType.varBoolean :
-                return (int) (((Boolean) value).booleanValue() ? ~0 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).intValue();
-            case VariantType.varDouble :
-                return ((Double) value).intValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).intValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).intValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getInteger();
-            case VariantType.varString :
-                return ((Double) Double.parseDouble((String) value)).intValue();
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Integer) ((IVariantConnectable) value)
-                            .castTo(VariantType.varInteger);
-                } else {
-                    noCastThrow(value.getClass().getName(), "int");
-                }
-            default :
+        case VariantType.varByte:
+            return ((Byte) value).intValue();
+        case VariantType.varShort:
+            return ((Short) value).intValue();
+        case VariantType.varInteger:
+            return ((Integer) value).intValue();
+        case VariantType.varLong:
+            return ((Long) value).intValue();
+        case VariantType.varDate:
+            return Long.valueOf(((Date) value).getTime()).intValue();
+        case VariantType.varTime:
+            return Long.valueOf(((Time) value).getTime()).intValue();
+        case VariantType.varTimestamp:
+            return Long.valueOf(((Timestamp) value).getTime()).intValue();
+        case VariantType.varBoolean:
+            return (int) (((Boolean) value).booleanValue() ? ~0 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).intValue();
+        case VariantType.varDouble:
+            return ((Double) value).intValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).intValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).intValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getInteger();
+        case VariantType.varString:
+            return ((Double) Double.parseDouble((String) value)).intValue();
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Integer) ((IVariantConnectable) value)
+                        .castTo(VariantType.varInteger);
+            } else {
                 noCastThrow(value.getClass().getName(), "int");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "int");
         }
         return 0;
     }
@@ -795,45 +793,44 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public long getLong() throws VariantException {
         checkNull("long");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).longValue();
-            case VariantType.varShort :
-                return ((Short) value).longValue();
-            case VariantType.varInteger :
-                return ((Integer) value).longValue();
-            case VariantType.varLong :
-                return ((Long) value).longValue();
-            case VariantType.varDate :
-                return ((Date) value).getTime();
-            case VariantType.varTime :
-                return ((Time) value).getTime();
-            case VariantType.varTimestamp :
-                return ((Timestamp) value).getTime();
-            case VariantType.varBoolean :
-                return (long) (((Boolean) value).booleanValue() ? ~0 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).longValue();
-            case VariantType.varDouble :
-                return ((Double) value).longValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).longValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).longValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getLong();
-            case VariantType.varString : {
-                return ((Double) Double.parseDouble((String) value))
-                        .longValue();
-            }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Long) ((IVariantConnectable) value)
-                            .castTo(VariantType.varLong);
-                } else {
-                    noCastThrow(value.getClass().getName(), "long");
-                }
-            default :
+        case VariantType.varByte:
+            return ((Byte) value).longValue();
+        case VariantType.varShort:
+            return ((Short) value).longValue();
+        case VariantType.varInteger:
+            return ((Integer) value).longValue();
+        case VariantType.varLong:
+            return ((Long) value).longValue();
+        case VariantType.varDate:
+            return ((Date) value).getTime();
+        case VariantType.varTime:
+            return ((Time) value).getTime();
+        case VariantType.varTimestamp:
+            return ((Timestamp) value).getTime();
+        case VariantType.varBoolean:
+            return (long) (((Boolean) value).booleanValue() ? ~0 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).longValue();
+        case VariantType.varDouble:
+            return ((Double) value).longValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).longValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).longValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getLong();
+        case VariantType.varString: {
+            return ((Double) Double.parseDouble((String) value)).longValue();
+        }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Long) ((IVariantConnectable) value)
+                        .castTo(VariantType.varLong);
+            } else {
                 noCastThrow(value.getClass().getName(), "long");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "long");
         }
         return 0;
     }
@@ -848,50 +845,50 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public float getFloat() throws VariantException {
         checkNull("float");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).floatValue();
-            case VariantType.varShort :
-                return ((Short) value).floatValue();
-            case VariantType.varInteger :
-                return ((Integer) value).floatValue();
-            case VariantType.varLong :
-                return ((Long) value).floatValue();
-            case VariantType.varDate :
-                return Long.valueOf(((Date) value).getTime()).floatValue();
-            case VariantType.varTime :
-                return Long.valueOf(((Time) value).getTime()).floatValue();
-            case VariantType.varTimestamp :
-                return Long.valueOf(((Timestamp) value).getTime()).floatValue();
-            case VariantType.varBoolean :
-                return (float) (((Boolean) value).booleanValue() ? ~0 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).floatValue();
-            case VariantType.varDouble :
-                return ((Double) value).floatValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).floatValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).floatValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getFloat();
-            case VariantType.varString :
-                try {
-                    if (decimalFormat != null) {
-                        return decimalFormat.parse((String) value).floatValue();
-                    }
-                    return Float.parseFloat((String) value);
-                } catch (Exception e) {
-                    return Float.parseFloat((String) value);
+        case VariantType.varByte:
+            return ((Byte) value).floatValue();
+        case VariantType.varShort:
+            return ((Short) value).floatValue();
+        case VariantType.varInteger:
+            return ((Integer) value).floatValue();
+        case VariantType.varLong:
+            return ((Long) value).floatValue();
+        case VariantType.varDate:
+            return Long.valueOf(((Date) value).getTime()).floatValue();
+        case VariantType.varTime:
+            return Long.valueOf(((Time) value).getTime()).floatValue();
+        case VariantType.varTimestamp:
+            return Long.valueOf(((Timestamp) value).getTime()).floatValue();
+        case VariantType.varBoolean:
+            return (float) (((Boolean) value).booleanValue() ? ~0 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).floatValue();
+        case VariantType.varDouble:
+            return ((Double) value).floatValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).floatValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).floatValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getFloat();
+        case VariantType.varString:
+            try {
+                if (decimalFormat != null) {
+                    return decimalFormat.parse((String) value).floatValue();
                 }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Float) ((IVariantConnectable) value)
-                            .castTo(VariantType.varFloat);
-                } else {
-                    noCastThrow(value.getClass().getName(), "float");
-                }
-            default :
+                return Float.parseFloat((String) value);
+            } catch (Exception e) {
+                return Float.parseFloat((String) value);
+            }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Float) ((IVariantConnectable) value)
+                        .castTo(VariantType.varFloat);
+            } else {
                 noCastThrow(value.getClass().getName(), "float");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "float");
         }
         return 0;
     }
@@ -906,52 +903,50 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public double getDouble() throws VariantException {
         checkNull("double");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).doubleValue();
-            case VariantType.varShort :
-                return ((Short) value).doubleValue();
-            case VariantType.varInteger :
-                return ((Integer) value).doubleValue();
-            case VariantType.varLong :
-                return ((Long) value).doubleValue();
-            case VariantType.varDate :
-                return Long.valueOf(((Date) value).getTime()).doubleValue();
-            case VariantType.varTime :
-                return Long.valueOf(((Time) value).getTime()).doubleValue();
-            case VariantType.varTimestamp :
-                return Long.valueOf(((Timestamp) value).getTime())
-                        .doubleValue();
-            case VariantType.varBoolean :
-                return (double) (((Boolean) value).booleanValue() ? ~0 : 0);
-            case VariantType.varFloat :
-                return ((Float) value).doubleValue();
-            case VariantType.varDouble :
-                return ((Double) value).doubleValue();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).doubleValue();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).doubleValue();
-            case VariantType.varVariant :
-                return ((Variant) value).getDouble();
-            case VariantType.varString :
-                try {
-                    if (decimalFormat != null) {
-                        return decimalFormat.parse((String) value)
-                                .doubleValue();
-                    }
-                    return Double.parseDouble((String) value);
-                } catch (Exception e) {
-                    return Double.parseDouble((String) value);
+        case VariantType.varByte:
+            return ((Byte) value).doubleValue();
+        case VariantType.varShort:
+            return ((Short) value).doubleValue();
+        case VariantType.varInteger:
+            return ((Integer) value).doubleValue();
+        case VariantType.varLong:
+            return ((Long) value).doubleValue();
+        case VariantType.varDate:
+            return Long.valueOf(((Date) value).getTime()).doubleValue();
+        case VariantType.varTime:
+            return Long.valueOf(((Time) value).getTime()).doubleValue();
+        case VariantType.varTimestamp:
+            return Long.valueOf(((Timestamp) value).getTime()).doubleValue();
+        case VariantType.varBoolean:
+            return (double) (((Boolean) value).booleanValue() ? ~0 : 0);
+        case VariantType.varFloat:
+            return ((Float) value).doubleValue();
+        case VariantType.varDouble:
+            return ((Double) value).doubleValue();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).doubleValue();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).doubleValue();
+        case VariantType.varVariant:
+            return ((Variant) value).getDouble();
+        case VariantType.varString:
+            try {
+                if (decimalFormat != null) {
+                    return decimalFormat.parse((String) value).doubleValue();
                 }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Double) ((IVariantConnectable) value)
-                            .castTo(VariantType.varDouble);
-                } else {
-                    noCastThrow(value.getClass().getName(), "double");
-                }
-            default :
+                return Double.parseDouble((String) value);
+            } catch (Exception e) {
+                return Double.parseDouble((String) value);
+            }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Double) ((IVariantConnectable) value)
+                        .castTo(VariantType.varDouble);
+            } else {
                 noCastThrow(value.getClass().getName(), "double");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "double");
         }
         return 0;
     }
@@ -970,43 +965,43 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public boolean getBoolean() throws VariantException {
         checkNull("boolean");
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).byteValue() != 0;
-            case VariantType.varShort :
-                return ((Short) value).shortValue() != 0;
-            case VariantType.varInteger :
-                return ((Integer) value).intValue() != 0;
-            case VariantType.varLong :
-                return ((Long) value).longValue() != 0;
-            case VariantType.varDate :
-                return ((Date) value).getTime() != 0;
-            case VariantType.varTime :
-                return ((Time) value).getTime() != 0;
-            case VariantType.varTimestamp :
-                return ((Timestamp) value).getTime() != 0;
-            case VariantType.varBoolean :
-                return ((Boolean) value).booleanValue();
-            case VariantType.varFloat :
-                return ((Float) value).floatValue() != 0;
-            case VariantType.varDouble :
-                return ((Double) value).doubleValue() != 0;
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).longValue() != 0;
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).doubleValue() != 0;
-            case VariantType.varVariant :
-                return ((Variant) value).getBoolean();
-            case VariantType.varString :
-                return Boolean.parseBoolean((String) value);
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Boolean) ((IVariantConnectable) value)
-                            .castTo(VariantType.varBoolean);
-                } else {
-                    noCastThrow(value.getClass().getName(), "boolean");
-                }
-            default :
+        case VariantType.varByte:
+            return ((Byte) value).byteValue() != 0;
+        case VariantType.varShort:
+            return ((Short) value).shortValue() != 0;
+        case VariantType.varInteger:
+            return ((Integer) value).intValue() != 0;
+        case VariantType.varLong:
+            return ((Long) value).longValue() != 0;
+        case VariantType.varDate:
+            return ((Date) value).getTime() != 0;
+        case VariantType.varTime:
+            return ((Time) value).getTime() != 0;
+        case VariantType.varTimestamp:
+            return ((Timestamp) value).getTime() != 0;
+        case VariantType.varBoolean:
+            return ((Boolean) value).booleanValue();
+        case VariantType.varFloat:
+            return ((Float) value).floatValue() != 0;
+        case VariantType.varDouble:
+            return ((Double) value).doubleValue() != 0;
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).longValue() != 0;
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).doubleValue() != 0;
+        case VariantType.varVariant:
+            return ((Variant) value).getBoolean();
+        case VariantType.varString:
+            return Boolean.parseBoolean((String) value);
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Boolean) ((IVariantConnectable) value)
+                        .castTo(VariantType.varBoolean);
+            } else {
                 noCastThrow(value.getClass().getName(), "boolean");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "boolean");
         }
         return false;
     }
@@ -1025,50 +1020,49 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Date getDate() throws VariantException, ParseException {
         checkNull("Date");
         switch (valueType) {
-            case VariantType.varByte :
-                return new Date(((Byte) value).longValue());
-            case VariantType.varShort :
-                return new Date(((Short) value).longValue());
-            case VariantType.varInteger :
-                return new Date(((Integer) value).longValue());
-            case VariantType.varLong :
-                return new Date(((Long) value).longValue());
-            case VariantType.varDate :
-                return new Date(((Date) value).getTime());
-            case VariantType.varTime :
-                return new Date(((Time) value).getTime());
-            case VariantType.varTimestamp :
-                return new Date(((Timestamp) value).getTime());
-            case VariantType.varFloat :
-                return new Date(((Float) value).longValue());
-            case VariantType.varDouble :
-                return new Date(((Double) value).longValue());
-            case VariantType.varBigInteger :
-                return new Date(((BigInteger) value).longValue());
-            case VariantType.varBigDecimal :
-                return new Date(((BigDecimal) value).longValue());
-            case VariantType.varVariant :
-                return ((Variant) value).getDate();
-            case VariantType.varString : {
-                try {
-                    if (dateFormat != null) {
-                        return dateFormat.parse((String) value);
-                    }
-                    return DateFormat.getDateInstance().parse((String) value);
-                } catch (ParseException pe) {
-                    return DateFormat.getDateTimeInstance().parse(
-                            (String) value);
+        case VariantType.varByte:
+            return new Date(((Byte) value).longValue());
+        case VariantType.varShort:
+            return new Date(((Short) value).longValue());
+        case VariantType.varInteger:
+            return new Date(((Integer) value).longValue());
+        case VariantType.varLong:
+            return new Date(((Long) value).longValue());
+        case VariantType.varDate:
+            return new Date(((Date) value).getTime());
+        case VariantType.varTime:
+            return new Date(((Time) value).getTime());
+        case VariantType.varTimestamp:
+            return new Date(((Timestamp) value).getTime());
+        case VariantType.varFloat:
+            return new Date(((Float) value).longValue());
+        case VariantType.varDouble:
+            return new Date(((Double) value).longValue());
+        case VariantType.varBigInteger:
+            return new Date(((BigInteger) value).longValue());
+        case VariantType.varBigDecimal:
+            return new Date(((BigDecimal) value).longValue());
+        case VariantType.varVariant:
+            return ((Variant) value).getDate();
+        case VariantType.varString: {
+            try {
+                if (dateFormat != null) {
+                    return dateFormat.parse((String) value);
                 }
+                return DateFormat.getDateInstance().parse((String) value);
+            } catch (ParseException pe) {
+                return DateFormat.getDateTimeInstance().parse((String) value);
             }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Date) ((IVariantConnectable) value)
-                            .castTo(VariantType.varDate);
-                } else {
-                    noCastThrow(value.getClass().getName(), "date");
-                }
-            default :
+        }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Date) ((IVariantConnectable) value)
+                        .castTo(VariantType.varDate);
+            } else {
                 noCastThrow(value.getClass().getName(), "date");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "date");
         }
         return new Date(0);
     }
@@ -1087,52 +1081,51 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Time getTime() throws VariantException, ParseException {
         checkNull("Time");
         switch (valueType) {
-            case VariantType.varByte :
-                return new Time(((Byte) value).longValue());
-            case VariantType.varShort :
-                return new Time(((Short) value).longValue());
-            case VariantType.varInteger :
-                return new Time(((Integer) value).longValue());
-            case VariantType.varLong :
-                return new Time(((Long) value).longValue());
-            case VariantType.varDate :
-                return new Time(((Date) value).getTime());
-            case VariantType.varTime :
-                return new Time(((Time) value).getTime());
-            case VariantType.varTimestamp :
-                return new Time(((Timestamp) value).getTime());
-            case VariantType.varFloat :
-                return new Time(((Float) value).longValue());
-            case VariantType.varDouble :
-                return new Time(((Double) value).longValue());
-            case VariantType.varBigInteger :
-                return new Time(((BigInteger) value).longValue());
-            case VariantType.varBigDecimal :
-                return new Time(((BigDecimal) value).longValue());
-            case VariantType.varVariant :
-                return ((Variant) value).getTime();
-            case VariantType.varString : {
-                try {
-                    if (timeFormat != null) {
-                        return new Time(timeFormat.parse((String) value)
-                                .getTime());
-                    }
-                    return new Time(DateFormat.getTimeInstance()
-                            .parse((String) value).getTime());
-                } catch (ParseException pe) {
-                    return new Time(DateFormat.getDateTimeInstance()
-                            .parse((String) value).getTime());
+        case VariantType.varByte:
+            return new Time(((Byte) value).longValue());
+        case VariantType.varShort:
+            return new Time(((Short) value).longValue());
+        case VariantType.varInteger:
+            return new Time(((Integer) value).longValue());
+        case VariantType.varLong:
+            return new Time(((Long) value).longValue());
+        case VariantType.varDate:
+            return new Time(((Date) value).getTime());
+        case VariantType.varTime:
+            return new Time(((Time) value).getTime());
+        case VariantType.varTimestamp:
+            return new Time(((Timestamp) value).getTime());
+        case VariantType.varFloat:
+            return new Time(((Float) value).longValue());
+        case VariantType.varDouble:
+            return new Time(((Double) value).longValue());
+        case VariantType.varBigInteger:
+            return new Time(((BigInteger) value).longValue());
+        case VariantType.varBigDecimal:
+            return new Time(((BigDecimal) value).longValue());
+        case VariantType.varVariant:
+            return ((Variant) value).getTime();
+        case VariantType.varString: {
+            try {
+                if (timeFormat != null) {
+                    return new Time(timeFormat.parse((String) value).getTime());
                 }
+                return new Time(DateFormat.getTimeInstance()
+                        .parse((String) value).getTime());
+            } catch (ParseException pe) {
+                return new Time(DateFormat.getDateTimeInstance()
+                        .parse((String) value).getTime());
             }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Time) ((IVariantConnectable) value)
-                            .castTo(VariantType.varTime);
-                } else {
-                    noCastThrow(value.getClass().getName(), "time");
-                }
-            default :
+        }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Time) ((IVariantConnectable) value)
+                        .castTo(VariantType.varTime);
+            } else {
                 noCastThrow(value.getClass().getName(), "time");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "time");
         }
         return new Time(0);
     }
@@ -1151,52 +1144,52 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Timestamp getTimestamp() throws VariantException, ParseException {
         checkNull("Timestamp");
         switch (valueType) {
-            case VariantType.varByte :
-                return new Timestamp(((Byte) value).longValue());
-            case VariantType.varShort :
-                return new Timestamp(((Short) value).longValue());
-            case VariantType.varInteger :
-                return new Timestamp(((Integer) value).longValue());
-            case VariantType.varLong :
-                return new Timestamp(((Long) value).longValue());
-            case VariantType.varDate :
-                return new Timestamp(((Date) value).getTime());
-            case VariantType.varTime :
-                return new Timestamp(((Time) value).getTime());
-            case VariantType.varTimestamp :
-                return new Timestamp(((Timestamp) value).getTime());
-            case VariantType.varFloat :
-                return new Timestamp(((Float) value).longValue());
-            case VariantType.varDouble :
-                return new Timestamp(((Double) value).longValue());
-            case VariantType.varBigInteger :
-                return new Timestamp(((BigInteger) value).longValue());
-            case VariantType.varBigDecimal :
-                return new Timestamp(((BigDecimal) value).longValue());
-            case VariantType.varVariant :
-                return ((Variant) value).getTimestamp();
-            case VariantType.varString : {
-                try {
-                    if (timeStampFormat != null) {
-                        return new Timestamp(timeStampFormat.parse(
-                                (String) value).getTime());
-                    }
-                    return new Timestamp(DateFormat.getDateTimeInstance()
-                            .parse((String) value).getTime());
-                } catch (ParseException pe) {
-                    return new Timestamp(DateFormat.getDateInstance()
-                            .parse((String) value).getTime());
+        case VariantType.varByte:
+            return new Timestamp(((Byte) value).longValue());
+        case VariantType.varShort:
+            return new Timestamp(((Short) value).longValue());
+        case VariantType.varInteger:
+            return new Timestamp(((Integer) value).longValue());
+        case VariantType.varLong:
+            return new Timestamp(((Long) value).longValue());
+        case VariantType.varDate:
+            return new Timestamp(((Date) value).getTime());
+        case VariantType.varTime:
+            return new Timestamp(((Time) value).getTime());
+        case VariantType.varTimestamp:
+            return new Timestamp(((Timestamp) value).getTime());
+        case VariantType.varFloat:
+            return new Timestamp(((Float) value).longValue());
+        case VariantType.varDouble:
+            return new Timestamp(((Double) value).longValue());
+        case VariantType.varBigInteger:
+            return new Timestamp(((BigInteger) value).longValue());
+        case VariantType.varBigDecimal:
+            return new Timestamp(((BigDecimal) value).longValue());
+        case VariantType.varVariant:
+            return ((Variant) value).getTimestamp();
+        case VariantType.varString: {
+            try {
+                if (timeStampFormat != null) {
+                    return new Timestamp(timeStampFormat.parse((String) value)
+                            .getTime());
                 }
+                return new Timestamp(DateFormat.getDateTimeInstance()
+                        .parse((String) value).getTime());
+            } catch (ParseException pe) {
+                return new Timestamp(DateFormat.getDateInstance()
+                        .parse((String) value).getTime());
             }
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Timestamp) ((IVariantConnectable) value)
-                            .castTo(VariantType.varTimestamp);
-                } else {
-                    noCastThrow(value.getClass().getName(), "time");
-                }
-            default :
+        }
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Timestamp) ((IVariantConnectable) value)
+                        .castTo(VariantType.varTimestamp);
+            } else {
                 noCastThrow(value.getClass().getName(), "time");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "time");
         }
         return new Timestamp(0);
     }
@@ -1228,72 +1221,71 @@ public final class Variant implements Cloneable, Comparable<Object> {
             return "";
         } else {
             switch (valueType) {
-                case VariantType.varVariant :
-                    return ((Variant) value).getString();
-                case VariantType.varDate :
-                    try {
-                        if (dateFormat != null) {
-                            return dateFormat.format(value);
-                        }
-                        return java.text.DateFormat.getDateTimeInstance()
-                                .format(value);
-                    } catch (Exception e) {
-                        return java.text.DateFormat.getDateTimeInstance()
-                                .format(value);
+            case VariantType.varVariant:
+                return ((Variant) value).getString();
+            case VariantType.varDate:
+                try {
+                    if (dateFormat != null) {
+                        return dateFormat.format(value);
                     }
-                case VariantType.varTime :
-                    try {
-                        if (timeFormat != null) {
-                            return timeFormat.format(value);
-                        }
-                        return java.text.DateFormat.getTimeInstance().format(
-                                value);
-                    } catch (Exception e) {
-                        return java.text.DateFormat.getTimeInstance().format(
-                                value);
+                    return java.text.DateFormat.getDateTimeInstance().format(
+                            value);
+                } catch (Exception e) {
+                    return java.text.DateFormat.getDateTimeInstance().format(
+                            value);
+                }
+            case VariantType.varTime:
+                try {
+                    if (timeFormat != null) {
+                        return timeFormat.format(value);
                     }
-                case VariantType.varTimestamp :
-                    try {
-                        if (timeStampFormat != null) {
-                            return timeStampFormat.format(value);
-                        }
-                        return java.text.DateFormat.getDateTimeInstance()
-                                .format(value);
-                    } catch (Exception e) {
-                        return java.text.DateFormat.getDateTimeInstance()
-                                .format(value);
+                    return java.text.DateFormat.getTimeInstance().format(value);
+                } catch (Exception e) {
+                    return java.text.DateFormat.getTimeInstance().format(value);
+                }
+            case VariantType.varTimestamp:
+                try {
+                    if (timeStampFormat != null) {
+                        return timeStampFormat.format(value);
                     }
-                case VariantType.varFloat :
-                case VariantType.varDouble :
-                    try {
-                        if (decimalFormat != null) {
-                            return decimalFormat.format(value);
-                        }
-                        return java.text.DecimalFormat.getNumberInstance()
-                                .format(value);
-                    } catch (Exception e) {
-                        return java.text.DecimalFormat.getNumberInstance()
-                                .format(value);
+                    return java.text.DateFormat.getDateTimeInstance().format(
+                            value);
+                } catch (Exception e) {
+                    return java.text.DateFormat.getDateTimeInstance().format(
+                            value);
+                }
+            case VariantType.varFloat:
+            case VariantType.varDouble:
+                try {
+                    if (decimalFormat != null) {
+                        return decimalFormat.format(value);
                     }
-                case VariantType.varBigDecimal :
-                    try {
-                        if (bigDecimalFormat != null) {
-                            return bigDecimalFormat.format(value);
-                        }
-                        return value.toString();
-                    } catch (Exception e) {
-                        return value.toString();
+                    return java.text.DecimalFormat.getNumberInstance().format(
+                            value);
+                } catch (Exception e) {
+                    return java.text.DecimalFormat.getNumberInstance().format(
+                            value);
+                }
+            case VariantType.varBigDecimal:
+                try {
+                    if (bigDecimalFormat != null) {
+                        return bigDecimalFormat.format(value);
                     }
-                case VariantType.varBinary :
-                    return new String(binaryData);
-                case VariantType.varInputStream :
-                    return new String(getBinary());
-                default :
                     return value.toString();
+                } catch (Exception e) {
+                    return value.toString();
+                }
+            case VariantType.varBinary:
+                return new String(binaryData);
+            case VariantType.varInputStream:
+                return new String(getBinary());
+            default:
+                return value.toString();
             }
         }
     }
 
+    @Override
     public String toString() {
         try {
             return getString();
@@ -1324,41 +1316,38 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public BigInteger getBigInteger() throws VariantException {
         checkNull("BigInteger");
         switch (valueType) {
-            case VariantType.varByte :
-            case VariantType.varShort :
-            case VariantType.varInteger :
-            case VariantType.varLong :
-            case VariantType.varFloat :
-            case VariantType.varDouble :
-            case VariantType.varBigDecimal :
-            case VariantType.varString :
-                return new BigInteger(value.toString());
-            case VariantType.varDate :
-                return new BigInteger(String.valueOf(((Date) value).getTime()));
-            case VariantType.varTime :
-                return new BigInteger(String.valueOf(((Time) value).getTime()));
-            case VariantType.varTimestamp :
-                return new BigInteger(String.valueOf(((Timestamp) value)
-                        .getTime()));
-            case VariantType.varBoolean :
-                return new BigInteger(((Boolean) value).booleanValue()
-                        ? "1"
-                        : "0");
-            case VariantType.varBigInteger :
-                return new BigInteger(((BigInteger) value).toByteArray());
-            case VariantType.varVariant :
-                return ((Variant) value).getBigInteger();
-            case VariantType.varBinary :
-                return new BigInteger(binaryData);
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (BigInteger) ((IVariantConnectable) value)
-                            .castTo(VariantType.varBigInteger);
-                } else {
-                    noCastThrow(value.getClass().getName(), "BigInteger");
-                }
-            default :
+        case VariantType.varByte:
+        case VariantType.varShort:
+        case VariantType.varInteger:
+        case VariantType.varLong:
+        case VariantType.varFloat:
+        case VariantType.varDouble:
+        case VariantType.varBigDecimal:
+        case VariantType.varString:
+            return new BigInteger(value.toString());
+        case VariantType.varDate:
+            return new BigInteger(String.valueOf(((Date) value).getTime()));
+        case VariantType.varTime:
+            return new BigInteger(String.valueOf(((Time) value).getTime()));
+        case VariantType.varTimestamp:
+            return new BigInteger(String.valueOf(((Timestamp) value).getTime()));
+        case VariantType.varBoolean:
+            return new BigInteger(((Boolean) value).booleanValue() ? "1" : "0");
+        case VariantType.varBigInteger:
+            return new BigInteger(((BigInteger) value).toByteArray());
+        case VariantType.varVariant:
+            return ((Variant) value).getBigInteger();
+        case VariantType.varBinary:
+            return new BigInteger(binaryData);
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (BigInteger) ((IVariantConnectable) value)
+                        .castTo(VariantType.varBigInteger);
+            } else {
                 noCastThrow(value.getClass().getName(), "BigInteger");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "BigInteger");
         }
         return new BigInteger("");
     }
@@ -1385,53 +1374,51 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public BigDecimal getBigDecimal() throws VariantException {
         checkNull("BigDecimal");
         switch (valueType) {
-            case VariantType.varByte :
-                return new BigDecimal((Byte) value);
-            case VariantType.varShort :
-                return new BigDecimal((Short) value);
-            case VariantType.varInteger :
-                return new BigDecimal((Integer) value);
-            case VariantType.varLong :
-                return new BigDecimal((Long) value);
-            case VariantType.varFloat :
-                return new BigDecimal((Float) value);
-            case VariantType.varDouble :
-                return new BigDecimal((Double) value);
-            case VariantType.varBigDecimal :
-                return (BigDecimal) value;
-            case VariantType.varDate :
-                return new BigDecimal(((Date) value).getTime());
-            case VariantType.varTime :
-                return new BigDecimal(((Time) value).getTime());
-            case VariantType.varTimestamp :
-                return new BigDecimal(((Timestamp) value).getTime());
-            case VariantType.varBoolean :
-                return new BigDecimal(((Boolean) value).booleanValue()
-                        ? "1"
-                        : "0");
-            case VariantType.varBigInteger :
-                return new BigDecimal((BigInteger) value);
-            case VariantType.varString :
-                try {
-                    if (bigDecimalFormat != null) {
-                        return new BigDecimal(bigDecimalFormat.parse(
-                                (String) value).doubleValue());
-                    }
-                    return new BigDecimal(value.toString());
-                } catch (Exception e) {
-                    return new BigDecimal(value.toString());
+        case VariantType.varByte:
+            return new BigDecimal((Byte) value);
+        case VariantType.varShort:
+            return new BigDecimal((Short) value);
+        case VariantType.varInteger:
+            return new BigDecimal((Integer) value);
+        case VariantType.varLong:
+            return new BigDecimal((Long) value);
+        case VariantType.varFloat:
+            return new BigDecimal((Float) value);
+        case VariantType.varDouble:
+            return new BigDecimal((Double) value);
+        case VariantType.varBigDecimal:
+            return (BigDecimal) value;
+        case VariantType.varDate:
+            return new BigDecimal(((Date) value).getTime());
+        case VariantType.varTime:
+            return new BigDecimal(((Time) value).getTime());
+        case VariantType.varTimestamp:
+            return new BigDecimal(((Timestamp) value).getTime());
+        case VariantType.varBoolean:
+            return new BigDecimal(((Boolean) value).booleanValue() ? "1" : "0");
+        case VariantType.varBigInteger:
+            return new BigDecimal((BigInteger) value);
+        case VariantType.varString:
+            try {
+                if (bigDecimalFormat != null) {
+                    return new BigDecimal(bigDecimalFormat
+                            .parse((String) value).doubleValue());
                 }
-            case VariantType.varVariant :
-                return ((Variant) value).getBigDecimal();
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (BigDecimal) ((IVariantConnectable) value)
-                            .castTo(VariantType.varBigDecimal);
-                } else {
-                    noCastThrow(value.getClass().getName(), "BigDecimal");
-                }
-            default :
+                return new BigDecimal(value.toString());
+            } catch (Exception e) {
+                return new BigDecimal(value.toString());
+            }
+        case VariantType.varVariant:
+            return ((Variant) value).getBigDecimal();
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (BigDecimal) ((IVariantConnectable) value)
+                        .castTo(VariantType.varBigDecimal);
+            } else {
                 noCastThrow(value.getClass().getName(), "BigDecimal");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "BigDecimal");
         }
         return new BigDecimal("");
     }
@@ -1446,19 +1433,19 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public AbstractCollection<?> getList() throws VariantException {
         checkNull("List");
         switch (valueType) {
-            case VariantType.varVariant :
-                return ((Variant) value).getList();
-            case VariantType.varList :
-                return (AbstractCollection<?>) value;
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (AbstractCollection<?>) ((IVariantConnectable) value)
-                            .castTo(VariantType.varList);
-                } else {
-                    noCastThrow(value.getClass().getName(), "List");
-                }
-            default :
+        case VariantType.varVariant:
+            return ((Variant) value).getList();
+        case VariantType.varList:
+            return (AbstractCollection<?>) value;
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (AbstractCollection<?>) ((IVariantConnectable) value)
+                        .castTo(VariantType.varList);
+            } else {
                 noCastThrow(value.getClass().getName(), "List");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "List");
         }
         return null;
     }
@@ -1529,54 +1516,54 @@ public final class Variant implements Cloneable, Comparable<Object> {
 
     public Variant getVariant() throws VariantException, IOException {
         switch (valueType) {
-            case VariantType.varUnassigned :
-            case VariantType.varNull :
-                return new Variant((Object) null);
-            case VariantType.varByte :
-                return new Variant(((Byte) value).byteValue());
-            case VariantType.varShort :
-                return new Variant(((Short) value).shortValue());
-            case VariantType.varInteger :
-                return new Variant(((Integer) value).intValue());
-            case VariantType.varLong :
-                return new Variant(((Long) value).longValue());
-            case VariantType.varDate :
-                return new Variant((Date) value);
-            case VariantType.varTime :
-                return new Variant((Time) value);
-            case VariantType.varTimestamp :
-                return new Variant((Timestamp) value);
-            case VariantType.varFloat :
-                return new Variant(((Float) value).floatValue());
-            case VariantType.varDouble :
-                return new Variant(((Double) value).doubleValue());
-            case VariantType.varBigDecimal :
-                return new Variant((BigDecimal) value);
-            case VariantType.varString :
-                return new Variant((String) value);
-            case VariantType.varBoolean :
-                return new Variant(((Boolean) value).booleanValue());
-            case VariantType.varBigInteger :
-                return new Variant((BigInteger) value);
-            case VariantType.varVariant :
-                return (Variant) value;
-            case VariantType.varInputStream :
-                return new Variant((InputStream) value);
-            case VariantType.varOutputStream :
-                return new Variant((OutputStream) value);
-            case VariantType.varBinary :
-                return new Variant(getBinary());
-            case VariantType.varList :
+        case VariantType.varUnassigned:
+        case VariantType.varNull:
+            return new Variant((Object) null);
+        case VariantType.varByte:
+            return new Variant(((Byte) value).byteValue());
+        case VariantType.varShort:
+            return new Variant(((Short) value).shortValue());
+        case VariantType.varInteger:
+            return new Variant(((Integer) value).intValue());
+        case VariantType.varLong:
+            return new Variant(((Long) value).longValue());
+        case VariantType.varDate:
+            return new Variant((Date) value);
+        case VariantType.varTime:
+            return new Variant((Time) value);
+        case VariantType.varTimestamp:
+            return new Variant((Timestamp) value);
+        case VariantType.varFloat:
+            return new Variant(((Float) value).floatValue());
+        case VariantType.varDouble:
+            return new Variant(((Double) value).doubleValue());
+        case VariantType.varBigDecimal:
+            return new Variant((BigDecimal) value);
+        case VariantType.varString:
+            return new Variant((String) value);
+        case VariantType.varBoolean:
+            return new Variant(((Boolean) value).booleanValue());
+        case VariantType.varBigInteger:
+            return new Variant((BigInteger) value);
+        case VariantType.varVariant:
+            return (Variant) value;
+        case VariantType.varInputStream:
+            return new Variant((InputStream) value);
+        case VariantType.varOutputStream:
+            return new Variant((OutputStream) value);
+        case VariantType.varBinary:
+            return new Variant(getBinary());
+        case VariantType.varList:
+            return new Variant(value);
+        case VariantType.varJavaObject:
+            if (value instanceof IVariantConnectable) {
+                return (Variant) ((IVariantConnectable) value)
+                        .castTo(VariantType.varVariant);
+            } else {
                 return new Variant(value);
-            case VariantType.varJavaObject :
-                if (value instanceof IVariantConnectable) {
-                    return (Variant) ((IVariantConnectable) value)
-                            .castTo(VariantType.varVariant);
-                } else {
-                    return new Variant(value);
-                }
-            default :
-                noCastThrow(value.getClass().getName(), "Variant");
+            }
+        default:
+            noCastThrow(value.getClass().getName(), "Variant");
         }
         return new Variant();
     }
@@ -1587,66 +1574,66 @@ public final class Variant implements Cloneable, Comparable<Object> {
             return this;
         }
         switch (valueType) {
-            case VariantType.varNull :
-            case VariantType.varUnassigned :
-                setNull();
-                break;
-            case VariantType.varByte :
-                setByte(getByte());
-                break;
-            case VariantType.varShort :
-                setShort(getShort());
-                break;
-            case VariantType.varInteger :
-                setInteger(getInteger());
-                break;
-            case VariantType.varLong :
-                setLong(getLong());
-                break;
-            case VariantType.varDate :
-                setDate(getDate());
-                break;
-            case VariantType.varTime :
-                setTime(getTime());
-                break;
-            case VariantType.varTimestamp :
-                setTimestamp(getTimestamp());
-                break;
-            case VariantType.varFloat :
-                setFloat(getFloat());
-                break;
-            case VariantType.varDouble :
-                setDouble(getDouble());
-                break;
-            case VariantType.varBigDecimal :
-                setBigDecimal(getBigDecimal());
-                break;
-            case VariantType.varString :
-                setString(getString());
-                break;
-            case VariantType.varBoolean :
-                setBoolean(getBoolean());
-                break;
-            case VariantType.varBigInteger :
-                setBigInteger(getBigInteger());
-                break;
-            case VariantType.varVariant :
-                setVariant(getVariant());
-                break;
-            case VariantType.varBinary :
-                setBinary(getBinary());
-                break;
-            case VariantType.varJavaObject :
-                setObject(getObject());
-                break;
-            case VariantType.varList : {
-                ArrayList<Variant> list = new ArrayList<Variant>();
-                list.add(getVariant());
-                setList(list);
-                break;
-            }
-            default :
-                noCastThrow(value.getClass().getName(), "[cast]");
+        case VariantType.varNull:
+        case VariantType.varUnassigned:
+            setNull();
+            break;
+        case VariantType.varByte:
+            setByte(getByte());
+            break;
+        case VariantType.varShort:
+            setShort(getShort());
+            break;
+        case VariantType.varInteger:
+            setInteger(getInteger());
+            break;
+        case VariantType.varLong:
+            setLong(getLong());
+            break;
+        case VariantType.varDate:
+            setDate(getDate());
+            break;
+        case VariantType.varTime:
+            setTime(getTime());
+            break;
+        case VariantType.varTimestamp:
+            setTimestamp(getTimestamp());
+            break;
+        case VariantType.varFloat:
+            setFloat(getFloat());
+            break;
+        case VariantType.varDouble:
+            setDouble(getDouble());
+            break;
+        case VariantType.varBigDecimal:
+            setBigDecimal(getBigDecimal());
+            break;
+        case VariantType.varString:
+            setString(getString());
+            break;
+        case VariantType.varBoolean:
+            setBoolean(getBoolean());
+            break;
+        case VariantType.varBigInteger:
+            setBigInteger(getBigInteger());
+            break;
+        case VariantType.varVariant:
+            setVariant(getVariant());
+            break;
+        case VariantType.varBinary:
+            setBinary(getBinary());
+            break;
+        case VariantType.varJavaObject:
+            setObject(getObject());
+            break;
+        case VariantType.varList: {
+            ArrayList<Variant> list = new ArrayList<Variant>();
+            list.add(getVariant());
+            setList(list);
+            break;
+        }
+        default:
+            noCastThrow(value.getClass().getName(), "[cast]");
         }
         return this;
     }
@@ -1654,50 +1641,50 @@ public final class Variant implements Cloneable, Comparable<Object> {
     public Variant negate() throws VariantException, ParseException,
             IOException {
         switch (valueType) {
-            case VariantType.varByte :
-                setByte((byte) -getByte());
-                break;
-            case VariantType.varShort :
-                setShort((short) -getShort());
-                break;
-            case VariantType.varInteger :
-                setInteger(-getInteger());
-                break;
-            case VariantType.varLong :
-                setLong(-getLong());
-                break;
-            case VariantType.varDate :
-                setDate(new Date(-getDate().getTime()));
-                break;
-            case VariantType.varTime :
-                setTime(new Time(-getTime().getTime()));
-                break;
-            case VariantType.varTimestamp :
-                setTimestamp(new Timestamp(-getTimestamp().getTime()));
-                break;
-            case VariantType.varFloat :
-                setFloat(-getFloat());
-                break;
-            case VariantType.varDouble :
-                setDouble(-getDouble());
-                break;
-            case VariantType.varBigDecimal :
-                setBigDecimal(getBigDecimal().negate());
-                break;
-            case VariantType.varString :
-                setBigDecimal(getBigDecimal().negate());
-                break;
-            case VariantType.varBoolean :
-                setBoolean(getBoolean() ? false : true);
-                break;
-            case VariantType.varBigInteger :
-                setBigInteger(getBigInteger().negate());
-                break;
-            case VariantType.varVariant :
-                setVariant(getVariant().negate());
-                break;
-            default :
-                noCastThrow(value.getClass().getName(), "[negate]");
+        case VariantType.varByte:
+            setByte((byte) -getByte());
+            break;
+        case VariantType.varShort:
+            setShort((short) -getShort());
+            break;
+        case VariantType.varInteger:
+            setInteger(-getInteger());
+            break;
+        case VariantType.varLong:
+            setLong(-getLong());
+            break;
+        case VariantType.varDate:
+            setDate(new Date(-getDate().getTime()));
+            break;
+        case VariantType.varTime:
+            setTime(new Time(-getTime().getTime()));
+            break;
+        case VariantType.varTimestamp:
+            setTimestamp(new Timestamp(-getTimestamp().getTime()));
+            break;
+        case VariantType.varFloat:
+            setFloat(-getFloat());
+            break;
+        case VariantType.varDouble:
+            setDouble(-getDouble());
+            break;
+        case VariantType.varBigDecimal:
+            setBigDecimal(getBigDecimal().negate());
+            break;
+        case VariantType.varString:
+            setBigDecimal(getBigDecimal().negate());
+            break;
+        case VariantType.varBoolean:
+            setBoolean(getBoolean() ? false : true);
+            break;
+        case VariantType.varBigInteger:
+            setBigInteger(getBigInteger().negate());
+            break;
+        case VariantType.varVariant:
+            setVariant(getVariant().negate());
+            break;
+        default:
+            noCastThrow(value.getClass().getName(), "[negate]");
         }
         return this;
     }
@@ -1708,55 +1695,54 @@ public final class Variant implements Cloneable, Comparable<Object> {
             setNull();
         } else {
             switch (valueType) {
-                case VariantType.varByte :
-                    setLong(getByte() + value.getByte());
-                    break;
-                case VariantType.varShort :
-                    setLong(getShort() + value.getShort());
-                    break;
-                case VariantType.varInteger :
-                    setLong(getInteger() + value.getInteger());
-                    break;
-                case VariantType.varLong :
-                    setDouble(getLong() + value.getLong());
-                    break;
-                case VariantType.varDate :
-                    setDate(new Date(
-                            (long) (((((double) getLong() / 86400000L) + value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varTime :
-                    setTime(new Time(
-                            (long) (((((double) getLong() / 86400000L) + value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varTimestamp :
-                    setTimestamp(new Timestamp(
-                            (long) (((((double) getLong() / 86400000L) + value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varFloat :
-                    setDouble(getFloat() + value.getFloat());
-                    break;
-                case VariantType.varDouble :
-                    setBigDecimal(new BigDecimal(getDouble()
-                            + value.getDouble()));
-                    break;
-                case VariantType.varString :
-                case VariantType.varBigDecimal :
-                    setBigDecimal(getBigDecimal().add(value.getBigDecimal()));
-                    break;
-                case VariantType.varBoolean :
-                    setBoolean(getBoolean() | value.getBoolean());
-                    break;
-                case VariantType.varBigInteger :
-                    setBigInteger(getBigInteger().add(value.getBigInteger()));
-                    break;
-                case VariantType.varVariant :
-                    setVariant(getVariant().add(value));
-                    break;
-                default :
-                    noCastThrow(value.getClass().getName(), "[add]");
+            case VariantType.varByte:
+                setLong(getByte() + value.getByte());
+                break;
+            case VariantType.varShort:
+                setLong(getShort() + value.getShort());
+                break;
+            case VariantType.varInteger:
+                setLong(getInteger() + value.getInteger());
+                break;
+            case VariantType.varLong:
+                setDouble(getLong() + value.getLong());
+                break;
+            case VariantType.varDate:
+                setDate(new Date(
+                        (long) (((((double) getLong() / 86400000L) + value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varTime:
+                setTime(new Time(
+                        (long) (((((double) getLong() / 86400000L) + value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varTimestamp:
+                setTimestamp(new Timestamp(
+                        (long) (((((double) getLong() / 86400000L) + value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varFloat:
+                setDouble(getFloat() + value.getFloat());
+                break;
+            case VariantType.varDouble:
+                setBigDecimal(new BigDecimal(getDouble() + value.getDouble()));
+                break;
+            case VariantType.varString:
+            case VariantType.varBigDecimal:
+                setBigDecimal(getBigDecimal().add(value.getBigDecimal()));
+                break;
+            case VariantType.varBoolean:
+                setBoolean(getBoolean() | value.getBoolean());
+                break;
+            case VariantType.varBigInteger:
+                setBigInteger(getBigInteger().add(value.getBigInteger()));
+                break;
+            case VariantType.varVariant:
+                setVariant(getVariant().add(value));
+                break;
+            default:
+                noCastThrow(value.getClass().getName(), "[add]");
             }
         }
         return this;
@@ -1768,56 +1754,54 @@ public final class Variant implements Cloneable, Comparable<Object> {
             setNull();
         } else {
             switch (valueType) {
-                case VariantType.varByte :
-                    setByte((byte) (getByte() - value.getByte()));
-                    break;
-                case VariantType.varShort :
-                    setShort((short) (getShort() - value.getShort()));
-                    break;
-                case VariantType.varInteger :
-                    setInteger(getInteger() - value.getInteger());
-                    break;
-                case VariantType.varLong :
-                    setLong(getLong() - value.getLong());
-                    break;
-                case VariantType.varDate :
-                    setDate(new Date(
-                            (long) (((((double) getLong() / 86400000L) - value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varTime :
-                    setTime(new Time(
-                            (long) (((((double) getLong() / 86400000L) - value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varTimestamp :
-                    setTimestamp(new Timestamp(
-                            (long) (((((double) getLong() / 86400000L) - value
-                                    .getDouble())) * 86400000L)));
-                    break;
-                case VariantType.varFloat :
-                    setFloat(getFloat() - value.getFloat());
-                    break;
-                case VariantType.varDouble :
-                    setDouble(getDouble() - value.getDouble());
-                    break;
-                case VariantType.varString :
-                case VariantType.varBigDecimal :
-                    setBigDecimal(getBigDecimal().subtract(
-                            value.getBigDecimal()));
-                    break;
-                case VariantType.varBoolean :
-                    setBoolean(getBoolean() | value.getBoolean());
-                    break;
-                case VariantType.varBigInteger :
-                    setBigInteger(getBigInteger().subtract(
-                            value.getBigInteger()));
-                    break;
-                case VariantType.varVariant :
-                    setVariant(getVariant().subtract(value));
-                    break;
-                default :
-                    noCastThrow(value.getClass().getName(), "[subtract]");
+            case VariantType.varByte:
+                setByte((byte) (getByte() - value.getByte()));
+                break;
+            case VariantType.varShort:
+                setShort((short) (getShort() - value.getShort()));
+                break;
+            case VariantType.varInteger:
+                setInteger(getInteger() - value.getInteger());
+                break;
+            case VariantType.varLong:
+                setLong(getLong() - value.getLong());
+                break;
+            case VariantType.varDate:
+                setDate(new Date(
+                        (long) (((((double) getLong() / 86400000L) - value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varTime:
+                setTime(new Time(
+                        (long) (((((double) getLong() / 86400000L) - value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varTimestamp:
+                setTimestamp(new Timestamp(
+                        (long) (((((double) getLong() / 86400000L) - value
+                                .getDouble())) * 86400000L)));
+                break;
+            case VariantType.varFloat:
+                setFloat(getFloat() - value.getFloat());
+                break;
+            case VariantType.varDouble:
+                setDouble(getDouble() - value.getDouble());
+                break;
+            case VariantType.varString:
+            case VariantType.varBigDecimal:
+                setBigDecimal(getBigDecimal().subtract(value.getBigDecimal()));
+                break;
+            case VariantType.varBoolean:
+                setBoolean(getBoolean() | value.getBoolean());
+                break;
+            case VariantType.varBigInteger:
+                setBigInteger(getBigInteger().subtract(value.getBigInteger()));
+                break;
+            case VariantType.varVariant:
+                setVariant(getVariant().subtract(value));
+                break;
+            default:
+                noCastThrow(value.getClass().getName(), "[subtract]");
             }
         }
         return this;
@@ -1829,51 +1813,48 @@ public final class Variant implements Cloneable, Comparable<Object> {
             setNull();
         } else {
             switch (valueType) {
-                case VariantType.varByte :
-                    setLong(getByte() * value.getByte());
-                    break;
-                case VariantType.varShort :
-                    setLong(getShort() * value.getShort());
-                    break;
-                case VariantType.varInteger :
-                    setLong(getInteger() * value.getInteger());
-                    break;
-                case VariantType.varLong :
-                    setDouble(getLong() * value.getLong());
-                    break;
-                case VariantType.varDate :
-                    setDate(new Date(getLong() * value.getLong()));
-                    break;
-                case VariantType.varTime :
-                    setTime(new Time(getLong() * value.getLong()));
-                    break;
-                case VariantType.varTimestamp :
-                    setTimestamp(new Timestamp(getLong() * value.getLong()));
-                    break;
-                case VariantType.varFloat :
-                    setDouble(getFloat() * value.getFloat());
-                    break;
-                case VariantType.varDouble :
-                    setBigDecimal(new BigDecimal(getDouble()
-                            * value.getDouble()));
-                    break;
-                case VariantType.varString :
-                case VariantType.varBigDecimal :
-                    setBigDecimal(getBigDecimal().multiply(
-                            value.getBigDecimal()));
-                    break;
-                case VariantType.varBoolean :
-                    setBoolean(getBoolean() & value.getBoolean());
-                    break;
-                case VariantType.varBigInteger :
-                    setBigInteger(getBigInteger().multiply(
-                            value.getBigInteger()));
-                    break;
-                case VariantType.varVariant :
-                    setVariant(getVariant().multiply(value));
-                    break;
-                default :
-                    noCastThrow(value.getClass().getName(), "[multiply]");
+            case VariantType.varByte:
+                setLong(getByte() * value.getByte());
+                break;
+            case VariantType.varShort:
+                setLong(getShort() * value.getShort());
+                break;
+            case VariantType.varInteger:
+                setLong(getInteger() * value.getInteger());
+                break;
+            case VariantType.varLong:
+                setDouble(getLong() * value.getLong());
+                break;
+            case VariantType.varDate:
+                setDate(new Date(getLong() * value.getLong()));
+                break;
+            case VariantType.varTime:
+                setTime(new Time(getLong() * value.getLong()));
+                break;
+            case VariantType.varTimestamp:
+                setTimestamp(new Timestamp(getLong() * value.getLong()));
+                break;
+            case VariantType.varFloat:
+                setDouble(getFloat() * value.getFloat());
+                break;
+            case VariantType.varDouble:
+                setBigDecimal(new BigDecimal(getDouble() * value.getDouble()));
+                break;
+            case VariantType.varString:
+            case VariantType.varBigDecimal:
+                setBigDecimal(getBigDecimal().multiply(value.getBigDecimal()));
+                break;
+            case VariantType.varBoolean:
+                setBoolean(getBoolean() & value.getBoolean());
+                break;
+            case VariantType.varBigInteger:
+                setBigInteger(getBigInteger().multiply(value.getBigInteger()));
+                break;
+            case VariantType.varVariant:
+                setVariant(getVariant().multiply(value));
+                break;
+            default:
+                noCastThrow(value.getClass().getName(), "[multiply]");
             }
         }
         return this;
@@ -1893,49 +1874,49 @@ public final class Variant implements Cloneable, Comparable<Object> {
         } else {
             checkZeroDivider(value);
             switch (valueType) {
-                case VariantType.varByte :
-                    setDouble(getByte() / (double) value.getByte());
-                    break;
-                case VariantType.varShort :
-                    setDouble(getShort() / (double) value.getShort());
-                    break;
-                case VariantType.varInteger :
-                    setDouble(getInteger() / (double) value.getInteger());
-                    break;
-                case VariantType.varLong :
-                    setDouble(getLong() / (double) value.getLong());
-                    break;
-                case VariantType.varDate :
-                    setDate(new Date(getLong() / value.getLong()));
-                    break;
-                case VariantType.varTime :
-                    setTime(new Time(getLong() / value.getLong()));
-                    break;
-                case VariantType.varTimestamp :
-                    setTimestamp(new Timestamp(getLong() / value.getLong()));
-                    break;
-                case VariantType.varFloat :
-                    setFloat(getFloat() / value.getFloat());
-                    break;
-                case VariantType.varDouble :
-                    setDouble(getDouble() / value.getDouble());
-                    break;
-                case VariantType.varString :
-                case VariantType.varBigDecimal :
-                    setBigDecimal(getBigDecimal().divide(value.getBigDecimal(),
-                            30, RoundingMode.CEILING));
-                    break;
-                case VariantType.varBoolean :
-                    setBoolean(getBoolean() & value.getBoolean());
-                    break;
-                case VariantType.varBigInteger :
-                    setBigInteger(getBigInteger().divide(value.getBigInteger()));
-                    break;
-                case VariantType.varVariant :
-                    setVariant(getVariant().divide(value));
-                    break;
-                default :
-                    noCastThrow(value.getClass().getName(), "[divide]");
+            case VariantType.varByte:
+                setDouble(getByte() / (double) value.getByte());
+                break;
+            case VariantType.varShort:
+                setDouble(getShort() / (double) value.getShort());
+                break;
+            case VariantType.varInteger:
+                setDouble(getInteger() / (double) value.getInteger());
+                break;
+            case VariantType.varLong:
+                setDouble(getLong() / (double) value.getLong());
+                break;
+            case VariantType.varDate:
+                setDate(new Date(getLong() / value.getLong()));
+                break;
+            case VariantType.varTime:
+                setTime(new Time(getLong() / value.getLong()));
+                break;
+            case VariantType.varTimestamp:
+                setTimestamp(new Timestamp(getLong() / value.getLong()));
+                break;
+            case VariantType.varFloat:
+                setFloat(getFloat() / value.getFloat());
+                break;
+            case VariantType.varDouble:
+                setDouble(getDouble() / value.getDouble());
+                break;
+            case VariantType.varString:
+            case VariantType.varBigDecimal:
+                setBigDecimal(getBigDecimal().divide(value.getBigDecimal(), 30,
+                        RoundingMode.CEILING));
+                break;
+            case VariantType.varBoolean:
+                setBoolean(getBoolean() & value.getBoolean());
+                break;
+            case VariantType.varBigInteger:
+                setBigInteger(getBigInteger().divide(value.getBigInteger()));
+                break;
+            case VariantType.varVariant:
+                setVariant(getVariant().divide(value));
+                break;
+            default:
+                noCastThrow(value.getClass().getName(), "[divide]");
             }
         }
         return this;
@@ -1948,50 +1929,48 @@ public final class Variant implements Cloneable, Comparable<Object> {
         } else {
             checkZeroDivider(value);
             switch (valueType) {
-                case VariantType.varByte :
-                    setLong(getByte() % value.getByte());
-                    break;
-                case VariantType.varShort :
-                    setLong(getShort() % value.getShort());
-                    break;
-                case VariantType.varInteger :
-                    setLong(getInteger() % value.getInteger());
-                    break;
-                case VariantType.varLong :
-                    setBigInteger(getLong() % value.getLong());
-                    break;
-                case VariantType.varDate :
-                    setBigInteger(getLong() % value.getLong());
-                    break;
-                case VariantType.varTime :
-                    setBigInteger(getLong() % value.getLong());
-                    break;
-                case VariantType.varTimestamp :
-                    setBigInteger(getLong() % value.getLong());
-                    break;
-                case VariantType.varFloat :
-                    setDouble(getFloat() % value.getFloat());
-                    break;
-                case VariantType.varDouble :
-                    setDouble(getDouble() % value.getDouble());
-                    break;
-                case VariantType.varString :
-                case VariantType.varBigDecimal :
-                    setBigDecimal(getBigDecimal().remainder(
-                            value.getBigDecimal()));
-                    break;
-                case VariantType.varBoolean :
-                    setBoolean(getByte() % value.getByte());
-                    break;
-                case VariantType.varBigInteger :
-                    setBigInteger(getBigInteger().remainder(
-                            value.getBigInteger()));
-                    break;
-                case VariantType.varVariant :
-                    setVariant(getVariant().remainder(value));
-                    break;
-                default :
-                    noCastThrow(value.getClass().getName(), "[remainder]");
+            case VariantType.varByte:
+                setLong(getByte() % value.getByte());
+                break;
+            case VariantType.varShort:
+                setLong(getShort() % value.getShort());
+                break;
+            case VariantType.varInteger:
+                setLong(getInteger() % value.getInteger());
+                break;
+            case VariantType.varLong:
+                setBigInteger(getLong() % value.getLong());
+                break;
+            case VariantType.varDate:
+                setBigInteger(getLong() % value.getLong());
+                break;
+            case VariantType.varTime:
+                setBigInteger(getLong() % value.getLong());
+                break;
+            case VariantType.varTimestamp:
+                setBigInteger(getLong() % value.getLong());
+                break;
+            case VariantType.varFloat:
+                setDouble(getFloat() % value.getFloat());
+                break;
+            case VariantType.varDouble:
+                setDouble(getDouble() % value.getDouble());
+                break;
+            case VariantType.varString:
+            case VariantType.varBigDecimal:
+                setBigDecimal(getBigDecimal().remainder(value.getBigDecimal()));
+                break;
+            case VariantType.varBoolean:
+                setBoolean(getByte() % value.getByte());
+                break;
+            case VariantType.varBigInteger:
+                setBigInteger(getBigInteger().remainder(value.getBigInteger()));
+                break;
+            case VariantType.varVariant:
+                setVariant(getVariant().remainder(value));
+                break;
+            default:
+                noCastThrow(value.getClass().getName(), "[remainder]");
             }
         }
         return this;
@@ -2068,93 +2047,87 @@ public final class Variant implements Cloneable, Comparable<Object> {
             return 1;
         } else {
             switch (valueType) {
-                case VariantType.varByte :
-                case VariantType.varShort :
-                case VariantType.varInteger :
-                case VariantType.varLong :
-                    return ((Long) getLong()).compareTo(variant.getLong());
-                case VariantType.varFloat :
-                case VariantType.varDouble :
-                    return ((Double) getDouble())
-                            .compareTo(variant.getDouble());
-                case VariantType.varBigDecimal :
-                    return getBigDecimal().compareTo(variant.getBigDecimal());
-                case VariantType.varDate :
-                    return ((Date) value).compareTo(variant.getDate());
-                case VariantType.varTime :
-                    return ((Time) value).compareTo(variant.getTime());
-                case VariantType.varTimestamp :
-                    return ((Timestamp) value)
-                            .compareTo(variant.getTimestamp());
-                case VariantType.varBoolean :
-                    return ((Boolean) value).compareTo(variant.getBoolean());
-                case VariantType.varBigInteger :
-                    return ((BigInteger) value).compareTo(variant
-                            .getBigInteger());
-                case VariantType.varVariant :
-                    return ((Variant) value).compareTo(variant.getVariant());
-                case VariantType.varJavaObject : {
-                    if (ignoreCase) {
-                        if (value instanceof IVariantConnectable) {
-                            return ((IVariantConnectable) value)
-                                    .compareTo(variant);
-                        } else {
-                            return Integer.signum(toString()
-                                    .compareToIgnoreCase(variant.toString()));
-                        }
-                    }
+            case VariantType.varByte:
+            case VariantType.varShort:
+            case VariantType.varInteger:
+            case VariantType.varLong:
+                return ((Long) getLong()).compareTo(variant.getLong());
+            case VariantType.varFloat:
+            case VariantType.varDouble:
+                return ((Double) getDouble()).compareTo(variant.getDouble());
+            case VariantType.varBigDecimal:
+                return getBigDecimal().compareTo(variant.getBigDecimal());
+            case VariantType.varDate:
+                return ((Date) value).compareTo(variant.getDate());
+            case VariantType.varTime:
+                return ((Time) value).compareTo(variant.getTime());
+            case VariantType.varTimestamp:
+                return ((Timestamp) value).compareTo(variant.getTimestamp());
+            case VariantType.varBoolean:
+                return ((Boolean) value).compareTo(variant.getBoolean());
+            case VariantType.varBigInteger:
+                return ((BigInteger) value).compareTo(variant.getBigInteger());
+            case VariantType.varVariant:
+                return ((Variant) value).compareTo(variant.getVariant());
+            case VariantType.varJavaObject: {
+                if (ignoreCase) {
                     if (value instanceof IVariantConnectable) {
                         return ((IVariantConnectable) value).compareTo(variant);
                     } else {
-                        return Integer.signum(toString().compareTo(
+                        return Integer.signum(toString().compareToIgnoreCase(
                                 variant.toString()));
                     }
                 }
-                case VariantType.varList : {
-                    if (variant.getValueType() != VariantType.varList) {
-                        return -1;
+                if (value instanceof IVariantConnectable) {
+                    return ((IVariantConnectable) value).compareTo(variant);
+                } else {
+                    return Integer.signum(toString().compareTo(
+                            variant.toString()));
+                }
+            }
+            case VariantType.varList: {
+                if (variant.getValueType() != VariantType.varList) {
+                    return -1;
+                }
+                if (getList().size() != variant.getList().size()) {
+                    return (getList().size() > variant.getList().size() ? 1
+                            : -1);
+                }
+                Iterator<?> left = getList().iterator();
+                Iterator<?> right = variant.getList().iterator();
+                while (left.hasNext()) {
+                    int retValue = (new Variant(left.next()))
+                            .compareTo(new Variant(right.next()));
+                    if (retValue != 0) {
+                        return retValue;
                     }
-                    if (getList().size() != variant.getList().size()) {
-                        return (getList().size() > variant.getList().size()
-                                ? 1
-                                : -1);
-                    }
-                    Iterator<?> left = getList().iterator();
-                    Iterator<?> right = variant.getList().iterator();
-                    while (left.hasNext()) {
-                        int retValue = (new Variant(left.next()))
-                                .compareTo(new Variant(right.next()));
-                        if (retValue != 0) {
-                            return retValue;
+                }
+                return 0;
+            }
+            case VariantType.varBinary: {
+                byte[] temp = variant.getBinary();
+                if (binaryData.length > temp.length) {
+                    return 1;
+                } else if (binaryData.length < temp.length) {
+                    return -1;
+                } else {
+                    for (int i = 0; i < temp.length; i++) {
+                        if (binaryData[i] > temp[i]) {
+                            return 1;
+                        } else if (binaryData[i] < temp[i]) {
+                            return -1;
                         }
                     }
                     return 0;
                 }
-                case VariantType.varBinary : {
-                    byte[] temp = variant.getBinary();
-                    if (binaryData.length > temp.length) {
-                        return 1;
-                    } else if (binaryData.length < temp.length) {
-                        return -1;
-                    } else {
-                        for (int i = 0; i < temp.length; i++) {
-                            if (binaryData[i] > temp[i]) {
-                                return 1;
-                            } else if (binaryData[i] < temp[i]) {
-                                return -1;
-                            }
-                        }
-                        return 0;
-                    }
-                }
-                default : {
-                    if (ignoreCase) {
-                        return Integer.signum(toString().compareToIgnoreCase(
-                                variant.toString()));
-                    }
-                    return Integer.signum(toString().compareTo(
+            }
+            default: {
+                if (ignoreCase) {
+                    return Integer.signum(toString().compareToIgnoreCase(
                             variant.toString()));
                 }
+                return Integer.signum(toString().compareTo(variant.toString()));
+            }
             }
         }
     }
@@ -2280,6 +2253,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
         return bigDecimalFormat;
     }
 
+    @Override
     public int compareTo(Object o) {
         if (o != null) {
             if ((o instanceof Variant)) {
@@ -2302,6 +2276,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
         }
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o != null) {
             return compareTo(o) == 0;
@@ -2332,6 +2307,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
         }
     }
 
+    @Override
     public Object clone() {
         try {
             return getVariant();
@@ -2343,44 +2319,45 @@ public final class Variant implements Cloneable, Comparable<Object> {
         return new Variant();
     }
 
+    @Override
     public int hashCode() {
         switch (valueType) {
-            case VariantType.varByte :
-                return ((Byte) value).hashCode();
-            case VariantType.varShort :
-                return ((Short) value).hashCode();
-            case VariantType.varInteger :
-                return ((Integer) value).hashCode();
-            case VariantType.varLong :
-                return ((Long) value).hashCode();
-            case VariantType.varDate :
-                return ((Date) value).hashCode();
-            case VariantType.varTime :
-                return ((Time) value).hashCode();
-            case VariantType.varTimestamp :
-                return ((Timestamp) value).hashCode();
-            case VariantType.varFloat :
-                return ((Float) value).hashCode();
-            case VariantType.varDouble :
-                return ((Double) value).hashCode();
-            case VariantType.varBigDecimal :
-                return ((BigDecimal) value).hashCode();
-            case VariantType.varString :
-                return ((String) value).hashCode();
-            case VariantType.varBoolean :
-                return ((Boolean) value).hashCode();
-            case VariantType.varBigInteger :
-                return ((BigInteger) value).hashCode();
-            case VariantType.varVariant :
-                return ((Variant) value).hashCode();
-            case VariantType.varJavaObject :
-                return value.hashCode();
+        case VariantType.varByte:
+            return ((Byte) value).hashCode();
+        case VariantType.varShort:
+            return ((Short) value).hashCode();
+        case VariantType.varInteger:
+            return ((Integer) value).hashCode();
+        case VariantType.varLong:
+            return ((Long) value).hashCode();
+        case VariantType.varDate:
+            return ((Date) value).hashCode();
+        case VariantType.varTime:
+            return ((Time) value).hashCode();
+        case VariantType.varTimestamp:
+            return ((Timestamp) value).hashCode();
+        case VariantType.varFloat:
+            return ((Float) value).hashCode();
+        case VariantType.varDouble:
+            return ((Double) value).hashCode();
+        case VariantType.varBigDecimal:
+            return ((BigDecimal) value).hashCode();
+        case VariantType.varString:
+            return ((String) value).hashCode();
+        case VariantType.varBoolean:
+            return ((Boolean) value).hashCode();
+        case VariantType.varBigInteger:
+            return ((BigInteger) value).hashCode();
+        case VariantType.varVariant:
+            return ((Variant) value).hashCode();
+        case VariantType.varJavaObject:
+            return value.hashCode();
         }
         return 0;
     }
 
     public static String toString(Variant[] values) {
-        StringBuffer result = new StringBuffer("[");
+        StringBuilder result = new StringBuilder("[");
         if (values != null) {
             for (int i = 0; i < values.length; i++) {
                 if (i > 0) {

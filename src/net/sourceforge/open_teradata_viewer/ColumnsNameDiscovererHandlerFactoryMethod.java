@@ -45,7 +45,7 @@ public abstract class ColumnsNameDiscovererHandlerFactoryMethod {
 
     public IColumnsNameDiscovererElement createElement(String relationName) {
         IColumnsNameDiscovererElement element = newElement();
-        element.setSQLQuery(relationName);
+        element.setSQLQuery(relationName.trim());
         return element;
     }
 

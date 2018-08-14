@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -40,7 +41,8 @@ public class IncreaseFontSizesAction extends CustomAction {
 
     protected IncreaseFontSizesAction() {
         super("Increase font sizes", "fontsizeup.png", KeyStroke.getKeyStroke(
-                KeyEvent.VK_PLUS, KeyEvent.CTRL_DOWN_MASK),
+                KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit()
+                        .getMenuShortcutKeyMask()),
                 "Increases the size of all text area fonts.");
         increaseFontSize = new SyntaxTextAreaEditorKit.IncreaseFontSizeAction();
         setEnabled(true);

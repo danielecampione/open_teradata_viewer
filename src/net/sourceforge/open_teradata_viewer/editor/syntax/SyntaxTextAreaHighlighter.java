@@ -20,25 +20,20 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.plaf.TextUI;
-import javax.swing.plaf.basic.BasicTextUI.BasicHighlighter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
-import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.LayeredHighlighter;
-import javax.swing.text.Position;
 import javax.swing.text.View;
 
-import net.sourceforge.open_teradata_viewer.editor.TextArea;
+import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
+import net.sourceforge.open_teradata_viewer.editor.TextAreaHighlighter;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
 
@@ -53,64 +48,61 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
  * @author D. Campione
  * 
  */
-public class SyntaxTextAreaHighlighter extends BasicHighlighter {
-
-    /** The text component we are the highlighter for. */
-    private TextArea textArea;
+public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
 
     /**
      * Marked occurrences in the document (to be painted separately from other
      * highlights).
      */
-    private List<IHighlightInfo> markedOccurrences;
+    private List<SyntaxLayeredHighlightInfoImpl> markedOccurrences;
 
     /**
      * Highlights from document parsers. These should be painted "on top of" all
      * other highlights to ensure they are always above the selection.
      */
-    private List<IHighlightInfo> parserHighlights;
+    private List<SyntaxLayeredHighlightInfoImpl> parserHighlights;
 
     /** The default color used for parser notices when none is specified. */
     private static final Color DEFAULT_PARSER_NOTICE_COLOR = Color.RED;
 
     /** Ctor. */
     public SyntaxTextAreaHighlighter() {
-        markedOccurrences = new ArrayList<IHighlightInfo>();
-        parserHighlights = new ArrayList<IHighlightInfo>(0); // Often unused
+        markedOccurrences = new ArrayList<SyntaxLayeredHighlightInfoImpl>();
+        parserHighlights = new ArrayList<SyntaxLayeredHighlightInfoImpl>(0); // Often unused
     }
 
     /**
      * Adds a special "marked occurrence" highlight.
      *
-     * @param start
-     * @param end
-     * @param p
      * @return A tag to reference the highlight later.
      * @throws BadLocationException
      * @see #clearMarkOccurrencesHighlights()
      */
     Object addMarkedOccurrenceHighlight(int start, int end,
-            MarkOccurrencesHighlightPainter p) throws BadLocationException {
+            SmartHighlightPainter p) throws BadLocationException {
         Document doc = textArea.getDocument();
         TextUI mapper = textArea.getUI();
-        // Always layered highlights for marked occurrences
-        HighlightInfoImpl i = new LayeredHighlightInfoImpl();
-        i.painter = p;
-        i.p0 = doc.createPosition(start);
-        i.p1 = doc.createPosition(end - 1);
+        // Always layered highlights for marked occurrences.
+        SyntaxLayeredHighlightInfoImpl i = new SyntaxLayeredHighlightInfoImpl();
+        i.setPainter(p);
+        i.setStartOffset(doc.createPosition(start));
+        // HACK: Use "end-1" to prevent chars the user types at the "end" of the
+        // highlight to be absorbed into the highlight (default Highlight
+        // behavior)
+        i.setEndOffset(doc.createPosition(end - 1));
         markedOccurrences.add(i);
         mapper.damageRange(textArea, start, end);
         return i;
     }
 
     /**
-     * Adds a special "marked occurrence" highlight.
+     * Adds a highlight from a parser.
      *
      * @param notice The notice from a {@link IParser}.
      * @return A tag with which to reference the highlight.
      * @throws BadLocationException
      * @see #clearParserHighlights()
-     * @see #clearParserHighlights(IParser)
+     * @see #clearParserHighlights(Parser)
      */
     IHighlightInfo addParserHighlight(IParserNotice notice, HighlightPainter p)
             throws BadLocationException {
@@ -132,11 +124,14 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
         }
 
         // Always layered highlights for parser highlights
-        HighlightInfoImpl i = new LayeredHighlightInfoImpl();
-        i.painter = p;
-        i.p0 = doc.createPosition(start);
-        i.p1 = doc.createPosition(end);
-        i.notice = notice;
+        SyntaxLayeredHighlightInfoImpl i = new SyntaxLayeredHighlightInfoImpl();
+        i.setPainter(p);
+        i.setStartOffset(doc.createPosition(start));
+        // HACK: Use "end-1" to prevent chars the user types at the "end" of the
+        // highlight to be absorbed into the highlight (default Highlight
+        // behavior)
+        i.setEndOffset(doc.createPosition(end - 1));
+        i.notice = notice;//i.color = notice.getColor();
 
         parserHighlights.add(i);
         mapper.damageRange(textArea, start, end);
@@ -146,11 +141,11 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
     /**
      * Removes all "marked occurrences" highlights from the view.
      *
-     * @see #addMarkedOccurrenceHighlight(int, int, MarkOccurrencesHighlightPainter)
+     * @see #addMarkedOccurrenceHighlight(int, int, SmartHighlightPainter)
      */
     void clearMarkOccurrencesHighlights() {
         // Don't remove via an iterator; since our List is an ArrayList, this
-        // implies tons of System.arrayCopy()s 
+        // implies tons of System.arrayCopy()s
         for (IHighlightInfo info : markedOccurrences) {
             repaintListHighlight(info);
         }
@@ -177,20 +172,14 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
      * @param parser The parser.
      */
     public void clearParserHighlights(IParser parser) {
-        for (Iterator<IHighlightInfo> i = parserHighlights.iterator(); i
-                .hasNext();) {
-            HighlightInfoImpl info = (HighlightInfoImpl) i.next();
+        Iterator<SyntaxLayeredHighlightInfoImpl> i = parserHighlights
+                .iterator();
+        for (; i.hasNext();) {
+            SyntaxLayeredHighlightInfoImpl info = i.next();
 
             if (info.notice.getParser() == parser) {
-                if (info instanceof LayeredHighlightInfoImpl) {
-                    LayeredHighlightInfoImpl lhi = (LayeredHighlightInfoImpl) info;
-                    if (lhi.width > 0 && lhi.height > 0) {
-                        textArea.repaint(lhi.x, lhi.y, lhi.width, lhi.height);
-                    }
-                } else {
-                    TextUI ui = textArea.getUI();
-                    ui.damageRange(textArea, info.getStartOffset(),
-                            info.getEndOffset());
+                if (info.width > 0 && info.height > 0) {
+                    textArea.repaint(info.x, info.y, info.width, info.height);
                 }
                 i.remove();
             }
@@ -200,14 +189,14 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
     /** {@inheritDoc} */
     @Override
     public void deinstall(JTextComponent c) {
-        this.textArea = null;
+        super.deinstall(c);
         markedOccurrences.clear();
         parserHighlights.clear();
     }
 
     /**
-     * Returns a list of "marked occurrences" in the text area. If there are
-     * no marked occurrences, this will be an empty list.
+     * Returns a list of "marked occurrences" in the text area. If there are no
+     * marked occurrences, this will be an empty list.
      *
      * @return The list of marked occurrences, or an empty list if none. The
      *         contents of this list will be of type {@link DocumentRange}.
@@ -217,108 +206,22 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
                 markedOccurrences.size());
         for (IHighlightInfo info : markedOccurrences) {
             int start = info.getStartOffset();
-            int end = info.getEndOffset() + 1;
+            int end = info.getEndOffset() + 1; // HACK
             DocumentRange range = new DocumentRange(start, end);
             list.add(range);
         }
         return list;
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void install(JTextComponent c) {
-        super.install(c);
-        this.textArea = (TextArea) c;
-    }
-
-    /**
-     * Renders the highlights.
-     *
-     * @param g the graphics context
-     */
-    @Override
-    public void paint(Graphics g) {
-        paintList(g, markedOccurrences);
-        super.paint(g);
-        paintList(g, parserHighlights);
-    }
-
-    private void paintList(Graphics g, List<IHighlightInfo> highlights) {
-        int len = highlights.size();
-
-        for (int i = 0; i < len; i++) {
-            IHighlightInfo info = highlights.get(i);
-            if (!(info instanceof LayeredHighlightInfoImpl)) {
-                // Avoid allocating unless we need it
-                Rectangle a = textArea.getBounds();
-                Insets insets = textArea.getInsets();
-                a.x = insets.left;
-                a.y = insets.top;
-                a.width -= insets.left + insets.right;
-                a.height -= insets.top + insets.bottom;
-                for (; i < len; i++) {
-                    info = markedOccurrences.get(i);
-                    if (!(info instanceof LayeredHighlightInfoImpl)) {
-                        Color c = ((HighlightInfoImpl) info).getColor();
-                        Highlighter.HighlightPainter p = info.getPainter();
-                        if (c != null
-                                && p instanceof ChangeableColorHighlightPainter) {
-                            ((ChangeableColorHighlightPainter) p).setColor(c);
-                        }
-                        p.paint(g, info.getStartOffset(), info.getEndOffset(),
-                                a, textArea);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * When leaf Views (such as LabelView) are rendering they should call into
-     * this method. If a highlight is in the given region it will be drawn
-     * immediately.
-     *
-     * @param g Graphics used to draw
-     * @param p0 starting offset of view
-     * @param p1 ending offset of view
-     * @param viewBounds Bounds of View
-     * @param editor JTextComponent
-     * @param view View instance being rendered
-     */
-    @Override
-    public void paintLayeredHighlights(Graphics g, int p0, int p1,
+    public void paintLayeredHighlights(Graphics g, int lineStart, int lineEnd,
             Shape viewBounds, JTextComponent editor, View view) {
-        paintListLayered(g, p0, p1, viewBounds, editor, view, markedOccurrences);
-        super.paintLayeredHighlights(g, p0, p1, viewBounds, editor, view);
-        paintListLayered(g, p0, p1, viewBounds, editor, view, parserHighlights);
-    }
-
-    private void paintListLayered(Graphics g, int p0, int p1, Shape viewBounds,
-            JTextComponent editor, View view, List<IHighlightInfo> highlights) {
-        for (int i = highlights.size() - 1; i >= 0; i--) {
-            Object tag = highlights.get(i);
-            if (tag instanceof LayeredHighlightInfoImpl) {
-                LayeredHighlightInfoImpl lhi = (LayeredHighlightInfoImpl) tag;
-                int start = lhi.getStartOffset();
-                int end = lhi.getEndOffset();
-                if ((p0 < start && p1 > start) || (p0 >= start && p0 < end)) {
-                    lhi.paintLayeredHighlights(g, p0, p1, viewBounds, editor,
-                            view);
-                }
-            }
-        }
-    }
-
-    private void repaintListHighlight(IHighlightInfo info) {
-        if (info instanceof LayeredHighlightInfoImpl) {
-            LayeredHighlightInfoImpl lhi = (LayeredHighlightInfoImpl) info;
-            if (lhi.width > 0 && lhi.height > 0) {
-                textArea.repaint(lhi.x, lhi.y, lhi.width, lhi.height);
-            }
-        } else {
-            TextUI ui = textArea.getUI();
-            ui.damageRange(textArea, info.getStartOffset(), info.getEndOffset());
-        }
+        paintListLayered(g, lineStart, lineEnd, viewBounds, editor, view,
+                markedOccurrences);
+        super.paintLayeredHighlights(g, lineStart, lineEnd, viewBounds, editor,
+                view);
+        paintListLayered(g, lineStart, lineEnd, viewBounds, editor, view,
+                parserHighlights);
     }
 
     /**
@@ -333,27 +236,17 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
     }
 
     /**
-     * 
-     * 
-     * @author D. Campione
-     * 
-     */
-    public static interface IHighlightInfo extends Highlighter.Highlight {
-    }
-
-    /**
-     * 
+     * Highlight info implementation used for parser notices and marked
+     * occurrences.
      * 
      * @author D. Campione
      * 
      */
-    private static class HighlightInfoImpl implements IHighlightInfo {
+    private static class SyntaxLayeredHighlightInfoImpl extends
+            LayeredHighlightInfoImpl {
+        IParserNotice notice;//Color color; // Used only by Parser highlights
 
-        private Position p0;
-        private Position p1;
-        protected Highlighter.HighlightPainter painter;
-        private IParserNotice notice;
-
+        @Override
         public Color getColor() {
             Color color = null;
             if (notice != null) {
@@ -363,78 +256,6 @@ public class SyntaxTextAreaHighlighter extends BasicHighlighter {
                 }
             }
             return color;
-        }
-
-        @Override
-        public int getStartOffset() {
-            return p0.getOffset();
-        }
-
-        @Override
-        public int getEndOffset() {
-            return p1.getOffset();
-        }
-
-        @Override
-        public Highlighter.HighlightPainter getPainter() {
-            return painter;
-        }
-    }
-
-    /**
-     * 
-     * 
-     * @author D. Campione
-     * 
-     */
-    private static class LayeredHighlightInfoImpl extends HighlightInfoImpl {
-
-        private int x;
-        private int y;
-        private int width;
-        private int height;
-
-        void union(Shape bounds) {
-            if (bounds == null) {
-                return;
-            }
-            Rectangle alloc = (bounds instanceof Rectangle) ? (Rectangle) bounds
-                    : bounds.getBounds();
-            if (width == 0 || height == 0) {
-                x = alloc.x;
-                y = alloc.y;
-                width = alloc.width;
-                height = alloc.height;
-            } else {
-                width = Math.max(x + width, alloc.x + alloc.width);
-                height = Math.max(y + height, alloc.y + alloc.height);
-                x = Math.min(x, alloc.x);
-                width -= x;
-                y = Math.min(y, alloc.y);
-                height -= y;
-            }
-        }
-
-        /**
-         * Restricts the region based on the receivers offsets and messages the
-         * painter to paint the region.
-         */
-        void paintLayeredHighlights(Graphics g, int p0, int p1,
-                Shape viewBounds, JTextComponent editor, View view) {
-            int start = getStartOffset();
-            int end = getEndOffset();
-            // Restrict the region to what we represent
-            p0 = Math.max(start, p0);
-            p1 = Math.min(end, p1);
-            if (getColor() != null
-                    && (painter instanceof ChangeableColorHighlightPainter)) {
-                ((ChangeableColorHighlightPainter) painter)
-                        .setColor(getColor());
-            }
-            // Paint the appropriate region using the painter and union the
-            // effected region with our bounds
-            union(((LayeredHighlighter.LayerPainter) painter).paintLayer(g, p0,
-                    p1, viewBounds, editor, view));
         }
     }
 }

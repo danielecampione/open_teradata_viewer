@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import javax.swing.text.BadLocationException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
 
 /**
  * DefaultOccurrenceMarker marks occurrences of the current token for most
@@ -37,7 +38,7 @@ class DefaultOccurrenceMarker implements IOccurrenceMarker {
     /** {@inheritDoc} */
     @Override
     public void markOccurrences(SyntaxDocument doc, IToken t,
-            SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p) {
+            SyntaxTextAreaHighlighter h, SmartHighlightPainter p) {
         char[] lexeme = t.getLexeme().toCharArray();
         int type = t.getType();
         int lineCount = doc.getDefaultRootElement().getElementCount();

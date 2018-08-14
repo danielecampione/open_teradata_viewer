@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -40,7 +41,8 @@ public class DecreaseFontSizesAction extends CustomAction {
 
     protected DecreaseFontSizesAction() {
         super("Decrease font sizes", "fontsizedown.png", KeyStroke
-                .getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.CTRL_DOWN_MASK),
+                .getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit()
+                        .getMenuShortcutKeyMask()),
                 "Decreases the size of all text area fonts.");
         decreaseFontSize = new SyntaxTextAreaEditorKit.DecreaseFontSizeAction();
         setEnabled(true);

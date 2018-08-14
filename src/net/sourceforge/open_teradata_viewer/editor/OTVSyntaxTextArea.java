@@ -44,16 +44,8 @@ public class OTVSyntaxTextArea extends SyntaxTextArea {
         _OTVSyntaxSearchEngine = new OTVSyntaxSearchEngine(this);
     }
 
-    public void unmarkAll() {
-        _OTVSyntaxSearchEngine.unmarkAll();
-    }
-
     public void showGoToLineDialog(ActionEvent evt) {
         _OTVSyntaxSearchEngine.goToLine();
-    }
-
-    public void showFindDialog(ActionEvent evt) {
-        _OTVSyntaxSearchEngine.find();
     }
 
     public int[] getBoundsOfSQLToBeExecuted() {

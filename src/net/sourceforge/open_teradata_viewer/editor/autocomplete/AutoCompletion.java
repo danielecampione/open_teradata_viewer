@@ -633,8 +633,8 @@ public class AutoCompletion {
         return parameterAssistanceEnabled;
     }
 
-    /** @return Whether the popup window is visible. */
-    private boolean isPopupVisible() {
+    /** @return Whether the completion popup window is visible. */
+    public boolean isPopupVisible() {
         return popupWindow != null && popupWindow.isVisible();
     }
 

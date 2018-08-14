@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
+import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
+
 /**
  * IOccurrenceMarker marks occurrences of the current token.
  * 
@@ -40,6 +42,6 @@ public interface IOccurrenceMarker {
      * @param p The painter for the highlights.
      */
     public void markOccurrences(SyntaxDocument doc, IToken t,
-            SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p);
+            SyntaxTextAreaHighlighter h, SmartHighlightPainter p);
 
 }

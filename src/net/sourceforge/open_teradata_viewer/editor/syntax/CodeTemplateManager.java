@@ -18,8 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -36,7 +34,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Segment;
@@ -45,7 +42,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.templates.ICodeTemplate;
 
 /**
- * Manages "code templates."<p>
+ * Manages "code templates".<p>
  *
  * All methods in this class are synchronized for thread safety, but as a best
  * practice, you should probably only modify the templates known to a
@@ -61,22 +58,12 @@ public class CodeTemplateManager {
     private int maxTemplateIDLength;
     private List<ICodeTemplate> templates;
 
-    private KeyStroke insertTrigger;
-    private String insertTriggerString;
     private Segment s;
     private TemplateComparator comparator;
     private File directory;
 
-    private static final int mask = InputEvent.CTRL_MASK
-            | InputEvent.SHIFT_MASK;
-    static final KeyStroke TEMPLATE_KEYSTROKE = KeyStroke.getKeyStroke(
-            KeyEvent.VK_SPACE, mask);
-
     /** Ctor. */
     public CodeTemplateManager() {
-        // Default insert trigger is a space
-        setInsertTrigger(TEMPLATE_KEYSTROKE);
-
         s = new Segment();
         comparator = new TemplateComparator();
         templates = new ArrayList<ICodeTemplate>();
@@ -97,34 +84,6 @@ public class CodeTemplateManager {
         }
         templates.add(template);
         sortTemplates();
-    }
-
-    /**
-     * Returns the keystroke that is the "insert trigger" for templates; that
-     * is, the character that, when inserted into an instance of
-     * <code>SyntaxTextArea</code>, triggers the search for a template matching
-     * the token ending at the caret position.
-     *
-     * @return The insert trigger.
-     * @see #getInsertTriggerString()
-     * @see #setInsertTrigger(KeyStroke)
-     */
-    public KeyStroke getInsertTrigger() {
-        return insertTrigger;
-    }
-
-    /**
-     * Returns the "insert trigger" for templates; that is, the character that,
-     * when inserted into an instance of <code>SyntaxTextArea</code>, triggers
-     * the search for a template matching the token ending at the caret
-     * position.
-     *
-     * @return The insert trigger character.
-     * @see #getInsertTrigger()
-     * @see #setInsertTrigger(KeyStroke)
-     */
-    public String getInsertTriggerString() {
-        return insertTriggerString;
     }
 
     /**
@@ -283,27 +242,6 @@ public class CodeTemplateManager {
     }
 
     /**
-     * Sets the "trigger" character for templates.
-     *
-     * @param trigger The trigger character to set for templates. This means
-     *                that when this character is pressed in an
-     *                <code>SyntaxTextArea</code>,  the last-typed token is
-     *                found, and is checked against all template ID's to see if
-     *                a template should be inserted. If a template ID matches,
-     *                that template is inserted; if not, the trigger character
-     *                is inserted. If this parameter is <code>null</code>, no
-     *                change is made to the trigger character.
-     * @see #getInsertTrigger()
-     * @see #getInsertTriggerString()
-     */
-    public void setInsertTrigger(KeyStroke trigger) {
-        if (trigger != null) {
-            insertTrigger = trigger;
-            insertTriggerString = Character.toString(trigger.getKeyChar());
-        }
-    }
-
-    /**
      * Sets the directory in which to look for templates. Calling this method
      * adds any new templates found in the specified directory to the templates
      * already registered.
@@ -423,16 +361,17 @@ public class CodeTemplateManager {
     }
 
     /**
-     * A file filter for File.listFiles() (NOT for JFileChoosers!) that
-     * accepts only XML files.
+     * A file filter that accepts only XML files.
      * 
      * @author D. Campione
      * 
      */
     private static class XMLFileFilter implements FileFilter {
+
         @Override
         public boolean accept(File f) {
             return f.getName().toLowerCase().endsWith(".xml");
         }
+
     }
 }

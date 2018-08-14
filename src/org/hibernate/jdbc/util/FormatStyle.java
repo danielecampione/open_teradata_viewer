@@ -25,6 +25,7 @@ package org.hibernate.jdbc.util;
  * 
  */
 public class FormatStyle {
+
     public static final FormatStyle BASIC = new FormatStyle("basic",
             new BasicFormatterImpl());
     public static final FormatStyle DDL = new FormatStyle("ddl",
@@ -33,11 +34,11 @@ public class FormatStyle {
             new NoFormatImpl());
 
     private final String name;
-    private final IFormatter iFormatter;
+    private final IFormatter formatter;
 
-    private FormatStyle(String name, IFormatter iFormatter) {
+    private FormatStyle(String name, IFormatter formatter) {
         this.name = name;
-        this.iFormatter = iFormatter;
+        this.formatter = formatter;
     }
 
     public String getName() {
@@ -45,9 +46,10 @@ public class FormatStyle {
     }
 
     public IFormatter getFormatter() {
-        return iFormatter;
+        return formatter;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -62,6 +64,7 @@ public class FormatStyle {
 
     }
 
+    @Override
     public int hashCode() {
         return name.hashCode();
     }
@@ -74,6 +77,7 @@ public class FormatStyle {
      * 
      */
     private static class NoFormatImpl implements IFormatter {
+        @Override
         public String format(String source) {
             return source;
         }

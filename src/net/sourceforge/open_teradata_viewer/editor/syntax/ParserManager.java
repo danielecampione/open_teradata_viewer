@@ -19,6 +19,8 @@
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -40,7 +42,7 @@ import javax.swing.text.Position;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaHighlighter.IHighlightInfo;
+import net.sourceforge.open_teradata_viewer.editor.TextAreaHighlighter.IHighlightInfo;
 import net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip.FocusableTip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParseResult;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
@@ -405,16 +407,17 @@ class ParserManager implements DocumentListener, ActionListener,
      * @return The tool tip to display, and possibly a hyperlink event handler. 
      */
     public ToolTipInfo getToolTipText(MouseEvent e) {
-
         String tip = null;
         HyperlinkListener listener = null;
         parserForTip = null;
+        Point p = e.getPoint();
 
-        int pos = textArea.viewToModel(e.getPoint());
+        int pos = textArea.viewToModel(p);
         if (noticeHighlightPairs != null) {
             for (NoticeHighlightPair pair : noticeHighlightPairs) {
                 IParserNotice notice = pair.notice;
-                if (notice.containsPosition(pos)) {
+                if (notice.containsPosition(pos)
+                        && noticeContainsPointInView(notice, p)) {
                     tip = notice.getToolTipText();
                     parserForTip = notice.getParser();
                     if (parserForTip instanceof HyperlinkListener) {
@@ -477,6 +480,42 @@ class ParserManager implements DocumentListener, ActionListener,
         }
 
         handleDocumentEvent(e);
+    }
+
+    /**
+     * Since <code>viewToModel()</code> returns the <em>closest</em> model
+     * position, and the position doesn't <em>necessarily</em> contain the
+     * point passed in as an argument, this method checks whether the point is
+     * indeed contained in the view rectangle for the specified offset.
+     *
+     * @param notice The parser notice.
+     * @param p The point possibly contained in the view range of the
+     *        parser notice.
+     * @return Whether the parser notice actually contains the specified point
+     *         in the view.
+     */
+    private final boolean noticeContainsPointInView(IParserNotice notice,
+            Point p) {
+        try {
+            int offs = notice.getOffset();
+            Rectangle r1 = textArea.modelToView(offs);
+            Rectangle r2 = textArea.modelToView(offs + notice.getLength() - 1);
+            if (r1.y != r2.y) {
+                // If the notice spans multiple lines, give them the benefit of
+                // the doubt. This is only "wrong" if the user is in empty space
+                // "to the right" of the error marker when it ends at the end of
+                // a line anyway
+                return true;
+            }
+            r1.y--; // Be a tiny bit lenient
+            r1.height += 2; // Ditto
+            return p.x >= r1.x && p.x < (r2.x + r2.width) && p.y >= r1.y
+                    && p.y < (r1.y + r1.height);
+        } catch (BadLocationException ble) { // Never occurs
+            // Give them the benefit of the doubt, should 99% of the time be
+            // true anyway
+            return true;
+        }
     }
 
     /**

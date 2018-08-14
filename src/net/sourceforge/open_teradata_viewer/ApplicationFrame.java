@@ -50,9 +50,13 @@ import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
+import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
 import net.sourceforge.open_teradata_viewer.editor.IToolTipSupplier;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.SearchContext;
+import net.sourceforge.open_teradata_viewer.editor.SearchEngine;
+import net.sourceforge.open_teradata_viewer.editor.SearchResult;
 import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.AutoCompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.BasicCompletion;
@@ -60,8 +64,12 @@ import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletio
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
-import net.sourceforge.open_teradata_viewer.editor.search.OTVFindDialog;
+import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
+import net.sourceforge.open_teradata_viewer.editor.search.FindToolBar;
+import net.sourceforge.open_teradata_viewer.editor.search.ISearchListener;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
+import net.sourceforge.open_teradata_viewer.editor.search.ReplaceToolBar;
+import net.sourceforge.open_teradata_viewer.editor.search.SearchEvent;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
@@ -73,7 +81,6 @@ import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
-import net.sourceforge.open_teradata_viewer.util.TranslucencyUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -83,7 +90,8 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  *
  */
-public class ApplicationFrame extends JFrame implements ISyntaxConstants {
+public class ApplicationFrame extends JFrame implements ISyntaxConstants,
+        ISearchListener {
 
     private static final long serialVersionUID = -8572855678886323789L;
 
@@ -120,37 +128,15 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     private GlassPane glassPane;
 
-    private OTVFindDialog _OTVFindDialog;
+    private FindDialog findDialog;
     private OTVGoToDialog _OTVGoToDialog;
+    private CaretListenerLabel caretListenerLabel;
+    private CollapsibleSectionPanel csp;
+    private FindToolBar findToolBar;
+    private ReplaceToolBar replaceToolBar;
 
     /** Used to dynamically load 3rd-party LookAndFeels. */
     private ThirdPartyLookAndFeelManager lafManager;
-
-    /**
-     * Whether <code>findWindowOpacityListener</code> has been attempted to be
-     * created yet. This is kept in a variable instead of checking for
-     * <code>null</code> because the creation is done via reflection, so it is a
-     * fairly common case that creation is attempted but fails.
-     */
-    private boolean windowListenersInited;
-
-    /**
-     * Listens for focus events of certain child windows (those that can be made
-     * translucent on focus lost).
-     */
-    private ChildWindowListener findWindowOpacityListener;
-
-    /** Whether the Find dialog can have its opacity changed. */
-    private boolean findWindowOpacityEnabled;
-
-    /**
-     * The opacity with which to render unfocused child windows that support
-     * opacity changes.
-     */
-    private float findWindowOpacity;
-
-    /** The rule used for making certain unfocused child windows translucent. */
-    private int findWindowOpacityRule;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -202,7 +188,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         while (pluginsIterator.hasNext()) {
             EntryDescriptor entryDescriptor = (EntryDescriptor) pluginsIterator
                     .next();
-            IPluginEntry iPluginEntry = (IPluginEntry) pluginFactory
+            IPluginEntry pluginEntry = (IPluginEntry) pluginFactory
                     .getPluginEntry(entryDescriptor.getId());
         }
     }
@@ -269,13 +255,14 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         gutter.setBookmarkIcon(ImageManager.getImage("/icons/bookmark.png"));
         textScrollPane
                 .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, textScrollPane,
-                null);
+        csp.add(textScrollPane);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, csp, null);
+
         globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
 
         // Create the status area
         JPanel statusPane = new JPanel(new GridLayout(1, 1));
-        CaretListenerLabel caretListenerLabel = new CaretListenerLabel("Ready.");
+        caretListenerLabel = new CaretListenerLabel("Ready.");
         statusPane.add(caretListenerLabel);
         globalQueryEditorPanel.add(statusPane, BorderLayout.PAGE_END);
 
@@ -284,6 +271,19 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         addSyntaxHighlighting();
 
         return globalQueryEditorPanel;
+    }
+
+    /** Creates our Find and Replace toolbars. */
+    public void initSearchToolBars() {
+        findDialog = new FindDialog(this, this);
+
+        SearchContext context = findDialog.getSearchContext();
+
+        // Create tool bars and tie their search contexts together also
+        setFindToolBar(new FindToolBar(this));
+        findToolBar.setSearchContext(context);
+        setReplaceToolBar(new ReplaceToolBar(this));
+        replaceToolBar.setSearchContext(context);
     }
 
     private void addSyntaxHighlighting() {
@@ -376,9 +376,20 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             Actions.DISCONNECT.actionPerformed(new ActionEvent(this, 0, null));
         }
 
-        if (_OTVFindDialog != null) {
-            _OTVFindDialog.dispose();
-            _OTVFindDialog = null;
+        csp.hideBottomComponent();
+        setCollapsibleSectionPanel(null);
+        if (findToolBar != null) {
+            setFindToolBar(null);
+        }
+        if (replaceToolBar != null) {
+            setReplaceToolBar(null);
+        }
+        if (findDialog != null) {
+            if (findDialog.isVisible()) {
+                findDialog.setVisible(false);
+            }
+            findDialog.dispose();
+            findDialog = null;
         }
         if (_OTVGoToDialog != null) {
             _OTVGoToDialog.dispose();
@@ -524,22 +535,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         textArea.requestFocusInWindow();
     }
 
-    public void registerChildWindowListeners(Window w) {
-        if (!windowListenersInited) {
-            windowListenersInited = true;
-            if (TranslucencyUtil.get().isTranslucencySupported(false)) {
-                findWindowOpacityListener = new ChildWindowListener(this);
-                findWindowOpacityListener
-                        .setTranslucencyRule(findWindowOpacityRule);
-            }
-        }
-
-        if (findWindowOpacityListener != null) {
-            w.addWindowFocusListener(findWindowOpacityListener);
-            w.addComponentListener(findWindowOpacityListener);
-        }
-    }
-
     /**
      * Creates the completion provider for a SQL editor. This provider can be
      * shared among multiple editors.
@@ -633,6 +628,44 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         return cp;
     }
 
+    /**
+     * Listens for events from our search dialogs and actually does the dirty
+     * work.
+     */
+    @Override
+    public void searchEvent(SearchEvent e) {
+        SearchEvent.Type type = e.getType();
+        SearchContext context = e.getSearchContext();
+        SearchResult result = null;
+
+        switch (type) {
+        case MARK_ALL:
+            result = SearchEngine.markAll(textArea, context);
+            break;
+        case FIND:
+            result = SearchEngine.find(textArea, context);
+            if (!result.wasFound()) {
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+            }
+            break;
+        case REPLACE:
+            result = SearchEngine.replace(textArea, context);
+            if (!result.wasFound()) {
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+            }
+            break;
+        case REPLACE_ALL:
+            result = SearchEngine.replaceAll(textArea, context);
+            UISupport.getDialogs().showInfoMessage(
+                    result.getCount() + " occurrences replaced.");
+            break;
+        }
+
+        if (result.getMarkedCount() == 0) {
+            caretListenerLabel.setText("Text not found");
+        }
+    }
+
     public static ApplicationFrame getInstance() {
         return APPLICATION_FRAME;
     }
@@ -644,63 +677,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
     public AutoCompletion getAutoCompletion() {
         return autoCompletion;
-    }
-
-    /**
-     * Sets the opacity with which to render unfocused child windows, if this
-     * option is enabled.
-     *
-     * @param opacity The opacity. This should be between <code>0</code> and
-     *        <code>1</code>.
-     * @see #getFindWindowOpacity()
-     * @see #setFindWindowOpacityRule(int)
-     */
-    public void setFindWindowOpacity(float opacity) {
-        findWindowOpacity = Math.max(0, Math.min(opacity, 1));
-        if (windowListenersInited && isFindWindowOpacityEnabled()) {
-            findWindowOpacityListener.refreshTranslucencies();
-        }
-    }
-
-    /**
-     * Toggles whether find window opacity is enabled.
-     *
-     * @param enabled Whether find window opacity should be enabled.
-     * @see #isFindWindowOpacityEnabled()
-     */
-    public void setFindWindowOpacityEnabled(boolean enabled) {
-        if (enabled != findWindowOpacityEnabled) {
-            findWindowOpacityEnabled = enabled;
-            if (windowListenersInited && findWindowOpacityListener != null) {
-                findWindowOpacityListener.refreshTranslucencies();
-            }
-        }
-    }
-
-    /**
-     * Toggles whether certain child windows should be made translucent.
-     *
-     * @param rule The new opacity rule.
-     * @see #getFindWindowOpacityRule()
-     * @see #setFindWindowOpacity(float)
-     */
-    public void setFindWindowOpacityRule(int rule) {
-        if (rule != findWindowOpacityRule) {
-            findWindowOpacityRule = rule;
-            if (windowListenersInited) {
-                findWindowOpacityListener.setTranslucencyRule(rule);
-            }
-        }
-    }
-
-    /**
-     * Returns whether find window opacity is enabled.
-     *
-     * @return Whether find window opacity is enabled.
-     * @see #setFindWindowOpacityEnabled(boolean)
-     */
-    public boolean isFindWindowOpacityEnabled() {
-        return findWindowOpacityEnabled;
     }
 
     @Override
@@ -736,7 +712,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
 
                 // Load the Look and Feel class. Note that we cannot simply use
                 // its name for some reason (Exceptions are thrown)
-                Class c = cl.loadClass(lnfClassName);
+                Class<?> c = cl.loadClass(lnfClassName);
                 final LookAndFeel lnf = (LookAndFeel) c.newInstance();
 
                 // If we're changing to a LAF that supports window decorations
@@ -791,28 +767,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
                 ExceptionDialog.ignoreException(e);
             }
         }
-    }
-
-    /**
-     * Returns the opacity with which to render unfocused child windows, if this
-     * option is enabled.
-     *
-     * @return The opacity.
-     * @see #setFindWindowOpacity(float)
-     */
-    public float getFindWindowOpacity() {
-        return findWindowOpacity;
-    }
-
-    /**
-     * Returns the rule used for making certain child windows translucent.
-     *
-     * @return The rule.
-     * @see #setFindWindowOpacityRule(int)
-     * @see #getFindWindowOpacity()
-     */
-    public int getFindWindowOpacityRule() {
-        return findWindowOpacityRule;
     }
 
     /**
@@ -926,24 +880,44 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
         this.console = console;
     }
 
-    /** @return The find dialog. */
-    public OTVFindDialog getFindDialog() {
-        return _OTVFindDialog;
-    }
-
-    /** @param _OTVFindDialog The find dialog to set. */
-    public void setFindDialog(OTVFindDialog _OTVFindDialog) {
-        this._OTVFindDialog = _OTVFindDialog;
-    }
-
     /** @return The goto dialog. */
     public OTVGoToDialog getGoToDialog() {
         return _OTVGoToDialog;
     }
 
     /** @param _OTVGoToDialog The goto dialog to set. */
-    public void setGoToDialog(OTVGoToDialog _OTVGoToDialog) {
+    private void setGoToDialog(OTVGoToDialog _OTVGoToDialog) {
         this._OTVGoToDialog = _OTVGoToDialog;
+    }
+
+    /**
+     * Returns the application's "collapsible section panel"; that is, the panel
+     * containing the main view and possible find/replace tool bars.
+     *
+     * @return The collapsible section panel.
+     */
+    public CollapsibleSectionPanel getCollapsibleSectionPanel() {
+        return csp;
+    }
+
+    private void setCollapsibleSectionPanel(CollapsibleSectionPanel csp) {
+        this.csp = csp;
+    }
+
+    public FindToolBar getFindToolBar() {
+        return findToolBar;
+    }
+
+    private void setFindToolBar(FindToolBar findToolBar) {
+        this.findToolBar = findToolBar;
+    }
+
+    public ReplaceToolBar getReplaceToolBar() {
+        return replaceToolBar;
+    }
+
+    private void setReplaceToolBar(ReplaceToolBar replaceToolBar) {
+        this.replaceToolBar = replaceToolBar;
     }
 
     /**
@@ -973,6 +947,14 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             getContentPane().setLayout(new BorderLayout());
             UISupport.setMainFrame(getInstance());
 
+            splashScreen
+                    .updateStatus(
+                            "Initializing the goto dialog and the find tool bars..",
+                            25);
+            setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
+            initSearchToolBars();
+            setCollapsibleSectionPanel(new CollapsibleSectionPanel());
+
             splashScreen.updateStatus("Initializing the work area..", 30);
             JPanel globalPanel = new JPanel(new BorderLayout());
             globalPanel.add(createWorkArea(), BorderLayout.CENTER);
@@ -998,23 +980,13 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants {
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
 
-            splashScreen.updateStatus("Initializing the work panels..", 45);
+            splashScreen.updateStatus("Initializing the work panels..", 50);
             JSplitPane mainSplitPane = new JSplitPane(
                     JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
             mainSplitPane.setOneTouchExpandable(true);
             mainSplitPane.setDividerSize(4);
             mainSplitPane.setDividerLocation(510);
             getContentPane().add(mainSplitPane, BorderLayout.CENTER);
-
-            splashScreen.updateStatus("Initializing the find dialog..", 50);
-            setFindWindowOpacityEnabled(true);
-            setFindWindowOpacity(0.6f);
-            setFindWindowOpacityRule(ChildWindowListener.TRANSLUCENT_WHEN_OVERLAPPING_APP);
-            setFindDialog(new OTVFindDialog(ApplicationFrame.this));
-
-            splashScreen
-                    .updateStatus("Initializing the goto line dialog..", 55);
-            setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
 
             splashScreen.updateStatus("Initializing the graphic viewer..", 60);
             graphicViewer = new GraphicViewer();

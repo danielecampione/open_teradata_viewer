@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -40,9 +41,12 @@ public class FormatSQLAction extends CustomAction {
     private static final long serialVersionUID = 860629017867347294L;
 
     protected FormatSQLAction() {
-        super("Format SQL code", "format.png", KeyStroke.getKeyStroke(
-                KeyEvent.VK_F, KeyEvent.SHIFT_DOWN_MASK
-                        + KeyEvent.CTRL_DOWN_MASK), null);
+        super(
+                "Format SQL code",
+                "format.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.SHIFT_DOWN_MASK
+                        + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                null);
         setEnabled(true);
     }
 

@@ -1,3 +1,13 @@
+0.19b (19/11/2013)
+    - Improvements in Clojure syntax highlighting.
+    - Fixed exception in certain scenarios when word wrap and code folding were
+      both enabled.
+    - Fixed rendering bug when visible whitespace was enabled.
+    - TextScrollPane now allows JLayer/JXLayer as its view.
+    - The translucent Find dialog has been replaced by the Find search bar.
+    - Added the "SHOW REPLACE SEARCH BAR" command to the "Edit" menu.
+    - Other minor bugs fixed.
+
 0.19a (31/10/2013)
     - Added first support for Teradata hierarchical queries to the SQL parser.
 

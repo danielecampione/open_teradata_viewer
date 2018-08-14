@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -43,7 +44,7 @@ public class SelectFromAction extends CustomAction {
 
     protected SelectFromAction() {
         super("SELECT * FROM ..", null, KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                KeyEvent.CTRL_DOWN_MASK), null);
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
     }
 

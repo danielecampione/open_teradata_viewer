@@ -19,9 +19,13 @@
 package net.sourceforge.open_teradata_viewer.editor;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.Image;
-
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A strategy for painting the background of an <code>TextAreaBase</code> as an
@@ -48,7 +52,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 public class BufferedImageBackgroundPainterStrategy extends
         ImageBackgroundPainterStrategy {
 
-    private Image bgImage;
+    private BufferedImage bgImage;
 
     /**
      * Ctor.
@@ -85,19 +89,32 @@ public class BufferedImageBackgroundPainterStrategy extends
     protected void rescaleImage(int width, int height, int hint) {
         Image master = getMasterImage();
         if (master != null) {
-            bgImage = master.getScaledInstance(width, height, hint);
-            tracker.addImage(bgImage, 1);
-            try {
-                tracker.waitForID(1);
-            } catch (InterruptedException ie) {
-                ExceptionDialog.notifyException(ie);
-                bgImage = null;
-                return;
-            } finally {
-                tracker.removeImage(bgImage, 1);
+            Map<RenderingHints.Key, Object> hints = new HashMap<RenderingHints.Key, Object>();
+            switch (hint) {
+            default:
+            case Image.SCALE_AREA_AVERAGING:
+            case Image.SCALE_SMOOTH:
+                hints.put(RenderingHints.KEY_INTERPOLATION,
+                        RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                hints.put(RenderingHints.KEY_RENDERING,
+                        RenderingHints.VALUE_RENDER_QUALITY);
+                hints.put(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
             }
+
+            bgImage = createAcceleratedImage(width, height);
+            Graphics2D g = bgImage.createGraphics();
+            g.addRenderingHints(hints);
+            g.drawImage(master, 0, 0, width, height, null);
+            g.dispose();
         } else {
             bgImage = null;
         }
+    }
+
+    private BufferedImage createAcceleratedImage(int width, int height) {
+        GraphicsConfiguration gc = getTextAreaBase().getGraphicsConfiguration();
+        BufferedImage image = gc.createCompatibleImage(width, height);
+        return image;
     }
 }

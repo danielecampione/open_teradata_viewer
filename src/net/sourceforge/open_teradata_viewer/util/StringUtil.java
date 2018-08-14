@@ -205,6 +205,7 @@ public class StringUtil {
         }
         return fmt.format(size).concat(" bytes");
     }
+
     /**
      * <pre>
      *       : bytes
@@ -228,16 +229,18 @@ public class StringUtil {
      * </pre>
      */
     public static long toBytes(String bytes) {
-        if (bytes == null)
+        if (bytes == null) {
             return -1;
+        }
 
         long value = 0;
         long sign = 1;
         int i = 0;
         int length = bytes.length();
 
-        if (length == 0)
+        if (length == 0) {
             return -1;
+        }
 
         if (bytes.charAt(i) == '-') {
             sign = -1;
@@ -246,8 +249,9 @@ public class StringUtil {
             i++;
         }
 
-        if (length <= i)
+        if (length <= i) {
             return -1;
+        }
 
         int ch;
         for (; i < length && (ch = bytes.charAt(i)) >= '0' && ch <= '9'; i++) {
@@ -278,9 +282,9 @@ public class StringUtil {
         } else if (bytes.endsWith("b") || bytes.endsWith("B")
                 || bytes.endsWith("bytes") || bytes.endsWith("BYTES")) {
             return value;
-        } else if (value < 0)
+        } else if (value < 0) {
             return value;
-        else {
+        } else {
             throw new IllegalArgumentException(
                     "byte-valued expression must have units.");
         }
@@ -478,7 +482,7 @@ public class StringUtil {
             return null;
         }
         if (maxLineLength <= 10) {
-            return new String[]{text};
+            return new String[] { text };
         }
         BreakIterator boundary = BreakIterator.getLineInstance();
         boundary.setText(text);
@@ -538,7 +542,7 @@ public class StringUtil {
      * @return  Cleaned string.
      */
     public static String cleanString(String str) {
-        final StringBuffer buf = new StringBuffer(str.length());
+        final StringBuilder buf = new StringBuilder(str.length());
         char prevCh = ' ';
 
         for (int i = 0, limit = str.length(); i < limit; ++i) {
@@ -637,36 +641,36 @@ public class StringUtil {
             newlineReplacement = "";
         }
         String tabString = "   ";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
-                case ' ' :
-                    if (inPreBlock) {
-                        sb.append(' ');
-                    } else {
-                        sb.append("&nbsp;");
-                    }
-                    break;
-                case '\n' :
-                    sb.append(newlineReplacement);
-                    break;
-                case '&' :
-                    sb.append("&amp;");
-                    break;
-                case '\t' :
-                    sb.append(tabString);
-                    break;
-                case '<' :
-                    sb.append("&lt;");
-                    break;
-                case '>' :
-                    sb.append("&gt;");
-                    break;
-                default :
-                    sb.append(ch);
-                    break;
+            case ' ':
+                if (inPreBlock) {
+                    sb.append(' ');
+                } else {
+                    sb.append("&nbsp;");
+                }
+                break;
+            case '\n':
+                sb.append(newlineReplacement);
+                break;
+            case '&':
+                sb.append("&amp;");
+                break;
+            case '\t':
+                sb.append(tabString);
+                break;
+            case '<':
+                sb.append("&lt;");
+                break;
+            case '>':
+                sb.append("&gt;");
+                break;
+            default:
+                sb.append(ch);
+                break;
             }
         }
 
@@ -674,29 +678,27 @@ public class StringUtil {
     }
 
     public static String unescape(String s) {
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         int l = s.length();
         int ch = -1;
         int b, sumb = 0;
         for (int i = 0, more = -1; i < l; i++) {
             /* Get next byte b from URL segment s */
             switch (ch = s.charAt(i)) {
-                case '%' :
-                    ch = s.charAt(++i);
-                    int hb = (Character.isDigit((char) ch)
-                            ? ch - '0'
-                            : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
-                    ch = s.charAt(++i);
-                    int lb = (Character.isDigit((char) ch)
-                            ? ch - '0'
-                            : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
-                    b = (hb << 4) | lb;
-                    break;
-                case '+' :
-                    b = ' ';
-                    break;
-                default :
-                    b = ch;
+            case '%':
+                ch = s.charAt(++i);
+                int hb = (Character.isDigit((char) ch) ? ch - '0'
+                        : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                ch = s.charAt(++i);
+                int lb = (Character.isDigit((char) ch) ? ch - '0'
+                        : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                b = (hb << 4) | lb;
+                break;
+            case '+':
+                b = ' ';
+                break;
+            default:
+                b = ch;
             }
             // Decode byte b as UTF-8, sumb collects incomplete chars
             if ((b & 0xc0) == 0x80) {
@@ -742,18 +744,18 @@ public class StringUtil {
     }
 
     public static String conformize(String s) {
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         int l = s.length();
         int ch = -1;
         int b;
         for (int i = 0; i < l; i++) {
             /* Get next byte b from URL segment s */
             switch (ch = s.charAt(i)) {
-                case ((char) 13) :
-                    ch = '\n';
-                default :
-                    b = ch;
-                    sbuf.append((char) b);
+            case ((char) 13):
+                ch = '\n';
+            default:
+                b = ch;
+                sbuf.append((char) b);
             }
         }
         return sbuf.toString();

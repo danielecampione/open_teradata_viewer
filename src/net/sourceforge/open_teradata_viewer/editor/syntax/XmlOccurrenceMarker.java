@@ -24,6 +24,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
 
 /**
  * Marks occurrences of the current token for XML.
@@ -39,7 +40,7 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
     /** {@inheritDoc} */
     @Override
     public void markOccurrences(SyntaxDocument doc, IToken t,
-            SyntaxTextAreaHighlighter h, MarkOccurrencesHighlightPainter p) {
+            SyntaxTextAreaHighlighter h, SmartHighlightPainter p) {
         char[] lexeme = t.getLexeme().toCharArray();
         int tokenOffs = t.getOffset();
         Element root = doc.getDefaultRootElement();

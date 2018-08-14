@@ -77,7 +77,7 @@ public class UncommentAction extends CustomAction {
 
         String[] lines = textToComment.split("\n");
 
-        StringBuffer uncommentedLines = new StringBuffer();
+        StringBuilder uncommentedLines = new StringBuilder();
 
         for (int i = 0; i < lines.length; i++) {
             if (bounds[0] + uncommentedLines.length() < caretPosition) {

@@ -31,8 +31,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
-import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * A cell renderer that adds some pizazz when rendering the standard {@link
@@ -129,7 +129,8 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     private String createParamColor() {
         return UIUtil.isLightForeground(getForeground()) ? Util
-                .getHexString(Utilities.getHyperlinkForeground()) : "#aa0077";
+                .getHexString(SyntaxUtilities.getHyperlinkForeground())
+                : "#aa0077";
     }
 
     /**

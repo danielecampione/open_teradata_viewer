@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.CallableStatement;
@@ -53,7 +54,7 @@ public class RunAction extends CustomAction {
 
     protected RunAction() {
         super("Run", "run.png", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                KeyEvent.CTRL_DOWN_MASK), null);
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
@@ -93,8 +94,8 @@ public class RunAction extends CustomAction {
 
         String[] bindVariables = handleBindVariables(statement);
 
-        final Statement[] statements = new Statement[]{statement};
-        final boolean[] executed = {false};
+        final Statement[] statements = new Statement[] { statement };
+        final boolean[] executed = { false };
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -180,7 +181,7 @@ public class RunAction extends CustomAction {
                     row.add(Integer.toString(updateCount));
                     dataVector.add(row);
                     columnIdentifiers.add("Rows updated");
-                    columnTypes = new int[]{Types.INTEGER};
+                    columnTypes = new int[] { Types.INTEGER };
                     columnTypeNames = new String[1];
                 } else if (statement instanceof CallableStatement) {
                     for (int i = 0; i < bindVariables.length; i++) {
@@ -196,11 +197,11 @@ public class RunAction extends CustomAction {
                         }
                     }
                     columnIdentifiers.add("Statement executed");
-                    columnTypes = new int[]{Types.VARCHAR};
+                    columnTypes = new int[] { Types.VARCHAR };
                     columnTypeNames = new String[1];
                 } else {
                     columnIdentifiers.add("Statement executed");
-                    columnTypes = new int[]{Types.INTEGER};
+                    columnTypes = new int[] { Types.INTEGER };
                     columnTypeNames = new String[1];
                 }
             }

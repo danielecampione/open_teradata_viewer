@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -37,7 +38,7 @@ public class PasteAction extends CustomAction {
 
     protected PasteAction() {
         super("Paste", "paste.png", KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                KeyEvent.CTRL_DOWN_MASK), null);
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
     }
 

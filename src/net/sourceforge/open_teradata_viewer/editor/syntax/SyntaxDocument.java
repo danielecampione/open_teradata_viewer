@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Iterator;
 
 import javax.swing.Action;
 import javax.swing.event.DocumentEvent;
@@ -58,7 +59,8 @@ import net.sourceforge.open_teradata_viewer.util.DynamicIntArray;
  * @author D. Campione
  * 
  */
-public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
+public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
+        ISyntaxConstants {
 
     private static final long serialVersionUID = 6225009820554485519L;
 
@@ -395,6 +397,21 @@ public class SyntaxDocument extends OTVDocument implements ISyntaxConstants {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns an iterator over the tokens in this document. Results are
+     * undefined if this document is modified while the iterator is being
+     * iterated through, so this should only be used on the EDT.<p>
+     *
+     * The <code>remove()</code> method of the returned iterator will throw an
+     * <code>UnsupportedOperationException</code>.
+     *
+     * @return An iterator.
+     */
+    @Override
+    public Iterator<IToken> iterator() {
+        return new TokenIterator(this);
     }
 
     /**

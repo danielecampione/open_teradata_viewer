@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -39,8 +40,11 @@ public class CopyAsRTFAction extends CustomAction {
     private Action copyAsRTF;
 
     protected CopyAsRTFAction() {
-        super("Copy as RTF", "copy.png", KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                KeyEvent.SHIFT_DOWN_MASK + KeyEvent.CTRL_DOWN_MASK),
+        super(
+                "Copy as RTF",
+                "copy.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.SHIFT_DOWN_MASK
+                        + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 "Copies the current selection to the clipboard as RTF.");
         copyAsRTF = new SyntaxTextAreaEditorKit.CopyAsRtfAction();
         setEnabled(true);

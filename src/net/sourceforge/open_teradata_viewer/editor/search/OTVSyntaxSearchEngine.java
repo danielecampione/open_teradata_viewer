@@ -38,14 +38,6 @@ public class OTVSyntaxSearchEngine {
         this._OTVSyntaxTextArea = _OTVSyntaxTextArea;
     }
 
-    public void unmarkAll() {
-        _OTVSyntaxTextArea.clearMarkAllHighlights();
-    }
-
-    public void find() {
-        UISupport.showDialog(ApplicationFrame.getInstance().getFindDialog());
-    }
-
     public void goToLine() {
         OTVGoToDialog _OTVGoToDialog = ApplicationFrame.getInstance()
                 .getGoToDialog();
@@ -56,7 +48,6 @@ public class OTVSyntaxSearchEngine {
 
         int lineNumber = _OTVGoToDialog.getLineNumber();
         if (lineNumber > 0) {
-
             try {
                 _OTVSyntaxTextArea.setCaretPosition(_OTVSyntaxTextArea
                         .getLineStartOffset(lineNumber - 1));

@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,13 +51,13 @@ import javax.swing.text.Caret;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
-import javax.swing.text.Highlighter;
 import javax.swing.text.Segment;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.Macro.MacroRecord;
+import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
 import net.sourceforge.open_teradata_viewer.util.PrintUtil;
 
 /**
@@ -107,6 +106,9 @@ public class TextArea extends TextAreaBase implements Printable {
     /** The property fired when the "mark all" color changes. */
     public static final String MARK_ALL_COLOR_PROPERTY = "TA.markAllColor";
 
+    /** The property fired when what ranges are labeled "mark all" changes. */
+    public static final String MARK_ALL_OCCURRENCES_CHANGED_PROPERTY = "TA.markAllOccurrencesChanged";
+
     // Constants for all actions
     private static final int MIN_ACTION_CONSTANT = 0;
     public static final int COPY_ACTION = 0;
@@ -118,7 +120,7 @@ public class TextArea extends TextAreaBase implements Printable {
     public static final int UNDO_ACTION = 6;
     private static final int MAX_ACTION_CONSTANT = 6;
 
-    private static final Color DEFAULT_MARK_ALL_COLOR = Color.ORANGE;
+    private static final Color DEFAULT_MARK_ALL_COLOR = new Color(0xffc800);
 
     /**
      * The current text mode ({@link #INSERT_MODE} or {@link #OVERWRITE_MODE}).
@@ -166,15 +168,12 @@ public class TextArea extends TextAreaBase implements Printable {
 
     private transient LineHighlightManager lineHighlightManager;
 
-    private ArrayList<Object> markAllHighlights; // Highlights from "mark all"
-    private String markedWord; // IExpression marked in "mark all"
-    private ChangeableHighlightPainter markAllHighlightPainter;
+    private SmartHighlightPainter markAllHighlightPainter;
 
     private int[] carets; // Index 0=>insert caret, 1=>overwrite
 
     /** Ctor. */
     public TextArea() {
-        init(INSERT_MODE);
     }
 
     /**
@@ -184,7 +183,6 @@ public class TextArea extends TextAreaBase implements Printable {
      */
     public TextArea(AbstractDocument doc) {
         super(doc);
-        init(INSERT_MODE);
     }
 
     /**
@@ -194,7 +192,6 @@ public class TextArea extends TextAreaBase implements Printable {
      */
     public TextArea(String text) {
         super(text);
-        init(INSERT_MODE);
     }
 
     /**
@@ -207,7 +204,6 @@ public class TextArea extends TextAreaBase implements Printable {
      */
     public TextArea(int rows, int cols) {
         super(rows, cols);
-        init(INSERT_MODE);
     }
 
     /**
@@ -221,7 +217,6 @@ public class TextArea extends TextAreaBase implements Printable {
      */
     public TextArea(String text, int rows, int cols) {
         super(text, rows, cols);
-        init(INSERT_MODE);
     }
 
     /**
@@ -236,7 +231,6 @@ public class TextArea extends TextAreaBase implements Printable {
      */
     public TextArea(AbstractDocument doc, String text, int rows, int cols) {
         super(doc, text, rows, cols);
-        init(INSERT_MODE);
     }
 
     /**
@@ -246,7 +240,7 @@ public class TextArea extends TextAreaBase implements Printable {
      *                 <code>OVERWRITE_MODE</code>.
      */
     public TextArea(int textMode) {
-        init(textMode);
+        setTextMode(textMode);
     }
 
     /**
@@ -344,20 +338,12 @@ public class TextArea extends TextAreaBase implements Printable {
     /**
      * Clears any "mark all" highlights, if any.
      *
-     * @see #markAll
-     * @see #getMarkAllHighlightColor
-     * @see #setMarkAllHighlightColor
+     * @see #markAll(List)
+     * @see #getMarkAllHighlightColor()
+     * @see #setMarkAllHighlightColor(Color)
      */
-    public void clearMarkAllHighlights() {
-        Highlighter h = getHighlighter();
-        if (h != null && markAllHighlights != null) {
-            int count = markAllHighlights.size();
-            for (int i = 0; i < count; i++) {
-                h.removeHighlight(markAllHighlights.get(i));
-            }
-            markAllHighlights.clear();
-        }
-        markedWord = null;
+    void clearMarkAllHighlights() {
+        ((TextAreaHighlighter) getHighlighter()).clearMarkAllHighlights();
         repaint();
     }
 
@@ -805,12 +791,10 @@ public class TextArea extends TextAreaBase implements Printable {
         super.replaceSelection(content);
     }
 
-    /**
-     * Initializes this text area.
-     *
-     * @param textMode The text mode.
-     */
-    private void init(int textMode) {
+    /** {@inheritDoc} */
+    @Override
+    protected void init() {
+        super.init();
         // NOTE: Our actions are created here instead of in a static block so
         // they are only created when the first TextArea is instantiated, not
         // before. There have been reports of users calling static getters (e.g.
@@ -826,7 +810,7 @@ public class TextArea extends TextAreaBase implements Printable {
 
         // Set the defaults for various stuff
         Color markAllHighlightColor = getDefaultMarkAllHighlightColor();
-        markAllHighlightPainter = new ChangeableHighlightPainter(
+        markAllHighlightPainter = new SmartHighlightPainter(
                 markAllHighlightColor);
         setMarkAllHighlightColor(markAllHighlightColor);
         carets = new int[2];
@@ -834,8 +818,7 @@ public class TextArea extends TextAreaBase implements Printable {
         setCaretStyle(OVERWRITE_MODE, ConfigurableCaret.BLOCK_STYLE);
         setDragEnabled(true); // Enable drag-and-drop
 
-        // Set values for stuff the user passed in
-        setTextMode(textMode); // Carets array must be initialized first
+        setTextMode(INSERT_MODE); // Carets array must be created first
 
         // Fix the odd "Ctrl+H <=> Backspace" Java behavior
         fixCtrlH();
@@ -862,54 +845,39 @@ public class TextArea extends TextAreaBase implements Printable {
     }
 
     /**
-     * Marks all instances of the specified text in this text area.
+     * Marks all ranges specified with the "mark all" highlighter. Typically,
+     * this method is called indirectly from {@link SearchEngine} when doing a
+     * fine or replace operation.<p>
+     * 
+     * This method fires a property change event of type
+     * {@link #MARK_ALL_OCCURRENCES_CHANGED_PROPERTY}.
      *
-     * @param toMark The text to mark.
-     * @param matchCase Whether the match should be case-sensitive.
-     * @param wholeWord Whether the matches should be surrounded by spaces or
-     *                  tabs.
-     * @param regex Whether <code>toMark</code> is a Java regular expression.
-     * @return The number of matches marked.
-     * @see #clearMarkAllHighlights
-     * @see #getMarkAllHighlightColor
-     * @see #setMarkAllHighlightColor
+     * @param ranges The ranges to mark. This should not be <code>null</code>.
+     * @see SearchEngine
+     * @see SearchContext#setMarkAll(boolean)
+     * @see #clearMarkAllHighlights()
+     * @see #getMarkAllHighlightColor()
+     * @see #setMarkAllHighlightColor(Color)
      */
-    public int markAll(String toMark, boolean matchCase, boolean wholeWord,
-            boolean regex) {
-        Highlighter h = getHighlighter();
-        int numMarked = 0;
-        if (toMark != null && !toMark.equals(markedWord) && h != null) {
-            if (markAllHighlights != null) {
-                clearMarkAllHighlights();
-            } else {
-                markAllHighlights = new ArrayList<Object>();
-            }
-            int caretPos = getCaretPosition();
-            markedWord = toMark;
-            setCaretPosition(0);
-            SearchContext context = new SearchContext();
-            context.setSearchFor(toMark);
-            context.setMatchCase(matchCase);
-            context.setRegularExpression(regex);
-            context.setSearchForward(true);
-            context.setWholeWord(wholeWord);
-            boolean found = SearchEngine.search(this, context);
-            while (found) {
-                int start = getSelectionStart();
-                int end = getSelectionEnd();
-                try {
-                    markAllHighlights.add(h.addHighlight(start, end,
-                            markAllHighlightPainter));
-                } catch (BadLocationException ble) {
-                    ExceptionDialog.notifyException(ble);
+    void markAll(List<DocumentRange> ranges) {
+        TextAreaHighlighter h = (TextAreaHighlighter) getHighlighter();
+        if (h != null) {
+            if (ranges != null) {
+                for (DocumentRange range : ranges) {
+                    try {
+                        h.addMarkAllHighlight(range.getStartOffset(),
+                                range.getEndOffset(), markAllHighlightPainter);
+                    } catch (BadLocationException ble) {
+                        ExceptionDialog.hideException(ble);
+                    }
                 }
-                numMarked++;
-                found = SearchEngine.search(this, context);
             }
-            setCaretPosition(caretPos);
+
             repaint();
+            firePropertyChange(MARK_ALL_OCCURRENCES_CHANGED_PROPERTY, null,
+                    ranges);
+
         }
-        return numMarked;
     }
 
     /** {@inheritDoc} */
@@ -1406,7 +1374,8 @@ public class TextArea extends TextAreaBase implements Printable {
         Color old = (Color) markAllHighlightPainter.getPaint();
         if (old != null && !old.equals(color)) {
             markAllHighlightPainter.setPaint(color);
-            if (markedWord != null) {
+            TextAreaHighlighter h = (TextAreaHighlighter) getHighlighter();
+            if (h.getMarkAllHighlightCount() > 0) {
                 repaint(); // Repaint if words are highlighted
             }
             firePropertyChange(MARK_ALL_COLOR_PROPERTY, old, color);
@@ -1576,16 +1545,6 @@ public class TextArea extends TextAreaBase implements Printable {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
-                Caret caret = getCaret();
-                dot = caret.getDot();
-                mark = caret.getMark();
-                fireCaretUpdate(this);
-            }
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
             // WORKAROUND: Since JTextComponent only updates the caret location
             // on mouse clicked and released, we'll do it on dragged events when
             // the left mouse button is clicked
@@ -1598,8 +1557,20 @@ public class TextArea extends TextAreaBase implements Printable {
         }
 
         @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.isPopupTrigger()) { // OS X popup triggers are on pressed
+                showPopup(e);
+            } else if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
+                Caret caret = getCaret();
+                dot = caret.getDot();
+                mark = caret.getMark();
+                fireCaretUpdate(this);
+            }
+        }
+
+        @Override
         public void mouseReleased(MouseEvent e) {
-            if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+            if (e.isPopupTrigger()) {
                 showPopup(e);
             }
         }
@@ -1615,6 +1586,7 @@ public class TextArea extends TextAreaBase implements Printable {
             if (popupMenu != null) {
                 configurePopupMenu(popupMenu);
                 popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                e.consume();
             }
         }
     }

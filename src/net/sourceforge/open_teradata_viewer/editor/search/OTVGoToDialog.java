@@ -32,7 +32,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
@@ -46,12 +45,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 import net.sourceforge.open_teradata_viewer.EscapableDialog;
+import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.editor.ResizableFrameContentPane;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
- * A "Go To" dialog allowing you to go to a specific line number in an
- * instance of SyntaxTextArea.<p>
+ * A "Go To" dialog allowing you to go to a specific line number in an instance
+ * of SyntaxTextArea.<p>
  *
  * Example usage:
  * <pre>
@@ -80,7 +80,6 @@ public class OTVGoToDialog extends EscapableDialog {
     private JTextField lineNumberField;
     private int maxLineNumberAllowed; // Number of lines in the document
     private int lineNumber; // The line to go to, or -1 for Cancel
-    private String errorDialogTitle;
 
     /**
      * Creates a new <code>OTVGoToDialog</code>.
@@ -201,9 +200,8 @@ public class OTVGoToDialog extends EscapableDialog {
      * override.
      */
     protected void displayInvalidLineNumberMessage() {
-        JOptionPane.showMessageDialog(this, "Manimum line number allowed is "
-                + maxLineNumberAllowed + ".", getErrorDialogTitle(),
-                JOptionPane.ERROR_MESSAGE);
+        UISupport.getDialogs().showErrorMessage(
+                "Manimum line number allowed is " + maxLineNumberAllowed + ".");
     }
 
     /**
@@ -214,20 +212,6 @@ public class OTVGoToDialog extends EscapableDialog {
     protected void escapePressed() {
         lineNumber = -1;
         super.escapePressed();
-    }
-
-    /**
-     * Returns the title for the error dialog.
-     *
-     * @return The title for the error dialog.
-     * @see #setErrorDialogTitle(String)
-     */
-    public String getErrorDialogTitle() {
-        String title = errorDialogTitle;
-        if (title == null) {
-            title = "Warning";
-        }
-        return title;
     }
 
     /**
@@ -249,17 +233,6 @@ public class OTVGoToDialog extends EscapableDialog {
      */
     public int getMaxLineNumberAllowed() {
         return maxLineNumberAllowed;
-    }
-
-    /**
-     * Sets the title for the error dialog.
-     *
-     * @param title The new title. If this is <code>null</code>, a default value
-     *        will be used.
-     * @see #getErrorDialogTitle()
-     */
-    public void setErrorDialogTitle(String title) {
-        this.errorDialogTitle = title;
     }
 
     /**
@@ -292,7 +265,12 @@ public class OTVGoToDialog extends EscapableDialog {
         super.setVisible(visible);
     }
 
-    /** Listens for events in this dialog. */
+    /**
+     * Listens for events in this dialog.
+     * 
+     * @author D. Campione
+     * 
+     */
     private class Listener implements ActionListener, DocumentListener {
 
         @Override
@@ -320,7 +298,12 @@ public class OTVGoToDialog extends EscapableDialog {
         }
     }
 
-    /** A document filter that only lets the user enter digits. */
+    /**
+     * A document filter that only lets the user enter digits.
+     * 
+     * @author D. Campione
+     * 
+     */
     private class NumberDocumentFilter extends DocumentFilter {
 
         private String fix(String str) {

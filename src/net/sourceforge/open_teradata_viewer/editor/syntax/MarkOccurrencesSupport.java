@@ -29,6 +29,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
 
 /**
  * Marks all occurrences of the token at the current caret position, if it is an
@@ -42,7 +43,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
 
     private SyntaxTextArea textArea;
     private Timer timer;
-    private MarkOccurrencesHighlightPainter p;
+    private SmartHighlightPainter p;
 
     /** The default color used to mark occurrences. */
     public static final Color DEFAULT_COLOR = new Color(224, 224, 224);
@@ -78,7 +79,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
     public MarkOccurrencesSupport(int delay, Color color) {
         timer = new Timer(delay, this);
         timer.setRepeats(false);
-        p = new MarkOccurrencesHighlightPainter();
+        p = new SmartHighlightPainter();
         setColor(color);
     }
 
@@ -157,7 +158,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      * @see #setColor(Color)
      */
     public Color getColor() {
-        return p.getColor();
+        return (Color) p.getPaint();
     }
 
     /**
@@ -240,7 +241,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      * @see #setPaintBorder(boolean)
      */
     public void setColor(Color color) {
-        p.setColor(color);
+        p.setPaint(color);
         if (textArea != null) {
             removeHighlights();
             caretUpdate(null); // Force a highlight repaint

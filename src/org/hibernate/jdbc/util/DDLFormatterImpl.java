@@ -39,6 +39,7 @@ public class DDLFormatterImpl implements IFormatter {
      * 
      * @param sql The statement to be fornmatted.
      */
+    @Override
     public String format(String sql) {
         if (sql.toLowerCase().startsWith("create table")) {
             return formatCreateTable(sql);
@@ -52,7 +53,7 @@ public class DDLFormatterImpl implements IFormatter {
     }
 
     private String formatCommentOn(String sql) {
-        StringBuffer result = new StringBuffer(60).append("\n    ");
+        StringBuilder result = new StringBuilder(60).append("\n    ");
         StringTokenizer tokens = new StringTokenizer(sql, " '[]\"", true);
 
         boolean quoted = false;
@@ -72,7 +73,7 @@ public class DDLFormatterImpl implements IFormatter {
     }
 
     private String formatAlterTable(String sql) {
-        StringBuffer result = new StringBuffer(60).append("\n    ");
+        StringBuilder result = new StringBuilder(60).append("\n    ");
         StringTokenizer tokens = new StringTokenizer(sql, " (,)'[]\"", true);
 
         boolean quoted = false;
@@ -92,7 +93,7 @@ public class DDLFormatterImpl implements IFormatter {
     }
 
     private String formatCreateTable(String sql) {
-        StringBuffer result = new StringBuffer(60).append("\n    ");
+        StringBuilder result = new StringBuilder(60).append("\n    ");
         StringTokenizer tokens = new StringTokenizer(sql, "(,)'[]\"", true);
 
         int depth = 0;
