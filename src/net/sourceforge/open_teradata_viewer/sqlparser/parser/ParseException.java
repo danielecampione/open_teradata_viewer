@@ -2,7 +2,7 @@
 /* JavaCCOptions:KEEP_LINE_COL=null */
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -202,4 +202,4 @@ public class ParseException extends Exception {
    }
 
 }
-/* JavaCC - OriginalChecksum=3d3db0114ad0f0915ca6c4d7caca38e1 (do not edit this line) */
+/* JavaCC - OriginalChecksum=d9884c3f6bcce0c09d52b27a7f1f6099 (do not edit this line) */

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,11 @@ public class LongValue implements IExpression {
         }
         this.value = Long.parseLong(val);
         this.stringValue = val;
+    }
+
+    public LongValue(long value) {
+        this.value = value;
+        stringValue = String.valueOf(value);
     }
 
     @Override

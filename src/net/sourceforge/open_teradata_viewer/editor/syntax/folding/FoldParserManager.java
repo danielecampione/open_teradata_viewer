@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax folding )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ public class FoldParserManager implements ISyntaxConstants {
 
         map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));
         map.put(SYNTAX_STYLE_CLOJURE, new LispFoldParser());
+        map.put(SYNTAX_STYLE_JAVA, new CurlyFoldParser(true, true));
 
         return map;
     }

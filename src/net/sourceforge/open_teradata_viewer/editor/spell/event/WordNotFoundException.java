@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell event )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 package net.sourceforge.open_teradata_viewer.editor.spell.event;
 
 /**
- * An exception to indicate that there not enough words as expected.
+ * An exception to indicate that there aren't enough words as expected.
  * 
  * @author D. Campione
  * 

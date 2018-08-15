@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 import java.util.Iterator;
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
@@ -184,7 +185,7 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
     public void visit(SelectExpressionItem selectExpressionItem) {
         selectExpressionItem.getExpression().accept(expressionVisitor);
         if (selectExpressionItem.getAlias() != null) {
-            buffer.append(" AS ").append(selectExpressionItem.getAlias());
+            buffer.append(selectExpressionItem.getAlias().toString());
         }
     }
 
@@ -193,9 +194,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         buffer.append("(");
         subSelect.getSelectBody().accept(this);
         buffer.append(")");
-        String alias = subSelect.getAlias();
+        Alias alias = subSelect.getAlias();
         if (alias != null) {
-            buffer.append(" AS ").append(alias);
+            buffer.append(alias.toString());
         }
     }
 
@@ -206,9 +207,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         if (pivot != null) {
             pivot.accept(this);
         }
-        String alias = tableName.getAlias();
-        if (alias != null && !alias.isEmpty()) {
-            buffer.append(" AS ").append(alias);
+        Alias alias = tableName.getAlias();
+        if (alias != null) {
+            buffer.append(alias);
         }
     }
 

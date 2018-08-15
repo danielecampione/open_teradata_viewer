@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor autocomplete )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ public class SQLCellRenderer extends CompletionCellRenderer {
 
     /** Ctor. */
     public SQLCellRenderer() {
-        variableIcon = getIcon("img/var.png");
-        functionIcon = getIcon("img/function.png");
+        variableIcon = getIcon("/icons/var.png");
+        functionIcon = getIcon("/icons/function.png");
         emptyIcon = new EmptyIcon(16);
     }
 
@@ -71,6 +71,7 @@ public class SQLCellRenderer extends CompletionCellRenderer {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void prepareForOtherCompletion(JList list, ICompletion c,
             int index, boolean selected, boolean hasFocus) {
         super.prepareForOtherCompletion(list, c, index, selected, hasFocus);
@@ -78,6 +79,7 @@ public class SQLCellRenderer extends CompletionCellRenderer {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void prepareForVariableCompletion(JList list,
             VariableCompletion vc, int index, boolean selected, boolean hasFocus) {
         super.prepareForVariableCompletion(list, vc, index, selected, hasFocus);
@@ -85,6 +87,7 @@ public class SQLCellRenderer extends CompletionCellRenderer {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void prepareForFunctionCompletion(JList list,
             FunctionCompletion fc, int index, boolean selected, boolean hasFocus) {
         super.prepareForFunctionCompletion(list, fc, index, selected, hasFocus);

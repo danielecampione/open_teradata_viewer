@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -35,11 +39,14 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLayer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
+import javax.swing.JTree;
 import javax.swing.LookAndFeel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -47,7 +54,9 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.plaf.LayerUI;
 import javax.swing.text.DefaultCaret;
+import javax.swing.tree.TreeNode;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
@@ -67,6 +76,12 @@ import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletio
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.AbstractSourceTree;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.ILanguageSupport;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSupportFactory;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JavaLanguageSupport;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.tree.JavaOutlineTree;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree.JavaScriptOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.FindToolBar;
 import net.sourceforge.open_teradata_viewer.editor.search.ISearchListener;
@@ -77,6 +92,7 @@ import net.sourceforge.open_teradata_viewer.editor.search.SearchEvent;
 import net.sourceforge.open_teradata_viewer.editor.spell.SpellingParser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ErrorStrip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.UndoMgr;
@@ -146,6 +162,9 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     private ThirdPartyLookAndFeelManager lafManager;
 
     private SpellingParser spellingParser;
+
+    private JScrollPane treeSP;
+    private AbstractSourceTree tree;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -234,7 +253,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
 
     private JSplitPane createWorkArea() {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                createQueryEditor(), createQueryTable());
+                createEditor(), createTable());
         queryArea.setOneTouchExpandable(true);
         queryArea.setDividerSize(4);
         queryArea.setDividerLocation(200);
@@ -250,22 +269,49 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         return textArea;
     }
 
-    private JPanel createQueryEditor() {
+    private JPanel createEditor() {
         JPanel globalQueryEditorPanel = new JPanel(new BorderLayout());
         JPanel contentPane = new JPanel(new BorderLayout());
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         Actions.SCHEMA_BROWSER.setEnabled(isConnected);
         setToolbar(new ApplicationToolBar(schemaBrowserToggleButton));
         globalQueryEditorPanel.add(getToolbar(), BorderLayout.NORTH);
+
+        LanguageSupportFactory lsf = LanguageSupportFactory.get();
+        ILanguageSupport support = lsf.getSupportFor(SYNTAX_STYLE_JAVA);
+        JavaLanguageSupport jls = (JavaLanguageSupport) support;
+        try {
+            jls.getJarManager().addCurrentJreClassFileSource();
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
+
         textArea = createTextArea();
+        LanguageSupportFactory.get().register(textArea);
+        ToolTipManager.sharedInstance().registerComponent(textArea);
 
         textScrollPane = new TextScrollPane(textArea, true);
+        textScrollPane.setIconRowHeaderEnabled(true);
+        // Dummy tree keeps JViewport's "background" looking right initially
+        JTree dummy = new JTree((TreeNode) null);
+        treeSP = new JScrollPane(dummy);
+        LayerUI<JComponent> layerUI = new WallpaperLayerUI();
+        JLayer<JComponent> jlayer = new JLayer<JComponent>(treeSP, layerUI);
+        final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                jlayer, textScrollPane);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                sp.setDividerLocation(0.25);
+            }
+        });
+        sp.setContinuousLayout(true);
         Gutter gutter = textScrollPane.getGutter();
         gutter.setBookmarkingEnabled(true);
         gutter.setBookmarkIcon(ImageManager.getImage("/icons/bookmark.png"));
         textScrollPane
                 .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        csp.add(textScrollPane);
+        csp.add(sp);
         ErrorStrip errorStrip = new ErrorStrip(textArea);
         contentPane.add(csp, BorderLayout.CENTER);
         contentPane.add(errorStrip, BorderLayout.LINE_END);
@@ -378,7 +424,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         textArea.addHyperlinkListener(this);
     }
 
-    private JScrollPane createQueryTable() {
+    private JScrollPane createTable() {
         return new JScrollPane(ResultSetTable.getInstance());
     }
 
@@ -439,6 +485,11 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             }
         } catch (IOException ioe) {
             ExceptionDialog.ignoreException(ioe);
+        }
+
+        if (tree != null) {
+            tree.uninstall();
+            treeSP.remove(tree);
         }
 
         dispose();
@@ -712,6 +763,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                     try {
                         File userDict = File
                                 .createTempFile("spellDemo", ".txt");
+                        userDict.deleteOnExit();
                         spellingParser.setUserDictionary(userDict);
                         System.out.println("User dictionary: "
                                 + userDict.getAbsolutePath());
@@ -753,6 +805,32 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             } else {
                 Utilities.openURLWithDefaultBrowser(url.toString());
             }
+        }
+    }
+
+    /**
+     * Displays a tree view of the current source code, if available for the
+     * current programming language.
+     */
+    public void refreshSourceTree() {
+        if (tree != null) {
+            tree.uninstall();
+            treeSP.remove(tree);
+        }
+
+        String language = textArea.getSyntaxEditingStyle();
+        if (ISyntaxConstants.SYNTAX_STYLE_JAVA.equals(language)) {
+            tree = new JavaOutlineTree();
+        } else if (ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT.equals(language)) {
+            tree = new JavaScriptOutlineTree();
+        } else {
+            tree = null;
+        }
+
+        if (tree != null) {
+            tree.listenTo(textArea);
+            treeSP.setViewportView(tree);
+            treeSP.revalidate();
         }
     }
 
@@ -891,6 +969,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                 .getViewport().getComponent(0);
     }
 
+    /** Sets the content in the text area. */
     public void setText(final String t) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -898,6 +977,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                 textArea.setText(t);
             }
         });
+        refreshSourceTree();
     }
 
     public boolean isFullScreenModeActive() {
@@ -1035,6 +1115,20 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     }
 
     /**
+     * Called when we are made visible. Here we request that the {@link
+     * SyntaxTextArea} is given focus.
+     *
+     * @param visible Whether this frame should be visible.
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            focusTextArea();
+        }
+    }
+
+    /**
      * Actually creates the GUI. This is called after the splash screen is
      * displayed via <code>SwingUtilities#invokeLater()</code>.
      *
@@ -1169,6 +1263,34 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             setVisible(true);
 
             Actions.CONNECT.actionPerformed(new ActionEvent(this, 0, null));
+        }
+    }
+
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    class WallpaperLayerUI extends LayerUI<JComponent> {
+
+        private static final long serialVersionUID = -8621209118099109672L;
+
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            super.paint(g, c);
+
+            Graphics2D g2 = (Graphics2D) g.create();
+
+            int w = c.getWidth();
+            int h = c.getHeight();
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+                    .2f));
+            g2.setPaint(new GradientPaint(0, 0, c.getBackground().darker(),
+                    w - 50, 0, c.getBackground().brighter().brighter()));
+            g2.fillRect(0, 0, w, h);
+
+            g2.dispose();
         }
     }
 }

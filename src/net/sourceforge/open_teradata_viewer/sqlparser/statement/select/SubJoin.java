@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
+
 /**
  * A table created by "(tab1 join tab2)".
  * 
@@ -28,7 +30,7 @@ public class SubJoin implements IFromItem {
 
     private IFromItem left;
     private Join join;
-    private String alias;
+    private Alias alias;
     private Pivot pivot;
 
     @Override
@@ -52,28 +54,30 @@ public class SubJoin implements IFromItem {
         join = j;
     }
 
+    @Override
     public Pivot getPivot() {
         return pivot;
     }
 
+    @Override
     public void setPivot(Pivot pivot) {
         this.pivot = pivot;
     }
 
     @Override
-    public String getAlias() {
+    public Alias getAlias() {
         return alias;
     }
 
     @Override
-    public void setAlias(String string) {
-        alias = string;
+    public void setAlias(Alias alias) {
+        this.alias = alias;
     }
 
     @Override
     public String toString() {
         return "(" + left + " " + join + ")"
                 + ((pivot != null) ? " " + pivot : "")
-                + ((alias != null) ? " AS " + alias : "");
+                + ((alias != null) ? alias.toString() : "");
     }
 }

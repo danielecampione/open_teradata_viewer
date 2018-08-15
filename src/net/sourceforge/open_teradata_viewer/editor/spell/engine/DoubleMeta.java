@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell engine )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,13 +159,13 @@ public class DoubleMeta implements ITransformator {
         return false;
     }
 
-    private final static void MetaphAdd(StringBuffer primary, String main) {
+    private final static void MetaphAdd(StringBuilder primary, String main) {
         if (main != null) {
             primary.append(main);
         }
     }
 
-    private final static void MetaphAdd(StringBuffer primary, char main) {
+    private final static void MetaphAdd(StringBuilder primary, char main) {
         primary.append(main);
     }
 
@@ -206,7 +206,7 @@ public class DoubleMeta implements ITransformator {
      */
     @Override
     public final String transform(String word) {
-        StringBuffer primary = new StringBuffer(word.length() + 5);
+        StringBuilder primary = new StringBuilder(word.length() + 5);
         String in = word.toUpperCase() + "     ";
         int current = 0;
         int length = in.length();

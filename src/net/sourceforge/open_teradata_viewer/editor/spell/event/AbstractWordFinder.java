@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell event )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ public abstract class AbstractWordFinder implements IWordFinder {
             throw new WordNotFoundException("No Words in current String");
         }
 
-        StringBuffer sb = new StringBuffer(text.substring(0,
+        StringBuilder sb = new StringBuilder(text.substring(0,
                 currentWord.getStart()));
         sb.append(newWord);
         sb.append(text.substring(currentWord.getEnd()));

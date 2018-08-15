@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
+
 /**
  * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
  * sub-select).
@@ -29,9 +31,9 @@ public interface IFromItem {
 
     void accept(IFromItemVisitor fromItemVisitor);
 
-    String getAlias();
+    Alias getAlias();
 
-    void setAlias(String alias);
+    void setAlias(Alias alias);
 
     Pivot getPivot();
 

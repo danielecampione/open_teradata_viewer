@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public class CommentAction extends CustomAction {
     private static final long serialVersionUID = -2802751406188460908L;
 
     public CommentAction() {
-        super("Comment", "comment.png", null, null);
+        super("Comment SQL code", "comment.png", null, null);
         setEnabled(true);
     }
 

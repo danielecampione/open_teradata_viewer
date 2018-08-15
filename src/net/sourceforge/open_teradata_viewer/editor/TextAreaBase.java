@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -555,14 +555,14 @@ abstract class TextAreaBase extends JTextArea {
         // Defaults for various properties
         setHighlightCurrentLine(true);
         setCurrentLineHighlightColor(getDefaultCurrentLineHighlightColor());
-        setMarginLineEnabled(false);
+        setMarginLineEnabled(true);
         setMarginLineColor(getDefaultMarginLineColor());
         setMarginLinePosition(getDefaultMarginLinePosition());
         setBackgroundObject(Color.WHITE);
         setWrapStyleWord(true); // We only support wrapping at word boundaries
-        setTabSize(5);
+        setTabSize(4);
         setForeground(Color.BLACK);
-        setTabsEmulated(false);
+        setTabsEmulated(true);
 
         // Stuff needed by the caret listener below
         previousCaretY = currentCaretY = getInsets().top;

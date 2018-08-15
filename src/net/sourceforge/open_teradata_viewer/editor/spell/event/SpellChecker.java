@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell event )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -560,7 +560,7 @@ public class SpellChecker {
                 // Check for capitalization
                 if (isSupposedToBeCapitalized(word, tokenizer)) {
                     errors++;
-                    StringBuffer buf = new StringBuffer(word);
+                    StringBuilder buf = new StringBuilder(word);
                     buf.setCharAt(0, Character.toUpperCase(word.charAt(0)));
                     Vector suggestion = new Vector();
                     suggestion.addElement(new Word(buf.toString(), 0));

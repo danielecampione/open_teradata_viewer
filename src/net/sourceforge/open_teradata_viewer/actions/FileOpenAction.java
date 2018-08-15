@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,22 +48,19 @@ public class FileOpenAction extends CustomAction implements ISyntaxConstants {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
         File file = FileIO.openFile();
         if (file != null) {
-            ApplicationFrame.getInstance().setText("");
+            applicationFrame.setText("");
             Context.getInstance().setOpenedFile(file);
             SyntaxTextArea textArea = ApplicationFrame.getInstance()
                     .getTextComponent();
-            resetEditorPaneToAvoidMemoryLeak(textArea);
             TransferHandler transferHandler = textArea.getTransferHandler();
             StringSelection stringSelection = new StringSelection(new String(
                     FileIO.readFile(file)));
             transferHandler.importData(new TransferSupport(textArea,
                     stringSelection));
+            textArea.setCaretPosition(0);
         }
-    }
-
-    private void resetEditorPaneToAvoidMemoryLeak(SyntaxTextArea textArea) {
-        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
     }
 }

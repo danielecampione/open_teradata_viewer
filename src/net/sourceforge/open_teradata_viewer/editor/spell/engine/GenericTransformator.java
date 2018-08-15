@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell engine )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -316,8 +316,8 @@ public class GenericTransformator implements ITransformator {
         // "replacement expression" giving the phonetic equivalent of the "match
         // expression"
         TransformationRule rule = null;
-        StringBuffer matchExp = new StringBuffer();
-        StringBuffer replaceExp = new StringBuffer();
+        StringBuilder matchExp = new StringBuilder();
+        StringBuilder replaceExp = new StringBuilder();
         boolean start = false, end = false;
         int takeOutPart = 0, matchLength = 0;
         boolean match = true, inMulti = false;
@@ -352,7 +352,7 @@ public class GenericTransformator implements ITransformator {
             }
         }
         if (replaceExp.toString().equals(REPLACEVOID)) {
-            replaceExp = new StringBuffer("");
+            replaceExp = new StringBuilder("");
         }
         rule = new TransformationRule(matchExp.toString(),
                 replaceExp.toString(), takeOutPart, matchLength, start, end);

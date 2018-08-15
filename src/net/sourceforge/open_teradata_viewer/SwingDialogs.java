@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 
 /**
  * 
@@ -57,8 +57,11 @@ public class SwingDialogs implements IXDialogs {
     @Override
     public void showExtendedInfo(String title, String description,
             String content, Dimension size) {
-        JPanel buttonBar = ButtonBarFactory.buildRightAlignedBar(new JButton(
-                new OkAction("OK")));
+        // Build a right-aligned bar for: OK
+        ButtonBarBuilder builder = new ButtonBarBuilder();
+        builder.addGlue();
+        builder.addButton(new JButton(new OkAction("OK")));
+        JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);
     }
@@ -137,7 +140,7 @@ public class SwingDialogs implements IXDialogs {
 
     @Override
     public int yesYesToAllOrNo(String question, String title) {
-        String[] buttons = {"Yes", "Yes to all", "No"};
+        String[] buttons = { "Yes", "Yes to all", "No" };
         return JOptionPane.showOptionDialog(parent, question, title, 0,
                 JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[0]);
     }
@@ -175,17 +178,21 @@ public class SwingDialogs implements IXDialogs {
         passwordField.addAncestorListener(new FocusAncestorListener(
                 passwordField));
         JLabel qLabel = new JLabel(question);
-        JOptionPane.showConfirmDialog(null,
-                new Object[]{qLabel, passwordField}, title,
-                JOptionPane.OK_CANCEL_OPTION);
+        JOptionPane.showConfirmDialog(null, new Object[] { qLabel,
+                passwordField }, title, JOptionPane.OK_CANCEL_OPTION);
         return passwordField.getPassword();
     }
 
     @Override
     public boolean confirmExtendedInfo(String title, String description,
             String content, Dimension size) {
-        JPanel buttonBar = ButtonBarFactory.buildRightAlignedBar(new JButton(
-                new OkAction("OK")), new JButton(new CancelAction("Cancel")));
+        // Build a right-aligned bar for: OK and Cancel
+        ButtonBarBuilder builder = new ButtonBarBuilder();
+        builder.addGlue();
+        builder.addButton(new JButton(new OkAction("OK")));
+        builder.addRelatedGap();
+        builder.addButton(new JButton(new CancelAction("Cancel")));
+        JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);
 
@@ -195,9 +202,15 @@ public class SwingDialogs implements IXDialogs {
     @Override
     public Boolean confirmOrCancleExtendedInfo(String title,
             String description, String content, Dimension size) {
-        JPanel buttonBar = ButtonBarFactory.buildRightAlignedBar(new JButton(
-                new OkAction("Yes")), new JButton(new NoAction("No")),
-                new JButton(new CancelAction("Cancel")));
+        // Build a right-aligned bar for: Yes, No and Cancel
+        ButtonBarBuilder builder = new ButtonBarBuilder();
+        builder.addGlue();
+        builder.addButton(new JButton(new OkAction("Yes")));
+        builder.addRelatedGap();
+        builder.addButton(new JButton(new NoAction("No")));
+        builder.addRelatedGap();
+        builder.addButton(new JButton(new CancelAction("Cancel")));
+        JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);
 

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,6 +119,7 @@ public class AboutAction extends CustomAction implements MouseListener {
     public void mouseReleased(MouseEvent e) {
     }
 
+    @Override
     public void openURL(String uri) throws Exception {
         Desktop.getDesktop().browse(new URI(uri));
     }
@@ -159,7 +160,7 @@ public class AboutAction extends CustomAction implements MouseListener {
         c.gridy++;
         panel.add(
                 new JLabel(
-                        "<html><font style=\"color:gray\">Copyright &copy 2013 D. Campione</font></html>"),
+                        "<html><font style=\"color:gray\">Copyright &copy 2014 D. Campione</font></html>"),
                 c);
         c.gridy++;
         JLabel link = new JLabel("GNU General Public License");
@@ -203,8 +204,11 @@ public class AboutAction extends CustomAction implements MouseListener {
             }
         }
         panel.setBorder(new BevelBorder(BevelBorder.RAISED) {
+
             private static final long serialVersionUID = 5762741907494684733L;
+
             private Insets insets = new Insets(65, 10, 10, 10);
+
             @Override
             public Insets getBorderInsets(Component c) {
                 return insets;

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
@@ -56,4 +57,6 @@ public interface IStatementVisitor {
     void visit(CreateTable createTable);
 
     void visit(CreateView createView);
+
+    void visit(Alter alter);
 }

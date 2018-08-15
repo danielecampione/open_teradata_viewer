@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import java.util.Iterator;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AllComparisonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnalyticExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnyComparisonExpression;
@@ -72,6 +73,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.OldTeradataJoinBinaryExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
@@ -105,6 +107,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
      * ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeparser, myBuf);
      * </code>
      * </pre>
+     * 
      * @param buffer the buffer that will be filled with the expression.
      */
     public ExpressionDeParser(ISelectVisitor selectVisitor, StringBuilder buffer) {
@@ -332,8 +335,11 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(Column tableColumn) {
-        String tableName = tableColumn.getTable().getAlias();
-        if (tableName == null) {
+        final Alias alias = tableColumn.getTable().getAlias();
+        String tableName = null;
+        if (alias != null) {
+            tableName = alias.getName();
+        } else if (tableName == null) {
             tableName = tableColumn.getTable().getWholeTableName();
         }
         if (tableName != null) {
@@ -541,5 +547,10 @@ public class ExpressionDeParser implements IExpressionVisitor,
     @Override
     public void visit(TeradataHierarchicalExpression texpr) {
         buffer.append(texpr.toString());
+    }
+
+    @Override
+    public void visit(RegExpMatchOperator rexpr) {
+        visitBinaryExpression(rexpr, " " + rexpr.getStringExpression() + " ");
     }
 }

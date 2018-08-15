@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( graphic viewer layout )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,8 @@ import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerPort;
  * @author D. Campione
  *
  */
-public class GraphicViewerLayeredDigraphAutoLayout
-        extends
-            GraphicViewerAutoLayout {
+public class GraphicViewerLayeredDigraphAutoLayout extends
+        GraphicViewerAutoLayout {
 
     private int layerSpacing;
     private int columnSpacing;
@@ -176,6 +175,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
         setPackOption(graphicViewerLayeredDigraphAutoLayout.getPackOption());
     }
 
+    @Override
     public void performLayout() {
         if (getNetwork() == null) {
             return;
@@ -255,8 +255,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
             return 8D;
         }
         return graphicViewerNetworkNode.getGraphicViewerObject() != null
-                && graphicViewerNetworkNode1.getGraphicViewerObject() != null
-                ? 1.0D
+                && graphicViewerNetworkNode1.getGraphicViewerObject() != null ? 1.0D
                 : 4D;
     }
 
@@ -267,19 +266,19 @@ public class GraphicViewerLayeredDigraphAutoLayout
             GraphicViewerObject graphicViewerObject = graphicViewerNetworkNode
                     .getGraphicViewerObject();
             switch (directionOption) {
-                case 0 : // '\0'
-                case 1 : // '\001'
-                    k = graphicViewerObject.getHeight() / 2 / layerSpacing + 1;
-                    break;
+            case 0: // '\0'
+            case 1: // '\001'
+                k = graphicViewerObject.getHeight() / 2 / layerSpacing + 1;
+                break;
 
-                case 2 : // '\002'
-                case 3 : // '\003'
-                    k = graphicViewerObject.getWidth() / 2 / layerSpacing + 1;
-                    break;
+            case 2: // '\002'
+            case 3: // '\003'
+                k = graphicViewerObject.getWidth() / 2 / layerSpacing + 1;
+                break;
 
-                default :
-                    k = graphicViewerObject.getHeight() / 2 / layerSpacing + 1;
-                    break;
+            default:
+                k = graphicViewerObject.getHeight() / 2 / layerSpacing + 1;
+                break;
             }
         }
         return k;
@@ -292,19 +291,19 @@ public class GraphicViewerLayeredDigraphAutoLayout
             GraphicViewerObject graphicViewerObject = graphicViewerNetworkNode
                     .getGraphicViewerObject();
             switch (directionOption) {
-                case 0 : // '\0'
-                case 1 : // '\001'
-                    k = graphicViewerObject.getWidth() / 2 / columnSpacing + 1;
-                    break;
+            case 0: // '\0'
+            case 1: // '\001'
+                k = graphicViewerObject.getWidth() / 2 / columnSpacing + 1;
+                break;
 
-                case 2 : // '\002'
-                case 3 : // '\003'
-                    k = graphicViewerObject.getHeight() / 2 / columnSpacing + 1;
-                    break;
+            case 2: // '\002'
+            case 3: // '\003'
+                k = graphicViewerObject.getHeight() / 2 / columnSpacing + 1;
+                break;
 
-                default :
-                    k = graphicViewerObject.getWidth() / 2 / columnSpacing + 1;
-                    break;
+            default:
+                k = graphicViewerObject.getWidth() / 2 / columnSpacing + 1;
+                break;
             }
         }
         return k;
@@ -935,17 +934,17 @@ public class GraphicViewerLayeredDigraphAutoLayout
         }
 
         switch (cycleremoveOption) {
-            case 0 : // '\0'
-                greedyCycleRemoval();
-                break;
+        case 0: // '\0'
+            greedyCycleRemoval();
+            break;
 
-            case 1 : // '\001'
-                depthFirstSearchCycleRemoval();
-                break;
+        case 1: // '\001'
+            depthFirstSearchCycleRemoval();
+            break;
 
-            default :
-                greedyCycleRemoval();
-                break;
+        default:
+            greedyCycleRemoval();
+            break;
         }
     }
 
@@ -1203,21 +1202,21 @@ public class GraphicViewerLayeredDigraphAutoLayout
 
     protected void assignLayers() {
         switch (layeringOption) {
-            case 0 : // '\0'
-                longestPathSinkLayering();
-                break;
+        case 0: // '\0'
+            longestPathSinkLayering();
+            break;
 
-            case 1 : // '\001'
-                longestPathSourceLayering();
-                break;
+        case 1: // '\001'
+            longestPathSourceLayering();
+            break;
 
-            case 2 : // '\002'
-                optimalLinkLengthLayering();
-                break;
+        case 2: // '\002'
+            optimalLinkLengthLayering();
+            break;
 
-            default :
-                longestPathSinkLayering();
-                break;
+        default:
+            longestPathSinkLayering();
+            break;
         }
     }
 
@@ -1548,34 +1547,34 @@ public class GraphicViewerLayeredDigraphAutoLayout
                     point3 = graphicViewerLink.getFromPort().getFromLinkPoint();
                 }
                 switch (directionOption) {
-                    case 0 : // '\0'
-                    case 1 : // '\001'
-                        i1 = (int) Math.round((double) (point2.x - point.x)
-                                / (double) columnSpacing);
-                        k1 = point2.x;
-                        j1 = (int) Math.round((double) (point3.x - point1.x)
-                                / (double) columnSpacing);
-                        l1 = point3.x;
-                        break;
+                case 0: // '\0'
+                case 1: // '\001'
+                    i1 = (int) Math.round((double) (point2.x - point.x)
+                            / (double) columnSpacing);
+                    k1 = point2.x;
+                    j1 = (int) Math.round((double) (point3.x - point1.x)
+                            / (double) columnSpacing);
+                    l1 = point3.x;
+                    break;
 
-                    case 2 : // '\002'
-                    case 3 : // '\003'
-                        i1 = (int) Math.round((double) (point2.y - point.y)
-                                / (double) columnSpacing);
-                        k1 = point2.y;
-                        j1 = (int) Math.round((double) (point3.y - point1.y)
-                                / (double) columnSpacing);
-                        l1 = point3.y;
-                        break;
+                case 2: // '\002'
+                case 3: // '\003'
+                    i1 = (int) Math.round((double) (point2.y - point.y)
+                            / (double) columnSpacing);
+                    k1 = point2.y;
+                    j1 = (int) Math.round((double) (point3.y - point1.y)
+                            / (double) columnSpacing);
+                    l1 = point3.y;
+                    break;
 
-                    default :
-                        i1 = (int) Math.round((double) (point2.x - point.x)
-                                / (double) columnSpacing);
-                        k1 = point2.x;
-                        j1 = (int) Math.round((double) (point3.x - point1.x)
-                                / (double) columnSpacing);
-                        l1 = point3.x;
-                        break;
+                default:
+                    i1 = (int) Math.round((double) (point2.x - point.x)
+                            / (double) columnSpacing);
+                    k1 = point2.x;
+                    j1 = (int) Math.round((double) (point3.x - point1.x)
+                            / (double) columnSpacing);
+                    l1 = point3.x;
+                    break;
                 }
                 linkData(graphicViewerNetworkLink1).portFromColOffset = i1;
                 linkData(graphicViewerNetworkLink1).portFromPos = k1;
@@ -1686,21 +1685,21 @@ public class GraphicViewerLayeredDigraphAutoLayout
 
     protected void initializeIndices() {
         switch (initializeOption) {
-            case 0 : // '\0'
-                naiveInitializeIndices();
-                break;
+        case 0: // '\0'
+            naiveInitializeIndices();
+            break;
 
-            case 1 : // '\001'
-                depthFirstOutInitializeIndices();
-                break;
+        case 1: // '\001'
+            depthFirstOutInitializeIndices();
+            break;
 
-            case 2 : // '\002'
-                depthFirstInInitializeIndices();
-                break;
+        case 2: // '\002'
+            depthFirstInInitializeIndices();
+            break;
 
-            default :
-                naiveInitializeIndices();
-                break;
+        default:
+            naiveInitializeIndices();
+            break;
         }
     }
 
@@ -1888,230 +1887,230 @@ public class GraphicViewerLayeredDigraphAutoLayout
         }
 
         restoreLayout(ai);
-        label0 : switch (aggressiveOption) {
-            default :
-                break;
+        label0: switch (aggressiveOption) {
+        default:
+            break;
 
-            case 0 : // '\0'
-                for (int j7 = k + 1; countCrossings() < j7;) {
-                    j7 = countCrossings();
-                    int j6 = maxLayer;
-                    while (j6 >= 0) {
-                        for (int l6 = 0; l6 <= j6; l6++) {
-                            for (boolean flag = true; flag;) {
-                                flag = false;
-                                int j2 = j6;
-                                while (j2 >= l6) {
-                                    flag = adjacentExchangeCrossingReductionBendStraighten(
-                                            j2, -1, false, -1) || flag;
-                                    j2--;
-                                }
-                            }
-
-                            int l5 = countCrossings();
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
-                            }
-                            for (boolean flag1 = true; flag1;) {
-                                flag1 = false;
-                                int k2 = j6;
-                                while (k2 >= l6) {
-                                    flag1 = adjacentExchangeCrossingReductionBendStraighten(
-                                            k2, 1, false, 1) || flag1;
-                                    k2--;
-                                }
-                            }
-
-                            l5 = countCrossings();
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
-                            }
-                            for (boolean flag2 = true; flag2;) {
-                                flag2 = false;
-                                int l2 = l6;
-                                while (l2 <= j6) {
-                                    flag2 = adjacentExchangeCrossingReductionBendStraighten(
-                                            l2, 1, false, 1) || flag2;
-                                    l2++;
-                                }
-                            }
-
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
-                            }
-                            for (boolean flag3 = true; flag3;) {
-                                flag3 = false;
-                                int i3 = l6;
-                                while (i3 <= j6) {
-                                    flag3 = adjacentExchangeCrossingReductionBendStraighten(
-                                            i3, -1, false, -1) || flag3;
-                                    i3++;
-                                }
-                            }
-
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
-                            }
-                            for (boolean flag4 = true; flag4;) {
-                                flag4 = false;
-                                int j3 = j6;
-                                while (j3 >= l6) {
-                                    flag4 = adjacentExchangeCrossingReductionBendStraighten(
-                                            j3, 0, false, 0) || flag4;
-                                    j3--;
-                                }
-                            }
-
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
-                            }
-                            for (boolean flag5 = true; flag5;) {
-                                flag5 = false;
-                                int k3 = l6;
-                                while (k3 <= j6) {
-                                    flag5 = adjacentExchangeCrossingReductionBendStraighten(
-                                            k3, 0, false, 0) || flag5;
-                                    k3++;
-                                }
-                            }
-
-                            if (l5 >= k) {
-                                restoreLayout(ai);
-                            } else {
-                                k = l5;
-                                ai = saveLayout();
+        case 0: // '\0'
+            for (int j7 = k + 1; countCrossings() < j7;) {
+                j7 = countCrossings();
+                int j6 = maxLayer;
+                while (j6 >= 0) {
+                    for (int l6 = 0; l6 <= j6; l6++) {
+                        for (boolean flag = true; flag;) {
+                            flag = false;
+                            int j2 = j6;
+                            while (j2 >= l6) {
+                                flag = adjacentExchangeCrossingReductionBendStraighten(
+                                        j2, -1, false, -1) || flag;
+                                j2--;
                             }
                         }
 
-                        j6--;
+                        int l5 = countCrossings();
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                        for (boolean flag1 = true; flag1;) {
+                            flag1 = false;
+                            int k2 = j6;
+                            while (k2 >= l6) {
+                                flag1 = adjacentExchangeCrossingReductionBendStraighten(
+                                        k2, 1, false, 1) || flag1;
+                                k2--;
+                            }
+                        }
+
+                        l5 = countCrossings();
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                        for (boolean flag2 = true; flag2;) {
+                            flag2 = false;
+                            int l2 = l6;
+                            while (l2 <= j6) {
+                                flag2 = adjacentExchangeCrossingReductionBendStraighten(
+                                        l2, 1, false, 1) || flag2;
+                                l2++;
+                            }
+                        }
+
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                        for (boolean flag3 = true; flag3;) {
+                            flag3 = false;
+                            int i3 = l6;
+                            while (i3 <= j6) {
+                                flag3 = adjacentExchangeCrossingReductionBendStraighten(
+                                        i3, -1, false, -1) || flag3;
+                                i3++;
+                            }
+                        }
+
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                        for (boolean flag4 = true; flag4;) {
+                            flag4 = false;
+                            int j3 = j6;
+                            while (j3 >= l6) {
+                                flag4 = adjacentExchangeCrossingReductionBendStraighten(
+                                        j3, 0, false, 0) || flag4;
+                                j3--;
+                            }
+                        }
+
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                        for (boolean flag5 = true; flag5;) {
+                            flag5 = false;
+                            int k3 = l6;
+                            while (k3 <= j6) {
+                                flag5 = adjacentExchangeCrossingReductionBendStraighten(
+                                        k3, 0, false, 0) || flag5;
+                                k3++;
+                            }
+                        }
+
+                        if (l5 >= k) {
+                            restoreLayout(ai);
+                        } else {
+                            k = l5;
+                            ai = saveLayout();
+                        }
+                    }
+
+                    j6--;
+                }
+            }
+
+            break;
+
+        case 1: // '\001'
+            int k6 = maxLayer;
+            int i7 = 0;
+            int k7 = k + 1;
+            do {
+                if (countCrossings() >= k7) {
+                    break label0;
+                }
+                k7 = countCrossings();
+                for (boolean flag6 = true; flag6;) {
+                    flag6 = false;
+                    int l3 = k6;
+                    while (l3 >= i7) {
+                        flag6 = adjacentExchangeCrossingReductionBendStraighten(
+                                l3, -1, false, -1) || flag6;
+                        l3--;
                     }
                 }
 
-                break;
+                int i6 = countCrossings();
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+                for (boolean flag7 = true; flag7;) {
+                    flag7 = false;
+                    int i4 = k6;
+                    while (i4 >= i7) {
+                        flag7 = adjacentExchangeCrossingReductionBendStraighten(
+                                i4, 1, false, 1) || flag7;
+                        i4--;
+                    }
+                }
 
-            case 1 : // '\001'
-                int k6 = maxLayer;
-                int i7 = 0;
-                int k7 = k + 1;
-                do {
-                    if (countCrossings() >= k7) {
-                        break label0;
+                i6 = countCrossings();
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+                for (boolean flag8 = true; flag8;) {
+                    flag8 = false;
+                    int j4 = i7;
+                    while (j4 <= k6) {
+                        flag8 = adjacentExchangeCrossingReductionBendStraighten(
+                                j4, 1, false, 1) || flag8;
+                        j4++;
                     }
-                    k7 = countCrossings();
-                    for (boolean flag6 = true; flag6;) {
-                        flag6 = false;
-                        int l3 = k6;
-                        while (l3 >= i7) {
-                            flag6 = adjacentExchangeCrossingReductionBendStraighten(
-                                    l3, -1, false, -1) || flag6;
-                            l3--;
-                        }
-                    }
+                }
 
-                    int i6 = countCrossings();
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+                for (boolean flag9 = true; flag9;) {
+                    flag9 = false;
+                    int k4 = i7;
+                    while (k4 <= k6) {
+                        flag9 = adjacentExchangeCrossingReductionBendStraighten(
+                                k4, -1, false, -1) || flag9;
+                        k4++;
                     }
-                    for (boolean flag7 = true; flag7;) {
-                        flag7 = false;
-                        int i4 = k6;
-                        while (i4 >= i7) {
-                            flag7 = adjacentExchangeCrossingReductionBendStraighten(
-                                    i4, 1, false, 1) || flag7;
-                            i4--;
-                        }
-                    }
+                }
 
-                    i6 = countCrossings();
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+                for (boolean flag10 = true; flag10;) {
+                    flag10 = false;
+                    int l4 = k6;
+                    while (l4 >= i7) {
+                        flag10 = adjacentExchangeCrossingReductionBendStraighten(
+                                l4, 0, false, 0) || flag10;
+                        l4--;
                     }
-                    for (boolean flag8 = true; flag8;) {
-                        flag8 = false;
-                        int j4 = i7;
-                        while (j4 <= k6) {
-                            flag8 = adjacentExchangeCrossingReductionBendStraighten(
-                                    j4, 1, false, 1) || flag8;
-                            j4++;
-                        }
-                    }
+                }
 
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+                for (boolean flag11 = true; flag11;) {
+                    flag11 = false;
+                    int i5 = i7;
+                    while (i5 <= k6) {
+                        flag11 = adjacentExchangeCrossingReductionBendStraighten(
+                                i5, 0, false, 0) || flag11;
+                        i5++;
                     }
-                    for (boolean flag9 = true; flag9;) {
-                        flag9 = false;
-                        int k4 = i7;
-                        while (k4 <= k6) {
-                            flag9 = adjacentExchangeCrossingReductionBendStraighten(
-                                    k4, -1, false, -1) || flag9;
-                            k4++;
-                        }
-                    }
+                }
 
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
-                    }
-                    for (boolean flag10 = true; flag10;) {
-                        flag10 = false;
-                        int l4 = k6;
-                        while (l4 >= i7) {
-                            flag10 = adjacentExchangeCrossingReductionBendStraighten(
-                                    l4, 0, false, 0) || flag10;
-                            l4--;
-                        }
-                    }
-
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
-                    }
-                    for (boolean flag11 = true; flag11;) {
-                        flag11 = false;
-                        int i5 = i7;
-                        while (i5 <= k6) {
-                            flag11 = adjacentExchangeCrossingReductionBendStraighten(
-                                    i5, 0, false, 0) || flag11;
-                            i5++;
-                        }
-                    }
-
-                    if (i6 >= k) {
-                        restoreLayout(ai);
-                    } else {
-                        k = i6;
-                        ai = saveLayout();
-                    }
-                } while (true);
+                if (i6 >= k) {
+                    restoreLayout(ai);
+                } else {
+                    k = i6;
+                    ai = saveLayout();
+                }
+            } while (true);
         }
         restoreLayout(ai);
     }
@@ -2858,7 +2857,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
     protected void componentPack(int k) {
         tightPack();
         if (k > 0) {
-            label0 : for (int l = 0; l <= maxColumn; l++) {
+            label0: for (int l = 0; l <= maxColumn; l++) {
                 int ai[] = saveLayout();
                 double d1 = countBends(true);
                 double d3 = d1 + 1.0D;
@@ -2880,7 +2879,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
 
         }
         if (k < 0) {
-            label1 : for (int i1 = maxColumn; i1 >= 0; i1--) {
+            label1: for (int i1 = maxColumn; i1 >= 0; i1--) {
                 int ai1[] = saveLayout();
                 double d2 = countBends(true);
                 double d4 = d2 + 1.0D;
@@ -3085,30 +3084,30 @@ public class GraphicViewerLayeredDigraphAutoLayout
             int l2;
             int i3;
             switch (directionOption) {
-                case 0 : // '\0'
-                    l2 = columnSpacing * (k2 + 1);
-                    i3 = layerSpacing * (ai1[j1] + 1);
-                    break;
+            case 0: // '\0'
+                l2 = columnSpacing * (k2 + 1);
+                i3 = layerSpacing * (ai1[j1] + 1);
+                break;
 
-                case 1 : // '\001'
-                    l2 = columnSpacing * (k2 + 1);
-                    i3 = layerSpacing * (l1 - ai1[j1]);
-                    break;
+            case 1: // '\001'
+                l2 = columnSpacing * (k2 + 1);
+                i3 = layerSpacing * (l1 - ai1[j1]);
+                break;
 
-                case 2 : // '\002'
-                    l2 = layerSpacing * (ai1[j1] + 1);
-                    i3 = columnSpacing * (k2 + 1);
-                    break;
+            case 2: // '\002'
+                l2 = layerSpacing * (ai1[j1] + 1);
+                i3 = columnSpacing * (k2 + 1);
+                break;
 
-                case 3 : // '\003'
-                    l2 = layerSpacing * (l1 - ai1[j1]);
-                    i3 = columnSpacing * (k2 + 1);
-                    break;
+            case 3: // '\003'
+                l2 = layerSpacing * (l1 - ai1[j1]);
+                i3 = columnSpacing * (k2 + 1);
+                break;
 
-                default :
-                    l2 = columnSpacing * (k2 + 1);
-                    i3 = layerSpacing * (ai1[j1] + 1);
-                    break;
+            default:
+                l2 = columnSpacing * (k2 + 1);
+                i3 = layerSpacing * (ai1[j1] + 1);
+                break;
             }
             graphicViewerNetworkNode1.setCenter(l2, i3);
             graphicViewerNetworkNode1.commitPosition();
@@ -3195,8 +3194,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                     if (flag1) {
                         if (getDirectionOption() == 2
                                 || getDirectionOption() == 3) {
-                            byte byte2 = ((byte) (getDirectionOption() != 3
-                                    ? -30
+                            byte byte2 = ((byte) (getDirectionOption() != 3 ? -30
                                     : 30));
                             graphicViewerLink.insertPoint(l++,
                                     point9.x - byte2, point9.y);
@@ -3205,8 +3203,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                             graphicViewerLink.insertPoint(l++,
                                     point9.x + byte2, point9.y);
                         } else {
-                            byte byte3 = ((byte) (getDirectionOption() != 1
-                                    ? -30
+                            byte byte3 = ((byte) (getDirectionOption() != 1 ? -30
                                     : 30));
                             graphicViewerLink.insertPoint(l++, point9.x,
                                     point9.y - byte3);
@@ -3284,8 +3281,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                     if (flag1) {
                         if (getDirectionOption() == 2
                                 || getDirectionOption() == 3) {
-                            byte byte4 = ((byte) (getDirectionOption() != 3
-                                    ? 30
+                            byte byte4 = ((byte) (getDirectionOption() != 3 ? 30
                                     : -30));
                             graphicViewerLink.insertPoint(l++, point10.x
                                     - byte4, point10.y);
@@ -3294,8 +3290,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                             graphicViewerLink.insertPoint(l++, point10.x
                                     + byte4, point10.y);
                         } else {
-                            byte byte5 = ((byte) (getDirectionOption() != 1
-                                    ? 30
+                            byte byte5 = ((byte) (getDirectionOption() != 1 ? 30
                                     : -30));
                             graphicViewerLink.insertPoint(l++, point10.x,
                                     point10.y - byte5);
@@ -3335,8 +3330,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                     Point point3 = graphicViewerLink.getPoint(l - 1);
                     Point point6 = graphicViewerLink.getPoint(l);
                     if (getDirectionOption() == 2 || getDirectionOption() == 3) {
-                        byte byte0 = ((byte) (getDirectionOption() != 3
-                                ? 30
+                        byte byte0 = ((byte) (getDirectionOption() != 3 ? 30
                                 : -30));
                         if (point3.y == point6.y) {
                             graphicViewerLink.insertPoint(l++, point6.x - 2
@@ -3358,8 +3352,7 @@ public class GraphicViewerLayeredDigraphAutoLayout
                                     point3.y);
                         }
                     } else {
-                        byte byte1 = ((byte) (getDirectionOption() != 1
-                                ? 30
+                        byte byte1 = ((byte) (getDirectionOption() != 1 ? 30
                                 : -30));
                         if (point3.x == point6.x) {
                             graphicViewerLink.insertPoint(l++,

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
+
 /**
  * A lateral subselect followed by an alias.
  *
@@ -27,7 +29,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 public class LateralSubSelect implements IFromItem {
 
     private SubSelect subSelect;
-    private String alias;
+    private Alias alias;
     private Pivot pivot;
 
     public void setSubSelect(SubSelect subSelect) {
@@ -44,19 +46,21 @@ public class LateralSubSelect implements IFromItem {
     }
 
     @Override
-    public String getAlias() {
+    public Alias getAlias() {
         return alias;
     }
 
     @Override
-    public void setAlias(String alias) {
+    public void setAlias(Alias alias) {
         this.alias = alias;
     }
 
+    @Override
     public Pivot getPivot() {
         return pivot;
     }
 
+    @Override
     public void setPivot(Pivot pivot) {
         this.pivot = pivot;
     }
@@ -65,6 +69,6 @@ public class LateralSubSelect implements IFromItem {
     public String toString() {
         return "LATERAL" + subSelect.toString()
                 + ((pivot != null) ? " " + pivot : "")
-                + ((alias != null) ? " AS " + alias : "");
+                + ((alias != null) ? alias.toString() : "");
     }
 }

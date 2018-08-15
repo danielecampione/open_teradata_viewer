@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 import java.util.Iterator;
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 
@@ -33,7 +34,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
  */
 public class ValuesList implements IFromItem {
 
-    private String alias;
+    private Alias alias;
     private MultiExpressionList multexpressionList;
     private boolean noBrackets = false;
     private List<String> columnNames;
@@ -51,12 +52,12 @@ public class ValuesList implements IFromItem {
     }
 
     @Override
-    public String getAlias() {
+    public Alias getAlias() {
         return alias;
     }
 
     @Override
-    public void setAlias(String alias) {
+    public void setAlias(Alias alias) {
         this.alias = alias;
     }
 
@@ -100,7 +101,7 @@ public class ValuesList implements IFromItem {
         }
         b.append(")");
         if (alias != null) {
-            b.append(" AS ").append(alias);
+            b.append(alias.toString());
 
             if (columnNames != null) {
                 b.append("(");

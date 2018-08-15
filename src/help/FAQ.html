@@ -1,47 +1,45 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional" 
-  "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>
-            Frequently Asked Questions (FAQ)
-        </title>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+      <meta name="author" content="D. Campione" />
+      <meta name="description" content="Frequently Asked Questions (FAQ) of Open Teradata Viewer. A database editor, suitable as front-end for your Teradata relational database." />
+      <meta name="keywords" content="open teradata viewer,teradata,java,jdbc,database,gui,front-end,tool,edit,editing,reporting,synchronization,blob,clob" />
+      <link rel="stylesheet" type="text/css" href="style.css" />
+      <title>
+          Open Teradata Viewer - Frequently Asked Questions (FAQ)
+      </title>
     </head>
     <body bgcolor="#FFFFFF">
-        <p>
-            <span>
-                <img src="images/logo.png" align=left alt="Open Teradata Viewer" />
-            </span>
-        </p>
-        <span lang=EN style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN'>
-            </br>
-        </span>
-        <span lang=EN style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN'>
-            </br>
-        </span>
-        <span lang=EN style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN'>
-            </br>
-        </span>
-        <p>
-            <b>
-                <span lang=EN style='font-size:13.5pt;font-family:"Arial","sans-serif"; color:black;mso-ansi-language:EN'>
-                    FAQ
-                </span>
-            </b>
-        </p>
-        <b>
-            <span lang=EN style='font-size:13pt;font-family:"Arial";color:black;'>
-                <br>
+        <div id="header">
+            <div id="title">
+            </div>
+            <div id="menu">
+                <a class="headerselected"><img src="images/logo.png" alt="Open Teradata Viewer" width="500" height="61" /></a>
+            </div>
+        </div>
+        <div id="content">
+            <h4>
                 How to create a volatile table without generating errors
-                <br>
-            </span>
-        </b>
-        <span lang=EN style='font-size:13.5pt;font-family:"Arial","sans-serif";color:black;'>
-            </br>
-            To create a volatile table without generating the error &quot;Only
-            an ET or null statement is legal after a DDL Statement&quot;, do a
-            COMMIT after the creation of the volatile table and before
-            submitting any SQL instruction that acts on the volatile table. Do a
-            commit after populating the same table to be able to use it.
-        </span>
+            </h4>
+            To create a volatile table without generating the error &quot;Only an ET
+            or null statement is legal after a DDL Statement&quot;, do a COMMIT
+            after the creation of the volatile table and before submitting any SQL
+            instruction that acts on the volatile table. Do a commit after
+            populating the same table to be able to use it. <br /><br />
+            <h4>
+                How to install a plugin
+            </h4>
+            for Linux users:<br />
+            To install a plugin download the compressed archive from the official
+            repository and extract the content to the user home directory. Run Open
+            Teradata Viewer and select the Files comparator.. menu voice.<br /><br />
+            for Windows users:<br />
+            To install a plugin download the compressed archive from the official
+            repository and extract the content to the same directory where
+            Open_Teradata_Viewer_x.xx.jar resides. Run Open Teradata Viewer and
+            select the Files comparator.. menu voice.
+        </div>
     </body>
 </html>

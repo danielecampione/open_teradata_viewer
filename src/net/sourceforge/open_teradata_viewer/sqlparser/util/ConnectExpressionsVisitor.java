@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
@@ -41,10 +42,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
  * @author D. Campione
  * 
  */
-public abstract class ConnectExpressionsVisitor
-        implements
-            ISelectVisitor,
-            ISelectItemVisitor {
+public abstract class ConnectExpressionsVisitor implements ISelectVisitor,
+        ISelectItemVisitor {
 
     private String alias = "expr";
     private List<SelectExpressionItem> itemsExpr = new LinkedList<SelectExpressionItem>();
@@ -90,7 +89,7 @@ public abstract class ConnectExpressionsVisitor
         }
 
         ((SelectExpressionItem) plainSelect.getSelectItems().get(0))
-                .setAlias(alias);
+                .setAlias(new Alias(alias));
     }
 
     @Override

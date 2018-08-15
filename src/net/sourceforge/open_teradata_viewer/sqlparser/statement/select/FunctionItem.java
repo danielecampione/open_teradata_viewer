@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
 
 /**
@@ -29,14 +30,14 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
 public class FunctionItem {
 
     private Function function;
-    private String alias;
+    private Alias alias;
 
-    public String getAlias() {
+    public Alias getAlias() {
         return alias;
     }
 
-    public void setAlias(String string) {
-        alias = string;
+    public void setAlias(Alias alias) {
+        this.alias = alias;
     }
 
     public Function getFunction() {
@@ -49,6 +50,6 @@ public class FunctionItem {
 
     @Override
     public String toString() {
-        return function + ((alias != null) ? " AS " + alias : "");
+        return function + ((alias != null) ? alias.toString() : "");
     }
 }

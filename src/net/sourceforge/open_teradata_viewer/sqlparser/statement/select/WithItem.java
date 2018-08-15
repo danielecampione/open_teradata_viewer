@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,13 +77,12 @@ public class WithItem implements ISelectBody {
     @Override
     public String toString() {
         return name
-                + ((withItemList != null)
-                        ? " "
-                                + PlainSelect.getStringList(withItemList, true,
-                                        true)
+                + ((withItemList != null) ? " "
+                        + PlainSelect.getStringList(withItemList, true, true)
                         : "") + " AS (" + selectBody + ")";
     }
 
+    @Override
     public void accept(ISelectVisitor visitor) {
         visitor.visit(this);
     }

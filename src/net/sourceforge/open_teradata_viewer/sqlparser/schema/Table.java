@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.schema;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IIntoTableVisitor;
@@ -33,10 +34,14 @@ public class Table implements IFromItem {
 
     private String schemaName;
     private String name;
-    private String alias;
+    private Alias alias;
     private Pivot pivot;
 
     public Table() {
+    }
+
+    public Table(String name) {
+        this.name = name;
     }
 
     public Table(String schemaName, String name) {
@@ -61,17 +66,16 @@ public class Table implements IFromItem {
     }
 
     @Override
-    public String getAlias() {
+    public Alias getAlias() {
         return alias;
     }
 
     @Override
-    public void setAlias(String string) {
-        alias = string;
+    public void setAlias(Alias alias) {
+        this.alias = alias;
     }
 
     public String getWholeTableName() {
-
         String tableWholeName = null;
         if (name == null) {
             return null;
@@ -95,10 +99,12 @@ public class Table implements IFromItem {
         iIntoTableVisitor.visit(this);
     }
 
+    @Override
     public Pivot getPivot() {
         return pivot;
     }
 
+    @Override
     public void setPivot(Pivot pivot) {
         this.pivot = pivot;
     }
@@ -106,6 +112,6 @@ public class Table implements IFromItem {
     @Override
     public String toString() {
         return getWholeTableName() + ((pivot != null) ? " " + pivot : "")
-                + ((alias != null) ? " AS " + alias : "");
+                + ((alias != null) ? alias.toString() : "");
     }
 }

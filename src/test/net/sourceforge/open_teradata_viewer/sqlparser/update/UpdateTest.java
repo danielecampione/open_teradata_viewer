@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,16 +68,16 @@ public class UpdateTest extends TestCase {
     }
 
     public void testUpdateWAlias() throws SQLParserException {
-        String statement = "UPDATE table1 A SET A.column = 'XXX' WHERE A.cod_table = 'YYY'";
+        String statement = "UPDATE table1 A SET A.columna = 'XXX' WHERE A.cod_table = 'YYY'";
         Update update = (Update) parserManager
                 .parse(new StringReader(statement));
     }
 
     public void testUpdateWithDeparser() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("UPDATE table1 AS A SET A.column = 'XXX' WHERE A.cod_table = 'YYY'");
+        assertSqlCanBeParsedAndDeparsed("UPDATE table1 AS A SET A.columna = 'XXX' WHERE A.cod_table = 'YYY'");
     }
 
     public void testUpdateWithFrom() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("UPDATE table1 SET column = 5 FROM table1 LEFT JOIN table2 ON col1 = col2");
+        assertSqlCanBeParsedAndDeparsed("UPDATE table1 SET columna = 5 FROM table1 LEFT JOIN table2 ON col1 = col2");
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,8 @@ public class ApplicationMenuBar extends JMenuBar {
             Actions.ANIMATE_BRACKET_MATCHING);
     JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(
             Actions.PAINT_MATCHED_BRACKET_PAIR);
+    JCheckBoxMenuItem cbTabsEmulatedBySpaces = new JCheckBoxMenuItem(
+            Actions.TABS_EMULATED_BY_SPACES);
     private JCheckBoxMenuItem cbCellRendering = new JCheckBoxMenuItem(
             Actions.FANCY_CELL_RENDERING);
     private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(
@@ -146,6 +148,7 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu.add(cbTabLines);
         subMenu.add(cbAnimateBracketMatching);
         subMenu.add(cbPaintMatchedBracketPair);
+        subMenu.add(cbTabsEmulatedBySpaces);
         menu.addSeparator();
         subMenu = new JMenu("Text");
         menu.add(subMenu);
@@ -307,6 +310,10 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("SQL", ISyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
         addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
                 subMenu);
+        addSyntaxItem("Java", ISyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
+        addSyntaxItem("JavaScript", ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
+                bg, subMenu);
+        addSyntaxItem("C", ISyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
         addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
                 bg, subMenu);
         subMenu.getItem(0).setSelected(true);
@@ -386,6 +393,8 @@ public class ApplicationMenuBar extends JMenuBar {
                 .getAnimateBracketMatching());
         cbPaintMatchedBracketPair.setSelected(_OTVSyntaxTextArea
                 .getPaintMatchedBracketPair());
+        cbTabsEmulatedBySpaces
+                .setSelected(_OTVSyntaxTextArea.getTabsEmulated());
     }
 
     private void addThemeItem(String name, String themeXml, ButtonGroup bg,

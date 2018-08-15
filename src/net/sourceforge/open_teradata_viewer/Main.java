@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.io.File;
 
 import javax.swing.JDialog;
@@ -142,6 +143,7 @@ public class Main {
                     }
                 }
 
+                Toolkit.getDefaultToolkit().setDynamicLayout(true);
                 ApplicationFrame applicationFrame = new ApplicationFrame();
                 applicationFrame.initLookAndFeelManager(lafManager);
                 applicationFrame.drawIt();

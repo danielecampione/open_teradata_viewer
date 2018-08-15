@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor spell )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -510,7 +510,7 @@ public class SpellingParser extends AbstractParser implements
 
         @Override
         public String getToolTipText() {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             String spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             int threshold = sc.getConfiguration().getInteger(
                     Configuration.SPELL_THRESHOLD);

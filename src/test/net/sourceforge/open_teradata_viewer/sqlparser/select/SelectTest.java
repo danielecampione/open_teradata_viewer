@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ public class SelectTest extends TestCase {
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
 
         assertEquals("MYID", ((SelectExpressionItem) plainSelect
-                .getSelectItems().get(0)).getAlias());
+                .getSelectItems().get(0)).getAlias().getName());
         assertEquals("mycol", ((Column) ((SelectExpressionItem) plainSelect
                 .getSelectItems().get(1)).getExpression()).getColumnName());
         assertEquals("tab", ((AllTableColumns) plainSelect.getSelectItems()
@@ -169,14 +169,14 @@ public class SelectTest extends TestCase {
         select = (Select) parserManager.parse(new StringReader(statement));
         plainSelect = (PlainSelect) select.getSelectBody();
         assertEquals("myalias", ((SelectExpressionItem) plainSelect
-                .getSelectItems().get(1)).getAlias());
+                .getSelectItems().get(1)).getAlias().getName());
         assertStatementCanBeDeparsedAs(select, statement);
 
         statement = "SELECT (myid + myid2) AS MYID FROM mytable WHERE mytable.col = 9";
         select = (Select) parserManager.parse(new StringReader(statement));
         plainSelect = (PlainSelect) select.getSelectBody();
         assertEquals("MYID", ((SelectExpressionItem) plainSelect
-                .getSelectItems().get(0)).getAlias());
+                .getSelectItems().get(0)).getAlias().getName());
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
@@ -222,19 +222,20 @@ public class SelectTest extends TestCase {
 
     public void testFrom() throws SQLParserException {
         String statement = "SELECT * FROM mytable as mytable0, mytable1 alias_tab1, mytable2 as alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
-        String statementToString = "SELECT * FROM mytable AS mytable0, mytable1 AS alias_tab1, mytable2 AS alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
+        String statementToString = "SELECT * FROM mytable AS mytable0, mytable1 alias_tab1, mytable2 AS alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
 
         Select select = (Select) parserManager
                 .parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         assertEquals(3, plainSelect.getJoins().size());
-        assertEquals("mytable0", ((Table) plainSelect.getFromItem()).getAlias());
+        assertEquals("mytable0", ((Table) plainSelect.getFromItem()).getAlias()
+                .getName());
         assertEquals("alias_tab1", ((Join) plainSelect.getJoins().get(0))
-                .getRightItem().getAlias());
+                .getRightItem().getAlias().getName());
         assertEquals("alias_tab2", ((Join) plainSelect.getJoins().get(1))
-                .getRightItem().getAlias());
+                .getRightItem().getAlias().getName());
         assertEquals("mytable4", ((Join) plainSelect.getJoins().get(2))
-                .getRightItem().getAlias());
+                .getRightItem().getAlias().getName());
         assertStatementCanBeDeparsedAs(select, statementToString);
     }
 
@@ -312,14 +313,14 @@ public class SelectTest extends TestCase {
                 .parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         assertEquals("max", ((SelectExpressionItem) plainSelect
-                .getSelectItems().get(0)).getAlias());
+                .getSelectItems().get(0)).getAlias().getName());
         assertStatementCanBeDeparsedAs(select, statement);
 
         statement = "SELECT MAX(id), AVG(pro) AS myavg FROM mytable WHERE mytable.col = 9 GROUP BY pro";
         select = (Select) parserManager.parse(new StringReader(statement));
         plainSelect = (PlainSelect) select.getSelectBody();
         assertEquals("myavg", ((SelectExpressionItem) plainSelect
-                .getSelectItems().get(1)).getAlias());
+                .getSelectItems().get(1)).getAlias().getName());
         assertStatementCanBeDeparsedAs(select, statement);
 
         statement = "SELECT MAX(a, b, c), COUNT(*), D FROM tab1 GROUP BY D";
@@ -676,6 +677,11 @@ public class SelectTest extends TestCase {
 
     public void testSelectAliasInQuotes() throws SQLParserException {
         String statement = "SELECT mycolumn AS \"My Column Name\" FROM mytable";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testSelectAliasWithoutAs() throws SQLParserException {
+        String statement = "SELECT mycolumn \"My Column Name\" FROM mytable";
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
@@ -1103,7 +1109,7 @@ public class SelectTest extends TestCase {
                         .getResourceAsStream("/res/testfiles/sqlparser/complex-lateral-select-request.txt"));
         Select select = (Select) parserManager.parse(new StringReader(stmt));
         assertEquals(
-                "SELECT O.ORDERID, O.CUSTNAME, OL.LINETOTAL, OC.ORDCHGTOTAL, OT.TAXTOTAL FROM ORDERS AS O, LATERAL(SELECT SUM(NETAMT) AS LINETOTAL FROM ORDERLINES AS LINES WHERE LINES.ORDERID = O.ORDERID) AS OL, LATERAL(SELECT SUM(CHGAMT) AS ORDCHGTOTAL FROM ORDERCHARGES AS CHARGES WHERE LINES.ORDERID = O.ORDERID) AS OC, LATERAL(SELECT SUM(TAXAMT) AS TAXTOTAL FROM ORDERTAXES AS TAXES WHERE TAXES.ORDERID = O.ORDERID) AS OT",
+                "SELECT O.ORDERID, O.CUSTNAME, OL.LINETOTAL, OC.ORDCHGTOTAL, OT.TAXTOTAL FROM ORDERS O, LATERAL(SELECT SUM(NETAMT) AS LINETOTAL FROM ORDERLINES LINES WHERE LINES.ORDERID = O.ORDERID) AS OL, LATERAL(SELECT SUM(CHGAMT) AS ORDCHGTOTAL FROM ORDERCHARGES CHARGES WHERE LINES.ORDERID = O.ORDERID) AS OC, LATERAL(SELECT SUM(TAXAMT) AS TAXTOTAL FROM ORDERTAXES TAXES WHERE TAXES.ORDERID = O.ORDERID) AS OT",
                 select.toString());
     }
 
@@ -1305,6 +1311,30 @@ public class SelectTest extends TestCase {
 
     public void testTeradataHierarchicalQuery3() throws SQLParserException {
         String stmt = "SELECT last_name, employee_id, manager_id, LEVEL FROM employees START WITH employee_id = 100 CONNECT BY PRIOR employee_id = manager_id ORDER SIBLINGS BY last_name";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testPostgreSQLRegExpCaseSensitiveMatch()
+            throws SQLParserException {
+        String stmt = "SELECT a, b FROM foo WHERE a ~ '[help].*'";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testPostgreSQLRegExpCaseSensitiveMatch2()
+            throws SQLParserException {
+        String stmt = "SELECT a, b FROM foo WHERE a ~* '[help].*'";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testPostgreSQLRegExpCaseSensitiveMatch3()
+            throws SQLParserException {
+        String stmt = "SELECT a, b FROM foo WHERE a !~ '[help].*'";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testPostgreSQLRegExpCaseSensitiveMatch4()
+            throws SQLParserException {
+        String stmt = "SELECT a, b FROM foo WHERE a !~* '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 }

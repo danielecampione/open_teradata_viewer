@@ -2,7 +2,7 @@
 /* JavaCCOptions:TOKEN_EXTENDS=,KEEP_LINE_COL=null,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,4 +146,4 @@ public class Token implements java.io.Serializable {
   }
 
 }
-/* JavaCC - OriginalChecksum=c894bd943d6f0da25d8e3909fad66723 (do not edit this line) */
+/* JavaCC - OriginalChecksum=bb3b92ab16c794bcd1f0aab152ddf0c8 (do not edit this line) */

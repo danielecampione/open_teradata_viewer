@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,10 @@ public class Column implements IExpression {
         this.columnName = columnName;
     }
 
+    public Column(String columnName) {
+        this(null, columnName);
+    }
+
     public String getColumnName() {
         return columnName;
     }
@@ -58,9 +62,12 @@ public class Column implements IExpression {
 
     /** @return the name of the column, prefixed with 'tableName' and '.'. */
     public String getWholeColumnName() {
-        String columnWholeName = null;
-        String tableWholeName = table.getWholeTableName();
+        String columnWholeName;
+        String tableWholeName = null;
 
+        if (table != null) {
+            tableWholeName = table.getWholeTableName();
+        }
         if (tableWholeName != null && tableWholeName.length() != 0) {
             columnWholeName = tableWholeName + "." + columnName;
         } else {

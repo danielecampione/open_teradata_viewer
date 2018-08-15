@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ public final class Actions implements ListSelectionListener,
     public static final CustomAction TAB_LINES = new TabLinesAction();
     public static final CustomAction ANIMATE_BRACKET_MATCHING = new AnimateBracketMatchingAction();
     public static final CustomAction PAINT_MATCHED_BRACKET_PAIR = new PaintMatchedBracketPairAction();
+    public static final CustomAction TABS_EMULATED_BY_SPACES = new TabsEmulatedBySpacesAction();
     public static final CustomAction COMMENT = new CommentAction();
     public static final CustomAction UNCOMMENT = new UncommentAction();
     public static final CustomAction DATE_TIME = new DateTimeAction();

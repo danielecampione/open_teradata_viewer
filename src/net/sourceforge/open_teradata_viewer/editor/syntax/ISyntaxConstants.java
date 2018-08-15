@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,4 +44,13 @@ public interface ISyntaxConstants {
 
     /** Style for highlighting Clojure. */
     public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
+
+    /** Style for highlighting Java. */
+    public static final String SYNTAX_STYLE_JAVA = "text/java";
+
+    /** Style for highlighting JavaScript. */
+    public static final String SYNTAX_STYLE_JAVASCRIPT = "text/javascript";
+
+    /** Style for highlighting C. */
+    public static final String SYNTAX_STYLE_C = "text/c";
 }

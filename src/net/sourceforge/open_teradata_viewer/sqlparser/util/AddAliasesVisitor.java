@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
@@ -82,16 +83,16 @@ public class AddAliasesVisitor implements ISelectVisitor, ISelectItemVisitor {
     public void visit(SelectExpressionItem selectExpressionItem) {
         if (firstRun) {
             if (selectExpressionItem.getAlias() != null) {
-                aliases.add(selectExpressionItem.getAlias().toUpperCase());
+                aliases.add(selectExpressionItem.getAlias().getName()
+                        .toUpperCase());
             }
         } else {
             if (selectExpressionItem.getAlias() == null) {
-
                 while (true) {
                     String alias = getNextAlias().toUpperCase();
                     if (!aliases.contains(alias)) {
                         aliases.add(alias);
-                        selectExpressionItem.setAlias(alias);
+                        selectExpressionItem.setAlias(new Alias(alias));
                         break;
                     }
                 }

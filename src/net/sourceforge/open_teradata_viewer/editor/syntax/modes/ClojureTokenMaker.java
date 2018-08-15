@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax modes )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
  *
  * The original version of this class was graciously donated by the folks at the
  * <a href="http://pacific.mpi-cbg.de/wiki/index.php/Fiji">Fiji</a> project.
- * This version has been modified to fix a few issues.
- * Its original location was
- * <a href="http://pacific.mpi-cbg.de/cgi-bin/gitweb.cgi?p=fiji.git;a=tree;f=src-plugins/Script_Editor/fiji/scripting;hb=935d85d9d88dd780c6d5f2765937ddc18b5008ca">here</a>.
- * <p>
+ * This version has been modified to fix a few issues.<p>
  * 
  * This implementation was created using <a
  * href="http://www.jflex.de/">JFlex</a> 1.4.1; however, the generated file was
@@ -1844,7 +1841,7 @@ public class ClojureTokenMaker extends AbstractJFlexTokenMaker {
      * @param initialTokenType The token type we should start with.
      * @param startOffset The offset into the document at which
      *        <code>text</code> starts.
-     * @return The first <code>Token</code> in a linked list representing
+     * @return The first <code>IToken</code> in a linked list representing
      *         the syntax highlighted text.
      */
     @Override

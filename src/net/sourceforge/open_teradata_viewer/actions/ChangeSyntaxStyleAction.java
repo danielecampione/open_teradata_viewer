@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 
 /**
  * 
@@ -43,8 +44,11 @@ public class ChangeSyntaxStyleAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ApplicationFrame.getInstance().getTextComponent().setCaretPosition(0);
-        ApplicationFrame.getInstance().getTextComponent()
-                .setSyntaxEditingStyle(style);
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        OTVSyntaxTextArea textArea = applicationFrame.getTextComponent();
+
+        textArea.setCaretPosition(0);
+        textArea.setSyntaxEditingStyle(style);
+        applicationFrame.refreshSourceTree();
     }
 }

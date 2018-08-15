@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,17 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.rela
  */
 public interface ISupportsOldTeradataJoinSyntax {
 
-    final int NO_TERADATA_JOIN = 0;
-    final int TERADATA_JOIN_RIGHT = 1;
-    final int TERADATA_JOIN_LEFT = 2;
+    int NO_TERADATA_JOIN = 0;
+    int TERADATA_JOIN_RIGHT = 1;
+    int TERADATA_JOIN_LEFT = 2;
 
     int getOldTeradataJoinSyntax();
 
     void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax);
 
-    final int NO_TERADATA_PRIOR = 0;
-    final int TERADATA_PRIOR_START = 1;
-    final int TERADATA_PRIOR_END = 2;
+    int NO_TERADATA_PRIOR = 0;
+    int TERADATA_PRIOR_START = 1;
+    int TERADATA_PRIOR_END = 2;
 
     int getTeradataPriorPosition();
 

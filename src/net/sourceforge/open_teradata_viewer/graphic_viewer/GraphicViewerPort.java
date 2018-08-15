@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( graphic viewer )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +30,8 @@ import java.util.ArrayList;
  * @author D. Campione
  *
  */
-public class GraphicViewerPort extends GraphicViewerDrawable
-        implements
-            IGraphicViewerIdentifiablePart {
+public class GraphicViewerPort extends GraphicViewerDrawable implements
+        IGraphicViewerIdentifiablePart {
 
     private static final long serialVersionUID = -6212048868696697211L;
 
@@ -55,14 +54,6 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     public static final int ChangedValidDuplicateLinks = 311;
     public static final int ChangedPartID = 312;
     static final int ChangedClearsLinksWhenRemoved = 313;
-    private static final int flagValidLink = 32768;
-    private static final int flagValidSource = 16384;
-    private static final int flagValidDestination = 8192;
-    private static final int flagValidSelfNode = 4096;
-    private static final int flagValidDuplicateLinks = 65536;
-    private static final int flagRecursive = 131072;
-    private static final int flagClearsLinksWhenRemoved = 262144;
-    private static final int flagNoClearLinks = 524288;
     private static double myDefaultPaintNothingScale = 0.15D;
     private static double myDefaultPaintGreekScale = 0.25D;
     private int myPartID = -1;
@@ -77,8 +68,8 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         init(2);
     }
 
-    public GraphicViewerPort(Rectangle rectangle) {
-        super(rectangle);
+    public GraphicViewerPort(Rectangle paramRectangle) {
+        super(paramRectangle);
         init(2);
     }
 
@@ -111,6 +102,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         setBrush(GraphicViewerBrush.black);
     }
 
+    @Override
     public GraphicViewerObject copyObject(
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment) {
         GraphicViewerPort graphicviewerport = (GraphicViewerPort) super
@@ -131,6 +123,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         return graphicviewerport;
     }
 
+    @Override
     public void copyObjectDelayed(
             IGraphicViewerCopyEnvironment graphicviewercopyenvironment,
             GraphicViewerObject graphicviewerobject) {
@@ -144,6 +137,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public void SVGWriteObject(IDomDoc domdoc, IDomElement domelement) {
         if (domdoc.GraphicViewerXMLOutputEnabled()) {
             IDomElement domelement1 = domdoc
@@ -174,156 +168,155 @@ public class GraphicViewerPort extends GraphicViewerDrawable
             int ai[] = new int[4];
             int ai1[] = new int[4];
             switch (myStyle) {
-                case 0 : // '\0'
-                    break;
+            case 0: // '\0'
+                break;
 
-                case 3 : // '\003'
-                    switch (getToSpot()) {
-                        case 1 : // '\001'
-                            ai[0] = rectangle.x + rectangle.width / 2;
-                            ai1[0] = rectangle.y;
-                            ai[1] = rectangle.x + rectangle.width;
-                            ai1[1] = rectangle.y + rectangle.height;
-                            ai[2] = rectangle.x;
-                            ai1[2] = rectangle.y + rectangle.height / 2;
-                            break;
-
-                        case 2 : // '\002'
-                            ai[0] = rectangle.x + rectangle.width;
-                            ai1[0] = rectangle.y;
-                            ai[1] = rectangle.x + rectangle.width / 2;
-                            ai1[1] = rectangle.y + rectangle.height;
-                            ai[2] = rectangle.x;
-                            ai1[2] = rectangle.y;
-                            break;
-
-                        case 3 : // '\003'
-                            ai[0] = rectangle.x + rectangle.width;
-                            ai1[0] = rectangle.y + rectangle.height / 2;
-                            ai[1] = rectangle.x;
-                            ai1[1] = rectangle.y + rectangle.height;
-                            ai[2] = rectangle.x + rectangle.width / 2;
-                            ai1[2] = rectangle.y;
-                            break;
-
-                        case 4 : // '\004'
-                            ai[0] = rectangle.x + rectangle.width;
-                            ai1[0] = rectangle.y + rectangle.height;
-                            ai[1] = rectangle.x;
-                            ai1[1] = rectangle.y + rectangle.height / 2;
-                            ai[2] = rectangle.x + rectangle.width;
-                            ai1[2] = rectangle.y;
-                            break;
-
-                        case 5 : // '\005'
-                            ai[0] = rectangle.x + rectangle.width / 2;
-                            ai1[0] = rectangle.y + rectangle.height;
-                            ai[1] = rectangle.x;
-                            ai1[1] = rectangle.y;
-                            ai[2] = rectangle.x + rectangle.width;
-                            ai1[2] = rectangle.y + rectangle.height / 2;
-                            break;
-
-                        case 6 : // '\006'
-                            ai[0] = rectangle.x;
-                            ai1[0] = rectangle.y + rectangle.height;
-                            ai[1] = rectangle.x + rectangle.width / 2;
-                            ai1[1] = rectangle.y;
-                            ai[2] = rectangle.x + rectangle.width;
-                            ai1[2] = rectangle.y + rectangle.height;
-                            break;
-
-                        case 7 : // '\007'
-                            ai[0] = rectangle.x;
-                            ai1[0] = rectangle.y + rectangle.height / 2;
-                            ai[1] = rectangle.x + rectangle.width;
-                            ai1[1] = rectangle.y;
-                            ai[2] = rectangle.x + rectangle.width / 2;
-                            ai1[2] = rectangle.y + rectangle.height;
-                            break;
-
-                        case 0 : // '\0'
-                        case 8 : // '\b'
-                        default :
-                            ai[0] = rectangle.x;
-                            ai1[0] = rectangle.y;
-                            ai[1] = rectangle.x + rectangle.width;
-                            ai1[1] = rectangle.y + rectangle.height / 2;
-                            ai[2] = rectangle.x;
-                            ai1[2] = rectangle.y + rectangle.height;
-                            break;
-                    }
-                    IDomElement domelement3 = domdoc.createElement("path");
-                    String s = "M " + Integer.toString(ai[0]) + " "
-                            + Integer.toString(ai1[0]);
-                    s = s + " L " + Integer.toString(ai[1]) + " "
-                            + Integer.toString(ai1[1]);
-                    s = s + " L " + Integer.toString(ai[2]) + " "
-                            + Integer.toString(ai1[2]);
-                    s = s + " Z";
-                    domelement3.setAttribute("d", s);
-                    SVGWriteAttributes(domelement3);
-                    domelement.appendChild(domelement3);
-                    break;
-
-                case 4 : // '\004'
-                    IDomElement domelement4 = domdoc.createElement("rect");
-                    domelement4
-                            .setAttribute("x", Integer.toString(rectangle.x));
-                    domelement4
-                            .setAttribute("y", Integer.toString(rectangle.y));
-                    domelement4.setAttribute("width",
-                            Integer.toString(rectangle.width));
-                    domelement4.setAttribute("height",
-                            Integer.toString(rectangle.height));
-                    SVGWriteAttributes(domelement4);
-                    domelement.appendChild(domelement4);
-                    break;
-
-                case 5 : // '\005'
+            case 3: // '\003'
+                switch (getToSpot()) {
+                case 1: // '\001'
                     ai[0] = rectangle.x + rectangle.width / 2;
                     ai1[0] = rectangle.y;
                     ai[1] = rectangle.x + rectangle.width;
-                    ai1[1] = rectangle.y + rectangle.height / 2;
-                    ai[2] = ai[0];
-                    ai1[2] = rectangle.y + rectangle.height;
-                    ai[3] = rectangle.x;
-                    ai1[3] = ai1[1];
-                    IDomElement domelement5 = domdoc.createElement("path");
-                    String s1 = "M " + Integer.toString(ai[0]) + " "
-                            + Integer.toString(ai1[0]);
-                    s1 = s1 + " L " + Integer.toString(ai[1]) + " "
-                            + Integer.toString(ai1[1]);
-                    s1 = s1 + " L " + Integer.toString(ai[2]) + " "
-                            + Integer.toString(ai1[2]);
-                    s1 = s1 + " L " + Integer.toString(ai[3]) + " "
-                            + Integer.toString(ai1[3]);
-                    s1 = s1 + " Z";
-                    domelement5.setAttribute("d", s1);
-                    SVGWriteAttributes(domelement5);
-                    domelement.appendChild(domelement5);
+                    ai1[1] = rectangle.y + rectangle.height;
+                    ai[2] = rectangle.x;
+                    ai1[2] = rectangle.y + rectangle.height / 2;
                     break;
 
-                case 1 : // '\001'
-                case 2 : // '\002'
-                default :
-                    int i = getTopLeft().x + getWidth() / 2;
-                    int j = getTopLeft().y + getHeight() / 2;
-                    int k = getWidth() / 2;
-                    int l = getHeight() / 2;
-                    IDomElement domelement6 = domdoc.createElement("ellipse");
-                    domelement6.setAttribute("rx", Integer.toString(k));
-                    domelement6.setAttribute("ry", Integer.toString(l));
-                    domelement6.setAttribute("cx", Integer.toString(i));
-                    domelement6.setAttribute("cy", Integer.toString(j));
-                    SVGWriteAttributes(domelement6);
-                    domelement.appendChild(domelement6);
+                case 2: // '\002'
+                    ai[0] = rectangle.x + rectangle.width;
+                    ai1[0] = rectangle.y;
+                    ai[1] = rectangle.x + rectangle.width / 2;
+                    ai1[1] = rectangle.y + rectangle.height;
+                    ai[2] = rectangle.x;
+                    ai1[2] = rectangle.y;
                     break;
+
+                case 3: // '\003'
+                    ai[0] = rectangle.x + rectangle.width;
+                    ai1[0] = rectangle.y + rectangle.height / 2;
+                    ai[1] = rectangle.x;
+                    ai1[1] = rectangle.y + rectangle.height;
+                    ai[2] = rectangle.x + rectangle.width / 2;
+                    ai1[2] = rectangle.y;
+                    break;
+
+                case 4: // '\004'
+                    ai[0] = rectangle.x + rectangle.width;
+                    ai1[0] = rectangle.y + rectangle.height;
+                    ai[1] = rectangle.x;
+                    ai1[1] = rectangle.y + rectangle.height / 2;
+                    ai[2] = rectangle.x + rectangle.width;
+                    ai1[2] = rectangle.y;
+                    break;
+
+                case 5: // '\005'
+                    ai[0] = rectangle.x + rectangle.width / 2;
+                    ai1[0] = rectangle.y + rectangle.height;
+                    ai[1] = rectangle.x;
+                    ai1[1] = rectangle.y;
+                    ai[2] = rectangle.x + rectangle.width;
+                    ai1[2] = rectangle.y + rectangle.height / 2;
+                    break;
+
+                case 6: // '\006'
+                    ai[0] = rectangle.x;
+                    ai1[0] = rectangle.y + rectangle.height;
+                    ai[1] = rectangle.x + rectangle.width / 2;
+                    ai1[1] = rectangle.y;
+                    ai[2] = rectangle.x + rectangle.width;
+                    ai1[2] = rectangle.y + rectangle.height;
+                    break;
+
+                case 7: // '\007'
+                    ai[0] = rectangle.x;
+                    ai1[0] = rectangle.y + rectangle.height / 2;
+                    ai[1] = rectangle.x + rectangle.width;
+                    ai1[1] = rectangle.y;
+                    ai[2] = rectangle.x + rectangle.width / 2;
+                    ai1[2] = rectangle.y + rectangle.height;
+                    break;
+
+                case 0: // '\0'
+                case 8: // '\b'
+                default:
+                    ai[0] = rectangle.x;
+                    ai1[0] = rectangle.y;
+                    ai[1] = rectangle.x + rectangle.width;
+                    ai1[1] = rectangle.y + rectangle.height / 2;
+                    ai[2] = rectangle.x;
+                    ai1[2] = rectangle.y + rectangle.height;
+                    break;
+                }
+                IDomElement domelement3 = domdoc.createElement("path");
+                String s = "M " + Integer.toString(ai[0]) + " "
+                        + Integer.toString(ai1[0]);
+                s = s + " L " + Integer.toString(ai[1]) + " "
+                        + Integer.toString(ai1[1]);
+                s = s + " L " + Integer.toString(ai[2]) + " "
+                        + Integer.toString(ai1[2]);
+                s = s + " Z";
+                domelement3.setAttribute("d", s);
+                SVGWriteAttributes(domelement3);
+                domelement.appendChild(domelement3);
+                break;
+
+            case 4: // '\004'
+                IDomElement domelement4 = domdoc.createElement("rect");
+                domelement4.setAttribute("x", Integer.toString(rectangle.x));
+                domelement4.setAttribute("y", Integer.toString(rectangle.y));
+                domelement4.setAttribute("width",
+                        Integer.toString(rectangle.width));
+                domelement4.setAttribute("height",
+                        Integer.toString(rectangle.height));
+                SVGWriteAttributes(domelement4);
+                domelement.appendChild(domelement4);
+                break;
+
+            case 5: // '\005'
+                ai[0] = rectangle.x + rectangle.width / 2;
+                ai1[0] = rectangle.y;
+                ai[1] = rectangle.x + rectangle.width;
+                ai1[1] = rectangle.y + rectangle.height / 2;
+                ai[2] = ai[0];
+                ai1[2] = rectangle.y + rectangle.height;
+                ai[3] = rectangle.x;
+                ai1[3] = ai1[1];
+                IDomElement domelement5 = domdoc.createElement("path");
+                String s1 = "M " + Integer.toString(ai[0]) + " "
+                        + Integer.toString(ai1[0]);
+                s1 = s1 + " L " + Integer.toString(ai[1]) + " "
+                        + Integer.toString(ai1[1]);
+                s1 = s1 + " L " + Integer.toString(ai[2]) + " "
+                        + Integer.toString(ai1[2]);
+                s1 = s1 + " L " + Integer.toString(ai[3]) + " "
+                        + Integer.toString(ai1[3]);
+                s1 = s1 + " Z";
+                domelement5.setAttribute("d", s1);
+                SVGWriteAttributes(domelement5);
+                domelement.appendChild(domelement5);
+                break;
+
+            case 1: // '\001'
+            case 2: // '\002'
+            default:
+                int i = getTopLeft().x + getWidth() / 2;
+                int j = getTopLeft().y + getHeight() / 2;
+                int k = getWidth() / 2;
+                int l = getHeight() / 2;
+                IDomElement domelement6 = domdoc.createElement("ellipse");
+                domelement6.setAttribute("rx", Integer.toString(k));
+                domelement6.setAttribute("ry", Integer.toString(l));
+                domelement6.setAttribute("cx", Integer.toString(i));
+                domelement6.setAttribute("cy", Integer.toString(j));
+                SVGWriteAttributes(domelement6);
+                domelement.appendChild(domelement6);
+                break;
             }
         }
         super.SVGWriteObject(domdoc, domelement);
     }
 
+    @Override
     public IDomNode SVGReadObject(IDomDoc domdoc,
             GraphicViewerDocument graphicviewerdocument,
             IDomElement domelement, IDomElement domelement1) {
@@ -362,6 +355,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public void SVGUpdateReference(String s, Object obj) {
         super.SVGUpdateReference(s, obj);
         if (s.equals("portobject")) {
@@ -369,130 +363,131 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         if (paintGreek(graphics2d, graphicviewerview)) {
             return;
         }
         Rectangle rectangle = getBoundingRect();
         switch (getStyle()) {
-            case 0 : // '\0'
-                return;
+        case 0: // '\0'
+            return;
 
-            case 1 : // '\001'
-                GraphicViewerObject graphicviewerobject = getPortObject();
-                if (graphicviewerobject != null
-                        && graphicviewerobject.getLayer() == null
-                        && graphicviewerobject.getView() == null) {
-                    graphicviewerobject.setBoundingRect(rectangle);
-                    graphicviewerobject.paint(graphics2d, graphicviewerview);
-                }
+        case 1: // '\001'
+            GraphicViewerObject graphicviewerobject = getPortObject();
+            if (graphicviewerobject != null
+                    && graphicviewerobject.getLayer() == null
+                    && graphicviewerobject.getView() == null) {
+                graphicviewerobject.setBoundingRect(rectangle);
+                graphicviewerobject.paint(graphics2d, graphicviewerview);
+            }
+            break;
+
+        case 3: // '\003'
+            int ai[] = graphicviewerview.getTempXs(3);
+            int ai2[] = graphicviewerview.getTempYs(3);
+            switch (getToSpot()) {
+            case 1: // '\001'
+                ai[0] = rectangle.x + rectangle.width / 2;
+                ai2[0] = rectangle.y;
+                ai[1] = rectangle.x + rectangle.width;
+                ai2[1] = rectangle.y + rectangle.height;
+                ai[2] = rectangle.x;
+                ai2[2] = rectangle.y + rectangle.height / 2;
                 break;
 
-            case 3 : // '\003'
-                int ai[] = graphicviewerview.getTempXs(3);
-                int ai2[] = graphicviewerview.getTempYs(3);
-                switch (getToSpot()) {
-                    case 1 : // '\001'
-                        ai[0] = rectangle.x + rectangle.width / 2;
-                        ai2[0] = rectangle.y;
-                        ai[1] = rectangle.x + rectangle.width;
-                        ai2[1] = rectangle.y + rectangle.height;
-                        ai[2] = rectangle.x;
-                        ai2[2] = rectangle.y + rectangle.height / 2;
-                        break;
-
-                    case 2 : // '\002'
-                        ai[0] = rectangle.x + rectangle.width;
-                        ai2[0] = rectangle.y;
-                        ai[1] = rectangle.x + rectangle.width / 2;
-                        ai2[1] = rectangle.y + rectangle.height;
-                        ai[2] = rectangle.x;
-                        ai2[2] = rectangle.y;
-                        break;
-
-                    case 3 : // '\003'
-                        ai[0] = rectangle.x + rectangle.width;
-                        ai2[0] = rectangle.y + rectangle.height / 2;
-                        ai[1] = rectangle.x;
-                        ai2[1] = rectangle.y + rectangle.height;
-                        ai[2] = rectangle.x + rectangle.width / 2;
-                        ai2[2] = rectangle.y;
-                        break;
-
-                    case 4 : // '\004'
-                        ai[0] = rectangle.x + rectangle.width;
-                        ai2[0] = rectangle.y + rectangle.height;
-                        ai[1] = rectangle.x;
-                        ai2[1] = rectangle.y + rectangle.height / 2;
-                        ai[2] = rectangle.x + rectangle.width;
-                        ai2[2] = rectangle.y;
-                        break;
-
-                    case 5 : // '\005'
-                        ai[0] = rectangle.x + rectangle.width / 2;
-                        ai2[0] = rectangle.y + rectangle.height;
-                        ai[1] = rectangle.x;
-                        ai2[1] = rectangle.y;
-                        ai[2] = rectangle.x + rectangle.width;
-                        ai2[2] = rectangle.y + rectangle.height / 2;
-                        break;
-
-                    case 6 : // '\006'
-                        ai[0] = rectangle.x;
-                        ai2[0] = rectangle.y + rectangle.height;
-                        ai[1] = rectangle.x + rectangle.width / 2;
-                        ai2[1] = rectangle.y;
-                        ai[2] = rectangle.x + rectangle.width;
-                        ai2[2] = rectangle.y + rectangle.height;
-                        break;
-
-                    case 7 : // '\007'
-                        ai[0] = rectangle.x;
-                        ai2[0] = rectangle.y + rectangle.height / 2;
-                        ai[1] = rectangle.x + rectangle.width;
-                        ai2[1] = rectangle.y;
-                        ai[2] = rectangle.x + rectangle.width / 2;
-                        ai2[2] = rectangle.y + rectangle.height;
-                        break;
-
-                    case 0 : // '\0'
-                    case 8 : // '\b'
-                    default :
-                        ai[0] = rectangle.x;
-                        ai2[0] = rectangle.y;
-                        ai[1] = rectangle.x + rectangle.width;
-                        ai2[1] = rectangle.y + rectangle.height / 2;
-                        ai[2] = rectangle.x;
-                        ai2[2] = rectangle.y + rectangle.height;
-                        break;
-                }
-                drawPolygon(graphics2d, ai, ai2, 3);
+            case 2: // '\002'
+                ai[0] = rectangle.x + rectangle.width;
+                ai2[0] = rectangle.y;
+                ai[1] = rectangle.x + rectangle.width / 2;
+                ai2[1] = rectangle.y + rectangle.height;
+                ai[2] = rectangle.x;
+                ai2[2] = rectangle.y;
                 break;
 
-            case 4 : // '\004'
-                drawRect(graphics2d, rectangle.x, rectangle.y, rectangle.width,
-                        rectangle.height);
+            case 3: // '\003'
+                ai[0] = rectangle.x + rectangle.width;
+                ai2[0] = rectangle.y + rectangle.height / 2;
+                ai[1] = rectangle.x;
+                ai2[1] = rectangle.y + rectangle.height;
+                ai[2] = rectangle.x + rectangle.width / 2;
+                ai2[2] = rectangle.y;
                 break;
 
-            case 5 : // '\005'
-                int ai1[] = graphicviewerview.getTempXs(4);
-                int ai3[] = graphicviewerview.getTempYs(4);
-                ai1[0] = rectangle.x + rectangle.width / 2;
-                ai3[0] = rectangle.y;
-                ai1[1] = rectangle.x + rectangle.width;
-                ai3[1] = rectangle.y + rectangle.height / 2;
-                ai1[2] = ai1[0];
-                ai3[2] = rectangle.y + rectangle.height;
-                ai1[3] = rectangle.x;
-                ai3[3] = ai3[1];
-                drawPolygon(graphics2d, ai1, ai3, 4);
+            case 4: // '\004'
+                ai[0] = rectangle.x + rectangle.width;
+                ai2[0] = rectangle.y + rectangle.height;
+                ai[1] = rectangle.x;
+                ai2[1] = rectangle.y + rectangle.height / 2;
+                ai[2] = rectangle.x + rectangle.width;
+                ai2[2] = rectangle.y;
                 break;
 
-            case 2 : // '\002'
-            default :
-                drawEllipse(graphics2d, rectangle.x, rectangle.y,
-                        rectangle.width, rectangle.height);
+            case 5: // '\005'
+                ai[0] = rectangle.x + rectangle.width / 2;
+                ai2[0] = rectangle.y + rectangle.height;
+                ai[1] = rectangle.x;
+                ai2[1] = rectangle.y;
+                ai[2] = rectangle.x + rectangle.width;
+                ai2[2] = rectangle.y + rectangle.height / 2;
                 break;
+
+            case 6: // '\006'
+                ai[0] = rectangle.x;
+                ai2[0] = rectangle.y + rectangle.height;
+                ai[1] = rectangle.x + rectangle.width / 2;
+                ai2[1] = rectangle.y;
+                ai[2] = rectangle.x + rectangle.width;
+                ai2[2] = rectangle.y + rectangle.height;
+                break;
+
+            case 7: // '\007'
+                ai[0] = rectangle.x;
+                ai2[0] = rectangle.y + rectangle.height / 2;
+                ai[1] = rectangle.x + rectangle.width;
+                ai2[1] = rectangle.y;
+                ai[2] = rectangle.x + rectangle.width / 2;
+                ai2[2] = rectangle.y + rectangle.height;
+                break;
+
+            case 0: // '\0'
+            case 8: // '\b'
+            default:
+                ai[0] = rectangle.x;
+                ai2[0] = rectangle.y;
+                ai[1] = rectangle.x + rectangle.width;
+                ai2[1] = rectangle.y + rectangle.height / 2;
+                ai[2] = rectangle.x;
+                ai2[2] = rectangle.y + rectangle.height;
+                break;
+            }
+            drawPolygon(graphics2d, ai, ai2, 3);
+            break;
+
+        case 4: // '\004'
+            drawRect(graphics2d, rectangle.x, rectangle.y, rectangle.width,
+                    rectangle.height);
+            break;
+
+        case 5: // '\005'
+            int ai1[] = graphicviewerview.getTempXs(4);
+            int ai3[] = graphicviewerview.getTempYs(4);
+            ai1[0] = rectangle.x + rectangle.width / 2;
+            ai3[0] = rectangle.y;
+            ai1[1] = rectangle.x + rectangle.width;
+            ai3[1] = rectangle.y + rectangle.height / 2;
+            ai1[2] = ai1[0];
+            ai3[2] = rectangle.y + rectangle.height;
+            ai1[3] = rectangle.x;
+            ai3[3] = ai3[1];
+            drawPolygon(graphics2d, ai1, ai3, 4);
+            break;
+
+        case 2: // '\002'
+        default:
+            drawEllipse(graphics2d, rectangle.x, rectangle.y, rectangle.width,
+                    rectangle.height);
+            break;
         }
     }
 
@@ -520,6 +515,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public void expandRectByPenWidth(Rectangle rectangle) {
         if (getStyle() == 0) {
             return;
@@ -537,6 +533,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public boolean getNearestIntersectionPoint(int i, int j, int k, int l,
             Point point) {
         GraphicViewerObject graphicviewerobject = getPortObject();
@@ -557,10 +554,12 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public int getPartID() {
         return myPartID;
     }
 
+    @Override
     public void setPartID(int i) {
         int j = myPartID;
         if (j != i) {
@@ -593,10 +592,10 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public void setPortObject(GraphicViewerObject graphicviewerobject) {
-        internalSetPortObject(graphicviewerobject, false);
+        setInternalFlags(graphicviewerobject, false);
     }
 
-    private void internalSetPortObject(GraphicViewerObject graphicviewerobject,
+    private void setInternalFlags(GraphicViewerObject graphicviewerobject,
             boolean flag) {
         GraphicViewerObject graphicviewerobject1 = myObject;
         if (graphicviewerobject1 != graphicviewerobject) {
@@ -707,51 +706,51 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         int j1 = rectangle.y + rectangle.height / 2;
         int k1 = rectangle.y + rectangle.height;
         switch (i) {
-            case 0 : // '\0'
-            default :
-                point.x = k;
-                point.y = j1;
-                break;
+        case 0: // '\0'
+        default:
+            point.x = k;
+            point.y = j1;
+            break;
 
-            case 1 : // '\001'
-                point.x = j;
-                point.y = i1;
-                break;
+        case 1: // '\001'
+            point.x = j;
+            point.y = i1;
+            break;
 
-            case 2 : // '\002'
-                point.x = k;
-                point.y = i1;
-                break;
+        case 2: // '\002'
+            point.x = k;
+            point.y = i1;
+            break;
 
-            case 3 : // '\003'
-                point.x = l;
-                point.y = i1;
-                break;
+        case 3: // '\003'
+            point.x = l;
+            point.y = i1;
+            break;
 
-            case 4 : // '\004'
-                point.x = l;
-                point.y = j1;
-                break;
+        case 4: // '\004'
+            point.x = l;
+            point.y = j1;
+            break;
 
-            case 5 : // '\005'
-                point.x = l;
-                point.y = k1;
-                break;
+        case 5: // '\005'
+            point.x = l;
+            point.y = k1;
+            break;
 
-            case 6 : // '\006'
-                point.x = k;
-                point.y = k1;
-                break;
+        case 6: // '\006'
+            point.x = k;
+            point.y = k1;
+            break;
 
-            case 7 : // '\007'
-                point.x = j;
-                point.y = k1;
-                break;
+        case 7: // '\007'
+            point.x = j;
+            point.y = k1;
+            break;
 
-            case 8 : // '\b'
-                point.x = j;
-                point.y = j1;
-                break;
+        case 8: // '\b'
+            point.x = j;
+            point.y = j1;
+            break;
         }
         return point;
     }
@@ -941,33 +940,33 @@ public class GraphicViewerPort extends GraphicViewerDrawable
 
     public double getLinkDir(int i) {
         switch (i) {
-            case 0 : // '\0'
-            default :
-                return -1D;
+        case 0: // '\0'
+        default:
+            return -1D;
 
-            case 1 : // '\001'
-                return 3.9269908169872414D;
+        case 1: // '\001'
+            return 3.9269908169872414D;
 
-            case 2 : // '\002'
-                return 4.7123889803846897D;
+        case 2: // '\002'
+            return 4.7123889803846897D;
 
-            case 3 : // '\003'
-                return 5.497787143782138D;
+        case 3: // '\003'
+            return 5.497787143782138D;
 
-            case 4 : // '\004'
-                return 0.0D;
+        case 4: // '\004'
+            return 0.0D;
 
-            case 5 : // '\005'
-                return 0.78539816339744828D;
+        case 5: // '\005'
+            return 0.78539816339744828D;
 
-            case 6 : // '\006'
-                return 1.5707963267948966D;
+        case 6: // '\006'
+            return 1.5707963267948966D;
 
-            case 7 : // '\007'
-                return 2.3561944901923448D;
+        case 7: // '\007'
+            return 2.3561944901923448D;
 
-            case 8 : // '\b'
-                return 3.1415926535897931D;
+        case 8: // '\b'
+            return 3.1415926535897931D;
         }
     }
 
@@ -1039,36 +1038,36 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
         int i = graphicviewerdocument.getValidCycle();
         switch (i) {
-            case 0 : // '\0'
-            default :
-                return true;
+        case 0: // '\0'
+        default:
+            return true;
 
-            case 1 : // '\001'
-                return !GraphicViewerDocument.makesDirectedCycle(
-                        getParentGraphicViewerNode(),
-                        graphicviewerport.getParentGraphicViewerNode());
+        case 1: // '\001'
+            return !GraphicViewerDocument.makesDirectedCycle(
+                    getParentGraphicViewerNode(),
+                    graphicviewerport.getParentGraphicViewerNode());
 
-            case 2 : // '\002'
-                return !GraphicViewerDocument.makesDirectedCycleFast(
-                        getParentGraphicViewerNode(),
-                        graphicviewerport.getParentGraphicViewerNode());
+        case 2: // '\002'
+            return !GraphicViewerDocument.makesDirectedCycleFast(
+                    getParentGraphicViewerNode(),
+                    graphicviewerport.getParentGraphicViewerNode());
 
-            case 3 : // '\003'
-                return !GraphicViewerDocument.makesUndirectedCycle(
-                        getParentGraphicViewerNode(),
-                        graphicviewerport.getParentGraphicViewerNode());
+        case 3: // '\003'
+            return !GraphicViewerDocument.makesUndirectedCycle(
+                    getParentGraphicViewerNode(),
+                    graphicviewerport.getParentGraphicViewerNode());
 
-            case 4 : // '\004'
-                return graphicviewerport.getNumToLinks() == 0
-                        && !GraphicViewerDocument.makesDirectedCycleFast(
-                                getParentGraphicViewerNode(),
-                                graphicviewerport.getParentGraphicViewerNode());
+        case 4: // '\004'
+            return graphicviewerport.getNumToLinks() == 0
+                    && !GraphicViewerDocument.makesDirectedCycleFast(
+                            getParentGraphicViewerNode(),
+                            graphicviewerport.getParentGraphicViewerNode());
 
-            case 5 : // '\005'
-                return getNumFromLinks() == 0
-                        && !GraphicViewerDocument.makesDirectedCycleFast(
-                                getParentGraphicViewerNode(),
-                                graphicviewerport.getParentGraphicViewerNode());
+        case 5: // '\005'
+            return getNumFromLinks() == 0
+                    && !GraphicViewerDocument.makesDirectedCycleFast(
+                            getParentGraphicViewerNode(),
+                            graphicviewerport.getParentGraphicViewerNode());
         }
     }
 
@@ -1219,6 +1218,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     protected void geometryChange(Rectangle rectangle) {
         super.geometryChange(rectangle);
         portChange(1, 0, rectangle);
@@ -1236,6 +1236,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     public void linkChange() {
     }
 
+    @Override
     protected void ownerChange(
             IGraphicViewerObjectCollection graphicviewerobjectcollection,
             IGraphicViewerObjectCollection graphicviewerobjectcollection1,
@@ -1278,6 +1279,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public boolean doUncapturedMouseMove(int i, Point point, Point point1,
             GraphicViewerView graphicviewerview) {
         if (getLayer() != null && !getLayer().isModifiable()) {
@@ -1310,147 +1312,145 @@ public class GraphicViewerPort extends GraphicViewerDrawable
         }
     }
 
+    @Override
     public void copyNewValueForRedo(
             GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit) {
         switch (graphicviewerdocumentchangededit.getFlags()) {
-            case 301 :
-                graphicviewerdocumentchangededit.setNewValueInt(getStyle());
-                return;
+        case 301:
+            graphicviewerdocumentchangededit.setNewValueInt(getStyle());
+            return;
 
-            case 302 :
-                graphicviewerdocumentchangededit.setNewValue(getPortObject());
-                return;
+        case 302:
+            graphicviewerdocumentchangededit.setNewValue(getPortObject());
+            return;
 
-            case 303 :
-                graphicviewerdocumentchangededit
-                        .setNewValueBoolean(isValidSource());
-                return;
+        case 303:
+            graphicviewerdocumentchangededit
+                    .setNewValueBoolean(isValidSource());
+            return;
 
-            case 304 :
-                graphicviewerdocumentchangededit
-                        .setNewValueBoolean(isValidDestination());
-                return;
+        case 304:
+            graphicviewerdocumentchangededit
+                    .setNewValueBoolean(isValidDestination());
+            return;
 
-            case 305 :
-                graphicviewerdocumentchangededit.setNewValueInt(getFromSpot());
-                return;
+        case 305:
+            graphicviewerdocumentchangededit.setNewValueInt(getFromSpot());
+            return;
 
-            case 306 :
-                graphicviewerdocumentchangededit.setNewValueInt(getToSpot());
-                return;
+        case 306:
+            graphicviewerdocumentchangededit.setNewValueInt(getToSpot());
+            return;
 
-            case 307 :
-                return;
+        case 307:
+            return;
 
-            case 308 :
-                return;
+        case 308:
+            return;
 
-            case 309 :
-                graphicviewerdocumentchangededit
-                        .setNewValueInt(getEndSegmentLength());
-                return;
+        case 309:
+            graphicviewerdocumentchangededit
+                    .setNewValueInt(getEndSegmentLength());
+            return;
 
-            case 312 :
-                graphicviewerdocumentchangededit.setNewValueInt(getPartID());
-                return;
+        case 312:
+            graphicviewerdocumentchangededit.setNewValueInt(getPartID());
+            return;
 
-            case 313 :
-                graphicviewerdocumentchangededit
-                        .setNewValueBoolean(isClearsLinksWhenRemoved());
-                return;
+        case 313:
+            graphicviewerdocumentchangededit
+                    .setNewValueBoolean(isClearsLinksWhenRemoved());
+            return;
 
-            case 310 :
-            case 311 :
-            default :
-                super.copyNewValueForRedo(graphicviewerdocumentchangededit);
-                return;
+        case 310:
+        case 311:
+        default:
+            super.copyNewValueForRedo(graphicviewerdocumentchangededit);
+            return;
         }
     }
 
+    @Override
     public void changeValue(
             GraphicViewerDocumentChangedEdit graphicviewerdocumentchangededit,
             boolean flag) {
         switch (graphicviewerdocumentchangededit.getFlags()) {
-            case 301 :
-                internalSetStyle(
-                        graphicviewerdocumentchangededit.getValueInt(flag),
-                        true);
-                return;
+        case 301:
+            internalSetStyle(
+                    graphicviewerdocumentchangededit.getValueInt(flag), true);
+            return;
 
-            case 302 :
-                internalSetPortObject(
-                        (GraphicViewerObject) graphicviewerdocumentchangededit
-                                .getValue(flag),
-                        true);
-                return;
+        case 302:
+            setInternalFlags(
+                    (GraphicViewerObject) graphicviewerdocumentchangededit
+                            .getValue(flag),
+                    true);
+            return;
 
-            case 303 :
-                setValidSource(graphicviewerdocumentchangededit
-                        .getValueBoolean(flag));
-                return;
+        case 303:
+            setValidSource(graphicviewerdocumentchangededit
+                    .getValueBoolean(flag));
+            return;
 
-            case 304 :
-                setValidDestination(graphicviewerdocumentchangededit
-                        .getValueBoolean(flag));
-                return;
+        case 304:
+            setValidDestination(graphicviewerdocumentchangededit
+                    .getValueBoolean(flag));
+            return;
 
-            case 305 :
-                internalSetFromSpot(
-                        graphicviewerdocumentchangededit.getValueInt(flag),
-                        true);
-                return;
+        case 305:
+            internalSetFromSpot(
+                    graphicviewerdocumentchangededit.getValueInt(flag), true);
+            return;
 
-            case 306 :
-                internalSetToSpot(
-                        graphicviewerdocumentchangededit.getValueInt(flag),
-                        true);
-                return;
+        case 306:
+            internalSetToSpot(
+                    graphicviewerdocumentchangededit.getValueInt(flag), true);
+            return;
 
-            case 307 :
-                GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerdocumentchangededit
-                        .getOldValue();
-                if (flag) {
-                    removeLink(graphicviewerlink);
-                } else {
-                    addLink(graphicviewerlink);
-                }
-                return;
+        case 307:
+            GraphicViewerLink graphicviewerlink = (GraphicViewerLink) graphicviewerdocumentchangededit
+                    .getOldValue();
+            if (flag) {
+                removeLink(graphicviewerlink);
+            } else {
+                addLink(graphicviewerlink);
+            }
+            return;
 
-            case 308 :
-                GraphicViewerLink graphicviewerlink1 = (GraphicViewerLink) graphicviewerdocumentchangededit
-                        .getOldValue();
-                if (flag) {
-                    addLink(graphicviewerlink1);
-                } else {
-                    removeLink(graphicviewerlink1);
-                }
-                return;
+        case 308:
+            GraphicViewerLink graphicviewerlink1 = (GraphicViewerLink) graphicviewerdocumentchangededit
+                    .getOldValue();
+            if (flag) {
+                addLink(graphicviewerlink1);
+            } else {
+                removeLink(graphicviewerlink1);
+            }
+            return;
 
-            case 309 :
-                internalSetEndSegmentLength(
-                        graphicviewerdocumentchangededit.getValueInt(flag),
-                        true);
-                return;
+        case 309:
+            internalSetEndSegmentLength(
+                    graphicviewerdocumentchangededit.getValueInt(flag), true);
+            return;
 
-            case 312 :
-                setPartID(graphicviewerdocumentchangededit.getValueInt(flag));
-                return;
+        case 312:
+            setPartID(graphicviewerdocumentchangededit.getValueInt(flag));
+            return;
 
-            case 313 :
-                setClearsLinksWhenRemoved(graphicviewerdocumentchangededit
-                        .getValueBoolean(flag));
-                return;
+        case 313:
+            setClearsLinksWhenRemoved(graphicviewerdocumentchangededit
+                    .getValueBoolean(flag));
+            return;
 
-            case 310 :
-            case 311 :
-            default :
-                super.changeValue(graphicviewerdocumentchangededit, flag);
-                return;
+        case 310:
+        case 311:
+        default:
+            super.changeValue(graphicviewerdocumentchangededit, flag);
+            return;
         }
     }
 
     public static double getDefaultPaintNothingScale() {
-        return flagValidLink;
+        return myDefaultPaintNothingScale;
     }
 
     public static void setDefaultPaintNothingScale(double paramDouble) {
@@ -1458,7 +1458,7 @@ public class GraphicViewerPort extends GraphicViewerDrawable
     }
 
     public static double getDefaultPaintGreekScale() {
-        return flagValidSource;
+        return myDefaultPaintGreekScale;
     }
 
     public static void setDefaultPaintGreekScale(double paramDouble) {

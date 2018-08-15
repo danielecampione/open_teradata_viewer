@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2013, D. Campione
+ * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 
 /**
@@ -29,9 +30,16 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 public class SelectExpressionItem implements ISelectItem {
 
     private IExpression expression;
-    private String alias;
+    private Alias alias;
 
-    public String getAlias() {
+    public SelectExpressionItem() {
+    }
+
+    public SelectExpressionItem(IExpression expression) {
+        this.expression = expression;
+    }
+
+    public Alias getAlias() {
         return alias;
     }
 
@@ -39,8 +47,8 @@ public class SelectExpressionItem implements ISelectItem {
         return expression;
     }
 
-    public void setAlias(String string) {
-        alias = string;
+    public void setAlias(Alias alias) {
+        this.alias = alias;
     }
 
     public void setExpression(IExpression expression) {
@@ -54,6 +62,6 @@ public class SelectExpressionItem implements ISelectItem {
 
     @Override
     public String toString() {
-        return expression + ((alias != null) ? " AS " + alias : "");
+        return expression + ((alias != null) ? alias.toString() : "");
     }
 }
