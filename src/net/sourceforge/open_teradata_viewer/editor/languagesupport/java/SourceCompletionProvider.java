@@ -466,7 +466,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
         comp.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         try {
-            completions.clear();
+            completions = new ArrayList<ICompletion>();
 
             CompilationUnit cu = javaProvider.getCompilationUnit();
             if (cu == null) {

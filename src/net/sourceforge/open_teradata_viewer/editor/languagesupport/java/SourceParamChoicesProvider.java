@@ -67,7 +67,7 @@ class SourceParamChoicesProvider implements IParameterChoicesProvider {
      * extended class or implemented interface.
      */
     private void addPublicAndProtectedFieldsAndGetters(Type type,
-            JarManager jm, Package pkg, List list) {
+            JarManager jm, Package pkg, List<ICompletion> list) {
     }
 
     /**

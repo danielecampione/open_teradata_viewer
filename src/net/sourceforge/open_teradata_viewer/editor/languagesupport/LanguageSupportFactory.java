@@ -78,12 +78,16 @@ public class LanguageSupportFactory implements PropertyChangeListener {
 
         String prefix = "net.sourceforge.open_teradata_viewer.editor.languagesupport.";
 
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_C, prefix
+                + "c.CLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_CSS, prefix
+                + "css.CssLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVA, prefix
                 + "java.JavaLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, prefix
                 + "js.JavaScriptLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_C, prefix
-                + "c.CLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_XML, prefix
+                + "xml.XmlLanguageSupport");
     }
 
     /**

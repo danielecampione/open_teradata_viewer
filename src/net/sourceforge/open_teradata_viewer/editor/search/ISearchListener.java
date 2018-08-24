@@ -40,4 +40,5 @@ public interface ISearchListener extends EventListener {
      */
     void searchEvent(SearchEvent e);
 
+    String getSelectedText();
 }

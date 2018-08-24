@@ -595,6 +595,11 @@ public class ErrorStrip extends JComponent {
             return color;
         }
 
+        /** {@inheritDoc} */
+        public boolean getKnowsOffsetAndLength() {
+            return true;
+        }
+
         @Override
         public int getLength() {
             return range.getEndOffset() - range.getStartOffset();

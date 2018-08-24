@@ -3,7 +3,7 @@
 
 <!--
    sql.xml - API specification for the SQL Standard Library.
-           Used by OTVSyntaxTextArea to provide code completion.
+             Used by OTVSyntaxTextArea to provide code completion.
 
    Author:         D. Campione
 

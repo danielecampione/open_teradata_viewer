@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.editor.autocomplete;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -146,12 +145,11 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      */
     @Override
     protected List<ICompletion> getCompletionsImpl(JTextComponent comp) {
-        if (!(comp instanceof SyntaxTextArea)) {
-            return new ArrayList<ICompletion>(0);
-        }
-        ICompletionProvider provider = getProviderFor(comp);
-        if (provider != null) {
-            return provider.getCompletions(comp);
+        if (comp instanceof SyntaxTextArea) {
+            ICompletionProvider provider = getProviderFor(comp);
+            if (provider != null) {
+                return provider.getCompletions(comp);
+            }
         }
         return Collections.emptyList();
     }

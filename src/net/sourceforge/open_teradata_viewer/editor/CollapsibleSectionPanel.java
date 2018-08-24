@@ -183,6 +183,9 @@ public class CollapsibleSectionPanel extends JPanel {
         }
 
         if (timer != null) {
+            if (down) {
+                return; // Already animating away
+            }
             timer.stop();
             tick = totalTicks - tick;
         }

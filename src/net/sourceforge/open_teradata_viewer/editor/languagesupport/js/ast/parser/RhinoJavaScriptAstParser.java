@@ -28,6 +28,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.CodeBl
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDeclarationOptions;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType.JavaScriptTypesFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType.RhinoJavaScriptTypesFactory;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import sun.org.mozilla.javascript.internal.Token;
 import sun.org.mozilla.javascript.internal.ast.AstNode;
 import sun.org.mozilla.javascript.internal.ast.AstRoot;
@@ -67,8 +68,8 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
     }
 
     @Override
-    public CodeBlock convertAstNodeToCodeBlock(AstRoot root, Set set,
-            String entered) {
+    public CodeBlock convertAstNodeToCodeBlock(AstRoot root,
+            Set<IJSCompletionUI> set, String entered) {
         try {
             return super.convertAstNodeToCodeBlock(root, set, entered);
         } finally {
@@ -98,8 +99,8 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
      * super.iterateNode().
      */
     @Override
-    protected void iterateNode(AstNode child, Set set, String entered,
-            CodeBlock block, int offset) {
+    protected void iterateNode(AstNode child, Set<IJSCompletionUI> set,
+            String entered, CodeBlock block, int offset) {
         // Look for importPackage and importClass
         switch (child.getType()) {
         case Token.EXPR_RESULT:
@@ -125,8 +126,8 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
      * @param offset Position of AstNode within document.
      * @return true if either importPackage or importClass is found.
      */
-    private boolean processImportNode(AstNode child, Set set, String entered,
-            CodeBlock block, int offset) {
+    private boolean processImportNode(AstNode child, Set<IJSCompletionUI> set,
+            String entered, CodeBlock block, int offset) {
         String src = JavaScriptHelper.convertNodeToSource(child);
         if (src != null) {
             if (src.startsWith("importPackage")) {

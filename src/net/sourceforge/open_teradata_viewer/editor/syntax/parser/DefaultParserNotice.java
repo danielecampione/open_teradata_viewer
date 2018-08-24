@@ -40,7 +40,7 @@ public class DefaultParserNotice implements IParserNotice {
     private String message;
     private String toolTipText;
 
-    private static final Color[] DEFAULT_COLORS = {new Color(255, 0, 128), // Error
+    private static final Color[] DEFAULT_COLORS = { new Color(255, 0, 128), // Error
             new Color(244, 200, 45), // Warning
             Color.gray, // Info
     };
@@ -85,6 +85,7 @@ public class DefaultParserNotice implements IParserNotice {
      * @return How the two parser notices should be sorted relative to one
      *         another.
      */
+    @Override
     public int compareTo(IParserNotice other) {
         int diff = -1;
         if (other != null) {
@@ -100,6 +101,7 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsPosition(int pos) {
         return offset <= pos && pos < (offset + length);
     }
@@ -119,6 +121,7 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Color getColor() {
         Color c = color; // User-defined
         if (c == null) {
@@ -128,41 +131,54 @@ public class DefaultParserNotice implements IParserNotice {
     }
 
     /** {@inheritDoc} */
+    public boolean getKnowsOffsetAndLength() {
+        return offset >= 0 && length >= 0;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public int getLength() {
         return length;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getLevel() {
         return level;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getLine() {
         return line;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getMessage() {
         return message;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getOffset() {
         return offset;
     }
 
     /** {@inheritDoc} */
+    @Override
     public IParser getParser() {
         return parser;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getShowInEditor() {
         return showInEditor;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getToolTipText() {
         return toolTipText != null ? toolTipText : getMessage();
     }

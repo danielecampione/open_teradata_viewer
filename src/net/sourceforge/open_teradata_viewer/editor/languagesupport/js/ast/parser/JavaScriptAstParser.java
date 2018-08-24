@@ -76,8 +76,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     @Override
-    public CodeBlock convertAstNodeToCodeBlock(AstRoot root, Set set,
-            String entered) {
+    public CodeBlock convertAstNodeToCodeBlock(AstRoot root,
+            Set<IJSCompletionUI> set, String entered) {
         functions.clear();
         CodeBlock block = new CodeBlock(0);
         addCodeBlock(root, set, entered, block, Integer.MAX_VALUE);
@@ -104,8 +104,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
      * @param codeBlock Parent CodeBlock.
      * @param offset CodeBlock offset.
      */
-    private void addCodeBlock(Node parent, Set set, String entered,
-            CodeBlock codeBlock, int offset) {
+    private void addCodeBlock(Node parent, Set<IJSCompletionUI> set,
+            String entered, CodeBlock codeBlock, int offset) {
         if (parent == null) {
             return;
         }
@@ -126,8 +126,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
         }
     }
 
-    protected void iterateNode(AstNode child, Set set, String entered,
-            CodeBlock block, int offset) {
+    protected void iterateNode(AstNode child, Set<IJSCompletionUI> set,
+            String entered, CodeBlock block, int offset) {
         if (child == null) {
             return;
         }
@@ -212,7 +212,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     private void processExpressionStatement(Node child, CodeBlock block,
-            Set set, String entered, int offset) {
+            Set<IJSCompletionUI> set, String entered, int offset) {
         ExpressionStatement exp = (ExpressionStatement) child;
 
         AstNode expNode = exp.getExpression();
@@ -282,8 +282,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
         }
     }
 
-    private void processCaseNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processCaseNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         SwitchCase switchCase = (SwitchCase) child;
         List<AstNode> statements = switchCase.getStatements();
         int start = switchCase.getAbsolutePosition();
@@ -300,8 +300,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract local variables from switch node. */
-    private void processSwitchNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processSwitchNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         SwitchStatement switchStatement = (SwitchStatement) child;
         if (canProcessNode(switchStatement)) {
             List<SwitchCase> cases = switchStatement.getCases();
@@ -314,8 +314,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract variables from try/catch node(s). */
-    private void processTryCatchNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processTryCatchNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         TryStatement tryStatement = (TryStatement) child;
         if (canProcessNode(tryStatement)) {
             offset = tryStatement.getTryBlock().getAbsolutePosition()
@@ -361,8 +361,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract variables from if/else node(s). */
-    private void processIfThenElse(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processIfThenElse(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         IfStatement ifStatement = (IfStatement) child;
         if (canProcessNode(ifStatement)) {
             offset = ifStatement.getAbsolutePosition()
@@ -380,8 +380,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract completions from expression node. */
-    private void processExpressionNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processExpressionNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         if (child instanceof ExpressionStatement) {
             ExpressionStatement expr = (ExpressionStatement) child;
             iterateNode(expr.getExpression(), set, entered, block, offset);
@@ -389,8 +389,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract while loop from node and add new code block. */
-    private void processWhileNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processWhileNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         WhileLoop loop = (WhileLoop) child;
         if (canProcessNode(loop)) {
             offset = loop.getAbsolutePosition() + loop.getLength();
@@ -399,8 +399,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract while loop from node and add new code block. */
-    private void processDoNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processDoNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         DoLoop loop = (DoLoop) child;
         if (canProcessNode(loop)) {
             offset = loop.getAbsolutePosition() + loop.getLength();
@@ -409,8 +409,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /** Extract variable from binary operator e.g <, >, = etc.. */
-    private void processInfix(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processInfix(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         InfixExpression epre = (InfixExpression) child;
         AstNode target = epre.getLeft();
         if (canProcessNode(target)) {
@@ -525,8 +525,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
      * Extract code from Token.FOR and add completions, then parse body of for
      * loop.
      */
-    private void processForNode(Node child, CodeBlock block, Set set,
-            String entered, int offset) {
+    private void processForNode(Node child, CodeBlock block,
+            Set<IJSCompletionUI> set, String entered, int offset) {
         if (child instanceof ForLoop) {
             ForLoop loop = (ForLoop) child;
             offset = loop.getAbsolutePosition() + loop.getLength();

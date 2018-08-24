@@ -20,34 +20,22 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.AbstractSourceTree;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.ILanguageSupport;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSupportFactory;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.IconFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptLanguageSupport;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptParser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
-import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import sun.org.mozilla.javascript.internal.Node;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
 import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.FunctionNode;
-import sun.org.mozilla.javascript.internal.ast.Name;
-import sun.org.mozilla.javascript.internal.ast.VariableDeclaration;
-import sun.org.mozilla.javascript.internal.ast.VariableInitializer;
 
 /**
  * A tree view showing the outline of JavaScript source, similar to the
@@ -72,8 +60,8 @@ public class JavaScriptOutlineTree extends AbstractSourceTree {
     private JavaScriptParser parser;
     private Listener listener;
 
-    private static final int PRIORITY_FUNCTION = 1;
-    private static final int PRIORITY_VARIABLE = 2;
+    static final int PRIORITY_FUNCTION = 1;
+    static final int PRIORITY_VARIABLE = 2;
 
     /**
      * Ctor. The tree created will not have its elements sorted alphabetically.
@@ -140,8 +128,14 @@ public class JavaScriptOutlineTree extends AbstractSourceTree {
             collapseRow(j++);
         }
 
-        // Expand only the root node
+        // Expand only functions
         expandRow(0);
+        j = 1;
+        while (j < getRowCount()) {
+            TreePath path = getPathForRow(j);
+            expandPath(path);
+            j++;
+        }
     }
 
     private void gotoElementAtPath(TreePath path) {
@@ -211,103 +205,9 @@ public class JavaScriptOutlineTree extends AbstractSourceTree {
      *        cleared.
      */
     private void update(AstRoot ast) {
-        JavaScriptTreeNode root = new JavaScriptTreeNode(null);
-        if (ast == null) {
-            model.setRoot(root);
-            return;
-        }
-
-        // Loop through all children and add tree nodes for functions and
-        // variables
-        Node child = ast.getFirstChild();
-        while (child != null) {
-            switch (child.getType()) {
-            case IToken.FUNCTION:
-                FunctionNode fn = (FunctionNode) child;
-                Name funcName = fn.getFunctionName();
-                // Happens with certain syntax errors, such as
-                // "function function foo() {"
-                if (funcName != null) {
-                    StringBuilder sb = new StringBuilder(fn.getName())
-                            .append('(');
-                    int paramCount = fn.getParamCount();
-                    if (paramCount > 0) {
-                        List<AstNode> fnParams = fn.getParams();
-                        for (int i = 0; i < paramCount; i++) {
-                            String paramName = null;
-                            AstNode node = fnParams.get(i);
-                            switch (node.getType()) {
-                            case Token.NAME:
-                                paramName = ((Name) node).getIdentifier();
-                                break;
-                            default:
-                                System.out
-                                        .println("Unhandled class for param: "
-                                                + node.getClass());
-                                paramName = "?";
-                                break;
-                            }
-                            sb.append(paramName);
-                            if (i < paramCount - 1) {
-                                sb.append(", ");
-                            }
-                        }
-                    }
-                    sb.append(')');
-                    JavaScriptTreeNode tn = new JavaScriptTreeNode(funcName);
-                    try {
-                        int offs = funcName.getAbsolutePosition();
-                        tn.setOffset(textArea.getDocument()
-                                .createPosition(offs));
-                    } catch (BadLocationException ble) { // Never happens
-                        ExceptionDialog.hideException(ble);
-                    }
-                    tn.setText(sb.toString());
-                    tn.setIcon(IconFactory
-                            .getIcon(IconFactory.DEFAULT_FUNCTION_ICON));
-                    tn.setSortPriority(PRIORITY_FUNCTION);
-                    root.add(tn);
-                }
-                break;
-
-            case Token.VAR:
-                VariableDeclaration varDec = (VariableDeclaration) child;
-                List<VariableInitializer> vars = varDec.getVariables();
-                for (VariableInitializer var : vars) {
-                    Name varNameNode = null;
-                    String varName = null;
-                    AstNode target = var.getTarget();
-                    switch (target.getType()) {
-                    case Token.NAME:
-                        varNameNode = (Name) target;
-                        varName = varNameNode.getIdentifier();
-                        break;
-                    default:
-                        System.out.println("... Unknown var target type: "
-                                + target.getClass());
-                        varName = "?";
-                        break;
-                    }
-                    JavaScriptTreeNode tn = new JavaScriptTreeNode(varNameNode);
-                    try {
-                        int offs = varNameNode.getAbsolutePosition();
-                        tn.setOffset(textArea.getDocument()
-                                .createPosition(offs));
-                    } catch (BadLocationException ble) { // Never happens
-                        ExceptionDialog.hideException(ble);
-                    }
-                    tn.setText(varName);
-                    tn.setIcon(IconFactory
-                            .getIcon(IconFactory.LOCAL_VARIABLE_ICON));
-                    tn.setSortPriority(PRIORITY_VARIABLE);
-                    root.add(tn);
-                }
-                break;
-            }
-
-            child = child.getNext();
-        }
-
+        JavaScriptOutlineTreeGenerator generator = new JavaScriptOutlineTreeGenerator(
+                textArea, ast);
+        JavaScriptTreeNode root = generator.getTreeRoot();
         model.setRoot(root);
         root.setSorted(isSorted());
         refresh();

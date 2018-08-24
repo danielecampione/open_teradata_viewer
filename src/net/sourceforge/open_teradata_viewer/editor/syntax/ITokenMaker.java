@@ -64,12 +64,16 @@ public interface ITokenMaker {
     public int getClosestStandardTokenTypeForInternalType(int type);
 
     /**
-     * Returns whether this programming language uses curly braces ('<tt>{</tt>'
-     * and '<tt>}</tt>') to denote code blocks.
+     * Returns whether this programming language uses curly braces
+     * ('<code>{</code>' and '<code>}</code>') to denote code blocks.
      *
+     * @param languageIndex The language index at the offset in question.
+     *        Since some <code>ITokenMaker</code>s effectively have nested
+     *        languages, this parameter tells the <code>ITokenMaker</code> what
+     *        sub-language to look at.
      * @return Whether curly braces denote code blocks.
      */
-    public boolean getCurlyBracesDenoteCodeBlocks();
+    public boolean getCurlyBracesDenoteCodeBlocks(int languageIndex);
 
     /**
      * Returns the last token on this line's type if the token is "unfinished",

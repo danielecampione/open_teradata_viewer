@@ -37,8 +37,10 @@ import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 
 import net.sourceforge.open_teradata_viewer.EscapableDialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.editor.SearchContext;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
@@ -330,6 +332,34 @@ public class AbstractSearchDialog extends EscapableDialog implements
         cancelButton = new JButton("Cancel");
         cancelButton.setActionCommand("Cancel");
         cancelButton.addActionListener(this);
+    }
+
+    protected boolean matchesSearchFor(String text) {
+        if (text == null || text.length() == 0) {
+            return false;
+        }
+        String searchFor = findTextCombo.getSelectedString();
+        if (searchFor != null && searchFor.length() > 0) {
+            boolean matchCase = caseCheckBox.isSelected();
+            if (regexCheckBox.isSelected()) {
+                int flags = Pattern.MULTILINE; // '^' and '$' are done per line
+                flags = SyntaxUtilities.getPatternFlags(matchCase, flags);
+                Pattern pattern = null;
+                try {
+                    pattern = Pattern.compile(searchFor, flags);
+                } catch (PatternSyntaxException pse) {
+                    ExceptionDialog.hideException(pse); // Never happens
+                    return false;
+                }
+                return pattern.matcher(text).matches();
+            } else {
+                if (matchCase) {
+                    return searchFor.equals(text);
+                }
+                return searchFor.equalsIgnoreCase(text);
+            }
+        }
+        return false;
     }
 
     /**

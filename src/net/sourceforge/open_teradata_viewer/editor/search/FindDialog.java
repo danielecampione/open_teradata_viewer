@@ -75,6 +75,13 @@ public class FindDialog extends AbstractFindReplaceDialog {
 
     private static final long serialVersionUID = 4395409214307100638L;
 
+    // This helps us work around the "bug" where JComboBox eats the first Enter
+    // press
+    private String lastSearchString;
+
+    /** Our search listener, cached so we can grab its selected text easily. */
+    protected ISearchListener searchListener;
+
     /**
      * Creates a new <code>FindDialog</code>.
      *
@@ -103,6 +110,8 @@ public class FindDialog extends AbstractFindReplaceDialog {
      * @param listener The component that listens for {@link SearchEvent}s.
      */
     private void init(ISearchListener listener) {
+        this.searchListener = listener;
+
         ComponentOrientation orientation = ComponentOrientation
                 .getOrientation(getLocale());
 
@@ -129,8 +138,8 @@ public class FindDialog extends AbstractFindReplaceDialog {
                 0, 0, //initX, initY
                 6, 6); //xPad, yPad
 
-        // Make a panel containing the inherited search direction radio buttons
-        // and the inherited search options
+        // Make a panel containing the inherited search direction radio
+        // buttons and the inherited search options
         JPanel bottomPanel = new JPanel(new BorderLayout());
         temp = new JPanel(new BorderLayout());
         bottomPanel.setBorder(UIUtil.getEmpty5Border());
@@ -186,8 +195,16 @@ public class FindDialog extends AbstractFindReplaceDialog {
     @Override
     public void setVisible(boolean visible) {
         if (visible) {
-            String selectedItem = (String) findTextCombo.getSelectedItem();
-            findNextButton.setEnabled(selectedItem != null);
+            // Select text entered in the UI
+            String text = searchListener.getSelectedText();
+            if (text != null) {
+                findTextCombo.addItem(text);
+            }
+
+            String selectedItem = findTextCombo.getSelectedString();
+            boolean nonEmpty = selectedItem != null
+                    && selectedItem.length() > 0;
+            findNextButton.setEnabled(nonEmpty);
             super.setVisible(true);
             focusFindTextField();
         } else {
@@ -252,6 +269,8 @@ public class FindDialog extends AbstractFindReplaceDialog {
         @Override
         public void focusGained(FocusEvent e) {
             UIUtil.getTextComponent(findTextCombo).selectAll();
+            // Remember what it originally was, in case they tabbed out
+            lastSearchString = (String) findTextCombo.getSelectedItem();
         }
 
     }

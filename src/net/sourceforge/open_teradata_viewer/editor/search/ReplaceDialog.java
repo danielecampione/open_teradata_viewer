@@ -89,6 +89,14 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
 
     private SearchComboBox replaceWithCombo;
 
+    // This helps us work around the "bug" where JComboBox eats the first Enter
+    // press
+    private String lastSearchString;
+    private String lastReplaceString;
+
+    /** Our search listener, cached so we can grab its selected text easily. */
+    protected ISearchListener searchListener;
+
     /**
      * Creates a new <code>ReplaceDialog</code>.
      *
@@ -133,6 +141,9 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
             fireSearchEvent(e); // Let parent application know
         } else {
             super.actionPerformed(e);
+            if (SearchEvent.Type.FIND.name().equals(command)) {
+                handleToggleButtons(); // Replace button could toggle state
+            }
         }
     }
 
@@ -140,11 +151,11 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     protected void escapePressed() {
         // Workaround for the strange behavior (Java bug?) that sometimes the
         // Escape keypress "gets through" from the AutoComplete's registered key
-        // Actions, and gets to this EscapableDialog, which hides the entire
+        // Actions and gets to this EscapableDialog, which hides the entire
         // dialog. Reproduce by doing the following:
-        //   1. In an empty find field, press Ctrl+Space
-        //   2. Type "\\".
-        //   3. Press Escape.
+        //   1. In an empty find field, press Ctrl+Space;
+        //   2. type "\\";
+        //   3. press Escape.
         // The entire dialog will hide, instead of the completion popup.
         // Further, bringing the Find dialog back up, the completion popup will
         // still be visible
@@ -155,6 +166,8 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     }
 
     /**
+     * Returns the text on the "Replace" button.
+     *
      * @return The text on the Replace button.
      * @see #setReplaceButtonText
      */
@@ -163,7 +176,9 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     }
 
     /**
-     * @return The text on the "Replace All" button.
+     * Returns the text on the "Replace All" button.
+     *
+     * @return The text on the Replace All button.
      * @see #setReplaceAllButtonText
      */
     public final String getReplaceAllButtonText() {
@@ -227,8 +242,16 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     @Override
     protected FindReplaceButtonsEnableResult handleToggleButtons() {
         FindReplaceButtonsEnableResult er = super.handleToggleButtons();
-        replaceButton.setEnabled(er.getEnable());
-        replaceAllButton.setEnabled(er.getEnable());
+        boolean shouldReplace = er.getEnable();
+        replaceAllButton.setEnabled(shouldReplace);
+
+        // "Replace" is only enabled if text to search for is selected in the UI
+        if (shouldReplace) {
+            String text = searchListener.getSelectedText();
+            shouldReplace = matchesSearchFor(text);
+        }
+        replaceButton.setEnabled(shouldReplace);
+
         return er;
     }
 
@@ -238,6 +261,8 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
      * @param listener The component that listens for {@link SearchEvent}s.
      */
     private void init(ISearchListener listener) {
+        this.searchListener = listener;
+
         ComponentOrientation orientation = ComponentOrientation
                 .getOrientation(getLocale());
 
@@ -309,13 +334,13 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
         // Make a panel containing the action buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(4, 1, 5, 5));
-        replaceButton = new JButton("Replace");
+        replaceButton = UIUtil.newButton("Replace");
         replaceButton.setActionCommand(SearchEvent.Type.REPLACE.name());
         replaceButton.addActionListener(this);
         replaceButton.setEnabled(false);
         replaceButton.setIcon(null);
         replaceButton.setToolTipText(null);
-        replaceAllButton = new JButton("Replace All");
+        replaceAllButton = UIUtil.newButton("ReplaceAll");
         replaceAllButton.setActionCommand(SearchEvent.Type.REPLACE_ALL.name());
         replaceAllButton.addActionListener(this);
         replaceAllButton.setEnabled(false);
@@ -381,8 +406,8 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     /**
      * Sets the <code>java.lang.String</code> to replace with.
      *
-     * @param newReplaceString The <code>String</code> to put into
-     *        the replace field.
+     * @param newReplaceString The <code>String</code> to put into the replace
+     *        field.
      */
     public void setReplaceString(String newReplaceString) {
         replaceWithCombo.addItem(newReplaceString);
@@ -397,8 +422,14 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
     @Override
     public void setVisible(boolean visible) {
         if (visible) {
+            // Select text entered in the UI
+            String text = searchListener.getSelectedText();
+            if (text != null) {
+                findTextCombo.addItem(text);
+            }
+
             String selectedItem = findTextCombo.getSelectedString();
-            if (selectedItem == null) {
+            if (selectedItem == null || selectedItem.length() == 0) {
                 findNextButton.setEnabled(false);
                 replaceButton.setEnabled(false);
                 replaceAllButton.setEnabled(false);
@@ -479,7 +510,7 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
         }
     }
 
-    /** 
+    /**
      * Listens for the text fields gaining focus.
      * 
      * @author D. Campione
@@ -491,8 +522,18 @@ public class ReplaceDialog extends AbstractFindReplaceDialog {
         public void focusGained(FocusEvent e) {
             JTextComponent textField = (JTextComponent) e.getSource();
             textField.selectAll();
-        }
 
+            if (textField == UIUtil.getTextComponent(findTextCombo)) {
+                // Remember what it originally was, in case they tabbed out
+                lastSearchString = findTextCombo.getSelectedString();
+            } else { // if (textField==getTextComponent(replaceWithComboBox))
+                     // Remember what it originally was, in case they tabbed out
+                lastReplaceString = replaceWithCombo.getSelectedString();
+            }
+
+            // Replace button's state might need to be changed
+            handleToggleButtons();
+        }
     }
 
     /**

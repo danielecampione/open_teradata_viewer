@@ -1,3 +1,18 @@
+0.21c (14/03/2014)
+    - Added the XML syntax highlighting.
+    - Added the CSS syntax highlighting.
+    - Whether or not curly braces denote code blocks is now handled on a
+      language-index level, not per ITokenMaker.
+    - Java syntax highlighting updated for Java 8 classes, interfaces and enums.
+    - The SearchEngine class now automatically selects the next match after a
+      Replace operation.
+    - The JavaScript language support can now use JSHint for its squiggle
+      underlining of errors and warnings. A .jshintrc file can be specified to
+      override the default JSHint behavior.
+    - Fixed several bugs.
+    - Upgraded forms library 1.7.2 -> 1.8.0
+    - Upgraded looks library 2.5.3 -> 2.6.0
+
 0.21b (27/02/2014)
     - Added first multi-statements or script support to the SQL parser.
     - Added backported window option from fork to analytic expression of the SQL

@@ -42,6 +42,9 @@ public abstract class AbstractCompletion implements ICompletion {
     /** The provider that created this completion. */
     private ICompletionProvider provider;
 
+    /** The icon to use for this completion. */
+    private Icon icon;
+
     /**
      * The relevance of this completion. ICompletion instances with higher
      * "relevance" values are inserted higher into the list of possible
@@ -55,8 +58,19 @@ public abstract class AbstractCompletion implements ICompletion {
      *
      * @param provider The provider that created this completion.
      */
-    public AbstractCompletion(ICompletionProvider provider) {
+    protected AbstractCompletion(ICompletionProvider provider) {
         this.provider = provider;
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param provider The provider that created this completion.
+     * @param icon The icon for this completion.
+     */
+    protected AbstractCompletion(ICompletionProvider provider, Icon icon) {
+        this(provider);
+        setIcon(icon);
     }
 
     /** {@inheritDoc} */
@@ -77,14 +91,11 @@ public abstract class AbstractCompletion implements ICompletion {
     }
 
     /**
-     * The default implementation returns <code>null</code>. Subclasses who wish
-     * to display an icon can override this method.
-     *
-     * @return The icon for this completion.
+     * {@inheritDoc}
      */
     @Override
     public Icon getIcon() {
-        return null;
+        return icon;
     }
 
     /**
@@ -121,6 +132,16 @@ public abstract class AbstractCompletion implements ICompletion {
     @Override
     public String getToolTipText() {
         return null;
+    }
+
+    /**
+     * Sets the icon to use for this completion.
+     *
+     * @param icon The icon to use.
+     * @see #getIcon()
+     */
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     /**

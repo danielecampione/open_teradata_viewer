@@ -687,7 +687,7 @@ class SourceCodeScanner implements ITokenTypes {
      */
     private char zzBuffer[] = new char[ZZ_BUFFERSIZE];
 
-    /** The textposition at the last accepting state. */
+    /** The text position at the last accepting state. */
     private int zzMarkedPos;
 
     /** The current text position in the buffer. */
@@ -986,7 +986,7 @@ class SourceCodeScanner implements ITokenTypes {
      * Usual syntax/scanner level error handling should be done in error
      * fallback rules.
      *
-     * @param errorCode The code of the errormessage to display.
+     * @param errorCode The code of the error message to display.
      */
     private void zzScanError(int errorCode) {
         String message;

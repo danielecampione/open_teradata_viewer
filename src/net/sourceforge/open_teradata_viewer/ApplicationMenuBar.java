@@ -308,12 +308,14 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu = new JMenu("View As (Highlighting File Type)");
         ButtonGroup bg = new ButtonGroup();
         addSyntaxItem("SQL", ISyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
+        addSyntaxItem("C", ISyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
         addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
                 subMenu);
+        addSyntaxItem("CSS", ISyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
         addSyntaxItem("Java", ISyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
         addSyntaxItem("JavaScript", ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
                 bg, subMenu);
-        addSyntaxItem("C", ISyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
+        addSyntaxItem("XML", ISyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
         addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
                 bg, subMenu);
         subMenu.getItem(0).setSelected(true);

@@ -3652,7 +3652,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      * Usual syntax/scanner level error handling should be done in error
      * fallback rules.
      *
-     * @param   errorCode  the code of the errormessage to display.
+     * @param   errorCode  the code of the error message to display.
      */
     private void zzScanError(int errorCode) {
         String message;

@@ -195,11 +195,12 @@ public abstract class AbstractSourceTree extends JTree {
      * internally on filtering and sorting.
      */
     public void refresh() {
-        Object root = getModel().getRoot();
+        DefaultTreeModel model = (DefaultTreeModel) getModel();
+        Object root = model.getRoot();
         if (root instanceof SourceTreeNode) {
             SourceTreeNode node = (SourceTreeNode) root;
             node.refresh();
-            ((DefaultTreeModel) getModel()).reload();
+            model.reload();
             expandInitialNodes();
         }
     }

@@ -102,6 +102,7 @@ public class Theme {
     private SyntaxScheme scheme;
 
     private Color gutterBorderColor;
+    private Color activeLineRangeColor;
     private Color lineNumberColor;
     private String lineNumberFont;
     private int lineNumberFontSize;
@@ -116,8 +117,10 @@ public class Theme {
      *        default monospaced font will be used.
      */
     private Theme(Font baseFont) {
+        // Optional fields that require a default value
         this.baseFont = baseFont != null ? baseFont : TextArea.getDefaultFont();
         secondaryLanguages = new Color[3];
+        activeLineRangeColor = Gutter.DEFAULT_ACTIVE_LINE_RANGE_COLOR;
     }
 
     /**
@@ -159,6 +162,7 @@ public class Theme {
         if (gutter != null) {
             bgColor = gutter.getBackground();
             gutterBorderColor = gutter.getBorderColor();
+            activeLineRangeColor = gutter.getActiveLineRangeColor();
             lineNumberColor = gutter.getLineNumberColor();
             lineNumberFont = gutter.getLineNumberFont().getFamily();
             lineNumberFontSize = gutter.getLineNumberFont().getSize();
@@ -204,6 +208,7 @@ public class Theme {
         if (gutter != null) {
             gutter.setBackground(bgColor);
             gutter.setBorderColor(gutterBorderColor);
+            gutter.setActiveLineRangeColor(activeLineRangeColor);
             gutter.setLineNumberColor(lineNumberColor);
             String fontName = lineNumberFont != null ? lineNumberFont
                     : baseFont.getFamily();
@@ -422,7 +427,9 @@ public class Theme {
                 elem2.setAttribute("index", Integer.toString(i + 1));
                 elem2.setAttribute("bg", color == null ? ""
                         : colorToString(color));
+                elem.appendChild(elem2);
             }
+            root.appendChild(elem);
 
             elem = doc.createElement("gutterBorder");
             elem.setAttribute("color", colorToString(gutterBorderColor));
@@ -442,6 +449,11 @@ public class Theme {
             elem = doc.createElement("foldIndicator");
             elem.setAttribute("fg", colorToString(foldIndicatorFG));
             elem.setAttribute("iconBg", colorToString(foldBG));
+            root.appendChild(elem);
+
+            elem = doc.createElement("iconRowHeader");
+            elem.setAttribute("activeLineRange",
+                    colorToString(activeLineRangeColor));
             root.appendChild(elem);
 
             elem = doc.createElement("tokenStyles");
@@ -663,6 +675,9 @@ public class Theme {
             } else if ("gutterBorder".equals(qName)) {
                 String color = attrs.getValue("color");
                 theme.gutterBorderColor = stringToColor(color);
+            } else if ("iconRowHeader".equals(qName)) {
+                String color = attrs.getValue("activeLineRange");
+                theme.activeLineRangeColor = stringToColor(color);
             } else if ("lineNumbers".equals(qName)) {
                 String color = attrs.getValue("fg");
                 theme.lineNumberColor = stringToColor(color);

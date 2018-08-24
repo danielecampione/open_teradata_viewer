@@ -28,6 +28,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -196,6 +197,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     private BracketMatchingTimer bracketRepaintTimer;
 
+    private boolean metricsNeverRefreshed;
+
     /** Whether or not auto-indent is on. */
     private boolean autoIndentEnabled;
 
@@ -262,6 +265,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /** Manages running the parser. */
     private ParserManager parserManager;
+
+    private String cachedTip;
+    /** Used to work around an issue with Apple JVMs. */
+    private Point cachedTipLoc;
 
     /**
      * Whether the editor is currently scanning for hyperlinks on mouse
@@ -392,9 +399,18 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     public void addNotify() {
         super.addNotify();
 
-        // We know we've just been connected to a screen resource (by
-        // definition), so initialize our font metrics objects
-        refreshFontMetrics(getGraphics2D(getGraphics()));
+        // Some LookAndFeels (e.g. WebLaF) for some reason have a 0x0 parent
+        // window initially (perhaps something to do with them fading in?),
+        // which will cause an exception from getGraphics(), so we must be
+        // careful here
+        if (metricsNeverRefreshed) {
+            Window parent = SwingUtilities.getWindowAncestor(this);
+            if (parent != null && parent.getWidth() > 0
+                    && parent.getHeight() > 0) {
+                refreshFontMetrics(getGraphics2D(getGraphics()));
+                metricsNeverRefreshed = false;
+            }
+        }
 
         // Re-start parsing if we were removed from one container and added to
         // another
@@ -1541,6 +1557,28 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     @Override
     public String getToolTipText(MouseEvent e) {
+        // Apple JVMS (Java 6 and prior) have their ToolTipManager events repeat
+        // for some reason, so this method gets called every 1 second or so. We
+        // short-circuit that since some ToolTipManagers may do expensive
+        // calculations (e.g. language supports)
+        if (SyntaxUtilities.getOS() == SyntaxUtilities.OS_MAC_OSX) {
+            Point newLoc = e.getPoint();
+            if (newLoc != null && newLoc.equals(cachedTipLoc)) {
+                return cachedTip;
+            }
+            cachedTipLoc = newLoc;
+        }
+
+        return cachedTip = getToolTipTextImpl(e);
+    }
+
+    /**
+     * Does the dirty work of getting the tool tip text.
+     *
+     * @param e The mouse event.
+     * @return The tool tip text.
+     */
+    protected String getToolTipTextImpl(MouseEvent e) {
         // Check parsers for tool tips first
         String text = null;
         URL imageBase = null;
@@ -1564,7 +1602,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 focusableTip.setImageBase(imageBase);
                 focusableTip.toolTipRequested(e, text);
             }
-            // No tooltip text at new location - hide tip window if one is
+            // No tool tip text at new location - hide tip window if one is
             // currently visible
             else if (focusableTip != null) {
                 focusableTip.possiblyDisposeOfTipWindow();
@@ -1624,6 +1662,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     @Override
     protected void init() {
         super.init();
+        metricsNeverRefreshed = true;
 
         tokenPainter = new DefaultTokenPainter();
 
@@ -1751,6 +1790,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     @Override
     protected void paintComponent(Graphics g) {
+        // A call to refreshFontMetrics() used to be in addNotify() but
+        // unfortunately we cannot always get the graphics context there. If the
+        // parent frame/dialog is LAF-decorated, there is a chance that the
+        // window's width and/or height is still == 0 at addNotify() (e.g.
+        // WebLaF). So unfortunately it's safest to do this here, with a flag to
+        // only allow it to happen once
+        if (metricsNeverRefreshed) {
+            refreshFontMetrics(getGraphics2D(getGraphics()));
+            metricsNeverRefreshed = false;
+        }
+
         super.paintComponent(getGraphics2D(g));
     }
 

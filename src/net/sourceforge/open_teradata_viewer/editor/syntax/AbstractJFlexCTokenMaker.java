@@ -47,7 +47,7 @@ public abstract class AbstractJFlexCTokenMaker extends AbstractJFlexTokenMaker {
      * @return <code>true</code> always.
      */
     @Override
-    public boolean getCurlyBracesDenoteCodeBlocks() {
+    public boolean getCurlyBracesDenoteCodeBlocks(int languageIndex) {
         return true;
     }
 

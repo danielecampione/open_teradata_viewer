@@ -108,6 +108,8 @@ class AutoCompletePopupWindow extends JWindow implements CaretListener,
 
     private int lastLine;
 
+    private boolean keyBindingsInstalled;
+
     private KeyActionPair escapeKap;
     private KeyActionPair upKap;
     private KeyActionPair downKap;
@@ -300,6 +302,11 @@ class AutoCompletePopupWindow extends JWindow implements CaretListener,
             ApplicationFrame.getInstance().getConsole()
                     .println("PopupWindow: Installing keybindings");
         }
+        if (keyBindingsInstalled) {
+            System.err.println("Error: key bindings were already installed");
+            Thread.dumpStack();
+            return;
+        }
 
         if (escapeKap == null) { // Lazily create actions
             createKeyActionPairs();
@@ -334,6 +341,8 @@ class AutoCompletePopupWindow extends JWindow implements CaretListener,
         am.put(ctrlCKap.key, ctrlCKap.action);
 
         comp.addCaretListener(this);
+
+        keyBindingsInstalled = true;
     }
 
     @Override
@@ -680,6 +689,9 @@ class AutoCompletePopupWindow extends JWindow implements CaretListener,
             ApplicationFrame.getInstance().getConsole()
                     .println("PopupWindow: Removing keybindings");
         }
+        if (!keyBindingsInstalled) {
+            return;
+        }
 
         JTextComponent comp = ac.getTextComponent();
         InputMap im = comp.getInputMap();
@@ -703,6 +715,8 @@ class AutoCompletePopupWindow extends JWindow implements CaretListener,
         im.put(ks, oldCtrlC.key); // Original key
 
         comp.removeCaretListener(this);
+
+        keyBindingsInstalled = false;
     }
 
     /**

@@ -56,7 +56,8 @@ public class SQLCellRenderer extends CompletionCellRenderer {
      *        resource loadable by the current ClassLoader.
      * @return The icon.
      */
-    private Icon getIcon(String resource) {
+    @Override
+    protected Icon getIcon(String resource) {
         ClassLoader cl = getClass().getClassLoader();
         URL url = cl.getResource(resource);
         if (url == null) {

@@ -1045,8 +1045,16 @@ class ParameterizedCompletionContext {
                 minPos = info.getMinOffset();
                 maxPos = info.getMaxOffset();
                 try {
-                    defaultEndOffs = tc.getDocument().createPosition(
-                            info.getDefaultEndOffs());
+                    Document doc = tc.getDocument();
+                    if (maxPos.getOffset() == 0) {
+                        // Positions at offset 0 don't track document changes,
+                        // so we must manually do this here. This is not a
+                        // common occurrence
+                        maxPos = doc.createPosition(info.getTextToInsert()
+                                .length());
+                    }
+                    defaultEndOffs = doc.createPosition(info
+                            .getDefaultEndOffs());
                 } catch (BadLocationException ble) {
                     ExceptionDialog.hideException(ble); // Never happens
                 }

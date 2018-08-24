@@ -23,6 +23,7 @@ import java.util.Set;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.CodeBlock;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDeclarationOptions;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import sun.org.mozilla.javascript.internal.ast.AstRoot;
 
 /**
@@ -53,8 +54,8 @@ public abstract class JavaScriptParser {
      * @param entered Text entered by user.
      * @return CodeBlock tree.
      */
-    public abstract CodeBlock convertAstNodeToCodeBlock(AstRoot root, Set set,
-            String entered);
+    public abstract CodeBlock convertAstNodeToCodeBlock(AstRoot root,
+            Set<IJSCompletionUI> set, String entered);
 
     /**
      * If options are null, then it is assumed that the main editor text is

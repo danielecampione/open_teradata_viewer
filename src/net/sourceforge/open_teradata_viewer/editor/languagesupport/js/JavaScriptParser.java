@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -125,6 +126,49 @@ public class JavaScriptParser extends AbstractParser {
     }
 
     /**
+     * Launches jshint as an external process and gathers syntax errors from it.
+     *
+     * @param doc The document to parse.
+     * @see #gatherParserErrorsRhino(ErrorCollector, Element)
+     */
+    private void gatherParserErrorsJsHint(SyntaxDocument doc) {
+        try {
+            JsHinter.parse(this, doc, result);
+        } catch (IOException ioe) {
+            String msg = "Error launching jshint: " + ioe.getMessage();
+            result.addNotice(new DefaultParserNotice(this, msg, 0));
+            ExceptionDialog.hideException(ioe);
+        }
+    }
+
+    /**
+     * Gathers the syntax errors found by Rhino in-process when parsing the
+     * document.
+     *
+     * @param errorHandler The errors found by Rhino.
+     * @param root The root element of the document parsed.
+     * @see #gatherParserErrorsJsHint(SyntaxDocument)
+     */
+    private void gatherParserErrorsRhino(ErrorCollector errorHandler,
+            Element root) {
+        List<ParseProblem> errors = errorHandler.getErrors();
+        if (errors != null && errors.size() > 0) {
+            for (ParseProblem problem : errors) {
+                int offs = problem.getFileOffset();
+                int len = problem.getLength();
+                int line = root.getElementIndex(offs);
+                String desc = problem.getMessage();
+                DefaultParserNotice notice = new DefaultParserNotice(this,
+                        desc, line, offs, len);
+                if (problem.getType() == ParseProblem.Type.Warning) {
+                    notice.setLevel(IParserNotice.WARNING);
+                }
+                result.addNotice(notice);
+            }
+        }
+    }
+
+    /**
      * Returns the AST or <code>null</code> if the editor's content has not yet
      * been parsed.
      * 
@@ -132,6 +176,24 @@ public class JavaScriptParser extends AbstractParser {
      */
     public AstRoot getAstRoot() {
         return astRoot;
+    }
+
+    public int getJsHintIndent() {
+        return langSupport.getJsHintIndent();
+    }
+
+    /**
+     * Returns the location of the <code>.jshintrc</code> file to use if using
+     * JsHint as your error parser. This property is ignored if {@link
+     * #getErrorParser()} does not return {@link JsErrorParser#JSHINT}.
+     *
+     * @return The <code>.jshintrc</code> file or <code>null</code> if none; in
+     *         that case, the JsHint defaults will be used.
+     * @see #setJsHintRCFile(File)
+     * @see #setErrorParser(JsErrorParser)
+     */
+    public File getJsHintRCFile() {
+        return langSupport.getJsHintRCFile();
     }
 
     /** {@inheritDoc} */
@@ -172,20 +234,14 @@ public class JavaScriptParser extends AbstractParser {
         r.close();
 
         // Get any parser errors
-        List<ParseProblem> errors = errorHandler.getErrors();
-        if (errors != null && errors.size() > 0) {
-            for (ParseProblem problem : errors) {
-                int offs = problem.getFileOffset();
-                int len = problem.getLength();
-                int line = root.getElementIndex(offs);
-                String desc = problem.getMessage();
-                DefaultParserNotice notice = new DefaultParserNotice(this,
-                        desc, line, offs, len);
-                if (problem.getType() == ParseProblem.Type.Warning) {
-                    notice.setLevel(IParserNotice.WARNING);
-                }
-                result.addNotice(notice);
-            }
+        switch (langSupport.getErrorParser()) {
+        default:
+        case RHINO:
+            gatherParserErrorsRhino(errorHandler, root);
+            break;
+        case JSHINT:
+            gatherParserErrorsJsHint(doc);
+            break;
         }
 
         support.firePropertyChange(PROPERTY_AST, null, astRoot);
@@ -213,7 +269,7 @@ public class JavaScriptParser extends AbstractParser {
     }
 
     /**
-     * 
+     * Error reporter for Rhino-based parsing.
      * 
      * @author D. Campione
      *

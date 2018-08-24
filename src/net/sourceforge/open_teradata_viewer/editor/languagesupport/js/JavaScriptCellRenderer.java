@@ -18,11 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.js;
 
-import javax.swing.Icon;
 import javax.swing.JList;
 
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.CompletionCellRenderer;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.EmptyIcon;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.FunctionCompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.TemplateCompletion;
@@ -38,11 +36,8 @@ public class JavaScriptCellRenderer extends CompletionCellRenderer {
 
     private static final long serialVersionUID = 4701950133516668348L;
 
-    private Icon emptyIcon;
-
     /** Ctor. */
     public JavaScriptCellRenderer() {
-        emptyIcon = new EmptyIcon(16);
     }
 
     /** {@inheritDoc} */
@@ -50,7 +45,7 @@ public class JavaScriptCellRenderer extends CompletionCellRenderer {
     protected void prepareForOtherCompletion(JList list, ICompletion c,
             int index, boolean selected, boolean hasFocus) {
         super.prepareForOtherCompletion(list, c, index, selected, hasFocus);
-        setIconWithDefault(c, emptyIcon);
+        setIconWithDefault(c);
     }
 
     /** {@inheritDoc} */

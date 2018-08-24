@@ -29,6 +29,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.Util;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
 
@@ -43,6 +44,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
 public class JarLibraryInfo extends LibraryInfo {
 
     private File jarFile;
+    private JarFile bulkCreateJar;
 
     public JarLibraryInfo(String jarFile) {
         this(new File(jarFile));
@@ -55,6 +57,24 @@ public class JarLibraryInfo extends LibraryInfo {
     public JarLibraryInfo(File jarFile, ISourceLocation sourceLoc) {
         setJarFile(jarFile);
         setSourceLocation(sourceLoc);
+    }
+
+    @Override
+    public void bulkClassFileCreationEnd() {
+        try {
+            bulkCreateJar.close();
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
+    }
+
+    @Override
+    public void bulkClassFileCreationStart() {
+        try {
+            bulkCreateJar = new JarFile(jarFile);
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
     }
 
     /**
@@ -80,19 +100,33 @@ public class JarLibraryInfo extends LibraryInfo {
     public ClassFile createClassFile(String entryName) throws IOException {
         JarFile jar = new JarFile(jarFile);
         try {
-            JarEntry entry = (JarEntry) jar.getEntry(entryName);
-            if (entry == null) {
-                System.err.println("ERROR: Invalid entry: " + entryName);
-                return null;
-            }
-            DataInputStream in = new DataInputStream(new BufferedInputStream(
-                    jar.getInputStream(entry)));
-            ClassFile cf = new ClassFile(in);
-            in.close();
-            return cf;
+            return createClassFileImpl(jar, entryName);
         } finally {
             jar.close();
         }
+    }
+
+    @Override
+    public ClassFile createClassFileBulk(String entryName) throws IOException {
+        return createClassFileImpl(bulkCreateJar, entryName);
+    }
+
+    private static final ClassFile createClassFileImpl(JarFile jar,
+            String entryName) throws IOException {
+        JarEntry entry = (JarEntry) jar.getEntry(entryName);
+        if (entry == null) {
+            System.err.println("ERROR: Invalid entry: " + entryName);
+            return null;
+        }
+        DataInputStream in = new DataInputStream(new BufferedInputStream(
+                jar.getInputStream(entry)));
+        ClassFile cf = null;
+        try {
+            cf = new ClassFile(in);
+        } finally {
+            in.close();
+        }
+        return cf;
     }
 
     @Override

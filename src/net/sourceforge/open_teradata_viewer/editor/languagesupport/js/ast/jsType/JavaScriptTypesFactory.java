@@ -20,8 +20,8 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsTyp
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletionProvider;
@@ -34,6 +34,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceComp
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclarationFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations.JavaScriptObject;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletion;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSBeanCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSClassCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSConstructorCompletion;
@@ -349,18 +351,18 @@ public abstract class JavaScriptTypesFactory {
 
     /** Populate Completions for types.. included extended classes. */
     public void populateCompletionsForType(JavaScriptType cachedType,
-            Set completions) {
+            Set<IJSCompletionUI> completions) {
         if (cachedType != null) {
-            HashMap completionsForType = cachedType.getMethodFieldCompletions();
-            for (Iterator i = completionsForType.values().iterator(); i
-                    .hasNext();) {
-                completions.add(i.next());
+            Map<String, IJSCompletion> completionsForType = cachedType
+                    .getMethodFieldCompletions();
+            for (IJSCompletion completion : completionsForType.values()) {
+                completions.add(completion);
             }
 
-            // Get any extended classes and recursivley populate
-            List extendedClasses = cachedType.getExtendedClasses();
-            for (Iterator i = extendedClasses.iterator(); i.hasNext();) {
-                JavaScriptType extendedType = (JavaScriptType) i.next();
+            // Get any extended classes and recursively populate
+            List<JavaScriptType> extendedClasses = cachedType
+                    .getExtendedClasses();
+            for (JavaScriptType extendedType : extendedClasses) {
                 populateCompletionsForType(extendedType, completions);
             }
         }

@@ -57,6 +57,16 @@ public class DirLibraryInfo extends LibraryInfo {
         this(new File(dir), sourceLoc);
     }
 
+    @Override
+    public void bulkClassFileCreationEnd() {
+        // Do nothing
+    }
+
+    @Override
+    public void bulkClassFileCreationStart() {
+        // Do nothing
+    }
+
     /**
      * Compares this <code>LibraryInfo</code> to another one. Two instances of
      * this class are only considered equal if they represent the same class
@@ -78,6 +88,11 @@ public class DirLibraryInfo extends LibraryInfo {
 
     @Override
     public ClassFile createClassFile(String entryName) throws IOException {
+        return createClassFileBulk(entryName);
+    }
+
+    @Override
+    public ClassFile createClassFileBulk(String entryName) throws IOException {
         File file = new File(dir, entryName);
         if (!file.isFile()) {
             System.err.println("ERROR: Invalid class file: "

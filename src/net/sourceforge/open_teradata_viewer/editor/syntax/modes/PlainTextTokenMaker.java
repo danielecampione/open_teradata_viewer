@@ -228,7 +228,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      */
     private char zzBuffer[];
 
-    /** The textposition at the last accepting state. */
+    /** The text position at the last accepting state. */
     private int zzMarkedPos;
 
     /** The current text position in the buffer. */
@@ -470,7 +470,7 @@ public class PlainTextTokenMaker extends AbstractJFlexTokenMaker {
      * Usual syntax/scanner level error handling should be done in error
      * fallback rules.
      *
-     * @param   errorCode  the code of the errormessage to display
+     * @param   errorCode  the code of the error message to display
      */
     private void zzScanError(int errorCode) {
         String message;

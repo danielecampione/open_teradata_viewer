@@ -295,8 +295,15 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
         public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
             SyntaxTextArea sta = (SyntaxTextArea) textArea;
             SyntaxDocument doc = (SyntaxDocument) sta.getDocument();
+
+            int languageIndex = 0;
+            int dot = textArea.getCaretPosition();
+            if (dot > 0) {
+                IToken t = SyntaxUtilities.getTokenAtOffset(sta, dot - 1);
+                languageIndex = t == null ? 0 : t.getLanguageIndex();
+            }
             boolean alignCurlyBraces = sta.isAutoIndentEnabled()
-                    && doc.getCurlyBracesDenoteCodeBlocks();
+                    && doc.getCurlyBracesDenoteCodeBlocks(languageIndex);
 
             if (alignCurlyBraces) {
                 textArea.beginAtomicEdit();
@@ -308,7 +315,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 // If the user wants to align curly braces..
                 if (alignCurlyBraces) {
                     Element root = doc.getDefaultRootElement();
-                    int dot = sta.getCaretPosition() - 1; // Start before '{'
+                    dot = sta.getCaretPosition() - 1; // Start before '}'
                     int line = root.getElementIndex(dot);
                     Element elem = root.getElement(line);
                     int start = elem.getStartOffset();
@@ -883,28 +890,6 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     }
 
     /**
-     * Moves the caret to the end of the document, taking into account code
-     * folding.
-     * 
-     * @author D. Campione
-     * 
-     */
-    public static class EndAction extends TextAreaEditorKit.EndAction {
-
-        private static final long serialVersionUID = 1438440461947654626L;
-
-        public EndAction(String name, boolean select) {
-            super(name, select);
-        }
-
-        @Override
-        protected int getVisibleEnd(TextArea textArea) {
-            SyntaxTextArea sta = (SyntaxTextArea) textArea;
-            return sta.getLastVisibleOffset();
-        }
-    }
-
-    /**
      * Positions the caret at the end of the word. This class is here to better
      * handle finding the "end of the word" in programming languages.
      * 
@@ -1069,6 +1054,28 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * 
      */
     public static class GoToMatchingBracketAction extends RecordableTextAction {
+
+        /**
+         * Moves the caret to the end of the document, taking into account code
+         * folding.
+         * 
+         * @author D. Campione
+         * 
+         */
+        public static class EndAction extends TextAreaEditorKit.EndAction {
+
+            private static final long serialVersionUID = 5769612738475434320L;
+
+            public EndAction(String name, boolean select) {
+                super(name, select);
+            }
+
+            @Override
+            protected int getVisibleEnd(TextArea textArea) {
+                SyntaxTextArea sta = (SyntaxTextArea) textArea;
+                return sta.getLastVisibleOffset();
+            }
+        }
 
         private static final long serialVersionUID = 8112036198256912568L;
 
@@ -1243,22 +1250,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             return -1;
         }
 
-        private static final int getOpenBraceCount(SyntaxDocument doc) {
+        private static final int getOpenBraceCount(SyntaxDocument doc,
+                int languageIndex) {
             int openCount = 0;
-            Element root = doc.getDefaultRootElement();
-            int lineCount = root.getElementCount();
-            for (int i = 0; i < lineCount; i++) {
-                IToken t = doc.getTokenListForLine(i);
-                while (t != null && t.isPaintable()) {
-                    if (t.getType() == IToken.SEPARATOR && t.length() == 1) {
-                        char ch = t.charAt(0);
-                        if (ch == '{') {
-                            openCount++;
-                        } else if (ch == '}') {
-                            openCount--;
-                        }
+            for (IToken t : doc) {
+                if (t.getType() == IToken.SEPARATOR && t.length() == 1
+                        && t.getLanguageIndex() == languageIndex) {
+                    char ch = t.charAt(0);
+                    if (ch == '{') {
+                        openCount++;
+                    } else if (ch == '}') {
+                        openCount--;
                     }
-                    t = t.getNextToken();
                 }
             }
             return openCount;
@@ -1346,16 +1349,15 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 String leadingWS) {
             SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
 
-            if (textArea.getCloseCurlyBraces()
-                    && doc.getCurlyBracesDenoteCodeBlocks()) {
-
+            if (textArea.getCloseCurlyBraces()) {
                 int line = textArea.getCaretLineNumber();
                 IToken t = doc.getTokenListForLine(line - 1);
                 t = t.getLastNonCommentNonWhitespaceToken();
 
                 if (t != null && t.isLeftCurly()) {
-
-                    if (getOpenBraceCount(doc) > 0) {
+                    int languageIndex = t.getLanguageIndex();
+                    if (doc.getCurlyBracesDenoteCodeBlocks(languageIndex)
+                            && getOpenBraceCount(doc, languageIndex) > 0) {
                         StringBuilder sb = new StringBuilder();
                         if (line == textArea.getLineCount() - 1) {
                             sb.append('\n');

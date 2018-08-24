@@ -82,6 +82,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSuppo
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JavaLanguageSupport;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.tree.JavaOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree.JavaScriptOutlineTree;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.tree.XmlOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
 import net.sourceforge.open_teradata_viewer.editor.search.FindToolBar;
 import net.sourceforge.open_teradata_viewer.editor.search.ISearchListener;
@@ -286,15 +287,17 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             ExceptionDialog.hideException(ioe);
         }
 
+        // Dummy tree keeps JViewport's "background" looking right initially
+        JTree dummy = new JTree((TreeNode) null);
+        treeSP = new JScrollPane(dummy);
+
         textArea = createTextArea();
         LanguageSupportFactory.get().register(textArea);
         ToolTipManager.sharedInstance().registerComponent(textArea);
 
         textScrollPane = new TextScrollPane(textArea, true);
         textScrollPane.setIconRowHeaderEnabled(true);
-        // Dummy tree keeps JViewport's "background" looking right initially
-        JTree dummy = new JTree((TreeNode) null);
-        treeSP = new JScrollPane(dummy);
+
         LayerUI<JComponent> layerUI = new WallpaperLayerUI();
         JLayer<JComponent> jlayer = new JLayer<JComponent>(treeSP, layerUI);
         final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -739,9 +742,20 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             break;
         }
 
-        if (result.getMarkedCount() == 0) {
-            caretListenerLabel.setText("Text not found");
+        String text = null;
+        if (result.wasFound()) {
+            text = "Text found; occurrences marked: " + result.getMarkedCount();
+        } else if (type == SearchEvent.Type.MARK_ALL) {
+            if (result.getMarkedCount() > 0) {
+                text = "Occurrences marked: " + result.getMarkedCount();
+            } else {
+                text = "";
+            }
+        } else {
+            text = "Text not found";
         }
+
+        caretListenerLabel.setText(text);
     }
 
     /**
@@ -815,7 +829,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     public void refreshSourceTree() {
         if (tree != null) {
             tree.uninstall();
-            treeSP.remove(tree);
         }
 
         String language = textArea.getSyntaxEditingStyle();
@@ -823,6 +836,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             tree = new JavaOutlineTree();
         } else if (ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT.equals(language)) {
             tree = new JavaScriptOutlineTree();
+        } else if (ISyntaxConstants.SYNTAX_STYLE_XML.equals(language)) {
+            tree = new XmlOutlineTree();
         } else {
             tree = null;
         }
@@ -830,17 +845,30 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         if (tree != null) {
             tree.listenTo(textArea);
             treeSP.setViewportView(tree);
-            treeSP.revalidate();
+        } else {
+            JTree dummy = new JTree((TreeNode) null);
+            treeSP.setViewportView(dummy);
         }
+        treeSP.revalidate();
     }
 
     public static ApplicationFrame getInstance() {
         return APPLICATION_FRAME;
     }
 
+    /**
+     * Implements the <code>ISearchListener</code> interface.
+     *
+     * @return The selected text in the active text area.
+     */
+    @Override
+    public String getSelectedText() {
+        return textArea.getSelectedText();
+    }
+
     public String getText() {
-        return textArea.getSelectedText() != null ? textArea.getSelectedText()
-                : textArea.getText();
+        return getSelectedText() != null ? getSelectedText() : textArea
+                .getText();
     }
 
     public AutoCompletion getAutoCompletion() {
@@ -853,7 +881,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     }
 
     /**
-     * Sets the Look and Feel for the opened application instance.
+     * Sets the Look and Feel for the open application instance.
      *
      * @param lnfClassName The class name of the Look and Feel to set.
      */
@@ -873,10 +901,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                 // the LaF is updated outside of this call, and the property
                 // value is reset to null
                 ClassLoader cl = getLookAndFeelManager().getLAFClassLoader();
-                // Set these properties before instantiating WebLookAndFeel
-                if (WebLookAndFeelUtil.isWebLookAndFeel(lnfClassName)) {
-                    WebLookAndFeelUtil.installWebLookAndFeelProperties(cl);
-                }
 
                 // Load the Look and Feel class. Note that we cannot simply use
                 // its name for some reason (Exceptions are thrown)

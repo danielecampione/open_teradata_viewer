@@ -24,7 +24,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -123,6 +122,8 @@ public class SyntaxUtilities implements SwingConstants {
     /** Used internally. */
     private static final char[] JS_KEYWORD_RETURN = { 'r', 'e', 't', 'u', 'r',
             'n' };
+    private static final char[] JS_AND = { '&', '&' };
+    private static final char[] JS_OR = { '|', '|' };
 
     /** Used internally. */
     private static final String BRACKETS = "{([})]";
@@ -435,10 +436,11 @@ public class SyntaxUtilities implements SwingConstants {
             int end = line.getEndOffset();
             IToken token = doc.getTokenListForLine(curLine);
             token = SyntaxUtilities.getTokenAtOffset(token, caretPosition);
-            // All brackets are always returned as "separators."
+            // All brackets are always returned as "separators"
             if (token.getType() != IToken.SEPARATOR) {
                 return input;
             }
+            int languageIndex = token.getLanguageIndex();
             if (index < 3) { // One of "{[("
                 goForward = true;
                 bracketMatch = BRACKETS.charAt(index + 3);
@@ -471,12 +473,11 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             token = SyntaxUtilities.getTokenAtOffset(token,
                                     offset);
-                            if (token.getType() == IToken.SEPARATOR) {
+                            if (token.getType() == IToken.SEPARATOR
+                                    && token.getLanguageIndex() == languageIndex) {
                                 numEmbedded++;
                             }
-                        }
-
-                        else if (ch == bracketMatch) {
+                        } else if (ch == bracketMatch) {
                             if (haveTokenList == false) {
                                 token = doc.getTokenListForLine(curLine);
                                 haveTokenList = true;
@@ -484,7 +485,8 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             token = SyntaxUtilities.getTokenAtOffset(token,
                                     offset);
-                            if (token.getType() == IToken.SEPARATOR) {
+                            if (token.getType() == IToken.SEPARATOR
+                                    && token.getLanguageIndex() == languageIndex) {
                                 if (numEmbedded == 0) {
                                     if (textArea.isCodeFoldingEnabled()
                                             && textArea.getFoldManager()
@@ -497,7 +499,6 @@ public class SyntaxUtilities implements SwingConstants {
                                 numEmbedded--;
                             }
                         }
-
                     } // End of for (int i=segOffset; i<segOffset+charSegment.count; i++)
 
                     // Bail out if we've gone through all lines and haven't
@@ -540,12 +541,11 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             t2 = SyntaxUtilities
                                     .getTokenAtOffset(token, offset);
-                            if (t2.getType() == IToken.SEPARATOR) {
+                            if (t2.getType() == IToken.SEPARATOR
+                                    && token.getLanguageIndex() == languageIndex) {
                                 numEmbedded++;
                             }
-                        }
-
-                        else if (ch == bracketMatch) {
+                        } else if (ch == bracketMatch) {
                             if (haveTokenList == false) {
                                 token = doc.getTokenListForLine(curLine);
                                 haveTokenList = true;
@@ -553,7 +553,8 @@ public class SyntaxUtilities implements SwingConstants {
                             int offset = start + (i - segOffset);
                             t2 = SyntaxUtilities
                                     .getTokenAtOffset(token, offset);
-                            if (t2.getType() == IToken.SEPARATOR) {
+                            if (t2.getType() == IToken.SEPARATOR
+                                    && token.getLanguageIndex() == languageIndex) {
                                 if (numEmbedded == 0) {
                                     input.setLocation(caretPosition, offset);
                                     return input;
@@ -592,7 +593,8 @@ public class SyntaxUtilities implements SwingConstants {
      * @param line The current line index (the line index of <code>t</code>).
      * @return The next non-whitespace, non-comment token, or <code>null</code>
      *         if there isn't one.
-     * @see #getPreviousImportantToken(SyntaxTextArea, int)
+     * @see #getPreviousImportantToken(SyntaxDocument, int)
+     * @see #getPreviousImportantTokenFromOffs(SyntaxDocument, int)
      */
     public static final IToken getNextImportantToken(IToken t,
             SyntaxTextArea textArea, int line) {
@@ -727,6 +729,56 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
+     * Returns an integer constant representing the OS. This can be handy for
+     * special case situations such as Mac OS-X (special application
+     * registration) or Windows (allow mixed case, etc..).
+     *
+     * @return An integer constant representing the OS.
+     */
+    public static final int getOS() {
+        return OS;
+    }
+
+    /**
+     * Returns an integer constant representing the OS. This can be handy for
+     * special case situations such as Mac OS-X (special application
+     * registration) or Windows (allow mixed case, etc..).
+     *
+     * @return An integer constant representing the OS.
+     */
+    private static final int getOSImpl() {
+        int os = OS_OTHER;
+        String osName = System.getProperty("os.name");
+        if (osName != null) { // Should always be true
+            osName = osName.toLowerCase();
+            if (osName.indexOf("windows") > -1) {
+                os = OS_WINDOWS;
+            } else if (osName.indexOf("mac os x") > -1) {
+                os = OS_MAC_OSX;
+            } else if (osName.indexOf("linux") > -1) {
+                os = OS_LINUX;
+            } else {
+                os = OS_OTHER;
+            }
+        }
+        return os;
+    }
+
+    /**
+     * Returns the flags necessary to create a {@link Pattern}.
+     *
+     * @param matchCase Whether the pattern should be case sensitive.
+     * @param others Any other flags. This may be <code>0</code>.
+     * @return The flags.
+     */
+    public static final int getPatternFlags(boolean matchCase, int others) {
+        if (!matchCase) {
+            others |= Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+        }
+        return others;
+    }
+
+    /**
      * Determines the position in the model that is closest to the given view
      * location in the row above. The component given must have a size to
      * compute the result. If the component doesn't have a size a value of -1
@@ -788,25 +840,91 @@ public class SyntaxUtilities implements SwingConstants {
      * Returns the last non-whitespace, non-comment token, starting with the
      * specified line.
      *
-     * @param textArea The text area.
+     * @param doc The document.
      * @param line The line at which to start looking.
      * @return The last non-whitespace, non-comment token, or <code>null</code>
      *         if there isn't one.
      * @see #getNextImportantToken(IToken, SyntaxTextArea, int)
+     * @see #getPreviousImportantTokenFromOffs(SyntaxDocument, int)
      */
-    public static final IToken getPreviousImportantToken(
-            SyntaxTextArea textArea, int line) {
+    public static final IToken getPreviousImportantToken(SyntaxDocument doc,
+            int line) {
         if (line < 0) {
             return null;
         }
-        IToken t = textArea.getTokenListForLine(line);
+        IToken t = doc.getTokenListForLine(line);
         if (t != null) {
             t = t.getLastNonCommentNonWhitespaceToken();
             if (t != null) {
                 return t;
             }
         }
-        return getPreviousImportantToken(textArea, line - 1);
+        return getPreviousImportantToken(doc, line - 1);
+    }
+
+    /**
+     * Returns the last non-whitespace, non-comment token, before the specified
+     * offset.
+     *
+     * @param doc The document.
+     * @param offs The ending offset for the search.
+     * @return The last non-whitespace, non-comment token or <code>null</code>
+     *         if there isn't one.
+     * @see #getPreviousImportantToken(SyntaxDocument, int)
+     * @see #getNextImportantToken(IToken, SyntaxTextArea, int)
+     */
+    public static final IToken getPreviousImportantTokenFromOffs(
+            SyntaxDocument doc, int offs) {
+        Element root = doc.getDefaultRootElement();
+        int line = root.getElementIndex(offs);
+        IToken t = doc.getTokenListForLine(line);
+
+        // Check line containing offs
+        IToken target = null;
+        while (t != null && t.isPaintable() && !t.containsPosition(offs)) {
+            if (!t.isCommentOrWhitespace()) {
+                target = t;
+            }
+            t = t.getNextToken();
+        }
+
+        // Check previous line(s)
+        if (target == null) {
+            target = SyntaxUtilities.getPreviousImportantToken(doc, line - 1);
+        }
+
+        return target;
+    }
+
+    /**
+     * Returns the token at the specified offset.
+     *
+     * @param textArea The text area.
+     * @param offset The offset of the token.
+     * @return The token or <code>null</code> if the offset is not valid.
+     * @see #getTokenAtOffset(SyntaxDocument, int)
+     * @see #getTokenAtOffset(IToken, int)
+     */
+    public static final IToken getTokenAtOffset(SyntaxTextArea textArea,
+            int offset) {
+        SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+        return SyntaxUtilities.getTokenAtOffset(doc, offset);
+    }
+
+    /**
+     * Returns the token at the specified offset.
+     *
+     * @param doc The document.
+     * @param offset The offset of the token.
+     * @return The token or <code>null</code> if the offset is not valid.
+     * @see #getTokenAtOffset(SyntaxTextArea, int)
+     * @see #getTokenAtOffset(IToken, int)
+     */
+    public static final IToken getTokenAtOffset(SyntaxDocument doc, int offset) {
+        Element root = doc.getDefaultRootElement();
+        int lineIndex = root.getElementIndex(offset);
+        IToken t = doc.getTokenListForLine(lineIndex);
+        return SyntaxUtilities.getTokenAtOffset(t, offset);
     }
 
     /**
@@ -819,6 +937,8 @@ public class SyntaxUtilities implements SwingConstants {
      * @param offset The offset at which to get the token.
      * @return The token at <code>offset</code>, or <code>null</code> if
      *         none of the tokens are at that offset.
+     * @see #getTokenAtOffset(SyntaxTextArea, int)
+     * @see #getTokenAtOffset(SyntaxDocument, int)
      */
     public static final IToken getTokenAtOffset(IToken tokenList, int offset) {
         for (IToken t = tokenList; t != null && t.isPaintable(); t = t
@@ -1110,8 +1230,9 @@ public class SyntaxUtilities implements SwingConstants {
                         || ch == ',' || ch == '?' || ch == ':' || ch == '['
                         || ch == '!' || ch == '&'))
                 ||
-                /* Operators "==", "===", "!=", "!==" */
-                (t.getType() == IToken.OPERATOR && t.charAt(t.length() - 1) == '=')
+                /* Operators "==", "===", "!=", "!==", "&&", "||" */
+                (t.getType() == IToken.OPERATOR && (t.charAt(t.length() - 1) == '='
+                        || t.is(JS_AND) || t.is(JS_OR)))
                 || t.is(IToken.RESERVED_WORD_2, JS_KEYWORD_RETURN);
     }
 
@@ -1138,45 +1259,6 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
-     * Returns an integer constant representing the OS. This can be handy for
-     * special case situations such as Mac OS-X (special application
-     * registration) or Windows (allow mixed case, etc..).
-     *
-     * @return An integer constant representing the OS.
-     */
-    public static final int getOS() {
-        return OS;
-    }
-
-    /**
-     * Returns an integer constant representing the OS. This can be handy for
-     * special case situations such as Mac OS-X (special application
-     * registration) or Windows (allow mixed case, etc..).
-     *
-     * @return An integer constant representing the OS.
-     */
-    private static final int getOSImpl() {
-        int os = OS_OTHER;
-        String osName = System.getProperty("os.name");
-        if (osName != null) { // Should always be true
-            osName = osName.toLowerCase(Locale.ENGLISH);
-            if (osName.indexOf("windows") > -1) {
-                os = OS_WINDOWS;
-            }
-            // Recommended at:
-            // http://developer.apple.com/mac/library/technotes/tn2002/tn2110.html
-            else if (osName.indexOf("mac os x") > -1) {
-                os = OS_MAC_OSX;
-            } else if (osName.indexOf("linux") > -1) {
-                os = OS_LINUX;
-            } else {
-                os = OS_OTHER;
-            }
-        }
-        return os;
-    }
-
-    /**
      * Creates a regular expression pattern that matches a "wildcard" pattern.
      * 
      * @param wildcard The wildcard pattern.
@@ -1187,10 +1269,7 @@ public class SyntaxUtilities implements SwingConstants {
      */
     public static Pattern wildcardToPattern(String wildcard, boolean matchCase,
             boolean escapeStartChar) {
-        int flags = 0;
-        if (!matchCase) {
-            flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-        }
+        int flags = SyntaxUtilities.getPatternFlags(matchCase, 0);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < wildcard.length(); i++) {

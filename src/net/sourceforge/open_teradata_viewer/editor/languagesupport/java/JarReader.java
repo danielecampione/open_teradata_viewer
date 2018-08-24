@@ -282,30 +282,35 @@ class JarReader {
         // newly-created ClassFiles
         Map newClassFiles = null;
 
-        for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry) i.next();
-            Object value = entry.getValue();
-            if (value == null) {
-                StringBuilder name = new StringBuilder(pkgs[0]);
-                for (int j = 1; j < pkgs.length; j++) {
-                    name.append('/').append(pkgs[j]);
-                }
-                name.append('/');
-                name.append((String) entry.getKey()).append(".class");
-                try {
-                    ClassFile cf = info.createClassFile(name.toString());
-                    if (newClassFiles == null) {
-                        newClassFiles = new TreeMap();
+        try {
+            info.bulkClassFileCreationStart();
+            try {
+                for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
+                    Map.Entry entry = (Map.Entry) i.next();
+                    Object value = entry.getValue();
+                    if (value == null) {
+                        StringBuilder name = new StringBuilder(pkgs[0]);
+                        for (int j = 1; j < pkgs.length; j++) {
+                            name.append('/').append(pkgs[j]);
+                        }
+                        name.append('/');
+                        name.append((String) entry.getKey()).append(".class");
+                        ClassFile cf = info
+                                .createClassFileBulk(name.toString());
+                        if (newClassFiles == null) {
+                            newClassFiles = new TreeMap();
+                        }
+                        newClassFiles.put(entry.getKey(), cf);
+                        possiblyAddTo(addTo, cf, inPkg);
+                    } else if (value instanceof ClassFile) {
+                        possiblyAddTo(addTo, (ClassFile) value, inPkg);
                     }
-                    newClassFiles.put(entry.getKey(), cf);
-                    possiblyAddTo(addTo, cf, inPkg);
-                } catch (IOException ioe) {
-                    ExceptionDialog.hideException(ioe);
-                    break;
                 }
-            } else if (value instanceof ClassFile) {
-                possiblyAddTo(addTo, (ClassFile) value, inPkg);
+            } finally {
+                info.bulkClassFileCreationEnd();
             }
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
         }
 
         if (newClassFiles != null) {
@@ -405,5 +410,10 @@ class JarReader {
                         .isPublic(cf.getAccessFlags())) {
             addTo.add(cf);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "[JarReader: " + getLibraryInfo() + "]";
     }
 }

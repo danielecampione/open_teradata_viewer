@@ -23,14 +23,19 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -87,6 +92,9 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
     /** The color to use for function arguments. */
     private String paramColor;
 
+    /** An icon to use when no appropriate icon is found. */
+    private Icon emptyIcon;
+
     /** Used in rendering calculations. */
     private Rectangle paintTextR;
 
@@ -119,6 +127,17 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
     public CompletionCellRenderer(DefaultListCellRenderer delegate) {
         setDelegateRenderer(delegate);
         init();
+    }
+
+    /**
+     * Creates the icon to use if no icon is found for a specific completion.
+     * The default implementation returns a 16x16 empty icon.
+     *
+     * @return The icon.
+     * @see #getEmptyIcon()
+     */
+    protected Icon createEmptyIcon() {
+        return new EmptyIcon(16);
     }
 
     /**
@@ -189,6 +208,40 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
      */
     public Font getDisplayFont() {
         return font;
+    }
+
+    /**
+     * Returns the icon to use if no icon is found for a specific completion.
+     * This icon is lazily created if necessary.
+     *
+     * @return The icon.
+     * @see #createEmptyIcon()
+     */
+    protected Icon getEmptyIcon() {
+        if (emptyIcon == null) {
+            emptyIcon = createEmptyIcon();
+        }
+        return emptyIcon;
+    }
+
+    /**
+     * Returns an icon.
+     *
+     * @param resource The icon to retrieve. This should either be a file or a
+     *        resource loadable by the current ClassLoader.
+     * @return The icon.
+     */
+    protected Icon getIcon(String resource) {
+        URL url = getClass().getResource(resource);
+        if (url == null) {
+            File file = new File(resource);
+            try {
+                url = file.toURI().toURL();
+            } catch (MalformedURLException mue) {
+                ExceptionDialog.hideException(mue); // Never happens
+            }
+        }
+        return url != null ? new ImageIcon(url) : null;
     }
 
     /**
@@ -514,16 +567,29 @@ public class CompletionCellRenderer extends DefaultListCellRenderer {
     }
 
     /**
+     * Sets the icon to display based off of a completion, falling back to the
+     * empty icon if the completion has no icon.
+     *
+     * @param completion The completion to check.
+     * @see #setIconWithDefault(ICompletion, Icon)
+     */
+    protected void setIconWithDefault(ICompletion completion) {
+        setIconWithDefault(completion, getEmptyIcon());
+    }
+
+    /**
      * Sets the icon to display based off of a completion, falling back to a
      * default icon if the completion has no icon.
      *
      * @param completion The completion to check.
      * @param defaultIcon The icon to use if <code>completion</code> does not
      *        specify an icon.
+     * @see #setIconWithDefault(ICompletion)
      */
     protected void setIconWithDefault(ICompletion completion, Icon defaultIcon) {
         Icon icon = completion.getIcon();
-        setIcon(icon != null ? icon : defaultIcon);
+        setIcon(icon != null ? icon : (defaultIcon != null ? defaultIcon
+                : emptyIcon));
     }
 
     /**

@@ -272,12 +272,16 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
 
     /**
      * Returns whether the current programming language uses curly braces
-     * ('<tt>{</tt>' and '<tt>}</tt>') to denote code blocks.
+     * ('<code>{</code>' and '<code>}</code>') to denote code blocks.
      *
+     * @param languageIndex The language index at the offset in question.
+     *        Since some <code>ITokenMaker</code>s effectively have nested
+     *        languages, this parameter tells the <code>ITokenMaker</code> what
+     *        sub-language to look at.
      * @return Whether curly braces denote code blocks.
      */
-    public boolean getCurlyBracesDenoteCodeBlocks() {
-        return tokenMaker.getCurlyBracesDenoteCodeBlocks();
+    public boolean getCurlyBracesDenoteCodeBlocks(int languageIndex) {
+        return tokenMaker.getCurlyBracesDenoteCodeBlocks(languageIndex);
     }
 
     /**
@@ -567,7 +571,7 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
      *
      * This is called internally whenever the syntax style changes.
      */
-    protected void updateSyntaxHighlightingInformation() {
+    private void updateSyntaxHighlightingInformation() {
         // Reinitialize the "last token on each line" array. Note that since the
         // actual text in the document isn't changing, the number of lines is
         // the same
@@ -579,6 +583,10 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
             lastTokenType = tokenMaker.getLastTokenTypeOnLine(s, lastTokenType);
             lastTokensOnLines.set(i, lastTokenType);
         }
+
+        // Clear our token cache to force re-painting
+        lastLine = -1;
+        cachedTokenList = null;
 
         // Let everybody know that syntax styles have (probably) changed
         fireChangedUpdate(new DefaultDocumentEvent(0, numLines - 1,

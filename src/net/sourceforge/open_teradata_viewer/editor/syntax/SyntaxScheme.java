@@ -475,6 +475,14 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
         styles[ERROR_NUMBER_FORMAT] = new Style(error);
         styles[ERROR_STRING_DOUBLE] = new Style(error);
         styles[ERROR_CHAR] = new Style(error);
+
+        // If an application modifies ITokenTypes to add new built-in
+        // token types, we'll get NPEs if not all styles are initialized
+        for (int i = 0; i < styles.length; i++) {
+            if (styles[i] == null) {
+                styles[i] = new Style();
+            }
+        }
     }
 
     /**

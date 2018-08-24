@@ -357,7 +357,7 @@ public class TokenImpl implements IToken {
 
     @Override
     public String getLexeme() {
-        return new String(text, textOffset, textCount);
+        return text == null ? null : new String(text, textOffset, textCount);
     }
 
     @Override

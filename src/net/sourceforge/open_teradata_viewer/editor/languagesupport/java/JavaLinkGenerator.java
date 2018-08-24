@@ -37,6 +37,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.ILinkGenerator;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ILinkGeneratorResult;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SelectRegionLinkGeneratorResult;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
@@ -76,6 +77,7 @@ class JavaLinkGenerator implements ILinkGenerator {
             try {
                 int line = textArea.getLineOfOffset(offs);
                 IToken first = textArea.getTokenListForLine(line);
+                SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
                 IToken prev = null;
 
                 for (IToken t = first; t != null && t.isPaintable(); t = t
@@ -88,7 +90,7 @@ class JavaLinkGenerator implements ILinkGenerator {
 
                         if (prev == null) {
                             prev = SyntaxUtilities.getPreviousImportantToken(
-                                    textArea, line - 1);
+                                    doc, line - 1);
                         }
                         if (prev != null && prev.isSingleChar('.')) {
                             // Not a field or method defined in this class

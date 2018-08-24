@@ -50,6 +50,7 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
     public AbstractCompletionProvider() {
         comparator = new CaseInsensitiveComparator();
         clearParameterizedCompletionParams();
+        completions = new ArrayList<ICompletion>();
     }
 
     /**
@@ -218,7 +219,7 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
      * 
      */
     @SuppressWarnings("rawtypes")
-    protected static class CaseInsensitiveComparator implements Comparator,
+    public static class CaseInsensitiveComparator implements Comparator,
             Serializable {
 
         private static final long serialVersionUID = 5231161608905723621L;

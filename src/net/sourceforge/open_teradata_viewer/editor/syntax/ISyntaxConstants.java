@@ -39,8 +39,11 @@ public interface ISyntaxConstants {
     /** Style meaning don't syntax highlight anything. */
     public static final String SYNTAX_STYLE_NONE = "text/plain";
 
-    /** Style for highlighting SQL. */
-    public static final String SYNTAX_STYLE_SQL = "text/sql";
+    /** Style for highlighting C. */
+    public static final String SYNTAX_STYLE_C = "text/c";
+
+    /** Style for highlighting CSS. */
+    public static final String SYNTAX_STYLE_CSS = "text/css";
 
     /** Style for highlighting Clojure. */
     public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
@@ -51,6 +54,9 @@ public interface ISyntaxConstants {
     /** Style for highlighting JavaScript. */
     public static final String SYNTAX_STYLE_JAVASCRIPT = "text/javascript";
 
-    /** Style for highlighting C. */
-    public static final String SYNTAX_STYLE_C = "text/c";
+    /** Style for highlighting SQL. */
+    public static final String SYNTAX_STYLE_SQL = "text/sql";
+
+    /** Style for highlighting XML. */
+    public static final String SYNTAX_STYLE_XML = "text/xml";
 }

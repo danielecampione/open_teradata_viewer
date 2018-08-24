@@ -67,9 +67,13 @@ public class FoldParserManager implements ISyntaxConstants {
     private Map<String, IFoldParser> createFoldParserMap() {
         Map<String, IFoldParser> map = new HashMap<String, IFoldParser>();
 
-        map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));
+        map.put(SYNTAX_STYLE_C, new CurlyFoldParser());
         map.put(SYNTAX_STYLE_CLOJURE, new LispFoldParser());
+        map.put(SYNTAX_STYLE_CSS, new CurlyFoldParser());
         map.put(SYNTAX_STYLE_JAVA, new CurlyFoldParser(true, true));
+        map.put(SYNTAX_STYLE_JAVASCRIPT, new CurlyFoldParser());
+        map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));
+        map.put(SYNTAX_STYLE_XML, new XmlFoldParser());
 
         return map;
     }

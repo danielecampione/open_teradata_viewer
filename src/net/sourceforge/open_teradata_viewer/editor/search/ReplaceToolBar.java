@@ -23,6 +23,9 @@ import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -33,6 +36,8 @@ import javax.swing.SpringLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.JTextComponent;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
@@ -50,6 +55,9 @@ public class ReplaceToolBar extends FindToolBar {
     private JButton replaceButton;
     private JButton replaceAllButton;
 
+    /** Our search listener, cached so we can grab its selected text easily. */
+    protected ISearchListener searchListener;
+
     /**
      * Creates the tool bar.
      *
@@ -57,6 +65,13 @@ public class ReplaceToolBar extends FindToolBar {
      */
     public ReplaceToolBar(ISearchListener listener) {
         super(listener);
+        this.searchListener = listener;
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        handleToggleButtons();
     }
 
     @Override
@@ -190,11 +205,66 @@ public class ReplaceToolBar extends FindToolBar {
     }
 
     @Override
+    protected void handleSearchAction(ActionEvent e) {
+        String command = e.getActionCommand();
+        super.handleSearchAction(e);
+        if ("FindNext".equals(command) || "FindPrevious".equals(command)) {
+            handleToggleButtons(); // Replace button could toggle state
+        }
+    }
+
+    @Override
     protected FindReplaceButtonsEnableResult handleToggleButtons() {
         FindReplaceButtonsEnableResult er = super.handleToggleButtons();
-        replaceButton.setEnabled(er.getEnable());
-        replaceAllButton.setEnabled(er.getEnable());
+        boolean shouldReplace = er.getEnable();
+        replaceAllButton.setEnabled(shouldReplace);
+
+        // "Replace" is only enabled if text to search for is selected in the UI
+        if (shouldReplace) {
+            String text = searchListener.getSelectedText();
+            shouldReplace = matchesSearchFor(text);
+        }
+        replaceButton.setEnabled(shouldReplace);
+
         return er;
+    }
+
+    private boolean matchesSearchFor(String text) {
+        if (text == null || text.length() == 0) {
+            return false;
+        }
+        String searchFor = findCombo.getSelectedString();
+        if (searchFor != null && searchFor.length() > 0) {
+            boolean matchCase = matchCaseCheckBox.isSelected();
+            if (regexCheckBox.isSelected()) {
+                int flags = Pattern.MULTILINE; // '^' and '$' are done per line
+                flags = SyntaxUtilities.getPatternFlags(matchCase, flags);
+                Pattern pattern = null;
+                try {
+                    pattern = Pattern.compile(searchFor, flags);
+                } catch (PatternSyntaxException pse) {
+                    ExceptionDialog.hideException(pse); // Never happens
+                    return false;
+                }
+                return pattern.matcher(text).matches();
+            } else {
+                if (matchCase) {
+                    return searchFor.equals(text);
+                }
+                return searchFor.equalsIgnoreCase(text);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Overridden to possibly toggle the enabled state of the replace button.
+     */
+    @Override
+    public boolean requestFocusInWindow() {
+        boolean result = super.requestFocusInWindow();
+        handleToggleButtons(); // Replace button state may change
+        return result;
     }
 
     /**
@@ -208,7 +278,11 @@ public class ReplaceToolBar extends FindToolBar {
         @Override
         protected void handleDocumentEvent(DocumentEvent e) {
             super.handleDocumentEvent(e);
+            JTextComponent findField = UIUtil.getTextComponent(findCombo);
             JTextComponent replaceField = UIUtil.getTextComponent(replaceCombo);
+            if (e.getDocument().equals(findField.getDocument())) {
+                handleToggleButtons();
+            }
             if (e.getDocument() == replaceField.getDocument()) {
                 getSearchContext().setReplaceWith(replaceField.getText());
             }

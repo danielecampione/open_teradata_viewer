@@ -822,7 +822,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 Color c = SyntaxUtilities.getFoldedLineBottomColor(host);
                 if (c != null) {
                     g.setColor(c);
-                    g.drawLine(x, tempRect.y - 1, alloc.width, tempRect.y - 1);
+                    g.drawLine(x, tempRect.y - 1, host.getWidth(),
+                            tempRect.y - 1);
                 }
             }
         }
