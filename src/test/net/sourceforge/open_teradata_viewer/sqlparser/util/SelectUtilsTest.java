@@ -19,6 +19,7 @@
 package test.net.sourceforge.open_teradata_viewer.sqlparser.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Addition;
@@ -27,7 +28,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.util.SelectUtils;
 
 import org.junit.After;
@@ -89,5 +92,29 @@ public class SelectUtilsTest {
         addJoin.setLeft(true);
         assertEquals("SELECT a FROM mytable LEFT JOIN mytable2 ON a = b",
                 select.toString());
+    }
+
+    @Test
+    public void testBuildSelectFromTableAndExpressions() {
+        Select select = SelectUtils.buildSelectFromTableAndExpressions(
+                new Table("mytable"), new Column("a"), new Column("b"));
+        assertEquals("SELECT a, b FROM mytable", select.toString());
+    }
+
+    @Test
+    public void testBuildSelectFromTable() {
+        Select select = SelectUtils.buildSelectFromTable(new Table("mytable"));
+        assertEquals("SELECT * FROM mytable", select.toString());
+    }
+
+    @Test
+    public void testBuildSelectFromTableAndParsedExpression()
+            throws SQLParserException {
+        Select select = SelectUtils.buildSelectFromTableAndExpressions(
+                new Table("mytable"), "a+b", "test");
+        assertEquals("SELECT a + b, test FROM mytable", select.toString());
+
+        assertTrue(((SelectExpressionItem) ((PlainSelect) select
+                .getSelectBody()).getSelectItems().get(0)).getExpression() instanceof Addition);
     }
 }

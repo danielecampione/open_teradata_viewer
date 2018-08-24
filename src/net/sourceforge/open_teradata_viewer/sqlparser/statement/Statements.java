@@ -16,35 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer.sqlparser.expression;
+package net.sourceforge.open_teradata_viewer.sqlparser.statement;
+
+import java.util.List;
 
 /**
- * It represents a "-" before an expression.
+ * 
  * 
  * @author D. Campione
  * 
  */
-public class InverseExpression implements IExpression {
+public class Statements {
 
-    private IExpression expression;
+    private List<IStatement> statements;
 
-    public InverseExpression() {
+    public List<IStatement> getStatements() {
+        return statements;
     }
 
-    public InverseExpression(IExpression expression) {
-        setExpression(expression);
+    public void setStatements(List<IStatement> statements) {
+        this.statements = statements;
     }
 
-    public IExpression getExpression() {
-        return expression;
-    }
-
-    public final void setExpression(IExpression expression) {
-        this.expression = expression;
+    public void accept(IStatementVisitor statementVisitor) {
+        statementVisitor.visit(this);
     }
 
     @Override
-    public void accept(IExpressionVisitor expressionVisitor) {
-        expressionVisitor.visit(this);
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        for (IStatement stmt : statements) {
+            b.append(stmt.toString()).append(";\n");
+        }
+        return b.toString();
     }
 }

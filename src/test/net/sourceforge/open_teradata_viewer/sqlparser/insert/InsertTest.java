@@ -75,7 +75,8 @@ public class InsertTest extends TestCase {
 
         statement = "INSERT INTO myschema.mytable VALUES (?, ?, 2.3)";
         insert = (Insert) parserManager.parse(new StringReader(statement));
-        assertEquals("myschema.mytable", insert.getTable().getWholeTableName());
+        assertEquals("myschema.mytable", insert.getTable()
+                .getFullyQualifiedName());
         assertEquals(3, ((ExpressionList) insert.getItemsList())
                 .getExpressions().size());
         assertTrue(((ExpressionList) insert.getItemsList()).getExpressions()

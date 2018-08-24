@@ -56,13 +56,13 @@ public class TestUtils {
     public static void assertExpressionCanBeDeparsedAs(
             final IExpression parsed, String expression) {
         ExpressionDeParser expressionDeParser = new ExpressionDeParser();
-        StringBuilder stringBuffer = new StringBuilder();
-        expressionDeParser.setBuffer(stringBuffer);
+        StringBuilder stringBuilder = new StringBuilder();
+        expressionDeParser.setBuffer(stringBuilder);
         SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser,
-                stringBuffer);
+                stringBuilder);
         expressionDeParser.setSelectVisitor(selectDeParser);
         parsed.accept(expressionDeParser);
 
-        assertEquals(expression, stringBuffer.toString());
+        assertEquals(expression, stringBuilder.toString());
     }
 }

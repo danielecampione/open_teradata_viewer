@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -84,6 +86,13 @@ public class PlainSelect implements ISelectBody {
 
     public void setSelectItems(List<ISelectItem> list) {
         selectItems = list;
+    }
+
+    public void addSelectItems(ISelectItem... items) {
+        if (selectItems == null) {
+            selectItems = new ArrayList<ISelectItem>();
+        }
+        Collections.addAll(selectItems, items);
     }
 
     public void setWhere(IExpression where) {

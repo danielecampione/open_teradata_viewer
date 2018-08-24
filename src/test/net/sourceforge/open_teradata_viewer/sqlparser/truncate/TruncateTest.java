@@ -43,7 +43,8 @@ public class TruncateTest extends TestCase {
         Truncate truncate = (Truncate) parserManager.parse(new StringReader(
                 statement));
         assertEquals("myschema", truncate.getTable().getSchemaName());
-        assertEquals("myschema.mytab", truncate.getTable().getWholeTableName());
+        assertEquals("myschema.mytab", truncate.getTable()
+                .getFullyQualifiedName());
         assertEquals(statement.toUpperCase(), truncate.toString().toUpperCase());
 
         statement = "TRUncATE   TABLE    mytab";

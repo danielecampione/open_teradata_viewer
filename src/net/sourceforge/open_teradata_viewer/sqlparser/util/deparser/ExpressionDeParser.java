@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 
 import java.util.Iterator;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AllComparisonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnalyticExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnyComparisonExpression;
@@ -34,12 +33,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.InverseExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
@@ -75,6 +74,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.OldTeradataJoinBinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
@@ -210,9 +210,9 @@ public class ExpressionDeParser implements IExpressionVisitor,
     }
 
     @Override
-    public void visit(InverseExpression inverseExpression) {
-        buffer.append("-");
-        inverseExpression.getExpression().accept(this);
+    public void visit(SignedExpression signedExpression) {
+        buffer.append(signedExpression.getSign());
+        signedExpression.getExpression().accept(this);
     }
 
     @Override
@@ -335,14 +335,16 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(Column tableColumn) {
-        final Alias alias = tableColumn.getTable().getAlias();
+        final Table table = tableColumn.getTable();
         String tableName = null;
-        if (alias != null) {
-            tableName = alias.getName();
-        } else if (tableName == null) {
-            tableName = tableColumn.getTable().getWholeTableName();
+        if (table != null) {
+            if (table.getAlias() != null) {
+                tableName = table.getAlias().getName();
+            } else {
+                tableName = table.getFullyQualifiedName();
+            }
         }
-        if (tableName != null) {
+        if (tableName != null && !tableName.isEmpty()) {
             buffer.append(tableName).append(".");
         }
 

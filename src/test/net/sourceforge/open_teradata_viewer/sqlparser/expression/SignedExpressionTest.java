@@ -16,33 +16,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package test.net.sourceforge.open_teradata_viewer.sqlparser.alter;
+package test.net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.fail;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * 
  * 
  * @author D. Campione
- *
+ * 
  */
-public class AlterTest extends TestCase {
+public class SignedExpressionTest {
 
-    public AlterTest(String arg0) {
-        super(arg0);
+    public SignedExpressionTest() {
     }
 
-    public void testAlterTableAddColumn() throws SQLParserException {
-        IStatement stmt = CCSqlParserUtil
-                .parse("ALTER TABLE mytable ADD COLUMN mycolumn varchar (255)");
-        assertTrue(stmt instanceof Alter);
-        Alter alter = (Alter) stmt;
-        assertEquals("mytable", alter.getTable().getFullyQualifiedName());
-        assertEquals("mycolumn", alter.getColumnName());
-        assertEquals("varchar (255)", alter.getDataType().toString());
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /** Test of getSign method, of class SignedExpression. */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetSign() throws SQLParserException {
+        new SignedExpression('*', CCSqlParserUtil.parseExpression("a"));
+        fail("must not work");
     }
 }

@@ -23,7 +23,9 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statements;
 
 /**
  * Toolfunctions to start and use ISqlParser.
@@ -36,7 +38,7 @@ public final class CCSqlParserUtil {
             throws SQLParserException {
         CCSqlParser parser = new CCSqlParser(statementReader);
         try {
-            return parser.IStatement();
+            return parser.Statement();
         } catch (Exception ex) {
             throw new SQLParserException(ex);
         }
@@ -45,7 +47,7 @@ public final class CCSqlParserUtil {
     public static IStatement parse(String sql) throws SQLParserException {
         CCSqlParser parser = new CCSqlParser(new StringReader(sql));
         try {
-            return parser.IStatement();
+            return parser.Statement();
         } catch (Exception ex) {
             throw new SQLParserException(ex);
         }
@@ -54,7 +56,7 @@ public final class CCSqlParserUtil {
     public static IStatement parse(InputStream is) throws SQLParserException {
         CCSqlParser parser = new CCSqlParser(is);
         try {
-            return parser.IStatement();
+            return parser.Statement();
         } catch (Exception ex) {
             throw new SQLParserException(ex);
         }
@@ -64,7 +66,29 @@ public final class CCSqlParserUtil {
             throws SQLParserException {
         CCSqlParser parser = new CCSqlParser(is, encoding);
         try {
-            return parser.IStatement();
+            return parser.Statement();
+        } catch (Exception ex) {
+            throw new SQLParserException(ex);
+        }
+    }
+
+    /** Parse an expression. */
+    public static IExpression parseExpression(String expression)
+            throws SQLParserException {
+        CCSqlParser parser = new CCSqlParser(new StringReader(expression));
+        try {
+            return parser.SimpleExpression();
+        } catch (Exception ex) {
+            throw new SQLParserException(ex);
+        }
+    }
+
+    /** Parse a statement list. */
+    public static Statements parseStatements(String sqls)
+            throws SQLParserException {
+        CCSqlParser parser = new CCSqlParser(new StringReader(sqls));
+        try {
+            return parser.Statements();
         } catch (Exception ex) {
             throw new SQLParserException(ex);
         }

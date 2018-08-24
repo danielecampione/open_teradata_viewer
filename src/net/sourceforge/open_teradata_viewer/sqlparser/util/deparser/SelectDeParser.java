@@ -164,21 +164,21 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         if (!orderBy.isAsc()) {
             buffer.append(" DESC");
         }
+        if (orderBy.getNullOrdering() != null) {
+            buffer.append(' ');
+            buffer.append(orderBy.getNullOrdering() == OrderByElement.NullOrdering.NULLS_FIRST ? "NULLS FIRST"
+                    : "NULLS LAST");
+        }
     }
 
     public void visit(Column column) {
-        buffer.append(column.getWholeColumnName());
-    }
-
-    @Override
-    public void visit(AllColumns allColumns) {
-        buffer.append("*");
+        buffer.append(column.getFullyQualifiedName());
     }
 
     @Override
     public void visit(AllTableColumns allTableColumns) {
-        buffer.append(allTableColumns.getTable().getWholeTableName()).append(
-                ".*");
+        buffer.append(allTableColumns.getTable().getFullyQualifiedName())
+                .append(".*");
     }
 
     @Override
@@ -202,7 +202,7 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
     @Override
     public void visit(Table tableName) {
-        buffer.append(tableName.getWholeTableName());
+        buffer.append(tableName.getFullyQualifiedName());
         Pivot pivot = tableName.getPivot();
         if (pivot != null) {
             pivot.accept(this);
@@ -344,7 +344,7 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
             for (Iterator<Column> iterator = join.getUsingColumns().iterator(); iterator
                     .hasNext();) {
                 Column column = iterator.next();
-                buffer.append(column.getWholeColumnName());
+                buffer.append(column.getFullyQualifiedName());
                 if (iterator.hasNext()) {
                     buffer.append(", ");
                 }
@@ -386,5 +386,10 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
     @Override
     public void visit(ValuesList valuesList) {
         buffer.append(valuesList.toString());
+    }
+
+    @Override
+    public void visit(AllColumns allColumns) {
+        buffer.append('*');
     }
 }

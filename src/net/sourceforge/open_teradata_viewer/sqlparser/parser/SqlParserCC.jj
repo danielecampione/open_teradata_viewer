@@ -29,118 +29,32 @@ PARSER_BEGIN(CCSqlParser)
 
 package net.sourceforge.open_teradata_viewer.sqlparser.parser;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.conditional.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.*;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.*;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.InverseExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.DateValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.CaseExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.CastExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnalyticExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExtractExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.AnyComparisonExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.AllComparisonExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Addition;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Concat;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Division;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Multiplication;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Modulo;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Subtraction;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.conditional.AndExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.conditional.OrExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.Between;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.EqualsTo;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.GreaterThan;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperatorType;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.InExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IsNullExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsList;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.LikeExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExistsExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.Matches;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThan;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThanEquals;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ISupportsOldTeradataJoinSyntax;
-import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
-import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ColDataType;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ColumnDefinition;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Index;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ForeignKeyIndex;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Distinct;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubJoin;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Limit;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PivotXml;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.FunctionItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ExpressionListItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectBody;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.LateralSubSelect;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Top;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SetOperationList;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SetOperation;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.UnionOp;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.MinusOp;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ExceptOp;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IntersectOp;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ValuesList;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.Truncate;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
+import java.util.*;
 
-/**
- * The parser generated by JavaCC
- */
+/** The parser generated by JavaCC. */
 public class CCSqlParser {
     private boolean allowTeradataPrior = false;
-} 
-
+}
 
 PARSER_END(CCSqlParser)
-
 
 SKIP:
 {
@@ -150,24 +64,24 @@ SKIP:
 |   "\n"
 }
 
-
 TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 {
-<K_AS: "AS">
+    <K_AS:"AS">
 |   <K_BY:"BY">
 |   <K_DO:"DO">
 |   <K_IS:"IS">
 |   <K_IN:"IN">
 |   <K_OR:"OR">
 |   <K_ON:"ON">
-|   <K_ALL: "ALL">
-|   <K_AND: "AND">
-|   <K_ANY: "ANY">
-|   <K_KEY: "KEY">
+|   <K_ALL:"ALL">
+|   <K_AND:"AND">
+|   <K_ANY:"ANY">
+|   <K_KEY:"KEY">
 |   <K_NOT:"NOT">
 |   <K_SET:"SET">
 |   <K_ASC:"ASC">
 |   <K_TOP:"TOP">
+|   <K_PERCENT:"PERCENT">
 |   <K_END:"END">
 |   <K_DESC:"DESC">
 |   <K_INTO:"INTO">
@@ -196,9 +110,9 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_UNION:"UNION">
 |   <K_GROUP:"GROUP">
 |   <K_BEGIN:"BEGIN">
-|   <K_INDEX: "INDEX">
+|   <K_INDEX:"INDEX">
 |   <K_INNER:"INNER">
-|   <K_LIMIT:"LIMIT"> 
+|   <K_LIMIT:"LIMIT">
 |   <K_OUTER:"OUTER">
 |   <K_ORDER:"ORDER">
 |   <K_RIGHT:"RIGHT">
@@ -226,12 +140,12 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_OVER:"OVER">
 |   <K_PARTITION:"PARTITION">
 |   <K_EXTRACT:"EXTRACT">
-|	<K_LATERAL:"LATERAL">
-|	<K_MATERIALIZED:"MATERIALIZED">
+|   <K_LATERAL:"LATERAL">
+|   <K_MATERIALIZED:"MATERIALIZED">
 |   <K_INTERVAL:"INTERVAL">
-|	<K_FOREIGN:"FOREIGN">
-|	<K_CONSTRAINT:"CONSTRAINT">
-|	<K_REFERENCES:"REFERENCES">
+|   <K_FOREIGN:"FOREIGN">
+|   <K_CONSTRAINT:"CONSTRAINT">
+|   <K_REFERENCES:"REFERENCES">
 |   <K_CHARACTER:"CHARACTER">
 |   <K_VARYING:"VARYING">
 |   <K_START:"START">
@@ -242,55 +156,67 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_ALTER:"ALTER">
 |   <K_ADD:"ADD">
 |   <K_COLUMN:"COLUMN">
+|   <K_NULLS:"NULLS">
+|   <K_FIRST:"FIRST">
+|   <K_LAST:"LAST">
+|   <K_ROWS:"ROWS">
+|   <K_RANGE:"RANGE">
+|   <K_UNBOUNDED:"UNBOUNDED"> 
+|   <K_PRECEDING:"PRECEDING">
+|   <K_FOLLOWING:"FOLLOWING">
+|   <K_CURRENT:"CURRENT">
+|   <K_ROW:"ROW"> 
 }
-
 
 TOKEN : /* Numeric Constants */
 {
-	< S_DOUBLE: ((<S_INTEGER>)? "." <S_INTEGER> ( ["e","E"] ([ "-","+"])? <S_INTEGER> )? 
-				|
-				<S_INTEGER> "." (["e","E"] ([ "-","+"])? <S_INTEGER>)?
-				|
-				<S_INTEGER> ["e","E"] ([ "-","+"])? <S_INTEGER>
-				)>
-  | 	< S_INTEGER: ( <DIGIT> )+ >
-  | 	< #DIGIT: ["0" - "9"] >
-
+   < S_DOUBLE: ((<S_LONG>)? "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
+            |
+            <S_LONG> "." (["e","E"] (["+", "-"])? <S_LONG>)?
+            |
+            <S_LONG> ["e","E"] (["+", "-"])? <S_LONG>
+            )>
+  |     < S_LONG: ( <DIGIT> )+ >
+  |     < #DIGIT: ["0" - "9"] >
 }
-
 
 SPECIAL_TOKEN:
 {
-   <LINE_COMMENT: "--"(~["\r","\n"])*>
-|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
-
+   < LINE_COMMENT: "--"(~["\r","\n"])*>
+|  < MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
-
 
 TOKEN:
 {
-	< S_IDENTIFIER: ( <LETTER> | <ADDITIONAL_LETTERS> )+ ( <DIGIT> | <LETTER> | <ADDITIONAL_LETTERS> | <SPECIAL_CHARS>)* >
-| 	< #LETTER: ["a"-"z", "A"-"Z", "_"] >
+    < S_IDENTIFIER: ( <LETTER> | <ADDITIONAL_LETTERS> )+ ( <DIGIT> | <LETTER> | <ADDITIONAL_LETTERS> | <SPECIAL_CHARS>)* >
+|   < #LETTER: ["a"-"z", "A"-"Z", "_"] >
 |   < #SPECIAL_CHARS: "$" | "_">
 |   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" | ("`" (~["\n","\r","`"])* "`") | ("[" (~["\n","\r","]"])* "]") >
 
 /*
 To deal with database names (columns, tables) using not only latin base characters, one
-can expand the following rule to accept additional letters. Here is the
-addition of german umlauts.
+can expand the following rule to accept additional letters. Here is the addition of german umlauts.
 
 There seems to be no way to recognize letters by an external function to allow
 a configurable addition. One must rebuild SqlParser with this new "Letterset".
-*/ 
+*/
 |   < #ADDITIONAL_LETTERS: ["ä","ö","ü","Ä","Ö","Ü","ß"] >
 }
 
+IStatement Statement() : 
+{ IStatement stm; } 
+{
+    stm = SingleStatement()
+    [";"]
+    <EOF>
+    { return stm; }
+}
 
-IStatement IStatement() :
+IStatement SingleStatement() :
 { IStatement stm;}
 {
-	(
+    (
     stm = Select()
     |
     stm =  Update()
@@ -299,311 +225,302 @@ IStatement IStatement() :
     |
     stm = Delete()
     |
-    stm =  Replace()
+    stm = Replace()
     |
-    stm = Alter() 
+    stm = Alter()
     |
     LOOKAHEAD(3)
     stm = CreateIndex()
     |
-	LOOKAHEAD(2)
+    LOOKAHEAD(2)
     stm = CreateTable()
     |
-	LOOKAHEAD(2)
-	stm = CreateView()
-	|
+    LOOKAHEAD(2)
+    stm = CreateView()
+    |
     stm = Drop()
     |
     stm = Truncate()
     )
-    [";"]
-    <EOF>
     { return stm; }
 }
 
+Statements Statements() : 
+{ Statements stmts = new Statements();
+  List<IStatement> list = new ArrayList<IStatement>();
+  IStatement stm; }
+{
+    stm = SingleStatement() { list.add(stm); }
+     (LOOKAHEAD(2) ";" stm = SingleStatement() { list.add(stm); } )*
+
+    [";"]
+    <EOF>
+
+    {
+        stmts.setStatements(list);
+        return stmts;
+    }
+}
 
 Update Update():
-{ 
-	Update update = new Update(); 
-	Table table = null;
-	IExpression where = null;
-	Column tableColumn = null;
-	List<IExpression> expList = new ArrayList<IExpression>();
-	List<Column> columns = new ArrayList<Column>(); 
-	IExpression value = null;
-	IFromItem fromItem = null;
-	List<Join> joins = null;
+{
+    Update update = new Update();
+    Table table = null;
+    IExpression where = null;
+    Column tableColumn = null;
+    List<IExpression> expList = new ArrayList<IExpression>();
+    List<Column> columns = new ArrayList<Column>();
+    IExpression value = null;
+    IFromItem fromItem = null;
+    List<Join> joins = null;
 }
 {
     <K_UPDATE> table=TableWithAlias()
     <K_SET> tableColumn=Column() "=" value=SimpleExpression() { columns.add(tableColumn); expList.add(value); }
-		  ("," tableColumn=Column() "=" value=SimpleExpression()  { columns.add(tableColumn); expList.add(value); } )*
+          ("," tableColumn=Column() "=" value=SimpleExpression()  { columns.add(tableColumn); expList.add(value); } )*
 
    [ <K_FROM>
       fromItem=FromItem()
       joins=JoinsList() ]
 
    [ where=WhereClause() { update.setWhere(where); } ]
-   { 
-   		update.setColumns(columns);
-   		update.setExpressions(expList);
-   		update.setTable(table);
-		update.setFromItem(fromItem);
-		update.setJoins(joins);
-		return update;
+   {
+        update.setColumns(columns);
+        update.setExpressions(expList);
+        update.setTable(table);
+        update.setFromItem(fromItem);
+        update.setJoins(joins);
+        return update;
    }
 }
 
 Replace Replace():
-{ 
-	Replace replace = new Replace(); 
-	Table table = null;
-	Column tableColumn = null;
-	IExpression value = null;
-	
-	List<Column> columns = new ArrayList<Column>(); 
-	List<IExpression> expList = new ArrayList<IExpression>(); 
-	IItemsList itemsList = null;
-	IExpression exp = null;
+{
+    Replace replace = new Replace();
+    Table table = null;
+    Column tableColumn = null;
+    IExpression value = null;
+
+    List<Column> columns = new ArrayList<Column>();
+    List<IExpression> expList = new ArrayList<IExpression>();
+    IItemsList itemsList = null;
+    IExpression exp = null;
 }
 {
     <K_REPLACE> [<K_INTO>] table=Table()
-    
+
     (
-		(    
-		    <K_SET> tableColumn=Column() "=" value=SimpleExpression() { columns.add(tableColumn); expList.add(value); }
-			  ("," tableColumn=Column() "=" value=SimpleExpression() { columns.add(tableColumn); expList.add(value); } )*
-			 {
-		   		replace.setExpressions(expList);
-			 }
-		)
-		|
-	
-		(
-		     [LOOKAHEAD(2) "(" tableColumn=Column() { columns.add(tableColumn); } ("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  ]
-			
-			( 
-				LOOKAHEAD(2) [<K_VALUES> | <K_VALUE>] "(" exp=PrimaryExpression() { expList.add(exp); } 
-						("," exp=PrimaryExpression()  { expList.add(exp); } )* ")" { itemsList = new ExpressionList(expList); }
-				
-				| 
-					{ replace.setUseValues(false); }
-				
-				    itemsList=SubSelect()  
-			)
-		    { 
-				replace.setItemsList(itemsList);
-		    }
-		)
-	)
-   { 
-   		if (columns.size() > 0)
-	   		replace.setColumns(columns);
-   		replace.setTable(table);
-		return replace;
+        (
+            <K_SET> tableColumn=Column() "=" value=SimpleExpression() { columns.add(tableColumn); expList.add(value); }
+              ("," tableColumn=Column() "=" value=SimpleExpression() { columns.add(tableColumn); expList.add(value); } )*
+             {
+                replace.setExpressions(expList);
+             }
+        )
+        |
+
+        (
+             [LOOKAHEAD(2) "(" tableColumn=Column() { columns.add(tableColumn); } ("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  ]
+            (
+                LOOKAHEAD(2) [<K_VALUES> | <K_VALUE>] "(" exp=PrimaryExpression() { expList.add(exp); }
+                        ("," exp=PrimaryExpression()  { expList.add(exp); } )* ")" { itemsList = new ExpressionList(expList); }
+                |
+                    { replace.setUseValues(false); }
+                    itemsList=SubSelect()
+            )
+            {
+                replace.setItemsList(itemsList);
+            }
+        )
+    )
+   {
+        if (columns.size() > 0)
+            replace.setColumns(columns);
+        replace.setTable(table);
+        return replace;
    }
 }
 
-
 Insert Insert():
-{ 
-	Insert insert = new Insert(); 
-	Table table = null;
-	Column tableColumn = null;
- 	List<Column> columns = new ArrayList<Column>(); 
-	List<IExpression> primaryExpList = new ArrayList<IExpression>(); 
-	IItemsList itemsList = null;
-	IExpression exp = null;
-	MultiExpressionList multiExpr = null;
+{
+    Insert insert = new Insert();
+    Table table = null;
+    Column tableColumn = null;
+    List<Column> columns = new ArrayList<Column>();
+    List<IExpression> primaryExpList = new ArrayList<IExpression>();
+    IItemsList itemsList = null;
+    IExpression exp = null;
+    MultiExpressionList multiExpr = null;
 }
 {
     <K_INSERT> [<K_INTO>] table=Table()
-    
-    
-     [LOOKAHEAD(2) "(" tableColumn=Column() { columns.add(tableColumn); } ("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  ]
-	
-	( 
-		LOOKAHEAD(2) [<K_VALUES> | <K_VALUE>]  "(" exp=SimpleExpression() { primaryExpList.add(exp); } 
-				("," exp=SimpleExpression()  { primaryExpList.add(exp); } )* ")" { itemsList = new ExpressionList(primaryExpList); }
 
-			("," "(" exp=SimpleExpression() { 
-					if (multiExpr==null) {
-						multiExpr=new MultiExpressionList(); 
-						multiExpr.addExpressionList((ExpressionList)itemsList); 
-						itemsList = multiExpr;
-					}
-					primaryExpList = new ArrayList<IExpression>(); 
-					primaryExpList.add(exp); } 
-				("," exp=SimpleExpression() { primaryExpList.add(exp); } )* ")" { multiExpr.addExpressionList(primaryExpList); } )*
-		
-		| 
-		
-		[LOOKAHEAD(2) "(" ]
-		(
-			{ insert.setUseValues(false); }
-			itemsList=  SubSelect() 
-		)
-		[ ")" ]
-	)
-    
-    { 
-		insert.setItemsList(itemsList);
-	    insert.setTable(table);
-	    if (columns.size() > 0)
-	    	insert.setColumns(columns);
-    	return insert; 
+
+     [LOOKAHEAD(2) "(" tableColumn=Column() { columns.add(tableColumn); } ("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  ]
+    (
+        LOOKAHEAD(2) [<K_VALUES> | <K_VALUE>]  "(" exp=SimpleExpression() { primaryExpList.add(exp); }
+                ("," exp=SimpleExpression()  { primaryExpList.add(exp); } )* ")" { itemsList = new ExpressionList(primaryExpList); }
+            ("," "(" exp=SimpleExpression() {
+                    if (multiExpr==null) {
+                        multiExpr=new MultiExpressionList();
+                        multiExpr.addExpressionList((ExpressionList)itemsList);
+                        itemsList = multiExpr;
+                    }
+                    primaryExpList = new ArrayList<IExpression>();
+                    primaryExpList.add(exp); }
+                ("," exp=SimpleExpression() { primaryExpList.add(exp); } )* ")" { multiExpr.addExpressionList(primaryExpList); } )*
+
+        |
+
+        [LOOKAHEAD(2) "(" ]
+        (
+            { insert.setUseValues(false); }
+            itemsList=  SubSelect()
+        )
+        [ ")" ]
+    )
+
+    {
+        insert.setItemsList(itemsList);
+        insert.setTable(table);
+        if (columns.size() > 0)
+            insert.setColumns(columns);
+        return insert;
     }
 }
-
-
 
 Delete Delete():
-{ 
-	Delete delete = new Delete();
-	Table table = null;
-	IExpression where = null;
+{
+    Delete delete = new Delete();
+    Table table = null;
+    IExpression where = null;
 }
 {
-    <K_DELETE> [<K_FROM>] table=TableWithAlias() 
+    <K_DELETE> [<K_FROM>] table=TableWithAlias()
     [where=WhereClause() { delete.setWhere(where); } ]
-    { 
-    	delete.setTable(table);
-    	return delete;
+    {
+        delete.setTable(table);
+        return delete;
     }
 }
-
-
 
 Column Column():
 {
-	String name1 = null;
-	String name2 = null;
-	String name3 = null;
+    String databaseName = null, schemaName = null, tableName = null, columnName = null;
 }
 {
-    // [schema.][tabella.]colonna
-    name1=RelObjectName() [ "." name2=RelObjectName() ["." name3=RelObjectName()]]
+    (
+          LOOKAHEAD(7) databaseName=RelObjectName() "." [schemaName=RelObjectName()] "." tableName=RelObjectName() "." columnName=RelObjectName()
+        | LOOKAHEAD(5) schemaName=RelObjectName() "." tableName=RelObjectName() "." columnName=RelObjectName()
+        | LOOKAHEAD(3) tableName=RelObjectName() "." columnName=RelObjectName()
+        | columnName=RelObjectName()
+    )
     {
-    	String colName = null;
-    	Table table = null;
-    	if (name3 != null) {
-    		table = new Table(name1, name2);
-    		colName = name3;
-    	} else if (name2 != null) {
-    		table = new Table(null, name1);
-    		colName = name2;
-    	} else {
-    		table = new Table(null, null);
-    		colName = name1;
-    	}
-    	
-    	return new Column(table, colName); 
-   	}
+        final Database database = new Database(databaseName);
+        final Table table = new Table(database, schemaName, tableName);
+        return new Column(table, columnName);
+    }
 }
 
-String RelObjectName()  :
-{	Token tk = null; }
+String RelObjectName():
+{   Token tk = null; }
 {
-	(
-	tk=<S_IDENTIFIER>
-	|
-	tk=<S_QUOTED_IDENTIFIER>
-	)
-	
+    (
+        tk=<S_IDENTIFIER>
+    |
+        tk=<S_QUOTED_IDENTIFIER>
+    )
+
     { return tk.image; }
+}
+
+Table Table():
+{
+    String serverName = null, databaseName = null, schemaName = null, tableName = null;
+}
+{
+    (
+          LOOKAHEAD(7) serverName=RelObjectName() "." [databaseName=RelObjectName()] "." [schemaName=RelObjectName()] "." tableName=RelObjectName()
+        | LOOKAHEAD(5) databaseName=RelObjectName() "." [schemaName=RelObjectName()] "." tableName=RelObjectName()
+        | LOOKAHEAD(3) schemaName=RelObjectName() "." tableName=RelObjectName()
+        | tableName=RelObjectName()
+    )
+    {
+        final Server server = new Server(serverName);
+        final Database database = new Database(server, databaseName);
+        return new Table(database, schemaName, tableName);
+    }
 }
 
 Table TableWithAlias():
 {
-	Table table = null;
-	Alias alias = null;
+    Table table = null;
+    Alias alias = null;
 }
 {
-	table=Table() [alias=Alias() { table.setAlias(alias); }]
-	{ return table; }
+    table=Table() [alias=Alias() { table.setAlias(alias); }]
+    { return table; }
 }
-
-
-Table Table():
-{ 
-	Table table = null;
-	String name1 = null;
-	String name2 = null;
-}
-{
-	(LOOKAHEAD(3) 
-		name1=RelObjectName() "." name2=RelObjectName()  { table = new Table(name1, name2); }
-		|
-		name1=RelObjectName() { table = new Table(null, name1); } 
-	)	
-	{		
-		return table; 
-	}
-	
-}
-
-
 
 Select Select():
-{ 
-	Select select = new Select();
-	ISelectBody selectBody = null;
-	List<WithItem> with = null; 
+{
+    Select select = new Select();
+    ISelectBody selectBody = null;
+    List<WithItem> with = null;
 }
 {
-	[ with=WithList() { select.setWithItemsList(with); } ]
+    [ with=WithList() { select.setWithItemsList(with); } ]
     selectBody = SelectBody()
-	{ 
-		select.setSelectBody(selectBody);
-		return select; 
-	}
+    {
+        select.setSelectBody(selectBody);
+        return select;
+    }
 }
 
 ISelectBody SelectBody():
 { ISelectBody selectBody = null; }
 {
-	(
-		LOOKAHEAD(SetOperationList())
-		    selectBody = SetOperationList() 
-    	|
-	    selectBody = PlainSelect()
-	)
-	{ return selectBody; }
+    (
+        LOOKAHEAD(SetOperationList())
+            selectBody = SetOperationList()
+        |
+        selectBody = PlainSelect()
+    )
+    { return selectBody; }
 }
 
 PlainSelect PlainSelect():
-{ 
-	PlainSelect plainSelect = new PlainSelect(); 
-	List<ISelectItem> selectItems = null;
-	IFromItem fromItem = null;
-	List<Join> joins = null;
-	List<ISelectItem> distinctOn = null;
+{
+    PlainSelect plainSelect = new PlainSelect();
+    List<ISelectItem> selectItems = null;
+    IFromItem fromItem = null;
+    List<Join> joins = null;
+    List<ISelectItem> distinctOn = null;
     IExpression where = null;
-	List<OrderByElement> orderByElements;
-	List<IExpression> groupByColumnReferences = null;
+    List<OrderByElement> orderByElements;
+    List<IExpression> groupByColumnReferences = null;
     IExpression having = null;
-	Limit limit = null;
-	Top top = null;
-	TeradataHierarchicalExpression teradataHierarchicalQueryClause = null;
+    Limit limit = null;
+    Top top = null;
+    TeradataHierarchicalExpression teradataHierarchicalQueryClause = null;
 }
 {
-    <K_SELECT> 
+    <K_SELECT>
 
-    [ 
-    	<K_ALL> 
-    	| 
-    		(
-    			<K_DISTINCT> { Distinct distinct = new Distinct(); plainSelect.setDistinct(distinct); } 
-    				[ "ON" "(" distinctOn=SelectItemsList()  { plainSelect.getDistinct().setOnSelectItems(distinctOn); } ")" ]
-    		)
-    ] 
-    
-    [top = Top() { plainSelect.setTop(top);	} ]
+    [
+        <K_ALL>
+        |
+            (
+                <K_DISTINCT> { Distinct distinct = new Distinct(); plainSelect.setDistinct(distinct); }
+                    [ "ON" "(" distinctOn=SelectItemsList()  { plainSelect.getDistinct().setOnSelectItems(distinctOn); } ")" ]
+            )
+    ]
 
-    
+    [top = Top() { plainSelect.setTop(top); } ]
+
+
     selectItems=SelectItemsList()
-    
-    
+
      // TODO
     [IntoClause()]
     [ <K_FROM>
@@ -614,137 +531,129 @@ PlainSelect PlainSelect():
     [ teradataHierarchicalQueryClause=TeradataHierarchicalQueryClause() { plainSelect.setTeradataHierarchical(teradataHierarchicalQueryClause); } ]
     [ groupByColumnReferences=GroupByColumnReferences() { plainSelect.setGroupByColumnReferences(groupByColumnReferences); }]
     [ having=Having() { plainSelect.setHaving(having); }]
-	[LOOKAHEAD(<K_ORDER> <K_SIBLINGS> <K_BY>) orderByElements = OrderByElements() { plainSelect.setTeradataSiblings(true); plainSelect.setOrderByElements(orderByElements);  }   ]
+    [LOOKAHEAD(<K_ORDER> <K_SIBLINGS> <K_BY>) orderByElements = OrderByElements() { plainSelect.setTeradataSiblings(true); plainSelect.setOrderByElements(orderByElements);   }   ]
     [LOOKAHEAD(<K_ORDER> <K_BY>) orderByElements = OrderByElements() { plainSelect.setOrderByElements(orderByElements); }   ]
-    [LOOKAHEAD(2) limit = Limit() { plainSelect.setLimit(limit);	} ]
-	
-	{ 
-		plainSelect.setSelectItems(selectItems);
-		plainSelect.setFromItem(fromItem);
-		if (joins != null && joins.size() > 0)
-			plainSelect.setJoins(joins);
-		return plainSelect; 
-	}
+    [LOOKAHEAD(2) limit = Limit() { plainSelect.setLimit(limit);    } ]
+
+    {
+        plainSelect.setSelectItems(selectItems);
+        plainSelect.setFromItem(fromItem);
+        if (joins != null && joins.size() > 0)
+            plainSelect.setJoins(joins);
+        return plainSelect;
+    }
 }
 
 SetOperationList SetOperationList():
 {
-	SetOperationList list = new SetOperationList();
-	List<OrderByElement> orderByElements = null;
-	Limit limit = null;
-	PlainSelect select = null;
-	List<PlainSelect> selects = new ArrayList<PlainSelect>();
-	List<SetOperation> operations = new ArrayList<SetOperation>();
+    SetOperationList list = new SetOperationList();
+    List<OrderByElement> orderByElements = null;
+    Limit limit = null;
+    PlainSelect select = null;
+    List<PlainSelect> selects = new ArrayList<PlainSelect>();
+    List<SetOperation> operations = new ArrayList<SetOperation>();
 }
 {
-	(
-	
-		(
-			(("(" select=PlainSelect() ")") | (select=PlainSelect() )) {selects.add(select);}
-			(
-				((<K_UNION> { UnionOp union = new UnionOp();operations.add(union); } [ <K_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
-				| <K_INTERSECT> { operations.add(new IntersectOp()); }
-				| <K_MINUS> { operations.add(new MinusOp()); }
-				| <K_EXCEPT> { operations.add(new ExceptOp()); }
-				)
+    (
 
-				(("(" select=PlainSelect() ")") | (select=PlainSelect() )) {selects.add(select);} 
-			)+
-		)
+        (
+            (("(" select=PlainSelect() ")") | (select=PlainSelect() )) {selects.add(select);}
+            (
+                ((<K_UNION> { UnionOp union = new UnionOp();operations.add(union); } [ <K_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
+                | <K_INTERSECT> { operations.add(new IntersectOp()); }
+                | <K_MINUS> { operations.add(new MinusOp()); }
+                | <K_EXCEPT> { operations.add(new ExceptOp()); }
+                )
 
-		[orderByElements=OrderByElements() {list.setOrderByElements(orderByElements);} ]
-		[limit=Limit() {list.setLimit(limit);} ]
-	)
+                (("(" select=PlainSelect() ")") | (select=PlainSelect() )) {selects.add(select);}
+            )+
+        )
 
-	{ 
-		list.setOpsAndSelects(selects,operations);
-		return list; 
-	}
+        [orderByElements=OrderByElements() {list.setOrderByElements(orderByElements);} ]
+        [limit=Limit() {list.setLimit(limit);} ]
+    )
+
+    {
+        list.setOpsAndSelects(selects,operations);
+        return list;
+    }
 }
-
 
 List<WithItem> WithList():
 {
-	List<WithItem> withItemsList = new ArrayList<WithItem>();
-	WithItem with = null;
+    List<WithItem> withItemsList = new ArrayList<WithItem>();
+    WithItem with = null;
 }
 {
-	<K_WITH> with=WithItem() { withItemsList.add(with); } ("," with=WithItem() { withItemsList.add(with); } )*
- 
- 	{ return withItemsList; }
+    <K_WITH> with=WithItem() { withItemsList.add(with); } ("," with=WithItem() { withItemsList.add(with); } )*
+
+    { return withItemsList; }
 }
 
 WithItem WithItem():
 {
-	WithItem with = new WithItem();
-	String name = null;
-	List<ISelectItem> selectItems = null;
-	ISelectBody selectBody = null;
+    WithItem with = new WithItem();
+    String name = null;
+    List<ISelectItem> selectItems = null;
+    ISelectBody selectBody = null;
 }
 {
-	 name=RelObjectName() { with.setName(name); }
-	 [ "(" selectItems=SelectItemsList() ")" { with.setWithItemList(selectItems); } ]
-	 <K_AS> 
-	 "(" selectBody = SelectBody() { with.setSelectBody(selectBody); } ")"
-	 { return with; }
+     name=RelObjectName() { with.setName(name); }
+     [ "(" selectItems=SelectItemsList() ")" { with.setWithItemList(selectItems); } ]
+     <K_AS>
+     "(" selectBody = SelectBody() { with.setSelectBody(selectBody); } ")"
+     { return with; }
 }
 
 List<ISelectItem> SelectItemsList():
-{ 
-	List<ISelectItem> selectItemsList = new ArrayList<ISelectItem>();
-	ISelectItem selectItem = null; 
+{
+    List<ISelectItem> selectItemsList = new ArrayList<ISelectItem>();
+    ISelectItem selectItem = null;
 }
-{ 
+{
     selectItem=SelectItem() { selectItemsList.add(selectItem); } ("," selectItem=SelectItem() { selectItemsList.add(selectItem); } )*
-    
+
     { return selectItemsList; }
 }
 
 SelectExpressionItem SelectExpressionItem():
 {
-	SelectExpressionItem selectExpressionItem = null;
+    SelectExpressionItem selectExpressionItem = null;
     IExpression expression = null;
-	Alias alias = null;
+    Alias alias = null;
 }
 {
-	 expression=SimpleExpression() { selectExpressionItem = new SelectExpressionItem(); selectExpressionItem.setExpression(expression); }
-			 [alias=Alias() { selectExpressionItem.setAlias(alias); }] { return selectExpressionItem; }
+     expression=SimpleExpression() { selectExpressionItem = new SelectExpressionItem(); selectExpressionItem.setExpression(expression); }
+             [alias=Alias() { selectExpressionItem.setAlias(alias); }] { return selectExpressionItem; }
 }
 
 ISelectItem SelectItem():
 {
-	Function function = null;
-	AllColumns allTableColumns = null;
-	Column tableColumn = null;
-	ISelectItem selectItem = null;
-	SelectExpressionItem selectExpressionItem = null;
-	SubSelect subSelect = null;
+    ISelectItem selectItem = null;
+    SelectExpressionItem selectExpressionItem = null;
 }
-{
-	
-
-    ("*" { selectItem = new AllColumns(); }
+{   ("*" { selectItem = new AllColumns(); }
     |
-	LOOKAHEAD(AllTableColumns()) selectItem=AllTableColumns()
-	|
-	 selectExpressionItem=SelectExpressionItem() {selectItem = selectExpressionItem; }
-	)
-	{
-		return selectItem;
-	}
-	
+    LOOKAHEAD(AllTableColumns()) selectItem=AllTableColumns()
+    |
+     selectExpressionItem=SelectExpressionItem() {selectItem = selectExpressionItem; }
+    )
+    {
+        return selectItem;
+    }
+
 }
 
 AllTableColumns AllTableColumns():
 {
-	Table table = null;
+    Table table = null;
 }
-{  
+{
      table=Table() "." "*"
-	{ 
-		return new AllTableColumns(table); 
-	}
-	
+    {
+        return new AllTableColumns(table);
+    }
+
 }
 
 Alias Alias():
@@ -755,7 +664,6 @@ Alias Alias():
    { return new Alias(name,useAs); }
 }
 
-
 FunctionItem FunctionItem():
 {
     Alias alias = null;
@@ -764,10 +672,9 @@ FunctionItem FunctionItem():
 }
 {
     function=Function() { functionItem = new FunctionItem(); functionItem.setFunction(function); }
-			 [alias=Alias() { functionItem.setAlias(alias); }]
+             [alias=Alias() { functionItem.setAlias(alias); }]
     { return functionItem; }
 }
-
 
 List<Column> PivotForColumns():
 {
@@ -776,11 +683,11 @@ List<Column> PivotForColumns():
 }
 {
     (
-		("(" column = Column() { columns.add(column); }
+        ("(" column = Column() { columns.add(column); }
          ("," column = Column() { columns.add(column); } )*
-		 ")") 
-	| column = Column() { columns.add(column); }
-	)
+         ")")
+    | column = Column() { columns.add(column); }
+    )
     { return columns; }
 }
 
@@ -806,21 +713,19 @@ List<SelectExpressionItem> PivotSingleInItems():
    { return retval; }
 }
 
-
 ExpressionListItem ExpressionListItem():
 {
-	ExpressionListItem expressionListItem = null;
-	ExpressionList expressionList = null;
-	Alias alias = null;
+    ExpressionListItem expressionListItem = null;
+    ExpressionList expressionList = null;
+    Alias alias = null;
 }
 {
     "("
     expressionList=SimpleExpressionList() { expressionListItem = new ExpressionListItem(); expressionListItem.setExpressionList(expressionList); }
     ")"
-	[alias=Alias() { expressionListItem.setAlias(alias); }]
+    [alias=Alias() { expressionListItem.setAlias(alias); }]
     { return expressionListItem; }
 }
-
 
 List<ExpressionListItem> PivotMultiInItems():
 {
@@ -842,13 +747,13 @@ Pivot Pivot():
     List<ExpressionListItem> multiInItems = null;
 }
 {
-	<K_PIVOT> "(" functionItems = PivotFunctionItems() <K_FOR>
-	forColumns = PivotForColumns()
-	<K_IN> "("
-	(LOOKAHEAD(3) singleInItems = PivotSingleInItems() 
-	| multiInItems = PivotMultiInItems() )
-	")"
-	")"
+    <K_PIVOT> "(" functionItems = PivotFunctionItems() <K_FOR>
+    forColumns = PivotForColumns()
+    <K_IN> "("
+    (LOOKAHEAD(3) singleInItems = PivotSingleInItems()
+    | multiInItems = PivotMultiInItems() )
+    ")"
+    ")"
     {
         retval.setFunctionItems(functionItems);
         retval.setForColumns(forColumns);
@@ -868,17 +773,17 @@ PivotXml PivotXml():
     ISelectBody inSelect = null;
 }
 {
-	<K_PIVOT> <K_XML> "(" functionItems = PivotFunctionItems() <K_FOR>
-	forColumns = PivotForColumns()
-	<K_IN> "("
-	(
-	    <K_ANY> { retval.setInAny(true); } |
-	    LOOKAHEAD(1) inSelect = SelectBody() |
-	    LOOKAHEAD(2) singleInItems = PivotSingleInItems() |
-	    multiInItems = PivotMultiInItems()
+    <K_PIVOT> <K_XML> "(" functionItems = PivotFunctionItems() <K_FOR>
+    forColumns = PivotForColumns()
+    <K_IN> "("
+    (
+        <K_ANY> { retval.setInAny(true); } |
+        LOOKAHEAD(1) inSelect = SelectBody() |
+        LOOKAHEAD(2) singleInItems = PivotSingleInItems() |
+        multiInItems = PivotMultiInItems()
     )
-	")"
-	")"
+    ")"
+    ")"
     {
         retval.setFunctionItems(functionItems);
         retval.setForColumns(forColumns);
@@ -897,172 +802,171 @@ void IntoClause():
 
 IFromItem FromItem():
 {
-	IFromItem fromItem = null;
-	Pivot pivot = null;
-	Alias alias = null;
+    IFromItem fromItem = null;
+    Pivot pivot = null;
+    Alias alias = null;
 }
 {
-	(
-		LOOKAHEAD(ValuesList()) fromItem=ValuesList()
-		|
-		(
-			(
-				(	
-					"(" 	
-						(
-						LOOKAHEAD(SubJoin())
-						fromItem=SubJoin()  
-						|  
-						fromItem=SubSelect()
-						)
-					")"
-				)
-				|
-				fromItem=Table()
-				|
-				fromItem=LateralSubSelect()
-			)
-			[(LOOKAHEAD(2) pivot=PivotXml()|pivot=Pivot()) { fromItem.setPivot(pivot); } ]
-			[alias=Alias() { fromItem.setAlias(alias); } ]
-		)
-	)
-	{
-		return fromItem;
-	}
+    (
+        LOOKAHEAD(ValuesList()) fromItem=ValuesList()
+        |
+        (
+            (
+                (
+                    "("
+                        (
+                        LOOKAHEAD(SubJoin())
+                        fromItem=SubJoin()
+                        |
+                        fromItem=SubSelect()
+                        )
+                    ")"
+                )
+                |
+                fromItem=Table()
+                |
+                fromItem=LateralSubSelect()
+            )
+            [(LOOKAHEAD(2) pivot=PivotXml()|pivot=Pivot()) { fromItem.setPivot(pivot); } ]
+            [alias=Alias() { fromItem.setAlias(alias); } ]
+        )
+    )
+    {
+        return fromItem;
+    }
 }
 
-IFromItem ValuesList(): 
+IFromItem ValuesList():
 {
-	MultiExpressionList exprList = new MultiExpressionList();
-	List<IExpression> primaryExpList = new ArrayList<IExpression>();
-	ValuesList valuesList = new ValuesList();
+    MultiExpressionList exprList = new MultiExpressionList();
+    List<IExpression> primaryExpList = new ArrayList<IExpression>();
+    ValuesList valuesList = new ValuesList();
     IExpression exp = null;
-	List<String> colNames = null;
-	String colName;
-	Alias alias;
+    List<String> colNames = null;
+    String colName;
+    Alias alias;
 }
 {
-	"("
-	<K_VALUES>
-	(LOOKAHEAD(3) ("(" exp=SimpleExpression() { primaryExpList.add(exp); } 
-			("," exp=SimpleExpression()  { primaryExpList.add(exp); } )* ")" { exprList.addExpressionList(primaryExpList); }
+    "("
+    <K_VALUES>
+    (LOOKAHEAD(3) ("(" exp=SimpleExpression() { primaryExpList.add(exp); }
+            ("," exp=SimpleExpression()  { primaryExpList.add(exp); } )* ")" { exprList.addExpressionList(primaryExpList); }
 
-			("," "(" exp=SimpleExpression() { 
-					primaryExpList = new ArrayList<IExpression>(); 
-					primaryExpList.add(exp); } 
-				("," exp=SimpleExpression() { primaryExpList.add(exp); } )* ")" { exprList.addExpressionList(primaryExpList); } )*)
-	|
-	( exp=SimpleExpression() { exprList.addExpressionList(exp); valuesList.setNoBrackets(true); } 
-		("," exp=SimpleExpression()  { exprList.addExpressionList(exp);} )*
-	))
-	")"
+            ("," "(" exp=SimpleExpression() {
+                    primaryExpList = new ArrayList<IExpression>();
+                    primaryExpList.add(exp); }
+                ("," exp=SimpleExpression() { primaryExpList.add(exp); } )* ")" { exprList.addExpressionList(primaryExpList); } )*)
+    |
+    ( exp=SimpleExpression() { exprList.addExpressionList(exp); valuesList.setNoBrackets(true); }
+        ("," exp=SimpleExpression()  { exprList.addExpressionList(exp);} )*
+    ))
+    ")"
 
-	[alias=Alias() { valuesList.setAlias(alias); } 
+    [alias=Alias() { valuesList.setAlias(alias); }
 
-		[ "("
-			colName = RelObjectName() { colNames = new ArrayList<String>(); colNames.add(colName); }
-			( "," colName = RelObjectName() { colNames.add(colName); } )*
-			")" { valuesList.setColumnNames(colNames); } ]
+        [ "("
+            colName = RelObjectName() { colNames = new ArrayList<String>(); colNames.add(colName); }
+            ( "," colName = RelObjectName() { colNames.add(colName); } )*
+            ")" { valuesList.setColumnNames(colNames); } ]
 
-	]
+    ]
 
-	{
-		valuesList.setMultiExpressionList(exprList);
-		return valuesList;
-	}
+    {
+        valuesList.setMultiExpressionList(exprList);
+        return valuesList;
+    }
 }
 
 LateralSubSelect LateralSubSelect():
 {
-	LateralSubSelect lateralSubSelect = new LateralSubSelect();
-	SubSelect subSelect = null;
+    LateralSubSelect lateralSubSelect = new LateralSubSelect();
+    SubSelect subSelect = null;
 }
 {
-	<K_LATERAL>
-	 "(" subSelect=SubSelect() ")"
-	{
-		lateralSubSelect.setSubSelect(subSelect);
-		return lateralSubSelect;
-	}
+    <K_LATERAL>
+     "(" subSelect=SubSelect() ")"
+    {
+        lateralSubSelect.setSubSelect(subSelect);
+        return lateralSubSelect;
+    }
 }
 
 IFromItem SubJoin():
 {
-	IFromItem fromItem = null;
-	Join join = null;
-	SubJoin subJoin = new SubJoin();
+    IFromItem fromItem = null;
+    Join join = null;
+    SubJoin subJoin = new SubJoin();
 }
 {
-	fromItem=FromItem() { subJoin.setLeft(fromItem); } 
-	join=JoinerExpression() { subJoin.setJoin(join); }
-	
-	{
-		return subJoin;
-	}
+    fromItem=FromItem() { subJoin.setLeft(fromItem); }
+    join=JoinerExpression() { subJoin.setJoin(join); }
+
+    {
+        return subJoin;
+    }
 }
 
 List JoinsList():
 {
-	List<Join> joinsList = new ArrayList<Join>();
-	Join join = null; 
+    List<Join> joinsList = new ArrayList<Join>();
+    Join join = null;
 }
 {
 
     (join=JoinerExpression() { joinsList.add(join); })*
-    
+
     { return joinsList; }
 }
 
 Join JoinerExpression():
-{ 
-	Join join = new Join(); 
-	IFromItem right = null;
-	IExpression onExpression = null;
-	Column tableColumn;
-	List<Column> columns = null;
+{
+    Join join = new Join();
+    IFromItem right = null;
+    IExpression onExpression = null;
+    Column tableColumn;
+    List<Column> columns = null;
 }
 {
-	/*
-		Refactor to be more restrictive.
-			left [outer] join
-			right [outer] join
-			full [outer] join
-			[inner] join
-			cross join
-			natural join
+    /*
+        Refactor to be more restrictive.
+            left [outer] join
+            right [outer] join
+            full [outer] join
+            [inner] join
+            cross join
+            natural join
      */
-	  [ (
-	  	<K_LEFT> { join.setLeft(true); }
-  		| <K_RIGHT> { join.setRight(true); } 
-  		| <K_FULL> { join.setFull(true); } 
-  		| <K_NATURAL> { join.setNatural(true); } 
-		| <K_CROSS> { join.setCross(true); } 
-  		)
-  	   ]
-  		
-  	   [
-  	    (
-  		<K_OUTER> { join.setOuter(true); }
-  		| <K_INNER> { join.setInner(true); }
-  		)
-  	   ]
-  	  
-  	    ( <K_JOIN> | "," { join.setSimple(true); } ) right=FromItem()  
-	[
-		( <K_ON> onExpression=Expression()  { join.setOnExpression(onExpression); } )
-		|
-		( <K_USING> "(" tableColumn=Column() { columns = new ArrayList(); columns.add(tableColumn); } 
-				("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  
-		  { join.setUsingColumns(columns); }   )
-  	]			
+      [ (
+        <K_LEFT> { join.setLeft(true); }
+        | <K_RIGHT> { join.setRight(true); }
+        | <K_FULL> { join.setFull(true); }
+        | <K_NATURAL> { join.setNatural(true); }
+        | <K_CROSS> { join.setCross(true); }
+        )
+       ]
+
+       [
+        (
+        <K_OUTER> { join.setOuter(true); }
+        | <K_INNER> { join.setInner(true); }
+        )
+       ]
+
+        ( <K_JOIN> | "," { join.setSimple(true); } ) right=FromItem()
+    [
+        ( <K_ON> onExpression=Expression()  { join.setOnExpression(onExpression); } )
+        |
+        ( <K_USING> "(" tableColumn=Column() { columns = new ArrayList(); columns.add(tableColumn); }
+                ("," tableColumn=Column() { columns.add(tableColumn); } )* ")"
+          { join.setUsingColumns(columns); }   )
+    ]
   {
-  	join.setRightItem(right); 
-  } 
-  
-  
+    join.setRightItem(right);
+  }
+
+
   { return join; }
 }
-
 
 IExpression WhereClause():
 {
@@ -1073,15 +977,15 @@ IExpression WhereClause():
     { return retval; }
 }
 
-TeradataHierarchicalExpression TeradataHierarchicalQueryClause(): 
+TeradataHierarchicalExpression TeradataHierarchicalQueryClause():
 {
     TeradataHierarchicalExpression result = new TeradataHierarchicalExpression();
     IExpression expr;
 }
 {
     [ <K_START> <K_WITH>  expr=AndExpression() {result.setStartExpression(expr);} ]
-    <K_CONNECT> <K_BY> [ <K_NOCYCLE> { result.setNoCycle(true); } ]  
-    { allowTeradataPrior=true; } expr=AndExpression() 
+    <K_CONNECT> <K_BY> [ <K_NOCYCLE> { result.setNoCycle(true); } ]
+    { allowTeradataPrior=true; } expr=AndExpression()
     { result.setConnectExpression(expr);allowTeradataPrior=false; }
 
     { return result; }
@@ -1089,15 +993,15 @@ TeradataHierarchicalExpression TeradataHierarchicalQueryClause():
 
 List<IExpression> GroupByColumnReferences():
 {
-	IExpression columnReference = null;
-	List<IExpression> columnReferences = new ArrayList<IExpression>();
+    IExpression columnReference = null;
+    List<IExpression> columnReferences = new ArrayList<IExpression>();
 }
 {
     <K_GROUP> <K_BY> columnReference=SimpleExpression() {columnReferences.add(columnReference); }
     ("," columnReference=SimpleExpression()  {columnReferences.add(columnReference); } )*
-	{
-		return columnReferences;
-	}
+    {
+        return columnReferences;
+    }
 }
 
 IExpression Having():
@@ -1106,175 +1010,181 @@ IExpression Having():
 }
 {
     <K_HAVING> having=Expression()
-	{
-		return having;
-	}
+    {
+        return having;
+    }
 }
 
 List<OrderByElement> OrderByElements():
-{ 
-	List<OrderByElement> orderByList = new ArrayList<OrderByElement>();
-	OrderByElement orderByElement = null;
+{
+    List<OrderByElement> orderByList = new ArrayList<OrderByElement>();
+    OrderByElement orderByElement = null;
 }
 {
     <K_ORDER> [ <K_SIBLINGS> ] <K_BY> orderByElement=OrderByElement() { orderByList.add(orderByElement); }
         ("," orderByElement=OrderByElement() { orderByList.add(orderByElement); } )*
     {
-    	return orderByList; 	
+        return orderByList;
     }
 }
 
 OrderByElement OrderByElement():
 {
-	OrderByElement orderByElement = new OrderByElement(); 
+    OrderByElement orderByElement = new OrderByElement();
     IExpression columnReference = null;
 }
 {
-	columnReference = SimpleExpression()
+    columnReference = SimpleExpression()
     [<K_ASC> | (<K_DESC> { orderByElement.setAsc(false); } )  ]
-	{
-    	orderByElement.setExpression(columnReference);
-		return orderByElement;
-	}
+    [<K_NULLS> ( 
+        <K_FIRST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_FIRST);  }  | 
+        <K_LAST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_LAST);  }  
+        )?
+    ]
+    {
+        orderByElement.setExpression(columnReference);
+        return orderByElement;
+    }
 }
 
 Limit Limit():
 {
-	Limit limit = new Limit(); 
-	Token token = null;
+    Limit limit = new Limit();
+    Token token = null;
 }
 {
-	(
-			LOOKAHEAD(3)
-				// mysql-> LIMIT offset,row_count
-				<K_LIMIT> 
-					 (
-					 	token=<S_INTEGER> { limit.setOffset(Long.parseLong(token.image)); } 
-					 	|
-					 	"?" { limit.setOffsetJdbcParameter(true);} 
+    (
+            LOOKAHEAD(3)
+                // teradata -> LIMIT offset,row_count
+                <K_LIMIT>
+                     (
+                        token=<S_LONG> { limit.setOffset(Long.parseLong(token.image)); }
+                        |
+                        "?" { limit.setOffsetJdbcParameter(true);}
 
-					 ) 
-					 ","  
-				
-				(
-				token=<S_INTEGER> { limit.setRowCount(Long.parseLong(token.image)); } | "?" { limit.setRowCountJdbcParameter(true);}
-				)
-			| 
-			// postgresql-> OFFSET offset
-			 <K_OFFSET>
-				 (token=<S_INTEGER> { limit.setOffset(Long.parseLong(token.image)); } | "?" { limit.setOffsetJdbcParameter(true);} )  
-			|
-				// mysql-postgresql-> LIMIT (row_count | ALL) [OFFSET offset]
-				<K_LIMIT> 
-				 (
-				 	token=<S_INTEGER> { limit.setRowCount(Long.parseLong(token.image)); } 
-				 	|
-				 	"?" { limit.setRowCountJdbcParameter(true);}  
-				 	|
-				 	<K_ALL> { limit.setLimitAll(true);}  
-				 )
-				 
-				 [LOOKAHEAD(2) <K_OFFSET>
-					 (token=<S_INTEGER> { limit.setOffset(Long.parseLong(token.image)); } | "?" { limit.setOffsetJdbcParameter(true);} )  ]
+                     )
+                     ","
 
-		)
-	{
-		return limit;
-	}
+                (
+                token=<S_LONG> { limit.setRowCount(Long.parseLong(token.image)); } | "?" { limit.setRowCountJdbcParameter(true);}
+                )
+            |
+            // teradata-> OFFSET offset
+             <K_OFFSET>
+                 (token=<S_LONG> { limit.setOffset(Long.parseLong(token.image)); } | "?" { limit.setOffsetJdbcParameter(true);} )
+            |
+                // teradata-> LIMIT (row_count | ALL) [OFFSET offset]
+                <K_LIMIT>
+                 (
+                    token=<S_LONG> { limit.setRowCount(Long.parseLong(token.image)); }
+                    |
+                    "?" { limit.setRowCountJdbcParameter(true);}
+                    |
+                    <K_ALL> { limit.setLimitAll(true);}
+                 )
+
+                 [LOOKAHEAD(2) <K_OFFSET>
+                     (token=<S_LONG> { limit.setOffset(Long.parseLong(token.image)); } | "?" { limit.setOffsetJdbcParameter(true);} )  ]
+
+        )
+    {
+        return limit;
+    }
 }
 
 Top Top():
 {
-	Top top = new Top(); 
-	Token token = null;
+    Top top = new Top();
+    Token token = null;
 }
 {
-	<K_TOP>
-	 (
-	 	token=<S_INTEGER> { top.setRowCount(Long.parseLong(token.image)); } 
-	 	|
-	 	"?" { top.setRowCountJdbcParameter(true);} 
-	 ) 
-	{
-		return top;
-	}
+    <K_TOP>
+    (
+        token=<S_LONG>                      { top.setRowCount(Long.parseLong(token.image)); }
+       |
+        "?"                                 { top.setRowCountJdbcParameter(true);}
+       |
+       "("
+            ( token=<S_LONG>                { top.setRowCount(Long.parseLong(token.image)); }
+              | "?"                         { top.setRowCountJdbcParameter(true);} )
+            { top.setParenthesis(true);}
+       ")"
+    ) [ <K_PERCENT>                         { top.setPercentage(true); } ] 
+    {
+        return top;
+    }
 }
 
-	
-
 IExpression Expression():
-{ 
+{
     IExpression retval = null;
 }
 {
-	(
-	LOOKAHEAD(OrExpression())
-		retval=OrExpression() 
-		|
-		"(" retval=Expression() ")" {retval = new Parenthesis(retval); }
-		
-	)
-	
+    (
+    LOOKAHEAD(OrExpression())
+        retval=OrExpression()
+        |
+        "(" retval=Expression() ")" {retval = new Parenthesis(retval); }
+
+    )
+
     { return retval; }
 }
 
-IExpression OrExpression()  :
+IExpression OrExpression():
 {
     IExpression left, right, result;
 }
 {
-	left=AndExpression() { result = left; }
-	(
-		LOOKAHEAD(<K_OR>) 
-			<K_OR>
-			right=AndExpression()
-			{
-				result = new OrExpression(left, right);
-				left = result;
-	   		}
-	 )*
-	 {
-	 	return result;
-	 }
-	   
+    left=AndExpression() { result = left; }
+    (
+        LOOKAHEAD(<K_OR>)
+            <K_OR>
+            right=AndExpression()
+            {
+                result = new OrExpression(left, right);
+                left = result;
+            }
+     )*
+     {
+        return result;
+     }
+
 }
-
-
 
 IExpression AndExpression() :
 {
     IExpression left, right, result;
-	boolean not = false;
+    boolean not = false;
 }
 {
+    (
+    LOOKAHEAD(Condition())
+        left=Condition()
+        |
+        [ <K_NOT> { not = true; } ]
+        "(" left=OrExpression() ")" {left = new Parenthesis(left); if (not) { ((Parenthesis)left).setNot(); not = false; } }
+    )
+    { result = left; }
 
-	(
-	LOOKAHEAD(Condition())
-	    left=Condition()
-	    |
-	    [ <K_NOT> { not = true; } ]
-	    "(" left=OrExpression() ")" {left = new Parenthesis(left); if (not) { ((Parenthesis)left).setNot(); not = false; } }
-	)
-	{ result = left; }
-	
-	(
-		LOOKAHEAD(<K_AND>)
- 		<K_AND>
-		(
-		LOOKAHEAD(Condition())
-		    right=Condition()
-		    |
-		    [ <K_NOT> { not = true; } ]
-		    "(" right=OrExpression() ")" {right = new Parenthesis(right); if (not) { ((Parenthesis)right).setNot(); not = false; } }
-		)
-		{
-			result = new AndExpression(left, right);
-			left = result;
-		}
-	)*
-	{
-		return result;
-	}
+    (
+        LOOKAHEAD(<K_AND>)
+        <K_AND>
+        (
+        LOOKAHEAD(Condition())
+            right=Condition()
+            |
+            [ <K_NOT> { not = true; } ]
+            "(" right=OrExpression() ")" {right = new Parenthesis(right); if (not) { ((Parenthesis)right).setNot(); not = false; } }
+        )
+        {
+            result = new AndExpression(left, right);
+            left = result;
+        }
+    )*
+    {
+        return result;
+    }
 }
 
 IExpression Condition():
@@ -1282,12 +1192,12 @@ IExpression Condition():
     IExpression result;
 }
 {
-	(LOOKAHEAD(SQLCondition()) result=SQLCondition()
-	| LOOKAHEAD(RegularCondition()) result=RegularCondition()
-	| result=Function()
-	)
-	
-	{ return result; }
+    (LOOKAHEAD(SQLCondition()) result=SQLCondition()
+    | LOOKAHEAD(RegularCondition()) result=RegularCondition()
+    | result=Function()
+    )
+
+    { return result; }
 }
 
 IExpression RegularCondition():
@@ -1295,196 +1205,192 @@ IExpression RegularCondition():
     IExpression result = null;
     IExpression leftExpression;
     IExpression rightExpression;
-	boolean not = false;
-	int teradataJoin=EqualsTo.NO_TERADATA_JOIN;
-	int teradataPrior=EqualsTo.NO_TERADATA_PRIOR;
+    boolean not = false;
+    int teradataJoin=EqualsTo.NO_TERADATA_JOIN;
+    int teradataPrior=EqualsTo.NO_TERADATA_PRIOR;
 }
 {
-
     [ <K_PRIOR> { teradataPrior = EqualsTo.TERADATA_PRIOR_START; }]
-	[ <K_NOT> { not = true; } ] 
-	leftExpression=ComparisonItem() { result = leftExpression; }
+    [ <K_NOT> { not = true; } ]
+    leftExpression=ComparisonItem() { result = leftExpression; }
 
-	[ "(+)" { teradataJoin=EqualsTo.TERADATA_JOIN_RIGHT; } ]
+    [ "(+)" { teradataJoin=EqualsTo.TERADATA_JOIN_RIGHT; } ]
 
-	(
-	">" { result = new GreaterThan(); }
-	| "<" { result = new MinorThan(); }
-	| "=" { result = new EqualsTo(); }
-	| ">=" { result = new GreaterThanEquals(); }
-	| "<=" { result = new MinorThanEquals(); }
-	| ("<>" | "!=") { result = new NotEqualsTo(); }
-	| "@@" { result = new Matches(); }
-	| "~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASESENSITIVE); }
+    (
+    ">" { result = new GreaterThan(); }
+    | "<" { result = new MinorThan(); }
+    | "=" { result = new EqualsTo(); }
+    | ">=" { result = new GreaterThanEquals(); }
+    | "<=" { result = new MinorThanEquals(); }
+    | ("<>" | "!=") { result = new NotEqualsTo(); }
+    | "@@" { result = new Matches(); }
+    | "~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASESENSITIVE); }
     | "~*" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASEINSENSITIVE); }
     | "!~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.NOT_MATCH_CASESENSITIVE); }
     | "!~*" { result = new RegExpMatchOperator(RegExpMatchOperatorType.NOT_MATCH_CASEINSENSITIVE); }
-	)
-	rightExpression=ComparisonItem()
+    )
+    rightExpression=ComparisonItem()
 
     [ <K_PRIOR> { teradataPrior = EqualsTo.TERADATA_PRIOR_END; } ]
-	[ "(+)" { teradataJoin=EqualsTo.TERADATA_JOIN_LEFT; } ]
+    [ "(+)" { teradataJoin=EqualsTo.TERADATA_JOIN_LEFT; } ]
 
-	{
-		BinaryExpression regCond = (BinaryExpression) result;
-		regCond.setLeftExpression(leftExpression);
-		regCond.setRightExpression(rightExpression);
-		if (not)
-			regCond.setNot();
+    {
+        BinaryExpression regCond = (BinaryExpression) result;
+        regCond.setLeftExpression(leftExpression);
+        regCond.setRightExpression(rightExpression);
+        if (not)
+            regCond.setNot();
 
-		if (teradataJoin>0)
-			((ISupportsOldTeradataJoinSyntax)result).setOldTeradataJoinSyntax(teradataJoin);
+        if (teradataJoin>0)
+            ((ISupportsOldTeradataJoinSyntax)result).setOldTeradataJoinSyntax(teradataJoin);
 
-        if (teradataPrior!=EqualsTo.NO_TERADATA_PRIOR) 
+        if (teradataPrior!=EqualsTo.NO_TERADATA_PRIOR)
             ((ISupportsOldTeradataJoinSyntax)result).setTeradataPriorPosition(teradataPrior);
-	}		
-	
-	{ return result; }
-}
+    }
 
+    { return result; }
+}
 
 IExpression SQLCondition():
 {
     IExpression result;
 }
 {
-	(
-	LOOKAHEAD(InExpression()) result=InExpression()
-	| LOOKAHEAD(Between()) result=Between()
-	| LOOKAHEAD(IsNullExpression()) result=IsNullExpression()
-	| LOOKAHEAD(ExistsExpression()) result=ExistsExpression()
-	|  result=LikeExpression()
-	)
-	{ return result; }
+    (
+    LOOKAHEAD(InExpression()) result=InExpression()
+    | LOOKAHEAD(Between()) result=Between()
+    | LOOKAHEAD(IsNullExpression()) result=IsNullExpression()
+    | LOOKAHEAD(ExistsExpression()) result=ExistsExpression()
+    |  result=LikeExpression()
+    )
+    { return result; }
 }
 
 IExpression InExpression() :
 {
-	InExpression result = new InExpression();
-	IItemsList leftItemsList = null;
-	IItemsList rightItemsList = null;
+    InExpression result = new InExpression();
+    IItemsList leftItemsList = null;
+    IItemsList rightItemsList = null;
     IExpression leftExpression = null;
 }
 {
-	( LOOKAHEAD(1) "(" (
-			LOOKAHEAD(SimpleExpressionList()) leftItemsList = SimpleExpressionList() { result.setLeftItemsList(leftItemsList); } 
-			|
-			leftExpression=SimpleExpression()
-	        [ "(+)" { result.setOldTeradataJoinSyntax(EqualsTo.TERADATA_JOIN_RIGHT); } ]
-		  )
-	  ")"
-	|
-		leftExpression=SimpleExpression() { result.setLeftExpression(leftExpression); }
+    ( LOOKAHEAD(1) "(" (
+            LOOKAHEAD(SimpleExpressionList()) leftItemsList = SimpleExpressionList() { result.setLeftItemsList(leftItemsList); }
+            |
+            leftExpression=SimpleExpression()
+            [ "(+)" { result.setOldTeradataJoinSyntax(EqualsTo.TERADATA_JOIN_RIGHT); } ]
+          )
+      ")"
+    |
+        leftExpression=SimpleExpression() { result.setLeftExpression(leftExpression); }
         [ "(+)" { result.setOldTeradataJoinSyntax(EqualsTo.TERADATA_JOIN_RIGHT); } ]
-	)
+    )
     [<K_NOT> { result.setNot(true); } ] <K_IN> "(" (LOOKAHEAD(SubSelect()) rightItemsList=SubSelect() | rightItemsList=SimpleExpressionList() ) ")"
-	{ 
-		result.setRightItemsList(rightItemsList);
-		return result; 
-	}
+    {
+        result.setRightItemsList(rightItemsList);
+        return result;
+    }
 }
 
 IExpression Between() :
 {
-	Between result = new Between();
+    Between result = new Between();
     IExpression leftExpression = null;
     IExpression betweenExpressionStart = null;
     IExpression betweenExpressionEnd = null;
 }
 {
-	leftExpression=SimpleExpression()
-	    [<K_NOT> { result.setNot(true); }] 
-	    <K_BETWEEN> betweenExpressionStart=SimpleExpression() <K_AND> betweenExpressionEnd=SimpleExpression()
-	
-	{ 
-		result.setLeftExpression(leftExpression);
-		result.setBetweenExpressionStart(betweenExpressionStart);
-		result.setBetweenExpressionEnd(betweenExpressionEnd);
-		return result; 
-	}
+    leftExpression=SimpleExpression()
+        [<K_NOT> { result.setNot(true); }]
+        <K_BETWEEN> betweenExpressionStart=SimpleExpression() <K_AND> betweenExpressionEnd=SimpleExpression()
+
+    {
+        result.setLeftExpression(leftExpression);
+        result.setBetweenExpressionStart(betweenExpressionStart);
+        result.setBetweenExpressionEnd(betweenExpressionEnd);
+        return result;
+    }
 }
 
 IExpression LikeExpression() :
 {
-	LikeExpression result = new LikeExpression();
+    LikeExpression result = new LikeExpression();
     IExpression leftExpression = null;
     IExpression rightExpression = null;
 }
 {
-	leftExpression=SimpleExpression()
+    leftExpression=SimpleExpression()
     [<K_NOT> { result.setNot(true); } ] <K_LIKE> rightExpression=SimpleExpression()
     [<K_ESCAPE> token=<S_CHAR_LITERAL> { result.setEscape((new StringValue(token.image)).getValue()); }]
-	{ 
-		result.setLeftExpression(leftExpression);
-		result.setRightExpression(rightExpression);
-		return result; 
-	}
+    {
+        result.setLeftExpression(leftExpression);
+        result.setRightExpression(rightExpression);
+        return result;
+    }
 }
 
 IExpression IsNullExpression():
 {
-	IsNullExpression result = new IsNullExpression();
+    IsNullExpression result = new IsNullExpression();
     IExpression leftExpression = null;
 }
 {
-	(
-	<K_NOT> { result.setNot(true); } leftExpression=SimpleExpression() <K_IS> <K_NULL>
-	| 
-	leftExpression=SimpleExpression() <K_IS> [<K_NOT> { result.setNot(true); } ] <K_NULL>
-	)
+    (
+    <K_NOT> { result.setNot(true); } leftExpression=SimpleExpression() <K_IS> <K_NULL>
+    |
+    leftExpression=SimpleExpression() <K_IS> [<K_NOT> { result.setNot(true); } ] <K_NULL>
+    )
 
-	{ 
-		result.setLeftExpression(leftExpression);
-		return result; 
-	}
+    {
+        result.setLeftExpression(leftExpression);
+        return result;
+    }
 }
-
 
 IExpression ExistsExpression():
 {
-	ExistsExpression result = new ExistsExpression();
+    ExistsExpression result = new ExistsExpression();
     IExpression rightExpression = null;
 }
 {
     [<K_NOT> { result.setNot(true); } ] <K_EXISTS> rightExpression=SimpleExpression()
-	{ 
-		result.setRightExpression(rightExpression);
-		return result; 
-	}
+    {
+        result.setRightExpression(rightExpression);
+        return result;
+    }
 }
-
 
 ExpressionList SQLExpressionList():
 {
-	ExpressionList retval = new ExpressionList();
-	List<IExpression> expressions = new ArrayList<IExpression>();
+    ExpressionList retval = new ExpressionList();
+    List<IExpression> expressions = new ArrayList<IExpression>();
     IExpression expr = null;
 }
 {
     expr=Expression() { expressions.add(expr); } ("," expr=Expression() { expressions.add(expr); })*
-	{
-		retval.setExpressions(expressions);
-		return retval;
-	}
+    {
+        retval.setExpressions(expressions);
+        return retval;
+    }
 }
 
 ExpressionList SimpleExpressionList():
 {
-	ExpressionList retval = new ExpressionList();
-	List<IExpression> expressions = new ArrayList<IExpression>();
+    ExpressionList retval = new ExpressionList();
+    List<IExpression> expressions = new ArrayList<IExpression>();
     IExpression expr = null;
 }
 {
     expr=SimpleExpression() { expressions.add(expr); } ("," expr=SimpleExpression() { expressions.add(expr); })*
-	{
-		retval.setExpressions(expressions);
-		return retval;
-	}
+    {
+        retval.setExpressions(expressions);
+        return retval;
+    }
 }
 
 IExpression ComparisonItem() :
-{ 
-    IExpression retval = null; 
+{
+    IExpression retval = null;
 }
 {
   (
@@ -1499,9 +1405,9 @@ IExpression ComparisonItem() :
 }
 
 IExpression AllComparisonExpression() :
-{ 
-	AllComparisonExpression retval = null; 
-	SubSelect subselect = null; 
+{
+    AllComparisonExpression retval = null;
+    SubSelect subselect = null;
 }
 {
  <K_ALL> "(" subselect=SubSelect() ")" { retval = new AllComparisonExpression(subselect); }
@@ -1511,9 +1417,9 @@ IExpression AllComparisonExpression() :
 }
 
 IExpression AnyComparisonExpression() :
-{ 
-	AnyComparisonExpression retval = null; 
-	SubSelect subselect = null; 
+{
+    AnyComparisonExpression retval = null;
+    SubSelect subselect = null;
 }
 {
  (<K_ANY> | <K_SOME>) "(" subselect=SubSelect() ")" { retval = new AnyComparisonExpression(subselect); }
@@ -1523,16 +1429,16 @@ IExpression AnyComparisonExpression() :
 }
 
 IExpression SimpleExpression():
-{ 
-	IExpression retval = null; 
+{
+    IExpression retval = null;
 }
 {
   (
-		LOOKAHEAD(BitwiseAndOr())
-		retval=BitwiseAndOr() 
-		|
-		"(" retval=BitwiseAndOr() ")" {retval = new Parenthesis(retval); }
-  
+        LOOKAHEAD(BitwiseAndOr())
+        retval=BitwiseAndOr()
+        |
+        "(" retval=BitwiseAndOr() ")" {retval = new Parenthesis(retval); }
+
   )
 
    {
@@ -1542,24 +1448,24 @@ IExpression SimpleExpression():
 
 IExpression ConcatExpression():
 {
-	IExpression result = null;
-	IExpression leftExpression = null;
-	IExpression rightExpression = null;
+    IExpression result = null;
+    IExpression leftExpression = null;
+    IExpression rightExpression = null;
 }
 {
     leftExpression=AdditiveExpression()  { result = leftExpression; }
     (
-    	"||"
-    	rightExpression=AdditiveExpression()
-		{
-			Concat binExp = new Concat();
-			binExp.setLeftExpression(leftExpression);
-			binExp.setRightExpression(rightExpression);
-			result = binExp;
-			leftExpression = result; 
-		}								
+        "||"
+        rightExpression=AdditiveExpression()
+        {
+            Concat binExp = new Concat();
+            binExp.setLeftExpression(leftExpression);
+            binExp.setRightExpression(rightExpression);
+            result = binExp;
+            leftExpression = result;
+        }
     )*
-    
+
     { return result; }
 }
 
@@ -1572,22 +1478,22 @@ IExpression BitwiseAndOr():
 {
     leftExpression=ConcatExpression()  { result = leftExpression; }
     (
-    	LOOKAHEAD(2) (
-    					"|" { result = new BitwiseOr(); }
-    				  	| 
-    				  	"&" { result = new BitwiseAnd(); } 
-    				  ) 
-    								
-    						rightExpression=ConcatExpression()
-    						
-		{
-			BinaryExpression binExp = (BinaryExpression) result;
-			binExp.setLeftExpression(leftExpression);
-			binExp.setRightExpression(rightExpression);
-			leftExpression = result; 
-		}								
+        LOOKAHEAD(2) (
+                        "|" { result = new BitwiseOr(); }
+                        |
+                        "&" { result = new BitwiseAnd(); }
+                      )
+
+                            rightExpression=ConcatExpression()
+
+        {
+            BinaryExpression binExp = (BinaryExpression) result;
+            binExp.setLeftExpression(leftExpression);
+            binExp.setRightExpression(rightExpression);
+            leftExpression = result;
+        }
     )*
-    
+
     { return result; }
 }
 
@@ -1600,22 +1506,20 @@ IExpression AdditiveExpression():
 {
     leftExpression=MultiplicativeExpression()  { result = leftExpression; }
     (
-    	LOOKAHEAD(2) ("+" { result = new Addition(); }
-    								| "-" { result = new Subtraction(); } ) 
-    								
-    						rightExpression=MultiplicativeExpression()
-    						
-		{
-			BinaryExpression binExp = (BinaryExpression) result;
-			binExp.setLeftExpression(leftExpression);
-			binExp.setRightExpression(rightExpression);
-			leftExpression = result; 
-		}								
+        LOOKAHEAD(2) ("+" { result = new Addition(); }
+                                    | "-" { result = new Subtraction(); } )
+
+        rightExpression=MultiplicativeExpression()
+        {
+            BinaryExpression binExp = (BinaryExpression) result;
+            binExp.setLeftExpression(leftExpression);
+            binExp.setRightExpression(rightExpression);
+            leftExpression = result;
+        }
     )*
-    
+
     { return result; }
 }
-
 
 IExpression MultiplicativeExpression():
 {
@@ -1624,32 +1528,32 @@ IExpression MultiplicativeExpression():
     IExpression rightExpression = null;
 }
 {
-	(
-	LOOKAHEAD(BitwiseXor())
-	    leftExpression=BitwiseXor()
-	    |
-	    "(" leftExpression=ConcatExpression() ")" {leftExpression = new Parenthesis(leftExpression); }
-	)
+    (
+    LOOKAHEAD(BitwiseXor())
+        leftExpression=BitwiseXor()
+        |
+        "(" leftExpression=ConcatExpression() ")" {leftExpression = new Parenthesis(leftExpression); }
+    )
       { result = leftExpression; }
     (
-    	LOOKAHEAD(2) ("*" { result = new Multiplication(); }
-    								| "/" { result = new Division(); }
-    								| "%" { result = new Modulo(); }
-    				) 
-    								
-				(
-				LOOKAHEAD(BitwiseXor())
-    						rightExpression=BitwiseXor()
-						    |
-						    "(" rightExpression=ConcatExpression() ")" {rightExpression = new Parenthesis(rightExpression); }
-				)
-    						
-		{
-			BinaryExpression binExp = (BinaryExpression) result;
-			binExp.setLeftExpression(leftExpression);
-			binExp.setRightExpression(rightExpression);
-			leftExpression = result; 
-		}								
+        LOOKAHEAD(2) ("*" { result = new Multiplication(); }
+                                    | "/" { result = new Division(); }
+                                    | "%" { result = new Modulo(); }
+                    )
+
+                (
+                LOOKAHEAD(BitwiseXor())
+                            rightExpression=BitwiseXor()
+                            |
+                            "(" rightExpression=ConcatExpression() ")" {rightExpression = new Parenthesis(rightExpression); }
+                )
+
+        {
+            BinaryExpression binExp = (BinaryExpression) result;
+            binExp.setLeftExpression(leftExpression);
+            binExp.setRightExpression(rightExpression);
+            leftExpression = result;
+        }
     )*
     { return result; }
 }
@@ -1663,626 +1567,668 @@ IExpression BitwiseXor():
 {
     leftExpression=PrimaryExpression()  { result = leftExpression; }
     (
-    	"^"
-    	rightExpression=PrimaryExpression()
-		{
-			BitwiseXor binExp = new BitwiseXor();
-			binExp.setLeftExpression(leftExpression);
-			binExp.setRightExpression(rightExpression);
-			result = binExp;
-			leftExpression = result; 
-		}								
+        "^"
+        rightExpression=PrimaryExpression()
+        {
+            BitwiseXor binExp = new BitwiseXor();
+            binExp.setLeftExpression(leftExpression);
+            binExp.setRightExpression(rightExpression);
+            result = binExp;
+            leftExpression = result;
+        }
     )*
-    
+
     { return result; }
 }
 
-
 IExpression PrimaryExpression():
-{ 
+{
     IExpression retval = null;
     CastExpression castExpr = null;
-	Token token = null;
-	boolean isInverse = false;
-	String tmp = "";
-	ColDataType type = null;
+    Token token = null;
+    Token sign = null;
+    String tmp = "";
+    ColDataType type = null;
 }
 {
-
 (
+    <K_NULL> { retval = new NullValue(); }
 
-	<K_NULL> { retval = new NullValue(); }
+    | retval=CaseWhenExpression()
 
-	| retval=CaseWhenExpression()
-	
-	| "?" { retval = new JdbcParameter(); } 
+    | "?" { retval = new JdbcParameter(); }
 
     | retval=JdbcNamedParameter()
 
-	| LOOKAHEAD(AnalyticExpression()) retval=AnalyticExpression()
+    | LOOKAHEAD(AnalyticExpression()) retval=AnalyticExpression()
 
-	| LOOKAHEAD(ExtractExpression()) retval=ExtractExpression()
-	
-	| LOOKAHEAD([ "+" | "-"] Function()) [ "+" | "-" { isInverse = true; }] retval=Function() 
-	
-	| LOOKAHEAD([	"+" | "-"] <S_DOUBLE>) 	[	"+" | "-" { tmp = "-"; }]  token=<S_DOUBLE> { retval = new DoubleValue(tmp+token.image); }
-	
-	| LOOKAHEAD([	"+" | "-"] <S_INTEGER>)  	[	"+" | "-" { tmp = "-"; }]  token=<S_INTEGER> { retval = new LongValue(tmp+token.image); }
+    | LOOKAHEAD(ExtractExpression()) retval=ExtractExpression()
 
-	| LOOKAHEAD(CastExpression()) [ "+" | "-" { isInverse = true; }] retval=CastExpression()
-	
-	| LOOKAHEAD(Column()) 	[ "+" | "-" { isInverse = true; }] retval=Column() 
+    | LOOKAHEAD(["+" | "-"] Function())       [sign="+" | sign="-"] retval=Function()
 
-	| LOOKAHEAD(2) [ "+" | "-" { isInverse = true; }]  "(" retval=PrimaryExpression() ")" {retval = new Parenthesis(retval); }
+    | LOOKAHEAD(["+" | "-"] <S_DOUBLE>)       [sign="+" | sign="-"] token=<S_DOUBLE>  { retval = new DoubleValue(token.image); }
 
-	| token=<S_CHAR_LITERAL> { retval = new StringValue(token.image); }
+    | LOOKAHEAD(["+" | "-"] <S_LONG>)         [sign="+" | sign="-"] token=<S_LONG> { retval = new LongValue(token.image); }
 
-	| [ "+" | "-" { isInverse = true; }] "(" retval=SubSelect() ")"
-	
-	| 	"{d" token=<S_CHAR_LITERAL> "}" { retval = new DateValue(token.image); }
+    | LOOKAHEAD(["+" | "-"] CastExpression()) [sign="+" | sign="-"] retval=CastExpression()
 
-	| 	"{t" token=<S_CHAR_LITERAL> "}" { retval = new TimeValue(token.image); }
+    | LOOKAHEAD(["+" | "-"] Column())         [sign="+" | sign="-"] retval=Column()
 
-	| 	"{ts" token=<S_CHAR_LITERAL> "}" { retval = new TimestampValue(token.image); }
+    | LOOKAHEAD(2)                            [sign="+" | sign="-"] "(" retval=PrimaryExpression() ")" {retval = new Parenthesis(retval); }
 
-	| retval = IntervalExpression()
+    |                                         [sign="+" | sign="-"] "(" retval=SubSelect() ")"
+
+    | token=<S_CHAR_LITERAL> { retval = new StringValue(token.image); }
+
+
+    | "{d" token=<S_CHAR_LITERAL> "}"  { retval = new DateValue(token.image); }
+
+    | "{t" token=<S_CHAR_LITERAL> "}"  { retval = new TimeValue(token.image); }
+
+    | "{ts" token=<S_CHAR_LITERAL> "}" { retval = new TimestampValue(token.image); }
+
+    | retval = IntervalExpression()
 )
 
-[ "::" type=ColDataType() { 
-		castExpr = new CastExpression(); 
-		castExpr.setUseCastKeyword(false); 
-		castExpr.setLeftExpression(retval);
-		castExpr.setType(type);
-		retval=castExpr;
+[ "::" type=ColDataType() {
+        castExpr = new CastExpression();
+        castExpr.setUseCastKeyword(false);
+        castExpr.setLeftExpression(retval);
+        castExpr.setType(type);
+        retval=castExpr;
 } ]
 
-    { 
-		if (isInverse) { 
-			retval = new InverseExpression(retval); 
-		}
-    	return retval; 
+    {
+        if (sign != null) {
+            retval = new SignedExpression(sign.image.charAt(0), retval);
+        }
+        return retval;
     }
 }
 
 JdbcNamedParameter JdbcNamedParameter() : {
-	JdbcNamedParameter parameter = new JdbcNamedParameter();
-	Token token;
+    JdbcNamedParameter parameter = new JdbcNamedParameter();
+    Token token;
 }
 {
         ":" token=<S_IDENTIFIER> { parameter.setName(token.image); }
-	{
-		return parameter;
-	}
+    {
+        return parameter;
+    }
 }
 
 IntervalExpression IntervalExpression() : {
-	IntervalExpression interval = new IntervalExpression();
-	Token token;
+    IntervalExpression interval = new IntervalExpression();
+    Token token;
 }
 {
-	<K_INTERVAL> token=<S_CHAR_LITERAL> { interval.setParameter(token.image); }
-	{
-		return interval;
-	}
+    <K_INTERVAL> token=<S_CHAR_LITERAL> { interval.setParameter(token.image); }
+    {
+        return interval;
+    }
 }
 
 AnalyticExpression AnalyticExpression() :
 {
-	AnalyticExpression retval = new AnalyticExpression();
-	List<Column> plist = new ArrayList<Column>();
-	List<OrderByElement> olist = null;
-	Token token = null;
-	Column column = null;
+    AnalyticExpression retval = new AnalyticExpression();
+    List<Column> plist = new ArrayList<Column>();
+    List<OrderByElement> olist = null;
+    Token token = null;
+    Column column = null;
     IExpression expr = null;
     IExpression offset = null;
     IExpression defaultValue = null;
+    WindowElement windowElement = null;
 }
 {
-	token=<S_IDENTIFIER> { retval.setName(token.image); }
-	    "(" [ expr=SimpleExpression() ["," offset=SimpleExpression() ["," defaultValue=SimpleExpression() ]] | "*" { retval.setAllColumns(true); } ] ")" <K_OVER> "("
-        [<K_PARTITION> <K_BY> column=Column() {plist.add(column);}  ("," column=Column() {plist.add(column);} )* ] 
-        [olist=OrderByElements() ]
-	{
-		retval.setExpression(expr);
-		retval.setOffset(offset);
-		retval.setDefaultValue(defaultValue);
-		retval.setPartitionByColumns(plist);
-		retval.setOrderByElements(olist);
-	} 
-	")"
-	{
-		return retval;
-	}
+    token=<S_IDENTIFIER> { retval.setName(token.image); }
+        "(" [ expr=SimpleExpression() ["," offset=SimpleExpression() ["," defaultValue=SimpleExpression() ]] | "*" { retval.setAllColumns(true); } ] ")" <K_OVER> "("
+        [<K_PARTITION> <K_BY> column=Column() {plist.add(column);}  ("," column=Column() {plist.add(column);} )* ]
+        [olist=OrderByElements() [windowElement = WindowElement() ] ]
+        
+    {
+        retval.setExpression(expr);
+        retval.setOffset(offset);
+        retval.setDefaultValue(defaultValue);
+        retval.setPartitionByColumns(plist);
+        retval.setOrderByElements(olist);
+        retval.setWindowElement(windowElement);
+    }
+    ")"
+    {
+        return retval;
+    }
 }
 
-ExtractExpression ExtractExpression() :
+WindowElement WindowElement():
 {
-	ExtractExpression retval = new ExtractExpression();
-	Token token = null;
+    WindowElement windowElement = new WindowElement();
+    WindowRange range = new WindowRange();
+    WindowOffset offset = null;
+}
+{
+    (<K_ROWS> { windowElement.setType(WindowElement.Type.ROWS); }  |  <K_RANGE> { windowElement.setType(WindowElement.Type.RANGE); } )
+    ( (
+      <K_BETWEEN> { windowElement.setRange(range); } 
+      offset = WindowOffset() { range.setStart(offset); } 
+      <K_AND> offset = WindowOffset() { range.setEnd(offset); }
+      )
+    | 
+      offset = WindowOffset() { windowElement.setOffset(offset); } 
+    )
+ 
+    {
+        return windowElement;
+    }
+}
+
+WindowOffset WindowOffset():
+{
+    WindowOffset offset = new WindowOffset();
     IExpression expr = null;
 }
 {
-	<K_EXTRACT> 
-	"(" 
-		token=<S_IDENTIFIER> { retval.setName(token.image); } 
-		<K_FROM> 
-		expr=SimpleExpression() { retval.setExpression(expr); }
-	")"
-	{
-		return retval;
-	}
+    (
+  
+        <K_UNBOUNDED> (<K_PRECEDING> { offset.setType(WindowOffset.Type.PRECEDING); return offset; } |
+                                     <K_FOLLOWING> { offset.setType(WindowOffset.Type.FOLLOWING); return offset; } )
+    ) 
+    |
+    ( <K_CURRENT> <K_ROW> { offset.setType(WindowOffset.Type.CURRENT); return offset;} ) 
+    |
+    ( expr = SimpleExpression() {
+        offset.setType(WindowOffset.Type.EXPR); 
+        offset.setExpression(expr); 
+        } 
+        (<K_PRECEDING> { offset.setType(WindowOffset.Type.PRECEDING); } | <K_FOLLOWING> { offset.setType(WindowOffset.Type.FOLLOWING);  } )
+    )
+  
+    {
+        return offset;
+    }
+} 
+
+ExtractExpression ExtractExpression() :
+{
+    ExtractExpression retval = new ExtractExpression();
+    Token token = null;
+    IExpression expr = null;
+}
+{
+    <K_EXTRACT>
+    "("
+        token=<S_IDENTIFIER> { retval.setName(token.image); }
+        <K_FROM>
+        expr=SimpleExpression() { retval.setExpression(expr); }
+    ")"
+    {
+        return retval;
+    }
 }
 
 CastExpression CastExpression():
 {
-	CastExpression retval = new CastExpression();
-	ColDataType type = null;
+    CastExpression retval = new CastExpression();
+    ColDataType type = null;
     IExpression expression = null;
-	boolean	useCastKeyword;
+    boolean useCastKeyword;
 }
 {
-	<K_CAST> "(" expression=SimpleExpression() <K_AS> type=ColDataType() ")" { retval.setUseCastKeyword(true); }
+    <K_CAST> "(" expression=SimpleExpression() <K_AS> type=ColDataType() ")" { retval.setUseCastKeyword(true); }
 
     {
-	    retval.setLeftExpression(expression);
-	    retval.setType(type);
-    	return retval;
+        retval.setLeftExpression(expression);
+        retval.setType(type);
+        return retval;
     }
 }
 
 IExpression CaseWhenExpression():
 {
-	CaseExpression caseExp = new CaseExpression();
+    CaseExpression caseExp = new CaseExpression();
     IExpression switchExp = null;
-	WhenClause clause;
-	List whenClauses = new ArrayList();
+    WhenClause clause;
+    List whenClauses = new ArrayList();
     IExpression elseExp = null;
 }
 {
-	<K_CASE> 
-	(
-    	    ( clause=WhenThenSearchCondition() { whenClauses.add(clause); } )+
+    <K_CASE>
+    (
+            ( clause=WhenThenSearchCondition() { whenClauses.add(clause); } )+
              [<K_ELSE> elseExp=SimpleExpression()]
-		|
-		    switchExp=PrimaryExpression()
+        |
+            switchExp=PrimaryExpression()
              ( clause=WhenThenValue() { whenClauses.add(clause); } )*
              [<K_ELSE> elseExp=SimpleExpression()]
-	)             
+    )
     <K_END>
-    { 
-    	caseExp.setSwitchExpression(switchExp);
+    {
+        caseExp.setSwitchExpression(switchExp);
         caseExp.setWhenClauses(whenClauses);
-		caseExp.setElseExpression(elseExp);
-    	return caseExp;
+        caseExp.setElseExpression(elseExp);
+        return caseExp;
     }
 }
 
 WhenClause WhenThenSearchCondition():
 {
-	WhenClause whenThen = new WhenClause();
+    WhenClause whenThen = new WhenClause();
     IExpression whenExp = null;
     IExpression thenExp = null;
 }
 {
-	<K_WHEN> whenExp=Expression() <K_THEN> thenExp=SimpleExpression()
-	{
-	   whenThen.setWhenExpression(whenExp);
-	   whenThen.setThenExpression(thenExp);
-	   return whenThen;
-	}
+    <K_WHEN> whenExp=Expression() <K_THEN> thenExp=SimpleExpression()
+    {
+       whenThen.setWhenExpression(whenExp);
+       whenThen.setThenExpression(thenExp);
+       return whenThen;
+    }
 }
 
 WhenClause WhenThenValue():
 {
-	WhenClause whenThen = new WhenClause();
+    WhenClause whenThen = new WhenClause();
     IExpression whenExp = null;
     IExpression thenExp = null;
 }
 {
-	<K_WHEN> whenExp=PrimaryExpression() <K_THEN> thenExp=SimpleExpression()
-	{
-	   whenThen.setWhenExpression(whenExp);
-	   whenThen.setThenExpression(thenExp);
-	   return whenThen;
-	}
-}
-
-
-Function Function():
-{
-	Function retval = new Function();
-	String funcName = null;
-	String tmp = null;
-	ExpressionList expressionList = null;  
-}
-{
-	["{fn" { retval.setEscaped(true); } ]
-	(
-	    funcName=RelObjectName()
-    	| 
-    	// workaround for replace(string) function (name clash with mysql REPLACE expression)
-	    <K_REPLACE> { funcName = "REPLACE"; }
-		| 
-        // workaround for truncate(string) function (name clash with mysql TRUNCATE expression)
-        <K_TRUNCATE> { funcName = "TRUNCATE"; }
-    ) [ "." tmp=RelObjectName() { funcName+= "." + tmp; } ["." tmp=RelObjectName() { funcName+= "." + tmp; }]]
-    "(" [ [<K_DISTINCT> { retval.setDistinct(true); } | <K_ALL> { retval.setAllColumns(true); }] (expressionList=SimpleExpressionList() | "*" { retval.setAllColumns(true); }) ] ")"
-    
-    ["}"]
-    { 
-	    retval.setParameters(expressionList);
-	    retval.setName(funcName);
-    	return retval; 
+    <K_WHEN> whenExp=PrimaryExpression() <K_THEN> thenExp=SimpleExpression()
+    {
+       whenThen.setWhenExpression(whenExp);
+       whenThen.setThenExpression(thenExp);
+       return whenThen;
     }
 }
 
+Function Function():
+{
+    Function retval = new Function();
+    String funcName = null;
+    String tmp = null;
+    ExpressionList expressionList = null;
+}
+{
+    ["{fn" { retval.setEscaped(true); } ]
+    (
+        funcName=RelObjectName()
+        |
+        // workaround for replace(string) function (name clash with teradata REPLACE expression)
+        <K_REPLACE> { funcName = "REPLACE"; }
+        |
+        // workaround for truncate(string) function (name clash with teradata TRUNCATE expression)
+        <K_TRUNCATE> { funcName = "TRUNCATE"; }
+    ) [ "." tmp=RelObjectName() { funcName+= "." + tmp; } ["." tmp=RelObjectName() { funcName+= "." + tmp; }]]
+    "(" [ [<K_DISTINCT> { retval.setDistinct(true); } | <K_ALL> { retval.setAllColumns(true); }] (expressionList=SimpleExpressionList() | "*" { retval.setAllColumns(true); }) ] ")"
 
+    ["}"]
+    {
+        retval.setParameters(expressionList);
+        retval.setName(funcName);
+        return retval;
+    }
+}
 
 SubSelect SubSelect():
 {
-	ISelectBody selectBody = null;
+    ISelectBody selectBody = null;
 }
 {
     selectBody=SelectBody()
     {
-    	SubSelect subSelect = new SubSelect();
-    	subSelect.setSelectBody(selectBody);
-    	return subSelect;
+        SubSelect subSelect = new SubSelect();
+        subSelect.setSelectBody(selectBody);
+        return subSelect;
     }
 }
 
 CreateIndex CreateIndex():
 {
-	CreateIndex createIndex = new CreateIndex();
-	Table table = null;
-	List<String> colNames = new ArrayList<String>();
-	Token columnName;
-	Index index = null;
-	String name = null;
-	String parameter = null;
+    CreateIndex createIndex = new CreateIndex();
+    Table table = null;
+    List<String> colNames = new ArrayList<String>();
+    Token columnName;
+    Index index = null;
+    String name = null;
+    String parameter = null;
 }
 {
-	<K_CREATE>
-	( parameter=CreateParameter() )*
+    <K_CREATE>
+    ( parameter=CreateParameter() )*
 
-	<K_INDEX> name=RelObjectName()
-	{
-		index = new Index();
-		index.setName(name);
-		index.setType(parameter);
-	}
+    <K_INDEX> name=RelObjectName()
+    {
+        index = new Index();
+        index.setName(name);
+        index.setType(parameter);
+    }
 
-	<K_ON> table=Table()
+    <K_ON> table=Table()
 
-	"("
-	(columnName=<S_IDENTIFIER>
-	|
-	columnName=<S_QUOTED_IDENTIFIER>)
+    "("
+    (columnName=<S_IDENTIFIER>
+    |
+    columnName=<S_QUOTED_IDENTIFIER>)
 
-	(CreateParameter() | <K_ASC> | <K_DESC>)*
-	{
-		colNames.add(columnName.image);
-	}
+    (CreateParameter() | <K_ASC> | <K_DESC>)*
+    {
+        colNames.add(columnName.image);
+    }
 
-	(
-		","
-		(columnName=<S_IDENTIFIER>
-		|
-		columnName=<S_QUOTED_IDENTIFIER>)
+    (
+        ","
+        (columnName=<S_IDENTIFIER>
+        |
+        columnName=<S_QUOTED_IDENTIFIER>)
 
-		(CreateParameter() | <K_ASC> | <K_DESC>)*
-		{
-			colNames.add(columnName.image);
-		}
-	)*
+        (CreateParameter() | <K_ASC> | <K_DESC>)*
+        {
+            colNames.add(columnName.image);
+        }
+    )*
 
-	")"
-	(CreateParameter() {})*
+    ")"
+    (CreateParameter() {})*
 
-	{
-		index.setColumnsNames(colNames);
-		createIndex.setIndex(index);
-		createIndex.setTable(table);
-		return createIndex;
-	}
+    {
+        index.setColumnsNames(colNames);
+        createIndex.setIndex(index);
+        createIndex.setTable(table);
+        return createIndex;
+    }
 }
 
 CreateTable CreateTable():
 {
-	CreateTable createTable = new CreateTable();
-	Table table = null;
-	List columnDefinitions = new ArrayList();
-	List columnSpecs = null;
-	List tableOptions = new ArrayList();
-	Token columnName;
-	Token tk = null;
-	Token tk2 = null;
-	Token tk3 = null;
-	ColDataType colDataType = null;
-	String stringList = null;
-	ColumnDefinition coldef = null;
-	List indexes = new ArrayList();
-	List colNames = null;
-	Index index = null;
-	ForeignKeyIndex fkIndex = null;
-	String parameter = null;
-	Table fkTable = null;
+    CreateTable createTable = new CreateTable();
+    Table table = null;
+    List columnDefinitions = new ArrayList();
+    List columnSpecs = null;
+    List tableOptions = new ArrayList();
+    Token columnName;
+    Token tk = null;
+    Token tk2 = null;
+    Token tk3 = null;
+    ColDataType colDataType = null;
+    String stringList = null;
+    ColumnDefinition coldef = null;
+    List indexes = new ArrayList();
+    List colNames = null;
+    Index index = null;
+    ForeignKeyIndex fkIndex = null;
+    String parameter = null;
+    Table fkTable = null;
 }
 {
-	<K_CREATE> 
-	// TODO:
-//	[ [ GLOBAL | LOCAL ] { TEMPORARY | TEMP } ] 
-	(CreateParameter())*
+    <K_CREATE>
+    // TODO:
+//  [ [ GLOBAL | LOCAL ] { TEMPORARY | TEMP } ]
+    (CreateParameter())*
 
-	<K_TABLE> table=Table() 
-	[
-		"("
-		(columnName=<S_IDENTIFIER>
-		|
-		columnName=<S_QUOTED_IDENTIFIER>)
+    <K_TABLE> table=Table()
+    [
+        "("
+        (columnName=<S_IDENTIFIER>
+        |
+        columnName=<S_QUOTED_IDENTIFIER>)
 
-		colDataType = ColDataType()
-		{
-			columnSpecs = new ArrayList();
-		}
-	
-		( parameter=CreateParameter() { columnSpecs.add(parameter); } )*
-	
-		{ 
-			coldef = new ColumnDefinition();
-			coldef.setColumnName(columnName.image);
-			coldef.setColDataType(colDataType);
-			if (columnSpecs.size() > 0)
-				coldef.setColumnSpecStrings(columnSpecs);
-			columnDefinitions.add(coldef);
-		}
-		
-		(
-			","
-			
-			(
-				(
-					tk=<K_INDEX>
-						tk3=<S_IDENTIFIER>		
-						colNames=ColumnsNamesList()
-						{ 
-							index = new Index(); 
-							index.setType(tk.image);
-							index.setName(tk3.image);
-							index.setColumnsNames(colNames);
-							indexes.add(index);
-						}
-				)
-				|
-				(
-					tk=<K_PRIMARY> tk2=<K_KEY> 
-						colNames=ColumnsNamesList()
-						{ 
-							index = new Index(); 
-							index.setType(tk.image + " "+ tk2.image);
-							index.setColumnsNames(colNames);
-							indexes.add(index);
-						}
-				)
-				|
-				(
-					tk=<K_KEY>
-						tk3=<S_IDENTIFIER>		
-						colNames=ColumnsNamesList()
-						{ 
-							index = new Index(); 
-							index.setType(tk.image);
-							index.setName(tk3.image);
-							index.setColumnsNames(colNames);
-							indexes.add(index);
-						}
-				)
-				|
-				(	
-					{ 
-						fkIndex = new ForeignKeyIndex(); 
-					}
-					[<K_CONSTRAINT> tk3=<S_IDENTIFIER> {fkIndex.setName(tk3.image);} ]
-					tk=<K_FOREIGN> tk2=<K_KEY>		
-						colNames=ColumnsNamesList()
-						{ 
-							fkIndex.setType(tk.image + " " + tk2.image);
-							fkIndex.setColumnsNames(colNames);
-						}
-						<K_REFERENCES> fkTable=Table() colNames=ColumnsNamesList()
-						{
-							fkIndex.setTable(fkTable);
-							fkIndex.setReferencedColumnNames(colNames);
-							indexes.add(fkIndex);
-						}
-				)
-				|
-				(
-					(columnName=<S_IDENTIFIER>
-					|
-					columnName=<S_QUOTED_IDENTIFIER>)
-					colDataType = ColDataType()
-					{
-						columnSpecs = new ArrayList();
-					}
-				
-					( 	parameter=CreateParameter() { columnSpecs.add(parameter); } 	)*
-		
-					{ 
-						coldef = new ColumnDefinition();
-						coldef.setColumnName(columnName.image);
-						coldef.setColDataType(colDataType);
-						if (columnSpecs.size() > 0)
-							coldef.setColumnSpecStrings(columnSpecs);
-						columnDefinitions.add(coldef);
-					}
-				)
-			)
-		)* 
-		
-		")"
-		( 	parameter=CreateParameter() { tableOptions.add(parameter); } )*
-	
-	]
-	
-	
-	{
-		createTable.setTable(table);
-		if (indexes.size() > 0)
-			createTable.setIndexes(indexes);
-		if (tableOptions.size() > 0)
-			createTable.setTableOptionsStrings(tableOptions);
-		if (columnDefinitions.size() > 0)
-			createTable.setColumnDefinitions(columnDefinitions);
-		return createTable;
-	}
-	
+        colDataType = ColDataType()
+        {
+            columnSpecs = new ArrayList();
+        }
+
+        ( parameter=CreateParameter() { columnSpecs.add(parameter); } )*
+
+        {
+            coldef = new ColumnDefinition();
+            coldef.setColumnName(columnName.image);
+            coldef.setColDataType(colDataType);
+            if (columnSpecs.size() > 0)
+                coldef.setColumnSpecStrings(columnSpecs);
+            columnDefinitions.add(coldef);
+        }
+
+        (
+            ","
+
+            (
+                (
+                    tk=<K_INDEX>
+                        tk3=<S_IDENTIFIER>
+                        colNames=ColumnsNamesList()
+                        {
+                            index = new Index();
+                            index.setType(tk.image);
+                            index.setName(tk3.image);
+                            index.setColumnsNames(colNames);
+                            indexes.add(index);
+                        }
+                )
+                |
+                (
+                    tk=<K_PRIMARY> tk2=<K_KEY>
+                        colNames=ColumnsNamesList()
+                        {
+                            index = new Index();
+                            index.setType(tk.image + " "+ tk2.image);
+                            index.setColumnsNames(colNames);
+                            indexes.add(index);
+                        }
+                )
+                |
+                (
+                    tk=<K_KEY>
+                        tk3=<S_IDENTIFIER>
+                        colNames=ColumnsNamesList()
+                        {
+                            index = new Index();
+                            index.setType(tk.image);
+                            index.setName(tk3.image);
+                            index.setColumnsNames(colNames);
+                            indexes.add(index);
+                        }
+                )
+                |
+                (
+                    {
+                        fkIndex = new ForeignKeyIndex();
+                    }
+                    [<K_CONSTRAINT> tk3=<S_IDENTIFIER> {fkIndex.setName(tk3.image);} ]
+                    tk=<K_FOREIGN> tk2=<K_KEY>
+                        colNames=ColumnsNamesList()
+                        {
+                            fkIndex.setType(tk.image + " " + tk2.image);
+                            fkIndex.setColumnsNames(colNames);
+                        }
+                        <K_REFERENCES> fkTable=Table() colNames=ColumnsNamesList()
+                        {
+                            fkIndex.setTable(fkTable);
+                            fkIndex.setReferencedColumnNames(colNames);
+                            indexes.add(fkIndex);
+                        }
+                )
+                |
+                (
+                    (columnName=<S_IDENTIFIER>
+                    |
+                    columnName=<S_QUOTED_IDENTIFIER>)
+                    colDataType = ColDataType()
+                    {
+                        columnSpecs = new ArrayList();
+                    }
+
+                    (   parameter=CreateParameter() { columnSpecs.add(parameter); }     )*
+
+                    {
+                        coldef = new ColumnDefinition();
+                        coldef.setColumnName(columnName.image);
+                        coldef.setColDataType(colDataType);
+                        if (columnSpecs.size() > 0)
+                            coldef.setColumnSpecStrings(columnSpecs);
+                        columnDefinitions.add(coldef);
+                    }
+                )
+            )
+        )*
+
+        ")"
+        (   parameter=CreateParameter() { tableOptions.add(parameter); } )*
+
+    ]
+
+    {
+        createTable.setTable(table);
+        if (indexes.size() > 0)
+            createTable.setIndexes(indexes);
+        if (tableOptions.size() > 0)
+            createTable.setTableOptionsStrings(tableOptions);
+        if (columnDefinitions.size() > 0)
+            createTable.setColumnDefinitions(columnDefinitions);
+        return createTable;
+    }
 }
 
 ColDataType ColDataType():
 {
-	ColDataType colDataType = new ColDataType();
-	Token tk = null;
-	Token tk2 = null;
-	ArrayList argumentsStringList = new ArrayList();
+    ColDataType colDataType = new ColDataType();
+    Token tk = null;
+    Token tk2 = null;
+    ArrayList argumentsStringList = new ArrayList();
 }
 {
     ( tk=<K_CHARACTER> tk2=<K_VARYING> { colDataType.setDataType(tk.image + " " + tk2.image); }
     | tk=<S_IDENTIFIER> { colDataType.setDataType(tk.image); } )
-	
-	[LOOKAHEAD(2) "(" ( (tk=<S_INTEGER> | tk=<S_CHAR_LITERAL>) { argumentsStringList.add(tk.image); } ["," {/*argumentsStringList.add(",");*/}] )*    ")"]
-	{
-		if (argumentsStringList.size() > 0)
-			colDataType.setArgumentsStringList(argumentsStringList);
-		return colDataType;
-	}
+
+    [LOOKAHEAD(2) "(" ( (tk=<S_LONG> | tk=<S_CHAR_LITERAL>) { argumentsStringList.add(tk.image); } ["," {/*argumentsStringList.add(",");*/}] )*    ")"]
+    {
+        if (argumentsStringList.size() > 0)
+            colDataType.setArgumentsStringList(argumentsStringList);
+        return colDataType;
+    }
 }
 
 CreateView CreateView():
 {
-	CreateView createView = new CreateView();
-	Table view = null;
-	ISelectBody select = null;
-	List<String> columnNames = null;
+    CreateView createView = new CreateView();
+    Table view = null;
+    ISelectBody select = null;
+    List<String> columnNames = null;
 }
 {
-	<K_CREATE>
-	[ <K_OR> <K_REPLACE> { createView.setOrReplace(true);} ]
-	[ <K_MATERIALIZED> { createView.setMaterialized(true);} ]
-	<K_VIEW> view=Table() { createView.setView(view); }
-	[ columnNames = ColumnsNamesList() { createView.setColumnNames(columnNames); } ]
-	<K_AS>
-	(
+    <K_CREATE>
+    [ <K_OR> <K_REPLACE> { createView.setOrReplace(true);} ]
+    [ <K_MATERIALIZED> { createView.setMaterialized(true);} ]
+    <K_VIEW> view=Table() { createView.setView(view); }
+    [ columnNames = ColumnsNamesList() { createView.setColumnNames(columnNames); } ]
+    <K_AS>
+    (
       LOOKAHEAD(SelectBody()) select=SelectBody() { createView.setSelectBody(select); }
-	  |
-	  "(" select=SelectBody() ")" { createView.setSelectBody(select); }
+      |
+      "(" select=SelectBody() ")" { createView.setSelectBody(select); }
     )
-	{ return createView; }
+    { return createView; }
 }
 
 String CreateParameter():
 {
-	String retval = null;
-	Token tk = null;
+    String retval = null;
+    Token tk = null;
 }
 {
-		(
-			tk=<S_IDENTIFIER> { retval = tk.image; } 
-			|
-			tk=<K_NULL> { retval = tk.image; } 
-			|
-			tk=<K_NOT> { retval = tk.image; } 
-			|
-			tk=<K_PRIMARY> { retval = tk.image; } 
-			|
-			tk=<K_KEY> { retval = tk.image; } 
-			|
-			tk=<S_CHAR_LITERAL> { retval = tk.image; } 
-			|
-			tk=<S_INTEGER> { retval = tk.image; } 
-			|
-			tk=<S_DOUBLE> { retval = tk.image; } 
-			|
-			"=" { retval = "="; } 
-			| 
-			retval=AList()
-		)
-	{return retval;}
+        (
+            tk=<S_IDENTIFIER> { retval = tk.image; }
+            |
+            tk=<K_NULL> { retval = tk.image; }
+            |
+            tk=<K_NOT> { retval = tk.image; }
+            |
+            tk=<K_PRIMARY> { retval = tk.image; }
+            |
+            tk=<K_KEY> { retval = tk.image; }
+            |
+            tk=<S_CHAR_LITERAL> { retval = tk.image; }
+            |
+            tk=<S_LONG> { retval = tk.image; }
+            |
+            tk=<S_DOUBLE> { retval = tk.image; }
+            |
+            "=" { retval = "="; }
+            |
+            retval=AList()
+        )
+    {return retval;}
 }
 
 String AList():
 {
-	StringBuilder retval = new StringBuilder("(");
-	Token tk = null;
+    StringBuilder retval = new StringBuilder("(");
+    Token tk = null;
 }
 {
-	 "(" 
-	 
-	 ( (tk=<S_INTEGER> | tk=<S_DOUBLE> | tk=<S_CHAR_LITERAL> | tk=<S_IDENTIFIER>) { retval.append(tk.image); } ["," {retval.append(",");}] )*    
-	 
-	")"
-	{
-		retval.append(")");
-		return retval.toString();
-	}
+     "("
+
+     ( (tk=<S_LONG> | tk=<S_DOUBLE> | tk=<S_CHAR_LITERAL> | tk=<S_IDENTIFIER>) { retval.append(tk.image); } ["," {retval.append(",");}] )*
+
+    ")"
+    {
+        retval.append(")");
+        return retval.toString();
+    }
 }
 
 List<String> ColumnsNamesList():
 {
-	List<String> retval = new ArrayList<String>();
-	Token tk = null;
+    List<String> retval = new ArrayList<String>();
+    Token tk = null;
 }
 {
-	 "(" 
-	 
-	 	tk=<S_IDENTIFIER> { retval.add(tk.image); } 
-	 	( "," tk=<S_IDENTIFIER> { retval.add(tk.image); } )*
-	 
-	")"
-	{
-		return retval;
-	}
-}
+     "("
 
+        tk=<S_IDENTIFIER> { retval.add(tk.image); }
+        ( "," tk=<S_IDENTIFIER> { retval.add(tk.image); } )*
+
+    ")"
+    {
+        return retval;
+    }
+}
 
 Drop Drop():
 {
-	Drop drop = new Drop();
-	Token tk = null;
-	List<String> dropArgs = new ArrayList<String>();
+    Drop drop = new Drop();
+    Token tk = null;
+    List<String> dropArgs = new ArrayList<String>();
 }
 {
-	<K_DROP>
-	(
-		tk=<S_IDENTIFIER>
-		| 
-		tk=<K_TABLE>
-		|
-		tk=<K_INDEX>
-	)
+    <K_DROP>
+    (
+        tk=<S_IDENTIFIER>
+        |
+        tk=<K_TABLE>
+        |
+        tk=<K_INDEX>
+    )
     { drop.setType(tk.image); }
-	tk=<S_IDENTIFIER> { drop.setName(tk.image); }
-	(tk=<S_IDENTIFIER> { dropArgs.add(tk.image); })*
-	
-	{
-		if (dropArgs.size() > 0)
-			drop.setParameters(dropArgs);
-		return drop;
-	}
+    tk=<S_IDENTIFIER> { drop.setName(tk.image); }
+    (tk=<S_IDENTIFIER> { dropArgs.add(tk.image); })*
+
+    {
+        if (dropArgs.size() > 0)
+            drop.setParameters(dropArgs);
+        return drop;
+    }
 }
 
 Truncate Truncate():
 {
-	Truncate truncate = new Truncate();
-	Table table;
+    Truncate truncate = new Truncate();
+    Table table;
 }
 {
-	<K_TRUNCATE> <K_TABLE>
-	table=Table() { truncate.setTable(table); }
-	
-	{
-		return truncate;
-	}
+    <K_TRUNCATE> <K_TABLE>
+    table=Table() { truncate.setTable(table); }
+    {
+        return truncate;
+    }
 }
 
 Alter Alter():
@@ -2293,7 +2239,7 @@ Alter Alter():
     ColDataType dataType;
 }
 {
-    <K_ALTER> <K_TABLE> table=Table() <K_ADD> <K_COLUMN> 
+    <K_ALTER> <K_TABLE> table=Table() <K_ADD> <K_COLUMN>
     (tk=<S_IDENTIFIER>  | tk=<S_QUOTED_IDENTIFIER>) dataType=ColDataType()
 
     {

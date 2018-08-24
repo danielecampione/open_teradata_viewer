@@ -52,7 +52,7 @@ public class CreateIndexDeParser {
         buffer.append("INDEX ");
         buffer.append(index.getName());
         buffer.append(" ON ");
-        buffer.append(createIndex.getTable().getWholeTableName());
+        buffer.append(createIndex.getTable().getFullyQualifiedName());
 
         if (index.getColumnsNames() != null) {
             buffer.append(" (");

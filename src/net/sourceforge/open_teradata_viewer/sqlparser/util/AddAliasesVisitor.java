@@ -70,11 +70,6 @@ public class AddAliasesVisitor implements ISelectVisitor, ISelectItemVisitor {
     }
 
     @Override
-    public void visit(AllColumns allColumns) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public void visit(AllTableColumns allTableColumns) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -113,6 +108,11 @@ public class AddAliasesVisitor implements ISelectVisitor, ISelectItemVisitor {
 
     @Override
     public void visit(WithItem withItem) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(AllColumns allColumns) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

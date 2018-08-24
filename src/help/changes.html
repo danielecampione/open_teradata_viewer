@@ -5,7 +5,23 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.21a (23/01/2014)
+<PRE>0.21b (27/02/2014)
+    - Added first multi-statements or script support to the SQL parser.
+    - Added backported window option from fork to analytic expression of the SQL
+      parser.
+    - Added NULLS FIRST and NULLS LAST to order by clause of the SQL parser.
+    - Improved parsing of top clause of the SQL parser.
+    - Improved support for multi-part names of the SQL parser.
+    - Improved support for signed expressions of the SQL parser. The sign is
+      stored in the parse tree.
+    - Added CCSqlParserUtil.parseExpression to the SQL parser to parse a simple
+      expression. Now you can build expressions from a String like "a+b".
+    - Improved SelectUtils of the SQL parser to build simple select statements.
+    - Upgraded Teradata JDBC driver 14.10.00.17 -> 14.10.00.26
+    - Upgraded poi library 3.9 -> 3.10
+    - Upgraded itext library 5.4.5 -> 5.5.0
+
+0.21a (23/01/2014)
     - Started a simple utility class for the SQL parser, SelectUtils, to collect
       basic select modification tools:
         o addExpression adds a new expression to the select list;
@@ -259,7 +275,8 @@
     
 0.1a (20/02/2012)
     - Fixed semicolons being cut off at the end of PL/SQL blocks.
-    - Fixed the control acting on the length of the name of Teradata objects.
+    - Fixed the mechanism that verifies the length of the name of the Teradata
+      objects.
     - Upgraded Teradata JDBC driver 14.00.00.01 -> 14.00.00.12
 
 0.09c (17/10/2011)

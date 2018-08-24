@@ -57,7 +57,7 @@ public interface IExpressionVisitor {
 
     void visit(Function function);
 
-    void visit(InverseExpression inverseExpression);
+    void visit(SignedExpression signedExpression);
 
     void visit(JdbcParameter jdbcParameter);
 

@@ -27,54 +27,53 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * @author D. Campione
  * 
  */
-public class Column implements IExpression {
+public final class Column implements IExpression, IMultiPartName {
 
-    private String columnName = "";
     private Table table;
+    private String columnName;
 
     public Column() {
     }
 
     public Column(Table table, String columnName) {
-        this.table = table;
-        this.columnName = columnName;
+        setTable(table);
+        setColumnName(columnName);
     }
 
     public Column(String columnName) {
         this(null, columnName);
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
     public Table getTable() {
         return table;
-    }
-
-    public void setColumnName(String string) {
-        columnName = string;
     }
 
     public void setTable(Table table) {
         this.table = table;
     }
 
-    /** @return the name of the column, prefixed with 'tableName' and '.'. */
-    public String getWholeColumnName() {
-        String columnWholeName;
-        String tableWholeName = null;
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String string) {
+        columnName = string;
+    }
+
+    @Override
+    public String getFullyQualifiedName() {
+        StringBuilder fqn = new StringBuilder();
 
         if (table != null) {
-            tableWholeName = table.getWholeTableName();
+            fqn.append(table.getFullyQualifiedName());
         }
-        if (tableWholeName != null && tableWholeName.length() != 0) {
-            columnWholeName = tableWholeName + "." + columnName;
-        } else {
-            columnWholeName = columnName;
+        if (fqn.length() > 0) {
+            fqn.append('.');
         }
-
-        return columnWholeName;
+        if (columnName != null) {
+            fqn.append(columnName);
+        }
+        return fqn.toString();
     }
 
     @Override
@@ -84,6 +83,6 @@ public class Column implements IExpression {
 
     @Override
     public String toString() {
-        return getWholeColumnName();
+        return getFullyQualifiedName();
     }
 }

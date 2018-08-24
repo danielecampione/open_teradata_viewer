@@ -1,4 +1,4 @@
-Teradata JDBC Driver 14.10.00.17
+Teradata JDBC Driver 14.10.00.26
 
 Part of the Teradata Tools and Utilities 14.10 product suite
 
@@ -33,6 +33,57 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs:
+
+DR 110776 support INTERVAL data types for implicit data type conversions, and for use with the EXTRACT function
+DR 144698 Support TIME WITH TIME ZONE and TIMESTAMP WITH TIME ZONE Struct bind values
+DR 162127 Clarify exception for DBS request of same LOB token more than once
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.25:
+
+DR 168961 Improve Monitor connection PreparedStatement interoperability with JDK 7
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.23:
+
+DR 154833 Recoverable Network Support
+DR 154881 Support Redrive protocol to automatically redrive SQL request after communication failure
+DR 165410 setObject(col, new BigDecimal("1.5e-39"), Types.DECIMAL) generates StringIndexOutOfBoundsException
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.21:
+
+DR 165252 Improve JDBC FastLoad support for UTF8 session character set
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.19:
+
+DR 160024 Support PERIOD data type for JDBC FastExport
+DR 160027 Support PERIOD data type for JDBC FastLoad and JDBC FastLoad CSV
+DR 162940 JDBC PERIOD attributes have the same column type name as the PERIOD, which causes getAttributes (Map) to fail
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.18:
+
+DR 144415 STRICT_ENCODE connection parameter
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.40:
+
+DR 169289 Reconnect count not limited by RECONNECT_COUNT connection parameter after JDBC DR 159065 change
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.39:
+
+DR 167176 Avoid NullPointerException at logon when System property "java.vm.info" is not set
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.38:
+
+DR 161300 Slow JDBC logons inside TdgssContext.initSecContext 14.00
+DR 165159 Change TdgssConfigApi access to accommodate TeraGSSJava DR 161300
 
 This release includes changes to address the following DRs, originally included
 in release 14.00.00.37:
@@ -311,6 +362,12 @@ in release 13.10.00.03:
 
 DR 139067 DatabaseMetaData getSQLKeywords method to query SYSLIB.SQLRestrictedWords
 DR 140609 Additional support for DISTINCT user-defined types
+
+This release includes changes to address the following DRs, originally included
+in release 13.00.00.33:
+
+DR 166995 JDBC scalar function LOG returns incorrect results
+DR 167160 JDBC Fastload error with ENCRYPTDATA=ON
 
 This release includes changes to address the following DRs, originally included
 in release 13.00.00.32:
@@ -1077,7 +1134,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.10.00.17.zip and TeraJDBC__indep_indep.14.10.00.17.tar
+TeraJDBC__indep_indep.14.10.00.26.zip and TeraJDBC__indep_indep.14.10.00.26.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

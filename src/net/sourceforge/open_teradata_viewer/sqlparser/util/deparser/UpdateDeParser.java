@@ -60,7 +60,7 @@ public class UpdateDeParser {
         buffer.append("UPDATE ").append(update.getTable()).append(" SET ");
         for (int i = 0; i < update.getColumns().size(); i++) {
             Column column = update.getColumns().get(i);
-            buffer.append(column.getWholeColumnName()).append(" = ");
+            buffer.append(column.getFullyQualifiedName()).append(" = ");
 
             IExpression expression = update.getExpressions().get(i);
             expression.accept(expressionVisitor);

@@ -73,7 +73,7 @@ public class CreateIndex implements IStatement {
         buffer.append("INDEX ");
         buffer.append(index.getName());
         buffer.append(" ON ");
-        buffer.append(table.getWholeTableName());
+        buffer.append(table.getFullyQualifiedName());
 
         if (index.getColumnsNames() != null) {
             buffer.append(" (");

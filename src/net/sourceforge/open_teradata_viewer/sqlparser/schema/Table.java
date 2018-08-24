@@ -30,10 +30,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
  * @author D. Campione
  * 
  */
-public class Table implements IFromItem {
+public class Table implements IFromItem, IMultiPartName {
 
+    private Database database;
     private String schemaName;
     private String name;
+
     private Alias alias;
     private Pivot pivot;
 
@@ -49,20 +51,34 @@ public class Table implements IFromItem {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
+    public Table(Database database, String schemaName, String name) {
+        this.database = database;
+        this.schemaName = schemaName;
+        this.name = name;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public String getSchemaName() {
         return schemaName;
     }
 
-    public void setName(String string) {
-        name = string;
-    }
-
     public void setSchemaName(String string) {
         schemaName = string;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String string) {
+        name = string;
     }
 
     @Override
@@ -75,19 +91,29 @@ public class Table implements IFromItem {
         this.alias = alias;
     }
 
-    public String getWholeTableName() {
-        String tableWholeName = null;
-        if (name == null) {
-            return null;
+    @Override
+    public String getFullyQualifiedName() {
+        String fqn = "";
+
+        if (database != null) {
+            fqn += database.getFullyQualifiedName();
         }
+        if (!fqn.isEmpty()) {
+            fqn += ".";
+        }
+
         if (schemaName != null) {
-            tableWholeName = schemaName + "." + name;
-        } else {
-            tableWholeName = name;
+            fqn += schemaName;
+        }
+        if (!fqn.isEmpty()) {
+            fqn += ".";
         }
 
-        return tableWholeName;
+        if (name != null) {
+            fqn += name;
+        }
 
+        return fqn;
     }
 
     @Override
@@ -111,7 +137,7 @@ public class Table implements IFromItem {
 
     @Override
     public String toString() {
-        return getWholeTableName() + ((pivot != null) ? " " + pivot : "")
+        return getFullyQualifiedName() + ((pivot != null) ? " " + pivot : "")
                 + ((alias != null) ? alias.toString() : "");
     }
 }

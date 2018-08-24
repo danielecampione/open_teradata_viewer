@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 import java.util.Iterator;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statements;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
@@ -157,5 +158,10 @@ public class StatementDeParser implements IStatementVisitor {
 
     @Override
     public void visit(Alter alter) {
+    }
+
+    @Override
+    public void visit(Statements stmts) {
+        stmts.accept(this);
     }
 }

@@ -46,7 +46,7 @@ public abstract class ConnectExpressionsVisitor implements ISelectVisitor,
         ISelectItemVisitor {
 
     private String alias = "expr";
-    private List<SelectExpressionItem> itemsExpr = new LinkedList<SelectExpressionItem>();
+    private final List<SelectExpressionItem> itemsExpr = new LinkedList<SelectExpressionItem>();
 
     public ConnectExpressionsVisitor() {
     }
@@ -104,12 +104,12 @@ public abstract class ConnectExpressionsVisitor implements ISelectVisitor,
     }
 
     @Override
-    public void visit(AllColumns allColumns) {
+    public void visit(AllTableColumns allTableColumns) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void visit(AllTableColumns allTableColumns) {
+    public void visit(AllColumns allColumns) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

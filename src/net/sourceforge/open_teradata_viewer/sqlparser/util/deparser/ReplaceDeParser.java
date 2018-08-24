@@ -72,14 +72,14 @@ public class ReplaceDeParser implements IItemsListVisitor {
     }
 
     public void deParse(Replace replace) {
-        buffer.append("REPLACE ")
-                .append(replace.getTable().getWholeTableName());
+        buffer.append("REPLACE ").append(
+                replace.getTable().getFullyQualifiedName());
         if (replace.getItemsList() != null) {
             if (replace.getColumns() != null) {
                 buffer.append(" (");
                 for (int i = 0; i < replace.getColumns().size(); i++) {
                     Column column = replace.getColumns().get(i);
-                    buffer.append(column.getWholeColumnName());
+                    buffer.append(column.getFullyQualifiedName());
                     if (i < replace.getColumns().size() - 1) {
                         buffer.append(", ");
                     }
@@ -92,7 +92,7 @@ public class ReplaceDeParser implements IItemsListVisitor {
             buffer.append(" SET ");
             for (int i = 0; i < replace.getColumns().size(); i++) {
                 Column column = replace.getColumns().get(i);
-                buffer.append(column.getWholeColumnName()).append("=");
+                buffer.append(column.getFullyQualifiedName()).append("=");
 
                 IExpression expression = replace.getExpressions().get(i);
                 expression.accept(expressionVisitor);

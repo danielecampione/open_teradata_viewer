@@ -26,6 +26,9 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
  */
 public class AllColumns implements ISelectItem {
 
+    public AllColumns() {
+    }
+
     @Override
     public void accept(ISelectItemVisitor selectItemVisitor) {
         selectItemVisitor.visit(this);

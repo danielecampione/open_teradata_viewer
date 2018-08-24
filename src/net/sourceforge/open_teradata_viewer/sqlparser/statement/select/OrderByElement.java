@@ -28,11 +28,30 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
  */
 public class OrderByElement {
 
+    /**
+     * 
+     * 
+     * @author D. Campione
+     *
+     */
+    public enum NullOrdering {
+        NULLS_FIRST, NULLS_LAST
+    }
+
     private IExpression expression;
     private boolean asc = true;
+    private NullOrdering nullOrdering;
 
     public boolean isAsc() {
         return asc;
+    }
+
+    public NullOrdering getNullOrdering() {
+        return nullOrdering;
+    }
+
+    public void setNullOrdering(NullOrdering nullOrdering) {
+        this.nullOrdering = nullOrdering;
     }
 
     public void setAsc(boolean b) {
@@ -53,6 +72,16 @@ public class OrderByElement {
 
     @Override
     public String toString() {
-        return "" + expression + ((asc) ? "" : " DESC");
+        StringBuilder b = new StringBuilder();
+        b.append(expression.toString());
+        if (!asc) {
+            b.append(" DESC");
+        }
+        if (nullOrdering != null) {
+            b.append(' ');
+            b.append(nullOrdering == NullOrdering.NULLS_FIRST ? "NULLS FIRST"
+                    : "NULLS LAST");
+        }
+        return b.toString();
     }
 }

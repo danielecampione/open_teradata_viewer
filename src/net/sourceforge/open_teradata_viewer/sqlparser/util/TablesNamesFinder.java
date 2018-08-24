@@ -34,12 +34,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.InverseExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
@@ -206,7 +206,7 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     @Override
     public void visit(Table tableName) {
-        String tableWholeName = tableName.getWholeTableName();
+        String tableWholeName = tableName.getFullyQualifiedName();
         if (!otherItemNames.contains(tableWholeName.toLowerCase())
                 && !tables.contains(tableWholeName)) {
             tables.add(tableWholeName);
@@ -274,8 +274,8 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     }
 
     @Override
-    public void visit(InverseExpression inverseExpression) {
-        inverseExpression.getExpression().accept(this);
+    public void visit(SignedExpression signedExpression) {
+        signedExpression.getExpression().accept(this);
     }
 
     @Override
