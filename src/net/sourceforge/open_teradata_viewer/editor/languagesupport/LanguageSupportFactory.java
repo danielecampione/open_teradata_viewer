@@ -82,10 +82,16 @@ public class LanguageSupportFactory implements PropertyChangeListener {
                 + "c.CLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_CSS, prefix
                 + "css.CssLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_HTML, prefix
+                + "html.HtmlLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVA, prefix
                 + "java.JavaLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, prefix
                 + "js.JavaScriptLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JSP, prefix
+                + "jsp.JspLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_PHP, prefix
+                + "php.PhpLanguageSupport");
         addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_XML, prefix
                 + "xml.XmlLanguageSupport");
     }

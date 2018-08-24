@@ -33,9 +33,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
- * Base class for language supports for markup languages. This class facilitates
- * support for automatically adding a closing tag (e.g.
- * "<code>&lt;/foo&gt;</code>") when the user types an opening tag (e.g.
+ * Base class for language supports for markup languages, such as HTML, PHP and
+ * JSP. This class facilitates support for automatically adding a closing tag
+ * (e.g. "<code>&lt;/foo&gt;</code>") when the user types an opening tag (e.g.
  * "<code>&lt;foo attr='val'&gt;</code>").
  *
  * @author D. Campione

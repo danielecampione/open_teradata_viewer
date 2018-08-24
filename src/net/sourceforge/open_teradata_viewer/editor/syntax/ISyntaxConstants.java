@@ -45,6 +45,9 @@ public interface ISyntaxConstants {
     /** Style for highlighting CSS. */
     public static final String SYNTAX_STYLE_CSS = "text/css";
 
+    /** Style for highlighting HTML. */
+    public static final String SYNTAX_STYLE_HTML = "text/html";
+
     /** Style for highlighting Clojure. */
     public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
 
@@ -53,6 +56,12 @@ public interface ISyntaxConstants {
 
     /** Style for highlighting JavaScript. */
     public static final String SYNTAX_STYLE_JAVASCRIPT = "text/javascript";
+
+    /** Style for highlighting JSP. */
+    public static final String SYNTAX_STYLE_JSP = "text/jsp";
+
+    /** Style for highlighting PHP. */
+    public static final String SYNTAX_STYLE_PHP = "text/php";
 
     /** Style for highlighting SQL. */
     public static final String SYNTAX_STYLE_SQL = "text/sql";

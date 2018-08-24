@@ -35,7 +35,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
 /**
  * Parses a document into JavaScript tokens.
  * 
- * Scanner for JavaScript files.<p>
+ * Scanner for JavaScript files. Its states could be simplified but are kept the
+ * way they are to keep a degree of similarity (i.e. copy/paste) between it and
+ * HTML/JSP/PHPTokenMaker. This should cause no difference in performance.<p>
  *
  * This implementation was created using <a
  * href="http://www.jflex.de/">JFlex</a> 1.4.1; however, the generated file was
@@ -1170,7 +1172,7 @@ public class JavaScriptTokenMaker extends AbstractJFlexCTokenMaker {
 
     /**
      * Adds the token specified to the current linked list of tokens as an "end
-     * token;" that is, at <code>zzMarkedPos</code>.
+     * token"; that is, at <code>zzMarkedPos</code>.
      *
      * @param tokenType The token's type.
      */

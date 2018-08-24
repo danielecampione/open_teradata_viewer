@@ -33,7 +33,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
 
 /**
  * This class splits up text into tokens representing a CSS 3 file. It's written
- * with a few extra internal states.<p>
+ * with a few extra internal states, so that it can easily be copy and pasted
+ * into HTML, PHP and JSP TokenMakers when it is updated.<p>
  *
  * This implementation was created using <a
  * href="http://www.jflex.de/">JFlex</a> 1.4.1; however, the generated file was
@@ -370,7 +371,7 @@ public class CSSTokenMaker extends AbstractJFlexCTokenMaker {
 
     /**
      * The state previous CSS-related state we were in before going into a CSS
-     * string, multi-line comment, etc...
+     * string, multi-line comment, etc..
      */
     private int cssPrevState;
 
@@ -384,7 +385,7 @@ public class CSSTokenMaker extends AbstractJFlexCTokenMaker {
 
     /**
      * Adds the token specified to the current linked list of tokens as an "end
-     * token;" that is, at <code>zzMarkedPos</code>.
+     * token"; that is, at <code>zzMarkedPos</code>.
      *
      * @param tokenType The token's type.
      */
