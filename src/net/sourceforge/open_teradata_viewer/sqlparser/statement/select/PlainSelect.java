@@ -29,15 +29,15 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 
 /**
  * The core of a "SELECT" statement (no UNION, no ORDER BY).
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class PlainSelect implements ISelectBody {
 
     private Distinct distinct = null;
     private List<ISelectItem> selectItems;
-    private Table into;
+    private List<Table> intoTables;
     private IFromItem fromItem;
     private List<Join> joins;
     private IExpression where;
@@ -45,9 +45,12 @@ public class PlainSelect implements ISelectBody {
     private List<OrderByElement> orderByElements;
     private IExpression having;
     private Limit limit;
+    private Offset offset;
+    private Fetch fetch;
     private Top top;
     private TeradataHierarchicalExpression teradataHierarchical = null;
     private boolean teradataSiblings = false;
+    private boolean forUpdate = false;
 
     /**
      * The {@link IFromItem} in this query.
@@ -58,8 +61,8 @@ public class PlainSelect implements ISelectBody {
         return fromItem;
     }
 
-    public Table getInto() {
-        return into;
+    public List<Table> getIntoTables() {
+        return intoTables;
     }
 
     /**
@@ -80,8 +83,8 @@ public class PlainSelect implements ISelectBody {
         fromItem = item;
     }
 
-    public void setInto(Table table) {
-        into = table;
+    public void setIntoTables(List<Table> intoTables) {
+        this.intoTables = intoTables;
     }
 
     public void setSelectItems(List<ISelectItem> list) {
@@ -127,6 +130,22 @@ public class PlainSelect implements ISelectBody {
 
     public void setLimit(Limit limit) {
         this.limit = limit;
+    }
+
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
+    }
+
+    public Fetch getFetch() {
+        return fetch;
+    }
+
+    public void setFetch(Fetch fetch) {
+        this.fetch = fetch;
     }
 
     public Top getTop() {
@@ -184,6 +203,14 @@ public class PlainSelect implements ISelectBody {
         this.teradataSiblings = teradataSiblings;
     }
 
+    public boolean isForUpdate() {
+        return forUpdate;
+    }
+
+    public void setForUpdate(boolean forUpdate) {
+        this.forUpdate = forUpdate;
+    }
+
     @Override
     public String toString() {
         StringBuilder sql = new StringBuilder("SELECT ");
@@ -194,6 +221,17 @@ public class PlainSelect implements ISelectBody {
             sql.append(top).append(" ");
         }
         sql.append(getStringList(selectItems));
+
+        if (intoTables != null) {
+            sql.append(" INTO ");
+            for (Iterator<Table> iter = intoTables.iterator(); iter.hasNext();) {
+                sql.append(iter.next().toString());
+                if (iter.hasNext()) {
+                    sql.append(", ");
+                }
+            }
+        }
+
         if (fromItem != null) {
             sql.append(" FROM ").append(fromItem);
             if (joins != null) {
@@ -220,6 +258,15 @@ public class PlainSelect implements ISelectBody {
             sql.append(orderByToString(teradataSiblings, orderByElements));
             if (limit != null) {
                 sql.append(limit);
+            }
+            if (offset != null) {
+                sql.append(offset);
+            }
+            if (fetch != null) {
+                sql.append(fetch);
+            }
+            if (isForUpdate()) {
+                sql.append(" FOR UPDATE");
             }
         }
         return sql.toString();

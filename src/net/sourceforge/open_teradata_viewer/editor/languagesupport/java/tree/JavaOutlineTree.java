@@ -47,8 +47,10 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.M
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.NormalClassDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.NormalInterfaceDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.Package;
+import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
  * A tree view showing the outline of Java source, similar to the "Outline" view
@@ -62,9 +64,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * contains multiple instances of SyntaxTextArea, you'll either need a separate
  * <code>JavaOutlineTree</code> for each one or call <code>uninstall()</code>
  * and <code>listenTo(SyntaxTextArea)</code> each time a new STA receives focus.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaOutlineTree extends AbstractSourceTree {
 
@@ -266,7 +268,8 @@ public class JavaOutlineTree extends AbstractSourceTree {
             IASTNode astNode = (IASTNode) obj;
             int start = astNode.getNameStartOffset();
             int end = astNode.getNameEndOffset();
-            textArea.select(start, end);
+            DocumentRange range = new DocumentRange(start, end);
+            SyntaxUtilities.selectAndPossiblyCenter(textArea, range, true);
         }
     }
 
@@ -330,9 +333,9 @@ public class JavaOutlineTree extends AbstractSourceTree {
     /**
      * Listens for events this tree is interested in (events in the associated
      * editor, for example), as well as events in this tree.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener implements PropertyChangeListener,
             TreeSelectionListener {

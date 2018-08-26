@@ -82,24 +82,32 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *  <tr>
  *   <td style="vertical-align: top">
  *    <ul>
+ *       <li>Assembly (X86)
  *       <li>C
- *       <li>Clojure
+ *       <li>C++
  *       <li>CSS
+ *       <li>C#
+ *       <li>Clojure
+ *       <li>D
+ *       <li>Dart
  *       <li>Groovy
  *       <li>HTML
  *       <li>Java
  *       <li>JavaScript
  *       <li>JSP
+ *       <li>Visual Basic
  *    </ul>
  *   </td>
  *   <td style="vertical-align: top">
  *    <ul>
+ *       <li>JSON
  *       <li>NSIS
  *       <li>Perl
  *       <li>PHP
  *       <li>Python
  *       <li>SQL
  *       <li>UNIX shell scripts
+ *       <li>Windows batch
  *       <li>XML files
  *    </ul>
  *   </td>
@@ -123,7 +131,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *
  * @author D. Campione
  * @see TextEditorPane
- * 
+ *
  */
 public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
@@ -326,7 +334,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Ctor.
-     * 
+     *
      * @param doc The document for the editor.
      */
     public SyntaxTextArea(SyntaxDocument doc) {
@@ -335,7 +343,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Ctor.
-     * 
+     *
      * @param text The initial text to display.
      */
     public SyntaxTextArea(String text) {
@@ -344,7 +352,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Ctor.
-     * 
+     *
      * @param rows The number of rows to display.
      * @param cols The number of columns to display.
      * @throws IllegalArgumentException If either <code>rows</code> or
@@ -356,7 +364,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Ctor.
-     * 
+     *
      * @param text The initial text to display.
      * @param rows The number of rows to display.
      * @param cols The number of columns to display.
@@ -369,7 +377,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Ctor.
-     * 
+     *
      * @param doc The document for the editor.
      * @param text The initial text to display.
      * @param rows The number of rows to display.
@@ -545,7 +553,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     /**
      * Overridden to toggle the enabled state of various SyntaxTextArea-specific
      * menu items.
-     * 
+     *
      * If you set the popup menu via {@link #setPopupMenu(JPopupMenu)}, you will
      * want to override this method, especially if you removed any of the menu
      * items in the default popup menu.
@@ -842,7 +850,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     /**
      * Forces the given {@link IParser} to re-parse the content of this text
      * area.<p>
-     * 
+     *
      * This method can be useful when a <code>IParser</code> can be configured
      * as to what notices it returns. For example, if a Java language parser can
      * be configured to set whether no serialVersionUID is a warning, error, or
@@ -1300,7 +1308,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * "match" when a matched bracket is found. Note that this property does
      * nothing if {@link #isBracketMatchingEnabled()} returns
      * <code>false</code>.
-     * 
+     *
      * @return Whether both brackets in a bracket pair are highlighted when
      *         bracket matching is enabled.
      * @see #setPaintMatchedBracketPair(boolean)
@@ -1345,6 +1353,17 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Returns the currently set parser delay. This is the delay that must occur
+     * between edits for any registered {@link IParser}s to run.
+     *
+     * @return The currently set parser delay, in milliseconds.
+     * @see #setParserDelay(int)
+     */
+    public int getParserDelay() {
+        return parserManager.getDelay();
+    }
+
+    /**
      * Returns a list of the current parser notices for this text area. This
      * method (like most Swing methods) should only be called on the EDT.
      *
@@ -1374,11 +1393,11 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * this one should be indented (based on the standard indentation rules for
      * the current programming language). For example, in Java, for a line
      * containing:
-     * 
+     *
      * <pre>
      * for (int i=0; i<10; i++) {
      * </pre>
-     * 
+     *
      * the following line should be indented.
      *
      * @param line The line to check.
@@ -2416,7 +2435,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      *
      * This method fires a property change event of type {@link
      * #PAINT_MATCHED_BRACKET_PAIR_PROPERTY}.
-     * 
+     *
      * @param paintPair Whether both brackets in a bracket pair should be
      *        highlighted when bracket matching is enabled.
      * @see #getPaintMatchedBracketPair()
@@ -2447,6 +2466,18 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             repaint();
             firePropertyChange(TAB_LINES_PROPERTY, !paint, paint);
         }
+    }
+
+    /**
+     * Sets the parser delay. This is the delay that must occur between edits
+     * for any registered {@link IParser}s to run.
+     *
+     * @param millis The new parser delay, in milliseconds. This must be greater
+     *        than zero.
+     * @see #getParserDelay()
+     */
+    public void setParserDelay(int millis) {
+        parserManager.setDelay(millis);
     }
 
     /**
@@ -2544,8 +2575,10 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             refreshFontMetrics(getGraphics2D(getGraphics()));
         }
 
-        // Updates the margin line
+        // Updates the margin line and "matched bracket" highlight
         updateMarginLineX();
+        lastBracketMatchPos = -1;
+        doBracketMatching();
 
         // Force the current line highlight to be repainted, even though the
         // caret's location hasn't changed
@@ -2567,7 +2600,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return <code>true</code> if the load was successful;
      *         <code>false</code> if either templates aren't currently enabled
      *         or the load failed somehow (most likely, the directory doesn't
-     *         exist).	 
+     *         exist).
      * @see #getTemplatesEnabled
      * @see #setTemplatesEnabled
      * @see #saveTemplates
@@ -2788,9 +2821,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     /**
      * Handles hyperlinks.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class SyntaxTextAreaMutableCaretEvent extends
             TextAreaMutableCaretEvent {

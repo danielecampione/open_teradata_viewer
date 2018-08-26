@@ -38,8 +38,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 import test.net.sourceforge.open_teradata_viewer.sqlparser.TestException;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -61,12 +61,23 @@ public class CreateTableTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
+    public void testCreateTableAsSelect() throws SQLParserException {
+        String statement = "CREATE TABLE a AS SELECT col1, col2 FROM b";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testCreateTableAsSelect2() throws SQLParserException {
+        String statement = "CREATE TABLE newtable AS WITH a AS (SELECT col1, col3 FROM testtable) SELECT col1, col2, col3 FROM b INNER JOIN a ON b.col1 = a.col1";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
     public void testCreateTable() throws SQLParserException {
         String statement = "CREATE TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
                 + "PRIMARY KEY (mycol2, mycol)) type = myisam";
         CreateTable createTable = (CreateTable) parserManager
                 .parse(new StringReader(statement));
         assertEquals(2, createTable.getColumnDefinitions().size());
+        assertFalse(createTable.isUnlogged());
         assertEquals("mycol", ((ColumnDefinition) createTable
                 .getColumnDefinitions().get(0)).getColumnName());
         assertEquals("mycol2", ((ColumnDefinition) createTable
@@ -76,6 +87,29 @@ public class CreateTableTest extends TestCase {
         assertEquals("mycol", ((Index) createTable.getIndexes().get(0))
                 .getColumnsNames().get(1));
         assertEquals(statement, "" + createTable);
+    }
+
+    public void testCreateTableUnlogged() throws SQLParserException {
+        String statement = "CREATE UNLOGGED TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
+                + "PRIMARY KEY (mycol2, mycol)) type = myisam";
+        CreateTable createTable = (CreateTable) parserManager
+                .parse(new StringReader(statement));
+        assertEquals(2, createTable.getColumnDefinitions().size());
+        assertTrue(createTable.isUnlogged());
+        assertEquals("mycol", ((ColumnDefinition) createTable
+                .getColumnDefinitions().get(0)).getColumnName());
+        assertEquals("mycol2", ((ColumnDefinition) createTable
+                .getColumnDefinitions().get(1)).getColumnName());
+        assertEquals("PRIMARY KEY",
+                ((Index) createTable.getIndexes().get(0)).getType());
+        assertEquals("mycol", ((Index) createTable.getIndexes().get(0))
+                .getColumnsNames().get(1));
+        assertEquals(statement, "" + createTable);
+    }
+
+    public void testCreateTableUnlogged2() throws SQLParserException {
+        String statement = "CREATE UNLOGGED TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, PRIMARY KEY (mycol2, mycol))";
+        assertSqlCanBeParsedAndDeparsed(statement);
     }
 
     public void testCreateTableForeignKey() throws SQLParserException {
@@ -91,6 +125,10 @@ public class CreateTableTest extends TestCase {
     public void testCreateTablePrimaryKey() throws SQLParserException {
         String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED, CONSTRAINT pk_name PRIMARY KEY (id))";
         assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testCreateTableParams() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("CREATE TEMPORARY TABLE T1 (PROCESSID VARCHAR (32)) ON COMMIT PRESERVE ROWS");
     }
 
     public void testRUBiSCreateList() throws Exception {

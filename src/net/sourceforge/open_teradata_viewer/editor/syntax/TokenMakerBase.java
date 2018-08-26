@@ -27,9 +27,9 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * Base class for token makers.
  *
  * @author D. Campione
- * 
+ *
  */
-abstract class TokenMakerBase implements ITokenMaker {
+public abstract class TokenMakerBase implements ITokenMaker {
 
     /** The first token in the returned linked list. */
     protected TokenImpl firstToken;
@@ -146,7 +146,7 @@ abstract class TokenMakerBase implements ITokenMaker {
     /**
      * Returns the closest {@link ITokenTypes "standard" token type} for a given
      * "internal" token type (e.g. one whose value is <code>&lt; 0</code>).<p>
-     * 
+     *
      * The default implementation returns <code>type</code> always, which
      * denotes that a mapping from internal token types to standard token types
      * is not defined; subclasses can override.
@@ -251,6 +251,16 @@ abstract class TokenMakerBase implements ITokenMaker {
     @Override
     public boolean getShouldIndentNextLineAfter(IToken token) {
         return false;
+    }
+
+    /**
+     * Returns whether a character could be part of an "identifier" token in a
+     * specific language. The default implementation returns <code>true</code>
+     * for letters, numbers and certain symbols.
+     */
+    @Override
+    public boolean isIdentifierChar(int languageIndex, char ch) {
+        return Character.isLetterOrDigit(ch) || ch == '_' || ch == '$';
     }
 
     /**

@@ -24,15 +24,18 @@ import java.awt.event.KeyEvent;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+import javax.swing.ListCellRenderer;
 
 import net.sourceforge.open_teradata_viewer.actions.GoToMemberAction;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.AutoCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.AbstractMarkupLanguageSupport;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.html.HtmlCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.tree.XmlOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * Language support for XML. Currently supported features include:
- * 
+ *
  * <ul>
  *    <li>Squiggle underlining of basic XML structure errors.</li>
  *    <li>Usage of {@link XmlOutlineTree}, a tree view modeling the XML in the
@@ -41,19 +44,40 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  *
  * @author D. Campione
  * @see XmlOutlineTree
- * 
+ *
  */
 public class XmlLanguageSupport extends AbstractMarkupLanguageSupport {
+
+    /** The shared completion provider instance for all XML editors. */
+    private XmlCompletionProvider provider;
 
     /** Whether syntax errors are squiggle-underlined in the editor. */
     private boolean showSyntaxErrors;
 
     /** Ctor. */
     public XmlLanguageSupport() {
-        setAutoCompleteEnabled(false);
+        setAutoActivationEnabled(true);
         setParameterAssistanceEnabled(false);
         setShowDescWindow(false);
         setShowSyntaxErrors(true);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected ListCellRenderer createDefaultCompletionCellRenderer() {
+        return new HtmlCellRenderer();
+    }
+
+    /**
+     * Lazily creates the shared completion provider instance for XML.
+     *
+     * @return The completion provider.
+     */
+    private XmlCompletionProvider getProvider() {
+        if (provider == null) {
+            provider = new XmlCompletionProvider();
+        }
+        return provider;
     }
 
     /**
@@ -86,8 +110,12 @@ public class XmlLanguageSupport extends AbstractMarkupLanguageSupport {
     /** {@inheritDoc} */
     @Override
     public void install(SyntaxTextArea textArea) {
-        // No code completion yet; this exists solely to support the tree view
-        // and identifying syntax errors
+        // Code completion currently only completes words found elsewhere in the
+        // editor
+        XmlCompletionProvider provider = getProvider();
+        AutoCompletion ac = createAutoCompletion(provider);
+        ac.install(textArea);
+        installImpl(textArea, ac);
 
         XmlParser parser = new XmlParser(this);
         textArea.addParser(parser);

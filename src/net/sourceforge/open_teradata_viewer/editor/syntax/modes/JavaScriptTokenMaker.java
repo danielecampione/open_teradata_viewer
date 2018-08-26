@@ -34,7 +34,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
 
 /**
  * Parses a document into JavaScript tokens.
- * 
+ *
  * Scanner for JavaScript files. Its states could be simplified but are kept the
  * way they are to keep a degree of similarity (i.e. copy/paste) between it and
  * HTML/JSP/PHPTokenMaker. This should cause no difference in performance.<p>
@@ -67,11 +67,11 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
  *       will be pointing the array somewhere else anyway.</li>
  *   <li>You should NOT call <code>yylex()</code> on the generated scanner
  *       directly; rather, you should use <code>getTokenList</code> as you would
- *       with any other <code>TokenMaker</code> instance.</li>
+ *       with any other <code>ITokenMaker</code> instance.</li>
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptTokenMaker extends AbstractJFlexCTokenMaker {
 
@@ -1381,7 +1381,7 @@ public class JavaScriptTokenMaker extends AbstractJFlexCTokenMaker {
     /**
      * Returns whether features for a specific JS version should be honored
      * while highlighting.
-     * 
+     *
      * @param version JavaScript version required.
      * @return Whether the JavaScript version is the same or greater than
      *         version required.
@@ -1473,7 +1473,7 @@ public class JavaScriptTokenMaker extends AbstractJFlexCTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed The packed character translation table.
@@ -1524,11 +1524,11 @@ public class JavaScriptTokenMaker extends AbstractJFlexCTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos) but faster.
      *
-     * @param pos the position of the character to fetch. 
+     * @param pos the position of the character to fetch.
      *       A value from 0 to yylength()-1.
      * @return The character at position pos.
      */

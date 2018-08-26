@@ -22,25 +22,26 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptHelper;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.CodeBlock;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDeclarationOptions;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType.JavaScriptTypesFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType.RhinoJavaScriptTypesFactory;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
  * Rhino specific JavaScriptAstParser.
- *  
+ *
  * Reads the importPackage and importClass from the parsed document and adds to
  * the RhinoJavaScriptTypesFactory.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
@@ -56,7 +57,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
     /**
      * Clear the importPackage and importClass cache.
-     * 
+     *
      * @param provider SourceCompletionProvider.
      */
     public void clearImportCache(SourceCompletionProvider provider) {
@@ -69,7 +70,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
     @Override
     public CodeBlock convertAstNodeToCodeBlock(AstRoot root,
-            Set<IJSCompletionUI> set, String entered) {
+            Set<ICompletion> set, String entered) {
         try {
             return super.convertAstNodeToCodeBlock(root, set, entered);
         } finally {
@@ -99,7 +100,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
      * super.iterateNode().
      */
     @Override
-    protected void iterateNode(AstNode child, Set<IJSCompletionUI> set,
+    protected void iterateNode(AstNode child, Set<ICompletion> set,
             String entered, CodeBlock block, int offset) {
         // Look for importPackage and importClass
         switch (child.getType()) {
@@ -117,7 +118,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
     /**
      * Look for text importPackage and importClass and add to cache.
-     * 
+     *
      * @param child AstNode to check. This will always be Token.EXPR_RESULT
      *        AstNode.
      * @param set Set to add completions.
@@ -126,7 +127,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
      * @param offset Position of AstNode within document.
      * @return true if either importPackage or importClass is found.
      */
-    private boolean processImportNode(AstNode child, Set<IJSCompletionUI> set,
+    private boolean processImportNode(AstNode child, Set<ICompletion> set,
             String entered, CodeBlock block, int offset) {
         String src = JavaScriptHelper.convertNodeToSource(child);
         if (src != null) {
@@ -181,7 +182,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
     /**
      * Adds package name to RhinoJavaScriptTypesFactory.
-     * 
+     *
      * @param src Source text to extract the package.
      */
     private void processImportPackage(String src) {
@@ -191,7 +192,7 @@ public class RhinoJavaScriptAstParser extends JavaScriptAstParser {
 
     /**
      * Adds class name to RhinoJavaScriptTypesFactory.
-     * 
+     *
      * @param src Source text to extract the class name.
      */
     private void processImportClass(String src) {

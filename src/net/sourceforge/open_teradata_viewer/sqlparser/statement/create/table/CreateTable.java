@@ -24,19 +24,23 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
 
 /**
  * A "CREATE TABLE" statement.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class CreateTable implements IStatement {
 
     private Table table;
+    private boolean unlogged = false;
+    private List<String> createOptionsStrings;
     private List<String> tableOptionsStrings;
     private List<ColumnDefinition> columnDefinitions;
     private List<Index> indexes;
+    private Select select;
 
     @Override
     public void accept(IStatementVisitor statementVisitor) {
@@ -50,6 +54,15 @@ public class CreateTable implements IStatement {
 
     public void setTable(Table table) {
         this.table = table;
+    }
+
+    /** Whether the table is unlogged or not. */
+    public boolean isUnlogged() {
+        return unlogged;
+    }
+
+    public void setUnlogged(boolean unlogged) {
+        this.unlogged = unlogged;
     }
 
     /** A list of {@link ColumnDefinition}s of this table. */
@@ -73,6 +86,14 @@ public class CreateTable implements IStatement {
         tableOptionsStrings = list;
     }
 
+    public List<String> getCreateOptionsStrings() {
+        return createOptionsStrings;
+    }
+
+    public void setCreateOptionsStrings(List<String> createOptionsStrings) {
+        this.createOptionsStrings = createOptionsStrings;
+    }
+
     /**
      * A list of {@link Index}es (for example "PRIMARY KEY") of this table.<br>
      * Indexes created with column definitions (as in mycol INT PRIMARY KEY) are
@@ -86,22 +107,40 @@ public class CreateTable implements IStatement {
         indexes = list;
     }
 
+    public Select getSelect() {
+        return select;
+    }
+
+    public void setSelect(Select select) {
+        this.select = select;
+    }
+
     @Override
     public String toString() {
         String sql = "";
+        String createOps = PlainSelect.getStringList(createOptionsStrings,
+                false, false);
 
-        sql = "CREATE TABLE " + table + " (";
+        sql = "CREATE " + (unlogged ? "UNLOGGED " : "")
+                + (!"".equals(createOps) ? createOps + " " : "") + "TABLE "
+                + table;
 
-        sql += PlainSelect.getStringList(columnDefinitions, true, false);
-        if (indexes != null && indexes.size() != 0) {
-            sql += ", ";
-            sql += PlainSelect.getStringList(indexes);
-        }
-        sql += ")";
-        String options = PlainSelect.getStringList(tableOptionsStrings, false,
-                false);
-        if (options != null && options.length() > 0) {
-            sql += " " + options;
+        if (select != null) {
+            sql += " AS " + select.toString();
+        } else {
+            sql += " (";
+
+            sql += PlainSelect.getStringList(columnDefinitions, true, false);
+            if (indexes != null && indexes.size() != 0) {
+                sql += ", ";
+                sql += PlainSelect.getStringList(indexes);
+            }
+            sql += ")";
+            String options = PlainSelect.getStringList(tableOptionsStrings,
+                    false, false);
+            if (options != null && options.length() > 0) {
+                sql += " " + options;
+            }
         }
 
         return sql;

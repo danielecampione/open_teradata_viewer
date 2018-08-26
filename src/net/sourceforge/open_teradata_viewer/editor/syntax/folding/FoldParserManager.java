@@ -30,7 +30,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
  * their language to this manager and it will be used by STA.
  *
  * @author D. Campione
- * 
+ *
  */
 public class FoldParserManager implements ISyntaxConstants {
 
@@ -61,13 +61,15 @@ public class FoldParserManager implements ISyntaxConstants {
 
     /**
      * Creates the syntax style-to-fold parser mapping for built-in languages.
-     * 
+     *
      * @return The style-to-fold parser mapping.
      */
     private Map<String, IFoldParser> createFoldParserMap() {
         Map<String, IFoldParser> map = new HashMap<String, IFoldParser>();
 
         map.put(SYNTAX_STYLE_C, new CurlyFoldParser());
+        map.put(SYNTAX_STYLE_CPLUSPLUS, new CurlyFoldParser());
+        map.put(SYNTAX_STYLE_CSHARP, new CurlyFoldParser());
         map.put(SYNTAX_STYLE_CLOJURE, new LispFoldParser());
         map.put(SYNTAX_STYLE_CSS, new CurlyFoldParser());
         map.put(SYNTAX_STYLE_GROOVY, new CurlyFoldParser());
@@ -75,6 +77,7 @@ public class FoldParserManager implements ISyntaxConstants {
                 HtmlFoldParser.LANGUAGE_HTML));
         map.put(SYNTAX_STYLE_JAVA, new CurlyFoldParser(true, true));
         map.put(SYNTAX_STYLE_JAVASCRIPT, new CurlyFoldParser());
+        map.put(SYNTAX_STYLE_JSON, new JsonFoldParser());
         map.put(SYNTAX_STYLE_JSP, new HtmlFoldParser(
                 HtmlFoldParser.LANGUAGE_JSP));
         map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));

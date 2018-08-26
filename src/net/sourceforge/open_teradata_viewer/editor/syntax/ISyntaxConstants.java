@@ -32,18 +32,36 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * have a factory installed capable of handling all of these languages.
  *
  * @author D. Campione
- * 
+ *
  */
 public interface ISyntaxConstants {
 
     /** Style meaning don't syntax highlight anything. */
     public static final String SYNTAX_STYLE_NONE = "text/plain";
 
+    /** Style for highlighting x86 assembly. */
+    public static final String SYNTAX_STYLE_ASSEMBLY_X86 = "text/asm";
+
     /** Style for highlighting C. */
     public static final String SYNTAX_STYLE_C = "text/c";
 
+    /** Style for highlighting Clojure. */
+    public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
+
+    /** Style for highlighting C++. */
+    public static final String SYNTAX_STYLE_CPLUSPLUS = "text/cpp";
+
+    /** Style for highlighting C#. */
+    public static final String SYNTAX_STYLE_CSHARP = "text/cs";
+
     /** Style for highlighting CSS. */
     public static final String SYNTAX_STYLE_CSS = "text/css";
+
+    /** Syntax style for highlighting D. */
+    public static final String SYNTAX_STYLE_D = "text/d";
+
+    /** Style for highlighting Dart. */
+    public static final String SYNTAX_STYLE_DART = "text/dart";
 
     /** Style for highlighting Groovy. */
     public static final String SYNTAX_STYLE_GROOVY = "text/groovy";
@@ -51,14 +69,14 @@ public interface ISyntaxConstants {
     /** Style for highlighting HTML. */
     public static final String SYNTAX_STYLE_HTML = "text/html";
 
-    /** Style for highlighting Clojure. */
-    public static final String SYNTAX_STYLE_CLOJURE = "text/clojure";
-
     /** Style for highlighting Java. */
     public static final String SYNTAX_STYLE_JAVA = "text/java";
 
     /** Style for highlighting JavaScript. */
     public static final String SYNTAX_STYLE_JAVASCRIPT = "text/javascript";
+
+    /** Style for highlighting JSON. */
+    public static final String SYNTAX_STYLE_JSON = "text/json";
 
     /** Style for highlighting JSP. */
     public static final String SYNTAX_STYLE_JSP = "text/jsp";
@@ -80,6 +98,12 @@ public interface ISyntaxConstants {
 
     /** Style for highlighting UNIX shell keywords. */
     public static final String SYNTAX_STYLE_UNIX_SHELL = "text/unix";
+
+    /** Style for highlighting Visual Basic. */
+    public static final String SYNTAX_STYLE_VISUAL_BASIC = "text/vb";
+
+    /** Style for highlighting Windows batch files. */
+    public static final String SYNTAX_STYLE_WINDOWS_BATCH = "text/bat";
 
     /** Style for highlighting XML. */
     public static final String SYNTAX_STYLE_XML = "text/xml";

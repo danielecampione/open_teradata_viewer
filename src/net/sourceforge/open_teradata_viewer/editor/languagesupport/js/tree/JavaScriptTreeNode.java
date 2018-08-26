@@ -25,7 +25,8 @@ import javax.swing.text.Position;
 
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.SourceTreeNode;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.util.RhinoUtil;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
+
+import org.mozilla.javascript.ast.AstNode;
 
 /**
  * Tree node for JavaScript outline trees.

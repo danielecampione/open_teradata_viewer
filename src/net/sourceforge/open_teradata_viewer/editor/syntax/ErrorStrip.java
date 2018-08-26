@@ -41,6 +41,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
@@ -122,9 +123,6 @@ public class ErrorStrip extends JComponent {
 
     /** The preferred width of this component. */
     private static final int PREFERRED_WIDTH = 14;
-
-    private static final Color MARKED_OCCURRENCE_COLOR = new Color(220, 220,
-            220);
 
     /**
      * Ctor.
@@ -274,7 +272,7 @@ public class ErrorStrip extends JComponent {
     private int lineToY(int line) {
         int h = textArea.getVisibleRect().height;
         float lineCount = textArea.getLineCount();
-        return (int) ((line / lineCount) * h) - 2;
+        return (int) (((line - 1) / (lineCount - 1)) * h) - 2;
     }
 
     /**
@@ -328,7 +326,8 @@ public class ErrorStrip extends JComponent {
 
         if (getShowMarkedOccurrences() && textArea.getMarkOccurrences()) {
             List<DocumentRange> occurrences = textArea.getMarkedOccurrences();
-            addMarkersForRanges(occurrences, markerMap, MARKED_OCCURRENCE_COLOR);
+            addMarkersForRanges(occurrences, markerMap,
+                    textArea.getMarkOccurrencesColor());
         }
 
         if (getShowMarkAll() /*&& textArea.getMarkAll()*/) {
@@ -479,7 +478,7 @@ public class ErrorStrip extends JComponent {
         int h = textArea.getVisibleRect().height;
         if (y < h) {
             float at = y / (float) h;
-            line = (int) (textArea.getLineCount() * at);
+            line = Math.round((textArea.getLineCount() - 1) * at);
         }
         return line;
     }
@@ -499,7 +498,7 @@ public class ErrorStrip extends JComponent {
         public void caretUpdate(CaretEvent e) {
             if (getFollowCaret()) {
                 int line = textArea.getCaretLineNumber();
-                float percent = line / ((float) textArea.getLineCount());
+                float percent = line / (float) (textArea.getLineCount() - 1);
                 textArea.computeVisibleRect(visibleRect);
                 caretLineY = (int) (visibleRect.height * percent);
                 if (caretLineY != lastLineY) {
@@ -615,8 +614,9 @@ public class ErrorStrip extends JComponent {
         @Override
         public int getLine() {
             try {
-                return textArea.getLineOfOffset(range.getStartOffset());
+                return textArea.getLineOfOffset(range.getStartOffset()) + 1;
             } catch (BadLocationException ble) {
+                ExceptionDialog.ignoreException(ble);
                 return 0;
             }
         }

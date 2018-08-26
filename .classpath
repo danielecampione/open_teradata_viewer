@@ -4,11 +4,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/itextpdf-5.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/itextpdf-5.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-looks-2.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/joda-time-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/joda-time-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/js-14.jar"/>
 	<classpathentry kind="lib" path="lib/l2fprod-common-all.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.10-20140208.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.10.1-20140818.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

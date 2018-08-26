@@ -31,9 +31,9 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion
  * Cached Type Tree Node with pointer to a list of super classes to make it easy
  * to walk through Completion hierarchy. Contains a HashMap of lookup keys to
  * <code>IJSCompletion</code>
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptType {
 
@@ -58,7 +58,7 @@ public class JavaScriptType {
 
     /**
      * Add method or field completion to CachedType.
-     * 
+     *
      * @see IJSCompletion
      */
     public void addCompletion(IJSCompletion completion) {
@@ -99,7 +99,7 @@ public class JavaScriptType {
 
     /**
      * Set the class type completion, e.g String, Number.
-     * 
+     *
      * @param classType Completion to format the class.
      */
     public void setClassTypeCompletion(IJSCompletion classType) {
@@ -141,10 +141,9 @@ public class JavaScriptType {
                 provider);
         if (completion == null) {
             // Try the extended types
-            for (Iterator i = cachedType.getExtendedClasses().iterator(); i
-                    .hasNext();) {
-                completion = getCompletion((JavaScriptType) i.next(),
-                        completionLookup, provider);
+            for (Iterator<JavaScriptType> i = cachedType.getExtendedClasses()
+                    .iterator(); i.hasNext();) {
+                completion = getCompletion(i.next(), completionLookup, provider);
                 if (completion != null) {
                     break;
                 }
@@ -175,7 +174,7 @@ public class JavaScriptType {
 
     /**
      * Add Cached Type extension.
-     * 
+     *
      * @see JavaScriptType
      */
     public void addExtension(JavaScriptType type) {
@@ -208,7 +207,7 @@ public class JavaScriptType {
 
     /**
      * Overridden since {@link #equals(Object)} is overridden.
-     * 
+     *
      * @return The hash code.
      */
     @Override

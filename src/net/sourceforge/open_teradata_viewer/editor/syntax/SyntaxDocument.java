@@ -57,7 +57,7 @@ import net.sourceforge.open_teradata_viewer.util.DynamicIntArray;
  * should really be corrected, but oh well.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
         ISyntaxConstants {
@@ -404,8 +404,21 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
     }
 
     /**
-     * Returns an iterator over the tokens in this document. Results are
-     * undefined if this document is modified while the iterator is being
+     * Returns whether a character could be part of an "identifier" token in a
+     * specific language. This is used to identify such things as the bounds of
+     * the "word" to select on double-clicking.
+     *
+     * @param languageIndex The language index the character was found in.
+     * @param ch The character.
+     * @return Whether the character could be part of an "identifier" token.
+     */
+    public boolean isIdentifierChar(int languageIndex, char ch) {
+        return tokenMaker.isIdentifierChar(languageIndex, ch);
+    }
+
+    /**
+     * Returns an iterator over the paintable tokens in this document. Results
+     * are undefined if this document is modified while the iterator is being
      * iterated through, so this should only be used on the EDT.<p>
      *
      * The <code>remove()</code> method of the returned iterator will throw an

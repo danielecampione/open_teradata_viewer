@@ -42,12 +42,13 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThanEquals;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -146,4 +147,8 @@ public interface IExpressionVisitor {
     void visit(TeradataHierarchicalExpression texpr);
 
     void visit(RegExpMatchOperator rexpr);
+
+    void visit(JsonExpression jsonExpr);
+
+    void visit(RegExpTeradataOperator regExpTeradataOperator);
 }

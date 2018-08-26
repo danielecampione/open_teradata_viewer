@@ -26,21 +26,28 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 
 /**
- * The insert statement. Every column name in
- * <code>columnNames</code> matches an item in
- * <code>iItemsList</code>.
- * 
+ * The insert statement. Every column name in <code>columnNames</code> matches
+ * an item in <code>itemsList</code>.
+ *
  * @author D. Campione
- * 
+ *
  */
 public class Insert implements IStatement {
 
     private Table table;
     private List<Column> columns;
-    private IItemsList iItemsList;
+    private IItemsList itemsList;
     private boolean useValues = true;
+    private Select select;
+    private boolean useSelectBrackets = true;
+
+    private boolean returningAllColumns = false;
+
+    private List<SelectExpressionItem> returningExpressionList = null;
 
     @Override
     public void accept(IStatementVisitor statementVisitor) {
@@ -74,11 +81,11 @@ public class Insert implements IStatement {
      * @return the values of the insert.
      */
     public IItemsList getItemsList() {
-        return iItemsList;
+        return itemsList;
     }
 
     public void setItemsList(IItemsList list) {
-        iItemsList = list;
+        itemsList = list;
     }
 
     public boolean isUseValues() {
@@ -89,21 +96,76 @@ public class Insert implements IStatement {
         this.useValues = useValues;
     }
 
+    public boolean isReturningAllColumns() {
+        return returningAllColumns;
+    }
+
+    public void setReturningAllColumns(boolean returningAllColumns) {
+        this.returningAllColumns = returningAllColumns;
+    }
+
+    public List<SelectExpressionItem> getReturningExpressionList() {
+        return returningExpressionList;
+    }
+
+    public void setReturningExpressionList(
+            List<SelectExpressionItem> returningExpressionList) {
+        this.returningExpressionList = returningExpressionList;
+    }
+
+    public Select getSelect() {
+        return select;
+    }
+
+    public void setSelect(Select select) {
+        this.select = select;
+    }
+
+    public boolean isUseSelectBrackets() {
+        return useSelectBrackets;
+    }
+
+    public void setUseSelectBrackets(boolean useSelectBrackets) {
+        this.useSelectBrackets = useSelectBrackets;
+    }
+
     @Override
     public String toString() {
-        String sql = "";
+        StringBuilder sql = new StringBuilder();
 
-        sql = "INSERT INTO ";
-        sql += table + " ";
-        sql += ((columns != null) ? PlainSelect.getStringList(columns, true,
-                true) + " " : "");
-
-        if (useValues) {
-            sql += "VALUES " + iItemsList + "";
-        } else {
-            sql += "" + iItemsList + "";
+        sql.append("INSERT INTO ");
+        sql.append(table).append(" ");
+        if (columns != null) {
+            sql.append(PlainSelect.getStringList(columns, true, true)).append(
+                    " ");
         }
 
-        return sql;
+        if (useValues) {
+            sql.append("VALUES ");
+        }
+
+        if (itemsList != null) {
+            sql.append(itemsList);
+        }
+
+        if (useSelectBrackets) {
+            sql.append("(");
+        }
+        if (select != null) {
+            sql.append(select);
+        }
+        if (useSelectBrackets) {
+            sql.append(")");
+        }
+
+        if (isReturningAllColumns()) {
+            sql.append(" RETURNING *");
+        } else if (getReturningExpressionList() != null) {
+            sql.append(" RETURNING ").append(
+                    PlainSelect.getStringList(getReturningExpressionList(),
+                            true, false));
+        }
+
+        return sql.toString();
     }
 }

@@ -24,29 +24,30 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.CodeBlock;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDeclarationOptions;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
-import sun.org.mozilla.javascript.internal.CompilerEnvirons;
-import sun.org.mozilla.javascript.internal.Parser;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
  * Scripts to be processed before parsing main script text.
- * 
+ *
  * Useful for includes within JavaScript client.
- * 
+ *
  * Caches the completions so they do not have to parsed every single time the
  * main script text is parsed.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class PreProcesssingScripts {
 
     private SourceCompletionProvider provider;
 
-    private Set<IJSCompletionUI> preProcessingCompletions = new HashSet<IJSCompletionUI>();
+    private Set<ICompletion> preProcessingCompletions = new HashSet<ICompletion>();
 
     public PreProcesssingScripts(SourceCompletionProvider provider) {
         this.provider = provider;
@@ -79,7 +80,7 @@ public class PreProcesssingScripts {
         provider.getVariableResolver().resetPreProcessingVariables(true);
     }
 
-    public Set<IJSCompletionUI> getCompletions() {
+    public Set<ICompletion> getCompletions() {
         return preProcessingCompletions;
     }
 }

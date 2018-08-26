@@ -18,11 +18,15 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.insert;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
 
 import java.io.StringReader;
 
-import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
@@ -34,22 +38,20 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
+
+import org.junit.Test;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
-public class InsertTest extends TestCase {
+public class InsertTest {
 
     CCSqlParserManager parserManager = new CCSqlParserManager();
 
-    public InsertTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testRegularInsert() throws SQLParserException {
         String statement = "INSERT INTO mytable (col1, col2, col3) VALUES (?, 'sadfsd', 234)";
         Insert insert = (Insert) parserManager
@@ -88,6 +90,7 @@ public class InsertTest extends TestCase {
 
     }
 
+    @Test
     public void testInsertWithKeywordValue() throws SQLParserException {
         String statement = "INSERT INTO mytable (col1) VALUE ('val1')";
         Insert insert = (Insert) parserManager
@@ -103,6 +106,7 @@ public class InsertTest extends TestCase {
                 insert.toString());
     }
 
+    @Test
     public void testInsertFromSelect() throws SQLParserException {
         String statement = "INSERT INTO mytable (col1, col2, col3) SELECT * FROM mytable2";
         Insert insert = (Insert) parserManager
@@ -115,20 +119,22 @@ public class InsertTest extends TestCase {
                 ((Column) insert.getColumns().get(1)).getColumnName());
         assertEquals("col3",
                 ((Column) insert.getColumns().get(2)).getColumnName());
-        assertTrue(insert.getItemsList() instanceof SubSelect);
-        assertEquals("mytable2",
-                ((Table) ((PlainSelect) ((SubSelect) insert.getItemsList())
-                        .getSelectBody()).getFromItem()).getName());
+        assertNull(insert.getItemsList());
+        assertNotNull(insert.getSelect());
+        assertEquals("mytable2", ((Table) ((PlainSelect) insert.getSelect()
+                .getSelectBody()).getFromItem()).getName());
 
         // toString uses brakets
-        String statementToString = "INSERT INTO mytable (col1, col2, col3) (SELECT * FROM mytable2)";
+        String statementToString = "INSERT INTO mytable (col1, col2, col3) SELECT * FROM mytable2";
         assertEquals(statementToString, "" + insert);
     }
 
+    @Test
     public void testInsertMultiRowValue() throws SQLParserException {
         assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e)");
     }
 
+    @Test
     public void testInsertMultiRowValueDifferent() throws SQLParserException {
         try {
             assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
@@ -139,7 +145,40 @@ public class InsertTest extends TestCase {
         fail("should not work");
     }
 
+    @Test
     public void testSimpleInsert() throws SQLParserException {
         assertSqlCanBeParsedAndDeparsed("INSERT INTO example (num, name, address, tel) VALUES (1, 'name', 'test ', '1234-1234')");
+    }
+
+    @Test
+    public void testInsertWithReturning() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id");
+    }
+
+    @Test
+    public void testInsertWithReturning2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING *");
+    }
+
+    @Test
+    public void testInsertWithReturning3() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id AS a1, id2 AS a2");
+    }
+
+    @Test
+    public void testInsertSelect() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) SELECT mycolumn FROM mytable");
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) (SELECT mycolumn FROM mytable)");
+    }
+
+    @Test
+    public void testInsertWithSelect() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a");
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) (WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a)");
+    }
+
+    @Test
+    public void testInsertWithKeywords() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("INSERT INTO kvPair (value, key) VALUES (?, ?)");
     }
 }

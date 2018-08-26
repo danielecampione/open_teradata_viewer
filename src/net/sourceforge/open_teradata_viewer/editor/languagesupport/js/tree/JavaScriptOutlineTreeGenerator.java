@@ -29,20 +29,21 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.IconFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.util.RhinoUtil;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.Assignment;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.ExpressionStatement;
-import sun.org.mozilla.javascript.internal.ast.FunctionCall;
-import sun.org.mozilla.javascript.internal.ast.FunctionNode;
-import sun.org.mozilla.javascript.internal.ast.Name;
-import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
-import sun.org.mozilla.javascript.internal.ast.ObjectLiteral;
-import sun.org.mozilla.javascript.internal.ast.ObjectProperty;
-import sun.org.mozilla.javascript.internal.ast.PropertyGet;
-import sun.org.mozilla.javascript.internal.ast.VariableDeclaration;
-import sun.org.mozilla.javascript.internal.ast.VariableInitializer;
+
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ExpressionStatement;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.ObjectLiteral;
+import org.mozilla.javascript.ast.ObjectProperty;
+import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.VariableDeclaration;
+import org.mozilla.javascript.ast.VariableInitializer;
 
 /**
  * Generates the root node for a {@link JavaScriptOutlineTree} based on a Rhino

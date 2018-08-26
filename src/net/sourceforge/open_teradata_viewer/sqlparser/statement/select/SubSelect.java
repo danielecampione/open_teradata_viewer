@@ -26,14 +26,15 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 
 /**
  * A subselect followed by an optional alias.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class SubSelect implements IFromItem, IExpression, IItemsList {
 
     private ISelectBody selectBody;
     private Alias alias;
+    private boolean useBrackets = true;
 
     private Pivot pivot;
 
@@ -75,6 +76,14 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
         this.pivot = pivot;
     }
 
+    public boolean isUseBrackets() {
+        return useBrackets;
+    }
+
+    public void setUseBrackets(boolean useBrackets) {
+        this.useBrackets = useBrackets;
+    }
+
     @Override
     public void accept(IItemsListVisitor iItemsListVisitor) {
         iItemsListVisitor.visit(this);
@@ -82,7 +91,8 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
 
     @Override
     public String toString() {
-        return "(" + selectBody + ")" + ((pivot != null) ? " " + pivot : "")
+        return (useBrackets ? "(" : "") + selectBody + (useBrackets ? ")" : "")
+                + ((pivot != null) ? " " + pivot : "")
                 + ((alias != null) ? alias.toString() : "");
     }
 }

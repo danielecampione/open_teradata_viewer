@@ -21,31 +21,40 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
  * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class UpdateDeParser {
 
     private StringBuilder buffer;
     private IExpressionVisitor expressionVisitor;
+    private ISelectVisitor selectVisitor;
 
     /**
      * @param expressionVisitor a {@link IExpressionVisitor} to de-parse
      * expressions. It has to share the same<br>
      * StringBuilder (buffer parameter) as this object in order to work.
-     * @param buffer the buffer that will be filled with the select.
+     * @param selectVisitor A {@link ISelectVisitor} to de-parse {@link
+     * net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select}s.
+     * It has to share the same<br>
+     * StringBuilder (buffer parameter) as this object in order to work.
+     * @param buffer The buffer that will be filled with the select.
      */
     public UpdateDeParser(IExpressionVisitor expressionVisitor,
-            StringBuilder buffer) {
+            ISelectVisitor selectVisitor, StringBuilder buffer) {
         this.buffer = buffer;
         this.expressionVisitor = expressionVisitor;
+        this.selectVisitor = selectVisitor;
     }
 
     public StringBuilder getBuffer() {
@@ -57,16 +66,40 @@ public class UpdateDeParser {
     }
 
     public void deParse(Update update) {
-        buffer.append("UPDATE ").append(update.getTable()).append(" SET ");
-        for (int i = 0; i < update.getColumns().size(); i++) {
-            Column column = update.getColumns().get(i);
-            buffer.append(column.getFullyQualifiedName()).append(" = ");
+        buffer.append("UPDATE ")
+                .append(PlainSelect.getStringList(update.getTables(), true,
+                        false)).append(" SET ");
 
-            IExpression expression = update.getExpressions().get(i);
-            expression.accept(expressionVisitor);
-            if (i < update.getColumns().size() - 1) {
-                buffer.append(", ");
+        if (!update.isUseSelect()) {
+            for (int i = 0; i < update.getColumns().size(); i++) {
+                Column column = update.getColumns().get(i);
+                buffer.append(column.getFullyQualifiedName()).append(" = ");
+
+                IExpression expression = update.getExpressions().get(i);
+                expression.accept(expressionVisitor);
+                if (i < update.getColumns().size() - 1) {
+                    buffer.append(", ");
+                }
             }
+        } else {
+            if (update.isUseColumnsBrackets()) {
+                buffer.append("(");
+            }
+            for (int i = 0; i < update.getColumns().size(); i++) {
+                if (i != 0) {
+                    buffer.append(", ");
+                }
+                Column column = update.getColumns().get(i);
+                buffer.append(column.getFullyQualifiedName());
+            }
+            if (update.isUseColumnsBrackets()) {
+                buffer.append(")");
+            }
+            buffer.append(" = ");
+            buffer.append("(");
+            Select select = update.getSelect();
+            select.getSelectBody().accept(selectVisitor);
+            buffer.append(")");
         }
 
         if (update.getFromItem() != null) {

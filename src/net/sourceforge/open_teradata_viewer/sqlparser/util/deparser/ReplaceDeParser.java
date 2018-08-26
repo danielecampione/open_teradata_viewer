@@ -33,9 +33,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
  * string) a {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ReplaceDeParser implements IItemsListVisitor {
 
@@ -100,6 +100,14 @@ public class ReplaceDeParser implements IItemsListVisitor {
                     buffer.append(", ");
                 }
             }
+        }
+
+        if (replace.getItemsList() != null) {
+            if (replace.isUseValues()) {
+                buffer.append(" VALUES");
+            }
+
+            buffer.append(replace.getItemsList());
         }
     }
 

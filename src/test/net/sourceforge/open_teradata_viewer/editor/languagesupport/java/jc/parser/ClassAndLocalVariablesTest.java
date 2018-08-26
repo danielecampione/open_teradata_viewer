@@ -41,7 +41,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.parse
 
 /**
  * Simple test case verifying parsing common cases of:
- * 
+ *
  * <ul>
  *    <li>Class members (methods and fields)
  *    <li>Local variables
@@ -49,7 +49,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.parse
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 public class ClassAndLocalVariablesTest extends TestCase {
 
@@ -104,10 +104,14 @@ public class ClassAndLocalVariablesTest extends TestCase {
         assertEquals("java.util.List", id.getName());
         assertEquals(false, id.isWildcard());
         assertEquals(false, id.isStatic());
+
+        id = i.next();
+        assertEquals("java.lang.Math.*", id.getName());
+        assertEquals(true, id.isWildcard());
+        assertEquals(true, id.isStatic());
     }
 
     public void testMembers() throws IOException {
-
         // A single class is defined
         assertEquals(1, cu.getTypeDeclarationCount());
 
@@ -115,12 +119,12 @@ public class ClassAndLocalVariablesTest extends TestCase {
         ITypeDeclaration typeDec = cu.getTypeDeclarationIterator().next();
         assertEquals("SimpleClass", typeDec.getName());
 
-        // 4 fields, 1 constructor and 3 methods
+        // 4 fields, 1 constructor and 4 methods
         int memberCount = typeDec.getMemberCount();
-        assertEquals(8, memberCount);
+        assertEquals(9, memberCount);
 
-        // Iterate through members.  They should be returned in the
-        // order they are found in.
+        // Iterate through members. They should be returned in the order they
+        // are found in
         Iterator<IMember> i = typeDec.getMemberIterator();
 
         IMember member = i.next();
@@ -153,7 +157,7 @@ public class ClassAndLocalVariablesTest extends TestCase {
         assertTrue(member instanceof Field);
         field = (Field) member;
         assertEquals("list", field.getName());
-        assertEquals("List<String>", field.getType().toString());
+        assertEquals("List<Double>", field.getType().toString());
         assertTrue(field.getModifiers().isPrivate());
         assertEquals(field.getDocComment(), null);
 
@@ -175,9 +179,16 @@ public class ClassAndLocalVariablesTest extends TestCase {
         member = i.next();
         assertTrue(member instanceof Method);
         method = (Method) member;
+        assertEquals("computeValue", method.getName());
+        assertTrue(method.getModifiers().isPrivate());
+        assertNull(method.getDocComment());
+
+        member = i.next();
+        assertTrue(member instanceof Method);
+        method = (Method) member;
         assertEquals("localVarsComplex", method.getName());
         assertTrue(method.getModifiers().isPublic());
-        // This method takes two parameters.
+        // This method takes two parameters
         assertEquals(2, method.getParameterCount());
         FormalParameter param = method.getParameter(0);
         assertEquals("newValue", param.getName());
@@ -189,32 +200,28 @@ public class ClassAndLocalVariablesTest extends TestCase {
         method = (Method) member;
         assertEquals("localVarsSimple", method.getName());
         assertTrue(method.getModifiers().isPublic());
-
     }
 
     public void testLocalVariablesComplex() {
-
         ITypeDeclaration td = cu.getTypeDeclaration(0);
         List<Method> methods = td.getMethodsByName("localVarsComplex");
         assertEquals(1, methods.size());
         Method method = methods.get(0);
         CodeBlock body = method.getBody();
-        assertEquals(1, body.getLocalVarCount());
+        assertEquals(5, body.getLocalVarCount());
 
         LocalVariable var = body.getLocalVar(0);
         assertEquals("int", var.getType().getName(false));
         assertEquals("foo", var.getName());
 
-        for (int i = 1; i < 1; i++) {
+        for (int i = 1; i < 5; i++) {
             var = body.getLocalVar(i);
             assertEquals("double", var.getType().getName(false));
             assertEquals("val" + i, var.getName());
         }
-
     }
 
     public void testLocalVariablesSimple() {
-
         ITypeDeclaration td = cu.getTypeDeclaration(0);
         List<Method> methods = td.getMethodsByName("localVarsSimple");
         assertEquals(1, methods.size());
@@ -238,5 +245,4 @@ public class ClassAndLocalVariablesTest extends TestCase {
         assertEquals("f", var.getName());
 
     }
-
 }

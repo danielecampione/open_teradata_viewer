@@ -24,6 +24,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Cre
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.execute.Execute;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
@@ -31,8 +32,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.Truncat
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -61,4 +62,6 @@ public interface IStatementVisitor {
     void visit(Alter alter);
 
     void visit(Statements stmts);
+
+    void visit(Execute execute);
 }

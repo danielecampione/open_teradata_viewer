@@ -68,7 +68,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 public class ConfigurableCaret extends DefaultCaret {
 
@@ -97,6 +97,8 @@ public class ConfigurableCaret extends DefaultCaret {
      * area's selection color.
      */
     private ChangeableHighlightPainter selectionPainter;
+
+    private boolean alwaysVisible;
 
     /** Creates the caret using {@link CaretStyle#THICK_VERTICAL_LINE_STYLE}. */
     public ConfigurableCaret() {
@@ -236,6 +238,19 @@ public class ConfigurableCaret extends DefaultCaret {
     }
 
     /**
+     * Returns whether this caret is always visible (as opposed to blinking or
+     * not visible when the editor's window is not focused).
+     * This can be used by popup windows that want the caret's location to still
+     * be visible for contextual purposes while they are displayed.
+     *
+     * @return Whether this caret is always visible.
+     * @see #setAlwaysVisible(boolean)
+     */
+    public boolean isAlwaysVisible() {
+        return alwaysVisible;
+    }
+
+    /**
      * Called when the mouse is clicked. If the click was generated from
      * button1, a double click selects a word, and a triple click the current
      * line.
@@ -340,7 +355,7 @@ public class ConfigurableCaret extends DefaultCaret {
     @Override
     public void paint(Graphics g) {
         // If the cursor is currently visible..
-        if (isVisible()) {
+        if (isVisible() || alwaysVisible) {
             try {
                 TextArea textArea = getTextArea();
                 g.setColor(textArea.getCaretColor());
@@ -455,6 +470,26 @@ public class ConfigurableCaret extends DefaultCaret {
     }
 
     /**
+     * Toggles whether this caret should always be visible (as opposed to
+     * blinking or not visible when the editor's window is not focused).
+     * This can be used by popup windows that want the caret's location to still
+     * be visible for contextual purposes while they are displayed.
+     *
+     * @param alwaysVisible Whether this caret should always be visible.
+     * @see #isAlwaysVisible()
+     */
+    public void setAlwaysVisible(boolean alwaysVisible) {
+        if (alwaysVisible != this.alwaysVisible) {
+            this.alwaysVisible = alwaysVisible;
+            if (!isVisible()) {
+                // Force painting of caret since super class's "flasher" timer
+                // won't fire when the window doesn't have focus
+                repaint();
+            }
+        }
+    }
+
+    /**
      * Sets whether this caret's selection should have rounded edges.
      *
      * @param rounded Whether it should have rounded edges.
@@ -558,9 +593,9 @@ public class ConfigurableCaret extends DefaultCaret {
      * modelToView(), so this filter usually does not do anything.<p>
      *
      * Common cases: backspacing to visible line of collapsed region.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class FoldAwareNavigationFilter extends NavigationFilter {
 
@@ -589,7 +624,7 @@ public class ConfigurableCaret extends DefaultCaret {
                                 }
                                 if (line < lineCount) {
                                     dot = textArea.getLineStartOffset(line);
-                                } else { // No lower lines visible 
+                                } else { // No lower lines visible
                                     UIManager.getLookAndFeel()
                                             .provideErrorFeedback(textArea);
                                     return;

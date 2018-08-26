@@ -18,9 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.editor;
 
-import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,9 +32,7 @@ import javax.swing.text.Caret;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
-import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
 
 /**
  * A singleton class that can perform advanced find/replace operations in an
@@ -122,7 +118,8 @@ public class SearchEngine {
             if (forward && start > -1) {
                 result.getMatchRange().translate(start);
             }
-            selectAndPossiblyCenter(textArea, result.getMatchRange(), true);
+            SyntaxUtilities.selectAndPossiblyCenter(textArea,
+                    result.getMatchRange(), true);
         }
 
         result.setMarkedCount(markAllCount);
@@ -773,7 +770,7 @@ public class SearchEngine {
             } else {
                 range = new DocumentRange(dot, dot);
             }
-            selectAndPossiblyCenter(textArea, range, true);
+            SyntaxUtilities.selectAndPossiblyCenter(textArea, range, true);
         }
 
         int count = range != null ? 1 : 0;
@@ -844,7 +841,7 @@ public class SearchEngine {
                     range = new DocumentRange(dot, dot);
                 }
                 res.setMatchRange(range);
-                selectAndPossiblyCenter(textArea, range, true);
+                SyntaxUtilities.selectAndPossiblyCenter(textArea, range, true);
             }
 
             return res;
@@ -910,92 +907,5 @@ public class SearchEngine {
 
         lastFound.setCount(count);
         return lastFound;
-    }
-
-    /**
-     * Selects a range of text in a text component. If the new selection is
-     * outside of the previous viewable rectangle, then the view is centered
-     * around the new selection.
-     *
-     * @param textArea The text component whose selection is to be centered.
-     * @param range The range to select.
-     */
-    private static void selectAndPossiblyCenter(JTextArea textArea,
-            DocumentRange range, boolean select) {
-        int start = range.getStartOffset();
-        int end = range.getEndOffset();
-
-        boolean foldsExpanded = false;
-        if (textArea instanceof SyntaxTextArea) {
-            SyntaxTextArea sta = (SyntaxTextArea) textArea;
-            FoldManager fm = sta.getFoldManager();
-            if (fm.isCodeFoldingSupportedAndEnabled()) {
-                foldsExpanded = fm.ensureOffsetNotInClosedFold(start);
-                foldsExpanded |= fm.ensureOffsetNotInClosedFold(end);
-            }
-        }
-
-        if (select) {
-            textArea.setSelectionStart(start);
-            textArea.setSelectionEnd(end);
-        }
-
-        Rectangle r = null;
-        try {
-            r = textArea.modelToView(start);
-            if (r == null) { // Not yet visible; i.e. JUnit tests
-                return;
-            }
-            if (end != start) {
-                r = r.union(textArea.modelToView(end));
-            }
-        } catch (BadLocationException ble) { // Never happens
-            ExceptionDialog.notifyException(ble);
-            if (select) {
-                textArea.setSelectionStart(start);
-                textArea.setSelectionEnd(end);
-            }
-            return;
-        }
-
-        Rectangle visible = textArea.getVisibleRect();
-
-        // If the new selection is already in the view, don't scroll, as that is
-        // visually jarring
-        if (!foldsExpanded && visible.contains(r)) {
-            if (select) {
-                textArea.setSelectionStart(start);
-                textArea.setSelectionEnd(end);
-            }
-            return;
-        }
-
-        visible.x = r.x - (visible.width - r.width) / 2;
-        visible.y = r.y - (visible.height - r.height) / 2;
-
-        Rectangle bounds = textArea.getBounds();
-        Insets i = textArea.getInsets();
-        bounds.x = i.left;
-        bounds.y = i.top;
-        bounds.width -= i.left + i.right;
-        bounds.height -= i.top + i.bottom;
-
-        if (visible.x < bounds.x) {
-            visible.x = bounds.x;
-        }
-
-        if (visible.x + visible.width > bounds.x + bounds.width) {
-            visible.x = bounds.x + bounds.width - visible.width;
-        }
-
-        if (visible.y < bounds.y) {
-            visible.y = bounds.y;
-        }
-
-        if (visible.y + visible.height > bounds.y + bounds.height) {
-            visible.y = bounds.y + bounds.height - visible.height;
-        }
-
-        textArea.scrollRectToVisible(visible);
     }
 }

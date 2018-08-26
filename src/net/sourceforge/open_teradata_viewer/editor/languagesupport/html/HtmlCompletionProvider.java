@@ -44,7 +44,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * Completion provider for HTML documents.
  *
  * @author D. Campione
- * 
+ *
  */
 public class HtmlCompletionProvider extends DefaultCompletionProvider {
 
@@ -73,7 +73,7 @@ public class HtmlCompletionProvider extends DefaultCompletionProvider {
         tagToAttrs = new HashMap<String, List<AttributeCompletion>>();
         for (ICompletion comp : completions) {
             MarkupTagCompletion c = (MarkupTagCompletion) comp;
-            String tag = c.getInputText();
+            String tag = c.getName();
             List<AttributeCompletion> attrs = new ArrayList<AttributeCompletion>();
             tagToAttrs.put(tag.toLowerCase(), attrs);
             for (int j = 0; j < c.getAttributeCount(); j++) {

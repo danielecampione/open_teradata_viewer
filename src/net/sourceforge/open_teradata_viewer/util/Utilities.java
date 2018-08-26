@@ -21,10 +21,6 @@ package net.sourceforge.open_teradata_viewer.util;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -99,7 +95,7 @@ public class Utilities {
      * <code>true</code>, this library will not attempt to use Substance
      * renderers. Otherwise, if a Substance Look and Feel is installed, we will
      * attempt to use Substance cell renderers in all of our dropdowns.<p>
-     * 
+     *
      * Note that we do not have a build dependency on Substance, so all access
      * to Substance stuff is done via reflection. We will fall back onto default
      * renderers if something goes wrong.
@@ -150,7 +146,7 @@ public class Utilities {
     /**
      * Print the current stack trace to <TT>ps</TT>.
      *
-     * @param ps The <TT>PrintStream</TT> to print stack trace to.     
+     * @param ps The <TT>PrintStream</TT> to print stack trace to.
      * @throws IllegalArgumentException If a null <TT>ps</TT> passed.
      */
     public static void printStackTrace(Throwable t, PrintStream ps) {
@@ -403,7 +399,7 @@ public class Utilities {
     /**
       * This prevents you from having to place SuppressWarnings throughout your
       * code.
-      * 
+      *
       * @param <T> The return type to cast the object to.
       * @param x The object to cast.
       * @return a type-casted version of the specified object.
@@ -415,7 +411,7 @@ public class Utilities {
     /**
      * Checks the specified list of argument to see if any are null and throws a
      * runtime exception if one is.
-     * 
+     *
      * @param methodName The name of the method checking it's arguments.
      * @param arguments The arguments - these should be in name/value pairs.
      */
@@ -437,7 +433,7 @@ public class Utilities {
     /**
      * Cause the current thread to sleep for the specified number of
      * milliseconds. Exceptions logged.
-     * 
+     *
      * @param millis number of milliseconds to sleep.
      */
     public static void sleep(long millis) {
@@ -730,7 +726,7 @@ public class Utilities {
     /**
      * The method eliminates the differences between the path obtained by the
      * system property invocation on Linux family os and on Windows.
-     * 
+     *
      * @param path.
      * @return path in line with expectations.
      */
@@ -893,7 +889,7 @@ public class Utilities {
 
     /**
      * Check if the file is empty.
-     * 
+     *
      * @return true if the file is empty
      */
     public static boolean isAnEmptyText(String text) {
@@ -1018,30 +1014,6 @@ public class Utilities {
         sb.append(Integer.toHexString(b));
 
         return sb.toString();
-    }
-
-    /**
-     * Returns the screen coordinates for the monitor that contains the
-     * specified point. This is useful for setups with multiple monitors, to
-     * ensure that popup windows are positioned properly.
-     *
-     * @param x The x-coordinate, in screen coordinates.
-     * @param y The y-coordinate, in screen coordinates.
-     * @return The bounds of the monitor that contains the specified point.
-     */
-    public static Rectangle getScreenBoundsForPoint(int x, int y) {
-        GraphicsEnvironment env = GraphicsEnvironment
-                .getLocalGraphicsEnvironment();
-        GraphicsDevice[] devices = env.getScreenDevices();
-        for (int i = 0; i < devices.length; i++) {
-            GraphicsConfiguration config = devices[i].getDefaultConfiguration();
-            Rectangle gcBounds = config.getBounds();
-            if (gcBounds.contains(x, y)) {
-                return gcBounds;
-            }
-        }
-        // If point is outside all monitors, default to default monitor
-        return env.getMaximumWindowBounds();
     }
 
     /**

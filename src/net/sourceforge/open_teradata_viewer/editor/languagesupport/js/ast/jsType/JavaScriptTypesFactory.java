@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletionProvider;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JarManager;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.FieldInfo;
@@ -35,7 +36,6 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.T
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclarationFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations.JavaScriptObject;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletion;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSBeanCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSClassCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSConstructorCompletion;
@@ -350,7 +350,7 @@ public abstract class JavaScriptTypesFactory {
 
     /** Populate Completions for types.. included extended classes. */
     public void populateCompletionsForType(JavaScriptType cachedType,
-            Set<IJSCompletionUI> completions) {
+            Set<ICompletion> completions) {
         if (cachedType != null) {
             Map<String, IJSCompletion> completionsForType = cachedType
                     .getMethodFieldCompletions();

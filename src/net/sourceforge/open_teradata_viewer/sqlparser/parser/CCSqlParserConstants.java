@@ -229,27 +229,47 @@ public interface CCSqlParserConstants {
   /** RegularExpression Id. */
   int K_ROW = 104;
   /** RegularExpression Id. */
-  int S_DOUBLE = 105;
+  int K_RETURNING = 105;
   /** RegularExpression Id. */
-  int S_LONG = 106;
+  int K_BINARY = 106;
   /** RegularExpression Id. */
-  int DIGIT = 107;
+  int K_REGEXP = 107;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 108;
+  int K_UNLOGGED = 108;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 109;
+  int K_EXEC = 109;
   /** RegularExpression Id. */
-  int S_IDENTIFIER = 110;
+  int K_EXECUTE = 110;
   /** RegularExpression Id. */
-  int LETTER = 111;
+  int K_FETCH = 111;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 112;
+  int K_NEXT = 112;
   /** RegularExpression Id. */
-  int S_CHAR_LITERAL = 113;
+  int K_ONLY = 113;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 114;
+  int K_COMMIT = 114;
   /** RegularExpression Id. */
-  int ADDITIONAL_LETTERS = 115;
+  int S_DOUBLE = 115;
+  /** RegularExpression Id. */
+  int S_LONG = 116;
+  /** RegularExpression Id. */
+  int DIGIT = 117;
+  /** RegularExpression Id. */
+  int LINE_COMMENT = 118;
+  /** RegularExpression Id. */
+  int MULTI_LINE_COMMENT = 119;
+  /** RegularExpression Id. */
+  int S_IDENTIFIER = 120;
+  /** RegularExpression Id. */
+  int LETTER = 121;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 122;
+  /** RegularExpression Id. */
+  int S_CHAR_LITERAL = 123;
+  /** RegularExpression Id. */
+  int S_QUOTED_IDENTIFIER = 124;
+  /** RegularExpression Id. */
+  int ADDITIONAL_LETTERS = 125;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -361,6 +381,16 @@ public interface CCSqlParserConstants {
     "\"FOLLOWING\"",
     "\"CURRENT\"",
     "\"ROW\"",
+    "\"RETURNING\"",
+    "\"BINARY\"",
+    "\"REGEXP\"",
+    "\"UNLOGGED\"",
+    "\"EXEC\"",
+    "\"EXECUTE\"",
+    "\"FETCH\"",
+    "\"NEXT\"",
+    "\"ONLY\"",
+    "\"COMMIT\"",
     "<S_DOUBLE>",
     "<S_LONG>",
     "<DIGIT>",
@@ -373,12 +403,12 @@ public interface CCSqlParserConstants {
     "<S_QUOTED_IDENTIFIER>",
     "<ADDITIONAL_LETTERS>",
     "\";\"",
-    "\"=\"",
     "\",\"",
+    "\"=\"",
     "\"(\"",
     "\")\"",
-    "\".\"",
     "\"*\"",
+    "\".\"",
     "\"?\"",
     "\"(+)\"",
     "\">\"",
@@ -406,6 +436,7 @@ public interface CCSqlParserConstants {
     "\"{ts\"",
     "\"::\"",
     "\":\"",
+    "\"->\"",
     "\"{fn\"",
   };
 

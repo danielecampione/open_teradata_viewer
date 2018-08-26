@@ -35,15 +35,15 @@ import org.junit.Test;
 /**
  * Tries to parse and deparse all statments in
  * "src\res\testfiles\sqlparser\teradata-tests".
- * 
+ *
  * As a matter of fact that there are a lot of files that cannot yet be
  * processed.
  * A step by step improvement is the way to go.
- * 
+ *
  * The test ensures that the successfully parsed files count doesn't diminish.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SpecialTeradataTest {
 
@@ -75,7 +75,7 @@ public class SpecialTeradataTest {
 
         LOG.log(Level.INFO, "tested {0} files. got {1} correct parse results",
                 new Object[] { count, success });
-        assertTrue(success > 38);
+        assertTrue(success >= 40);
     }
 
     @Test

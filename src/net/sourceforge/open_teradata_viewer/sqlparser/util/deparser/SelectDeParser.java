@@ -28,6 +28,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Fetch;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IOrderByVisitor;
@@ -38,6 +39,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVi
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.LateralSubSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Limit;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Offset;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PivotXml;
@@ -53,9 +55,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
  * string) a {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         ISelectItemVisitor, IFromItemVisitor, IPivotVisitor {
@@ -81,10 +83,6 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
     @Override
     public void visit(PlainSelect plainSelect) {
         buffer.append("SELECT ");
-        Top top = plainSelect.getTop();
-        if (top != null) {
-            buffer.append(top).append(" ");
-        }
         if (plainSelect.getDistinct() != null) {
             buffer.append("DISTINCT ");
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
@@ -100,6 +98,10 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
                 buffer.append(") ");
             }
         }
+        Top top = plainSelect.getTop();
+        if (top != null) {
+            buffer.append(top).append(" ");
+        }
 
         for (Iterator<ISelectItem> iter = plainSelect.getSelectItems()
                 .iterator(); iter.hasNext();) {
@@ -107,6 +109,17 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
             iSelectItem.accept(this);
             if (iter.hasNext()) {
                 buffer.append(", ");
+            }
+        }
+
+        if (plainSelect.getIntoTables() != null) {
+            buffer.append(" INTO ");
+            for (Iterator<Table> iter = plainSelect.getIntoTables().iterator(); iter
+                    .hasNext();) {
+                visit(iter.next());
+                if (iter.hasNext()) {
+                    buffer.append(", ");
+                }
             }
         }
 
@@ -155,7 +168,15 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         if (plainSelect.getLimit() != null) {
             deparseLimit(plainSelect.getLimit());
         }
-
+        if (plainSelect.getOffset() != null) {
+            deparseOffset(plainSelect.getOffset());
+        }
+        if (plainSelect.getFetch() != null) {
+            deparseFetch(plainSelect.getFetch());
+        }
+        if (plainSelect.isForUpdate()) {
+            buffer.append(" FOR UPDATE");
+        }
     }
 
     @Override
@@ -277,9 +298,11 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         if (limit.isRowCountJdbcParameter()) {
             buffer.append(" LIMIT ");
             buffer.append("?");
-        } else if (limit.getRowCount() != 0) {
+        } else if (limit.getRowCount() >= 0) {
             buffer.append(" LIMIT ");
             buffer.append(limit.getRowCount());
+        } else if (limit.isLimitNull()) {
+            buffer.append(" LIMIT NULL");
         }
 
         if (limit.isOffsetJdbcParameter()) {
@@ -287,7 +310,36 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         } else if (limit.getOffset() != 0) {
             buffer.append(" OFFSET ").append(limit.getOffset());
         }
+    }
 
+    public void deparseOffset(Offset offset) {
+        // OFFSET offset
+        // or OFFSET offset (ROW | ROWS)
+        if (offset.isOffsetJdbcParameter()) {
+            buffer.append(" OFFSET ?");
+        } else if (offset.getOffset() != 0) {
+            buffer.append(" OFFSET ");
+            buffer.append(offset.getOffset());
+        }
+        if (offset.getOffsetParam() != null) {
+            buffer.append(" ").append(offset.getOffsetParam());
+        }
+    }
+
+    public void deparseFetch(Fetch fetch) {
+        // FETCH (FIRST | NEXT) row_count (ROW | ROWS) ONLY
+        buffer.append(" FETCH ");
+        if (fetch.isFetchParamFirst()) {
+            buffer.append("FIRST ");
+        } else {
+            buffer.append("NEXT ");
+        }
+        if (fetch.isFetchJdbcParameter()) {
+            buffer.append("?");
+        } else {
+            buffer.append(fetch.getRowCount());
+        }
+        buffer.append(" ").append(fetch.getFetchParam()).append(" ONLY");
     }
 
     public StringBuilder getBuffer() {
@@ -382,10 +434,25 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         if (list.getLimit() != null) {
             deparseLimit(list.getLimit());
         }
+        if (list.getOffset() != null) {
+            deparseOffset(list.getOffset());
+        }
+        if (list.getFetch() != null) {
+            deparseFetch(list.getFetch());
+        }
     }
 
     @Override
     public void visit(WithItem withItem) {
+        buffer.append(withItem.getName());
+        if (withItem.getWithItemList() != null) {
+            buffer.append(" ").append(
+                    PlainSelect.getStringList(withItem.getWithItemList(), true,
+                            true));
+        }
+        buffer.append(" AS (");
+        withItem.getSelectBody().accept(this);
+        buffer.append(")");
     }
 
     @Override

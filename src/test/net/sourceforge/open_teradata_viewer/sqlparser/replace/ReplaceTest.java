@@ -18,9 +18,11 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.replace;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.StringReader;
 
-import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
@@ -31,20 +33,21 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
+import org.junit.Test;
+
+import test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils;
+
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
-public class ReplaceTest extends TestCase {
+public class ReplaceTest {
 
-    CCSqlParserManager parserManager = new CCSqlParserManager();
+    private static CCSqlParserManager parserManager = new CCSqlParserManager();
 
-    public ReplaceTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testReplaceSyntax1() throws SQLParserException {
         String statement = "REPLACE mytable SET col1='as', col2=?, col3=565";
         Replace replace = (Replace) parserManager.parse(new StringReader(
@@ -63,9 +66,9 @@ public class ReplaceTest extends TestCase {
         assertEquals(565,
                 ((LongValue) replace.getExpressions().get(2)).getValue());
         assertEquals(statement, "" + replace);
-
     }
 
+    @Test
     public void testReplaceSyntax2() throws SQLParserException {
         String statement = "REPLACE mytable (col1, col2, col3) VALUES ('as', ?, 565)";
         Replace replace = (Replace) parserManager.parse(new StringReader(
@@ -89,6 +92,7 @@ public class ReplaceTest extends TestCase {
         assertEquals(statement, "" + replace);
     }
 
+    @Test
     public void testReplaceSyntax3() throws SQLParserException {
         String statement = "REPLACE mytable (col1, col2, col3) SELECT * FROM mytable3";
         Replace replace = (Replace) parserManager.parse(new StringReader(
@@ -102,5 +106,12 @@ public class ReplaceTest extends TestCase {
         assertEquals("col3",
                 ((Column) replace.getColumns().get(2)).getColumnName());
         assertTrue(replace.getItemsList() instanceof SubSelect);
+    }
+
+    @Test
+    public void testProblemReplaceParseDeparse() throws SQLParserException {
+        TestUtils.assertSqlCanBeParsedAndDeparsed(
+                "REPLACE a_table (ID, A, B) SELECT A_ID, A, B FROM b_table",
+                false);
     }
 }

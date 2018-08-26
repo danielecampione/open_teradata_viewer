@@ -35,6 +35,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
@@ -73,6 +74,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.OldTeradataJoinBinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
@@ -81,9 +83,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
 /**
  * A class to de-parse (that is, transform from ISqlParser hierarchy into a
  * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ExpressionDeParser implements IExpressionVisitor,
         IItemsListVisitor {
@@ -107,7 +109,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
      * ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeparser, myBuf);
      * </code>
      * </pre>
-     * 
+     *
      * @param buffer the buffer that will be filled with the expression.
      */
     public ExpressionDeParser(ISelectVisitor selectVisitor, StringBuilder buffer) {
@@ -558,5 +560,15 @@ public class ExpressionDeParser implements IExpressionVisitor,
     @Override
     public void visit(RegExpMatchOperator rexpr) {
         visitBinaryExpression(rexpr, " " + rexpr.getStringExpression() + " ");
+    }
+
+    @Override
+    public void visit(RegExpTeradataOperator rexpr) {
+        visitBinaryExpression(rexpr, " " + rexpr.getStringExpression() + " ");
+    }
+
+    @Override
+    public void visit(JsonExpression jsonExpr) {
+        buffer.append(jsonExpr.toString());
     }
 }

@@ -27,14 +27,15 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.Logger;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSMethodData;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.FunctionCall;
-import sun.org.mozilla.javascript.internal.ast.PropertyGet;
+
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.PropertyGet;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -123,7 +124,7 @@ public class JSR223JavaScriptCompletionResolver extends
     /**
      * Test whether the node can be resolved as a static Java class.
      * Only looks for Token.NAME nodes to test.
-     * 
+     *
      * @param node Node to test.
      */
     private TypeDeclaration testJavaStaticType(AstNode node) {
@@ -136,7 +137,7 @@ public class JSR223JavaScriptCompletionResolver extends
 
     /**
      * Try to resolve the Token.NAME AstNode and return a TypeDeclaration.
-     * 
+     *
      * @param node Node to resolve.
      * @return TypeDeclaration if the name can be resolved as a Java Class else
      *         null.

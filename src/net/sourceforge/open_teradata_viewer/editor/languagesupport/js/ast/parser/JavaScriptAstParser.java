@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.IParameterizedCompletion.Parameter;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptHelper;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.Logger;
@@ -33,35 +34,35 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDe
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ArrayTypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JavaScriptInScriptFunctionCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.resolver.JavaScriptResolver;
-import sun.org.mozilla.javascript.internal.Node;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.Assignment;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.CatchClause;
-import sun.org.mozilla.javascript.internal.ast.DoLoop;
-import sun.org.mozilla.javascript.internal.ast.ExpressionStatement;
-import sun.org.mozilla.javascript.internal.ast.ForInLoop;
-import sun.org.mozilla.javascript.internal.ast.ForLoop;
-import sun.org.mozilla.javascript.internal.ast.FunctionNode;
-import sun.org.mozilla.javascript.internal.ast.IfStatement;
-import sun.org.mozilla.javascript.internal.ast.InfixExpression;
-import sun.org.mozilla.javascript.internal.ast.Name;
-import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
-import sun.org.mozilla.javascript.internal.ast.ReturnStatement;
-import sun.org.mozilla.javascript.internal.ast.SwitchCase;
-import sun.org.mozilla.javascript.internal.ast.SwitchStatement;
-import sun.org.mozilla.javascript.internal.ast.TryStatement;
-import sun.org.mozilla.javascript.internal.ast.VariableDeclaration;
-import sun.org.mozilla.javascript.internal.ast.VariableInitializer;
-import sun.org.mozilla.javascript.internal.ast.WhileLoop;
+
+import org.mozilla.javascript.Node;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.CatchClause;
+import org.mozilla.javascript.ast.DoLoop;
+import org.mozilla.javascript.ast.ExpressionStatement;
+import org.mozilla.javascript.ast.ForInLoop;
+import org.mozilla.javascript.ast.ForLoop;
+import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.IfStatement;
+import org.mozilla.javascript.ast.InfixExpression;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.ReturnStatement;
+import org.mozilla.javascript.ast.SwitchCase;
+import org.mozilla.javascript.ast.SwitchStatement;
+import org.mozilla.javascript.ast.TryStatement;
+import org.mozilla.javascript.ast.VariableDeclaration;
+import org.mozilla.javascript.ast.VariableInitializer;
+import org.mozilla.javascript.ast.WhileLoop;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -77,7 +78,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     @Override
     public CodeBlock convertAstNodeToCodeBlock(AstRoot root,
-            Set<IJSCompletionUI> set, String entered) {
+            Set<ICompletion> set, String entered) {
         functions.clear();
         CodeBlock block = new CodeBlock(0);
         addCodeBlock(root, set, entered, block, Integer.MAX_VALUE);
@@ -97,14 +98,14 @@ public class JavaScriptAstParser extends JavaScriptParser {
     /**
      * For each child of parent AstNode add a new code block and add completions
      * for each block of code.
-     * 
+     *
      * @param parent AstNode to iterate children.
      * @param set Completions set to add to.
      * @param entered Text entered.
      * @param codeBlock Parent CodeBlock.
      * @param offset CodeBlock offset.
      */
-    private void addCodeBlock(Node parent, Set<IJSCompletionUI> set,
+    private void addCodeBlock(Node parent, Set<ICompletion> set,
             String entered, CodeBlock codeBlock, int offset) {
         if (parent == null) {
             return;
@@ -126,7 +127,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
         }
     }
 
-    protected void iterateNode(AstNode child, Set<IJSCompletionUI> set,
+    protected void iterateNode(AstNode child, Set<ICompletion> set,
             String entered, CodeBlock block, int offset) {
         if (child == null) {
             return;
@@ -212,7 +213,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     private void processExpressionStatement(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         ExpressionStatement exp = (ExpressionStatement) child;
 
         AstNode expNode = exp.getExpression();
@@ -283,7 +284,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     private void processCaseNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         SwitchCase switchCase = (SwitchCase) child;
         List<AstNode> statements = switchCase.getStatements();
         int start = switchCase.getAbsolutePosition();
@@ -301,7 +302,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract local variables from switch node. */
     private void processSwitchNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         SwitchStatement switchStatement = (SwitchStatement) child;
         if (canProcessNode(switchStatement)) {
             List<SwitchCase> cases = switchStatement.getCases();
@@ -315,7 +316,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract variables from try/catch node(s). */
     private void processTryCatchNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         TryStatement tryStatement = (TryStatement) child;
         if (canProcessNode(tryStatement)) {
             offset = tryStatement.getTryBlock().getAbsolutePosition()
@@ -362,7 +363,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract variables from if/else node(s). */
     private void processIfThenElse(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         IfStatement ifStatement = (IfStatement) child;
         if (canProcessNode(ifStatement)) {
             offset = ifStatement.getAbsolutePosition()
@@ -381,7 +382,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract completions from expression node. */
     private void processExpressionNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         if (child instanceof ExpressionStatement) {
             ExpressionStatement expr = (ExpressionStatement) child;
             iterateNode(expr.getExpression(), set, entered, block, offset);
@@ -390,7 +391,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract while loop from node and add new code block. */
     private void processWhileNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         WhileLoop loop = (WhileLoop) child;
         if (canProcessNode(loop)) {
             offset = loop.getAbsolutePosition() + loop.getLength();
@@ -400,7 +401,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract while loop from node and add new code block. */
     private void processDoNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         DoLoop loop = (DoLoop) child;
         if (canProcessNode(loop)) {
             offset = loop.getAbsolutePosition() + loop.getLength();
@@ -410,7 +411,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract variable from binary operator e.g <, >, = etc.. */
     private void processInfix(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         InfixExpression epre = (InfixExpression) child;
         AstNode target = epre.getLeft();
         if (canProcessNode(target)) {
@@ -424,7 +425,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
      * code block.
      */
     private void processFunctionNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         FunctionNode fn = (FunctionNode) child;
         String jsdoc = fn.getJsDoc();
         TypeDeclaration returnType = getFunctionType(fn);
@@ -510,7 +511,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /** Extract variable from node and add to code block. */
     private void processVariableNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         // Check block can resolve variable or is pre-processing variables
         if (block.contains(dot) || isPreProcessing()) {
             VariableDeclaration varDec = (VariableDeclaration) child;
@@ -526,7 +527,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
      * loop.
      */
     private void processForNode(Node child, CodeBlock block,
-            Set<IJSCompletionUI> set, String entered, int offset) {
+            Set<ICompletion> set, String entered, int offset) {
         if (child instanceof ForLoop) {
             ForLoop loop = (ForLoop) child;
             offset = loop.getAbsolutePosition() + loop.getLength();
@@ -565,7 +566,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /**
      * Extract the variable from the Variable initializer and set the Type.
-     * 
+     *
      * @param initializer AstNode from which to extract the variable.
      * @param block Code block to add the variable too.
      * @param offset Position of the variable in code.
@@ -667,7 +668,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /**
      * Extract the variable from the Rhino node and add to the CodeBlock.
-     * 
+     *
      * @param node AstNode node from which to extract the variable.
      * @param block Code block to add the variable too.
      * @param offset Position of the variable in code.
@@ -679,7 +680,7 @@ public class JavaScriptAstParser extends JavaScriptParser {
 
     /**
      * Extract the variable from the Rhino node and add to the CodeBlock.
-     * 
+     *
      * @param node AstNode node from which to extract the variable.
      * @param block Code block to add the variable too.
      * @param offset Position of the variable in code.
@@ -731,8 +732,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -777,8 +778,8 @@ public class JavaScriptAstParser extends JavaScriptParser {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

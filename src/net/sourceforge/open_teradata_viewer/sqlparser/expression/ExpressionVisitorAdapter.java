@@ -45,13 +45,14 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -316,5 +317,15 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
     protected void visitBinaryExpression(BinaryExpression expr) {
         expr.getLeftExpression().accept(this);
         expr.getRightExpression().accept(this);
+    }
+
+    @Override
+    public void visit(JsonExpression jsonExpr) {
+        visit(jsonExpr.getColumn());
+    }
+
+    @Override
+    public void visit(RegExpTeradataOperator expr) {
+        visitBinaryExpression(expr);
     }
 }

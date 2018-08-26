@@ -36,18 +36,19 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParseRes
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParserNotice;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParseResult;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
-import sun.org.mozilla.javascript.internal.CompilerEnvirons;
-import sun.org.mozilla.javascript.internal.ErrorReporter;
-import sun.org.mozilla.javascript.internal.EvaluatorException;
-import sun.org.mozilla.javascript.internal.Parser;
-import sun.org.mozilla.javascript.internal.RhinoException;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.ErrorCollector;
-import sun.org.mozilla.javascript.internal.ast.ParseProblem;
+
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.ErrorReporter;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.RhinoException;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ErrorCollector;
+import org.mozilla.javascript.ast.ParseProblem;
 
 /**
  * Parses JavaScript code in an <code>SyntaxTextArea</code>.<p>
- * 
+ *
  * Like all STA <tt>Parser</tt>s, a <tt>JavaScriptParser</tt> instance is
  * notified when the STA's text content changes. After a small delay, it will
  * parse the content as JS code, building an AST and looking for any errors.
@@ -55,12 +56,12 @@ import sun.org.mozilla.javascript.internal.ast.ParseProblem;
  * {@link #PROPERTY_AST} is fired. Listeners can check the new value of the
  * property for the <code>AstRoot</code> built that represents the source code
  * in the text area.<p>
- * 
+ *
  * This parser cannot be shared amongst multiple instances of
  * <code>SyntaxTextArea</code>.<p>
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptParser extends AbstractParser {
 
@@ -171,7 +172,7 @@ public class JavaScriptParser extends AbstractParser {
     /**
      * Returns the AST or <code>null</code> if the editor's content has not yet
      * been parsed.
-     * 
+     *
      * @return The AST or <code>null</code>.
      */
     public AstRoot getAstRoot() {
@@ -270,7 +271,7 @@ public class JavaScriptParser extends AbstractParser {
 
     /**
      * Error reporter for Rhino-based parsing.
-     * 
+     *
      * @author D. Campione
      *
      */

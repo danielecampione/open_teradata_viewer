@@ -1,4 +1,4 @@
-Teradata JDBC Driver 15.00.00.15
+Teradata JDBC Driver 15.00.00.20
 
 Part of the Teradata Tools and Utilities 15.00 product suite
 
@@ -33,6 +33,25 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.37:
+
+DR 163490 Translate new JDBC 15.0 error messages into Japanese
+DR 164061 Support the Connection.isValid method
+DR 168727 Support SQL current database for JDBC FastExport SELECT statements
+DR 170713 Improve DatabaseMetaData.getUDTs to return Class Name and Data Type for Array Types
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.36:
+
+DR 168132 avoid JDK call to System.err.println in case of XML transform error
+DR 170225 Coverity found null pointer dereferences in JDBC Driver
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.35:
+
+DR 171241 Increase the JDBC FastLoad maximum transmitted message size to 1MB
 
 This release includes changes to address the following DRs, originally included
 in release 14.10.00.34:
@@ -93,6 +112,12 @@ This release includes changes to address the following DRs, originally included
 in release 14.10.00.18:
 
 DR 144415 STRICT_ENCODE connection parameter
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.41:
+
+DR 167776 CLOB INOUT parameter assigned new value in procedure body is truncated to 4 bytes when input was NULL
+DR 172432 Error 1178 thrown for query returning result set of Array columns mixed with other type columns
 
 This release includes changes to address the following DRs, originally included
 in release 14.00.00.40:
@@ -1159,7 +1184,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.15.00.00.15.zip and TeraJDBC__indep_indep.15.00.00.15.tar
+TeraJDBC__indep_indep.15.00.00.20.zip and TeraJDBC__indep_indep.15.00.00.20.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

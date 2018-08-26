@@ -40,15 +40,15 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.MouseInputAdapter;
 
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.Util;
 import net.sourceforge.open_teradata_viewer.editor.syntax.PopupWindowDecorator;
-import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * A focusable tool tip, similar to those found in Eclipse. The user can click
  * in the tip and it becomes a "real", resizable window.
  *
  * @author D. Campione
- * 
+ *
  */
 public class FocusableTip {
 
@@ -109,6 +109,7 @@ public class FocusableTip {
         // for a discussion
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 // If a new FocusableTip is requested while another one is
                 // *focused* and visible, the focused tip (i.e. "tipWindow")
@@ -130,7 +131,7 @@ public class FocusableTip {
                 // description window, if applicable) both fit in the same
                 // window in a multi-monitor environment. To do this, we decide
                 // which monitor the rectangle "p" is in, and use that one
-                Rectangle sb = Utilities.getScreenBoundsForPoint(p.x, p.y);
+                Rectangle sb = Util.getScreenBoundsForPoint(p.x, p.y);
 
                 // Try putting our stuff "below" the mouse first
                 int y = p.y + Y_MARGIN;
@@ -188,7 +189,7 @@ public class FocusableTip {
 
     /**
      * Sets the base URL to use when loading images in this focusable tip.
-     * 
+     *
      * @param url The base URL to use.
      * @see #getImageBase()
      */
@@ -217,18 +218,15 @@ public class FocusableTip {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
-     * 
+     *
      */
-    private class TextAreaListener extends MouseInputAdapter
-            implements
-                CaretListener,
-                ComponentListener,
-                FocusListener,
-                KeyListener {
+    private class TextAreaListener extends MouseInputAdapter implements
+            CaretListener, ComponentListener, FocusListener, KeyListener {
 
+        @Override
         public void caretUpdate(CaretEvent e) {
             Object source = e.getSource();
             if (source == textArea) {
@@ -236,25 +234,31 @@ public class FocusableTip {
             }
         }
 
+        @Override
         public void componentHidden(ComponentEvent e) {
             handleComponentEvent(e);
         }
 
+        @Override
         public void componentMoved(ComponentEvent e) {
             handleComponentEvent(e);
         }
 
+        @Override
         public void componentResized(ComponentEvent e) {
             handleComponentEvent(e);
         }
 
+        @Override
         public void componentShown(ComponentEvent e) {
             handleComponentEvent(e);
         }
 
+        @Override
         public void focusGained(FocusEvent e) {
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
             // Only dispose of tip if it wasn't the TipWindow that was clicked
             // "c" can be null, at least on OS X, so we must check that before
@@ -281,6 +285,7 @@ public class FocusableTip {
             textArea.addMouseMotionListener(this);
         }
 
+        @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 possiblyDisposeOfTipWindow();
@@ -292,9 +297,11 @@ public class FocusableTip {
             }
         }
 
+        @Override
         public void keyReleased(KeyEvent e) {
         }
 
+        @Override
         public void keyTyped(KeyEvent e) {
         }
 

@@ -23,13 +23,14 @@ import java.util.Iterator;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.ColumnDefinition;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Index;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
  * string) a {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class CreateTableDeParser {
 
@@ -41,38 +42,58 @@ public class CreateTableDeParser {
     }
 
     public void deParse(CreateTable createTable) {
-        buffer.append("CREATE TABLE ").append(
+        buffer.append("CREATE ");
+        if (createTable.isUnlogged()) {
+            buffer.append("UNLOGGED ");
+        }
+        String params = PlainSelect.getStringList(
+                createTable.getCreateOptionsStrings(), false, false);
+        if (!"".equals(params)) {
+            buffer.append(params).append(' ');
+        }
+
+        buffer.append("TABLE ").append(
                 createTable.getTable().getFullyQualifiedName());
-        if (createTable.getColumnDefinitions() != null) {
-            buffer.append(" (");
-            for (Iterator<ColumnDefinition> iter = createTable
-                    .getColumnDefinitions().iterator(); iter.hasNext();) {
-                ColumnDefinition columnDefinition = iter.next();
-                buffer.append(columnDefinition.getColumnName());
-                buffer.append(" ");
-                buffer.append(columnDefinition.getColDataType().toString());
-                if (columnDefinition.getColumnSpecStrings() != null) {
-                    for (String s : columnDefinition.getColumnSpecStrings()) {
-                        buffer.append(" ");
-                        buffer.append(s);
+        if (createTable.getSelect() != null) {
+            buffer.append(" AS ").append(createTable.getSelect().toString());
+        } else {
+            if (createTable.getColumnDefinitions() != null) {
+                buffer.append(" (");
+                for (Iterator<ColumnDefinition> iter = createTable
+                        .getColumnDefinitions().iterator(); iter.hasNext();) {
+                    ColumnDefinition columnDefinition = iter.next();
+                    buffer.append(columnDefinition.getColumnName());
+                    buffer.append(" ");
+                    buffer.append(columnDefinition.getColDataType().toString());
+                    if (columnDefinition.getColumnSpecStrings() != null) {
+                        for (String s : columnDefinition.getColumnSpecStrings()) {
+                            buffer.append(" ");
+                            buffer.append(s);
+                        }
+                    }
+
+                    if (iter.hasNext()) {
+                        buffer.append(", ");
                     }
                 }
 
-                if (iter.hasNext()) {
-                    buffer.append(", ");
+                if (createTable.getIndexes() != null) {
+                    for (Iterator<Index> iter = createTable.getIndexes()
+                            .iterator(); iter.hasNext();) {
+                        buffer.append(", ");
+                        Index index = iter.next();
+                        buffer.append(index.toString());
+                    }
                 }
-            }
 
-            if (createTable.getIndexes() != null) {
-                for (Iterator<Index> iter = createTable.getIndexes().iterator(); iter
-                        .hasNext();) {
-                    buffer.append(", ");
-                    Index index = iter.next();
-                    buffer.append(index.toString());
-                }
+                buffer.append(")");
             }
+        }
 
-            buffer.append(")");
+        params = PlainSelect.getStringList(
+                createTable.getTableOptionsStrings(), false, false);
+        if (!"".equals(params)) {
+            buffer.append(' ').append(params);
         }
     }
 

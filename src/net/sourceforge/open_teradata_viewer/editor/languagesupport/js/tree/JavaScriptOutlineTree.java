@@ -33,9 +33,12 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.ILanguageSupp
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSupportFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptLanguageSupport;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.JavaScriptParser;
+import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
+
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
  * A tree view showing the outline of JavaScript source, similar to the
@@ -47,9 +50,9 @@ import sun.org.mozilla.javascript.internal.ast.AstRoot;
  * by calling {@link #listenTo(SyntaxTextArea)}. Note that, if you have an
  * application with multiple STA editors, you would want to call this method
  * each time a new editor is focused.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptOutlineTree extends AbstractSourceTree {
 
@@ -145,7 +148,8 @@ public class JavaScriptOutlineTree extends AbstractSourceTree {
             int len = jstn.getLength();
             if (len > -1) { // Should always be true
                 int offs = jstn.getOffset();
-                textArea.select(offs, offs + len);
+                DocumentRange range = new DocumentRange(offs, offs + len);
+                SyntaxUtilities.selectAndPossiblyCenter(textArea, range, true);
             }
         }
     }
@@ -225,9 +229,9 @@ public class JavaScriptOutlineTree extends AbstractSourceTree {
     /**
      * Listens for events this tree is interested in (events in the associated
      * editor, for example), as well as events in this tree.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener implements PropertyChangeListener,
             TreeSelectionListener {

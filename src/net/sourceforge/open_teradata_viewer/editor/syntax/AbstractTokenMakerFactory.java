@@ -29,7 +29,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * language keys to the names of {@link ITokenMaker} classes is stored.
  *
  * @author D. Campione
- * 
+ *
  */
 public abstract class AbstractTokenMakerFactory extends TokenMakerFactory {
 
@@ -99,11 +99,11 @@ public abstract class AbstractTokenMakerFactory extends TokenMakerFactory {
     }
 
     /**
-     * Adds a mapping from a key to a <code>TokenMaker</code> implementation
+     * Adds a mapping from a key to a <code>ITokenMaker</code> implementation
      * class name.
      *
      * @param key The key.
-     * @param className The <code>TokenMaker</code> class name.
+     * @param className The <code>ITokenMaker</code> class name.
      * @param cl The class loader to use when loading the class.
      * @see #putMapping(String, String)
      */

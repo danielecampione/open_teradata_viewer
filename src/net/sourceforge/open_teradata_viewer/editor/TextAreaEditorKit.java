@@ -22,6 +22,7 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Reader;
@@ -34,6 +35,7 @@ import javax.swing.Icon;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -55,7 +57,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * in <code>TextArea</code>.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TextAreaEditorKit extends DefaultEditorKit {
 
@@ -116,6 +118,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /** Action to jump to the next bookmark. */
     public static final String taNextBookmarkAction = "TA.NextBookmarkAction";
+
+    /** Action to display the paste history popup. */
+    public static final String clipboardHistoryAction = "TA.PasteHistoryAction";
 
     /** Action to jump to the previous bookmark. */
     public static final String taPrevBookmarkAction = "TA.PrevBookmarkAction";
@@ -188,6 +193,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
             new BeginLineAction(selectionBeginLineAction, true),
             new BeginRecordingMacroAction(),
             new BeginWordAction(beginWordAction, false),
+            new ClipboardHistoryAction(),
             new BeginWordAction(selectionBeginWordAction, true),
             new CopyAction(),
             new CutAction(),
@@ -294,7 +300,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
      * Inserts content from the given stream, which will be treated as plain
      * text. This method is overridden merely so we can increase the number of
      * characters read at a time.
-     * 
+     *
      * @param in  The stream to read from
      * @param doc The destination for the insertion.
      * @param pos The location in the document to place the content >= 0.
@@ -396,9 +402,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Creates a beep.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class BeepAction extends RecordableTextAction {
 
@@ -421,9 +427,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Moves the caret to the beginning of the document.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class BeginAction extends RecordableTextAction {
 
@@ -454,9 +460,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Toggles the position of the caret between the beginning of the line, and
      * the first non-whitespace character on the line.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class BeginLineAction extends RecordableTextAction {
 
@@ -538,9 +544,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action that begins recording a macro.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class BeginRecordingMacroAction extends RecordableTextAction {
 
@@ -573,9 +579,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Positions the caret at the beginning of the word.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected static class BeginWordAction extends RecordableTextAction {
 
@@ -615,10 +621,49 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     }
 
     /**
-     * Action for copying text.
-     * 
+     * Action for displaying a popup with a list of recently pasted text
+     * snippets.
+     *
      * @author D. Campione
-     * 
+     *
+     */
+    public static class ClipboardHistoryAction extends RecordableTextAction {
+
+        private static final long serialVersionUID = 6895410480274503395L;
+
+        private ClipboardHistory clipboardHistory;
+
+        public ClipboardHistoryAction() {
+            super(clipboardHistoryAction);
+            clipboardHistory = ClipboardHistory.get();
+        }
+
+        public ClipboardHistoryAction(String name, Icon icon, String desc,
+                Integer mnemonic, KeyStroke accelerator) {
+            super(name, icon, desc, mnemonic, accelerator);
+            clipboardHistory = ClipboardHistory.get();
+        }
+
+        @Override
+        public void actionPerformedImpl(ActionEvent e, TextArea textArea) {
+            Window owner = SwingUtilities.getWindowAncestor(textArea);
+            ClipboardHistoryPopup popup = new ClipboardHistoryPopup(owner,
+                    textArea);
+            popup.setContents(clipboardHistory.getHistory());
+            popup.setVisible(true);
+        }
+
+        @Override
+        public final String getMacroID() {
+            return clipboardHistoryAction;
+        }
+    }
+
+    /**
+     * Action for copying text.
+     *
+     * @author D. Campione
+     *
      */
     public static class CopyAction extends RecordableTextAction {
 
@@ -647,9 +692,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action for cutting text.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CutAction extends RecordableTextAction {
 
@@ -678,9 +723,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action for decreasing the font size.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DecreaseFontSizeAction extends RecordableTextAction {
 
@@ -735,9 +780,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * The action to use when no actions in the input/action map meet the key
      * pressed. This is actually called from the keymap.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DefaultKeyTypedAction extends RecordableTextAction {
 
@@ -770,9 +815,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Deletes the current line(s).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeleteLineAction extends RecordableTextAction {
 
@@ -819,9 +864,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Deletes the character of content that follows the current caret position.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeleteNextCharAction extends RecordableTextAction {
 
@@ -883,9 +928,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Deletes the character of content that precedes the current caret
      * position.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeletePrevCharAction extends RecordableTextAction {
 
@@ -939,9 +984,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action that deletes the previous word in the text area.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeletePrevWordAction extends RecordableTextAction {
 
@@ -986,9 +1031,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Action that deletes all text from the caret position to the end of the
      * caret's line.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeleteRestOfLineAction extends RecordableTextAction {
 
@@ -1030,9 +1075,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
      * the current caret position, and auto-completes the rest. Repeatedly
      * calling this action at the same location in the document goes one match
      * back each time it is called.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DumbCompleteWordAction extends RecordableTextAction {
 
@@ -1117,9 +1162,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Moves the caret to the end of the document.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class EndAction extends RecordableTextAction {
 
@@ -1154,9 +1199,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Positions the caret at the end of the line.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class EndLineAction extends RecordableTextAction {
 
@@ -1202,9 +1247,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action that ends recording a macro.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class EndRecordingMacroAction extends RecordableTextAction {
 
@@ -1237,9 +1282,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Positions the caret at the end of the word.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected static class EndWordAction extends RecordableTextAction {
 
@@ -1280,9 +1325,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action for increasing the font size.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class IncreaseFontSizeAction extends RecordableTextAction {
 
@@ -1335,9 +1380,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action for when the user presses the Enter key.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InsertBreakAction extends RecordableTextAction {
 
@@ -1375,9 +1420,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action taken when content is to be inserted.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InsertContentAction extends RecordableTextAction {
 
@@ -1410,9 +1455,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Places a tab character into the document. If there is a selection, it is
      * removed before the tab is added.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InsertTabAction extends RecordableTextAction {
 
@@ -1439,9 +1484,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action to invert the selection's case.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InvertSelectionCaseAction extends RecordableTextAction {
 
@@ -1482,9 +1527,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action to join the current line and the following line.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class JoinLinesAction extends RecordableTextAction {
 
@@ -1516,7 +1561,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                 c.setDot(caretPos); // Gets rid of any selection
                 doc.remove(caretPos, 1); // Should be '\n'
             } catch (BadLocationException ble) {
-                ExceptionDialog.notifyException(ble); // Shouldn't ever happen 
+                ExceptionDialog.notifyException(ble); // Shouldn't ever happen
             }
             textArea.requestFocusInWindow();
         }
@@ -1529,9 +1574,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action that moves a line up or down.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class LineMoveAction extends RecordableTextAction {
 
@@ -1621,9 +1666,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action to make the selection lower-case.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class LowerSelectionCaseAction extends RecordableTextAction {
 
@@ -1655,9 +1700,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action that moves the caret to the next (or previous) bookmark.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class NextBookmarkAction extends RecordableTextAction {
 
@@ -1740,9 +1785,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Selects the next occurrence of the text last selected.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class NextOccurrenceAction extends RecordableTextAction {
 
@@ -1778,9 +1823,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Action to move the selection and/or caret. Constructor indicates
      * direction to use.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class NextVisualPositionAction extends RecordableTextAction {
 
@@ -1868,9 +1913,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Positions the caret at the next word.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class NextWordAction extends RecordableTextAction {
 
@@ -1928,9 +1973,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Pages one view to the left or right.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     static class PageAction extends RecordableTextAction {
 
@@ -1989,9 +2034,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action for pasting text.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class PasteAction extends RecordableTextAction {
 
@@ -2020,7 +2065,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * "Plays back" the last macro recorded.
-     * 
+     *
      * @author D. Campione
      */
     public static class PlaybackLastMacroAction extends RecordableTextAction {
@@ -2054,9 +2099,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Select the previous occurrence of the text last selected.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class PreviousOccurrenceAction extends RecordableTextAction {
 
@@ -2092,9 +2137,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Positions the caret at the beginning of the previous word.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class PreviousWordAction extends RecordableTextAction {
 
@@ -2150,9 +2195,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Re-does the last action undone.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class RedoAction extends RecordableTextAction {
 
@@ -2184,9 +2229,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Scrolls the text area one line up or down, without changing
      * the caret position.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ScrollAction extends RecordableTextAction {
 
@@ -2227,9 +2272,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Selects the entire document.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SelectAllAction extends RecordableTextAction {
 
@@ -2259,9 +2304,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Selects the line around the caret.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SelectLineAction extends RecordableTextAction {
 
@@ -2290,9 +2335,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Selects the word around the caret.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SelectWordAction extends RecordableTextAction {
 
@@ -2325,9 +2370,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Puts the text area into read-only mode.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SetReadOnlyAction extends RecordableTextAction {
 
@@ -2355,9 +2400,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Puts the text area into writable (from read-only) mode.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SetWritableAction extends RecordableTextAction {
 
@@ -2385,9 +2430,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * The action for inserting a time/date stamp.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class TimeDateAction extends RecordableTextAction {
 
@@ -2422,9 +2467,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Toggles whether the current line has a bookmark.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ToggleBookmarkAction extends RecordableTextAction {
 
@@ -2456,9 +2501,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * The action for the insert key toggling insert/overwrite modes.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ToggleTextModeAction extends RecordableTextAction {
 
@@ -2486,9 +2531,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Undoes the last action done.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class UndoAction extends RecordableTextAction {
 
@@ -2519,9 +2564,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Removes the selection, if any.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class UnselectAction extends RecordableTextAction {
 
@@ -2544,9 +2589,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
 
     /**
      * Action to make the selection upper-case.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class UpperSelectionCaseAction extends RecordableTextAction {
 
@@ -2578,9 +2623,9 @@ public class TextAreaEditorKit extends DefaultEditorKit {
     /**
      * Scrolls up/down vertically. The select version of this action extends the
      * selection, instead of simply moving the caret.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class VerticalPageAction extends RecordableTextAction {
 

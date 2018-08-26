@@ -28,14 +28,16 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
 
 /**
  * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
  * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert}.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class InsertDeParser implements IItemsListVisitor {
 
@@ -88,7 +90,40 @@ public class InsertDeParser implements IItemsListVisitor {
             buffer.append(")");
         }
 
-        insert.getItemsList().accept(this);
+        if (insert.getItemsList() != null) {
+            insert.getItemsList().accept(this);
+        }
+
+        if (insert.getSelect() != null) {
+            buffer.append(" ");
+            if (insert.isUseSelectBrackets()) {
+                buffer.append("(");
+            }
+            if (insert.getSelect().getWithItemsList() != null) {
+                buffer.append("WITH ");
+                for (WithItem with : insert.getSelect().getWithItemsList()) {
+                    with.accept(selectVisitor);
+                }
+                buffer.append(" ");
+            }
+            insert.getSelect().getSelectBody().accept(selectVisitor);
+            if (insert.isUseSelectBrackets()) {
+                buffer.append(")");
+            }
+        }
+
+        if (insert.isReturningAllColumns()) {
+            buffer.append(" RETURNING *");
+        } else if (insert.getReturningExpressionList() != null) {
+            buffer.append(" RETURNING ");
+            for (Iterator<SelectExpressionItem> iter = insert
+                    .getReturningExpressionList().iterator(); iter.hasNext();) {
+                buffer.append(iter.next().toString());
+                if (iter.hasNext()) {
+                    buffer.append(", ");
+                }
+            }
+        }
     }
 
     @Override

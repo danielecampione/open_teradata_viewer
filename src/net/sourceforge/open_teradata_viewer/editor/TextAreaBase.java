@@ -33,6 +33,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.TextUI;
@@ -184,6 +185,23 @@ public abstract class TextAreaBase extends JTextArea {
         }
         if (add == true) {
             addMouseListener(mouseListener);
+        }
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        // If the caret is not on the first line, we must recalculate the line
+        // highlight y-offset after the text area is sized. This seems to be the
+        // best way to do it
+        if (getCaretPosition() != 0) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Yo");
+                    possiblyUpdateCurrentLineHighlightLocation();
+                }
+            });
         }
     }
 
@@ -583,6 +601,14 @@ public abstract class TextAreaBase extends JTextArea {
         return marginLineEnabled;
     }
 
+    /** @return Whether the OS we're running on is OS X. */
+    public static boolean isOSX() {
+        // Recommended at:
+        // http://developer.apple.com/mac/library/technotes/tn2002/tn2110.html
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.startsWith("mac os x");
+    }
+
     /**
      * Paints the text area.
      *
@@ -797,6 +823,9 @@ public abstract class TextAreaBase extends JTextArea {
      */
     @Override
     public void setFont(Font font) {
+        if (font != null && font.getSize() <= 0) {
+            throw new IllegalArgumentException("Font size must be > 0");
+        }
         super.setFont(font);
         if (font != null) {
             updateMarginLineX();

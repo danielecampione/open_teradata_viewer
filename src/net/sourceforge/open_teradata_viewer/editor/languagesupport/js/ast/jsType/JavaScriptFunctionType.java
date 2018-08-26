@@ -28,11 +28,12 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceComp
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclarationFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations;
-import sun.org.mozilla.javascript.internal.Kit;
+
+import org.mozilla.javascript.Kit;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -118,7 +119,7 @@ public class JavaScriptFunctionType {
      * Compare this JavaScriptFunctionType with another and return a weight
      * integer based on the parameters matching or whether the parameters are
      * compatible.
-     * 
+     *
      * @param compareType Method to compare with this.
      * @param provider SourceCompletionProvider.
      * @return Weight based on the compatibleness of method to compare.
@@ -173,7 +174,7 @@ public class JavaScriptFunctionType {
     /**
      * Converts TypeDeclaration into Java Class and compares whether another
      * parameter is compatible based on JSR-223.
-     * 
+     *
      * @param param Parameter to compare.
      * @param compareParam Compare parameter.
      * @param provider SourceCompletionProvider.
@@ -319,7 +320,7 @@ public class JavaScriptFunctionType {
 
     /**
      * Converts TypeDeclaration qualified name to Java Class.
-     * 
+     *
      * @throws ClassNotFoundException
      */
     private Class<?> convertClassToJavaClass(String name,
@@ -353,7 +354,7 @@ public class JavaScriptFunctionType {
     /**
      * Convenience method to parse function string and converts to
      * JavaScriptFunctionType.
-     * 
+     *
      * @param function String to parse e.g convertValue(java.util.String val);
      * @param provider Used for type conversions.
      */
@@ -391,7 +392,7 @@ public class JavaScriptFunctionType {
 
     /**
      * Converts JavaScript class name to integer code.
-     * 
+     *
      * @throws ClassNotFoundException
      */
     private static int getJSTypeCode(String clsName,

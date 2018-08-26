@@ -26,20 +26,21 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.T
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.resolver.JavaScriptCompletionResolver;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.resolver.JavaScriptResolver;
-import sun.org.mozilla.javascript.internal.CompilerEnvirons;
-import sun.org.mozilla.javascript.internal.ErrorReporter;
-import sun.org.mozilla.javascript.internal.EvaluatorException;
-import sun.org.mozilla.javascript.internal.Parser;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.ArrayLiteral;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.ElementGet;
-import sun.org.mozilla.javascript.internal.ast.FunctionCall;
-import sun.org.mozilla.javascript.internal.ast.InfixExpression;
-import sun.org.mozilla.javascript.internal.ast.Name;
-import sun.org.mozilla.javascript.internal.ast.NewExpression;
-import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
+
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.ErrorReporter;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.ArrayLiteral;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ElementGet;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.InfixExpression;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NewExpression;
+import org.mozilla.javascript.ast.NodeVisitor;
 
 /**
  *
@@ -49,7 +50,7 @@ import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
  */
 public class JavaScriptHelper {
 
-    private static final String INFIX = sun.org.mozilla.javascript.internal.ast.InfixExpression.class
+    private static final String INFIX = org.mozilla.javascript.ast.InfixExpression.class
             .getName();
 
     /**
@@ -169,7 +170,7 @@ public class JavaScriptHelper {
         if (typeNode != null) {
             switch (typeNode.getType()) {
             case Token.EXPR_RESULT:
-                AstNode expr = ((sun.org.mozilla.javascript.internal.ast.ExpressionStatement) typeNode)
+                AstNode expr = ((org.mozilla.javascript.ast.ExpressionStatement) typeNode)
                         .getExpression();
                 if (expr.getType() == Token.NAME) {
                     return provider.resolveTypeDeclation(((Name) expr)

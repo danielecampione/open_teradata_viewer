@@ -29,7 +29,7 @@ import javax.swing.Action;
  * of <code>ICompletionProvider</code>s via the trigger key. This allows the
  * application to logically "group together" completions of similar kinds; for
  * example, Java code completions vs. template completions.<p>
- * 
+ *
  * Usage:
  * <pre>
  * XPathDynamicCompletionProvider dynamicProvider = new XPathDynamicCompletionProvider();
@@ -40,9 +40,9 @@ import javax.swing.Action;
  * ...
  * ac.install(textArea);
  * </pre>
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class RoundRobinAutoCompletion extends AutoCompletion {
 
@@ -84,7 +84,7 @@ public class RoundRobinAutoCompletion extends AutoCompletion {
     /**
      * Moves to the next Provider internally. Needs refresh of the popup window
      * to display the changes.
-     * 
+     *
      * @return true if the next provider was the default one (thus returned to
      *         the default view). May be used in case you like to hide the popup
      *         in this case.
@@ -115,9 +115,9 @@ public class RoundRobinAutoCompletion extends AutoCompletion {
      * An implementation of the auto-complete action that ensures the proper
      * <code>ICompletionProvider</code> is displayed based on the context in
      * which the user presses the trigger key.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class CycleAutoCompleteAction extends AutoCompleteAction {
 
@@ -133,6 +133,23 @@ public class RoundRobinAutoCompletion extends AutoCompletion {
                 } else {
                     // Be sure to start with the default provider
                     resetProvider();
+                }
+                // Check if there are completions from the current provider. If
+                // not, advance to the next provider and display that one.
+                // A completion provider can force displaying "his" empty
+                // completion pop-up by returning an empty BasicCompletion. This
+                // is useful when the user is typing backspace and you like to
+                // display the first provider always first
+                for (int i = 1; i < cycle.size(); i++) {
+                    List<ICompletion> completions = getCompletionProvider()
+                            .getCompletions(getTextComponent());
+                    if (completions.size() > 0) {
+                        // Nothing to do, just let the current provider display
+                        break;
+                    } else {
+                        // Search for non-empty completions
+                        advanceProvider();
+                    }
                 }
             }
             super.actionPerformed(e);

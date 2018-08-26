@@ -36,6 +36,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
@@ -72,17 +73,23 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Join;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.LateralSubSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SetOperationList;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubJoin;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
@@ -92,12 +99,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
  * Find all used tables within an select statement.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
-        IExpressionVisitor, IItemsListVisitor {
+        IExpressionVisitor, IItemsListVisitor, ISelectItemVisitor {
 
     private List<String> tables;
     /**
@@ -111,7 +118,9 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     public List<String> getTableList(Delete delete) {
         init();
         tables.add(delete.getTable().getName());
-        delete.getWhere().accept(this);
+        if (delete.getWhere() != null) {
+            delete.getWhere().accept(this);
+        }
 
         return tables;
     }
@@ -159,7 +168,9 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Update update) {
         init();
-        tables.add(update.getTable().getName());
+        for (Table table : update.getTables()) {
+            tables.add(table.getName());
+        }
         if (update.getExpressions() != null) {
             for (IExpression expression : update.getExpressions()) {
                 expression.accept(this);
@@ -191,6 +202,12 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     @Override
     public void visit(PlainSelect plainSelect) {
+        if (plainSelect.getSelectItems() != null) {
+            for (ISelectItem item : plainSelect.getSelectItems()) {
+                item.accept(this);
+            }
+        }
+
         plainSelect.getFromItem().accept(this);
 
         if (plainSelect.getJoins() != null) {
@@ -201,7 +218,9 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
         if (plainSelect.getWhere() != null) {
             plainSelect.getWhere().accept(this);
         }
-
+        if (plainSelect.getTeradataHierarchical() != null) {
+            plainSelect.getTeradataHierarchical().accept(this);
+        }
     }
 
     @Override
@@ -370,7 +389,7 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor#visit(net.sourceforge.open_teradata_viewer.sqlparser.expression.CaseExpression)
      */
     @Override
@@ -379,7 +398,7 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor#visit(net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause)
      */
     @Override
@@ -483,10 +502,39 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     @Override
     public void visit(TeradataHierarchicalExpression texpr) {
+        if (texpr.getStartExpression() != null) {
+            texpr.getStartExpression().accept(this);
+        }
+
+        if (texpr.getConnectExpression() != null) {
+            texpr.getConnectExpression().accept(this);
+        }
     }
 
     @Override
     public void visit(RegExpMatchOperator rexpr) {
         visitBinaryExpression(rexpr);
+    }
+
+    @Override
+    public void visit(RegExpTeradataOperator rexpr) {
+        visitBinaryExpression(rexpr);
+    }
+
+    @Override
+    public void visit(JsonExpression jsonExpr) {
+    }
+
+    @Override
+    public void visit(AllColumns allColumns) {
+    }
+
+    @Override
+    public void visit(AllTableColumns allTableColumns) {
+    }
+
+    @Override
+    public void visit(SelectExpressionItem item) {
+        item.getExpression().accept(this);
     }
 }

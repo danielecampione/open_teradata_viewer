@@ -54,7 +54,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  * Manages running a parser object for an <code>SyntaxTextArea</code>.
  *
  * @author D. Campione
- * 
+ *
  */
 class ParserManager implements DocumentListener, ActionListener,
         HyperlinkListener {
@@ -122,7 +122,7 @@ class ParserManager implements DocumentListener, ActionListener,
 
     /**
      * Called when the timer fires (e.g. it's time to parse the document).
-     * 
+     *
      * @param e The event.
      */
     @Override
@@ -324,7 +324,7 @@ class ParserManager implements DocumentListener, ActionListener,
     /**
      * Forces the given {@link IParser} to re-parse the content of this text
      * area.<p>
-     * 
+     *
      * This method can be useful when a <code>IParser</code> can be configured
      * as to what notices it returns. For example, if a Java language parser can
      * be configured to set whether no serialVersionUID is a warning, error, or
@@ -405,7 +405,7 @@ class ParserManager implements DocumentListener, ActionListener,
      * highlight).
      *
      * @param e The mouse event.
-     * @return The tool tip to display, and possibly a hyperlink event handler. 
+     * @return The tool tip to display and possibly a hyperlink event handler.
      */
     public ToolTipInfo getToolTipText(MouseEvent e) {
         String tip = null;
@@ -675,6 +675,7 @@ class ParserManager implements DocumentListener, ActionListener,
         if (running) {
             timer.stop();
         }
+        timer.setInitialDelay(millis);
         timer.setDelay(millis);
         if (running) {
             timer.start();
@@ -724,9 +725,9 @@ class ParserManager implements DocumentListener, ActionListener,
 
     /**
      * Mapping of a parser notice to its highlight in the editor.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class NoticeHighlightPair {
         public IParserNotice notice;

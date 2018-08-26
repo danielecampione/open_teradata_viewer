@@ -20,11 +20,12 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast;
 
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
+
+import org.mozilla.javascript.ast.AstNode;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */

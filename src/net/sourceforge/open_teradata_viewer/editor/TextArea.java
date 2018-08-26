@@ -1444,6 +1444,10 @@ public class TextArea extends TextAreaBase implements Printable {
                 ((ConfigurableCaret) caret).setStyle(carets[mode]);
             }
             textMode = mode;
+            // Prevent the caret from blinking while e.g. holding down the
+            // Insert key to toggle insert/overwrite modes
+            caret.setVisible(false);
+            caret.setVisible(true);
         }
     }
 

@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.editor;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.util.ArrayList;
@@ -142,43 +141,6 @@ public class TextAreaHighlighter extends BasicHighlighter {
     public void install(JTextComponent c) {
         super.install(c);
         this.textArea = (TextArea) c;
-    }
-
-    /**
-     * Paints a list of highlights.
-     *
-     * @param g The graphics context.
-     * @param highlights The list of highlights to paint.
-     */
-    protected void paintList(Graphics g,
-            List<? extends IHighlightInfo> highlights) {
-        int len = highlights.size();
-
-        for (int i = 0; i < len; i++) {
-            IHighlightInfo info = highlights.get(i);
-            if (!(info instanceof ILayeredHighlightInfo)) {
-                // Avoid allocating unless we need it
-                Rectangle a = textArea.getBounds();
-                Insets insets = textArea.getInsets();
-                a.x = insets.left;
-                a.y = insets.top;
-                a.width -= insets.left + insets.right;
-                a.height -= insets.top + insets.bottom;
-                for (; i < len; i++) {
-                    info = highlights.get(i);
-                    if (!(info instanceof ILayeredHighlightInfo)) {
-                        Color c = ((HighlightInfoImpl) info).getColor();
-                        Highlighter.HighlightPainter p = info.getPainter();
-                        if (c != null
-                                && p instanceof ChangeableHighlightPainter) {
-                            ((ChangeableHighlightPainter) p).setPaint(c);
-                        }
-                        p.paint(g, info.getStartOffset(), info.getEndOffset(),
-                                a, textArea);
-                    }
-                }
-            }
-        }
     }
 
     /**

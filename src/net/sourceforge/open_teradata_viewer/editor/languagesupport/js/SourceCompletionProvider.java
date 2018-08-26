@@ -52,19 +52,19 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.T
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclarationFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.TypeDeclarations;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletion;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSVariableCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.engine.JavaScriptEngine;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.engine.JavaScriptEngineFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.resolver.JavaScriptResolver;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
  * Completion provider for JavaScript source code (not comments or strings).
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class SourceCompletionProvider extends DefaultCompletionProvider {
 
@@ -111,7 +111,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
      * @param set The set to add to.
      * @see ShorthandCompletionCache
      */
-    private void addShorthandCompletions(Set set) {
+    private void addShorthandCompletions(Set<ICompletion> set) {
         if (shorthandCache != null) {
             set.addAll(shorthandCache.getShorthandCompletions());
         }
@@ -171,7 +171,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
 
             // Get a list of all Completions matching the text
             AstRoot ast = this.parent.getASTRoot();
-            Set<IJSCompletionUI> set = new HashSet<IJSCompletionUI>();
+            Set<ICompletion> set = new HashSet<ICompletion>();
             CodeBlock block = iterateAstRoot(ast, set, text,
                     tc.getCaretPosition(), typeDeclarationOptions);
             recursivelyAddLocalVars(set, block, dot, null, false, false);
@@ -207,7 +207,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
                 return completions; // Empty
             }
 
-            Set<IJSCompletionUI> set = new TreeSet<IJSCompletionUI>();
+            Set<ICompletion> set = new TreeSet<ICompletion>();
 
             // Cut down the list to just those matching what we've typed.
             // Note: getAlreadyEnteredText() never returns null
@@ -271,8 +271,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
         }
     }
 
-    private List<ICompletion> handleNewFilter(Set<IJSCompletionUI> set,
-            String text) {
+    private List<ICompletion> handleNewFilter(Set<ICompletion> set, String text) {
         set.clear(); // Reset as just interested in the just load the
                      // constructors
         loadECMAClasses(set, text);
@@ -280,7 +279,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
     }
 
     private List<ICompletion> resolveCompletions(String text,
-            Set<IJSCompletionUI> set) {
+            Set<ICompletion> set) {
         completions.addAll(set);
 
         // Do a sort of all of our completions to put into case insensitive
@@ -310,10 +309,10 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
 
     /**
      * Load ECMA JavaScript class completions.
-     * 
+     *
      * @param set Completion set.
      */
-    private void loadECMAClasses(Set<IJSCompletionUI> set, String text) {
+    private void loadECMAClasses(Set<ICompletion> set, String text) {
         // All the constructors
         List<JavaScriptType> list = engine.getJavaScriptTypesFactory(this)
                 .getECMAObjectTypes(this);
@@ -339,7 +338,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
      * returns the Base class for the source completion provider. This is
      * represented by a class name or ECMA lookup name, e.g set to 'Global' for
      * server side or 'Window' for client JavaScript support.
-     * 
+     *
      * @return Base class for the completion provider.
      */
     public String getSelf() {
@@ -347,7 +346,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
     }
 
     /** Parse text and add completions to set. */
-    private void parseTextAndResolve(Set set, String text) {
+    private void parseTextAndResolve(Set<ICompletion> set, String text) {
         // Compile the entered text and resolve the variables/function
         JavaScriptResolver compiler = engine.getJavaScriptResolver(this);
         try {
@@ -366,7 +365,8 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
      * Populate Set of completions if JavaScriptType is not null and return
      * true, otherwise return false.
      */
-    private boolean populateCompletionsFromType(JavaScriptType type, Set set) {
+    private boolean populateCompletionsFromType(JavaScriptType type,
+            Set<ICompletion> set) {
         if (type != null) {
             javaScriptTypesFactory.populateCompletionsForType(type, set);
             return true;
@@ -397,7 +397,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
     /**
      * Iterates through AstRoot to extract all code blocks, functions, variables
      * etc.., e.g functions, if statements, variables.
-     * 
+     *
      * @param root AstRoot to iterate.
      * @param set Add completions to set (functions only).
      * @param entered Already entered text.
@@ -405,7 +405,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
      * @param preProcessingMode Flag to state whether the parsing is before the
      *        STA parsing.
      */
-    protected CodeBlock iterateAstRoot(AstRoot root, Set<IJSCompletionUI> set,
+    protected CodeBlock iterateAstRoot(AstRoot root, Set<ICompletion> set,
             String entered, int dot, TypeDeclarationOptions options) {
         JavaScriptParser parser = engine.getParser(this, dot, options);
         return parser.convertAstNodeToCodeBlock(root, set, entered);
@@ -418,7 +418,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
 
     /**
      * Convenience method to call variable resolver.
-     * 
+     *
      * @return JavaScript variable declaration.
      */
     public JavaScriptVariableDeclaration findDeclaration(String name) {
@@ -429,7 +429,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
      * Convenience method to call variable resolver for non local variables, i.e
      * does NOT try to resolve name to any local variables (just pre-processed
      * or system).
-     * 
+     *
      * @return JavaScript variable declaration.
      */
     public JavaScriptVariableDeclaration findNonLocalDeclaration(String name) {
@@ -438,7 +438,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
 
     /**
      * Get the source of the node and try to resolve function node:
-     * 
+     *
      * @return a.toString().getCharAt(1); returns String TypeDeclaration.
      */
     public TypeDeclaration resolveTypeFromFunctionNode(AstNode functionNode) {
@@ -461,7 +461,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
     }
 
     /** Iterate though the CodeBlock and extract all variables within scope. */
-    protected void recursivelyAddLocalVars(Set<IJSCompletionUI> completions,
+    protected void recursivelyAddLocalVars(Set<ICompletion> completions,
             CodeBlock block, int dot, String text, boolean findMatch,
             boolean isPreprocessing) {
 
@@ -561,7 +561,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
 
     public void parseDocument(int dot) {
         AstRoot ast = this.parent.getASTRoot();
-        Set<IJSCompletionUI> set = new HashSet<IJSCompletionUI>();
+        Set<ICompletion> set = new HashSet<ICompletion>();
         variableResolver.resetLocalVariables();
         iterateAstRoot(ast, set, "", dot, typeDeclarationOptions);
     }

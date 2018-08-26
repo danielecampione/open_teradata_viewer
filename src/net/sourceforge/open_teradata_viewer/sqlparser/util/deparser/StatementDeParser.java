@@ -28,6 +28,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.Cre
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.execute.Execute;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
@@ -36,8 +37,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.Truncat
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -122,7 +123,7 @@ public class StatementDeParser implements IStatementVisitor {
             for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter
                     .hasNext();) {
                 WithItem withItem = iter.next();
-                buffer.append(withItem);
+                withItem.accept(selectDeParser);
                 if (iter.hasNext()) {
                     buffer.append(",");
                 }
@@ -143,7 +144,7 @@ public class StatementDeParser implements IStatementVisitor {
         ExpressionDeParser expressionDeParser = new ExpressionDeParser(
                 selectDeParser, buffer);
         UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser,
-                buffer);
+                selectDeParser, buffer);
         selectDeParser.setExpressionVisitor(expressionDeParser);
         updateDeParser.deParse(update);
     }
@@ -163,5 +164,17 @@ public class StatementDeParser implements IStatementVisitor {
     @Override
     public void visit(Statements stmts) {
         stmts.accept(this);
+    }
+
+    @Override
+    public void visit(Execute execute) {
+        SelectDeParser selectDeParser = new SelectDeParser();
+        selectDeParser.setBuffer(buffer);
+        ExpressionDeParser expressionDeParser = new ExpressionDeParser(
+                selectDeParser, buffer);
+        ExecuteDeParser executeDeParser = new ExecuteDeParser(
+                expressionDeParser, buffer);
+        selectDeParser.setExpressionVisitor(expressionDeParser);
+        executeDeParser.deParse(execute);
     }
 }

@@ -21,9 +21,9 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
 /**
  * A limit clause in the form [LIMIT {[offset,] row_count) | (row_count | ALL)
  * OFFSET offset}].
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class Limit {
 
@@ -32,6 +32,7 @@ public class Limit {
     private boolean rowCountJdbcParameter = false;
     private boolean offsetJdbcParameter = false;
     private boolean limitAll;
+    private boolean limitNull = false;
 
     public long getOffset() {
         return offset;
@@ -74,10 +75,21 @@ public class Limit {
         limitAll = b;
     }
 
+    /** @return true if the limit is "LIMIT NULL [OFFSET ...])". */
+    public boolean isLimitNull() {
+        return limitNull;
+    }
+
+    public void setLimitNull(boolean b) {
+        limitNull = b;
+    }
+
     @Override
     public String toString() {
         String retVal = "";
-        if (rowCount > 0 || rowCountJdbcParameter) {
+        if (limitNull) {
+            retVal += " LIMIT NULL";
+        } else if (rowCount >= 0 || rowCountJdbcParameter) {
             retVal += " LIMIT " + (rowCountJdbcParameter ? "?" : rowCount + "");
         }
         if (offset > 0 || offsetJdbcParameter) {

@@ -20,13 +20,14 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast;
 
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
+
+import org.mozilla.javascript.ast.AstNode;
 
 /**
  * JavaScript Variable Declaration class <code>TypeDeclarations</code>.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptVariableDeclaration extends JavaScriptDeclaration {
 
@@ -49,7 +50,7 @@ public class JavaScriptVariableDeclaration extends JavaScriptDeclaration {
 
     /**
      * Lookup TypeDeclaration from the Rhino <code>AstNode</code>.
-     * 
+     *
      * @param typeNode Rhino AstNode linked to this variable.
      */
     public void setTypeDeclaration(AstNode typeNode) {
@@ -60,7 +61,7 @@ public class JavaScriptVariableDeclaration extends JavaScriptDeclaration {
     /**
      * Set the TypeDeclaration for the AstNode. Stores the original value so it
      * can be reset.
-     * 
+     *
      * @see #resetVariableToOriginalType()
      */
     public void setTypeDeclaration(AstNode typeNode, boolean overrideOriginal) {

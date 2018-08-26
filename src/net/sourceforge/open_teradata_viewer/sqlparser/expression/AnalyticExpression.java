@@ -20,8 +20,9 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 import java.util.List;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
  * Analytic function. The name of the function is variable but the parameters
@@ -30,11 +31,11 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByEl
  * like sum(col) or the "all collumns" wildcard like count(*).
  *
  * @author D. Campione
- * 
+ *
  */
 public class AnalyticExpression implements IExpression {
 
-    private List<Column> partitionByColumns;
+    private ExpressionList partitionExpressionList;
     private List<OrderByElement> orderByElements;
     private String name;
     private IExpression expression;
@@ -56,12 +57,13 @@ public class AnalyticExpression implements IExpression {
         this.orderByElements = orderByElements;
     }
 
-    public List<Column> getPartitionByColumns() {
-        return partitionByColumns;
+    public ExpressionList getPartitionExpressionList() {
+        return partitionExpressionList;
     }
 
-    public void setPartitionByColumns(List<Column> partitionByColumns) {
-        this.partitionByColumns = partitionByColumns;
+    public void setPartitionExpressionList(
+            ExpressionList partitionExpressionList) {
+        this.partitionExpressionList = partitionExpressionList;
     }
 
     public String getName() {
@@ -139,14 +141,11 @@ public class AnalyticExpression implements IExpression {
     }
 
     private void toStringPartitionBy(StringBuilder b) {
-        if (partitionByColumns != null && !partitionByColumns.isEmpty()) {
+        if (partitionExpressionList != null
+                && !partitionExpressionList.getExpressions().isEmpty()) {
             b.append("PARTITION BY ");
-            for (int i = 0; i < partitionByColumns.size(); i++) {
-                if (i > 0) {
-                    b.append(", ");
-                }
-                b.append(partitionByColumns.get(i).toString());
-            }
+            b.append(PlainSelect.getStringList(
+                    partitionExpressionList.getExpressions(), true, false));
             b.append(" ");
         }
     }

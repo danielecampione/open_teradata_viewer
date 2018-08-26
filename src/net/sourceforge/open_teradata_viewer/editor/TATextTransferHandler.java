@@ -44,11 +44,11 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * <code>BasicTextUI</code>. In the future, it will include the ability to
  * drag-and-drop files into <code>TextArea</code>s (i.e., the text will be
  * inserted into the text area).<p>
- * 
+ *
  * The main reason this class is kept around is so we can subclass it.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TATextTransferHandler extends TransferHandler {
 
@@ -62,7 +62,7 @@ public class TATextTransferHandler extends TransferHandler {
 
     /**
      * Try to find a flavor that can be used to import a Transferable to a
-     * specified text component.  
+     * specified text component.
      * The set of usable flavors are tried in the following order:
      * <ol>
      *     <li>First, an attempt is made to find a flavor matching the content
@@ -183,7 +183,7 @@ public class TATextTransferHandler extends TransferHandler {
      * This is the type of transfer actions supported by the source. Some models
      * are not mutable, so a transfer operation of COPY only should be
      * advertised in that case.
-     * 
+     *
      * @param c The component holding the data to be transfered. This argument
      *          is provided to enable sharing of TransferHandlers by multiple
      *          components.
@@ -205,8 +205,8 @@ public class TATextTransferHandler extends TransferHandler {
      * @param comp The component holding the data to be transfered. This
      *             argument is provided to enable sharing of TransferHandlers by
      *             multiple components.
-     * @return The representation of the data to be transfered. 
-     *  
+     * @return The representation of the data to be transfered.
+     *
      */
     @Override
     protected Transferable createTransferable(JComponent comp) {
@@ -224,7 +224,7 @@ public class TATextTransferHandler extends TransferHandler {
      * @param source The component that was the source of the data.
      * @param data The data that was transferred or possibly null if the action
      *             is <code>NONE</code>.
-     * @param action The actual action that was performed.  
+     * @param action The actual action that was performed.
      */
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
@@ -239,12 +239,16 @@ public class TATextTransferHandler extends TransferHandler {
             }
         }
         exportComp = null;
+        if (data instanceof TextTransferable) {
+            ClipboardHistory.get()
+                    .add(((TextTransferable) data).getPlainData());
+        }
     }
 
     /**
      * This method causes a transfer to a component from a clipboard or a DND
      * drop operation. The Transferable represents the data to be imported into
-     * the component.  
+     * the component.
      *
      * @param comp The component to receive the transfer. This argument is
      *             provided to enable sharing of TransferHandlers by multiple
@@ -292,7 +296,7 @@ public class TATextTransferHandler extends TransferHandler {
 
     /**
      * This method indicates if a component would accept an import of the given
-     * set of data flavors prior to actually attempting to import it. 
+     * set of data flavors prior to actually attempting to import it.
      *
      * @param comp The component to receive the transfer. This argument is
      *             provided to enable sharing of TransferHandlers by multiple
@@ -311,9 +315,9 @@ public class TATextTransferHandler extends TransferHandler {
 
     /**
      * A possible implementation of the Transferable interface for TextAreas.
-     * 
+     *
      *  @author D. Campione
-     *  
+     *
      */
     static class TextTransferable implements Transferable {
 
@@ -410,7 +414,7 @@ public class TATextTransferHandler extends TransferHandler {
         /**
          * Returns whether or not the specified data flavor is supported for
          * this object.
-         * 
+         *
          * @param flavor The requested flavor for the data.
          * @return boolean indicating whether or not the data flavor is
          *         supported.
@@ -429,7 +433,7 @@ public class TATextTransferHandler extends TransferHandler {
         /**
          * Returns whether or not the specified data flavor is an plain flavor
          * that is supported.
-         * 
+         *
          * @param flavor The requested flavor for the data.
          * @return boolean indicating whether or not the data flavor is
          *         supported.
@@ -455,7 +459,7 @@ public class TATextTransferHandler extends TransferHandler {
         /**
          * Returns whether or not the specified data flavor is a String flavor
          * that is supported.
-         * 
+         *
          * @param flavor The requested flavor for the data.
          * @return boolean indicating whether or not the data flavor is
          *         supported.

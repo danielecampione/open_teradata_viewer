@@ -26,7 +26,7 @@ import java.util.List;
  * operations have the same priority.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SetOperationList implements ISelectBody {
 
@@ -34,6 +34,8 @@ public class SetOperationList implements ISelectBody {
     private List<SetOperation> operations;
     private List<OrderByElement> orderByElements;
     private Limit limit;
+    private Offset offset;
+    private Fetch fetch;
 
     @Override
     public void accept(ISelectVisitor selectVisitor) {
@@ -74,6 +76,22 @@ public class SetOperationList implements ISelectBody {
         this.limit = limit;
     }
 
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
+    }
+
+    public Fetch getFetch() {
+        return fetch;
+    }
+
+    public void setFetch(Fetch fetch) {
+        this.fetch = fetch;
+    }
+
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
@@ -93,14 +111,20 @@ public class SetOperationList implements ISelectBody {
         if (limit != null) {
             buffer.append(limit.toString());
         }
+        if (offset != null) {
+            buffer.append(offset.toString());
+        }
+        if (fetch != null) {
+            buffer.append(fetch.toString());
+        }
         return buffer.toString();
     }
 
     /**
      * List of set operations.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public enum SetOperationType {
 

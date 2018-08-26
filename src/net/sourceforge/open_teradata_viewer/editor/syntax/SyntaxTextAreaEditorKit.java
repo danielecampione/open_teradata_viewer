@@ -202,13 +202,14 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             char nextCh = offs == end ? 0 : seg.array[seg.getIndex() + 1];
 
             // The "word" is a group of letters and/or digits
-            if (Character.isLetterOrDigit(ch)) {
-                if (offs != end && !Character.isLetterOrDigit(nextCh)) {
+            int languageIndex = 0;
+            if (doc.isIdentifierChar(languageIndex, ch)) {
+                if (offs != end && !doc.isIdentifierChar(languageIndex, nextCh)) {
                     return offs;
                 }
                 do {
                     ch = seg.previous();
-                } while (Character.isLetterOrDigit(ch));
+                } while (doc.isIdentifierChar(languageIndex, ch));
             } else if (Character.isWhitespace(ch)) { // The "word" is whitespace
                 if (offs != end && !Character.isWhitespace(nextCh)) {
                     return offs;
@@ -870,16 +871,17 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
 
             // The "word" is a group of letters and/or digits
-            if (Character.isLetterOrDigit(ch)) {
+            int languageIndex = 0;
+            if (doc.isIdentifierChar(languageIndex, ch)) {
                 do {
                     ch = seg.previous();
-                } while (Character.isLetterOrDigit(ch));
+                } while (doc.isIdentifierChar(languageIndex, ch));
             }
-
             // The "word" is a series of symbols
             else {
                 while (!Character.isWhitespace(ch)
-                        && !Character.isLetterOrDigit(ch) && ch != Segment.DONE) {
+                        && !doc.isIdentifierChar(languageIndex, ch)
+                        && ch != Segment.DONE) {
                     ch = seg.previous();
                 }
             }
@@ -935,12 +937,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             char ch = seg.first();
 
             // The "word" is a group of letters and/or digits
-            if (Character.isLetterOrDigit(ch)) {
+            int languageIndex = 0;
+            if (doc.isIdentifierChar(languageIndex, ch)) {
                 do {
                     ch = seg.next();
-                } while (Character.isLetterOrDigit(ch));
+                } while (doc.isIdentifierChar(languageIndex, ch));
             }
-
             // The "word" is whitespace
             else if (Character.isWhitespace(ch)) {
 
@@ -1525,18 +1527,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             char ch = seg.first();
 
             // Skip the group of letters and/or digits
-            if (Character.isLetterOrDigit(ch)) {
+            int languageIndex = 0;
+            if (doc.isIdentifierChar(languageIndex, ch)) {
                 do {
                     ch = seg.next();
-                } while (Character.isLetterOrDigit(ch));
+                } while (doc.isIdentifierChar(languageIndex, ch));
             }
-
             // Skip groups of "anything else" (operators, etc.)
             else if (!Character.isWhitespace(ch)) {
                 do {
                     ch = seg.next();
                 } while (ch != Segment.DONE
-                        && !(Character.isLetterOrDigit(ch) || Character
+                        && !(doc.isIdentifierChar(languageIndex, ch) || Character
                                 .isWhitespace(ch)));
             }
 
@@ -1676,18 +1678,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
 
             // Skip the group of letters and/or digits
-            if (Character.isLetterOrDigit(ch)) {
+            int languageIndex = 0;
+            if (doc.isIdentifierChar(languageIndex, ch)) {
                 do {
                     ch = seg.previous();
-                } while (Character.isLetterOrDigit(ch));
+                } while (doc.isIdentifierChar(languageIndex, ch));
             }
-
             // Skip groups of "anything else" (operators, etc.)
             else if (!Character.isWhitespace(ch)) {
                 do {
                     ch = seg.previous();
                 } while (ch != Segment.DONE
-                        && !(Character.isLetterOrDigit(ch) || Character
+                        && !(doc.isIdentifierChar(languageIndex, ch) || Character
                                 .isWhitespace(ch)));
             }
 

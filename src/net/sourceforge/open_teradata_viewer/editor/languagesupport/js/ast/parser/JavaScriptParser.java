@@ -20,15 +20,16 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.parse
 
 import java.util.Set;
 
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.CodeBlock;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.TypeDeclarationOptions;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletionUI;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -48,19 +49,19 @@ public abstract class JavaScriptParser {
 
     /**
      * Converts AstRoot to CodeBlock.
-     * 
+     *
      * @param root AstRoot to iterate.
      * @param set Completions set.
      * @param entered Text entered by user.
      * @return CodeBlock tree.
      */
     public abstract CodeBlock convertAstNodeToCodeBlock(AstRoot root,
-            Set<IJSCompletionUI> set, String entered);
+            Set<ICompletion> set, String entered);
 
     /**
      * If options are null, then it is assumed that the main editor text is
      * being parsed.
-     * 
+     *
      * @return Whether options is not null and is in pre-processing mode.
      */
     public boolean isPreProcessing() {

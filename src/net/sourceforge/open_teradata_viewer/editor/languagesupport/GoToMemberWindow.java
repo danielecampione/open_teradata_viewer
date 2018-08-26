@@ -49,6 +49,7 @@ import javax.swing.JWindow;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicTextFieldUI;
@@ -98,6 +99,7 @@ public class GoToMemberWindow extends JWindow {
         contentPane.add(field, BorderLayout.NORTH);
 
         this.tree = tree;
+        tweakTreeBorder(this.tree);
         tree.setSorted(true);
         tree.setShowMajorElementsOnly(true);
         tree.setGotoSelectedElementOnClick(false);
@@ -164,10 +166,29 @@ public class GoToMemberWindow extends JWindow {
     }
 
     /**
+     * Ensures the tree has a very small empty border at the top, to make things
+     * look a little nicer.
+     *
+     * @param tree The tree whose border should be examined.
+     */
+    private void tweakTreeBorder(AbstractSourceTree tree) {
+        Border treeBorder = tree.getBorder();
+        if (treeBorder == null) {
+            treeBorder = BorderFactory.createEmptyBorder(2, 0, 0, 0);
+            tree.setBorder(treeBorder);
+        } else if (treeBorder instanceof EmptyBorder
+                && ((EmptyBorder) treeBorder).getBorderInsets().top == 0) {
+            treeBorder = BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(2, 0, 0, 0), treeBorder);
+            tree.setBorder(treeBorder);
+        }
+    }
+
+    /**
      * Listens for events in this window.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener extends MouseAdapter implements WindowFocusListener,
             ComponentListener, DocumentListener, ActionListener, KeyListener {
@@ -265,9 +286,9 @@ public class GoToMemberWindow extends JWindow {
 
     /**
      * The border for the filtering text field.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class TextFieldBorder implements Border {
 

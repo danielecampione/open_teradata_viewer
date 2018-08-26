@@ -21,12 +21,13 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.Config;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class UpdateAction extends CustomAction {
 
@@ -39,6 +40,7 @@ public class UpdateAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        openURL(Config.SOURCEFORGE_MIRROR + "files/latest");
+        Utilities.openURLWithDefaultBrowser(Config.SOURCEFORGE_MIRROR
+                + "files/latest");
     }
 }

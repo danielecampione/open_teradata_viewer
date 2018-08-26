@@ -52,8 +52,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKi
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -308,16 +308,24 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu = new JMenu("View As (Highlighting File Type)");
         ButtonGroup bg = new ButtonGroup();
         addSyntaxItem("SQL", ISyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
+        addSyntaxItem("Assembly (x86)",
+                ISyntaxConstants.SYNTAX_STYLE_ASSEMBLY_X86, bg, subMenu);
         addSyntaxItem("C", ISyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
-        addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
+        addSyntaxItem("C++", ISyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg,
                 subMenu);
         addSyntaxItem("CSS", ISyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
+        addSyntaxItem("C#", ISyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu);
+        addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
+                subMenu);
+        addSyntaxItem("D", ISyntaxConstants.SYNTAX_STYLE_D, bg, subMenu);
+        addSyntaxItem("Dart", ISyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu);
         addSyntaxItem("Groovy", ISyntaxConstants.SYNTAX_STYLE_GROOVY, bg,
                 subMenu);
         addSyntaxItem("HTML", ISyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
         addSyntaxItem("Java", ISyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
         addSyntaxItem("JavaScript", ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
                 bg, subMenu);
+        addSyntaxItem("JSON", ISyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
         addSyntaxItem("JSP", ISyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
         addSyntaxItem("NSIS", ISyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
         addSyntaxItem("Perl", ISyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
@@ -326,6 +334,10 @@ public class ApplicationMenuBar extends JMenuBar {
                 subMenu);
         addSyntaxItem("Unix Shell", ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
                 bg, subMenu);
+        addSyntaxItem("Visual Basic",
+                ISyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
+        addSyntaxItem("Windows batch",
+                ISyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
         addSyntaxItem("XML", ISyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
         addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
                 bg, subMenu);

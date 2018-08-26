@@ -24,13 +24,14 @@ import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.ShorthandCompletionCache;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JarManager;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
+
+import org.mozilla.javascript.ast.AstRoot;
 
 /**
  * Completion provider for JavaScript.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptCompletionProvider extends
         LanguageAwareCompletionProvider {
@@ -66,7 +67,7 @@ public class JavaScriptCompletionProvider extends
 
     /**
      * Returns the AST for the JavaScript in the editor.
-     * 
+     *
      * @return The AST.
      */
     public synchronized AstRoot getASTRoot() {
@@ -108,7 +109,7 @@ public class JavaScriptCompletionProvider extends
 
     /**
      * Sets the AST for the JavaScript in this editor.
-     * 
+     *
      * @param root The AST.
      */
     public synchronized void setASTRoot(AstRoot root) {

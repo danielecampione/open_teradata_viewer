@@ -18,6 +18,9 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -26,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
@@ -35,27 +37,28 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
+
+import org.junit.Test;
+
 import test.net.sourceforge.open_teradata_viewer.sqlparser.TestException;
 import test.net.sourceforge.open_teradata_viewer.sqlparser.simpleparsing.CCSqlParserManagerTest;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
-public class TablesNamesFinderTest extends TestCase {
+public class TablesNamesFinderTest {
 
-    CCSqlParserManager pm = new CCSqlParserManager();
+    static CCSqlParserManager pm = new CCSqlParserManager();
 
-    public TablesNamesFinderTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testRUBiSTableList() throws Exception {
         runTestOnResource("/res/testfiles/sqlparser/RUBiS-select-requests.txt");
     }
 
+    @Test
     public void testMoreComplexExamples() throws Exception {
         runTestOnResource("/res/testfiles/sqlparser/complex-select-requests.txt");
     }
@@ -132,8 +135,8 @@ public class TablesNamesFinderTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetTableList() throws Exception {
-
         String sql = "SELECT * FROM MY_TABLE1, MY_TABLE2, (SELECT * FROM MY_TABLE3) LEFT OUTER JOIN MY_TABLE4 "
                 + " WHERE ID = (SELECT MAX(ID) FROM MY_TABLE5) AND ID2 IN (SELECT * FROM MY_TABLE6)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -154,9 +157,9 @@ public class TablesNamesFinderTest extends TestCase {
                 assertEquals("MY_TABLE" + i, tableName);
             }
         }
-
     }
 
+    @Test
     public void testGetTableListWithAlias() throws Exception {
         String sql = "SELECT * FROM MY_TABLE1 as ALIAS_TABLE1";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -169,6 +172,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertEquals("MY_TABLE1", (String) tableList.get(0));
     }
 
+    @Test
     public void testGetTableListWithStmt() throws Exception {
         String sql = "WITH TESTSTMT as (SELECT * FROM MY_TABLE1 as ALIAS_TABLE1) SELECT * FROM TESTSTMT";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -181,6 +185,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertEquals("MY_TABLE1", (String) tableList.get(0));
     }
 
+    @Test
     public void testGetTableListWithLateral() throws Exception {
         String sql = "SELECT * FROM MY_TABLE1, LATERAL(select a from MY_TABLE2) as AL";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -194,6 +199,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE2"));
     }
 
+    @Test
     public void testGetTableListFromDelete() throws Exception {
         String sql = "DELETE FROM MY_TABLE1 as AL WHERE a = (SELECT a from MY_TABLE2)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -207,6 +213,21 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE2"));
     }
 
+    @Test
+    public void testGetTableListFromDelete2() throws Exception {
+        String sql = "DELETE FROM MY_TABLE1";
+        net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement statement = pm
+                .parse(new StringReader(sql));
+
+        Delete deleteStatement = (Delete) statement;
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder
+                .getTableList(deleteStatement);
+        assertEquals(1, tableList.size());
+        assertTrue(tableList.contains("MY_TABLE1"));
+    }
+
+    @Test
     public void testGetTableListFromInsert() throws Exception {
         String sql = "INSERT INTO MY_TABLE1 (a) VALUES ((SELECT a from MY_TABLE2 WHERE a = 1))";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -220,6 +241,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE2"));
     }
 
+    @Test
     public void testGetTableListFromInsertValues() throws Exception {
         String sql = "INSERT INTO MY_TABLE1 (a) VALUES (5)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -232,6 +254,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE1"));
     }
 
+    @Test
     public void testGetTableListFromReplace() throws Exception {
         String sql = "REPLACE INTO MY_TABLE1 (a) VALUES ((SELECT a from MY_TABLE2 WHERE a = 1))";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -245,6 +268,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE2"));
     }
 
+    @Test
     public void testGetTableListFromUpdate() throws Exception {
         String sql = "UPDATE MY_TABLE1 SET a = (SELECT a from MY_TABLE2 WHERE a = 1)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -258,6 +282,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE2"));
     }
 
+    @Test
     public void testGetTableListFromUpdate2() throws Exception {
         String sql = "UPDATE MY_TABLE1 SET a = 5 WHERE 0 < (SELECT COUNT(b) FROM MY_TABLE3)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -271,6 +296,7 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE3"));
     }
 
+    @Test
     public void testGetTableListFromUpdate3() throws Exception {
         String sql = "UPDATE MY_TABLE1 SET a = 5 FROM MY_TABLE1 INNER JOIN MY_TABLE2 on MY_TABLE1.C = MY_TABLE2.D WHERE 0 < (SELECT COUNT(b) FROM MY_TABLE3)";
         IStatement statement = pm.parse(new StringReader(sql));
@@ -283,6 +309,22 @@ public class TablesNamesFinderTest extends TestCase {
         assertTrue(tableList.contains("MY_TABLE1"));
         assertTrue(tableList.contains("MY_TABLE2"));
         assertTrue(tableList.contains("MY_TABLE3"));
+    }
+
+    @Test
+    public void testCmplxSelectProblem() throws Exception {
+        String sql = "SELECT cid, (SELECT name FROM tbl0 WHERE tbl0.id = cid) AS name, original_id AS bc_id FROM tbl WHERE crid = ? AND user_id is null START WITH ID = (SELECT original_id FROM tbl2 WHERE USER_ID = ?) CONNECT BY prior parent_id = id AND rownum = 1";
+        net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement statement = pm
+                .parse(new StringReader(sql));
+
+        Select selectStatement = (Select) statement;
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder
+                .getTableList(selectStatement);
+        assertEquals(3, tableList.size());
+        assertTrue(tableList.contains("tbl0"));
+        assertTrue(tableList.contains("tbl"));
+        assertTrue(tableList.contains("tbl2"));
     }
 
     private String getLine(BufferedReader in) throws Exception {

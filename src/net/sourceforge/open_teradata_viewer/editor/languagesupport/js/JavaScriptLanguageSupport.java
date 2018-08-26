@@ -54,19 +54,20 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.JavaScriptTokenMaker;
-import sun.org.mozilla.javascript.internal.Context;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.NodeVisitor;
 
 /**
  * Language support for JavaScript. This requires Rhino, which is included with
  * this library.
- * 
+ *
  * @author D. Campione
  * @see JavaScriptOutlineTree
- * 
+ *
  */
 public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
@@ -93,7 +94,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
         jarManager = createJarManager();
         provider = createJavaScriptCompletionProvider();
         setErrorParser(JsErrorParser.RHINO);
-        setECMAVersion(null, jarManager); // Load default ECMA 
+        setECMAVersion(null, jarManager); // Load default ECMA
         setDefaultCompletionCellRenderer(new JavaScriptCellRenderer());
         setAutoActivationEnabled(true);
         setParameterAssistanceEnabled(true);
@@ -135,7 +136,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
      * Creates the provider to use for an STA instance editing JavaScript.
      * Subclasses can override to return custom subclasses of
      * <code>JavaScriptCompletionProvider</code>.
-     * 
+     *
      * @return The provider.
      */
     protected JavaScriptCompletionProvider createJavaScriptCompletionProvider() {
@@ -197,7 +198,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
     /**
      * Returns the JS parser running on a text area with this JavaScript
      * language support installed.
-     * 
+     *
      * @param textArea The text area.
      * @return The JS parser. This will be <code>null</code> if the text area
      *         does not have this <code>JavaScriptLanguageSupport</code>
@@ -247,7 +248,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Installs extra keyboard shortcuts supported by this language support.
-     * 
+     *
      * @param textArea The text area to install the shortcuts into.
      */
     private void installKeyboardShortcuts(SyntaxTextArea textArea) {
@@ -262,7 +263,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Returns whether strict mode (more warnings are detected) is enabled.
-     * 
+     *
      * @return Whether strict mode is enabled.
      * @see #setStrictMode(boolean)
      */
@@ -272,7 +273,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Returns whether E4X is supported in parsed JavaScript.
-     * 
+     *
      * @return Whether E4X is supported.
      * @see #setXmlAvailable(boolean)
      */
@@ -360,7 +361,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Sets whether strict mode (more warnings are detected) is enabled.
-     * 
+     *
      * @param strict Whether strict mode is enabled.
      * @return Whether a new value was actually set for this property.
      * @see #isStrictMode()
@@ -375,7 +376,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Sets whether E4X is supported in parsed JavaScript.
-     * 
+     *
      * @param available Whether E4X is supported.
      * @return Whether a new value was actually set for this property.
      * @see #isXmlAvailable()
@@ -413,7 +414,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
     /**
      * Uninstalls any keyboard shortcuts specific to this language support.
-     * 
+     *
      * @param textArea The text area to uninstall the actions from.
      */
     private void uninstallKeyboardShortcuts(SyntaxTextArea textArea) {
@@ -431,9 +432,9 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
      * area. Unlike many simpler language supports,
      * <code>JavaScriptLanguageSupport</code> cannot share any information
      * amongst instances of <code>SyntaxTextArea</code>.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class Info implements PropertyChangeListener {
 
@@ -448,7 +449,7 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
 
         /**
          * Called when a text area is re-parsed.
-         * 
+         *
          * @param e The event.
          */
         @Override
@@ -465,9 +466,9 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
     /**
      * A hack of <code>AutoCompletion</code> that forces the parser to re-parse
      * the document when the user presses Ctrl+space.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class JavaScriptAutoCompletion extends AutoCompletion {
 
@@ -514,9 +515,9 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
     /**
      * Listens for various events in a text area editing Java (in particular,
      * caret events, so we can track the "active" code block).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener implements CaretListener, ActionListener {
 
@@ -578,8 +579,8 @@ public class JavaScriptLanguageSupport extends AbstractLanguageSupport {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

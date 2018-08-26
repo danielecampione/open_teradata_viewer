@@ -53,7 +53,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
         implements Serializable {
@@ -216,6 +216,10 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
 
             // Entire highlight is on one line
             if (p0.y == p1.y) {
+                // Standard Swing views return 0 width for chars but ours
+                // returns the char's width. Set this to 0 here since p1 is
+                // technically an exclusive boundary
+                p1.width = 0;
                 Rectangle r = p0.union(p1);
                 g2d.fillRect(r.x, r.y, r.width, r.height);
             } else { // Highlight spans lines

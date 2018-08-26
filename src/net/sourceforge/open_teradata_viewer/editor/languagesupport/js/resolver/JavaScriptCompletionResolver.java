@@ -34,26 +34,27 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.IJSCompletion;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSMethodData;
-import sun.org.mozilla.javascript.internal.CompilerEnvirons;
-import sun.org.mozilla.javascript.internal.Parser;
-import sun.org.mozilla.javascript.internal.Token;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.AstRoot;
-import sun.org.mozilla.javascript.internal.ast.ExpressionStatement;
-import sun.org.mozilla.javascript.internal.ast.FunctionCall;
-import sun.org.mozilla.javascript.internal.ast.Name;
-import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
-import sun.org.mozilla.javascript.internal.ast.PropertyGet;
+
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ExpressionStatement;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.PropertyGet;
 
 /**
  * Compiles the entered text using Rhino and tries to resolve the JavaScriptType
  * from the AstRoot e.g var a = ""; "" -> String JavaScriptType var b =
  * a.toString() a.toString -> String JavaScriptType, etc..
- * 
+ *
  * Note, will resolve any type added to JavaScriptTypesFactory.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptCompletionResolver extends JavaScriptResolver {
 
@@ -67,9 +68,9 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
 
     /**
      * Compiles Text and resolves the type.
-     * e.g 
+     * e.g
      * "Hello World".length; // Resolve as a Number
-     * 
+     *
      * @param text Text to compile and resolve.
      */
     @Override
@@ -94,7 +95,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
     /**
      * Resolve node type to TypeDeclaration. Called instead of
      * #compileText(String text) when document is already parsed.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -123,7 +124,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
     /**
      * Resolve node type to TypeDeclaration. Called instead of
      * #compileText(String text) when document is already parsed.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -141,7 +142,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
     /**
      * Resolve node type to TypeDeclaration.
      * N.B called from <code>CompilerNodeVisitor.visit()</code>.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -151,8 +152,8 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -275,7 +276,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
         /**
          * Test node to check whether to ignore resolving, this is for
          * parameters.
-         * 
+         *
          * @param node Node to test.
          * @return true to ignore.
          */
@@ -320,7 +321,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
         /**
          * Check the function that a name may belong to contains this actual
          * parameter.
-         * 
+         *
          * @param node Node to check.
          * @return true if the function contains the parameter.
          */
@@ -453,7 +454,7 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
 
     /**
      * Creates a new JavaScriptType based on the String type.
-     * 
+     *
      * @param provider SourceCompletionProvider.
      * @param type Type of JavaScript type to create, e.g java.sql.Connection.
      * @param text Text entered from the user to resolve the node. This will be
@@ -481,10 +482,10 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
      * "".toString() // Resolve toString()
      * In some circumstances this is useful to resolve this. e.g for Custom
      * Object completions.
-     * 
+     *
      * @param node Node to resolve.
      * @return Type Declaration.
-     * 
+     *
      */
     protected TypeDeclaration resolveTypeFromLastJavaScriptType(AstNode node) {
         return null;
@@ -492,9 +493,9 @@ public class JavaScriptCompletionResolver extends JavaScriptResolver {
 
     /**
      * Visit all nodes in the AstNode tree and all to a single list
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class VisitorAll implements NodeVisitor {
 

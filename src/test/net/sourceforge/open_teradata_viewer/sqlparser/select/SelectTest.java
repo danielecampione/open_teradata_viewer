@@ -62,8 +62,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Top;
 import org.apache.commons.io.IOUtils;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -315,12 +315,10 @@ public class SelectTest extends TestCase {
         statement = "SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?";
         select = (Select) parserManager.parse(new StringReader(statement));
 
-        assertEquals(0, ((PlainSelect) select.getSelectBody()).getLimit()
-                .getRowCount());
-        assertTrue(((PlainSelect) select.getSelectBody()).getLimit()
+        assertNull(((PlainSelect) select.getSelectBody()).getLimit());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertTrue(((PlainSelect) select.getSelectBody()).getOffset()
                 .isOffsetJdbcParameter());
-        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
-                .isLimitAll());
         assertStatementCanBeDeparsedAs(select, statement);
 
         statement = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
@@ -340,6 +338,184 @@ public class SelectTest extends TestCase {
                 + "(SELECT * FROM mytable3 WHERE mytable4.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
         assertSqlCanBeParsedAndDeparsed(statement);
 
+    }
+
+    public void testLimit2() throws SQLParserException {
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 LIMIT 3, ?";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertEquals(3, ((PlainSelect) select.getSelectBody()).getLimit()
+                .getOffset());
+        assertTrue(((PlainSelect) select.getSelectBody()).getLimit()
+                .isRowCountJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isOffsetJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitAll());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitNull());
+
+        // toString uses standard syntax
+        statement = "SELECT * FROM mytable WHERE mytable.col = 9 LIMIT ? OFFSET 3";
+        assertSqlCanBeParsedAndDeparsed(statement);
+
+        statement = "SELECT * FROM mytable WHERE mytable.col = 9 LIMIT NULL OFFSET 3";
+        select = (Select) parserManager.parse(new StringReader(statement));
+        assertEquals(-1, ((PlainSelect) select.getSelectBody()).getLimit()
+                .getRowCount());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isRowCountJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isOffsetJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitAll());
+        assertTrue(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitNull());
+        assertSqlCanBeParsedAndDeparsed(statement);
+
+        statement = "SELECT * FROM mytable WHERE mytable.col = 9 LIMIT 0 OFFSET 3";
+        select = (Select) parserManager.parse(new StringReader(statement));
+        assertEquals(0, ((PlainSelect) select.getSelectBody()).getLimit()
+                .getRowCount());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isRowCountJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isOffsetJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitAll());
+        assertFalse(((PlainSelect) select.getSelectBody()).getLimit()
+                .isLimitNull());
+        assertSqlCanBeParsedAndDeparsed(statement);
+
+        statement = "SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?";
+        select = (Select) parserManager.parse(new StringReader(statement));
+
+        assertNull(((PlainSelect) select.getSelectBody()).getLimit());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertTrue(((PlainSelect) select.getSelectBody()).getOffset()
+                .isOffsetJdbcParameter());
+        assertStatementCanBeDeparsedAs(select, statement);
+
+        statement = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
+                + "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) LIMIT 3, 4";
+        select = (Select) parserManager.parse(new StringReader(statement));
+        SetOperationList setList = (SetOperationList) select.getSelectBody();
+        assertEquals(3, setList.getLimit().getOffset());
+        assertEquals(4, setList.getLimit().getRowCount());
+
+        // toString uses standard syntax
+        statement = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
+                + "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
+        assertSqlCanBeParsedAndDeparsed(statement);
+
+        statement = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION ALL "
+                + "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) UNION ALL "
+                + "(SELECT * FROM mytable3 WHERE mytable4.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testLimitTeradata1() throws SQLParserException {
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROWS FETCH NEXT 5 ROWS ONLY";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffsetParam());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getFetch());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getFetch()
+                .getFetchParam());
+        assertFalse(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchParamFirst());
+        assertFalse(((PlainSelect) select.getSelectBody()).getOffset()
+                .isOffsetJdbcParameter());
+        assertFalse(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchJdbcParameter());
+        assertEquals(3, ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffset());
+        assertEquals(5, ((PlainSelect) select.getSelectBody()).getFetch()
+                .getRowCount());
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testLimitTeradata2() throws SQLParserException {
+        // Alternative with the other keywords
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROW FETCH FIRST 5 ROW ONLY";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getFetch());
+        assertEquals("ROW", ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffsetParam());
+        assertEquals("ROW", ((PlainSelect) select.getSelectBody()).getFetch()
+                .getFetchParam());
+        assertTrue(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchParamFirst());
+        assertEquals(3, ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffset());
+        assertEquals(5, ((PlainSelect) select.getSelectBody()).getFetch()
+                .getRowCount());
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testLimitTeradata3() throws SQLParserException {
+        // Query with no Fetch
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROWS";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertNull(((PlainSelect) select.getSelectBody()).getFetch());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffsetParam());
+        assertEquals(3, ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffset());
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testLimitTeradata4() throws SQLParserException {
+        // For Teradata syntax, query with no offset
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id FETCH NEXT 5 ROWS ONLY";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getFetch());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getFetch()
+                .getFetchParam());
+        assertFalse(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchParamFirst());
+        assertEquals(5, ((PlainSelect) select.getSelectBody()).getFetch()
+                .getRowCount());
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testLimitTeradataJdbcParameters() throws SQLParserException {
+        String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+
+        assertNotNull(((PlainSelect) select.getSelectBody()).getOffset());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getOffset()
+                .getOffsetParam());
+        assertNotNull(((PlainSelect) select.getSelectBody()).getFetch());
+        assertEquals("ROWS", ((PlainSelect) select.getSelectBody()).getFetch()
+                .getFetchParam());
+        assertFalse(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchParamFirst());
+        assertTrue(((PlainSelect) select.getSelectBody()).getOffset()
+                .isOffsetJdbcParameter());
+        assertTrue(((PlainSelect) select.getSelectBody()).getFetch()
+                .isFetchJdbcParameter());
+        assertStatementCanBeDeparsedAs(select, statement);
     }
 
     public void testTop() throws SQLParserException {
@@ -466,6 +642,29 @@ public class SelectTest extends TestCase {
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
+    public void testDistinctTop() throws SQLParserException {
+        String statement = "SELECT DISTINCT TOP 5 myid, mycol FROM mytable WHERE mytable.col = 9";
+        Select select = (Select) parserManager
+                .parse(new StringReader(statement));
+        PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+        assertEquals("myid", ((Column) ((SelectExpressionItem) plainSelect
+                .getSelectItems().get(0)).getExpression()).getColumnName());
+        assertEquals("mycol", ((Column) ((SelectExpressionItem) plainSelect
+                .getSelectItems().get(1)).getExpression()).getColumnName());
+        assertNotNull(plainSelect.getTop());
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testDistinctTop2() {
+        String statement = "SELECT TOP 5 DISTINCT myid, mycol FROM mytable WHERE mytable.col = 9";
+        try {
+            parserManager.parse(new StringReader(statement));
+            fail("should not work");
+        } catch (SQLParserException ex) {
+            ExceptionDialog.ignoreException(ex);
+        }
+    }
+
     public void testFrom() throws SQLParserException {
         String statement = "SELECT * FROM mytable as mytable0, mytable1 alias_tab1, mytable2 as alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
         String statementToString = "SELECT * FROM mytable AS mytable0, mytable1 alias_tab1, mytable2 AS alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
@@ -541,7 +740,7 @@ public class SelectTest extends TestCase {
         statement = "SELECT * FROM tab1 RIGHT OUTER JOIN tab2 USING (id, id2)";
         assertSqlCanBeParsedAndDeparsed(statement);
 
-        statement = "SELECT * FROM foo AS f LEFT INNER JOIN (bar AS b RIGHT OUTER JOIN baz AS z ON f.id = z.id) ON f.id = b.id";
+        statement = "SELECT * FROM foo AS f LEFT OUTER JOIN (bar AS b RIGHT OUTER JOIN baz AS z ON f.id = z.id) ON f.id = b.id";
         select = (Select) parserManager.parse(new StringReader(statement));
         assertStatementCanBeDeparsedAs(select, statement);
     }
@@ -1224,6 +1423,16 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
+    public void testAnalyticFunctionProblem1() throws SQLParserException {
+        String statement = "SELECT last_value(s.revenue_hold) OVER (PARTITION BY s.id_d_insertion_order, s.id_d_product_ad_attr, trunc(s.date_id, 'mm') ORDER BY s.date_id) AS col FROM s";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testAnalyticFunctionProblem1b() throws SQLParserException {
+        String statement = "SELECT last_value(s.revenue_hold) OVER (PARTITION BY s.id_d_insertion_order, s.id_d_product_ad_attr, trunc(s.date_id, 'mm') ORDER BY s.date_id ROWS BETWEEN  UNBOUNDED PRECEDING AND  UNBOUNDED FOLLOWING) AS col FROM s";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
     public void testTeradataJoin() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a = tabelle2.b(+)";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1523,6 +1732,16 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
+    public void testRegexpTeradata() throws SQLParserException {
+        String stmt = "SELECT * FROM mytable WHERE first_name REGEXP '^Ste(v|ph)en$'";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testRegexpBinaryTeradata() throws SQLParserException {
+        String stmt = "SELECT * FROM mytable WHERE first_name REGEXP BINARY '^Ste(v|ph)en$'";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
     public void testBooleanFunction1() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE test_func(col1)";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1636,5 +1855,29 @@ public class SelectTest extends TestCase {
     public void testNotEqualsTo() throws SQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM foo WHERE a != b");
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM foo WHERE a <> b");
+    }
+
+    public void testJsonExpression() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT data->'images'->'thumbnail'->'url' AS thumb FROM instagram");
+    }
+
+    public void testSelectInto1() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * INTO user_copy FROM user");
+    }
+
+    public void testSelectForUpdate() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM user_table FOR UPDATE");
+    }
+
+    public void testSelectJoin() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT pg_class.relname, pg_attribute.attname, pg_constraint.conname "
+                + "FROM pg_constraint JOIN pg_class ON pg_class.oid = pg_constraint.conrelid"
+                + " JOIN pg_attribute ON pg_attribute.attrelid = pg_constraint.conrelid"
+                + " WHERE pg_constraint.contype = 'u' AND (pg_attribute.attnum = ANY(pg_constraint.conkey))"
+                + " ORDER BY pg_constraint.conname");
+    }
+
+    public void testSelectJoin2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM pg_constraint WHERE pg_attribute.attnum = ANY(pg_constraint.conkey)");
     }
 }

@@ -24,12 +24,13 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceComp
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.jsType.JavaScriptType;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.TypeDeclaration;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSMethodData;
-import sun.org.mozilla.javascript.internal.ast.AstNode;
-import sun.org.mozilla.javascript.internal.ast.FunctionCall;
+
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.FunctionCall;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -39,7 +40,7 @@ public abstract class JavaScriptResolver {
 
     /**
      * Base JavaScriptResolver.
-     * 
+     *
      * @param provider SourceCompletionProvider.
      */
     public JavaScriptResolver(SourceCompletionProvider provider) {
@@ -49,7 +50,7 @@ public abstract class JavaScriptResolver {
     /**
      * Resolve node type to TypeDeclaration. Called instead of
      * #compileText(String text) when document is already parsed.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -58,7 +59,7 @@ public abstract class JavaScriptResolver {
     /**
      * Resolve node type to TypeDeclaration. Called instead of
      * #compileText(String text) when document is already parsed.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -68,14 +69,14 @@ public abstract class JavaScriptResolver {
     /**
      * Compiles Text and resolves the type, e.g
      * "Hello World".length; // Resolve as a Number
-     * 
+     *
      * @param text To compile and resolve.
      */
     public abstract JavaScriptType compileText(String text) throws IOException;
 
     /**
      * Resolve node type to TypeDeclaration.
-     * 
+     *
      * @param node AstNode to resolve.
      * @return TypeDeclaration for node or null if not found.
      */
@@ -83,7 +84,7 @@ public abstract class JavaScriptResolver {
 
     /**
      * Get lookup string for function completions.
-     * 
+     *
      * @param method JSMethodData holding method information.
      * @param name Name of method.
      */

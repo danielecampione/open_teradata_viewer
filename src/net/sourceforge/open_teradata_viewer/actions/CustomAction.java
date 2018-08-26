@@ -19,11 +19,9 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.Container;
-import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
@@ -36,14 +34,13 @@ import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
-public abstract class CustomAction extends AbstractAction
-        implements
-            MouseListener {
+public abstract class CustomAction extends AbstractAction implements
+        MouseListener {
 
     private static final long serialVersionUID = 1753928583474033071L;
 
@@ -70,6 +67,7 @@ public abstract class CustomAction extends AbstractAction
         setEnabled(false);
     }
 
+    @Override
     public void actionPerformed(final ActionEvent e) {
         if (!inProgress) {
             inProgress = true;
@@ -90,10 +88,6 @@ public abstract class CustomAction extends AbstractAction
     }
 
     protected abstract void performThreaded(ActionEvent e) throws Exception;
-
-    public void openURL(String uri) throws Exception {
-        Desktop.getDesktop().browse(new URI(uri));
-    }
 
     @Override
     public void mouseClicked(MouseEvent e) {

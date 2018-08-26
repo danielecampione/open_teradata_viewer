@@ -32,8 +32,10 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.ILanguageSupp
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSupportFactory;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.XmlLanguageSupport;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.XmlParser;
+import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
  * A tree view showing the outline of XML, similar to the "Outline" view in
@@ -47,9 +49,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * contains multiple instances of SyntaxTextArea, you'll either need a separate
  * <code>XmlOutlineTree</code> for each one or call <code>uninstall()</code> and
  * <code>listenTo(SyntaxTextArea)</code> each time a new STA receives focus.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class XmlOutlineTree extends AbstractSourceTree {
 
@@ -126,7 +128,9 @@ public class XmlOutlineTree extends AbstractSourceTree {
         Object node = path.getLastPathComponent();
         if (node instanceof XmlTreeNode) {
             XmlTreeNode xtn = (XmlTreeNode) node;
-            textArea.select(xtn.getStartOffset(), xtn.getEndOffset());
+            DocumentRange range = new DocumentRange(xtn.getStartOffset(),
+                    xtn.getEndOffset());
+            SyntaxUtilities.selectAndPossiblyCenter(textArea, range, true);
         }
     }
 
@@ -199,9 +203,9 @@ public class XmlOutlineTree extends AbstractSourceTree {
     /**
      * Listens for events this tree is interested in (events in the associated
      * editor, for example), as well as events in this tree.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class XmlEditorListener implements PropertyChangeListener,
             TreeSelectionListener {

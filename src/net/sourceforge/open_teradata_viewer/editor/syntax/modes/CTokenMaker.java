@@ -61,7 +61,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
  *       be pointing the array somewhere else anyway.</li>
  *   <li>You should NOT call <code>yylex()</code> on the generated scanner
  *       directly; rather, you should use <code>getTokenList</code> as you would
- *       with any other <code>TokenMaker</code> instance.</li>
+ *       with any other <code>ITokenMaker</code> instance.</li>
  * </ul>
  *
  * @author D. Campione
@@ -539,11 +539,11 @@ public class CTokenMaker extends AbstractJFlexCTokenMaker {
             + "\3\5\2\0\2\5\1\0\1\5\1\0\1\4\1\5"
             + "\1\4\4\0\1\5\1\216\1\0\21\5\34\0\10\36"
             + "\56\0\33\u0101\1\u0102\7\u0101\1\0\101\u0101\1\u0103\3\u0101"
-            + "\1\u0102\7\u0101\1\0\57\u0101\1\u0104\4\u0101\1\201\1\u0101"
+            + "\1\u0102\7\u0101\1\0\57\u0101\1\u0104\3\u0101\2\201\1\u0101"
             + "\1\201\2\u0101\1\201\4\u0101\1\201\2\u0101\1\201\3\u0101"
             + "\1\u0105\4\u0101\1\201\1\u0106\1\u0107\1\0\3\201\1\u0106"
             + "\17\u0101\1\201\3\u0101\1\u0107\2\u0101\2\u0106\16\u0101\5\206"
-            + "\1\42\4\206\1\42\1\206\1\42\2\206\1\42\4\206"
+            + "\1\42\3\206\2\42\1\206\1\42\2\206\1\42\4\206"
             + "\1\42\2\206\1\42\3\206\1\42\4\206\2\42\1\u0108"
             + "\1\0\4\42\17\206\1\42\3\206\1\u0108\2\206\2\42"
             + "\56\206\1\u0109\3\206\1\u010a\51\206\1\4\6\5\1\0"
@@ -1708,7 +1708,7 @@ public class CTokenMaker extends AbstractJFlexCTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed   The packed character translation table.
@@ -1759,11 +1759,11 @@ public class CTokenMaker extends AbstractJFlexCTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos) but faster.
      *
-     * @param pos The position of the character to fetch. 
+     * @param pos The position of the character to fetch.
      *            A value from 0 to yylength()-1.
      * @return The character at position pos.
      */

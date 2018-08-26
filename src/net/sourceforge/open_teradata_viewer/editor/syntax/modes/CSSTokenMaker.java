@@ -550,6 +550,13 @@ public class CSSTokenMaker extends AbstractJFlexCTokenMaker {
         }
     }
 
+    /** Overridden to accept letters, digits, underscores and hyphens. */
+    @Override
+    public boolean isIdentifierChar(int languageIndex, char ch) {
+        return Character.isLetterOrDigit(ch) || ch == '-' || ch == '.'
+                || ch == '_';
+    }
+
     /**
      * Refills the input buffer.
      *
@@ -608,7 +615,7 @@ public class CSSTokenMaker extends AbstractJFlexCTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed   The packed character translation table.
@@ -659,8 +666,8 @@ public class CSSTokenMaker extends AbstractJFlexCTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos), but faster.
      *
      * @param pos The position of the character to fetch.

@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -53,7 +55,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * classes.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxUtilities implements SwingConstants {
 
@@ -676,14 +678,16 @@ public class SyntaxUtilities implements SwingConstants {
             break;
 
         case WEST:
+            int endOffs = view.getEndOffset();
             if (pos == -1) {
-                pos = Math.max(0, view.getEndOffset() - 1);
+                pos = Math.max(0, endOffs - 1);
             } else {
                 pos = Math.max(0, pos - 1);
                 if (target.isCodeFoldingEnabled()) {
-                    int last = target.getLineOfOffset(pos + 1);
+                    int last = pos == endOffs - 1 ? target.getLineCount() - 1
+                            : target.getLineOfOffset(pos + 1);
                     int current = target.getLineOfOffset(pos);
-                    if (last != current) { // If moving up a line...
+                    if (last != current) { // If moving up a line..
                         FoldManager fm = target.getFoldManager();
                         if (fm.isLineHidden(current)) {
                             while (--current > 0 && fm.isLineHidden(current)) {
@@ -702,9 +706,9 @@ public class SyntaxUtilities implements SwingConstants {
             } else {
                 pos = Math.min(pos + 1, view.getDocument().getLength());
                 if (target.isCodeFoldingEnabled()) {
-                    int last = target.getLineOfOffset(pos - 1);
+                    int last = pos == 0 ? 0 : target.getLineOfOffset(pos - 1);
                     int current = target.getLineOfOffset(pos);
-                    if (last != current) { // If moving down a line...
+                    if (last != current) { // If moving down a line..
                         FoldManager fm = target.getFoldManager();
                         if (fm.isLineHidden(current)) {
                             int lineCount = target.getLineCount();
@@ -808,7 +812,7 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
-     * Determines the position in the model that is closest to the given 
+     * Determines the position in the model that is closest to the given
      * view location in the row below. The component given must have a size to
      * compute the result. If the component doesn't have a size a value of -1
      * will be returned.
@@ -1205,7 +1209,7 @@ public class SyntaxUtilities implements SwingConstants {
      * many standard token makers return things like semicolons and periods as
      * {@link IToken#IDENTIFIER}s just to make the syntax highlighting coloring
      * look a little better.
-     * 
+     *
      * @param t The token to check. This cannot be <code>null</code>.
      * @return Whether the token is a single non-word char.
      */
@@ -1251,6 +1255,93 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
+     * Selects a range of text in a text component. If the new selection is
+     * outside of the previous viewable rectangle, then the view is centered
+     * around the new selection.
+     *
+     * @param textArea The text component whose selection is to be centered.
+     * @param range The range to select.
+     */
+    public static final void selectAndPossiblyCenter(JTextArea textArea,
+            DocumentRange range, boolean select) {
+        int start = range.getStartOffset();
+        int end = range.getEndOffset();
+
+        boolean foldsExpanded = false;
+        if (textArea instanceof SyntaxTextArea) {
+            SyntaxTextArea rsta = (SyntaxTextArea) textArea;
+            FoldManager fm = rsta.getFoldManager();
+            if (fm.isCodeFoldingSupportedAndEnabled()) {
+                foldsExpanded = fm.ensureOffsetNotInClosedFold(start);
+                foldsExpanded |= fm.ensureOffsetNotInClosedFold(end);
+            }
+        }
+
+        if (select) {
+            textArea.setSelectionStart(start);
+            textArea.setSelectionEnd(end);
+        }
+
+        Rectangle r = null;
+        try {
+            r = textArea.modelToView(start);
+            if (r == null) { // Not yet visible; i.e. JUnit tests
+                return;
+            }
+            if (end != start) {
+                r = r.union(textArea.modelToView(end));
+            }
+        } catch (BadLocationException ble) { // Never happens
+            ExceptionDialog.hideException(ble);
+            if (select) {
+                textArea.setSelectionStart(start);
+                textArea.setSelectionEnd(end);
+            }
+            return;
+        }
+
+        Rectangle visible = textArea.getVisibleRect();
+
+        // If the new selection is already in the view, don't scroll, as that is
+        // visually jarring
+        if (!foldsExpanded && visible.contains(r)) {
+            if (select) {
+                textArea.setSelectionStart(start);
+                textArea.setSelectionEnd(end);
+            }
+            return;
+        }
+
+        visible.x = r.x - (visible.width - r.width) / 2;
+        visible.y = r.y - (visible.height - r.height) / 2;
+
+        Rectangle bounds = textArea.getBounds();
+        Insets i = textArea.getInsets();
+        bounds.x = i.left;
+        bounds.y = i.top;
+        bounds.width -= i.left + i.right;
+        bounds.height -= i.top + i.bottom;
+
+        if (visible.x < bounds.x) {
+            visible.x = bounds.x;
+        }
+
+        if (visible.x + visible.width > bounds.x + bounds.width) {
+            visible.x = bounds.x + bounds.width - visible.width;
+        }
+
+        if (visible.y < bounds.y) {
+            visible.y = bounds.y;
+        }
+
+        if (visible.y + visible.height > bounds.y + bounds.height) {
+            visible.y = bounds.y + bounds.height - visible.height;
+        }
+
+        textArea.scrollRectToVisible(visible);
+    }
+
+    /**
      * If the character is an upper-case US-ASCII letter, it returns the
      * lower-case version of that letter; otherwise, it just returns the
      * character.
@@ -1274,7 +1365,7 @@ public class SyntaxUtilities implements SwingConstants {
 
     /**
      * Creates a regular expression pattern that matches a "wildcard" pattern.
-     * 
+     *
      * @param wildcard The wildcard pattern.
      * @param matchCase Whether the pattern should be case sensitive.
      * @param escapeStartChar Whether to escape a starting <code>'^'</code>

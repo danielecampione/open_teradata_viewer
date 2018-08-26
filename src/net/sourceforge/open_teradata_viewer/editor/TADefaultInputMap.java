@@ -48,9 +48,9 @@ import net.sourceforge.open_teradata_viewer.actions.Actions;
  *   <li>Ctrl+F2 toggles whether a bookmark is on the current line.
  *   <li>etc..
  * </ul>
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TADefaultInputMap extends InputMap {
 
@@ -63,9 +63,12 @@ public class TADefaultInputMap extends InputMap {
         int defaultModifier = getDefaultModifier();
         int alt = InputEvent.ALT_MASK;
         int shift = InputEvent.SHIFT_MASK;
+        boolean isOSX = TextArea.isOSX();
+        int moveByWordMod = isOSX ? alt : defaultModifier;
 
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0),
-                DefaultEditorKit.beginLineAction);
+                isOSX ? DefaultEditorKit.beginAction
+                        : DefaultEditorKit.beginLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, shift),
                 DefaultEditorKit.selectionBeginLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, defaultModifier),
@@ -73,7 +76,8 @@ public class TADefaultInputMap extends InputMap {
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, defaultModifier | shift),
                 DefaultEditorKit.selectionBeginAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0),
-                DefaultEditorKit.endLineAction);
+                isOSX ? DefaultEditorKit.endAction
+                        : DefaultEditorKit.endLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, shift),
                 DefaultEditorKit.selectionEndLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, defaultModifier),
@@ -85,9 +89,9 @@ public class TADefaultInputMap extends InputMap {
                 DefaultEditorKit.backwardAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, shift),
                 DefaultEditorKit.selectionBackwardAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, defaultModifier),
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, moveByWordMod),
                 DefaultEditorKit.previousWordAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, defaultModifier | shift),
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, moveByWordMod | shift),
                 DefaultEditorKit.selectionPreviousWordAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                 DefaultEditorKit.downAction);
@@ -101,9 +105,9 @@ public class TADefaultInputMap extends InputMap {
                 DefaultEditorKit.forwardAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, shift),
                 DefaultEditorKit.selectionForwardAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, defaultModifier),
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, moveByWordMod),
                 DefaultEditorKit.nextWordAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, defaultModifier | shift),
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, moveByWordMod | shift),
                 DefaultEditorKit.selectionNextWordAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
                 DefaultEditorKit.upAction);
@@ -141,6 +145,8 @@ public class TADefaultInputMap extends InputMap {
                 DefaultEditorKit.copyAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_V, defaultModifier),
                 DefaultEditorKit.pasteAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_V, defaultModifier | shift),
+                TextAreaEditorKit.clipboardHistoryAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
                 DefaultEditorKit.deleteNextCharAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, shift),
@@ -190,6 +196,13 @@ public class TADefaultInputMap extends InputMap {
                 TextAreaEditorKit.taPrevOccurrenceAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_K, defaultModifier),
                 TextAreaEditorKit.taNextOccurrenceAction);
+
+        if (isOSX) {
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, defaultModifier),
+                    DefaultEditorKit.beginLineAction);
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, defaultModifier),
+                    DefaultEditorKit.endLineAction);
+        }
 
         // NOTE: Currently, macros aren't part of the default input map for
         // TextArea, as they display their own popup windows, etc.. which may or
