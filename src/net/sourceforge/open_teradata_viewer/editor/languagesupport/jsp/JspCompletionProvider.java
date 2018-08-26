@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.jsp;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,17 +45,6 @@ public class JspCompletionProvider extends HtmlCompletionProvider {
 
     public JspCompletionProvider() {
         prefixToTld = new HashMap<String, TldFile>();
-
-        String fileName = JspCompletionProvider
-                .getStrutsCoreLibraryAbsolutePath();
-        File file = new File(fileName);
-
-        try {
-            prefixToTld.put("s", new TldFile(this, file));
-        } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
-        }
-
         setAutoActivationRules(false, "<:");
     }
 
@@ -138,12 +126,5 @@ public class JspCompletionProvider extends HtmlCompletionProvider {
     @Override
     protected boolean isValidChar(char ch) {
         return super.isValidChar(ch) || ch == ':';
-    }
-
-    public static String getStrutsCoreLibraryAbsolutePath() {
-        String jreHome = System.getProperty("java.home");
-        File sourceJar = new File(jreHome, "struts2-core-2.2.3.jar");
-        String absolutePath = sourceJar.getAbsolutePath();
-        return absolutePath;
     }
 }

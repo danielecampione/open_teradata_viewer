@@ -43,8 +43,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.completion.JSFunctionCompletion;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -93,7 +93,7 @@ public abstract class JavaScriptTypesFactory {
      * Find CachedType for TypeDeclaration. If it is not found, then lookup the
      * type and add all completions, then cache. Extracts all function and type
      * completions from API based on the <code>TypeDeclaration</code>.
-     * 
+     *
      * @param type TypeDeclaration to read from the API, e.g JSString.
      * @param manager JarManager containing source and classes.
      * @param text Full text entered by user.
@@ -128,7 +128,7 @@ public abstract class JavaScriptTypesFactory {
     /**
      * Read the class file and extract all completions, add them all to the
      * CachedType
-     * 
+     *
      * @param cachedType CachedType to populate all completions.
      * @param cf ClassFile to read.
      * @param provider CompletionsProvider to bind to <code>ICompletion</code>.
@@ -156,13 +156,12 @@ public abstract class JavaScriptTypesFactory {
      * Extract all methods and fields from CompilationUnit and add to the
      * completions map. Only public methods and fields will be added to
      * completions.
-     * 
+     *
      * @param cachedType CachedType to populate all completions.
      * @param dec TypeDeclaration to read from the API, e.g JSString.
      * @param provider CompletionsProvider to bind to <code>ICompletion</code>.
      * @param cu CompilationUnit that binds source to class.
      * @param jarManager JarManager containing source and classes.
-     * @return Map of all completions.
      */
     private void readMethodsAndFieldsFromTypeDeclaration(
             JavaScriptType cachedType, DefaultCompletionProvider provider,
@@ -270,7 +269,7 @@ public abstract class JavaScriptTypesFactory {
      * 			<LI>staticsOnly && public return true; // All public static methods and fields</LI>
      * 			<LI>!staticsOnly && public return true; // All public methods and fields</LI>
      * 			<LI>Built in JavaScript type and public or protected return true; // All public/protected built in JSType (net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3 package) methods and fields</LI>
-     * 		</OL> 
+     * 		</OL>
      * @param access Access flag to test.
      * @param staticsOnly Whether loading static methods and fields only.
      * @param isJSType Is a built in JavasScript type.
@@ -382,7 +381,7 @@ public abstract class JavaScriptTypesFactory {
 
     /**
      * Return all the JavaScript types that are part of the EMCA API.
-     * 
+     *
      * @param provider SourceCompletionProvider.
      */
     public List<JavaScriptType> getECMAObjectTypes(

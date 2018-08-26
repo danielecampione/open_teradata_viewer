@@ -35,7 +35,7 @@ import javax.swing.text.JTextComponent;
  * assistance icons for that text component.
  *
  * @author D. Campione
- * 
+ *
  */
 public class AssistanceIconPanel extends DecorativeIconPanel implements
         PropertyChangeListener {
@@ -52,7 +52,7 @@ public class AssistanceIconPanel extends DecorativeIconPanel implements
      * Ctor.
      *
      * @param comp The component to listen to. This can be <code>null</code> to
-     *        create a "filler" icon panel for alignment purposes.  
+     *        create a "filler" icon panel for alignment purposes.
      */
     public AssistanceIconPanel(JComponent comp) {
         // null can be passed to make a "filler" icon panel for alignment
@@ -110,7 +110,7 @@ public class AssistanceIconPanel extends DecorativeIconPanel implements
      *        is not currently available.
      */
     public void setAssistanceEnabled(Image img) {
-        if (img == null && getIcon() != EMPTY_ICON) {
+        if (img == null) {
             setIcon(EMPTY_ICON);
             setToolTipText(null);
         } else {
@@ -121,9 +121,9 @@ public class AssistanceIconPanel extends DecorativeIconPanel implements
 
     /**
      * Listens for events in the text component we're annotating.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class ComponentListener implements FocusListener {
 

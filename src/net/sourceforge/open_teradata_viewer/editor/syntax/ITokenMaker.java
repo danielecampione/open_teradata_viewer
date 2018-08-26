@@ -95,15 +95,19 @@ public interface ITokenMaker {
 
     /**
      * Returns the text to place at the beginning and end of a line to "comment"
-     * it in a this programming language.
+     * it in this programming language.
      *
+     * @param languageIndex The language index at the offset in question.
+     *        Since some <code>ITokenMaker</code>s effectively have nested
+     *        languages (such as JavaScript in HTML), this parameter tells the
+     *        <code>ITokenMaker</code> what sub-language to look at.
      * @return The start and end strings to add to a line to "comment" it out. A
      *         <code>null</code> value for either means there is no string to
      *         add for that part. A value of <code>null</code> for the array
      *         means this language does not support commenting/uncommenting
      *         lines.
      */
-    public String[] getLineCommentStartAndEnd();
+    public String[] getLineCommentStartAndEnd(int languageIndex);
 
     /**
      * Returns an action to handle "insert break" key presses (i.e. Enter).

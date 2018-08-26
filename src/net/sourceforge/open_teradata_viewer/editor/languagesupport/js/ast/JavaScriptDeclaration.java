@@ -19,8 +19,8 @@
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -51,8 +51,8 @@ public abstract class JavaScriptDeclaration {
 
     /**
      * Gets the end offset of this declaration.
-     * 
-     * @param end The end offset.
+     *
+     * @return The end offset.
      */
     public int getEndOffset() {
         return end;
@@ -60,7 +60,7 @@ public abstract class JavaScriptDeclaration {
 
     /**
      * Sets the end offset of this declaration.
-     * 
+     *
      * @param end The end offset.
      * @see #getEndOffset()
      */
@@ -70,9 +70,9 @@ public abstract class JavaScriptDeclaration {
 
     /**
      * Sets the start offset of this declaration.
-     * 
+     *
      * @param start The start offset.
-     * @see #getStartOffset()
+     * @see #getStartOffSet()
      */
     public void setStartOffset(int start) {
         this.start = start;
@@ -80,8 +80,8 @@ public abstract class JavaScriptDeclaration {
 
     /**
      * Gets the start offset of this declaration.
-     * 
-     * @param start The start offset.
+     *
+     * @return The start offset.
      */
     public int getStartOffSet() {
         return start;

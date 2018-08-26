@@ -73,7 +73,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.templates.ICodeTemplat
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
@@ -158,9 +158,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * Positions the caret at the beginning of the word. This class is here to
      * better handle finding the "beginning of the word" for programming
      * languages.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected static class BeginWordAction extends
             TextAreaEditorKit.BeginWordAction {
@@ -232,9 +232,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Expands or collapses the nearest fold.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ChangeFoldStateAction extends FoldRelatedAction {
 
@@ -275,9 +275,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action that (optionally) aligns a closing curly brace with the line
      * containing its matching opening curly brace.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CloseCurlyBraceAction extends RecordableTextAction {
 
@@ -368,9 +368,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * (Optionally) Completes a closing markup tag.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CloseMarkupTagAction extends RecordableTextAction {
 
@@ -474,7 +474,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                         }
                     }
 
-                    t = t.getNextToken();
+                    t = t == null ? null : t.getNextToken();
                 }
             }
 
@@ -489,9 +489,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Collapses all comment folds.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CollapseAllCommentFoldsAction extends FoldRelatedAction {
 
@@ -529,9 +529,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Collapses all folds.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CollapseAllFoldsAction extends FoldRelatedAction {
 
@@ -574,9 +574,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Action for copying text as RTF.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class CopyAsRtfAction extends RecordableTextAction {
 
@@ -605,9 +605,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Action for decreasing the font size of all fonts in the text area.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DecreaseFontSizeAction extends
             TextAreaEditorKit.DecreaseFontSizeAction {
@@ -698,9 +698,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action for when un-indenting lines (either the current line if there is
      * selection, or all selected lines if there is one).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DecreaseIndentAction extends RecordableTextAction {
 
@@ -741,6 +741,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 dot = Math.min(line1, line2);
                 mark = Math.max(line1, line2);
                 Element elem;
+                textArea.beginAtomicEdit();
                 try {
                     for (line1 = dot; line1 < mark; line1++) {
                         elem = map.getElement(line1);
@@ -758,6 +759,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 } catch (BadLocationException ble) {
                     UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                     ExceptionDialog.notifyException(ble);
+                } finally {
+                    textArea.endAtomicEdit();
                 }
             } else {
                 Element elem = map.getElement(line1);
@@ -820,9 +823,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Deletes the previous word, but differentiates symbols from "words" to
      * match the behavior of code editors.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class DeletePrevWordAction extends
             TextAreaEditorKit.DeletePrevWordAction {
@@ -892,9 +895,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Positions the caret at the end of the word. This class is here to better
      * handle finding the "end of the word" in programming languages.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected static class EndWordAction extends
             TextAreaEditorKit.EndWordAction {
@@ -956,9 +959,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Expands all folds.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ExpandAllFoldsAction extends FoldRelatedAction {
 
@@ -1007,7 +1010,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * Base class for folding-related actions.
      *
      * @author D. Campione
-     * 
+     *
      */
     static abstract class FoldRelatedAction extends RecordableTextAction {
 
@@ -1049,18 +1052,18 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action for moving the caret to the "matching bracket" of the bracket at
      * the caret position (either before or after).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class GoToMatchingBracketAction extends RecordableTextAction {
 
         /**
          * Moves the caret to the end of the document, taking into account code
          * folding.
-         * 
+         *
          * @author D. Campione
-         * 
+         *
          */
         public static class EndAction extends TextAreaEditorKit.EndAction {
 
@@ -1112,9 +1115,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Action for increasing the font size of all fonts in the text area.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class IncreaseFontSizeAction extends
             TextAreaEditorKit.IncreaseFontSizeAction {
@@ -1201,9 +1204,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action for when the user presses the Enter key. This is here so we can be
      * smart and "auto-indent" for programming languages.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InsertBreakAction extends
             TextAreaEditorKit.InsertBreakAction {
@@ -1383,9 +1386,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action for inserting tabs. This is extended to "block indent" a group of
      * contiguous lines if they are selected.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class InsertTabAction extends RecordableTextAction {
 
@@ -1471,9 +1474,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * Action to move the selection and/or caret. Constructor indicates
      * direction to use. This class overrides the behavior defined in {@link
      * TextAreaEditorKit} to better skip "words" in source code.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class NextWordAction extends TextAreaEditorKit.NextWordAction {
 
@@ -1551,9 +1554,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * Action for when the user tries to insert a template (that is, they've
      * typed a template ID and pressed the trigger character (a space) in an
      * attempt to do the substitution).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class PossiblyInsertTemplateAction extends
             RecordableTextAction {
@@ -1617,9 +1620,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * Action to move the selection and/or caret. Constructor indicates
      * direction to use. This class overrides the behavior defined in {@link
      * TextAreaEditorKit} to better skip "words" in source code.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class PreviousWordAction extends
             TextAreaEditorKit.PreviousWordAction {
@@ -1700,9 +1703,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Selects the word around the caret. This class is here to better handle
      * selecting "words" in programming languages.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class SelectWordAction extends
             TextAreaEditorKit.SelectWordAction {
@@ -1719,9 +1722,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
     /**
      * Action that toggles whether the currently selected lines are
      * commented.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ToggleCommentAction extends RecordableTextAction {
 
@@ -1739,13 +1742,6 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
 
             SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
-            String[] startEnd = doc.getLineCommentStartAndEnd();
-
-            if (startEnd == null) {
-                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
-                return;
-            }
-
             Element map = doc.getDefaultRootElement();
             Caret c = textArea.getCaret();
             int dot = c.getDot();
@@ -1754,6 +1750,15 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             int line2 = map.getElementIndex(mark);
             int start = Math.min(line1, line2);
             int end = Math.max(line1, line2);
+
+            IToken t = doc.getTokenListForLine(start);
+            int languageIndex = t != null ? t.getLanguageIndex() : 0;
+            String[] startEnd = doc.getLineCommentStartAndEnd(languageIndex);
+
+            if (startEnd == null) {
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                return;
+            }
 
             // Don't toggle comment on last line if there is no text selected on
             // it
@@ -1822,9 +1827,9 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
 
     /**
      * Toggles the fold at the current caret position or line.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class ToggleCurrentFoldAction extends FoldRelatedAction {
 

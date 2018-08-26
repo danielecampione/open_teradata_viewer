@@ -111,6 +111,14 @@ public class Main {
                 } catch (IllegalStateException ise) {
                     ExceptionDialog.hideException(ise);
                     ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                } catch (NoClassDefFoundError ncdfe) { // For example, the JGoodies Looks library is unavailable
+                    ExceptionDialog.hideException(ncdfe);
+                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                    String message = "The Look And Feel can't be installed.\n"
+                            + "Please restart the application.";
+                    String title = "Look And Feel";
+                    UISupport.getDialogs().showInfoMessage(message, title);
+                    System.exit(-3);
                 } catch (RuntimeException re) {
                     throw re;
                 } catch (Throwable t) {

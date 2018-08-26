@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.swing.Icon;
-
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.BasicCompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
 
@@ -86,15 +83,11 @@ class PercentageOrLengthCompletionGenerator implements ICompletionGenerator {
      * @author D. Campione
      * 
      */
-    private static class POrLCompletion extends BasicCompletion {
+    private static class POrLCompletion extends BasicCssCompletion {
 
         public POrLCompletion(ICompletionProvider provider, String value) {
-            super(provider, value);
+            super(provider, value, ICON_KEY);
         }
 
-        @Override
-        public Icon getIcon() {
-            return IconFactory.get().getIcon(ICON_KEY);
-        }
     }
 }

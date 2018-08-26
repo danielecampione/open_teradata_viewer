@@ -1200,6 +1200,20 @@ public class SyntaxUtilities implements SwingConstants {
     }
 
     /**
+     * Returns whether the specified token is a single non-word char (e.g. not
+     * in <code>[A-Za-z]</code>. This is a HACK to work around the fact that
+     * many standard token makers return things like semicolons and periods as
+     * {@link IToken#IDENTIFIER}s just to make the syntax highlighting coloring
+     * look a little better.
+     * 
+     * @param t The token to check. This cannot be <code>null</code>.
+     * @return Whether the token is a single non-word char.
+     */
+    public static final boolean isNonWordChar(IToken t) {
+        return t.length() == 1 && !SyntaxUtilities.isLetter(t.charAt(0));
+    }
+
+    /**
      * Returns whether or not a character is a whitespace character (either a
      * space ' ' or tab '\t'). This checks for the Unicode character values
      * 0x0020 and 0x0009.

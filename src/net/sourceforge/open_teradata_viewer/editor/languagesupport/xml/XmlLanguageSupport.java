@@ -40,6 +40,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * </ul>
  *
  * @author D. Campione
+ * @see XmlOutlineTree
  * 
  */
 public class XmlLanguageSupport extends AbstractMarkupLanguageSupport {

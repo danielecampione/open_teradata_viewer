@@ -37,7 +37,7 @@ import net.sourceforge.open_teradata_viewer.editor.TextArea;
  *    <li>Bold, italic, and underline
  * </ul>
  *
- * The RTF generated isn't really "optimized," but it will do, especially for
+ * The RTF generated isn't really "optimized" but it will do, especially for
  * small amounts of text, such as what's common when copy-and-pasting. It tries
  * to be sufficient for the use case of copying syntax highlighted
  * code:

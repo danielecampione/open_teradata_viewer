@@ -25,10 +25,8 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
 
 /**
@@ -105,29 +103,13 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         if (occurrenceMarker != null) {
             doc.readLock();
             try {
-                // Get the token at the caret position
-                int line = textArea.getCaretLineNumber();
-                IToken tokenList = textArea.getTokenListForLine(line);
-                int dot = c.getDot();
-                IToken t = SyntaxUtilities.getTokenAtOffset(tokenList, dot);
-                if (t == null /* EOL */|| !isValidType(t) || isNonWordChar(t)) {
-                    // Try to the "left" of the caret
-                    dot--;
-                    try {
-                        if (dot >= textArea.getLineStartOffset(line)) {
-                            t = SyntaxUtilities
-                                    .getTokenAtOffset(tokenList, dot);
-                        }
-                    } catch (BadLocationException ble) {
-                        ExceptionDialog.notifyException(ble); // Never happens
-                    }
-                }
+                IToken t = occurrenceMarker.getTokenToMark(textArea);
 
-                if (t != null && isValidType(t) && !isNonWordChar(t)) {
+                if (t != null && occurrenceMarker.isValidType(textArea, t)
+                        && !SyntaxUtilities.isNonWordChar(t)) {
                     removeHighlights();
                     SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                             .getHighlighter();
-
                     occurrenceMarker.markOccurrences(doc, t, h, p);
                     occurrencesChanged = true;
                 }
@@ -197,31 +179,6 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         if (textArea.getMarkOccurrencesColor() != null) {
             setColor(textArea.getMarkOccurrencesColor());
         }
-    }
-
-    /**
-     * Returns whether the specified token is a single non-word char (e.g. not
-     * in <tt>[A-Za-z]</tt>. This is a HACK to work around the fact that many
-     * standard token makers return things like semicolons and periods as {@link
-     * Token#IDENTIFIER}s just to make the syntax highlighting coloring look a
-     * little better.
-     * 
-     * @param t The token to check. This cannot be <tt>null</tt>.
-     * @return Whether the token is a single non-word char.
-     */
-    private static final boolean isNonWordChar(IToken t) {
-        return t.length() == 1 && !SyntaxUtilities.isLetter(t.charAt(0));
-    }
-
-    /**
-     * Returns whether the specified token is a type that we can do a "mark
-     * occurrences" on.
-     *
-     * @param t The token.
-     * @return Whether we should mark all occurrences of this token.
-     */
-    private boolean isValidType(IToken t) {
-        return textArea.getMarkOccurrencesOfTokenType(t.getType());
     }
 
     /** Removes all highlights added to the text area by this listener. */

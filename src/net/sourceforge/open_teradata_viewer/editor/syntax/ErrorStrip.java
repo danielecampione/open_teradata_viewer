@@ -56,8 +56,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.TaskTagParser.T
  * to register a <code>IParser</code> on an SyntaxTextArea and return
  * <code>IParserNotice</code>s for each line to display an icon for. The
  * severity of each notice must be at least the threshold set by {@link
- * #setLevelThreshold(int)} to be displayed in this error strip. The default
- * threshold is {@link IParserNotice#WARNING}.<p>
+ * #setLevelThreshold(net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice.Level)}
+ * to be displayed in this error strip. The default threshold is {@link
+ * net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice.Level#WARNING}.<p>
  *
  * An <code>ErrorStrip</code> can be added to a UI like so:
  * <pre>
@@ -71,7 +72,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.TaskTagParser.T
  * </pre>
  *
  * @author D. Campione
- * 
+ *
  */
 public class ErrorStrip extends JComponent {
 
@@ -105,7 +106,7 @@ public class ErrorStrip extends JComponent {
      * Only notices of this severity (or worse) will be displayed in this error
      * strip.
      */
-    private int levelThreshold;
+    private IParserNotice.Level levelThreshold;
 
     /** Whether the caret marker's location should be rendered. */
     private boolean followCaret;
@@ -138,7 +139,7 @@ public class ErrorStrip extends JComponent {
         addMouseListener(listener);
         setShowMarkedOccurrences(true);
         setShowMarkAll(true);
-        setLevelThreshold(IParserNotice.WARNING);
+        setLevelThreshold(IParserNotice.Level.WARNING);
         setFollowCaret(true);
         setCaretMarkerColor(Color.BLACK);
     }
@@ -226,9 +227,9 @@ public class ErrorStrip extends JComponent {
      * defined in the <code>IParserNotice</code> class.
      *
      * @return The minimum severity.
-     * @see #setLevelThreshold(int)
+     * @see #setLevelThreshold(net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice.Level)
      */
-    public int getLevelThreshold() {
+    public IParserNotice.Level getLevelThreshold() {
         return levelThreshold;
     }
 
@@ -310,7 +311,7 @@ public class ErrorStrip extends JComponent {
 
         List<IParserNotice> notices = textArea.getParserNotices();
         for (IParserNotice notice : notices) {
-            if (notice.getLevel() <= levelThreshold
+            if (notice.getLevel().isEqualToOrWorseThan(levelThreshold)
                     || (notice instanceof TaskNotice)) {
                 Integer key = Integer.valueOf(notice.getLine());
                 Marker m = markerMap.get(key);
@@ -422,13 +423,13 @@ public class ErrorStrip extends JComponent {
      * Sets the minimum severity a parser notice must be for it to be displayed
      * in this error strip. This should be one of the constants defined in the
      * <code>IParserNotice</code> class. The default value is {@link
-     * IParserNotice#WARNING}.
+     * net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice.Level#WARNING}.
      *
      * @param level The new severity threshold.
      * @see #getLevelThreshold()
      * @see IParserNotice
      */
-    public void setLevelThreshold(int level) {
+    public void setLevelThreshold(IParserNotice.Level level) {
         levelThreshold = level;
         if (isDisplayable()) {
             refreshMarkers();
@@ -485,9 +486,9 @@ public class ErrorStrip extends JComponent {
 
     /**
      * Listens for events in the error strip and its markers.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener extends MouseAdapter implements
             PropertyChangeListener, CaretListener {
@@ -558,9 +559,9 @@ public class ErrorStrip extends JComponent {
 
     /**
      * A notice that wraps a "marked occurrence".
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class MarkedOccurrenceNotice implements IParserNotice {
 
@@ -596,6 +597,7 @@ public class ErrorStrip extends JComponent {
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean getKnowsOffsetAndLength() {
             return true;
         }
@@ -606,8 +608,8 @@ public class ErrorStrip extends JComponent {
         }
 
         @Override
-        public int getLevel() {
-            return INFO;
+        public Level getLevel() {
+            return Level.INFO; // Won't matter
         }
 
         @Override
@@ -661,9 +663,9 @@ public class ErrorStrip extends JComponent {
 
     /**
      * A "marker" in this error strip, representing one or more notices.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Marker extends JComponent {
 
@@ -699,8 +701,8 @@ public class ErrorStrip extends JComponent {
             Color c = null;
             int lowestLevel = Integer.MAX_VALUE; // ERROR is 0
             for (IParserNotice notice : notices) {
-                if (notice.getLevel() < lowestLevel) {
-                    lowestLevel = notice.getLevel();
+                if (notice.getLevel().getNumericValue() < lowestLevel) {
+                    lowestLevel = notice.getLevel().getNumericValue();
                     c = notice.getColor();
                 }
             }

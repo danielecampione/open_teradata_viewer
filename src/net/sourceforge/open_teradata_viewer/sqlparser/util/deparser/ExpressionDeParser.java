@@ -79,7 +79,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVi
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
- * A class to de-parse (that is, tranform from ISqlParser hierarchy into a
+ * A class to de-parse (that is, transform from ISqlParser hierarchy into a
  * string) an {@link net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression}.
  * 
  * @author D. Campione
@@ -276,7 +276,8 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(NotEqualsTo notEqualsTo) {
-        visitOldTeradataJoinBinaryExpression(notEqualsTo, " <> ");
+        visitOldTeradataJoinBinaryExpression(notEqualsTo,
+                " " + notEqualsTo.getStringExpression() + " ");
 
     }
 
@@ -358,7 +359,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
         }
 
         buffer.append(function.getName());
-        if (function.isAllColumns()) {
+        if (function.isAllColumns() && function.getParameters() == null) {
             buffer.append("(*)");
         } else if (function.getParameters() == null) {
             buffer.append("()");
@@ -367,10 +368,13 @@ public class ExpressionDeParser implements IExpressionVisitor,
             if (function.isDistinct()) {
                 useBracketsInExprList = false;
                 buffer.append("(DISTINCT ");
+            } else if (function.isAllColumns()) {
+                useBracketsInExprList = false;
+                buffer.append("(ALL ");
             }
             visit(function.getParameters());
             useBracketsInExprList = oldUseBracketsInExprList;
-            if (function.isDistinct()) {
+            if (function.isDistinct() || function.isAllColumns()) {
                 buffer.append(")");
             }
         }

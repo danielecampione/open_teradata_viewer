@@ -24,16 +24,16 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object Namespace.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-357 2nd. Edition.
- * 
+ *
  */
 public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * Object Namespace().
-     * 
+     *
      * @constructor
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
@@ -44,7 +44,7 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * Object Namespace(uriValue).
-     * 
+     *
      * @constructor
      * @param uriValue uri part of Namespace.
      * @extends Object
@@ -56,9 +56,9 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * Object Namespace(prefixValue, uriValue).
-     * 
+     *
      * @constructor
-     * @param <i>prefixValue</i> Optional prefix part of Namespace.
+     * @param prefixValue Optional prefix part of Namespace.
      * @param uriValue uri part of Namespace.
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
@@ -69,7 +69,7 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type Namespace
      * @memberOf Namespace
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XNamespace
@@ -80,7 +80,7 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf Namespace
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XNamespace
@@ -91,7 +91,7 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * <b>property prefix</b>
-     * 
+     *
      * @type String
      * @memberOf Namespace
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XNamespace
@@ -102,7 +102,7 @@ public abstract class E4XNamespace implements IJSObjectFunctions {
 
     /**
      * <b>property uri</b>
-     * 
+     *
      * @type String
      * @memberOf Namespace
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XNamespace

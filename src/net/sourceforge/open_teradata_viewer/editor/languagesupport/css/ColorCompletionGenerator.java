@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.swing.Icon;
-
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.BasicCompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.TemplateCompletion;
@@ -133,15 +130,11 @@ class ColorCompletionGenerator implements ICompletionGenerator {
      * @author D. Campione
      * 
      */
-    private static class ColorCompletion extends BasicCompletion {
+    private static class ColorCompletion extends BasicCssCompletion {
 
         public ColorCompletion(ICompletionProvider provider, String value) {
-            super(provider, value);
+            super(provider, value, ICON_KEY);
         }
 
-        @Override
-        public Icon getIcon() {
-            return IconFactory.get().getIcon(ICON_KEY);
-        }
     }
 }

@@ -185,13 +185,13 @@ class JsHinter {
                         String errorCode = null;
 
                         // Ends in "(E0xxx)" or "(W0xxx)"
-                        int noticeType = IParserNotice.ERROR;
+                        IParserNotice.Level noticeType = IParserNotice.Level.ERROR;
                         if (msg.charAt(msg.length() - 1) == ')') {
                             int openParen = msg.lastIndexOf('(');
                             errorCode = msg.substring(openParen + 1,
                                     msg.length() - 1);
                             if (msg.charAt(openParen + 1) == 'W') {
-                                noticeType = IParserNotice.WARNING;
+                                noticeType = IParserNotice.Level.WARNING;
                             }
                             msg = msg.substring(0, openParen - 1);
                         }

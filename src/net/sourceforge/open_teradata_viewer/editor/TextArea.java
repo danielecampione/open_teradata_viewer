@@ -83,7 +83,7 @@ import net.sourceforge.open_teradata_viewer.util.PrintUtil;
  * have to set the opaque property yourself; it is always done for you.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TextArea extends TextAreaBase implements Printable {
 
@@ -92,14 +92,14 @@ public class TextArea extends TextAreaBase implements Printable {
     /**
      * Constant representing insert mode.
      *
-     * @see #setCaretStyle(int, int)
+     * @see #setCaretStyle(int, CaretStyle)
      */
     public static final int INSERT_MODE = 0;
 
     /**
      * Constant representing overwrite mode.
      *
-     * @see #setCaretStyle(int, int)
+     * @see #setCaretStyle(int, CaretStyle)
      */
     public static final int OVERWRITE_MODE = 1;
 
@@ -170,7 +170,7 @@ public class TextArea extends TextAreaBase implements Printable {
 
     private SmartHighlightPainter markAllHighlightPainter;
 
-    private int[] carets; // Index 0=>insert caret, 1=>overwrite
+    private CaretStyle[] carets; // Index 0=>insert caret, 1=>overwrite
 
     /** Ctor. */
     public TextArea() {
@@ -317,7 +317,7 @@ public class TextArea extends TextAreaBase implements Printable {
 
     /**
      * Tells whether an undo is possible.
-     * 
+     *
      * @see #canRedo()
      * @see #undoLastAction()
      */
@@ -327,7 +327,7 @@ public class TextArea extends TextAreaBase implements Printable {
 
     /**
      * Tells whether a redo is possible.
-     * 
+     *
      * @see #canUndo()
      * @see #redoLastAction()
      */
@@ -354,7 +354,7 @@ public class TextArea extends TextAreaBase implements Printable {
      * <p>
      *
      * The default implementation does nothing.<p>
-     * 
+     *
      * If you set the popup menu via {@link #setPopupMenu(JPopupMenu)}, you will
      * want to override this method, especially if you removed any of the menu
      * items in the default popup menu.
@@ -813,9 +813,9 @@ public class TextArea extends TextAreaBase implements Printable {
         markAllHighlightPainter = new SmartHighlightPainter(
                 markAllHighlightColor);
         setMarkAllHighlightColor(markAllHighlightColor);
-        carets = new int[2];
-        setCaretStyle(INSERT_MODE, ConfigurableCaret.THICK_VERTICAL_LINE_STYLE);
-        setCaretStyle(OVERWRITE_MODE, ConfigurableCaret.BLOCK_STYLE);
+        carets = new CaretStyle[2];
+        setCaretStyle(INSERT_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
+        setCaretStyle(OVERWRITE_MODE, CaretStyle.BLOCK_STYLE);
         setDragEnabled(true); // Enable drag-and-drop
 
         setTextMode(INSERT_MODE); // Carets array must be created first
@@ -848,7 +848,7 @@ public class TextArea extends TextAreaBase implements Printable {
      * Marks all ranges specified with the "mark all" highlighter. Typically,
      * this method is called indirectly from {@link SearchEngine} when doing a
      * fine or replace operation.<p>
-     * 
+     *
      * This method fires a property change event of type
      * {@link #MARK_ALL_OCCURRENCES_CHANGED_PROPERTY}.
      *
@@ -1270,7 +1270,7 @@ public class TextArea extends TextAreaBase implements Printable {
      *              <code>ConfigurableCaret</code>, an exception is thrown.
      * @throws IllegalArgumentException If the specified caret is not an
      *         <code>ConfigurableCaret</code>.
-     * @see #setCaretStyle(int, int)
+     * @see #setCaretStyle(int, CaretStyle)
      */
     @Override
     public void setCaret(Caret caret) {
@@ -1285,14 +1285,13 @@ public class TextArea extends TextAreaBase implements Printable {
      * Sets the style of caret used when in insert or overwrite mode.
      *
      * @param mode Either {@link #INSERT_MODE} or {@link #OVERWRITE_MODE}.
-     * @param style The style for the caret (such as {@link
-     *              ConfigurableCaret#VERTICAL_LINE_STYLE}).
-     * @see net.sourceforge.open_teradata_viewer.editor.ConfigurableCaret
+     * @param style The style for the caret.
+     * @see ConfigurableCaret
      */
-    public void setCaretStyle(int mode, int style) {
-        style = (style >= ConfigurableCaret.MIN_STYLE
-                && style <= ConfigurableCaret.MAX_STYLE ? style
-                : ConfigurableCaret.THICK_VERTICAL_LINE_STYLE);
+    public void setCaretStyle(int mode, CaretStyle style) {
+        if (style == null) {
+            style = CaretStyle.THICK_VERTICAL_LINE_STYLE;
+        }
         carets[mode] = style;
         if (mode == getTextMode() && getCaret() instanceof ConfigurableCaret) {
             // Will repaint the caret if necessary
@@ -1384,7 +1383,7 @@ public class TextArea extends TextAreaBase implements Printable {
 
     /**
      * Sets the popup menu used by this text area.<p>
-     * 
+     *
      * If you set the popup menu with this method, you'll want to consider also
      * overriding {@link #configurePopupMenu(JPopupMenu)}, especially if you
      * removed any of the default menu items.
@@ -1518,9 +1517,9 @@ public class TextArea extends TextAreaBase implements Printable {
      * <code>JTextComponent</code> so that mouse events get fired when the user
      * is selecting text with the mouse as well.  This class also displays the
      * popup menu when the user right-clicks in the text area.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected class TextAreaMutableCaretEvent extends TAMouseListener {
 

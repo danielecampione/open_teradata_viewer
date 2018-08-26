@@ -103,6 +103,7 @@ public class Theme {
 
     private Color gutterBorderColor;
     private Color activeLineRangeColor;
+    private boolean iconRowHeaderInheritsGutterBG;
     private Color lineNumberColor;
     private String lineNumberFont;
     private int lineNumberFontSize;
@@ -163,6 +164,8 @@ public class Theme {
             bgColor = gutter.getBackground();
             gutterBorderColor = gutter.getBorderColor();
             activeLineRangeColor = gutter.getActiveLineRangeColor();
+            iconRowHeaderInheritsGutterBG = gutter
+                    .getIconRowHeaderInheritsGutterBackground();
             lineNumberColor = gutter.getLineNumberColor();
             lineNumberFont = gutter.getLineNumberFont().getFamily();
             lineNumberFontSize = gutter.getLineNumberFont().getSize();
@@ -209,6 +212,7 @@ public class Theme {
             gutter.setBackground(bgColor);
             gutter.setBorderColor(gutterBorderColor);
             gutter.setActiveLineRangeColor(activeLineRangeColor);
+            gutter.setIconRowHeaderInheritsGutterBackground(iconRowHeaderInheritsGutterBG);
             gutter.setLineNumberColor(lineNumberColor);
             String fontName = lineNumberFont != null ? lineNumberFont
                     : baseFont.getFamily();
@@ -454,6 +458,8 @@ public class Theme {
             elem = doc.createElement("iconRowHeader");
             elem.setAttribute("activeLineRange",
                     colorToString(activeLineRangeColor));
+            elem.setAttribute("inheritsGutterBG",
+                    Boolean.toString(iconRowHeaderInheritsGutterBG));
             root.appendChild(elem);
 
             elem = doc.createElement("tokenStyles");
@@ -678,6 +684,9 @@ public class Theme {
             } else if ("iconRowHeader".equals(qName)) {
                 String color = attrs.getValue("activeLineRange");
                 theme.activeLineRangeColor = stringToColor(color);
+                String inheritBGStr = attrs.getValue("inheritsGutterBG");
+                theme.iconRowHeaderInheritsGutterBG = inheritBGStr == null ? false
+                        : Boolean.valueOf(inheritBGStr);
             } else if ("lineNumbers".equals(qName)) {
                 String color = attrs.getValue("fg");
                 theme.lineNumberColor = stringToColor(color);

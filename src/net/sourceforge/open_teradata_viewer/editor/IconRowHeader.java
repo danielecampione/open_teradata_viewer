@@ -55,7 +55,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.FoldingAwareIconRowHea
  * the line to bookmark. In order to enable bookmarking, you must first assign
  * an icon to represent a bookmarked line, then actually enable the feature.
  * This is actually done on the parent {@link Gutter} component:<p>
- * 
+ *
  * <pre>
  * Gutter gutter = scrollPane.getGutter();
  * gutter.setBookmarkIcon(new ImageIcon("bookmark.png"));
@@ -64,7 +64,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.FoldingAwareIconRowHea
  *
  * @author D. Campione
  * @see FoldingAwareIconRowHeader
- * 
+ *
  */
 public class IconRowHeader extends AbstractGutterComponent implements
         MouseListener {
@@ -108,23 +108,19 @@ public class IconRowHeader extends AbstractGutterComponent implements
     private Color activeLineRangeColor;
 
     /**
+     * Whether this component should use the gutter's background color (as
+     * opposed to using a LookAndFeel-dependent color, which is the default
+     * behavior).
+     */
+    private boolean inheritsGutterBackground;
+
+    /**
      * Ctor.
      *
      * @param textArea The parent text area.
      */
     public IconRowHeader(TextArea textArea) {
         super(textArea);
-        visibleRect = new Rectangle();
-        width = 16;
-        addMouseListener(this);
-        activeLineRangeStart = activeLineRangeEnd = -1;
-        setActiveLineRangeColor(null);
-
-        // Must explicitly set our background color, otherwise we inherit that
-        // of the parent Gutter
-        updateBackground();
-
-        ToolTipManager.sharedInstance().registerComponent(this);
     }
 
     /**
@@ -304,6 +300,23 @@ public class IconRowHeader extends AbstractGutterComponent implements
         return retVal.toArray(array);
     }
 
+    @Override
+    protected void init() {
+        super.init();
+
+        visibleRect = new Rectangle();
+        width = 16;
+        addMouseListener(this);
+        activeLineRangeStart = activeLineRangeEnd = -1;
+        setActiveLineRangeColor(null);
+
+        // Must explicitly set our background color, otherwise we inherit that
+        // of the parent Gutter
+        updateBackground();
+
+        ToolTipManager.sharedInstance().registerComponent(this);
+    }
+
     /**
      * @return Whether bookmarking is enabled.
      * @see #setBookmarkingEnabled(boolean)
@@ -362,9 +375,7 @@ public class IconRowHeader extends AbstractGutterComponent implements
         if (visibleRect == null) {
             return;
         }
-
-        g.setColor(getBackground());
-        g.fillRect(0, visibleRect.y, width, visibleRect.height);
+        paintBackgroundImpl(g, visibleRect);
 
         if (textArea.getLineWrap()) {
             paintComponentWrapped(g);
@@ -443,6 +454,21 @@ public class IconRowHeader extends AbstractGutterComponent implements
                 }
             }
         }
+    }
+
+    /**
+     * Paints the background of this component.
+     *
+     * @param g The graphics context.
+     * @param visibleRect The visible bounds of this component.
+     */
+    protected void paintBackgroundImpl(Graphics g, Rectangle visibleRect) {
+        Color bg = getBackground();
+        if (inheritsGutterBackground && getGutter() != null) {
+            bg = getGutter().getBackground();
+        }
+        g.setColor(bg);
+        g.fillRect(0, visibleRect.y, width, visibleRect.height);
     }
 
     /**
@@ -671,6 +697,21 @@ public class IconRowHeader extends AbstractGutterComponent implements
     }
 
     /**
+     * Sets whether the icon area inherits the gutter background (as opposed to
+     * painting with its own, default "panel" color, which is the default).
+     *
+     * @param inherits Whether the gutter background should be used in the icon
+     *        row header. If this is <code>false</code>, a default,
+     *        Look-and-feel-dependent color is used.
+     */
+    public void setInheritsGutterBackground(boolean inherits) {
+        if (inherits != inheritsGutterBackground) {
+            inheritsGutterBackground = inherits;
+            repaint();
+        }
+    }
+
+    /**
      * Sets the text area being displayed. This will clear any tracking icons
      * currently displayed.
      *
@@ -760,7 +801,7 @@ public class IconRowHeader extends AbstractGutterComponent implements
      * Implementation of the icons rendered.
      *
      * @author D. Campione
-     * 
+     *
      */
     private static class GutterIconImpl implements IGutterIconInfo,
             Comparable<IGutterIconInfo> {

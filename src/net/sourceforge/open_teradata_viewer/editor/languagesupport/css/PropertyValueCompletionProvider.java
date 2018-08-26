@@ -69,7 +69,7 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
     private List<ICompletion> htmlTagCompletions;
     private List<ICompletion> propertyCompletions;
     private Map<String, List<ICompletion>> valueCompletions;
-    private Map<String, ICompletionGenerator> valueCompletionGenerators;
+    private Map<String, List<ICompletionGenerator>> valueCompletionGenerators;
 
     private Segment seg = new Segment();
     private AbstractCompletionProvider.CaseInsensitiveComparator comparator;
@@ -92,7 +92,7 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
 
         try {
             this.valueCompletions = new HashMap<String, List<ICompletion>>();
-            this.valueCompletionGenerators = new HashMap<String, ICompletionGenerator>();
+            this.valueCompletionGenerators = new HashMap<String, List<ICompletionGenerator>>();
             loadPropertyCompletions();
             this.htmlTagCompletions = loadHtmlTagCompletions();
         } catch (IOException ioe) { // Never happens
@@ -236,24 +236,29 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
                 break;
             case 2:
                 choices = valueCompletions.get(currentProperty);
-                if (valueCompletionGenerators.get(currentProperty) != null) {
-                    List<ICompletion> toMerge = valueCompletionGenerators.get(
-                            currentProperty).generate(this, text);
-                    if (toMerge != null) {
-                        if (choices == null) {
-                            choices = toMerge;
-                        } else {
-                            // Clone choices array since we had a shallow copy
-                            // of the "static" completions for this property
-                            choices = new ArrayList<ICompletion>(choices);
-                            choices.addAll(toMerge);
+                List<ICompletionGenerator> generators = valueCompletionGenerators
+                        .get(currentProperty);
+                if (generators != null) {
+                    for (ICompletionGenerator generator : generators) {
+                        List<ICompletion> toMerge = generator.generate(this,
+                                text);
+                        if (toMerge != null) {
+                            if (choices == null) {
+                                choices = toMerge;
+                            } else {
+                                // Clone choices array since we had a
+                                // shallow copy of the "static" completions
+                                // for this property
+                                choices = new ArrayList<ICompletion>(choices);
+                                choices.addAll(toMerge);
+                            }
                         }
-                        Collections.sort(choices);
                     }
                 }
                 if (choices == null) {
                     return retVal;
                 }
+                Collections.sort(choices);
                 break;
             }
             int index = Collections.binarySearch(choices, text, comparator);
@@ -418,6 +423,18 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
         }
     }
 
+    /** Adds a completion generator for a specific property. */
+    private static final void add(
+            Map<String, List<ICompletionGenerator>> generatorMap, String prop,
+            ICompletionGenerator generator) {
+        List<ICompletionGenerator> generators = generatorMap.get(prop);
+        if (generators == null) {
+            generators = new ArrayList<ICompletionGenerator>();
+            generatorMap.put(prop, generators);
+        }
+        generators.add(generator);
+    }
+
     private void parsePropertyValueCompletionLine(String line)
             throws IOException {
         String[] tokens = line.split("\\s+");
@@ -435,20 +452,20 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
                     String token = tokens[i];
                     ICompletion completion = null;
                     if ("*length*".equals(token)) {
-                        valueCompletionGenerators
-                                .put(prop,
-                                        new PercentageOrLengthCompletionGenerator(
-                                                false));
+                        add(valueCompletionGenerators,
+                                prop,
+                                new PercentageOrLengthCompletionGenerator(false));
                     } else if ("*percentage-or-length*".equals(token)) {
-                        valueCompletionGenerators
-                                .put(prop,
-                                        new PercentageOrLengthCompletionGenerator(
-                                                true));
+                        add(valueCompletionGenerators, prop,
+                                new PercentageOrLengthCompletionGenerator(true));
                     } else if ("*color*".equals(token)) {
-                        valueCompletionGenerators.put(prop,
+                        add(valueCompletionGenerators, prop,
                                 new ColorCompletionGenerator(this));
+                    } else if ("*border-style*".equals(token)) {
+                        add(valueCompletionGenerators, prop,
+                                new BorderStyleCompletionGenerator());
                     } else if ("*time*".equals(token)) {
-                        valueCompletionGenerators.put(prop,
+                        add(valueCompletionGenerators, prop,
                                 new TimeCompletionGenerator());
                     } else {
                         completion = new BasicCssCompletion(this, tokens[i],

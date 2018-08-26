@@ -45,6 +45,8 @@ public class IconFactory {
     public static final String STATIC_VAR_ICON = "static_var";
     public static final String DEFAULT_VARIABLE_ICON = "default_variable";
     public static final String DEFAULT_CLASS_ICON = "default_class";
+    public static final String PUBLIC_METHOD_ICON = "methpub_obj";
+    public static final String PUBLIC_FIELD_ICON = "field_public_obj";
     public static final String JSDOC_ITEM_ICON = "jsdoc_item";
 
     private Map<String, Icon> iconMap;
@@ -54,20 +56,18 @@ public class IconFactory {
     private IconFactory() {
         iconMap = new HashMap<String, Icon>();
 
-        iconMap.put(FUNCTION_ICON, loadIcon("/icons/methpub_obj.gif"));
-        iconMap.put(PUBLIC_STATIC_FUNCTION_ICON,
-                loadIcon("/icons/methpub_static.gif"));
-        iconMap.put(LOCAL_VARIABLE_ICON,
-                loadIcon("/icons/localvariable_obj.gif"));
-        iconMap.put(GLOBAL_VARIABLE_ICON,
-                loadIcon("/icons/field_public_obj.gif"));
-        iconMap.put(TEMPLATE_ICON, loadIcon("/icons/template_obj.gif"));
-        iconMap.put(DEFAULT_FUNCTION_ICON, loadIcon("/icons/methdef_obj.gif"));
-        iconMap.put(STATIC_VAR_ICON, loadIcon("/icons/static_co.gif"));
-        iconMap.put(DEFAULT_VARIABLE_ICON,
-                loadIcon("/icons/field_default_obj.gif"));
-        iconMap.put(DEFAULT_CLASS_ICON, loadIcon("/icons/class_obj.gif"));
-        iconMap.put(JSDOC_ITEM_ICON, loadIcon("/icons/jdoc_tag_obj.gif"));
+        iconMap.put(FUNCTION_ICON, loadIcon("methpub_obj.gif"));
+        iconMap.put(PUBLIC_STATIC_FUNCTION_ICON, loadIcon("methpub_static.gif"));
+        iconMap.put(LOCAL_VARIABLE_ICON, loadIcon("localvariable_obj.gif"));
+        iconMap.put(GLOBAL_VARIABLE_ICON, loadIcon("field_public_obj.gif"));
+        iconMap.put(TEMPLATE_ICON, loadIcon("template_obj.gif"));
+        iconMap.put(DEFAULT_FUNCTION_ICON, loadIcon("methdef_obj.gif"));
+        iconMap.put(STATIC_VAR_ICON, loadIcon("static_co.gif"));
+        iconMap.put(DEFAULT_VARIABLE_ICON, loadIcon("field_default_obj.gif"));
+        iconMap.put(DEFAULT_CLASS_ICON, loadIcon("class_obj.gif"));
+        iconMap.put(PUBLIC_METHOD_ICON, loadIcon("methpub_obj.gif"));
+        iconMap.put(PUBLIC_FIELD_ICON, loadIcon("field_public_obj.gif"));
+        iconMap.put(JSDOC_ITEM_ICON, loadIcon("jdoc_tag_obj.gif"));
         iconMap.put(EMPTY_ICON, new EmptyIcon(16));
     }
 
@@ -90,6 +90,7 @@ public class IconFactory {
      * @return The icon.
      */
     private Icon loadIcon(String name) {
+        name = "/icons/" + name;
         URL res = IconFactory.class.getResource(name);
         if (res == null) { // Never happens
             // IllegalArgumentException is what would be thrown if res was null

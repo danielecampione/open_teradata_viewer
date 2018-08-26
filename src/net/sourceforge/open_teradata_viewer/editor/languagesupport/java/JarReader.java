@@ -29,6 +29,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletion;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpath.LibraryInfo;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
@@ -88,7 +89,7 @@ class JarReader {
      * @param addTo The list to add completion choices to.
      */
     public void addCompletions(ICompletionProvider provider, String[] pkgNames,
-            Set addTo) {
+            Set<ICompletion> addTo) {
         checkLastModified();
 
         TreeMap map = packageMap;

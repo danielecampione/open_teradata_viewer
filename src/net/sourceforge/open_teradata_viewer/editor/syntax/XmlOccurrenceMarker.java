@@ -18,7 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
@@ -30,12 +31,25 @@ import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
  * Marks occurrences of the current token for XML.
  *
  * @author D. Campione
- * 
+ *
  */
 public class XmlOccurrenceMarker implements IOccurrenceMarker {
 
     private static final char[] CLOSE_TAG_START = { '<', '/' };
     private static final char[] TAG_SELF_CLOSE = { '/', '>' };
+
+    /** {@inheritDoc} */
+    @Override
+    public IToken getTokenToMark(SyntaxTextArea textArea) {
+        return HtmlOccurrenceMarker.getTagNameTokenForCaretOffset(textArea,
+                this);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isValidType(SyntaxTextArea textArea, IToken t) {
+        return textArea.getMarkOccurrencesOfTokenType(t.getType());
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -46,9 +60,10 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
         Element root = doc.getDefaultRootElement();
         int lineCount = root.getElementCount();
         int curLine = root.getElementIndex(t.getOffset());
+        int depth = 0;
 
-        // We only check for tags on the current line. Tags spanning multiple
-        // lines aren't common anyway
+        // We only check for tags on the current line, for simplicity.
+        // Tags spanning multiple lines aren't common anyway
         boolean found = false;
         boolean forward = true;
         t = doc.getTokenListForLine(curLine);
@@ -72,26 +87,17 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
         }
 
         if (forward) {
-            int depth = 0;
             t = t.getNextToken().getNextToken();
 
             do {
                 while (t != null && t.isPaintable()) {
                     if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
-                        if (t.isSingleChar('<')) {
-                            depth++;
-                        } else if (t.is(TAG_SELF_CLOSE)) {
-                            if (depth > 0) {
-                                depth--;
-                            } else {
-                                return; // No match for this tag
-                            }
-                        } else if (t.is(CLOSE_TAG_START)) {
-                            if (depth > 0) {
-                                depth--;
-                            } else {
-                                IToken match = t.getNextToken();
-                                if (match != null && match.is(lexeme)) {
+                        if (t.is(CLOSE_TAG_START)) {
+                            IToken match = t.getNextToken();
+                            if (match != null && match.is(lexeme)) {
+                                if (depth > 0) {
+                                    depth--;
+                                } else {
                                     try {
                                         int end = match.getOffset()
                                                 + match.length();
@@ -103,12 +109,17 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                                     } catch (BadLocationException ble) {
                                         ExceptionDialog.hideException(ble); // Never happens
                                     }
+                                    return; // We're done
                                 }
-                                return; // We're done
+                            }
+                        } else if (t.isSingleChar('<')) {
+                            t = t.getNextToken();
+                            if (t != null && t.is(lexeme)) {
+                                depth++;
                             }
                         }
                     }
-                    t = t.getNextToken();
+                    t = t == null ? null : t.getNextToken();
                 }
 
                 if (++curLine < lineCount) {
@@ -116,7 +127,12 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                 }
             } while (curLine < lineCount);
         } else { // !forward
-            Stack<IToken> matches = new Stack<IToken>();
+            // Idea: Get all opening and closing tags of the relevant type on
+            // the current line. Find the opening tag paired to the closing tag
+            // we found originally; if it's not on this line, keep going to the
+            // previous line
+
+            List<Entry> openCloses = new ArrayList<Entry>();
             boolean inPossibleMatch = false;
             t = doc.getTokenListForLine(curLine);
             final int endBefore = tokenOffs - 2; // Stop before "</"
@@ -129,7 +145,7 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                             IToken next = t.getNextToken();
                             if (next != null) {
                                 if (next.is(lexeme)) {
-                                    matches.push(next);
+                                    openCloses.add(new Entry(true, next));
                                     inPossibleMatch = true;
                                 } else {
                                     inPossibleMatch = false;
@@ -139,13 +155,14 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                         } else if (t.isSingleChar('>')) {
                             inPossibleMatch = false;
                         } else if (inPossibleMatch && t.is(TAG_SELF_CLOSE)) {
-                            matches.pop();
+                            openCloses.remove(openCloses.size() - 1);
+                            inPossibleMatch = false;
                         } else if (t.is(CLOSE_TAG_START)) {
                             IToken next = t.getNextToken();
                             if (next != null) {
                                 // Invalid XML might not have a match
-                                if (next.is(lexeme) && !matches.isEmpty()) {
-                                    matches.pop();
+                                if (next.is(lexeme)) {
+                                    openCloses.add(new Entry(false, next));
                                 }
                                 t = next;
                             }
@@ -154,24 +171,47 @@ public class XmlOccurrenceMarker implements IOccurrenceMarker {
                     t = t.getNextToken();
                 }
 
-                if (!matches.isEmpty()) {
-                    try {
-                        IToken match = matches.pop();
-                        int end = match.getOffset() + match.length();
-                        h.addMarkedOccurrenceHighlight(match.getOffset(), end,
-                                p);
-                        end = tokenOffs + match.length();
-                        h.addMarkedOccurrenceHighlight(tokenOffs, end, p);
-                    } catch (BadLocationException ble) {
-                        ExceptionDialog.hideException(ble); // Never happens
+                for (int i = openCloses.size() - 1; i >= 0; i--) {
+                    Entry entry = openCloses.get(i);
+                    depth += entry.open ? -1 : 1;
+                    if (depth == -1) {
+                        try {
+                            IToken match = entry.t;
+                            int end = match.getOffset() + match.length();
+                            h.addMarkedOccurrenceHighlight(match.getOffset(),
+                                    end, p);
+                            end = tokenOffs + match.length();
+                            h.addMarkedOccurrenceHighlight(tokenOffs, end, p);
+                        } catch (BadLocationException ble) {
+                            ExceptionDialog.hideException(ble); // Never happens
+                        }
+                        openCloses.clear();
+                        return;
                     }
-                    return;
                 }
 
+                openCloses.clear();
                 if (--curLine >= 0) {
                     t = doc.getTokenListForLine(curLine);
                 }
             } while (curLine >= 0);
+        }
+    }
+
+    /**
+     * Used internally when searching backward for a matching "open" tag.
+     *
+     * @author D. Campione
+     *
+     */
+    private static class Entry {
+
+        public boolean open;
+        public IToken t;
+
+        public Entry(boolean open, IToken t) {
+            this.open = open;
+            this.t = t;
         }
     }
 }

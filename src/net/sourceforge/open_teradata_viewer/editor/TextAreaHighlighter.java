@@ -46,7 +46,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.DocumentRange;
  * unfortunately, we cannot re-use much of it since it is package private.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TextAreaHighlighter extends BasicHighlighter {
 
@@ -69,7 +69,7 @@ public class TextAreaHighlighter extends BasicHighlighter {
      *
      * @return A tag to reference the highlight later.
      * @throws BadLocationException
-     * @see #clearMarkOccurrencesHighlights()
+     * @see #clearMarkAllHighlights()
      */
     Object addMarkAllHighlight(int start, int end, HighlightPainter p)
             throws BadLocationException {
@@ -89,9 +89,9 @@ public class TextAreaHighlighter extends BasicHighlighter {
     }
 
     /**
-     * Removes all "marked occurrences" highlights from the view.
+     * Removes all "mark all" highlights from the view.
      *
-     * @see #addMarkedOccurrenceHighlight(int, int, MarkOccurrencesHighlightPainter)
+     * @see #addMarkAllHighlight(int, int, javax.swing.text.Highlighter.HighlightPainter)
      */
     void clearMarkAllHighlights() {
         // Don't remove via an iterator; since our List is an ArrayList, this
@@ -235,18 +235,18 @@ public class TextAreaHighlighter extends BasicHighlighter {
 
     /**
      * Information about a highlight being painted by this highlighter.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static interface IHighlightInfo extends Highlighter.Highlight {
     }
 
     /**
      * Information about a layered highlight being painted by this highlighter.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static interface ILayeredHighlightInfo extends IHighlightInfo {
 
@@ -261,9 +261,9 @@ public class TextAreaHighlighter extends BasicHighlighter {
 
     /**
      * A straightforward implementation of <code>IHighlightInfo</code>.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected static class HighlightInfoImpl implements IHighlightInfo {
 
@@ -307,9 +307,9 @@ public class TextAreaHighlighter extends BasicHighlighter {
     /**
      * A straightforward implementation of <code>IHighlightInfo</code> for
      * painting layered highlights.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     /*
      * NOTE: This implementation is a "hack" so typing at the "end" of the

@@ -24,18 +24,18 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Base JavaScript Object.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-262 3rd. Edition.
- * 
+ *
  */
 public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions {
 
     /**
      * Object Object().
-     * 
+     *
      * <p>Creates a new object instance.</p>
-     * 
+     *
      * @constructor
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -45,10 +45,10 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * Object Object(value).
-     * 
+     *
      * @constructor
-     * @param <i>value</i> Optional argument specifies a primitive JavaScript
-     *        value - a number, boolean etc..
+     * @param value Optional argument specifies a primitive JavaScript value - a
+     *        number, boolean etc...
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
      */
@@ -58,17 +58,17 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function create(proto, descriptors)</b> - Create an object with
      * specified prototype and properties.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * var p = Object.create({z:0}), {
      *   x: { value: 1, writable, false, enumerable:true. configurable:true},
      *   y: { value: 2, writable, false, enumerable:true. configurable:true},
      * });
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param proto The prototype of the newly created object or null.
-     * @param <i>descriptors</i> An optional object that maps property names to
+     * @param descriptors An optional object that maps property names to
      *        property descriptors.
      * @returns A newly created object that inherits from <b><i>proto</b></i>
      *          and has properties described by <b><i>descriptors</i></b>.
@@ -85,15 +85,15 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function defineProperties(o, descriptors)</b> - Create or configure
      * multiple object properties.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * var p = Object.defineProperties({}), {
      *   x: { value: 1, writable, false, enumerable:true. configurable:true},
      *   y: { value: 2, writable, false, enumerable:true. configurable:true},
      * });
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param o The object on which properties are to be created or configured.
      * @param descriptors An object that maps property names to property
      *        descriptors.
@@ -111,14 +111,14 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function defineProperty(o, name, desc)</b> - Create or configure an
      * object property.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * function constant(o, n, v) { // Define a constant with value v
      *   Object.defineProperty (o, n, { value: v, writable, false, enumerable:true. configurable:true});
      * }
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param o The object on which a property is to be created or configured.
      * @param name The name of the property created or configured.
      * @param desc A property descriptor object that describes the new property.
@@ -133,7 +133,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * <b>function freeze(o)</b> - Make an object immutable.
-     * 
+     *
      * @param o The object to be frozen.
      * @returns The now-frozen argument object <b><i>o</b></i>.
      * @see  net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma5.JS5Object
@@ -150,7 +150,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function getOwnPropertyDescriptor(o, name)</b> - Query property
      * attributes.
-     * 
+     *
      * @param o The object that is to have its property attributes queried.
      * @param name The name of the property to query.
      * @returns A property descriptor object for the specified property or
@@ -166,12 +166,12 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function getOwnPropertyNames(o)</b> - Return the names of
      * non-inherited properties.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * Object.getOwnPropertyNames([]); // Returns [length]: "length" is non enumerable
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param o An object
      * @returns An array that contains the names of all non-inherited properties
      *          of <b><i>o</b></i>, including non-enumerable properties.
@@ -185,15 +185,15 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * <b>function getPrototypeOf(o)</b> - Return the prototype of an object.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * var p = {}; // Create object
      * Object.getPrototypeOf(p); // => Object.prototype
      * var o = Object.create(p); // An object inherited from p
      * Object.getPrototypeOf(o); // => p
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param o An object.
      * @returns The prototype of object <b><i>o</b></i>.
      * @see  net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma5.JS5Object
@@ -207,15 +207,15 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function isExtensible(o)</b> - Can new properties be added to an
      * object?<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * var o = {}; // Create object
      * Object.isExtensible(o); // => true
      * Object.preventExtensions(o); // Make it non-extensible
      * Object.isExtensible(o); // => false
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @param o The object to be checked for extensibility
      * @returns <b><i>true</b></i> if the object can be extended with new
      *          properties, otherwise <b><i>false</b></i>.
@@ -228,7 +228,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * <b>function isFrozen(o)</b> - Is an object immutable?
-     * 
+     *
      * @param o The object to be checked.
      * @returns <b><i>true</b></i> if the object is frozen or immutable,
      *          otherwise <b><i>false</b></i>.
@@ -248,7 +248,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function isSealed(o)</b> - Can properties be added or deleted from an
      * object?
-     * 
+     *
      * @param o The object to be checked.
      * @returns <b><i>true</b></i> if the object is sealed, otherwise
      *          <b><i>false</b></i>.
@@ -267,12 +267,12 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * <b>function keys(o)</b> - Return enumerable property names.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * Object.keys({x:1, y:2}); // => ["x", "y"]
      * </pre>
-     * 
+     *
      * @param o an object
      * @returns An array that contains the names of all enumerable own
      *          (non-inherited) properties of <b><i>o</b></i>.
@@ -287,7 +287,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
     /**
      * <b>function preventExtensions(o)</b> - Don't allow new properties on an
      * object.
-     * 
+     *
      * @param o The object is to have its extensibility attribute set.
      * @returns The argument <b><i>o</b></i>.
      * @see  net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma5.JS5Object
@@ -302,7 +302,7 @@ public abstract class JS5Object extends JSObject implements IJS5ObjectFunctions 
 
     /**
      * <b>function seal(o)</b> - Prevent the addition or deletion of properties.
-     * 
+     *
      * @param o The object to be sealed.
      * @returns The now-sealed argument of <b><i>o</b></i>.
      * @see  net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma5.JS5Object

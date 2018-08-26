@@ -35,16 +35,10 @@ public abstract class AbstractMarkupTokenMaker extends AbstractJFlexTokenMaker {
      */
     public abstract boolean getCompleteCloseTags();
 
-    /**
-     * Returns the text to place at the beginning and end of a line to "comment"
-     * it in a this programming language.
-     *
-     * @return The start and end strings to add to a line to "comment" it
-     *         out.
-     */
+    /** {@inheritDoc} */
     @Override
-    public String[] getLineCommentStartAndEnd() {
-        return new String[]{"<!--", "-->"};
+    public String[] getLineCommentStartAndEnd(int languageIndex) {
+        return new String[] { "<!--", "-->" };
     }
 
     /**

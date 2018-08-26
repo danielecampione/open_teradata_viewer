@@ -307,7 +307,7 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
 
     /**
      * Returns the text to place at the beginning and end of a line to "comment"
-     * it in the current programming language.
+     * it in this programming language.
      *
      * @return The start and end strings to add to a line to "comment" it out. A
      *         <code>null</code> value for either means there is no string to
@@ -315,8 +315,8 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
      *         means this language does not support commenting/uncommenting
      *         lines.
      */
-    public String[] getLineCommentStartAndEnd() {
-        return tokenMaker.getLineCommentStartAndEnd();
+    public String[] getLineCommentStartAndEnd(int languageIndex) {
+        return tokenMaker.getLineCommentStartAndEnd(languageIndex);
     }
 
     /**

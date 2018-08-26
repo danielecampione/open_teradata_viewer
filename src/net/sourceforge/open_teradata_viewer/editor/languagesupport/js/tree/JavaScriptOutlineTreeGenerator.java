@@ -27,15 +27,19 @@ import javax.swing.text.BadLocationException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.IconFactory;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.util.RhinoUtil;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import sun.org.mozilla.javascript.internal.Token;
 import sun.org.mozilla.javascript.internal.ast.Assignment;
 import sun.org.mozilla.javascript.internal.ast.AstNode;
 import sun.org.mozilla.javascript.internal.ast.AstRoot;
 import sun.org.mozilla.javascript.internal.ast.ExpressionStatement;
+import sun.org.mozilla.javascript.internal.ast.FunctionCall;
 import sun.org.mozilla.javascript.internal.ast.FunctionNode;
 import sun.org.mozilla.javascript.internal.ast.Name;
 import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
+import sun.org.mozilla.javascript.internal.ast.ObjectLiteral;
+import sun.org.mozilla.javascript.internal.ast.ObjectProperty;
 import sun.org.mozilla.javascript.internal.ast.PropertyGet;
 import sun.org.mozilla.javascript.internal.ast.VariableDeclaration;
 import sun.org.mozilla.javascript.internal.ast.VariableInitializer;
@@ -45,7 +49,7 @@ import sun.org.mozilla.javascript.internal.ast.VariableInitializer;
  * AST of {@link SyntaxTextArea} code.
  *
  * @author D. Campione
- * 
+ *
  */
 class JavaScriptOutlineTreeGenerator implements NodeVisitor {
 
@@ -58,12 +62,17 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
 
     public JavaScriptOutlineTreeGenerator(SyntaxTextArea textArea, AstRoot ast) {
         this.textArea = textArea;
-        root = new JavaScriptTreeNode(null);
+        root = new JavaScriptTreeNode((AstNode) null);
         if (ast != null) {
             ast.visit(this);
         }
     }
 
+    /**
+     * While parsing JS code, this class identifies members added to prototypes.
+     * After all parsing is done, this method is called to create tree nodes for
+     * those prototype members identified.
+     */
     private void addPrototypeAdditionsToRoot() {
         if (prototypeAdditions != null) {
             root.refresh();
@@ -87,32 +96,56 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
         }
     }
 
-    private String getFunctionArgsString(FunctionNode fn) {
-        StringBuilder sb = new StringBuilder("(");
-        int paramCount = fn.getParamCount();
-        if (paramCount > 0) {
-            List<AstNode> fnParams = fn.getParams();
-            for (int i = 0; i < paramCount; i++) {
-                String paramName = null;
-                AstNode paramNode = fnParams.get(i);
-                switch (paramNode.getType()) {
-                case Token.NAME:
-                    paramName = ((Name) paramNode).getIdentifier();
-                    break;
-                default:
-                    System.out.println("Unhandled class for param: "
-                            + paramNode.getClass());
-                    paramName = "?";
-                    break;
-                }
-                sb.append(paramName);
-                if (i < paramCount - 1) {
-                    sb.append(", ");
-                }
-            }
+    /**
+     * Creates and returns a node for the outline tree that corresponds to a
+     * specific AST node.
+     *
+     * @param node The AST node.
+     * @return The outline tree node.
+     */
+    private final JavaScriptTreeNode createTreeNode(AstNode node) {
+        JavaScriptTreeNode tn = new JavaScriptTreeNode(node);
+        try {
+            int offs = node.getAbsolutePosition();
+            tn.setOffset(textArea.getDocument().createPosition(offs));
+        } catch (BadLocationException ble) { // Never happens
+            ExceptionDialog.hideException(ble);
         }
-        sb.append(')');
-        return sb.toString();
+        return tn;
+    }
+
+    /**
+     * Creates and returns a node for the outline tree that corresponds to
+     * a specific AST node.
+     *
+     * @param node The AST node.
+     * @return The outline tree node.
+     */
+    private final JavaScriptTreeNode createTreeNode(List<AstNode> nodes) {
+        JavaScriptTreeNode tn = new JavaScriptTreeNode(nodes);
+        try {
+            int offs = nodes.get(0).getAbsolutePosition();
+            tn.setOffset(textArea.getDocument().createPosition(offs));
+        } catch (BadLocationException ble) { // Never happens
+            ExceptionDialog.hideException(ble);
+        }
+        return tn;
+    }
+
+    private List<AstNode> getChainedPropertyGetNodes(PropertyGet pg) {
+        List<AstNode> nodes = new ArrayList<AstNode>();
+        getChainedPropertyGetNodesImpl(pg, nodes);
+        return nodes;
+    }
+
+    private void getChainedPropertyGetNodesImpl(PropertyGet pg,
+            List<AstNode> nodes) {
+        if (pg.getLeft() instanceof PropertyGet) {
+            getChainedPropertyGetNodesImpl((PropertyGet) pg.getLeft(), nodes);
+        } else {
+            nodes.add(pg.getLeft());
+        }
+        nodes.add(pg.getRight());
     }
 
     public JavaScriptTreeNode getTreeRoot() {
@@ -128,7 +161,6 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
 
         int nodeType = node.getType();
         switch (nodeType) {
-
         case Token.SCRIPT: // AstRoot
             curScopeTreeNode = root;
             return true;
@@ -153,71 +185,159 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
     }
 
     private boolean visitExpressionStatement(ExpressionStatement exprStmt) {
-        // NOTE: We currently only check for expressions of the form
-        // "Foo.prototype.xyz = ..."
+        // NOTE: We currently only check for expressions of the following forms:
+        //    * "Foo.prototype.xyz = ..."
+        //    * "Foo.prototype = { ...  };"
+        //    * "Foo.prototype = Object.create(...);"
 
         AstNode expr = exprStmt.getExpression();
 
-        // Check for "Foo.prototype.xyz = ..."
+        // "<something> = ..."
         if (expr instanceof Assignment) {
             Assignment assignment = (Assignment) expr;
             AstNode left = assignment.getLeft();
 
+            // e.g. "x.y(.z)* = ..."
             if (left instanceof PropertyGet) {
                 PropertyGet pg = (PropertyGet) left;
-                if (pg.getLeft() instanceof PropertyGet) {
-                    PropertyGet pg2 = (PropertyGet) pg.getLeft();
-                    if (pg2.getLeft() instanceof Name
-                            && pg2.getRight() instanceof Name) {
-                        Name temp = (Name) pg2.getRight();
-                        if (temp.getIdentifier().equals("prototype")) {
-                            String clazz = ((Name) pg2.getLeft())
-                                    .getIdentifier();
-                            String member = ((Name) pg.getRight())
-                                    .getIdentifier();
+                List<AstNode> chainedPropertyGetNodes = getChainedPropertyGetNodes(pg);
+                int count = chainedPropertyGetNodes.size();
 
-                            JavaScriptTreeNode tn = new JavaScriptTreeNode(
-                                    pg.getRight());
-                            try {
-                                int offs = pg.getRight().getAbsolutePosition();
-                                tn.setOffset(textArea.getDocument()
-                                        .createPosition(offs));
-                            } catch (BadLocationException ble) { // Never happens
-                                ExceptionDialog.hideException(ble);
-                            }
+                // Check for "Foo.prototype.xyz = ..."
+                if (count >= 3
+                        && RhinoUtil
+                                .isPrototypeNameNode(chainedPropertyGetNodes
+                                        .get(count - 2))) {
+                    String clazz = RhinoUtil.getPrototypeClazz(
+                            chainedPropertyGetNodes, count - 2);
+                    AstNode propNode = chainedPropertyGetNodes.get(count - 1);
+                    String member = ((Name) propNode).getIdentifier();
 
-                            boolean isFunction = assignment.getRight() instanceof FunctionNode;
-                            String text = member;
-                            if (isFunction) {
-                                FunctionNode func = (FunctionNode) assignment
-                                        .getRight();
-                                text += getFunctionArgsString(func);
-                            }
+                    JavaScriptTreeNode tn = createTreeNode(propNode);
+                    AstNode propertyValue = assignment.getRight();
+                    visitPrototypeMember(tn, clazz, member, propertyValue);
+                }
+                // Check for "Foo.prototype = ..."
+                else if (RhinoUtil.isPrototypeNameNode(chainedPropertyGetNodes
+                        .get(count - 1))) {
+                    JavaScriptTreeNode tn = createTreeNode(chainedPropertyGetNodes);
+                    tn.setIcon(IconFactory
+                            .getIcon(IconFactory.LOCAL_VARIABLE_ICON));
+                    tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_VARIABLE);
+                    curScopeTreeNode.add(tn);
 
-                            tn.setText(text);
-                            tn.setIcon(IconFactory
-                                    .getIcon(IconFactory.DEFAULT_FUNCTION_ICON));
-                            tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
-                            if (prototypeAdditions == null) {
-                                prototypeAdditions = new HashMap<String, List<JavaScriptTreeNode>>();
-                            }
-                            List<JavaScriptTreeNode> list = prototypeAdditions
-                                    .get(clazz);
-                            if (list == null) {
-                                list = new ArrayList<JavaScriptTreeNode>();
-                                prototypeAdditions.put(clazz, list);
-                            }
-                            list.add(tn);
+                    String clazz = RhinoUtil.getPrototypeClazz(
+                            chainedPropertyGetNodes, count - 1);
+                    AstNode rhs = assignment.getRight();
 
-                            if (isFunction) {
-                                JavaScriptTreeNode prevScopeTreeNode = curScopeTreeNode;
-                                curScopeTreeNode = tn;
-                                FunctionNode func = (FunctionNode) assignment
-                                        .getRight();
-                                func.getBody().visit(this);
-                                curScopeTreeNode = prevScopeTreeNode;
+                    // "Foo.prototype = { ... };"
+                    if (rhs instanceof ObjectLiteral) {
+                        tn.setText(clazz + "()");
+                        ObjectLiteral value = (ObjectLiteral) rhs;
+                        visitPrototypeMembers(value, clazz);
+                    }
+                    // Check for "Foo.prototype = Object.create(...)"
+                    else if (rhs instanceof FunctionCall) {
+                        FunctionCall rhsFunc = (FunctionCall) rhs;
+                        AstNode target = rhsFunc.getTarget();
+                        if (target instanceof PropertyGet) {
+                            pg = (PropertyGet) target;
+                            if (RhinoUtil.isSimplePropertyGet(pg, "Object",
+                                    "create")) {
+                                tn.setText(clazz + "()");
+                                List<AstNode> args = rhsFunc.getArguments();
+                                if (args.size() >= 2) {
+                                    AstNode arg2 = args.get(1);
+                                    if (arg2 instanceof ObjectLiteral) {
+                                        ObjectLiteral descriptorObjLit = (ObjectLiteral) arg2;
+                                        visitPropertyDescriptors(
+                                                descriptorObjLit, clazz);
+                                    }
+                                }
+                            } else {
+                                tn.setText(clazz + "(???)");
                             }
                         }
+                    } else {
+                        tn.setText(clazz + "(???)");
+                    }
+                } else {
+                    JavaScriptTreeNode tn = createTreeNode(chainedPropertyGetNodes);
+                    tn.setIcon(IconFactory
+                            .getIcon(IconFactory.DEFAULT_CLASS_ICON));
+                    tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
+                    //curScopeTreeNode.add(tn); // Don't add until we know how to handle it
+
+                    String clazz = RhinoUtil.getPrototypeClazz(
+                            chainedPropertyGetNodes, count);
+                    AstNode rhs = assignment.getRight();
+
+                    // "Foo.bar.bas = { ... };"
+                    if (rhs instanceof ObjectLiteral) {
+                        curScopeTreeNode.add(tn);
+                        tn.setText(clazz + "()");
+
+                        ObjectLiteral value = (ObjectLiteral) rhs;
+                        List<ObjectProperty> properties = value.getElements();
+                        for (ObjectProperty property : properties) {
+                            AstNode propertyKey = property.getLeft();
+                            tn = createTreeNode(propertyKey);
+
+                            String memberName = RhinoUtil
+                                    .getPropertyName(propertyKey);
+                            AstNode propertyValue = property.getRight();
+                            visitPrototypeMember(tn, clazz, memberName,
+                                    propertyValue);
+                        }
+                    }
+                    // Check for "Foo.bar.bas = Object.create(...)"
+                    else if (rhs instanceof FunctionCall) {
+                        FunctionCall rhsFunc = (FunctionCall) rhs;
+                        AstNode target = rhsFunc.getTarget();
+                        if (target instanceof PropertyGet) {
+                            pg = (PropertyGet) target;
+                            if (RhinoUtil.isSimplePropertyGet(pg, "Object",
+                                    "create")) {
+                                curScopeTreeNode.add(tn);
+                                tn.setText(clazz + "()");
+                                List<AstNode> args = rhsFunc.getArguments();
+                                if (args.size() >= 2) {
+                                    AstNode arg2 = args.get(1);
+                                    if (arg2 instanceof ObjectLiteral) {
+                                        ObjectLiteral descriptorObjLit = (ObjectLiteral) arg2;
+                                        visitPropertyDescriptors(
+                                                descriptorObjLit, clazz);
+                                    }
+                                }
+                            } else if (RhinoUtil.isSimplePropertyGet(pg,
+                                    "Object", "freeze")) {
+                                curScopeTreeNode.add(tn);
+                                tn.setText(clazz + "()");
+                                List<AstNode> args = rhsFunc.getArguments();
+                                if (args.size() == 1) {
+                                    AstNode arg = args.get(0);
+                                    if (arg instanceof ObjectLiteral) {
+                                        tn.setText(clazz + "()");
+                                        ObjectLiteral value = (ObjectLiteral) arg;
+                                        visitPrototypeMembers(value, clazz);
+                                    }
+                                }
+                            }
+                        } else {
+                            tn.setText(clazz + "(???)");
+                        }
+                    } else if (rhs instanceof FunctionNode) {
+                        String text = clazz;
+                        curScopeTreeNode.add(tn);
+                        tn.setText(text);
+
+                        curScopeTreeNode = tn;
+                        ((FunctionNode) rhs).getBody().visit(this);
+                        curScopeTreeNode = (JavaScriptTreeNode) curScopeTreeNode
+                                .getParent();
+                    } else {
+                        curScopeTreeNode.add(tn);
+                        tn.setText(clazz + "(???)");
                     }
                 }
             }
@@ -226,21 +346,163 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
         return false;
     }
 
+    /**
+     * It is assumed that <code>descriptorObjectLit</code> has been identified
+     * as an object literal containing property descriptors. Any property
+     * descriptors found as properties of that literal are parsed and tree nodes
+     * are created for them.
+     *
+     * @param descriptorObjLit The object literal containing property
+     *        descriptors (for example, the object parameter to
+     *        <code>Object.create()</code>).
+     * @param clazz The class that the properties belong to.
+     */
+    private void visitPropertyDescriptors(ObjectLiteral descriptorObjLit,
+            String clazz) {
+        List<ObjectProperty> descriptors = descriptorObjLit.getElements();
+        for (ObjectProperty prop : descriptors) {
+            AstNode propertyKey = prop.getLeft();
+            AstNode propertyValue = prop.getRight();
+
+            // Should always be true, as this should be a property descriptor
+            if (propertyValue instanceof ObjectLiteral) {
+                JavaScriptTreeNode tn = createTreeNode(propertyKey);
+
+                String memberName = RhinoUtil.getPropertyName(propertyKey);
+                visitPropertyDescriptor(tn, clazz, memberName,
+                        (ObjectLiteral) propertyValue);
+            }
+        }
+    }
+
+    /**
+     * Parses an AST node that represents a property descriptor.
+     *
+     * @param tn The tree node representing the property defined by the property
+     *        descriptor. This is configured by this method and added to the
+     *        list of nodes to ultimately add to the tree.
+     * @param clazz The class that the property belongs to.
+     * @param memberName The name of the property.
+     * @param propDesc The node representing the property descriptor.
+     */
+    private void visitPropertyDescriptor(JavaScriptTreeNode tn, String clazz,
+            String memberName, ObjectLiteral propDesc) {
+        List<ObjectProperty> propDescProperties = propDesc.getElements();
+        for (ObjectProperty propDescProperty : propDescProperties) {
+            AstNode propertyKey = propDescProperty.getLeft();
+            String propName = RhinoUtil.getPropertyName(propertyKey);
+            if ("value".equals(propName)) {
+                AstNode propertyValue = propDescProperty.getRight();
+                boolean isFunction = propertyValue instanceof FunctionNode;
+                String text = memberName;
+                if (isFunction) {
+                    FunctionNode func = (FunctionNode) propertyValue;
+                    text += RhinoUtil.getFunctionArgsString(func);
+                    tn.setIcon(IconFactory
+                            .getIcon(IconFactory.PUBLIC_METHOD_ICON));
+                    tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
+                } else {
+                    tn.setIcon(IconFactory
+                            .getIcon(IconFactory.PUBLIC_FIELD_ICON));
+                    tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_VARIABLE);
+                }
+
+                tn.setText(text);
+                if (prototypeAdditions == null) {
+                    prototypeAdditions = new HashMap<String, List<JavaScriptTreeNode>>();
+                }
+                List<JavaScriptTreeNode> list = prototypeAdditions.get(clazz);
+                if (list == null) {
+                    list = new ArrayList<JavaScriptTreeNode>();
+                    prototypeAdditions.put(clazz, list);
+                }
+
+                list.add(tn);
+
+                if (isFunction) {
+                    JavaScriptTreeNode prevScopeTreeNode = curScopeTreeNode;
+                    curScopeTreeNode = tn;
+                    FunctionNode func = (FunctionNode) propertyValue;
+                    func.getBody().visit(this);
+                    curScopeTreeNode = prevScopeTreeNode;
+                }
+            }
+        }
+    }
+
+    private void visitPrototypeMembers(ObjectLiteral objLiteral, String clazz) {
+        List<ObjectProperty> properties = objLiteral.getElements();
+        for (ObjectProperty property : properties) {
+            AstNode propertyKey = property.getLeft();
+            JavaScriptTreeNode tn = createTreeNode(propertyKey);
+
+            String memberName = RhinoUtil.getPropertyName(propertyKey);
+            AstNode propertyValue = property.getRight();
+            visitPrototypeMember(tn, clazz, memberName, propertyValue);
+        }
+    }
+
+    /**
+     * Visits a node representing a member being defined on a prototype.
+     *
+     * @param tn The tree node to extend, representing this member.
+     * @param clazz The class that the property belongs to.
+     * @param memberName The name of the member.
+     * @param memberValue The AST node representing the value of the member.
+     */
+    private void visitPrototypeMember(JavaScriptTreeNode tn, String clazz,
+            String memberName, AstNode memberValue) {
+        boolean isFunction = memberValue instanceof FunctionNode;
+        String text = memberName;
+        if (isFunction) {
+            FunctionNode func = (FunctionNode) memberValue;
+            text += RhinoUtil.getFunctionArgsString(func);
+            tn.setIcon(IconFactory.getIcon(IconFactory.PUBLIC_METHOD_ICON));
+            tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
+        } else {
+            tn.setIcon(IconFactory.getIcon(IconFactory.PUBLIC_FIELD_ICON));
+            tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_VARIABLE);
+        }
+
+        tn.setText(text);
+        if (prototypeAdditions == null) {
+            prototypeAdditions = new HashMap<String, List<JavaScriptTreeNode>>();
+        }
+        List<JavaScriptTreeNode> list = prototypeAdditions.get(clazz);
+        if (list == null) {
+            list = new ArrayList<JavaScriptTreeNode>();
+            prototypeAdditions.put(clazz, list);
+        }
+
+        list.add(tn);
+
+        if (isFunction) {
+            JavaScriptTreeNode prevScopeTreeNode = curScopeTreeNode;
+            curScopeTreeNode = tn;
+            FunctionNode func = (FunctionNode) memberValue;
+            func.getBody().visit(this);
+            curScopeTreeNode = prevScopeTreeNode;
+        }
+    }
+
+    /**
+     * Visits a function AST node. This will create a tree node for the
+     * function and also visit the AST nodes in the function's body, to identify
+     * local variables, nested functions, etc...
+     *
+     * @param fn The function node.
+     * @return <code>false</code> always, as this method manually visits the
+     *         function AST node's child nodes.
+     */
     private boolean visitFunction(FunctionNode fn) {
         Name funcName = fn.getFunctionName();
 
         // Happens with certain syntax errors, such as
         // "function function foo() {"
         if (funcName != null) {
-            String text = fn.getName() + getFunctionArgsString(fn);
+            String text = fn.getName() + RhinoUtil.getFunctionArgsString(fn);
 
-            JavaScriptTreeNode tn = new JavaScriptTreeNode(funcName);
-            try {
-                int offs = funcName.getAbsolutePosition();
-                tn.setOffset(textArea.getDocument().createPosition(offs));
-            } catch (BadLocationException ble) { // Never happens
-                ExceptionDialog.hideException(ble);
-            }
+            JavaScriptTreeNode tn = createTreeNode(funcName);
             tn.setText(text);
             tn.setIcon(IconFactory.getIcon(IconFactory.DEFAULT_FUNCTION_ICON));
             tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
@@ -257,6 +519,14 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
         return false;
     }
 
+    /**
+     * Visits a variable AST node. This will create a tree node for the variable
+     * and if it also has an initializer, it is parsed.
+     *
+     * @param varDec The variable declaration AST node.
+     * @return <code>false</code> always, as this method manually visits the
+     *         variable AST node's child nodes.
+     */
     private boolean visitVariableDeclaration(VariableDeclaration varDec) {
         List<VariableInitializer> vars = varDec.getVariables();
         for (VariableInitializer var : vars) {
@@ -276,16 +546,10 @@ class JavaScriptOutlineTreeGenerator implements NodeVisitor {
             }
 
             boolean isFunction = var.getInitializer() instanceof FunctionNode;
-            JavaScriptTreeNode tn = new JavaScriptTreeNode(varNameNode);
-            try {
-                int offs = varNameNode.getAbsolutePosition();
-                tn.setOffset(textArea.getDocument().createPosition(offs));
-            } catch (BadLocationException ble) { // Never happens
-                ExceptionDialog.hideException(ble);
-            }
+            JavaScriptTreeNode tn = createTreeNode(varNameNode);
             if (isFunction) {
                 FunctionNode func = (FunctionNode) var.getInitializer();
-                tn.setText(varName + getFunctionArgsString(func));
+                tn.setText(varName + RhinoUtil.getFunctionArgsString(func));
                 tn.setIcon(IconFactory.getIcon(IconFactory.DEFAULT_CLASS_ICON));
                 tn.setSortPriority(JavaScriptOutlineTree.PRIORITY_FUNCTION);
                 curScopeTreeNode.add(tn);

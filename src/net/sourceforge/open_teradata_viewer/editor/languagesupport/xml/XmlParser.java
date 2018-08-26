@@ -245,7 +245,7 @@ public class XmlParser extends AbstractParser {
             s = new Segment();
         }
 
-        private void doError(SAXParseException e, int level) {
+        private void doError(SAXParseException e, IParserNotice.Level level) {
             if (!xls.getShowSyntaxErrors()) {
                 return;
             }
@@ -270,12 +270,12 @@ public class XmlParser extends AbstractParser {
 
         @Override
         public void error(SAXParseException e) throws SAXException {
-            doError(e, IParserNotice.ERROR);
+            doError(e, IParserNotice.Level.ERROR);
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXException {
-            doError(e, IParserNotice.ERROR);
+            doError(e, IParserNotice.Level.ERROR);
         }
 
         private int getTagStart(int end) {
@@ -362,7 +362,7 @@ public class XmlParser extends AbstractParser {
 
         @Override
         public void warning(SAXParseException e) throws SAXException {
-            doError(e, IParserNotice.WARNING);
+            doError(e, IParserNotice.Level.WARNING);
         }
     }
 }

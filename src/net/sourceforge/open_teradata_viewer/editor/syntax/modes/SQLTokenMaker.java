@@ -3405,7 +3405,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
      */
     private int yycolumn;
 
-    /** 
+    /**
      * zzAtBOL == true <=> the scanner is currently at the beginning of a line.
      */
     private boolean zzAtBOL = true;
@@ -3417,7 +3417,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
 
     /**
      * Ctor.
-     * 
+     *
      * This must be here because JFlex does not generate a no-parameter
      * constructor.
      */
@@ -3473,13 +3473,18 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
     }
 
     /**
-     * Returns the text to place at the beginning and end of a line to "comment"
-     * it in a this programming language.
+     * Overridden to return <code>true</code> so paren matching occurs for SQL.
      *
-     * @return The start and end strings to add to a line to "comment" it out.
+     * @return <code>true</code> always.
      */
     @Override
-    public String[] getLineCommentStartAndEnd() {
+    public boolean getCurlyBracesDenoteCodeBlocks(int languageIndex) {
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String[] getLineCommentStartAndEnd(int languageIndex) {
         return new String[] { "--", null };
     }
 
@@ -3577,7 +3582,7 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed   the packed character translation table
@@ -3623,11 +3628,11 @@ public class SQLTokenMaker extends AbstractJFlexTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos), but faster.
      *
-     * @param pos the position of the character to fetch. 
+     * @param pos the position of the character to fetch.
      *            A value from 0 to yylength()-1.
      *
      * @return the character at position pos.

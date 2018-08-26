@@ -763,7 +763,7 @@ public class AutoCompletion {
 
         final List<ICompletion> completions = provider
                 .getCompletions(textComponent);
-        int count = completions.size();
+        int count = completions == null ? 0 : completions.size();
 
         if (count > 1 || (count == 1 && (isPopupVisible() || textLen == 0))
                 || (count == 1 && !getAutoCompleteSingleChoices())) {

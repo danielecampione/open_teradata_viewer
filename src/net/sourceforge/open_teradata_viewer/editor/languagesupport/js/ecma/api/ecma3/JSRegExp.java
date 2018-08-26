@@ -22,24 +22,24 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object RegExp.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-262 3rd. Edition.
- * 
+ *
  */
 public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
     * Object RegExp(pattern, attributes).
-    * 
+    *
     * @super Object
     * @constructor
     * @memberOf RegExp
     * @param pattern A string that specifies the pattern of the regular
     *        expression.
-    * @param <i>attributes</i> An optional string containing and of the "g", "i"
-    *        an "m" attributes that specify global, case-insensitive and
-    *        multiline matches respectively. 
+    * @param attributes An optional string containing and of the "g", "i" an "m"
+    *        attributes that specify global, case-insensitive and multiline
+    *        matches respectively.
     * @since Standard ECMA-262 3rd. Edition.
     * @since Level 2 Document Object Model Core Definition.
     */
@@ -48,7 +48,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
     * <b>property prototype</b>
-    * 
+    *
     * @type RegExp
     * @memberOf RegExp
     * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSRegExp
@@ -59,7 +59,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
     * <b>property constructor</b>
-    * 
+    *
     * @type Function
     * @memberOf RegExp
     * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSFunction
@@ -70,7 +70,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
      * <b>property source</b>
-     * 
+     *
      * @type String
      * @memberOf RegExp
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSString
@@ -81,7 +81,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
      * <b>property global</b>
-     * 
+     *
      * @type Boolean
      * @memberOf RegExp
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSBoolean
@@ -92,7 +92,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
      * <b>property ignoreCase</b>
-     * 
+     *
      * @type Boolean
      * @memberOf RegExp
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSBoolean
@@ -103,7 +103,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
      * <b>property multiline</b>
-     * 
+     *
      * @type Boolean
      * @memberOf RegExp
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSBoolean
@@ -114,7 +114,7 @@ public abstract class JSRegExp implements IJSRegExpFunctions {
 
     /**
      * <b>property lastIndex</b>
-     * 
+     *
      * @type Number
      * @memberOf RegExp
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSNumber

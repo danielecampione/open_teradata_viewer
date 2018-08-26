@@ -51,7 +51,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * Renders line numbers in the gutter.
  *
  * @author D. Campione
- * 
+ *
  */
 public class LineNumberList extends AbstractGutterComponent implements
         MouseInputListener {
@@ -129,18 +129,6 @@ public class LineNumberList extends AbstractGutterComponent implements
         } else {
             setForeground(Color.GRAY);
         }
-
-        // Initialize currentLine; otherwise, the current line won't start off
-        // as highlighted
-        currentLine = 0;
-        setLineNumberingStartIndex(1);
-
-        visibleRect = new Rectangle(); // Must be initialized
-
-        addMouseListener(this);
-        addMouseMotionListener(this);
-
-        aaHints = SyntaxUtilities.getDesktopAntiAliasHints();
     }
 
     /**
@@ -216,6 +204,23 @@ public class LineNumberList extends AbstractGutterComponent implements
             lastVisibleLine = newLastLine;
             repaint();
         }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        // Initialize currentLine; otherwise, the current line won't start off
+        // as highlighted
+        currentLine = 0;
+        setLineNumberingStartIndex(1);
+
+        visibleRect = new Rectangle(); // Must be initialized
+
+        addMouseListener(this);
+        addMouseMotionListener(this);
+
+        aaHints = SyntaxUtilities.getDesktopAntiAliasHints();
     }
 
     /** {@inheritDoc} */
@@ -341,16 +346,18 @@ public class LineNumberList extends AbstractGutterComponent implements
                 int width = metrics.stringWidth(number);
                 g.drawString(number, rhs - width, y);
                 y += cellHeight;
-                Fold fold = fm.getFoldForLine(line - 1);
-                // Skip to next line to paint, taking extra care for lines with
-                // block ends and begins together, e.g. "} else {"
-                while (fold != null && fold.isCollapsed()) {
-                    int hiddenLineCount = fold.getLineCount();
-                    if (hiddenLineCount == 0) {
-                        break;
+                if (fm != null) {
+                    Fold fold = fm.getFoldForLine(line - 1);
+                    // Skip to next line to paint, taking extra care for lines
+                    // with block ends and begins together, e.g. "} else {"
+                    while (fold != null && fold.isCollapsed()) {
+                        int hiddenLineCount = fold.getLineCount();
+                        if (hiddenLineCount == 0) {
+                            break;
+                        }
+                        line += hiddenLineCount;
+                        fold = fm.getFoldForLine(line - 1);
                     }
-                    line += hiddenLineCount;
-                    fold = fm.getFoldForLine(line - 1);
                 }
                 line++;
             }
@@ -362,12 +369,14 @@ public class LineNumberList extends AbstractGutterComponent implements
                         + getLineNumberingStartIndex() - 1);
                 g.drawString(number, RHS_BORDER_WIDTH, y);
                 y += cellHeight;
-                Fold fold = fm.getFoldForLine(line - 1);
-                // Skip to next line to paint, taking extra care for lines with
-                // block ends and begins together, e.g. "} else {"
-                while (fold != null && fold.isCollapsed()) {
-                    line += fold.getLineCount();
-                    fold = fm.getFoldForLine(line);
+                if (fm != null) {
+                    Fold fold = fm.getFoldForLine(line - 1);
+                    // Skip to next line to paint, taking extra care for lines
+                    // with block ends and begins together, e.g. "} else {"
+                    while (fold != null && fold.isCollapsed()) {
+                        line += fold.getLineCount();
+                        fold = fm.getFoldForLine(line);
+                    }
                 }
                 line++;
             }
@@ -421,7 +430,10 @@ public class LineNumberList extends AbstractGutterComponent implements
         int topPosition = textArea.viewToModel(new Point(visibleRect.x,
                 visibleRect.y));
         int topLine = root.getElementIndex(topPosition);
-        FoldManager fm = ((SyntaxTextArea) textArea).getFoldManager();
+        FoldManager fm = null;
+        if (textArea instanceof SyntaxTextArea) {
+            fm = ((SyntaxTextArea) textArea).getFoldManager();
+        }
 
         // Compute the y at which to begin painting text, taking into account
         // that 1 logical line => at least 1 physical line, so it may be that
@@ -467,9 +479,11 @@ public class LineNumberList extends AbstractGutterComponent implements
 
             // Update topLine (we're actually using it for our "current line"
             // variable now)
-            Fold fold = fm.getFoldForLine(topLine);
-            if (fold != null && fold.isCollapsed()) {
-                topLine += fold.getCollapsedLineCount();
+            if (fm != null) {
+                Fold fold = fm.getFoldForLine(topLine);
+                if (fold != null && fold.isCollapsed()) {
+                    topLine += fold.getCollapsedLineCount();
+                }
             }
             topLine++;
             if (topLine >= lineCount) {
@@ -599,9 +613,9 @@ public class LineNumberList extends AbstractGutterComponent implements
 
     /**
      * Listens for events in the text area we're interested in.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener implements CaretListener, PropertyChangeListener {
 

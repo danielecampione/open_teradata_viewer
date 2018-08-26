@@ -30,7 +30,7 @@ import javax.swing.text.View;
  * A component that can be displayed in a {@link Gutter}.
  *
  * @author D. Campione
- * 
+ *
  */
 abstract class AbstractGutterComponent extends JPanel {
 
@@ -48,6 +48,7 @@ abstract class AbstractGutterComponent extends JPanel {
      * @param textArea The text area.
      */
     public AbstractGutterComponent(TextArea textArea) {
+        init(); // Called before setTextArea()
         setTextArea(textArea);
     }
 
@@ -90,6 +91,14 @@ abstract class AbstractGutterComponent extends JPanel {
      * @param e The document event.
      */
     abstract void handleDocumentEvent(DocumentEvent e);
+
+    /**
+     * Called by the constructor before the text area is set. This is a hook to
+     * allow subclasses to do any needed initialization. The default
+     * implementation does nothing.
+     */
+    protected void init() {
+    }
 
     /**
      * Called when the line heights of the text area change. This is usually the

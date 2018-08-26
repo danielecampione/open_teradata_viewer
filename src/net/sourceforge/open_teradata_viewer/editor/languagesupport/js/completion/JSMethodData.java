@@ -35,8 +35,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.M
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.SourceCompletionProvider;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -281,7 +281,6 @@ public class JSMethodData {
         return info.isStatic();
     }
 
-    /** {@inheritDoc} */
     public String getEnclosingClassName(boolean fullyQualified) {
         return info.getClassFile().getClassName(fullyQualified);
     }

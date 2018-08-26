@@ -24,18 +24,18 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object XMLList.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-357 2nd. Edition.
- * 
+ *
  */
 public abstract class E4XXMLList implements IE4XXMLListFunctions {
 
     /**
      * Object E4XXMLList(xml).
-     * 
+     *
      * @constructor
-     * @param xml XML definition.
+     * @param xml The XML definition.
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
      * @since Level 3 Document Object Model Core Definition.
@@ -45,7 +45,7 @@ public abstract class E4XXMLList implements IE4XXMLListFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type XMLList
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -56,7 +56,7 @@ public abstract class E4XXMLList implements IE4XXMLListFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList

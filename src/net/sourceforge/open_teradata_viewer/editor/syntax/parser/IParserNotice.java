@@ -36,15 +36,6 @@ import java.awt.Color;
  */
 public interface IParserNotice extends Comparable<IParserNotice> {
 
-    /** Indicates an info notice. */
-    public static final int INFO = 2;
-
-    /** Indicates a warning notice. */
-    public static final int WARNING = 1;
-
-    /** Indicates an error notice. */
-    public static final int ERROR = 0;
-
     /**
      * Returns whether this parser notice contains the specified location in the
      * document.
@@ -76,9 +67,9 @@ public interface IParserNotice extends Comparable<IParserNotice> {
     /**
      * Returns the level of this notice.
      *
-     * @return One of {@link #INFO}, {@link #WARNING} OR {@link #ERROR}.
+     * @return A value from the {@link Level} enumeration.
      */
-    public int getLevel();
+    public Level getLevel();
 
     /**
      * Returns the line number the notice is about.
@@ -128,4 +119,48 @@ public interface IParserNotice extends Comparable<IParserNotice> {
      *         returns the same text as {@link #getMessage()}.
      */
     public String getToolTipText();
+
+    /**
+     * Denotes the severity of a parser notice.
+     * 
+     * @author D. Campione
+     * 
+     */
+    public static enum Level {
+
+        /** Indicates an informational notice. */
+        INFO(2),
+
+        /** Indicates a warning notice. */
+        WARNING(1),
+
+        /** Indicates an error notice. */
+        ERROR(0);
+
+        private int value;
+
+        private Level(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Returns the value of this notice level, as an integer.
+         *
+         * @return A numeric value for this notice level.
+         */
+        public int getNumericValue() {
+            return value;
+        }
+
+        /**
+         * Returns whether this level is as sever as, or worse than, another
+         * level.
+         *
+         * @param other The other level.
+         * @return Whether this level is equal to or more severe.
+         */
+        public boolean isEqualToOrWorseThan(Level other) {
+            return value <= other.getNumericValue();
+        }
+    }
 }

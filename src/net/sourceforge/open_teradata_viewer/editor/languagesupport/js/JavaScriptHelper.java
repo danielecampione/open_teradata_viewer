@@ -42,8 +42,8 @@ import sun.org.mozilla.javascript.internal.ast.NewExpression;
 import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -55,7 +55,7 @@ public class JavaScriptHelper {
     /**
      * Test whether the start of the variable is the same name as the variable
      * being initialised. This is not possible.
-     * 
+     *
      * @param target Name of variable being created.
      * @param initialiser Name of initialiser.
      * @return true if name is different.
@@ -78,7 +78,7 @@ public class JavaScriptHelper {
     /**
      * Parse Text with JavaScript Parser and return AstNode from the expression
      * etc..
-     * 
+     *
      * @param text Text to parse.
      * @return Expression statement text from source.
      */
@@ -134,12 +134,12 @@ public class JavaScriptHelper {
 
     /**
      * Iterate back up through parent nodes and check whether inside a function.
-     * 
+     *
      * If the node is a function, then the Parsed parent node structure is:
      * FunctionCall
      *   -> PropertyGet
      *    -> Name
-     * 
+     *
      * Anything other structure should be rejected.
      */
     public static FunctionCall findFunctionCallFromNode(AstNode node) {
@@ -158,7 +158,7 @@ public class JavaScriptHelper {
 
     /**
      * Convert AstNode to TypeDeclaration.
-     * 
+     *
      * @param typeNode AstNode to convert.
      * @param provider SourceProvider.
      * @return TypeDeclaration if node resolves to supported type, e.g Number,
@@ -168,6 +168,14 @@ public class JavaScriptHelper {
             AstNode typeNode, SourceCompletionProvider provider) {
         if (typeNode != null) {
             switch (typeNode.getType()) {
+            case Token.EXPR_RESULT:
+                AstNode expr = ((sun.org.mozilla.javascript.internal.ast.ExpressionStatement) typeNode)
+                        .getExpression();
+                if (expr.getType() == Token.NAME) {
+                    return provider.resolveTypeDeclation(((Name) expr)
+                            .getIdentifier());
+                }
+                break;
             case Token.CATCH:
                 return getTypeDeclaration(TypeDeclarations.ECMA_ERROR, provider);
             case Token.NAME:
@@ -271,7 +279,7 @@ public class JavaScriptHelper {
     /**
      * Find the array type from ArrayLiteral. Iterates through elements and
      * checks all the types are the same.
-     * 
+     *
      * @return TypeDeclaration if all elements are of the same type else
      *         TypeDeclarationFactory.getDefaultTypeDeclaration();.
      */
@@ -341,9 +349,9 @@ public class JavaScriptHelper {
      * string number literal Only works by determining the presence of
      * StringLiterals and NumberLiterals. StringLiteral will override type to
      * evaluate to String.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class InfixVisitor implements NodeVisitor {
 
@@ -466,7 +474,7 @@ public class JavaScriptHelper {
     /**
      * Returns the node name from 'Token.NEW' AstNode e.g new Object -> Object
      * new Date -> Date etc..
-     * 
+     *
      * @param node NewExpression node.
      * @return Extracts the Name identifier from NewExpression.
      */
@@ -526,7 +534,7 @@ public class JavaScriptHelper {
      * Do not need to trim off if inside either () or [].
      * e.g
      * 1, "".charAt(position).indexOf(2, "")
-     * 
+     *
      * String should be trimmed at the 1, not the 2.
      */
     public static String trimFromLastParam(String text) {
@@ -560,15 +568,15 @@ public class JavaScriptHelper {
             // Not trimmed yet, so find last index and trim there
             trim = text.lastIndexOf(',') + 1;
         }
-        // All else fails, trim 
+        // All else fails, trim
         String parseText = text.substring(trim, text.length());
 
         return parseText.trim();
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -611,8 +619,8 @@ public class JavaScriptHelper {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

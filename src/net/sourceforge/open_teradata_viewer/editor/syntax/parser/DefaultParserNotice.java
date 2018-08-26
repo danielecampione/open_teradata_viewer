@@ -31,7 +31,7 @@ import java.awt.Color;
 public class DefaultParserNotice implements IParserNotice {
 
     private IParser parser;
-    private int level;
+    private Level level;
     private int line;
     private int offset;
     private int length;
@@ -74,7 +74,7 @@ public class DefaultParserNotice implements IParserNotice {
         this.line = line;
         this.offset = offset;
         this.length = length;
-        setLevel(ERROR);
+        setLevel(Level.ERROR);
         setShowInEditor(true);
     }
 
@@ -89,7 +89,7 @@ public class DefaultParserNotice implements IParserNotice {
     public int compareTo(IParserNotice other) {
         int diff = -1;
         if (other != null) {
-            diff = level - other.getLevel();
+            diff = level.getNumericValue() - other.getLevel().getNumericValue();
             if (diff == 0) {
                 diff = line - other.getLine();
                 if (diff == 0) {
@@ -125,12 +125,13 @@ public class DefaultParserNotice implements IParserNotice {
     public Color getColor() {
         Color c = color; // User-defined
         if (c == null) {
-            c = DEFAULT_COLORS[getLevel()];
+            c = DEFAULT_COLORS[getLevel().getNumericValue()];
         }
         return c;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getKnowsOffsetAndLength() {
         return offset >= 0 && length >= 0;
     }
@@ -143,7 +144,7 @@ public class DefaultParserNotice implements IParserNotice {
 
     /** {@inheritDoc} */
     @Override
-    public int getLevel() {
+    public Level getLevel() {
         return level;
     }
 
@@ -209,11 +210,9 @@ public class DefaultParserNotice implements IParserNotice {
      * @param level The new level.
      * @see #getLevel()
      */
-    public void setLevel(int level) {
-        if (level > INFO) {
-            level = INFO;
-        } else if (level < ERROR) {
-            level = ERROR;
+    public void setLevel(Level level) {
+        if (level == null) {
+            level = Level.ERROR;
         }
         this.level = level;
     }

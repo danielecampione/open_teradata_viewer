@@ -109,7 +109,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * The main frame.
- * 
+ *
  * @author D. Campione
  *
  */
@@ -208,12 +208,12 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         // The application obtains the loaded EntryDescriptors
         Collection<EntryDescriptor> pluginsCollection = pluginFactory
                 .getAllEntryDescriptor();
-        if (pluginsCollection == null) { // No JAR file in the plugins path 
+        if (pluginsCollection == null) { // No JAR file in the plugins path
             return;
         }
         Iterator<EntryDescriptor> pluginsIterator = pluginsCollection
                 .iterator();
-        // Searching for plugins.. 
+        // Searching for plugins..
         while (pluginsIterator.hasNext()) {
             EntryDescriptor entryDescriptor = (EntryDescriptor) pluginsIterator
                     .next();
@@ -720,6 +720,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         SearchResult result = null;
 
         switch (type) {
+        default: // Prevent FindBugs warning later
         case MARK_ALL:
             result = SearchEngine.markAll(textArea, context);
             break;
@@ -803,7 +804,9 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     private SpellingParser createSpellingParser() {
         File zip = new File("english_dic.zip");
         try {
-            return SpellingParser.createEnglishSpellingParser(zip, true);
+            SpellingParser spellingParser = SpellingParser
+                    .createEnglishSpellingParser(zip, true);
+            return spellingParser;
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }
@@ -1157,7 +1160,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
      * displayed via <code>SwingUtilities#invokeLater()</code>.
      *
      * @author D. Campione
-     * 
+     *
      */
     private class StartupRunnable implements Runnable {
 
@@ -1291,8 +1294,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

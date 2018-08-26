@@ -65,6 +65,7 @@ import sun.org.mozilla.javascript.internal.ast.NodeVisitor;
  * this library.
  * 
  * @author D. Campione
+ * @see JavaScriptOutlineTree
  * 
  */
 public class JavaScriptLanguageSupport extends AbstractLanguageSupport {

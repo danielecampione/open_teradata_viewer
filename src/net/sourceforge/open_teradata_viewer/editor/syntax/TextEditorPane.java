@@ -51,6 +51,12 @@ import net.sourceforge.open_teradata_viewer.editor.TextAreaEditorKit;
  * </ul>
  *
  * Loading and saving is also built into the editor.<p>
+ * 
+ * When saving UTF-8 files, whether or not a BOM is written is controlled by the
+ * {@link UnicodeWriter} class.
+ * Use {@link UnicodeWriter#setWriteUtf8BOM(boolean)} to toggle writing BOMs for
+ * UTF-8 files.<p>
+ *
  * Both local and remote files (e.g. ftp) are supported. See the {@link
  * FileLocation} class for more information.
  *
@@ -221,7 +227,7 @@ public class TextEditorPane extends SyntaxTextArea implements DocumentListener {
 
     /** @return The file name of this document. */
     public String getFileName() {
-        return loc.getFileName();
+        return loc == null ? null : loc.getFileName();
     }
 
     /**

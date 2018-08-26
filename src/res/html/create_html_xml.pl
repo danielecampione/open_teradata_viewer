@@ -50,6 +50,7 @@ my $line = <INFILE>;
 $line = <INFILE>;
 $line = <INFILE>;
 $line = <INFILE>;
+$line = <INFILE>;
 while (chomp($line = <INFILE>)) {
 	my ($tag, $desc, $in4, $in5) = split(/\t+/, $line);
 	$tag =~ s!^\s+!!g;

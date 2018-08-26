@@ -23,8 +23,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSString;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -33,7 +33,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toDateString()</b> - Return the date portion of a Date as a
      * string.
-     * 
+     *
      * @memberOf Date
      * @returns A human-readable representation of the date portion of
      *          <b><i>date</i></b>.
@@ -46,7 +46,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toTimeString()</b> - Return the time portion of Date as a
      * string.
-     * 
+     *
      * @memberOf Date
      * @returns A human-readable representation of the time portion of
      *          <b><i>date</i></b>.
@@ -59,7 +59,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toLocaleString()</b> - Convert a Date to a locally formatted
      * string.
-     * 
+     *
      * @memberOf Date
      * @returns A string representation of the date and time specified by
      *          <b><i>date</i></b> in local time.
@@ -73,7 +73,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toLocaleDateString()</b> - Return the date portion of a Date
      * as a locally formatted string.
-     * 
+     *
      * @memberOf Date
      * @returns A string representation of the date portion specified by
      *          <b><i>date</i></b> in local time.
@@ -86,7 +86,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toLocaleTimeString()</b> - Return the time portion of a date
      * as a locally formatted string.
-     * 
+     *
      * @memberOf Date
      * @returns A string representation of the time portion specified by
      *          <b><i>date</i></b> in local time.
@@ -98,7 +98,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function valueOf()</b> - Convert a Date to millisecond representation.
-     * 
+     *
      * @memberOf Date
      * @returns The millisecond representation of <b><i>date</i></b>.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
@@ -110,7 +110,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getFullYear()</b> - Return the year field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The year that results when <b><i>date</i></b> is expressed in
      *          local time.
@@ -122,11 +122,11 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getTime()</b> - Return a Date in milliseconds.
-     * 
+     *
      * @memberOf Date
      * @returns The millisecond representation of a specified Date object
      *          <b><i>date</i></b>, between midnight 1/1/1970 and date and time
-     *          specified by <b><i>date</i></b>. 
+     *          specified by <b><i>date</i></b>.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -136,7 +136,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCFullYear()</b> - Return the year field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The year that results when <b><i>date</i></b> is expressed in
      *          local time in universal time.
@@ -148,7 +148,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getMonth()</b> - Return the month field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The month that results when <b><i>date</i></b> is expressed in
      *          local time.
@@ -161,7 +161,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCMonth()</b> - Return the month field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The month that results when <b><i>date</i></b> is expressed in
      *          universal time.
@@ -173,7 +173,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getDate()</b> - Return the day-of-month field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The day of the month that results when <b><i>date</i></b> is
      *          expressed in local time.
@@ -186,7 +186,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCDate()</b> - Return the day-of-month field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The day of the month that results when <b><i>date</i></b> is
      *          expressed in universal time.
@@ -198,7 +198,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getDay()</b> - Return the day-of-week field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The day of the week that results when <b><i>date</i></b> is
      *          expressed in local time. 0 == Sunday -> 6 Saturday.
@@ -211,7 +211,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCDay()</b> - Return the day-of-week field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @type Number
      * @returns The day of the week that results when <b><i>date</i></b> is
@@ -219,13 +219,13 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
-     * 
+     *
      */
     public JSNumber getUTCDay();
 
     /**
      * <b>function getHours()</b> - Return the hour field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The hour field that results when <b><i>date</i></b> is expressed
      *          in local time.
@@ -238,7 +238,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCHours()</b> - Return the hour field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The hour field that results when <b><i>date</i></b> is expressed
      *          in universal time.
@@ -250,7 +250,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getMinutes()</b> - Return the minute field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The minute field that results when <b><i>date</i></b> is
      *          expressed in local time.
@@ -263,7 +263,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCMinutes()</b> - Return the minute field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The minute field that results when <b><i>date</i></b> is
      *          expressed in universal time.
@@ -275,7 +275,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getSeconds()</b> - Return the second field of a Date.
-     * 
+     *
      * @memberOf Date
      * @returns The second field that results when <b><i>date</i></b> is
      *          expressed in local time.
@@ -288,7 +288,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCSeconds()</b> - Return the second field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The second field that results when <b><i>date</i></b> is
      *          expressed in universal time.
@@ -301,7 +301,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getMilliseconds()</b> - Return the millisecond field of a
      * Date.
-     * 
+     *
      * @memberOf Date
      * @returns The millisecond field that results when <b><i>date</i></b> is
      *          expressed in local time.
@@ -314,7 +314,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function getUTCMilliseconds()</b> - Return the millisecond field of a
      * Date (universal time).
-     * 
+     *
      * @memberOf Date
      * @returns The millisecond field that results when <b><i>date</i></b> is
      *          expressed in universal time.
@@ -326,7 +326,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function getTimezoneOffset()</b> - Determine the offset from GMT.
-     * 
+     *
      * @memberOf Date
      * @returns The difference in minutes, between GMT and local time.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
@@ -337,7 +337,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function setTime(value)</b> - Set a Date in milliseconds.
-     * 
+     *
      * @memberOf Date
      * @param value The number of milliseconds between desired date and time and
      *        midnight GMT on 1/1/1970.
@@ -351,7 +351,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setMilliseconds(value)</b> - Set the milliseconds field of a
      * Date.
-     * 
+     *
      * @memberOf Date
      * @param value The milliseconds field expressed in local time, to be set in
      *        <b></i>date</i></b>.
@@ -365,7 +365,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCMilliseconds(ms)</b> - Set the milliseconds field of a
      * Date (universal time).
-     * 
+     *
      * @memberOf JSDate
      * @param ms The millisecond field expressed in universal time, to be set in
      *        <b></i>date</i></b>.
@@ -379,12 +379,12 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setSeconds(sec,ms)</b> - Set the seconds and milliseconds
      * field of a Date.
-     * 
+     *
      * @memberOf Date
      * @param sec The second field expressed in local time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in local time, to
-     *        be set in <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in local time, to be set
+     *        in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -395,12 +395,12 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCSeconds(sec,ms)</b> - Set the seconds and milliseconds
      * field of a Date (universal time).
-     * 
+     *
      * @memberOf Date
      * @param sec The second field expressed in universal time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in universal time,
-     *        to be set in <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in universal time, to be
+     *        set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -411,14 +411,14 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setMinutes(min,sec,ms)</b> - Set the minutes, seconds and
      * milliseconds field of a Date.
-     * 
+     *
      * @memberOf Date
      * @param min The minute field expressed in local time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>sec</i> Optional second field expressed in local time, to be
-     *        set in <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in local time, to
-     *        be set in <b></i>date</i></b>.
+     * @param sec Optional second field expressed in local time, to be set in
+     *        <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in local time, to be set
+     *        in <b></i>date</i></b>.
      * @returns {Number} The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -429,14 +429,14 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCMinute(min,sec,ms)</b> - Set the minutes, seconds and
      * milliseconds field of a Date (universal time).
-     * 
+     *
      * @memberOf Date
      * @param min The minute field expressed in universal time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>sec</i> Optional second field expressed in universal time, to
-     *        be set in <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in universal time,
-     *        to be set in <b></i>date</i></b>.
+     * @param sec Optional second field expressed in universal time, to be set
+     *        in <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in universal time, to be
+     *        set in <b></i>date</i></b>.
      * @returns {Number} The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -447,16 +447,16 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setHours(hour,min,sec,ms)</b> - Set the hours, minutes,
      * seconds and milliseconds field of a Date.
-     * 
+     *
      * @memberOf Date
      * @param hour The hour field expressed in local time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>min</i> Optional minute field expressed in local time, to be
-     *        set in <b></i>date</i></b>.
-     * @param <i>sec</i> Optional second field expressed in local time, to be
-     *        set in <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in local time, to
-     *        be set in <b></i>date</i></b>.
+     * @param min Optional minute field expressed in local time, to be set in
+     *        <b></i>date</i></b>.
+     * @param sec Optional second field expressed in local time, to be set in
+     *        <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in local time, to be set
+     *        in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -467,17 +467,17 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function setUTCHours(hour,min,sec,ms)</b> - Set the hours, minutes,
-     * seconds and milliseconds field of a Date (universal time). 
-     * 
+     * seconds and milliseconds field of a Date (universal time).
+     *
      * @memberOf Date
      * @param hour The hour field expressed in universal time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>min</i> Optional minute field expressed in universal time, to
-     *        be set in <b></i>date</i></b>.
-     * @param <i>sec</i> Optional second field expressed in universal time, to
-     *        be set in <b></i>date</i></b>.
-     * @param <i>ms</i> Optional millisecond field expressed in universal time,
-     *        to be set in <b></i>date</i></b>.
+     * @param min Optional minute field expressed in universal time, to be set
+     *        in <b></i>date</i></b>.
+     * @param sec Optional second field expressed in universal time, to be set
+     *        in <b></i>date</i></b>.
+     * @param ms Optional millisecond field expressed in universal time, to be
+     *        set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -488,7 +488,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function setDate(date)</b> - Set the day of month field of a Date.
-     * 
+     *
      * @memberOf Date
      * @param date The day of the month field expressed in local time, to be set
      *        in <b></i>date</i></b>.
@@ -502,7 +502,7 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCDate(date)</b> - Set the day of month field of a Date
      * (universal time).
-     * 
+     *
      * @memberOf Date
      * @param date The day of the month field expressed in universal time, to be
      *        set in <b></i>date</i></b>.
@@ -516,13 +516,13 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setMonth(month,date)</b> - Set the month, day field of a
      * Date.
-     * 
+     *
      * @memberOf Date
      * @param month An integer between 0 (January) and 11 (December)
      *        representing the month field expressed in local time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>date</i> Optional day of the month field expressed in local
-     *        time, to be set in <b></i>date</i></b>.
+     * @param date Optional day of the month field expressed in local time, to
+     *        be set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -533,13 +533,13 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCMonth(month,date)</b> - Set the month, day field of a
      * Date (Universal time).
-     * 
+     *
      * @memberOf Date
      * @param month An integer between 0 (January) and 11 (December)
      *        representing the month field expressed in universal time, to be
      *        set in <b></i>date</i></b>.
-     * @param <i>date</i> Optional day of the month field expressed in universal
-     *        time, to be set in <b></i>date</i></b>.
+     * @param date Optional day of the month field expressed in universal time,
+     *        to be set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -550,15 +550,15 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setFullYear(year,month,date)</b> - Set the year, month, day
      * field of a Date.
-     * 
+     *
      * @memberOf Date
      * @param year The year field expressed in local time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>month</i> Optional integer between 0 (January) and 11
-     *        (December) representing the month field expressed in local time,
-     *        to be set in <b></i>date</i></b>.
-     * @param <i>date</i> Optional day of the month field expressed in local
-     *        time, to be set in <b></i>date</i></b>.
+     * @param month Optional integer between 0 (January) and 11 (December)
+     *        representing the month field expressed in local time, to be set in
+     *        <b></i>date</i></b>.
+     * @param date Optional day of the month field expressed in local time, to
+     *        be set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -569,15 +569,15 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function setUTCFullYear(year,month,date)</b> - Set the year, month,
      * day field of a Date (Universal time).
-     * 
+     *
      * @memberOf Date
      * @param year The year field expressed in universal time, to be set in
      *        <b></i>date</i></b>.
-     * @param <i>month</i> Optional integer between 0 (January) and 11
-     *        (December) representing the month field expressed in universal
-     *        time, to be set in <b></i>date</i></b>.
-     * @param <i>date</i> Optional day of the month field expressed in universal
-     *        time, to be set in <b></i>date</i></b>.
+     * @param month Optional integer between 0 (January) and 11 (December)
+     *        representing the month field expressed in universal time, to be
+     *        set in <b></i>date</i></b>.
+     * @param date Optional day of the month field expressed in universal time,
+     *        to be set in <b></i>date</i></b>.
      * @returns The millisecond representation of the adjusted date.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
@@ -588,10 +588,10 @@ public interface IJSDateFunctions extends IJSObjectFunctions {
     /**
      * <b>function toUTCString()</b> - Convert Date to a string (universal
      * time).
-     * 
+     *
      * @memberOf Date
      * @returns A human-readable string representation, expressed in universal
-     *          time, of <b><i>date</i></b>. 
+     *          time, of <b><i>date</i></b>.
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.

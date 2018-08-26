@@ -55,6 +55,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * Language support for Java.
  *
  * @author D. Campione
+ * @see JavaOutlineTree
  * 
  */
 public class JavaLanguageSupport extends AbstractLanguageSupport {

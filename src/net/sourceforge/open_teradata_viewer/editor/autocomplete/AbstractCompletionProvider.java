@@ -226,10 +226,11 @@ public abstract class AbstractCompletionProvider extends CompletionProviderBase 
 
         @Override
         public int compare(Object o1, Object o2) {
-            ICompletion c = (ICompletion) o1;
-            // o2.toString() needed to help compile with 1.6+
-            return String.CASE_INSENSITIVE_ORDER.compare(c.getInputText(),
-                    o2.toString());
+            String s1 = o1 instanceof String ? (String) o1 : ((ICompletion) o1)
+                    .getInputText();
+            String s2 = o2 instanceof String ? (String) o2 : ((ICompletion) o2)
+                    .getInputText();
+            return String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
         }
     }
 }

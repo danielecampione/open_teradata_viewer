@@ -48,7 +48,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * This class makes use of the "classic" Java IO library (java.io).
  *
  * @author D. Campione
- * 
+ *
  */
 public class SpellDictionaryDisk extends SpellDictionaryASpell {
 
@@ -68,19 +68,19 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
 
     protected boolean ready;
 
-    /* 
+    /*
      * Used at time of creation of index to speed up determining the number of
      * words per index entry.
      */
     private List indexCodeCache = null;
 
     /**
-     * Construct a spell dictionary on disk. 
+     * Construct a spell dictionary on disk.
      * The spell dictionary is created from words list(s) contained in file(s).
      * A words list file is a file with one word per line. Words list files are
-     * located in a <code>base/words</code> dictionary where <code>base</code> 
+     * located in a <code>base/words</code> dictionary where <code>base</code>
      * is the path to <code>words</code> dictionary. The on disk spell
-     * dictionary is created in <code>base/db</code> dictionary and contains 
+     * dictionary is created in <code>base/db</code> dictionary and contains
      * files:
      * <ul>
      * <li><code>contents</code> list the words files used for spelling.</li>
@@ -98,12 +98,12 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
      *
      * The spellchecking process is then worked upon the <code>words.db</code>
      * and <code>words.idx</code> files.<p/>
-     * 
+     *
      * NOTE: Do *not* create two instances of this class pointing to the same
      * <code>base</code> unless you are sure that a new dictionary does not have
      * to be created. In the future, some sort of external locking mechanism may
      * be created that handles this scenario gracefully.
-     * 
+     *
      * @param base The base directory in which <code>SpellDictionaryDisk</code>
      *        can expect to find its necessary files.
      * @param phonetic The phonetic file used by the spellchecker.
@@ -183,7 +183,7 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
     /**
      * Adds another word to the dictionary. <em>This method is not yet
      * implemented for this class</em>.
-     * 
+     *
      * @param word The word to add.
      */
     @Override
@@ -194,7 +194,7 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
 
     /**
      * Returns a list of words that have the same phonetic code.
-     * 
+     *
      * @param code The phonetic code common to the list of words.
      * @return A list of words having the same phonetic code.
      */
@@ -230,7 +230,7 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
     /**
      * Indicates if the initial preparation or loading of the on disk dictionary
      * is complete.
-     * 
+     *
      * @return the indication that the dictionary initial setup is done.
      */
     public boolean isReady() {
@@ -239,7 +239,7 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
 
     private boolean newDictionaryFiles() throws FileNotFoundException,
             IOException {
-        /* 
+        /*
          * Load in contents file, which indicates the files and sizes of the
          * last db build.
          */
@@ -500,8 +500,8 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -553,8 +553,8 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -575,7 +575,10 @@ public class SpellDictionaryDisk extends SpellDictionaryASpell {
             }
             if (o instanceof FileSize) {
                 FileSize fs = (FileSize) o;
-                return size == fs.size && fs.equals(fs.filename);
+                // Line below previously was buggy and would never return true
+                // (comparing a FileSize to a String)
+                return size == fs.size && this.filename != null
+                        && this.filename.equals(fs.filename);
             }
             return false;
         }

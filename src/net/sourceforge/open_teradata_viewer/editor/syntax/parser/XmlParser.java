@@ -99,6 +99,7 @@ public class XmlParser extends AbstractParser {
     }
 
     /** {@inheritDoc} */
+    @Override
     public IParseResult parse(SyntaxDocument doc, String style) {
         result.clearNotices();
         Element root = doc.getDefaultRootElement();
@@ -151,7 +152,7 @@ public class XmlParser extends AbstractParser {
             this.doc = doc;
         }
 
-        private void doError(SAXParseException e, int level) {
+        private void doError(SAXParseException e, IParserNotice.Level level) {
             int line = e.getLineNumber() - 1;
             Element root = doc.getDefaultRootElement();
             Element elem = root.getElement(line);
@@ -168,12 +169,12 @@ public class XmlParser extends AbstractParser {
 
         @Override
         public void error(SAXParseException e) {
-            doError(e, IParserNotice.ERROR);
+            doError(e, IParserNotice.Level.ERROR);
         }
 
         @Override
         public void fatalError(SAXParseException e) {
-            doError(e, IParserNotice.ERROR);
+            doError(e, IParserNotice.Level.ERROR);
         }
 
         @Override
@@ -187,7 +188,7 @@ public class XmlParser extends AbstractParser {
 
         @Override
         public void warning(SAXParseException e) {
-            doError(e, IParserNotice.WARNING);
+            doError(e, IParserNotice.Level.WARNING);
         }
     }
 }

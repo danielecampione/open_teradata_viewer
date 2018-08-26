@@ -22,16 +22,16 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object Error.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-262 3rd. Edition.
- * 
+ *
  */
 public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * Object Error().
-     * 
+     *
      * @super Object
      * @constructor
      * @memberOf Error
@@ -43,11 +43,11 @@ public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * Object Error(message).
-     * 
+     *
      * @super Object
      * @constructor
-     * @param <i>message</i> An optional error message that provides details
-     *        about the exception.
+     * @param message An optional error message that provides details about the
+     *        exception.
      * @memberOf Error
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -57,7 +57,7 @@ public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type Error
      * @memberOf Error
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSError
@@ -68,7 +68,7 @@ public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf Error
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSFunction
@@ -79,7 +79,7 @@ public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * <b>property name</b>
-     * 
+     *
      * @type String
      * @memberOf Error
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSString
@@ -90,7 +90,7 @@ public abstract class JSError implements IJSObjectFunctions {
 
     /**
      * <b>property message</b>
-     * 
+     *
      * @type String
      * @memberOf Error
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSString

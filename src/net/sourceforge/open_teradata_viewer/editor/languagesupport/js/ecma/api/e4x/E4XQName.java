@@ -24,16 +24,16 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object QName.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-357 2nd. Edition.
- * 
+ *
  */
 public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * Object QName().
-     * 
+     *
      * @constructor
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
@@ -44,7 +44,7 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * Object QName(name).
-     * 
+     *
      * @constructor
      * @param name Localname of the QName.
      * @extends Object
@@ -56,9 +56,9 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * Object QName(namespace, name).
-     * 
+     *
      * @constructor
-     * @param <i>namespace</i> Optional namespace part of QName.
+     * @param namespace Optional namespace part of QName.
      * @param name Localname of the QName.
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
@@ -69,7 +69,7 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type QName
      * @memberOf QName
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XQName
@@ -80,7 +80,7 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf QName
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XQName
@@ -91,7 +91,7 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * <b>property localName</b> local name part of QName.
-     * 
+     *
      * @type String
      * @memberOf QName
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XQName
@@ -102,7 +102,7 @@ public abstract class E4XQName implements IJSObjectFunctions {
 
     /**
      * <b>property uri</b> - Namespace uri part of QName.
-     * 
+     *
      * @type String
      * @memberOf QName
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XQName

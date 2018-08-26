@@ -26,6 +26,8 @@ import java.io.Reader;
 import javax.swing.text.Segment;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.syntax.HtmlOccurrenceMarker;
+import net.sourceforge.open_teradata_viewer.editor.syntax.IOccurrenceMarker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
@@ -4104,6 +4106,12 @@ public class JSPTokenMaker extends AbstractMarkupTokenMaker {
         zzStartRead = zzMarkedPos;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    protected IOccurrenceMarker createOccurrenceMarker() {
+        return new HtmlOccurrenceMarker();
+    }
+
     /**
      * Sets whether markup close tags should be completed. You might not want
      * this to be the case, since some tags in standard HTML aren't usually
@@ -4121,6 +4129,26 @@ public class JSPTokenMaker extends AbstractMarkupTokenMaker {
     public boolean getCurlyBracesDenoteCodeBlocks(int languageIndex) {
         return languageIndex == LANG_INDEX_CSS
                 || languageIndex == LANG_INDEX_JS;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String[] getLineCommentStartAndEnd(int languageIndex) {
+        switch (languageIndex) {
+        case LANG_INDEX_JS:
+            return new String[] { "//", null };
+        case LANG_INDEX_CSS:
+            return new String[] { "/*", "*/" };
+        default:
+            return new String[] { "<!--", "-->" };
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean getMarkOccurrencesOfTokenType(int type) {
+        return type == IToken.FUNCTION || type == IToken.VARIABLE
+                || type == IToken.MARKUP_TAG_NAME;
     }
 
     /**

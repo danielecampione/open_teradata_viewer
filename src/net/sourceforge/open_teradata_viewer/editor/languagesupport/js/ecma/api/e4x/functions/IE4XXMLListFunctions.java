@@ -26,8 +26,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.functions.IJSObjectFunctions;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -37,7 +37,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function attribute(attributeName)</b> - Calls the attribute method of
      * each XML object in this XMLList object passing attributeName as a
      * parameter and returns an XMLList containing the results in order.
-     * 
+     *
      * @param attributeName Name of attribute to find.
      * @returns An XMLList containing the results in order.
      * @memberOf XMLList
@@ -51,7 +51,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function attributes()</b> - Calls the attributes() method of each XML
      * object in this XMLList object and returns an XMLList containing the
      * results in order.
-     * 
+     *
      * @returns An XMLList containing the results in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -64,8 +64,8 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function child(propertyName)</b> - Calls the child() method of each
      * XML object in this XMLList object and returns an XMLList containing the
      * results in order.
-     * 
-     * @param propertyName Name of XML element to find. 
+     *
+     * @param propertyName Name of XML element to find.
      * @returns An XMLList containing the results in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -78,16 +78,16 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function children()</b> - Calls the children() method of each XML
      * object in this XMLList object and returns an XMLList containing the
      * results concatenated in order.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * // Get all the children of all the items in the order
      * var allitemchildren = order.item.children();
-     * 
+     *
      * // Get all grandchildren of the order that have the name price
      * var grandChildren = order.children().price;
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @returns An XMLList containing the results concatenated in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -100,7 +100,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function comments()</b> - Calls the comments method of each XML object
      * in this XMLList object and returns an XMLList containing the results
      * concatenated in order.
-     * 
+     *
      * @returns An XMLList containing the results concatenated in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -113,7 +113,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function contains(value)</b> - Returns a boolean value indicating
      * whether this XMLList object contains an XML object that compares equal to
      * the given <b><i>value</i></b>.
-     * 
+     *
      * @returns <b><i>true</i></b> if XMLList contains XML <b><i>value</i></b>,
      *          otherwise <b><i>false</i></b>.
      * @param value XML object to test.
@@ -125,7 +125,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function copy()</b> - Returns a deep copy of the XMLList object.
-     * 
+     *
      * @returns The copy method returns a deep copy of this XMLList object.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -138,13 +138,13 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * XML object in this XMLList object with the optional parameter name (or
      * the string "*" if name is omitted) and returns an XMLList containing the
      * results concatenated in order.
-     * 
+     *
      * @returns All the XML valued descendants (children, grandchildren,
      *          great-grandchildren, etc..) of this XMLList object with the
      *          given name. If the name parameter is omitted, it returns all
      *          descendants of this XMLList object.
-     * @param <i>name</i> Optional parameter to identity the decendants. If
-     *        omitted all decendants are returned.  
+     * @param name Optional parameter to identity the decendants. If omitted all
+     *        decendants are returned.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.functions.IE4XXMLFunctions#descendants(JSString)
@@ -156,14 +156,14 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function elements(name)</b> - Calls the elements method of each XML
      * object in this XMLList object passing the optional parameter name (or "*"
      * if it is omitted) and returns an XMList containing the results in order.
-     * 
+     *
      * @returns An XMLList containing all the children of this XMLList object
      *          that are XML elements with the given name. When the elements
      *          method is called with no parameters, it returns an XMLList
      *          containing all the children of this XML object that are XML
      *          elements regardless of their name.
-     * @param <i>name</i> Optional parameter to identity the element. If omitted
-     *        all children are returned.
+     * @param name Optional parameter to identity the element. If omitted all
+     *        children are returned.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.functions.IE4XXMLFunctions#elements(JSString)
@@ -176,7 +176,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * whether this XMLList object contains complex content. An XMLList object
      * is considered to contain complex content if it is not empty, contains a
      * single XML item with complex content or contains elements.
-     * 
+     *
      * @returns <b><i>true</i></b> if XMLList contains complex content,
      *          otherwise <b><i>false</i></b>.
      * @memberOf XMLList
@@ -190,7 +190,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * whether this XMLList contains simple content. An XMLList object is
      * considered to contain simple content if it is empty, contains a single
      * XML item with simple content or contains no elements.
-     * 
+     *
      * @returns <b><i>true</i></b> if XMLList contains simple content, otherwise
      *          <b><i>false</i></b>.
      * @memberOf XMLList
@@ -202,14 +202,14 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
     /**
      * <b>function length()</b> - Returns the number of properties in this
      * XMLList object.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * for (var i = 0; i < e..name.length(); i++) {
      *   print("Employee name:" + e..name[i]);
      * }
      * </pre>
-     * 
+     *
      * @returns The number of properties in this XMLList object.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -222,7 +222,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * the XML objects it contains and the descendents of all the XML objects it
      * contains into a normal form by merging adjacent text nodes and
      * eliminating empty text nodes.
-     * 
+     *
      * @returns This XMLList object.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -234,7 +234,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function parent()</b> - If all items in this XMLList object have the
      * same parent, it is returned. Otherwise, the parent method returns
      * <b><i>undefined</i></b>.
-     * 
+     *
      * @returns The parent of this XMLList object.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -247,8 +247,8 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * processingInstructions method of each XML object in this XMLList object
      * passing the optional parameter name (or "*" if it is omitted) and returns
      * an XMList containing the results in order.
-     * 
-     * @param <i>name</i> Optional node name filter. 
+     *
+     * @param name Optional node name filter.
      * @returns An XMList containing the results in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -261,7 +261,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * <b>function text()</b> - Calls the text method of each XML object
      * contained in this XMLList object and returns an XMLList containing the
      * results concatenated in order.
-     * 
+     *
      * @return An XMLList containing the results concatenated in order.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList
@@ -278,7 +278,7 @@ public interface IE4XXMLListFunctions extends IJSObjectFunctions {
      * toXMLString method always includes the start tag, attributes and end tag
      * of the XML object regardless of its content. It is provided for cases
      * when the default XML to string conversion rules are not desired.
-     * 
+     *
      * @return Serializes this XML object as parseable XML.
      * @memberOf XMLList
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXMLList

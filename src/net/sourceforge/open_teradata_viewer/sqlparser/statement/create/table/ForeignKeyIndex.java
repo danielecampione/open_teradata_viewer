@@ -29,7 +29,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
  * @author D. Campione
  * 
  */
-public class ForeignKeyIndex extends Index {
+public class ForeignKeyIndex extends NamedConstraint {
 
     private Table table;
     private List<String> referencedColumnNames;
@@ -52,10 +52,7 @@ public class ForeignKeyIndex extends Index {
 
     @Override
     public String toString() {
-        return (getName() != null ? "CONSTRAINT " + getName() + " " : "")
-                + getType()
-                + " "
-                + PlainSelect.getStringList(getColumnsNames(), true, true)
+        return super.toString()
                 + " REFERENCES "
                 + table
                 + PlainSelect.getStringList(getReferencedColumnNames(), true,

@@ -64,7 +64,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 
 /**
  * Parses a Java AST for code completions. It currently scans the following:
- * 
+ *
  * <ul>
  *    <li>Import statements
  *    <li>Method names
@@ -75,7 +75,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * position are also returned.
  *
  * @author D. Campione
- * 
+ *
  */
 class SourceCompletionProvider extends DefaultCompletionProvider {
 
@@ -237,7 +237,11 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
         }
     }
 
-    /** Set template completion cache for source completion provider. */
+    /**
+     * Set template completion cache for source completion provider.
+     *
+     * @param shorthandCache The new cache.
+     */
     public void setShorthandCache(ShorthandCompletionCache shorthandCache) {
         this.shorthandCache = shorthandCache;
     }
@@ -412,7 +416,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
      * Removes all jars from the "build path".
      *
      * @see #removeJar(File)
-     * @see #addClassFileSource(JarInfo)
+     * @see #addJar(LibraryInfo)
      * @see #getJars()
      */
     public void clearJars() {
@@ -588,7 +592,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
     /**
      * Loads completions based on the current caret location in the source. In
      * other words:
-     * 
+     *
      * <ul>
      *   <li>If the caret is anywhere in a class, the names of all methods and
      *       fields in the class are loaded. Methods and fields in super classes
@@ -629,7 +633,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
      * This method is called when the caret is found to be in a specific type
      * declaration. This method checks if the caret is in a child type
      * declaration first, then adds completions for itself next.
-     * 
+     *
      * <ul>
      *   <li>If the caret is anywhere in a class, the names of all methods and
      *       fields in the class are loaded. Methods and fields in super classes
@@ -928,7 +932,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
      * @param jar The jar to remove.
      * @return Whether the jar was removed. This will be <code>false</code> if
      *         the jar was not on the build path.
-     * @see #addClassFileSource(JarInfo)
+     * @see #addJar(LibraryInfo)
      * @see #getJars()
      * @see #clearJars()
      */
@@ -945,7 +949,7 @@ class SourceCompletionProvider extends DefaultCompletionProvider {
 
     /**
      * Sets the parent Java provider.
-     * 
+     *
      * @param javaProvider The parent completion provider.
      */
     void setJavaProvider(JavaCompletionProvider javaProvider) {

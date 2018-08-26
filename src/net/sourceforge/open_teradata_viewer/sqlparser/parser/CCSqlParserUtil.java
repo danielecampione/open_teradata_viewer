@@ -83,6 +83,20 @@ public final class CCSqlParserUtil {
         }
     }
 
+    /**
+     * Parse a conditional expression. This is the expression after a where
+     * clause. 
+     */
+    public static IExpression parseCondExpression(String condExpr)
+            throws SQLParserException {
+        CCSqlParser parser = new CCSqlParser(new StringReader(condExpr));
+        try {
+            return parser.Expression();
+        } catch (Exception ex) {
+            throw new SQLParserException(ex);
+        }
+    }
+
     /** Parse a statement list. */
     public static Statements parseStatements(String sqls)
             throws SQLParserException {

@@ -18,17 +18,20 @@
 
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree;
 
+import java.util.List;
+
 import javax.swing.Icon;
 import javax.swing.text.Position;
 
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.SourceTreeNode;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.util.RhinoUtil;
 import sun.org.mozilla.javascript.internal.ast.AstNode;
 
 /**
  * Tree node for JavaScript outline trees.
  *
  * @author D. Campione
- * 
+ *
  */
 public class JavaScriptTreeNode extends SourceTreeNode {
 
@@ -43,12 +46,16 @@ public class JavaScriptTreeNode extends SourceTreeNode {
     /** The icon this node displays in the tree. */
     private Icon icon;
 
-    public JavaScriptTreeNode(AstNode userObject) {
+    public JavaScriptTreeNode(List<AstNode> userObject) {
         super(userObject);
     }
 
+    public JavaScriptTreeNode(AstNode userObject) {
+        this(RhinoUtil.toList(userObject));
+    }
+
     public JavaScriptTreeNode(AstNode userObject, boolean sorted) {
-        super(userObject, sorted);
+        super(RhinoUtil.toList(userObject), sorted);
     }
 
     public Icon getIcon() {
@@ -61,8 +68,15 @@ public class JavaScriptTreeNode extends SourceTreeNode {
      * @return The length of this element.
      * @see #getOffset()
      */
+    @SuppressWarnings("unchecked")
     public int getLength() {
-        return ((AstNode) getUserObject()).getLength();
+        int length = 0;
+        List<AstNode> nodes = (List<AstNode>) getUserObject();
+        for (AstNode node : nodes) {
+            length += node.getLength();
+        }
+        length += nodes.size() - 1;
+        return length;
     }
 
     /**

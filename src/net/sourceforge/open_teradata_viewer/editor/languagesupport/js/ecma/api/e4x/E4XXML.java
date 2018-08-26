@@ -26,18 +26,18 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object XML
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-357 2nd. Edition.
- * 
+ *
  */
 public abstract class E4XXML implements IE4XXMLFunctions {
 
     /**
      * Object XML(xml).
-     * 
+     *
      * @constructor
-     * @param XML definition 
+     * @param xml The XML definition.
      * @extends Object
      * @since Standard ECMA-357 2nd. Edition.
      * @since Level 3 Document Object Model Core Definition.
@@ -47,7 +47,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type XML
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -58,7 +58,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -71,7 +71,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * <b>property ignoringComments</b> - The initial value of the
      * ignoreComments property is <b>true</b>. If ignoreComments is <b>true</b>,
      * XML comments are ignored when constructing new XML objects.
-     * 
+     *
      * @type Boolean
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -85,7 +85,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * ignoreProcessingInstructions property is <b>true</b>. If
      * ignoreProcessingInstructions is <b>true</b>, XML processing instructions
      * are ignored when constructing new XML objects.
-     * 
+     *
      * @type Boolean
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -99,7 +99,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * ignoreWhitespace property is <b>true</b>. If ignoreWhitespace is
      * <b>true</b>, insignificant whitespace characters are ignored when
      * processing constructing new XML objects.
-     * 
+     *
      * @type Boolean
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -113,7 +113,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * property is <b>true</b>. If prettyPrinting is <b>true</b>, the ToString
      * and ToXMLString operators will normalize whitespace characters between
      * certain tags to achieve a uniform and aesthetic appearance.
-     * 
+     *
      * @type Boolean
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -129,7 +129,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * normalize whitespace characters between certain tags to achieve a uniform
      * and aesthetic appearance. Certain child nodes will be indented relative
      * to their parent node by the number of spaces specified by prettyIndent.
-     * 
+     *
      * @type Boolean
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
@@ -142,7 +142,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * <b>function settings()</b> - The settings method is a convenience method
      * for managing the collection of global XML settings stored as properties
      * of the XML constructor.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * // Create a general purpose function that may need to save and restore XML settings
@@ -156,7 +156,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      *   return comments;
      * }
      * </pre>
-     * 
+     *
      * @return An object containing the properties of the XML constructor used
      *         for storing XML settings.
      * @memberOf XML
@@ -172,7 +172,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * <b>function setSetting(settings)</b> - The setSettings method is a
      * convenience method for managing the collection of global XML settings
      * stored as properties of the XML constructor.
-     * 
+     *
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
      * @since Standard ECMA-357 2nd. Edition.
@@ -185,7 +185,7 @@ public abstract class E4XXML implements IE4XXMLFunctions {
      * <b>function defaultSettings()</b> - The defaultSettings method is a
      * convenience method for managing the collection of global XML settings
      * stored as properties of the XML constructor.
-     * 
+     *
      * @memberOf XML
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e4x.E4XXML
      * @since Standard ECMA-357 2nd. Edition.

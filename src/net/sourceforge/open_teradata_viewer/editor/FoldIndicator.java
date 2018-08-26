@@ -51,7 +51,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * regions in the editor.
  *
  * @author D. Campione
- * 
+ *
  */
 public class FoldIndicator extends AbstractGutterComponent {
 
@@ -104,13 +104,6 @@ public class FoldIndicator extends AbstractGutterComponent {
 
     public FoldIndicator(TextArea textArea) {
         super(textArea);
-        setForeground(DEFAULT_FOREGROUND);
-        setFoldIconBackground(DEFAULT_FOLD_BACKGROUND);
-        collapsedFoldIcon = new FoldIcon(true);
-        expandedFoldIcon = new FoldIcon(false);
-        listener = new Listener(this);
-        visibleRect = new Rectangle();
-        setShowCollapsedRegionToolTips(true);
     }
 
     /**
@@ -274,6 +267,18 @@ public class FoldIndicator extends AbstractGutterComponent {
             currentLineCount = newLineCount;
             repaint();
         }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        setForeground(DEFAULT_FOREGROUND);
+        setFoldIconBackground(DEFAULT_FOLD_BACKGROUND);
+        collapsedFoldIcon = new FoldIcon(true);
+        expandedFoldIcon = new FoldIcon(false);
+        listener = new Listener(this);
+        visibleRect = new Rectangle();
+        setShowCollapsedRegionToolTips(true);
     }
 
     @Override
@@ -561,9 +566,9 @@ public class FoldIndicator extends AbstractGutterComponent {
 
     /**
      * The default +/- icon for expanding and collapsing folds.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class FoldIcon implements Icon {
         private boolean collapsed;
@@ -597,9 +602,9 @@ public class FoldIndicator extends AbstractGutterComponent {
 
     /**
      * Listens for events in this component.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener extends MouseInputAdapter implements
             PropertyChangeListener {

@@ -26,9 +26,9 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.T
  * Cache Local and System scope variables. Local scope variables are cleared each
  * time the <code>SourceCompletionProvider</code> finishes parsing the script.
  * System scope variables will not be cleared.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class VariableResolver {
 
@@ -46,7 +46,7 @@ public class VariableResolver {
 
     /**
      * Add local scope variable to cache.
-     * 
+     *
      * @param declaration Variable to add.
      */
     public void addLocalVariable(JavaScriptVariableDeclaration declaration) {
@@ -55,7 +55,7 @@ public class VariableResolver {
 
     /**
      * Add pre-processing scope variable to cache.
-     * 
+     *
      * @param declaration Variable to add.
      */
     public void addPreProcessingVariable(
@@ -65,7 +65,7 @@ public class VariableResolver {
 
     /**
      * Add system scope variable to cache.
-     * 
+     *
      * @param declaration Variable to add.
      */
     public void addSystemVariable(JavaScriptVariableDeclaration declaration) {
@@ -74,7 +74,7 @@ public class VariableResolver {
 
     /**
      * Remove pre-processing variable from system variable cache.
-     * 
+     *
      * @param name Name of the system variable to remove.
      */
     public void removePreProcessingVariable(String name) {
@@ -83,7 +83,7 @@ public class VariableResolver {
 
     /**
      * Remove system variable from system variable cache.
-     * 
+     *
      * @param name Name of the system variable to remove.
      */
     public void removeSystemVariable(String name) {
@@ -93,7 +93,7 @@ public class VariableResolver {
     /**
      * Find JSVariableDeclaration for name against all variable types and check
      * is in scope of caret position.
-     * 
+     *
      * @return JSVariableDeclaration from the name.
      */
     public JavaScriptVariableDeclaration findDeclaration(String name, int dot) {
@@ -123,7 +123,7 @@ public class VariableResolver {
     /**
      * Find JSVariableDeclaration within pre-processed and system variable only.
      * Also check is in scope of caret position.
-     * 
+     *
      * @param name Name of variable to resolve.
      * @param dot Position in text document.
      * @return JSVariableDeclaration from the name.
@@ -140,7 +140,7 @@ public class VariableResolver {
 
     /**
      * Find JSVariableDeclaration and check the scope of the caret position
-     * 
+     *
      * @return JSVariableDeclaration from the name.
      */
     private JavaScriptVariableDeclaration findDeclaration(
@@ -162,7 +162,7 @@ public class VariableResolver {
     /**
      * Find the <code>TypeDeclaration</code> for the variable and check the
      * scope of the caret position.
-     * 
+     *
      * @param name Name of variable.
      * @param dot Position.
      * @return TypeDeclaration from the name.
@@ -197,7 +197,7 @@ public class VariableResolver {
     /**
      * Resolve the entered text by chopping up the text and working from left to
      * right, resolving each type in turn.
-     * 
+     *
      * @return TypeDeclaration for variable name.
      */
     public TypeDeclaration resolveType(String varName, int dot) {
@@ -251,8 +251,8 @@ public class VariableResolver {
 
     /**
      * Add pre-processing scope function to cache.
-     * 
-     * @param function Variable to add.
+     *
+     * @param func Variable to add.
      */
     public void addPreProcessingFunction(JavaScriptFunctionDeclaration func) {
         preProcessedFunctions.put(func.getName(), func);

@@ -40,7 +40,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  *
  * The format of a template is similar to those in Eclipse. The following
  * example would be the format for a for-loop template:
- * 
+ *
  * <pre>
  * for (int ${i} = 0; ${i} &lt; ${array}.length; ${i}++) {
  *    ${cursor}
@@ -54,7 +54,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * the caret moves after it cycles through all other parameters. If the user
  * types into it, template mode terminates. If more than one
  * <code>${cursor}</code> parameter is specified, behavior is undefined.<p>
- * 
+ *
  * Two dollar signs in a row ("<code>$$</code>") will be evaluated as a single
  * dollar sign. Otherwise, the template parsing is pretty straightforward and
  * fault-tolerant.<p>
@@ -64,7 +64,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * <code>PlainDocument</code>, tabs will be converted to spaces if requested.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TemplateCompletion extends AbstractCompletion implements
         IParameterizedCompletion {
@@ -279,7 +279,7 @@ public class TemplateCompletion extends AbstractCompletion implements
             case '$': // "$$" => escaped single dollar sign
                 addTemplatePiece(new ITemplatePiece.Text(template.substring(
                         lastOffs, offs + 1)));
-                lastOffs = offs += 2;
+                lastOffs = offs + 2;
                 break;
             case '{': // "${...}" => variable
                 int closingCurly = template.indexOf('}', offs + 2);
@@ -292,7 +292,7 @@ public class TemplateCompletion extends AbstractCompletion implements
                     } else {
                         addTemplatePiece(new ITemplatePiece.Param(varName));
                     }
-                    lastOffs = offs = closingCurly + 1;
+                    lastOffs = closingCurly + 1;
                 }
                 break;
             }

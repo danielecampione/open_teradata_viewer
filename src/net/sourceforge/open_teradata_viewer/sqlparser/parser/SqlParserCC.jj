@@ -190,7 +190,7 @@ TOKEN:
 {
     < S_IDENTIFIER: ( <LETTER> | <ADDITIONAL_LETTERS> )+ ( <DIGIT> | <LETTER> | <ADDITIONAL_LETTERS> | <SPECIAL_CHARS>)* >
 |   < #LETTER: ["a"-"z", "A"-"Z", "_"] >
-|   < #SPECIAL_CHARS: "$" | "_">
+|   < #SPECIAL_CHARS: "$" | "_" | "#" | "@">
 |   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" | ("`" (~["\n","\r","`"])* "`") | ("[" (~["\n","\r","]"])* "]") >
 
@@ -425,11 +425,8 @@ Column Column():
 String RelObjectName():
 {   Token tk = null; }
 {
-    (
-        tk=<S_IDENTIFIER>
-    |
-        tk=<S_QUOTED_IDENTIFIER>
-    )
+    (tk=<S_IDENTIFIER> | tk=<S_QUOTED_IDENTIFIER>
+      | tk=<K_CAST> | tk=<K_DO> | tk=<K_EXTRACT> | tk=<K_FIRST> | tk=<K_FOLLOWING> | tk=<K_LAST> | tk=<K_MATERIALIZED> | tk=<K_NULLS> | tk=<K_PARTITION> | tk=<K_RANGE> | tk=<K_ROW> | tk=<K_ROWS> | tk=<K_SIBLINGS> | tk=<K_VALUE> | tk=<K_XML>)
 
     { return tk.image; }
 }
@@ -630,18 +627,16 @@ SelectExpressionItem SelectExpressionItem():
 ISelectItem SelectItem():
 {
     ISelectItem selectItem = null;
-    SelectExpressionItem selectExpressionItem = null;
 }
 {   ("*" { selectItem = new AllColumns(); }
     |
     LOOKAHEAD(AllTableColumns()) selectItem=AllTableColumns()
     |
-     selectExpressionItem=SelectExpressionItem() {selectItem = selectExpressionItem; }
+    LOOKAHEAD(SelectExpressionItem()) selectItem=SelectExpressionItem() 
     )
     {
         return selectItem;
     }
-
 }
 
 AllTableColumns AllTableColumns():
@@ -1035,7 +1030,7 @@ OrderByElement OrderByElement():
 }
 {
     columnReference = SimpleExpression()
-    [<K_ASC> | (<K_DESC> { orderByElement.setAsc(false); } )  ]
+    [ ( <K_ASC> | (<K_DESC> { orderByElement.setAsc(false); } )) { orderByElement.setAscDescPresent(true); }  ]
     [<K_NULLS> ( 
         <K_FIRST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_FIRST);  }  | 
         <K_LAST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_LAST);  }  
@@ -1222,7 +1217,8 @@ IExpression RegularCondition():
     | "=" { result = new EqualsTo(); }
     | ">=" { result = new GreaterThanEquals(); }
     | "<=" { result = new MinorThanEquals(); }
-    | ("<>" | "!=") { result = new NotEqualsTo(); }
+    | "<>" { result = new NotEqualsTo(); }
+    | "!=" { result = new NotEqualsTo("!="); }
     | "@@" { result = new Matches(); }
     | "~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASESENSITIVE); }
     | "~*" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASEINSENSITIVE); }
@@ -2004,11 +2000,14 @@ CreateTable CreateTable():
                         }
                 )
                 |
-                (
+                LOOKAHEAD(3) (
+                    {
+                        index = new NamedConstraint();
+                    }
+                    [<K_CONSTRAINT> tk3=<S_IDENTIFIER> {index.setName(tk3.image);} ]
                     tk=<K_PRIMARY> tk2=<K_KEY>
                         colNames=ColumnsNamesList()
                         {
-                            index = new Index();
                             index.setType(tk.image + " "+ tk2.image);
                             index.setColumnsNames(colNames);
                             indexes.add(index);
@@ -2099,6 +2098,8 @@ ColDataType ColDataType():
     | tk=<S_IDENTIFIER> { colDataType.setDataType(tk.image); } )
 
     [LOOKAHEAD(2) "(" ( (tk=<S_LONG> | tk=<S_CHAR_LITERAL>) { argumentsStringList.add(tk.image); } ["," {/*argumentsStringList.add(",");*/}] )*    ")"]
+    [<K_CHARACTER> <K_SET> tk=<S_IDENTIFIER> { colDataType.setCharacterSet(tk.image); } ]
+    
     {
         if (argumentsStringList.size() > 0)
             colDataType.setArgumentsStringList(argumentsStringList);

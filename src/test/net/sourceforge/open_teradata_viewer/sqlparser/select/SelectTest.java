@@ -699,7 +699,7 @@ public class SelectTest extends TestCase {
 
     public void testOrderBy() throws SQLParserException {
         String statement = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a DESC, tab1.b ASC";
-        String statementToString = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a DESC, tab1.b";
+        String statementToString = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a DESC, tab1.b ASC";
         Select select = (Select) parserManager
                 .parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -942,6 +942,10 @@ public class SelectTest extends TestCase {
 
         statement = "SELECT count(DISTINCT f, g, h) FROM a";
         assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testCount2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT count(ALL col1 + col2) FROM mytable");
     }
 
     public void testTeradataQuote() throws SQLParserException {
@@ -1211,7 +1215,7 @@ public class SelectTest extends TestCase {
     }
 
     public void testAnalyticFunction17() throws SQLParserException {
-        String statement = "SELECT AVG(sal) OVER (PARTITION BY deptno ORDER BY sal ROWS BETWEEN 0 PRECEDING AND 0 PRECEDING) AS avg_of_current_sal FROM emp";
+        String statement = "SELECT AVG(sal) OVER (PARTITION BY deptno ORDER BY sal ROWS BETWEEN  0 PRECEDING AND  0 PRECEDING) AS avg_of_current_sal FROM emp";
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
@@ -1505,6 +1509,10 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
+    public void testPivotXmlSubquery1() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM (SELECT times_purchased, state_code FROM customers t) PIVOT (count(state_code) FOR state_code IN ('NY', 'CT', 'NJ', 'FL', 'MO')) ORDER BY times_purchased");
+    }
+
     public void testRegexpLike1() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE REGEXP_LIKE(first_name, '^Ste(v|ph)en$')";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1611,5 +1619,22 @@ public class SelectTest extends TestCase {
             throws SQLParserException {
         String stmt = "SELECT a, b FROM foo WHERE a !~* '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testReservedKeyword() throws SQLParserException {
+        final String statement = "SELECT cast, do, extract, first, following, last, materialized, nulls, partition, range, row, rows, siblings, value, xml FROM tableName"; // All of these are legal
+        final Select select = (Select) parserManager.parse(new StringReader(
+                statement));
+        assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testCharacterSetClause() throws SQLParserException {
+        String stmt = "SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
+    public void testNotEqualsTo() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM foo WHERE a != b");
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM foo WHERE a <> b");
     }
 }

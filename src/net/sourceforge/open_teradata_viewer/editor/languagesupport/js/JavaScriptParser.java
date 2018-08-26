@@ -161,7 +161,7 @@ public class JavaScriptParser extends AbstractParser {
                 DefaultParserNotice notice = new DefaultParserNotice(this,
                         desc, line, offs, len);
                 if (problem.getType() == ParseProblem.Type.Warning) {
-                    notice.setLevel(IParserNotice.WARNING);
+                    notice.setLevel(IParserNotice.Level.WARNING);
                 }
                 result.addNotice(notice);
             }

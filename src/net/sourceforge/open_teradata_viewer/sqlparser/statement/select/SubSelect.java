@@ -82,7 +82,7 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
 
     @Override
     public String toString() {
-        return "(" + selectBody + ")"
+        return "(" + selectBody + ")" + ((pivot != null) ? " " + pivot : "")
                 + ((alias != null) ? alias.toString() : "");
     }
 }

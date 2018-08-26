@@ -81,4 +81,11 @@ public class CCSqlParserUtilTest {
         assertTrue(mult.getLeftExpression() instanceof LongValue);
         assertTrue(mult.getRightExpression() instanceof Parenthesis);
     }
+
+    @Test
+    public void testParseCondExpression() throws Exception {
+        IExpression result = CCSqlParserUtil
+                .parseCondExpression("a+b>5 and c<3");
+        assertEquals("a + b > 5 AND c < 3", result.toString());
+    }
 }

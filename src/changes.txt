@@ -1,3 +1,31 @@
+0.22c (30/06/2014)
+    - Improvements to PHP syntax highlighting.
+    - In HTML and XML, "mark occurrences" should match tag names even when the
+      caret is in an attribute, not just when it is in the tag name itself.
+    - Java syntax highlighting updated for other Java 8 classes, interfaces, and
+      enums.
+    - SQL: Matching opening/closing parens are now highlighted.
+    - Improvements to CSS code completion.
+    - Improvements to PHP code completion. Documentation for many functions is
+      now included.
+    - JavaScriptOutlineTree now understands basic JavaScript OO paradigms much
+      better.
+    - This release brings minor performance improvements to the spell checker.
+    - Added support for some keyword object names to the SQL parser.
+    - Added support for named primary keys to create table statements of the SQL
+      parser.
+    - Added adapter classes for visitor interfaces to the SQL parser to simplify
+      visitor usage.
+    - Added pivot support for subqueries to the SQL parser.
+    - Added Character Set support to the SQL parser.
+    - Added lax test utils to the SQL parser.
+    - Added some Teradata test SQLs to the SQL parser.
+    - Improved COUNT(ALL expr) support of the SQL parser.
+    - Fixed "!=" support to not give "<>" while deparsing with the SQL parser.
+    - Fixed toString() for window elements of the SQL parser.
+    - Fixed several bugs.
+    - Upgraded itext library 5.5.0 -> 5.5.1
+
 0.22b (06/05/2014)
     - Added the Python syntax highlighting.
     - Added the NSIS syntax highlighting.

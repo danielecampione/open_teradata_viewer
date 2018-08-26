@@ -107,7 +107,7 @@ public class TaskTagParser extends AbstractParser {
                 text = text.substring(start);
                 int len = text.length();
                 TaskNotice pn = new TaskNotice(this, text, line, offs, len);
-                pn.setLevel(IParserNotice.INFO);
+                pn.setLevel(IParserNotice.Level.INFO);
                 pn.setShowInEditor(false);
                 pn.setColor(COLOR);
                 result.addNotice(pn);

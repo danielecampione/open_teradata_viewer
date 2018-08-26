@@ -28,6 +28,19 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  */
 public class NotEqualsTo extends OldTeradataJoinBinaryExpression {
 
+    private final String operator;
+
+    public NotEqualsTo() {
+        operator = "<>";
+    }
+
+    public NotEqualsTo(String operator) {
+        this.operator = operator;
+        if (!"!=".equals(operator) && !"<>".equals(operator)) {
+            throw new IllegalArgumentException("only <> or != allowed");
+        }
+    }
+
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
@@ -35,6 +48,6 @@ public class NotEqualsTo extends OldTeradataJoinBinaryExpression {
 
     @Override
     public String getStringExpression() {
-        return "<>";
+        return operator;
     }
 }

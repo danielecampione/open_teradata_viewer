@@ -24,8 +24,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSString;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -33,9 +33,9 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function decodeURI(uri)</b> - Unescape characters in a URI.
-     * 
+     *
      * @param uri A string that contains an encoded URI or other text to be
-     *        decoded. 
+     *        decoded.
      * @returns A copy of <b><i>uri</i></b>, with any hexidecimal escaped
      *          sequences replaced with characters they represent.
      * @memberOf Global
@@ -53,9 +53,9 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
     /**
      * <b>function decodeURIComponent(s)</b> - Unescape characters in a URI
      * component.
-     * 
+     *
      * @param s A string that contains an encoded URI components or other text
-     *        to be decoded. 
+     *        to be decoded.
      * @returns A copy of <b><i>s</i></b>, with any hexidecimal escaped
      *          sequences replaced with characters they represent.
      * @memberOf Global
@@ -72,8 +72,8 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function encodeURI(uri)</b> - Escape characters in a URI.
-     * 
-     * @param uri A string that contains the URI or other text to be encoded. 
+     *
+     * @param uri A string that contains the URI or other text to be encoded.
      * @returns A copy of <b><i>uri</i></b>, with certain characters replaced by
      *          hexidecimal escape sequences.
      * @memberOf Global
@@ -91,9 +91,9 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
     /**
      * <b>function encodeURIComponent(s)</b> - Escape characters in a URI
      * Component.
-     * 
-     * @param s A string that contains a portion of a URI or other text to be
-     *        encoded. 
+     *
+     * @param code A string that contains a portion of a URI or other text to be
+     *        encoded.
      * @returns A copy of <b><i>s</i></b>, with certain characters replaced by
      *          hexidecimal escape sequences.
      * @memberOf Global
@@ -110,8 +110,8 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function escape(s)</b> - Encode a string.
-     * 
-     * @param s A string to be "escaped" or encoded. 
+     *
+     * @param s A string to be "escaped" or encoded.
      * @returns An encoded copy of <b><i>s</i></b>, with certain characters
      *          replaced by hexidecimal escape sequences.
      * @memberOf Global
@@ -125,14 +125,14 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function eval(code)</b> - Execute JavaScript from a string.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * eval("2+5"); // Returns 7
      * </pre>
-     * 
+     *
      * @param s A string that contains the JavaScript expression to be evaluated
-     *        or the statements to be executed. 
+     *        or the statements to be executed.
      * @returns The value of the evaluated <b><i>code</i></b>, if any.
      * @memberOf Global
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal
@@ -143,8 +143,8 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function isFinite(n)</b> - Determine whether a number is finite.
-     * 
-     * @param n The number to be tested. 
+     *
+     * @param n The number to be tested.
      * @returns <b><i>true</i></b> if <b><i>n</i></b> is or can be converted to
      *          a finite number or otherwise <b><i>false</i></b> if
      *          <b><i>n</i></b> is NaN or positive or negative Infinity.
@@ -159,7 +159,7 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function isNaN(n)</b> - Check for not-a-number.<p>
-     * 
+     *
      * <strong>Example</strong>
      * <pre>
      * isNaN(0); // => false
@@ -171,13 +171,13 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
      * isNaN(true); // => false
      * isNaN(undefined); // => true
      * </pre>
-     * 
-     * @param n The number to be tested. 
+     *
+     * @param n The number to be tested.
      * @returns <b><i>true</i></b> if <b><i>n</i></b> is not a number or if it
      *          is the special numeric value NaN, otherwise <b><i>false</i></b>
      *          if <b><i>n</i></b> is any other number.
      * @memberOf Global
-     * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal 
+     * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal#NaN
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSNumber#NaN
      * @see #parseFloat(JSString) parseFloat()
@@ -189,13 +189,13 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function parseFloat(s)</b> - Convert a string to a number.
-     * 
+     *
      * @param s The string to be parsed and converted to a number.
      * @returns The parsed number or <b><i>NaN</i></b> if <b><i>s</i></b> does
      *          not begin with a valid number.
      * @memberOf Global
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal
-     * @see #isNan(JSNumber) isNan()
+     * @see #isNaN(JSNumber) isNan()
      * @see #parseInt(JSString,JSNumber) parseInt()
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -204,16 +204,16 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function parseInt(s, radix)</b> - Convert a string to an integer.
-     * 
+     *
      * @param s The string to be parsed and converted to an integer.
-     * @param <i>radix</i> An optional integer argument that represents the
-     *        radix (i.e base) of the number to be parsed. If omitted or 0, the
-     *        number is parsed in base 10.
+     * @param radix An optional integer argument that represents the radix (i.e
+     *        base) of the number to be parsed. If omitted or 0, the number is
+     *        parsed in base 10.
      * @returns The parsed number or <b><i>NaN</i></b> if <b><i>s</i></b> does
      *          not begin with a valid number.
      * @memberOf Global
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal
-     * @see #isNan(JSNumber) isNan()
+     * @see #isNaN(JSNumber) isNan()
      * @see #parseFloat(JSString) parseFloat()
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -222,8 +222,8 @@ public interface IJSGlobalFunctions extends IJSObjectFunctions {
 
     /**
      * <b>function unescape(s)</b> - Decode an escaped string.
-     * 
-     * @param s A string to be "unescaped" or decoded. 
+     *
+     * @param s A string to be "unescaped" or decoded.
      * @returns An decoded copy of <b><i>s</i></b>.
      * @memberOf Global
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSGlobal

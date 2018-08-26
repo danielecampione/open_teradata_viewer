@@ -52,9 +52,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * This class is only supposed to be overridden by <code>TextArea</code>.
  *
  * @author D. Campione
- * 
+ *
  */
-abstract class TextAreaBase extends JTextArea {
+public abstract class TextAreaBase extends JTextArea {
 
     private static final long serialVersionUID = 4696859672360311137L;
 
@@ -440,7 +440,7 @@ abstract class TextAreaBase extends JTextArea {
         return DEFAULT_TAB_SIZE;
     }
 
-    /**     
+    /**
      * @return Whether the current line highlight is faded.
      * @see #setFadeCurrentLineHighlight
      */
@@ -798,9 +798,11 @@ abstract class TextAreaBase extends JTextArea {
     @Override
     public void setFont(Font font) {
         super.setFont(font);
-        updateMarginLineX();
-        if (highlightCurrentLine) {
-            possiblyUpdateCurrentLineHighlightLocation();
+        if (font != null) {
+            updateMarginLineX();
+            if (highlightCurrentLine) {
+                possiblyUpdateCurrentLineHighlightLocation();
+            }
         }
     }
 
@@ -976,8 +978,12 @@ abstract class TextAreaBase extends JTextArea {
      * margin line to be "80 characters" over.
      */
     protected void updateMarginLineX() {
-        marginLineX = getFontMetrics(getFont()).charWidth('m')
-                * marginSizeInChars;
+        Font font = getFont();
+        if (font == null) {
+            marginLineX = 0;
+            return;
+        }
+        marginLineX = getFontMetrics(font).charWidth('m') * marginSizeInChars;
     }
 
     /**
@@ -1009,10 +1015,10 @@ abstract class TextAreaBase extends JTextArea {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected class TAMouseListener extends CaretEvent implements
             MouseListener, MouseMotionListener, FocusListener {

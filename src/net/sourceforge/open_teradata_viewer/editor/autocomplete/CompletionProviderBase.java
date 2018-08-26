@@ -92,8 +92,11 @@ public abstract class CompletionProviderBase implements ICompletionProvider {
     public List<ICompletion> getCompletions(JTextComponent comp) {
         List<ICompletion> completions = getCompletionsImpl(comp);
         if (parent != null) {
-            completions.addAll(parent.getCompletions(comp));
-            Collections.sort(completions);
+            List<ICompletion> parentCompletions = parent.getCompletions(comp);
+            if (parentCompletions != null) {
+                completions.addAll(parentCompletions);
+                Collections.sort(completions);
+            }
         }
 
         // NOTE: We can't sort by relevance prior to this; we need to have

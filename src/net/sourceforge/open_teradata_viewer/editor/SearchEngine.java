@@ -42,7 +42,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * A singleton class that can perform advanced find/replace operations in an
  * {@link TextArea}. Simply create a {@link SearchContext} and call one of the
  * following methods:
- * 
+ *
  * <ul>
  *    <li>{@link #search(JTextArea, SearchContext)}
  *    <li>{@link #replace(TextArea, SearchContext)}
@@ -52,7 +52,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  *
  * @author D. Campione
  * @see SearchContext
- * 
+ *
  */
 public class SearchEngine {
 
@@ -83,6 +83,14 @@ public class SearchEngine {
 
         String text = context.getSearchFor();
         if (text == null || text.length() == 0) {
+            if (doMarkAll) {
+                // Force "mark all" event to be broadcast so listeners know to
+                // clear their mark-all markers. The STA already cleared its
+                // highlights above but cleraMarkAllHighlights() doesn't fire an
+                // event itself for performance reasons
+                List<DocumentRange> emptyRangeList = Collections.emptyList();
+                ((TextArea) textArea).markAll(emptyRangeList);
+            }
             return new SearchResult();
         }
 
@@ -107,7 +115,7 @@ public class SearchEngine {
         }
 
         SearchResult result = SearchEngine.findImpl(findIn, context);
-        if (result.wasFound()) {
+        if (result.wasFound() && !result.getMatchRange().isZeroLength()) {
             // Without this, if JTextArea isn't in focus, selection won't appear
             // selected
             textArea.getCaret().setSelectionVisible(true);
@@ -150,16 +158,27 @@ public class SearchEngine {
             // Regex matches can have varying widths. The returned point's x-
             // and y-values represent the start and end indices of the match in
             // findIn
-            Point regExPos = getNextMatchPosRegEx(text, findIn, forward,
-                    context.getMatchCase(), context.getWholeWord());
-            findIn = null; // May help garbage collecting
-            if (regExPos != null) {
-                range = new DocumentRange(regExPos.x, regExPos.y);
-            }
+            Point regExPos = null;
+            int start = 0;
+            do {
+                regExPos = getNextMatchPosRegEx(text, findIn.substring(start),
+                        forward, context.getMatchCase(), context.getWholeWord());
+                if (regExPos != null) {
+                    if (regExPos.x != regExPos.y) {
+                        regExPos.translate(start, start);
+                        range = new DocumentRange(regExPos.x, regExPos.y);
+                    } else {
+                        start += regExPos.x + 1;
+                    }
+                }
+            } while (start < findIn.length() && regExPos != null
+                    && range == null); // while (emptyMatchFound);
         }
 
-        int count = range != null ? 1 : 0;
-        return new SearchResult(range, count, 0);
+        if (range != null) {
+            return new SearchResult(range, 1, 0);
+        }
+        return new SearchResult();
     }
 
     /**
@@ -617,7 +636,7 @@ public class SearchEngine {
      * Marks all instances of the specified text in this text area. This method
      * is typically only called directly in response to search events of type
      * <code>SearchEvent.Type.MARK_ALL</code>. "Mark all" behavior is
-     * automatically performed when {@link #find(JTextArea, SearchContext) or
+     * automatically performed when {@link #find(JTextArea, SearchContext)} or
      * #replace(TextArea, SearchContext) is called.
      *
      * @param textArea The text area in which to mark occurrences.
@@ -632,7 +651,8 @@ public class SearchEngine {
         int markAllCount = 0;
 
         // context.getMarkAll()==false => clear "mark all" highlights
-        if (context.getMarkAll() && toMark != null && toMark.length() > 0) {
+        if (context.getMarkAll() && toMark != null && toMark.length() > 0
+        /*&& !toMark.equals(markedWord)*/) {
             List<DocumentRange> highlights = new ArrayList<DocumentRange>();
             context = context.clone();
             context.setSearchForward(true);
@@ -654,12 +674,21 @@ public class SearchEngine {
             SearchResult res = SearchEngine.findImpl(findIn, context);
             while (res.wasFound()) {
                 DocumentRange match = res.getMatchRange().translate(start);
-                highlights.add(match);
-                start = match.getEndOffset();
+                if (match.isZeroLength()) {
+                    // Searched for a regex like "foo|". The "empty string" part
+                    // of the regex matches space between chars. We want to skip
+                    // these in the case of mark-all
+                    start = match.getEndOffset() + 1;
+                    if (start > findIn.length()) {
+                        break;
+                    }
+                } else {
+                    highlights.add(match);
+                    start = match.getEndOffset();
+                }
                 res = SearchEngine.findImpl(findIn.substring(start), context);
             }
             textArea.markAll(highlights);
-            textArea.repaint();
             markAllCount = highlights.size();
         } else {
             // Force a repaint of "mark all" highlights so ErrorStrips can get
@@ -730,8 +759,7 @@ public class SearchEngine {
             textArea.replaceSelection(replacement);
 
             // If there is another match, find and select it
-            int dot = textArea.getCaretPosition();
-            dot -= (info.getMatchedText().length() - replacement.length());
+            int dot = matchStart + replacement.length();
             findIn = getFindInCharSequence(textArea, dot, forward);
             info = getRegExReplaceInfo(findIn, context);
             if (info != null) {
@@ -795,7 +823,7 @@ public class SearchEngine {
             // remove the selection to work properly
             makeMarkAndDotEqual(textArea, context.getSearchForward());
             SearchResult res = find(textArea, context);
-            if (res.wasFound()) {
+            if (res.wasFound() && !res.getMatchRange().isZeroLength()) {
                 // Do the replacement
                 String replacement = context.getReplaceWith();
                 textArea.replaceSelection(replacement);

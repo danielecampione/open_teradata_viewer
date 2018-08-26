@@ -41,7 +41,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * Class representing a <code>ClassFile</code> structure.
  *
  * @author D. Campione
- * 
+ *
  */
 public class ClassFile implements IAccessFlags {
 
@@ -75,7 +75,7 @@ public class ClassFile implements IAccessFlags {
     private int superClass;
 
     /**
-     * Indices into {@link #constantPool} for <code>ConstantClassInfo</code>s
+     * Indices into {@code constantPool} for <code>ConstantClassInfo</code>s
      * representing the implemented interfaces of this class or interface.
      */
     int[] interfaces;
@@ -106,7 +106,7 @@ public class ClassFile implements IAccessFlags {
      * #setTypeParamsToTypeArgs(Map)} during code completion of members of an
      * instance variable whose type is represented by this class file. This
      * <code>ClassFile</code> doesn't use this field itself; rather, it's there
-     * for consumers (such as the Java code completion API) to use. 
+     * for consumers (such as the Java code completion API) to use.
      */
     private Map<String, String> typeMap;
 

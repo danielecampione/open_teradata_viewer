@@ -23,8 +23,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma5.functions.IJS5ObjectFunctions;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -32,17 +32,18 @@ public interface ILocationFunctions extends IJS5ObjectFunctions {
 
     /**
      * function assign(newURL) - Method loads a new document.
-     * 
+     *
+     * @param newURL
      * @memberOf Location
      */
     public void assign(JSString newURL);
 
     /**
      * function reload(optionalArg) - Reload the current document.
-     * 
-     * @param <i>optionalArg</i> - default <i><b>false</b></i> which reloads the
-     *        page from the cache. Set this paramter to true if you want to
-     *        force the browser to get the page from the Server.
+     *
+     * @param optionalArg - Default <i><b>false</b></i> which reloads the page
+     *        from the cache. Set this paramter to true if you want to force the
+     *        browser to get the page from the Server.
      * @memberOf Location
      */
     public void reload(JSBoolean optionalArg);
@@ -50,7 +51,8 @@ public interface ILocationFunctions extends IJS5ObjectFunctions {
     /**
      * function replace(newURL) - Method replaces the current document with a
      * new one.
-     * 
+     *
+     * @param newURL
      * @memberOf Location
      */
     public void replace(JSString arg);

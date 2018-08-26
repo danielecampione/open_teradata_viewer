@@ -44,7 +44,7 @@ import javax.swing.Timer;
  * smancy animations.
  *
  * @author D. Campione
- * 
+ *
  */
 public class CollapsibleSectionPanel extends JPanel {
 
@@ -53,18 +53,30 @@ public class CollapsibleSectionPanel extends JPanel {
     private List<BottomComponentInfo> bottomComponentInfos;
     private BottomComponentInfo currentBci;
 
+    private boolean animate;
     private Timer timer;
     private int tick;
     private int totalTicks = 10;
     private boolean down;
+    private boolean firstTick;
 
     private static final int FRAME_MILLIS = 10;
 
     /** Ctor. */
     public CollapsibleSectionPanel() {
+        this(true);
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param animate Whether the collapsible sections should animate in.
+     */
+    public CollapsibleSectionPanel(boolean animate) {
         super(new BorderLayout());
         bottomComponentInfos = new ArrayList<BottomComponentInfo>();
         installKeystrokes();
+        this.animate = animate;
     }
 
     /**
@@ -125,7 +137,7 @@ public class CollapsibleSectionPanel extends JPanel {
                         currentBci = null;
                     }
                 } else {
-                    if (tick == 1) {
+                    if (firstTick) {
                         if (down) {
                             focusMainComponent();
                         } else {
@@ -133,6 +145,7 @@ public class CollapsibleSectionPanel extends JPanel {
                             // focusable child we want to play with
                             currentBci.component.requestFocusInWindow();
                         }
+                        firstTick = false;
                     }
                     float proportion = !down ? (((float) tick) / totalTicks)
                             : (1f - (((float) tick) / totalTicks));
@@ -181,6 +194,14 @@ public class CollapsibleSectionPanel extends JPanel {
         if (currentBci == null) {
             return;
         }
+        if (!animate) {
+            remove(currentBci.component);
+            revalidate();
+            repaint();
+            currentBci = null;
+            focusMainComponent();
+            return;
+        }
 
         if (timer != null) {
             if (down) {
@@ -190,6 +211,7 @@ public class CollapsibleSectionPanel extends JPanel {
             tick = totalTicks - tick;
         }
         down = true;
+        firstTick = true;
 
         createTimer();
         timer.start();
@@ -236,12 +258,19 @@ public class CollapsibleSectionPanel extends JPanel {
         }
         currentBci = bci;
         add(currentBci.component, BorderLayout.SOUTH);
+        if (!animate) {
+            currentBci.component.requestFocusInWindow();
+            revalidate();
+            repaint();
+            return;
+        }
 
         if (timer != null) {
             timer.stop();
         }
         tick = 0;
         down = false;
+        firstTick = true;
 
         // Animate display of new bottom component
         createTimer();
@@ -285,9 +314,9 @@ public class CollapsibleSectionPanel extends JPanel {
 
     /**
      * Information about a "bottom component".
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class BottomComponentInfo {
 
@@ -312,8 +341,8 @@ public class CollapsibleSectionPanel extends JPanel {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -328,8 +357,8 @@ public class CollapsibleSectionPanel extends JPanel {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

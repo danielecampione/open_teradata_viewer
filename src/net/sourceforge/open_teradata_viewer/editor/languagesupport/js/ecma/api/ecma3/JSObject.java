@@ -22,18 +22,18 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Base JavaScript Object.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-262 3rd. Edition.
- * 
+ *
  */
 public abstract class JSObject implements IJSObjectFunctions {
 
     /**
      * Object Object().
-     * 
+     *
      * <p>Creates a new object instance.</p>
-     * 
+     *
      * @constructor
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
@@ -43,11 +43,11 @@ public abstract class JSObject implements IJSObjectFunctions {
 
     /**
      * Object Object(value).
-     * 
-     * 
+     *
+     *
      * @constructor
-     * @param <i>value</i> Optional argument specifies a primitive JavaScript
-     *        value - a number, boolean etc..
+     * @param value Optional argument specifies a primitive JavaScript value - a
+     *        number, boolean etc...
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
      */
@@ -56,7 +56,7 @@ public abstract class JSObject implements IJSObjectFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type Object
      * @memberOf Object
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSObject
@@ -67,7 +67,7 @@ public abstract class JSObject implements IJSObjectFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf Object
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSFunction

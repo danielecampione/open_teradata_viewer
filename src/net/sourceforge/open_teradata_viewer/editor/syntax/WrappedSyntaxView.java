@@ -24,6 +24,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
@@ -167,7 +168,10 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
         alloc.width = getSpan(X_AXIS, line);
         alloc.height = getSpan(Y_AXIS, line);
 
-        alloc.y -= host.getMargin().top;
+        Insets margin = host.getMargin();
+        if (margin != null) {
+            alloc.y -= margin.top;
+        }
     }
 
     /**

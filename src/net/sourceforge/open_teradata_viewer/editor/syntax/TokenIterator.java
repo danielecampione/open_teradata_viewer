@@ -40,7 +40,13 @@ class TokenIterator implements Iterator<IToken> {
      */
     public TokenIterator(SyntaxDocument doc) {
         this.doc = doc;
-        token = doc.getTokenListForLine(0);
+        loadTokenListForCurLine();
+        int lineCount = getLineCount();
+        while ((token == null || !token.isPaintable())
+                && curLine < lineCount - 1) {
+            curLine++;
+            loadTokenListForCurLine();
+        }
     }
 
     private int getLineCount() {
@@ -58,6 +64,14 @@ class TokenIterator implements Iterator<IToken> {
         return token != null;
     }
 
+    private void loadTokenListForCurLine() {
+        token = doc.getTokenListForLine(curLine);
+        if (token != null && !token.isPaintable()) {
+            // Common end of document scenario
+            token = null;
+        }
+    }
+
     /**
      * @return The next paintable token in the document.
      * @see #hasNext()
@@ -65,19 +79,35 @@ class TokenIterator implements Iterator<IToken> {
     @Override
     public IToken next() {
         IToken t = token;
-        if (token != null) {
-            if (token.isPaintable()) {
-                token = token.getNextToken();
-                int lineCount = getLineCount();
-                while (token != null && !token.isPaintable()
-                        && ++curLine < lineCount) {
-                    t = new TokenImpl(t);
-                    token = doc.getTokenListForLine(curLine);
-                }
-            } else {
-                token = null;
-            }
+        boolean tIsCloned = false;
+        int lineCount = getLineCount();
+
+        // Get the next token, going to the next line if necessary
+        if (token != null && token.isPaintable()) {
+            token = token.getNextToken();
+        } else if (curLine < lineCount - 1) {
+            t = new TokenImpl(t); // Clone t since tokens are pooled
+            tIsCloned = true;
+            curLine++;
+            loadTokenListForCurLine();
+        } else if (token != null && !token.isPaintable()) {
+            // Ends with a non-paintable token
+            token = null;
         }
+
+        while ((token == null || !token.isPaintable())
+                && curLine < lineCount - 1) {
+            if (!tIsCloned) {
+                t = new TokenImpl(t); // Clone t since tokens are pooled
+                tIsCloned = true;
+            }
+            curLine++;
+            loadTokenListForCurLine();
+        }
+        if (token != null && !token.isPaintable() && curLine == lineCount - 1) {
+            token = null;
+        }
+
         return t;
     }
 

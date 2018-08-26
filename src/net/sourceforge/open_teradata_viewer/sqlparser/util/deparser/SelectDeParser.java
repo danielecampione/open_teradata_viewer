@@ -121,13 +121,13 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
             }
         }
 
-        if (plainSelect.getTeradataHierarchical() != null) {
-            plainSelect.getTeradataHierarchical().accept(expressionVisitor);
-        }
-
         if (plainSelect.getWhere() != null) {
             buffer.append(" WHERE ");
             plainSelect.getWhere().accept(expressionVisitor);
+        }
+
+        if (plainSelect.getTeradataHierarchical() != null) {
+            plainSelect.getTeradataHierarchical().accept(expressionVisitor);
         }
 
         if (plainSelect.getGroupByColumnReferences() != null) {
@@ -163,6 +163,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         orderBy.getExpression().accept(expressionVisitor);
         if (!orderBy.isAsc()) {
             buffer.append(" DESC");
+        } else if (orderBy.isAscDescPresent()) {
+            buffer.append(" ASC");
         }
         if (orderBy.getNullOrdering() != null) {
             buffer.append(' ');
@@ -194,6 +196,10 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         buffer.append("(");
         subSelect.getSelectBody().accept(this);
         buffer.append(")");
+        Pivot pivot = subSelect.getPivot();
+        if (pivot != null) {
+            pivot.accept(this);
+        }
         Alias alias = subSelect.getAlias();
         if (alias != null) {
             buffer.append(alias.toString());
@@ -306,6 +312,10 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         subjoin.getLeft().accept(this);
         deparseJoin(subjoin.getJoin());
         buffer.append(")");
+
+        if (subjoin.getPivot() != null) {
+            subjoin.getPivot().accept(this);
+        }
     }
 
     public void deparseJoin(Join join) {

@@ -53,20 +53,20 @@ public class UnicodeWriter extends Writer {
     /** The writer actually doing the writing. */
     private OutputStreamWriter internalOut;
 
-    private static final byte[] UTF8_BOM = new byte[]{(byte) 0xEF, (byte) 0xBB,
-            (byte) 0xBF};
+    private static final byte[] UTF8_BOM = new byte[] { (byte) 0xEF,
+            (byte) 0xBB, (byte) 0xBF };
 
-    private static final byte[] UTF16LE_BOM = new byte[]{(byte) 0xFF,
-            (byte) 0xFE};
+    private static final byte[] UTF16LE_BOM = new byte[] { (byte) 0xFF,
+            (byte) 0xFE };
 
-    private static final byte[] UTF16BE_BOM = new byte[]{(byte) 0xFE,
-            (byte) 0xFF};
+    private static final byte[] UTF16BE_BOM = new byte[] { (byte) 0xFE,
+            (byte) 0xFF };
 
-    private static final byte[] UTF32LE_BOM = new byte[]{(byte) 0xFF,
-            (byte) 0xFE, (byte) 0x00, (byte) 0x00};
+    private static final byte[] UTF32LE_BOM = new byte[] { (byte) 0xFF,
+            (byte) 0xFE, (byte) 0x00, (byte) 0x00 };
 
-    private static final byte[] UTF32BE_BOM = new byte[]{(byte) 0x00,
-            (byte) 0x00, (byte) 0xFE, (byte) 0xFF};
+    private static final byte[] UTF32BE_BOM = new byte[] { (byte) 0x00,
+            (byte) 0x00, (byte) 0xFE, (byte) 0xFF };
 
     /**
      * This is a utility constructor since the vast majority of the time, this
@@ -146,9 +146,12 @@ public class UnicodeWriter extends Writer {
      * Returns whether UTF-8 files should have a BOM in them when written.
      *
      * @return Whether to write a BOM for UTF-8 files.
+     * @see #setWriteUtf8BOM(boolean)
+     * @see UnicodeWriter
      */
     public static boolean getWriteUtf8BOM() {
         String prop = System.getProperty(PROPERTY_WRITE_UTF8_BOM);
+        // We default to writing the BOM
         if (prop != null && Boolean.valueOf(prop).equals(Boolean.FALSE)) {
             return false;
         }
@@ -179,13 +182,26 @@ public class UnicodeWriter extends Writer {
             }
         } else if ("UTF-16LE".equals(encoding)) {
             out.write(UTF16LE_BOM, 0, UTF16LE_BOM.length);
-        } else if ("UTF-16BE".equals(encoding)) {
+        } else if (/*"UTF-16".equals(encoding) || */"UTF-16BE"
+                .equals(encoding)) {
             out.write(UTF16BE_BOM, 0, UTF16BE_BOM.length);
         } else if ("UTF-32LE".equals(encoding)) {
             out.write(UTF32LE_BOM, 0, UTF32LE_BOM.length);
         } else if ("UTF-32".equals(encoding) || "UTF-32BE".equals(encoding)) {
             out.write(UTF32BE_BOM, 0, UTF32BE_BOM.length);
         }
+    }
+
+    /**
+     * Sets whether UTF-8 files should have a BOM written in them.
+     *
+     * @param write Whether to write a BOM.
+     * @see #getWriteUtf8BOM()
+     * @see UnicodeWriter
+     */
+    public static void setWriteUtf8BOM(boolean write) {
+        System.setProperty(UnicodeWriter.PROPERTY_WRITE_UTF8_BOM,
+                Boolean.toString(write));
     }
 
     /**

@@ -22,18 +22,18 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.e
 
 /**
  * Object Date.
- * 
+ *
  * @author D. Campione
  * @since Standard ECMA-262 3rd. Edition.
- * 
+ *
  */
 public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * Object Date().
-     * 
+     *
      * <p>Creates a Date object set to the current date and time.</p>
-     * 
+     *
      * @constructor
      * @extends Object
      * @since Standard ECMA-262 3rd. Edition.
@@ -44,7 +44,7 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * Object Date(milliseconds).
-     * 
+     *
      * @constructor
      * @extends Object
      * @param milliseconds The number of milliseconds between the desired date
@@ -57,7 +57,7 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * Object Date(datestring).
-     * 
+     *
      * @constructor
      * @extends Object
      * @param datestring A single argument that specifies date and optionally,
@@ -71,21 +71,21 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * Object Date(year, month, day, hours, minutes, seconds, ms).
-     * 
+     *
      * @constructor
      * @extends Object
      * @param year The year in a four digit format. e.g 2011 for the year 2011.
      * @param month The month specified as a single integer from 0 (January) to
      *        11 (December).
      * @param day The day of the month as an integer between 1 to 31.
-     * @param <i>hours<i> Optional hour value, specified as an integer from 0
+     * @param hours Optional hour value, specified as an integer from 0
      *        (midnight) to 23 (11pm).
-     * @param <i>minutes<i> Optional minute value, specified as an integer from
-     *        0 to 59.
-     * @param <i>seconds<i> Optional second value, specified as an integer from
-     *        0 to 59.
-     * @param <i>ms<i> Optional milliseconds value, specified as an integer from
-     *        0 to 999.
+     * @param minutes Optional minute value, specified as an integer from 0 to
+     *        59.
+     * @param seconds Optional second value, specified as an integer from 0 to
+     *        59.
+     * @param ms Optional milliseconds value, specified as an integer from 0 to
+     *        999.
      * @since Standard ECMA-262 3rd. Edition.
      * @since Level 2 Document Object Model Core Definition.
      */
@@ -95,7 +95,7 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * <b>property prototype</b>
-     * 
+     *
      * @type Date
      * @memberOf Date
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSDate
@@ -106,7 +106,7 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * <b>property constructor</b>
-     * 
+     *
      * @type Function
      * @memberOf Date
      * @see net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ecma.api.ecma3.JSFunction
@@ -118,11 +118,11 @@ public abstract class JSDate implements IJSDateFunctions {
     /**
      * <b>function UTC(year,month,day,hour,min,sec,ms)</b> - Converts a Date
      * specification to milliseconds.
-     * 
+     *
      * @memberOf Date
      * @param year The year in four digit format. If the year is added between 0
-     *        and 99 --> 1900 is added to it. 
-     * @param month The month specified from 0 (January) to 11 (December). 
+     *        and 99 --> 1900 is added to it.
+     * @param month The month specified from 0 (January) to 11 (December).
      * @param day The day in the month between 1 and 31.
      * @param hour The hour specified from 0 (midnight) and 23 (11 p.m).
      * @param min The minutes in the hour, specified from 0 to 59.
@@ -143,7 +143,7 @@ public abstract class JSDate implements IJSDateFunctions {
 
     /**
      * <b>function parse(string)</b> - Parse a date/time string.
-     * 
+     *
      * @memberOf Date
      * @param string A string containing the date and time to be parsed.
      * @returns The millisecond between 1st January 1970 and the specified date and time.

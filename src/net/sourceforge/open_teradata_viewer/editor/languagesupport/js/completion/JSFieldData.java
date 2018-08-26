@@ -30,8 +30,8 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.I
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.ITypeDeclaration;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -108,7 +108,6 @@ public class JSFieldData {
                 .isPublic(access);
     }
 
-    /** {@inheritDoc} */
     public String getEnclosingClassName(boolean fullyQualified) {
         return info.getClassFile().getClassName(fullyQualified);
     }

@@ -18,10 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.editor.syntax;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
@@ -34,7 +35,7 @@ import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
  * tag have their "opposite" tag closed.
  *
  * @author D. Campione
- * 
+ *
  */
 public class HtmlOccurrenceMarker implements IOccurrenceMarker {
 
@@ -65,10 +66,78 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
         return new HashSet<String>(Arrays.asList(tags));
     }
 
+    /**
+     * If the caret is inside of a tag, this method returns the token
+     * representing the tag name; otherwise, <code>null</code> is returned.<p>
+     *
+     * Currently, this method only checks for tag names on the same line as the
+     * caret, for simplicity. In the future it could check prior lines until the
+     * tag name is found.
+     *
+     * @param textArea The text area.
+     * @param occurrenceMarker The occurrence marker.
+     * @return The token to mark occurrences of. Note that, if the specified
+     *         occurrence marker identifies tokens other than tag names, these
+     *         other element types may be returned.
+     */
+    public static final IToken getTagNameTokenForCaretOffset(
+            SyntaxTextArea textArea, IOccurrenceMarker occurrenceMarker) {
+        // Get the tag name token.
+        // For now, we only check for tags on the current line, for simplicity
+
+        int dot = textArea.getCaretPosition();
+        IToken t = textArea.getTokenListForLine(textArea.getCaretLineNumber());
+        IToken toMark = null;
+
+        while (t != null && t.isPaintable()) {
+            if (t.getType() == IToken.MARKUP_TAG_NAME) {
+                toMark = t;
+            }
+            // Check for the token containing the caret before checking if it's
+            // the close token
+            if (t.getEndOffset() == dot || t.containsPosition(dot)) {
+                // Some languages, like PHP, mark functions/variables (PHP,
+                // JavaScript) as well as HTML tags
+                if (occurrenceMarker.isValidType(textArea, t)
+                        && t.getType() != IToken.MARKUP_TAG_NAME) {
+                    return t;
+                }
+                if (t.containsPosition(dot)) {
+                    break;
+                }
+            }
+            if (t.getType() == IToken.MARKUP_TAG_DELIMITER) {
+                if (t.isSingleChar('>') || t.is(TAG_SELF_CLOSE)) {
+                    toMark = null;
+                }
+            }
+            t = t.getNextToken();
+        }
+
+        return toMark;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public IToken getTokenToMark(SyntaxTextArea textArea) {
+        return getTagNameTokenForCaretOffset(textArea, this);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isValidType(SyntaxTextArea textArea, IToken t) {
+        return textArea.getMarkOccurrencesOfTokenType(t.getType());
+    }
+
     /** {@inheritDoc} */
     @Override
     public void markOccurrences(SyntaxDocument doc, IToken t,
             SyntaxTextAreaHighlighter h, SmartHighlightPainter p) {
+        if (t.getType() != IToken.MARKUP_TAG_NAME) {
+            DefaultOccurrenceMarker.markOccurrencesOfToken(doc, t, h, p);
+            return;
+        }
+
         String lexemeStr = t.getLexeme();
         char[] lexeme = lexemeStr.toCharArray();
         lexemeStr = lexemeStr.toLowerCase();
@@ -76,6 +145,7 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
         Element root = doc.getDefaultRootElement();
         int lineCount = root.getElementCount();
         int curLine = root.getElementIndex(t.getOffset());
+        int depth = 0;
 
         // For now, we only check for tags on the current line, for simplicity.
         // Tags spanning multiple lines aren't common anyway
@@ -116,22 +186,31 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
                         if (t.is(CLOSE_TAG_START)) {
                             IToken match = t.getNextToken();
                             if (match != null && match.is(lexeme)) {
-                                try {
-                                    int end = match.getOffset()
-                                            + match.length();
-                                    h.addMarkedOccurrenceHighlight(
-                                            match.getOffset(), end, p);
-                                    end = tokenOffs + match.length();
-                                    h.addMarkedOccurrenceHighlight(tokenOffs,
-                                            end, p);
-                                } catch (BadLocationException ble) {
-                                    ExceptionDialog.hideException(ble); // Never happens
+                                if (depth > 0) {
+                                    depth--;
+                                } else {
+                                    try {
+                                        int end = match.getOffset()
+                                                + match.length();
+                                        h.addMarkedOccurrenceHighlight(
+                                                match.getOffset(), end, p);
+                                        end = tokenOffs + match.length();
+                                        h.addMarkedOccurrenceHighlight(
+                                                tokenOffs, end, p);
+                                    } catch (BadLocationException ble) {
+                                        ExceptionDialog.hideException(ble); // Never happens
+                                    }
+                                    return; // We're done
                                 }
-                                return; // We're done
+                            }
+                        } else if (t.isSingleChar('<')) {
+                            t = t.getNextToken();
+                            if (t != null && t.is(lexeme)) {
+                                depth++;
                             }
                         }
                     }
-                    t = t.getNextToken();
+                    t = t == null ? null : t.getNextToken();
                 }
 
                 if (++curLine < lineCount) {
@@ -139,7 +218,12 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
                 }
             } while (curLine < lineCount);
         } else { // !forward
-            Stack<IToken> matches = new Stack<IToken>();
+            // Idea: Get all opening and closing tags of the relevant type
+            // on the current line. Find the opening tag paired to the
+            // closing tag we found originally; if it's not on this line,
+            // keep going to the previous line
+
+            List<Entry> openCloses = new ArrayList<Entry>();
             boolean inPossibleMatch = false;
             t = doc.getTokenListForLine(curLine);
             final int endBefore = tokenOffs - 2; // Stop before "</"
@@ -152,7 +236,7 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
                             IToken next = t.getNextToken();
                             if (next != null) {
                                 if (next.is(lexeme)) {
-                                    matches.push(next);
+                                    openCloses.add(new Entry(true, next));
                                     inPossibleMatch = true;
                                 } else {
                                     inPossibleMatch = false;
@@ -162,13 +246,14 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
                         } else if (t.isSingleChar('>')) {
                             inPossibleMatch = false;
                         } else if (inPossibleMatch && t.is(TAG_SELF_CLOSE)) {
-                            matches.pop();
+                            openCloses.remove(openCloses.size() - 1);
+                            inPossibleMatch = false;
                         } else if (t.is(CLOSE_TAG_START)) {
                             IToken next = t.getNextToken();
                             if (next != null) {
                                 // Invalid XML might not have a match
-                                if (next.is(lexeme) && !matches.isEmpty()) {
-                                    matches.pop();
+                                if (next.is(lexeme)) {
+                                    openCloses.add(new Entry(false, next));
                                 }
                                 t = next;
                             }
@@ -177,25 +262,48 @@ public class HtmlOccurrenceMarker implements IOccurrenceMarker {
                     t = t.getNextToken();
                 }
 
-                if (!matches.isEmpty()) {
-                    try {
-                        IToken match = matches.pop();
-                        int end = match.getOffset() + match.length();
-                        h.addMarkedOccurrenceHighlight(match.getOffset(), end,
-                                p);
-                        end = tokenOffs + match.length();
-                        h.addMarkedOccurrenceHighlight(tokenOffs, end, p);
-                    } catch (BadLocationException ble) {
-                        ExceptionDialog.hideException(ble); // Never happens
+                for (int i = openCloses.size() - 1; i >= 0; i--) {
+                    Entry entry = openCloses.get(i);
+                    depth += entry.open ? -1 : 1;
+                    if (depth == -1) {
+                        try {
+                            IToken match = entry.t;
+                            int end = match.getOffset() + match.length();
+                            h.addMarkedOccurrenceHighlight(match.getOffset(),
+                                    end, p);
+                            end = tokenOffs + match.length();
+                            h.addMarkedOccurrenceHighlight(tokenOffs, end, p);
+                        } catch (BadLocationException ble) {
+                            ExceptionDialog.hideException(ble); // Never happens
+                        }
+                        openCloses.clear();
+                        return;
                     }
-                    return;
                 }
 
+                openCloses.clear();
                 if (--curLine >= 0) {
                     t = doc.getTokenListForLine(curLine);
                 }
 
             } while (curLine >= 0);
+        }
+    }
+
+    /**
+     * Used internally when searching backward for a matching "open" tag.
+     *
+     * @author D. Campione
+     *
+     */
+    private static class Entry {
+
+        public boolean open;
+        public IToken t;
+
+        public Entry(boolean open, IToken t) {
+            this.open = open;
+            this.t = t;
         }
     }
 }
