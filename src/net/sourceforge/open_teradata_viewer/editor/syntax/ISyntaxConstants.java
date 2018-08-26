@@ -45,6 +45,9 @@ public interface ISyntaxConstants {
     /** Style for highlighting CSS. */
     public static final String SYNTAX_STYLE_CSS = "text/css";
 
+    /** Style for highlighting Groovy. */
+    public static final String SYNTAX_STYLE_GROOVY = "text/groovy";
+
     /** Style for highlighting HTML. */
     public static final String SYNTAX_STYLE_HTML = "text/html";
 
@@ -60,11 +63,23 @@ public interface ISyntaxConstants {
     /** Style for highlighting JSP. */
     public static final String SYNTAX_STYLE_JSP = "text/jsp";
 
+    /** Style for highlighting NSIS install scripts. */
+    public static final String SYNTAX_STYLE_NSIS = "text/nsis";
+
+    /** Style for highlighting Perl. */
+    public static final String SYNTAX_STYLE_PERL = "text/perl";
+
     /** Style for highlighting PHP. */
     public static final String SYNTAX_STYLE_PHP = "text/php";
 
+    /** Style for highlighting Python. */
+    public static final String SYNTAX_STYLE_PYTHON = "text/python";
+
     /** Style for highlighting SQL. */
     public static final String SYNTAX_STYLE_SQL = "text/sql";
+
+    /** Style for highlighting UNIX shell keywords. */
+    public static final String SYNTAX_STYLE_UNIX_SHELL = "text/unix";
 
     /** Style for highlighting XML. */
     public static final String SYNTAX_STYLE_XML = "text/xml";

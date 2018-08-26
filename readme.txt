@@ -1,6 +1,6 @@
-Teradata JDBC Driver 14.10.00.26
+Teradata JDBC Driver 15.00.00.15
 
-Part of the Teradata Tools and Utilities 14.10 product suite
+Part of the Teradata Tools and Utilities 15.00 product suite
 
 
 Get the Latest Software
@@ -24,7 +24,7 @@ Note that IBM WebSphere Application Server 5.0 is not supported, because
 WebSphere 5.0 uses JDK 1.3.1.
 
 This release of the Teradata JDBC Driver supports Teradata Database
-12.00, 13.00, 13.10, 14.00, and 14.10.
+13.00, 13.10, 14.00, 14.10, and 15.00.
 
 
 Release Notes
@@ -34,7 +34,32 @@ This section highlights issues that you should be aware of when upgrading to thi
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
 
-This release includes changes to address the following DRs:
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.34:
+
+DR 148040 Centralized administration for data encryption
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.33:
+
+DR 155892 Support for detection of replayed or out-of-order messages
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.32:
+
+DR 144067 Remove all references to the Cryptix source version of the AES algorithm
+DR 155353 Complete AES-256 implementation started in 14.0
+DR 163542 In wrap or unwrap throw GSSException if MsgProp is NULL
+DR 165341 TeraGSS Java on Linux + Oracle/Sun Java blocks on /dev/random increasing logon time
+DR 165369 TERAGSSJAVA: LDAP mechanism is not working
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.27:
+
+DR 162376 Support JSON data type
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.26:
 
 DR 110776 support INTERVAL data types for implicit data type conversions, and for use with the EXTRACT function
 DR 144698 Support TIME WITH TIME ZONE and TIMESTAMP WITH TIME ZONE Struct bind values
@@ -1134,7 +1159,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.14.10.00.26.zip and TeraJDBC__indep_indep.14.10.00.26.tar
+TeraJDBC__indep_indep.15.00.00.15.zip and TeraJDBC__indep_indep.15.00.00.15.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

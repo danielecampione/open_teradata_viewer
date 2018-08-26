@@ -312,12 +312,20 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
                 subMenu);
         addSyntaxItem("CSS", ISyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
+        addSyntaxItem("Groovy", ISyntaxConstants.SYNTAX_STYLE_GROOVY, bg,
+                subMenu);
         addSyntaxItem("HTML", ISyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
         addSyntaxItem("Java", ISyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
         addSyntaxItem("JavaScript", ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
                 bg, subMenu);
         addSyntaxItem("JSP", ISyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
+        addSyntaxItem("NSIS", ISyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
+        addSyntaxItem("Perl", ISyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
         addSyntaxItem("PHP", ISyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
+        addSyntaxItem("Python", ISyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
+                subMenu);
+        addSyntaxItem("Unix Shell", ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+                bg, subMenu);
         addSyntaxItem("XML", ISyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
         addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
                 bg, subMenu);

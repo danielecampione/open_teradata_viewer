@@ -1,3 +1,11 @@
+0.22b (06/05/2014)
+    - Added the Python syntax highlighting.
+    - Added the NSIS syntax highlighting.
+    - Added the UNIX shell scripting language syntax highlighting.
+    - Added the Perl syntax highlighting.
+    - Added the Groovy syntax highlighting.
+    - Upgraded Teradata JDBC driver 14.10.00.26 -> 15.00.00.15
+
 0.22a (03/04/2014)
     - Added the HTML syntax highlighting.
     - Added the PHP syntax highlighting.

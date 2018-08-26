@@ -83,8 +83,9 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *   <td style="vertical-align: top">
  *    <ul>
  *       <li>C
- *       <li>CSS
  *       <li>Clojure
+ *       <li>CSS
+ *       <li>Groovy
  *       <li>HTML
  *       <li>Java
  *       <li>JavaScript
@@ -93,8 +94,12 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *   </td>
  *   <td style="vertical-align: top">
  *    <ul>
+ *       <li>NSIS
+ *       <li>Perl
  *       <li>PHP
+ *       <li>Python
  *       <li>SQL
+ *       <li>UNIX shell scripts
  *       <li>XML files
  *    </ul>
  *   </td>
