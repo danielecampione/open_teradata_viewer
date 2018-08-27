@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -622,8 +622,8 @@ public class SyntaxUtilities implements SwingConstants {
      * ITokenOrientedView} and <code>javax.swing.text.TabExpander</code>;
      * otherwise, a <code>ClassCastException</code> could be thrown.
      *
-     * @param pos the position to convert >= 0
-     * @param a the allocated region in which to render
+     * @param pos The position to convert &gt;= 0.
+     * @param a The allocated region in which to render.
      * @param direction The direction from the current position that can be
      *                  thought of as the arrow keys typically found on a
      *                  keyboard. This will be one of the following values:
@@ -633,11 +633,11 @@ public class SyntaxUtilities implements SwingConstants {
      * <li>SwingConstants.NORTH
      * <li>SwingConstants.SOUTH
      * </ul>
-     * @return the location within the model that best represents the next
-     *         location visual position
+     * @return The location within the model that best represents the next
+     *         location visual position.
      * @exception BadLocationException
      * @exception IllegalArgumentException if <code>direction</code> doesn't
-     *            have one of the legal values above
+     *            have one of the legal values above.
      */
     public static int getNextVisualPositionFrom(int pos, Position.Bias b,
             Shape a, int direction, Position.Bias[] biasRet, View view)
@@ -788,12 +788,12 @@ public class SyntaxUtilities implements SwingConstants {
      * compute the result. If the component doesn't have a size a value of -1
      * will be returned.
      *
-     * @param c the editor
-     * @param offs the offset in the document >= 0
-     * @param x the X coordinate >= 0
-     * @return the position >= 0 if the request can be computed, otherwise a
+     * @param c The editor.
+     * @param offs The offset in the document &gt;= 0.
+     * @param x The X coordinate &gt;= 0.
+     * @return The position &gt;= 0 if the request can be computed, otherwise a
      *         value of -1 will be returned.
-     * @exception BadLocationException if the offset is out of range
+     * @exception BadLocationException if the offset is out of range.
      */
     public static final int getPositionAbove(SyntaxTextArea c, int offs,
             float x, TabExpander e) throws BadLocationException {
@@ -817,12 +817,12 @@ public class SyntaxUtilities implements SwingConstants {
      * compute the result. If the component doesn't have a size a value of -1
      * will be returned.
      *
-     * @param c the editor
-     * @param offs the offset in the document >= 0
-     * @param x the X coordinate >= 0
-     * @return the position >= 0 if the request can be computed, otherwise
-     *         a value of -1 will be returned.
-     * @exception BadLocationException if the offset is out of range
+     * @param c The editor.
+     * @param offs The offset in the document &gt;= 0.
+     * @param x The X coordinate &gt;= 0.
+     * @return The position &gt;= 0 if the request can be computed, otherwise a
+     *         value of -1 will be returned.
+     * @exception BadLocationException if the offset is out of range.
      */
     public static final int getPositionBelow(SyntaxTextArea c, int offs,
             float x, TabExpander e) throws BadLocationException {

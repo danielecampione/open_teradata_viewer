@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             new ChangeFoldStateAction(staExpandFoldAction, false),
             new CollapseAllFoldsAction(), new CopyAsRtfAction(),
             new DecreaseIndentAction(), new DeletePrevWordAction(),
-            new EndAction(endAction, false),
+            new DumbCompleteWordAction(), new EndAction(endAction, false),
             new EndAction(selectionEndAction, true),
             new EndWordAction(endWordAction, false),
             new EndWordAction(endWordAction, true), new ExpandAllFoldsAction(),
@@ -891,6 +891,147 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             }
             offs -= firstIndex - seg.getIndex();
             return offs;
+        }
+    }
+
+    /**
+     * Overridden to use the programming language STA is displaying when
+     * computing words to complete.
+     *
+     * @author D. Campione
+     *
+     */
+    public static class DumbCompleteWordAction extends
+            TextAreaEditorKit.DumbCompleteWordAction {
+
+        private static final long serialVersionUID = -6609967108000557355L;
+
+        @Override
+        public int getPreviousWord(TextArea textArea, int offs)
+                throws BadLocationException {
+            SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+            Element root = doc.getDefaultRootElement();
+            int line = root.getElementIndex(offs);
+            Element elem = root.getElement(line);
+
+            // If caret is at the beginning of a word, we should return the
+            // previous word
+            int start = elem.getStartOffset();
+            if (offs > start) {
+                char ch = doc.charAt(offs);
+                if (isIdentifierChar(ch)) {
+                    offs--;
+                }
+            } else { // offs == start => previous word is on previous line
+                if (line == 0) {
+                    return -1;
+                }
+                elem = root.getElement(--line);
+                offs = elem.getEndOffset() - 1;
+            }
+
+            int prevWordStart = getPreviousWordStartInLine(doc, elem, offs);
+            while (prevWordStart == -1 && line > 0) {
+                line--;
+                elem = root.getElement(line);
+                prevWordStart = getPreviousWordStartInLine(doc, elem,
+                        elem.getEndOffset());
+            }
+
+            return prevWordStart;
+        }
+
+        private int getPreviousWordStartInLine(SyntaxDocument doc,
+                Element elem, int offs) throws BadLocationException {
+            int start = elem.getStartOffset();
+            int cur = offs;
+
+            // Skip any whitespace or non-word chars
+            while (cur >= start) {
+                char ch = doc.charAt(cur);
+                if (isIdentifierChar(ch)) {
+                    break;
+                }
+                cur--;
+            }
+            if (cur < start) {
+                // Empty line or nothing but whitespace/non-word chars
+                return -1;
+            }
+
+            return getWordStartImpl(doc, elem, cur);
+        }
+
+        @Override
+        public int getWordEnd(TextArea textArea, int offs)
+                throws BadLocationException {
+            SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+            Element root = doc.getDefaultRootElement();
+            int line = root.getElementIndex(offs);
+            Element elem = root.getElement(line);
+            int end = elem.getEndOffset() - 1;
+
+            int wordEnd = offs;
+            while (wordEnd <= end) {
+                if (!isIdentifierChar(doc.charAt(wordEnd))) {
+                    break;
+                }
+                wordEnd++;
+            }
+
+            return wordEnd;
+        }
+
+        @Override
+        public int getWordStart(TextArea textArea, int offs)
+                throws BadLocationException {
+            SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
+            Element root = doc.getDefaultRootElement();
+            int line = root.getElementIndex(offs);
+            Element elem = root.getElement(line);
+            return getWordStartImpl(doc, elem, offs);
+        }
+
+        private static final int getWordStartImpl(SyntaxDocument doc,
+                Element elem, int offs) throws BadLocationException {
+            int start = elem.getStartOffset();
+
+            int wordStart = offs;
+            while (wordStart >= start) {
+                char ch = doc.charAt(wordStart);
+                // Ignore newlines so we work when caret is at end of line
+                if (!isIdentifierChar(ch) && ch != '\n') {
+                    break;
+                }
+                wordStart--;
+            }
+
+            return wordStart == offs ? offs : wordStart + 1;
+        }
+
+        /**
+         * Overridden to not suggest word completions if the text right before
+         * the caret contains non-word characters, such as '/' or '%'.
+         *
+         * @param prefix The prefix characters before the caret.
+         * @return Whether the prefix could be part of a "word" in the context
+         *         of the text area's current content.
+         */
+        @Override
+        protected boolean isAcceptablePrefix(String prefix) {
+            return prefix.length() > 0
+                    && isIdentifierChar(prefix.charAt(prefix.length() - 1));
+        }
+
+        /**
+         * Returns whether the specified character should be considered part
+         * of an identifier.
+         *
+         * @param ch The character.
+         * @return Whether the character is part of an identifier.
+         */
+        private static final boolean isIdentifierChar(char ch) {
+            return Character.isLetterOrDigit(ch) || ch == '_' || ch == '$';
         }
     }
 

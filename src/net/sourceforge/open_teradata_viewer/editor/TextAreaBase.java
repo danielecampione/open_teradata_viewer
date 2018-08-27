@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,6 @@ public abstract class TextAreaBase extends JTextArea {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("Yo");
                     possiblyUpdateCurrentLineHighlightLocation();
                 }
             });
@@ -363,6 +362,11 @@ public abstract class TextAreaBase extends JTextArea {
         } catch (BadLocationException ble) {
             return 0; // Never happens
         }
+    }
+
+    /** @return The y-offset of the caret. */
+    protected int getCurrentCaretY() {
+        return currentCaretY;
     }
 
     /**
@@ -697,7 +701,7 @@ public abstract class TextAreaBase extends JTextArea {
 
     /**
      * Sets the background color of this text editor. Note that this is
-     * equivalent to calling <code>setBackgroundObject(bg)</code>.
+     * equivalent to calling <code>setBackgroundObject(bg)</code>.<p>
      *
      * NOTE: the opaque property is set to <code>true</code> when the background
      * is set to a color (by this method). When an image is used for the
@@ -717,7 +721,7 @@ public abstract class TextAreaBase extends JTextArea {
         } else { // Was an image painter..
             backgroundPainter = new ColorBackgroundPainterStrategy(bg);
         }
-        setOpaque(true);
+        setOpaque(bg.getAlpha() == 0xff);
         firePropertyChange("background", oldBG, bg);
         repaint();
     }

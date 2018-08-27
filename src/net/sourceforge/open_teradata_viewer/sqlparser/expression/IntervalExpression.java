@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,15 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class IntervalExpression implements IExpression {
 
     private String parameter = null;
+    private String intervalType = null;
 
     public String getParameter() {
         return parameter;
@@ -36,9 +37,18 @@ public class IntervalExpression implements IExpression {
         this.parameter = parameter;
     }
 
+    public String getIntervalType() {
+        return intervalType;
+    }
+
+    public void setIntervalType(String intervalType) {
+        this.intervalType = intervalType;
+    }
+
     @Override
     public String toString() {
-        return "INTERVAL " + parameter;
+        return "INTERVAL " + parameter
+                + (intervalType != null ? " " + intervalType : "");
     }
 
     @Override

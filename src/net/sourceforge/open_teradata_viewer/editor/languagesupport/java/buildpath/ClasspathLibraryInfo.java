@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support java buildpath )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.Util;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.PackageMapNode;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
 
 /**
@@ -36,7 +35,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * add to the "build path". This type of container is useful if your application
  * ships with specific classes you want included in code completion but you
  * don't want to add the entire jar to the build path.<p>
- * 
+ *
  * Since there is no real way to determine all classes in a package via
  * reflection, you must explicitly enumerate all classes that are on the
  * classpath that you want on the build path. To make this easier, you can use
@@ -52,7 +51,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * @see JarLibraryInfo
  * @see DirLibraryInfo
  * @see ClasspathSourceLocation
- * 
+ *
  */
 public class ClasspathLibraryInfo extends LibraryInfo {
 
@@ -117,14 +116,14 @@ public class ClasspathLibraryInfo extends LibraryInfo {
     }
 
     @Override
-    public int compareTo(Object o) {
-        if (o == this) {
+    public int compareTo(LibraryInfo info) {
+        if (info == this) {
             return 0;
         }
         int res = -1;
 
-        if (o instanceof ClasspathLibraryInfo) {
-            ClasspathLibraryInfo other = (ClasspathLibraryInfo) o;
+        if (info instanceof ClasspathLibraryInfo) {
+            ClasspathLibraryInfo other = (ClasspathLibraryInfo) info;
             res = classNameToClassFile.size()
                     - other.classNameToClassFile.size();
             if (res == 0) {
@@ -179,27 +178,12 @@ public class ClasspathLibraryInfo extends LibraryInfo {
     }
 
     @Override
-    public TreeMap createPackageMap() throws IOException {
-        TreeMap packageMap = new TreeMap();
+    public PackageMapNode createPackageMap() throws IOException {
+        PackageMapNode root = new PackageMapNode();
         for (String className : classNameToClassFile.keySet()) {
-            String[] tokens = Util.splitOnChar(className, '/');
-            TreeMap temp = packageMap;
-            for (int j = 0; j < tokens.length - 1; j++) {
-                String pkg = tokens[j];
-                TreeMap submap = (TreeMap) temp.get(pkg);
-                if (submap == null) {
-                    submap = new TreeMap();
-                    temp.put(pkg, submap);
-                }
-                temp = submap;
-            }
-            className = tokens[tokens.length - 1];
-            // Our internal map must have all entries ending in ".class" but the
-            // one we pass to client code must not
-            className = className.substring(0, className.length() - 6);
-            temp.put(className, null); // Lazily set value to ClassFile later
+            root.add(className);
         }
-        return packageMap;
+        return root;
     }
 
     /**

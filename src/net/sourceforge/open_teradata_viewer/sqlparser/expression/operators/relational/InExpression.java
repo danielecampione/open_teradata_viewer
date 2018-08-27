@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +22,19 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
-public class InExpression implements IExpression,
-        ISupportsOldTeradataJoinSyntax {
+public class InExpression implements IExpression, ISupportsOldOracleJoinSyntax {
 
     private IExpression leftExpression;
     private IItemsList leftItemsList;
     private IItemsList rightItemsList;
     private boolean not = false;
 
-    private int oldTeradataJoinSyntax = NO_TERADATA_JOIN;
+    private int oldOracleJoinSyntax = NO_ORACLE_JOIN;
 
     public InExpression() {
     }
@@ -46,18 +45,18 @@ public class InExpression implements IExpression,
     }
 
     @Override
-    public void setOldTeradataJoinSyntax(int oldTeradataJoinSyntax) {
-        this.oldTeradataJoinSyntax = oldTeradataJoinSyntax;
-        if (oldTeradataJoinSyntax < 0 || oldTeradataJoinSyntax > 1) {
+    public void setOldOracleJoinSyntax(int oldOracleJoinSyntax) {
+        this.oldOracleJoinSyntax = oldOracleJoinSyntax;
+        if (oldOracleJoinSyntax < 0 || oldOracleJoinSyntax > 1) {
             throw new IllegalArgumentException(
-                    "unexpected join type for Teradata found with IN (type="
-                            + oldTeradataJoinSyntax + ")");
+                    "unexpected join type for oracle found with IN (type="
+                            + oldOracleJoinSyntax + ")");
         }
     }
 
     @Override
-    public int getOldTeradataJoinSyntax() {
-        return oldTeradataJoinSyntax;
+    public int getOldOracleJoinSyntax() {
+        return oldOracleJoinSyntax;
     }
 
     public IItemsList getRightItemsList() {
@@ -99,7 +98,7 @@ public class InExpression implements IExpression,
 
     private String getLeftExpressionString() {
         return leftExpression
-                + (oldTeradataJoinSyntax == TERADATA_JOIN_RIGHT ? "(+)" : "");
+                + (oldOracleJoinSyntax == ORACLE_JOIN_RIGHT ? "(+)" : "");
     }
 
     @Override
@@ -112,15 +111,15 @@ public class InExpression implements IExpression,
     }
 
     @Override
-    public int getTeradataPriorPosition() {
-        return ISupportsOldTeradataJoinSyntax.NO_TERADATA_PRIOR;
+    public int getOraclePriorPosition() {
+        return ISupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR;
     }
 
     @Override
-    public void setTeradataPriorPosition(int priorPosition) {
-        if (priorPosition != ISupportsOldTeradataJoinSyntax.NO_TERADATA_PRIOR) {
+    public void setOraclePriorPosition(int priorPosition) {
+        if (priorPosition != ISupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR) {
             throw new IllegalArgumentException(
-                    "unexpected prior for Teradata found");
+                    "unexpected prior for oracle found");
         }
     }
 }

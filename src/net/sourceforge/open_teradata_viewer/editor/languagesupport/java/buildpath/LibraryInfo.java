@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support java buildpath )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ package net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpa
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeMap;
 
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JarManager;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.PackageMapNode;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
 
 /**
@@ -40,9 +40,9 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * @see DirLibraryInfo
  * @see JarLibraryInfo
  * @see ClasspathLibraryInfo
- * 
+ *
  */
-public abstract class LibraryInfo implements Comparable, Cloneable {
+public abstract class LibraryInfo implements Comparable<LibraryInfo>, Cloneable {
 
     /**
      * The location of the source files corresponding to this library. This may
@@ -53,7 +53,7 @@ public abstract class LibraryInfo implements Comparable, Cloneable {
     /**
      * Does any cleanup necessary after a call to {@link
      * #bulkClassFileCreationStart()}.
-     * 
+     *
      * @throws IOException If an IO error occurs.
      * @see #bulkClassFileCreationStart()
      * @see #createClassFileBulk(String)
@@ -65,7 +65,7 @@ public abstract class LibraryInfo implements Comparable, Cloneable {
      * #createClassFileBulk(String)}. After calling this method, the actual
      * class file fetching should be done in a try/finally block that ensures a
      * call to {@link #bulkClassFileCreationEnd()}; e.g.
-     * 
+     *
      * <pre>
      * libInfo.bulkClassFileCreationStart();
      * try {
@@ -76,7 +76,7 @@ public abstract class LibraryInfo implements Comparable, Cloneable {
      *    libInfo.bulkClassFileCreationEnd();
      * }
      * </pre>
-     * 
+     *
      * @throws IOException If an IO error occurs.
      * @see #bulkClassFileCreationEnd()
      * @see #createClassFileBulk(String)
@@ -143,7 +143,7 @@ public abstract class LibraryInfo implements Comparable, Cloneable {
      * @return The package structure in this library.
      * @throws IOException If an IO error occurs.
      */
-    public abstract TreeMap createPackageMap() throws IOException;
+    public abstract PackageMapNode createPackageMap() throws IOException;
 
     /**
      * Two <code>LibraryInfo</code>s are considered equal if they represent the
@@ -154,7 +154,7 @@ public abstract class LibraryInfo implements Comparable, Cloneable {
      */
     @Override
     public boolean equals(Object o) {
-        return compareTo(o) == 0;
+        return o instanceof LibraryInfo && compareTo((LibraryInfo) o) == 0;
     }
 
     /**

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1025,8 +1025,8 @@ public class TextArea extends TextAreaBase implements Printable {
      * <code>SyntaxTextArea</code> and the "auto-indent" feature).
      *
      * @param str the text to use as the replacement
-     * @param start the start position >= 0
-     * @param end the end position >= start
+     * @param start The start position &gt;= 0.
+     * @param end The end position &gt;= start.
      * @exception IllegalArgumentException if part of the range is an invalid
      *            position in the model
      * @see #insert(String, int)

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpressio
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -31,6 +31,7 @@ public class LikeExpression extends BinaryExpression {
 
     private boolean not = false;
     private String escape = null;
+    private boolean caseInsensitive = false;
 
     @Override
     public boolean isNot() {
@@ -48,7 +49,7 @@ public class LikeExpression extends BinaryExpression {
 
     @Override
     public String getStringExpression() {
-        return ((not) ? "NOT " : "") + "LIKE";
+        return ((not) ? "NOT " : "") + (caseInsensitive ? "ILIKE" : "LIKE");
     }
 
     @Override
@@ -67,5 +68,13 @@ public class LikeExpression extends BinaryExpression {
 
     public void setEscape(String escape) {
         this.escape = escape;
+    }
+
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
     }
 }

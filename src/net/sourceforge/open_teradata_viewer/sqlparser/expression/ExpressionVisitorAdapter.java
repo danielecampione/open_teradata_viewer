@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
@@ -269,6 +269,9 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
         expr.getExpression().accept(this);
         expr.getDefaultValue().accept(this);
         expr.getOffset().accept(this);
+        if (expr.getKeep() != null) {
+            expr.getKeep().accept(this);
+        }
         for (OrderByElement element : expr.getOrderByElements()) {
             element.getExpression().accept(this);
         }
@@ -290,7 +293,7 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
     }
 
     @Override
-    public void visit(TeradataHierarchicalExpression expr) {
+    public void visit(OracleHierarchicalExpression expr) {
         expr.getConnectExpression().accept(this);
         expr.getStartExpression().accept(this);
     }
@@ -325,7 +328,30 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
     }
 
     @Override
-    public void visit(RegExpTeradataOperator expr) {
+    public void visit(RegExpMySQLOperator expr) {
         visitBinaryExpression(expr);
+    }
+
+    @Override
+    public void visit(WithinGroupExpression wgexpr) {
+        wgexpr.getExprList().accept(this);
+        for (OrderByElement element : wgexpr.getOrderByElements()) {
+            element.getExpression().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(UserVariable var) {
+    }
+
+    @Override
+    public void visit(NumericBind bind) {
+    }
+
+    @Override
+    public void visit(KeepExpression expr) {
+        for (OrderByElement element : expr.getOrderByElements()) {
+            element.getExpression().accept(this);
+        }
     }
 }

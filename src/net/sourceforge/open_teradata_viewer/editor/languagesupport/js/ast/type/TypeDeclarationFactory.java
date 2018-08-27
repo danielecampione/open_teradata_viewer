@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support js ast type )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,14 +28,14 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.e
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.client.DOMAddtions;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.client.HTMLDOMAdditions;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.e4x.ECMAvE4xAdditions;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.v3.TypeDeclarationsECMAv3;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.type.ecma.v5.TypeDeclarationsECMAv5;
 
 /**
  * TypeDeclarationFactory contains cache of TypeDeclarations for to make the
  * lookup of JavaScript types as efficient as possible.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TypeDeclarationFactory {
 
@@ -57,7 +57,7 @@ public class TypeDeclarationFactory {
         } catch (Exception e) {
             // Ignore this
             ExceptionDialog.ignoreException(e);
-            ecma = new TypeDeclarationsECMAv3();
+            ecma = new TypeDeclarationsECMAv5();
         }
 
         if (xmlSupported) { // Add E4X API
@@ -77,7 +77,7 @@ public class TypeDeclarationFactory {
 
     /** @return Default base ECMA implementation. */
     protected String getDefaultECMAVersion() {
-        return TypeDeclarationsECMAv3.class.getName();
+        return TypeDeclarationsECMAv5.class.getName();
     }
 
     public List<TypeDeclaration> getAllJavaScriptTypes() {
@@ -86,7 +86,7 @@ public class TypeDeclarationFactory {
 
     /**
      * Removes declaration type from type cache.
-     * 
+     *
      * @param name Name of type declaration.
      */
     public void removeType(String name) {
@@ -175,7 +175,7 @@ public class TypeDeclarationFactory {
     /**
      * Answers the question whether an object can be instantiated (i.e has a
      * constructor).
-     *  
+     *
      * @param name Name of class to test.
      */
     public boolean canJavaScriptBeInstantiated(String name) {

@@ -2,7 +2,7 @@
 /* JavaCCOptions:STATIC=false,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -486,4 +486,4 @@ public class SimpleCharStream
   }
 
 }
-/* JavaCC - OriginalChecksum=61bcb5f74bbca0cd457519078aa206bf (do not edit this line) */
+/* JavaCC - OriginalChecksum=ffe9d31597adca9014e45c548e303b55 (do not edit this line) */

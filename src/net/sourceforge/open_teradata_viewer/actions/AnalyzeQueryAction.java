@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -47,11 +47,17 @@ public class AnalyzeQueryAction extends CustomAction {
     private static final long serialVersionUID = 4156741775582762590L;
 
     public AnalyzeQueryAction() {
-        super("Analyze query..", null, null,
-                "Show table list of the SQL query in a graphic viewer.");
+        super(
+                "Analyze query..",
+                null,
+                null,
+                "<html><body>Show table list of the SQL query in a graphic viewer.<br />"
+                        + "SqlParser parses an SQL statement and translate it into a hierarchy of Java classes.<br />"
+                        + "The generated hierarchy can be navigated by using the Visitor Pattern.</body></html>");
         setEnabled(true);
     }
 
+    @Override
     public void actionPerformed(final ActionEvent e) {
         // The "analyze query" process can be performed altough other processes
         // are running. No ThreadAction object must be instantiated because the

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  *
  * @author D. Campione
  * @see Theme
- * 
+ *
  */
 public class SyntaxScheme implements Cloneable, ITokenTypes {
 
@@ -246,7 +246,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
 
     /**
      * Loads a syntax scheme from an input stream.<p>
-     * 
+     *
      * Consider using the {@link Theme} class for saving and loading STA styles
      * rather than using this API.
      *
@@ -270,7 +270,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      * Loads a syntax highlighting color scheme from a string created from
      * <code>toCommaSeparatedString</code>. This method is useful for saving and
      * restoring color schemes.<p>
-     * 
+     *
      * Consider using the {@link Theme} class for saving and loading STA styles
      * rather than using this API.
      *
@@ -286,7 +286,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      * Loads a syntax highlighting color scheme from a string created from
      * <code>toCommaSeparatedString</code>. This method is useful for saving
      * and restoring color schemes.<p>
-     * 
+     *
      * Consider using the {@link Theme} class for saving and loading STA styles
      * rather than using this API.
      *
@@ -535,8 +535,8 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      * Returns this syntax highlighting scheme as a comma-separated list of
      * values as follows:
      * <ul>
-     *   <li>If a color is non-null, it is added as a 24-bit integer of the
-     *       form <code>((r<<16) | (g<<8) | (b))</code>; if it is
+     *   <li>If a color is non-null, it is added as a 24-bit integer of the form
+     *       <code>((r&lt;*lt;16) | (g&lt;*lt;8) | (b))</code>; if it is
      *       <code>null</code>, it is added as "<i>-,</i>".
      *   <li>The font and style (bold/italic) is added as an integer like so:
      *       "<i>family,</i> <i>style,</i> <i>size</i>".
@@ -546,7 +546,7 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
      *       <ul>
      *          <li><code>i</code> is the index of the syntax scheme.
      *          <li><i>fg</i> and <i>bg</i> are the foreground and background
-     *              colors for the scheme, and may be null (represented by 
+     *              colors for the scheme, and may be null (represented by
      *              <code>-</code>).
      *          <li><code>uline</code> is whether or not the font should be
      *              underlined, and is either <code>t</code> or <code>f</code>.
@@ -592,9 +592,9 @@ public class SyntaxScheme implements Cloneable, ITokenTypes {
 
     /**
      * Loads a <code>SyntaxScheme</code> from an XML file.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class SyntaxSchemeLoader extends DefaultHandler {
 

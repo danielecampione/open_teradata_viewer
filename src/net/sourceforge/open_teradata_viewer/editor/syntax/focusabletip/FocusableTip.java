@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax focusabletip )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax.focusabletip;
 
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -58,6 +59,8 @@ public class FocusableTip {
     private TextAreaListener textAreaListener;
     private HyperlinkListener hyperlinkListener;
     private String lastText;
+
+    private Dimension maxSize; // null to automatic
 
     /**
      * The screen bounds in which the mouse has to stay for the currently
@@ -171,6 +174,17 @@ public class FocusableTip {
         return imageBase;
     }
 
+    /**
+     * The maximum size for unfocused tool tips.
+     *
+     * @return The maximum size for unfocused tool tips. A value of
+     *         <code>null</code> will use a default size.
+     * @see #setMaxSize(Dimension)
+     */
+    public Dimension getMaxSize() {
+        return maxSize;
+    }
+
     /** Disposes of the focusable tip currently displayed, if any. */
     public void possiblyDisposeOfTipWindow() {
         if (tipWindow != null) {
@@ -195,6 +209,17 @@ public class FocusableTip {
      */
     public void setImageBase(URL url) {
         imageBase = url;
+    }
+
+    /**
+     * Sets the maximum size for unfocused tool tips.
+     *
+     * @param maxSize The new maximum size. A value of <code>null</code> will
+     *        cause a default size to be used.
+     * @see #getMaxSize()
+     */
+    public void setMaxSize(Dimension maxSize) {
+        this.maxSize = maxSize;
     }
 
     private void setTextArea(JTextArea textArea) {

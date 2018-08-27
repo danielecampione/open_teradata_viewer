@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
+import java.sql.Types;
 import java.util.Scanner;
 
 import javax.swing.JTable;
@@ -30,8 +31,8 @@ import net.sourceforge.open_teradata_viewer.ExportPreviewer;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -60,8 +61,8 @@ public class ExportInsertsAction extends CustomAction {
         if (table.getSelectedRowCount() > 0
                 && table.getSelectedRowCount() != table.getRowCount()) {
             Object option = Dialog.show("Insert Statements", "Export",
-                    Dialog.QUESTION_MESSAGE, new Object[]{"Everything",
-                            "Selection"}, "Everything");
+                    Dialog.QUESTION_MESSAGE, new Object[] { "Everything",
+                            "Selection" }, "Everything");
             if (option == null || "-1".equals(option.toString())) {
                 return;
             }
@@ -94,7 +95,10 @@ public class ExportInsertsAction extends CustomAction {
             if (column + 1 < columnCount) {
                 prefix.append(",");
             }
-            parseDate[column] = false;
+            parseDate[column] = Context.getInstance().getConnectionData()
+                    .isOracle()
+                    && (Context.getInstance().getColumnTypes()[column] == Types.DATE || Context
+                            .getInstance().getColumnTypes()[column] == Types.TIMESTAMP);
             isLob[column] = ResultSetTable.isLob(column);
         }
         prefix.append(") values (");

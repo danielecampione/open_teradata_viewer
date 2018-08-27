@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support demo )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class AboutDialog extends JDialog {
         JTextArea textArea = new JTextArea(6, 60);
         // Windows LAF picks a bad font for text areas, for some reason
         textArea.setFont(labelFont);
-        textArea.setText("Copyright (C) 2014, D. Campione\n\n"
+        textArea.setText("Copyright (C) 2015, D. Campione\n\n"
                 + "Demonstrates basic features of the STALanguageSupport library.\n"
                 + "Note that some features for some languages may not work unless your system "
                 + "is set up properly.\nFor example, Java code completion requries a JRE on "

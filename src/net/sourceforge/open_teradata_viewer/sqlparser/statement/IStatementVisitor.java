@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,4 +64,6 @@ public interface IStatementVisitor {
     void visit(Statements stmts);
 
     void visit(Execute execute);
+
+    void visit(SetStatement set);
 }

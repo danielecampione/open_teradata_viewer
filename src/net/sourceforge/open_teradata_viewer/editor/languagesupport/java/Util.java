@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support java )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.ast.C
  * Utility methods for Java completion.
  *
  * @author D. Campione
- * 
+ *
  */
 public class Util {
 
@@ -50,9 +50,9 @@ public class Util {
             .compile("\\s*\\n\\s*\\*");//^\\s*\\*\\s*[/]?");
 
     /**
-     * Pattern matching a link in a "@link" tag. This should match the
-     * following:
-     * 
+     * Pattern matching a link in a "<code>@link</code>" tag. This should match
+     * the following:
+     *
      * <ul>
      *    <li>ClassName</li>
      *    <li>fully.qualified.ClassName</li>
@@ -63,6 +63,9 @@ public class Util {
      *    <li>fully.qualified.ClassName#method</li>
      *    <li>fully.qualified.ClassName#method(params)</li>
      * </ul>
+     *
+     * Hyperlinks (<code>"&lt;a href=..."</code>) are not matched and should be
+     * handled separately.
      */
     static final Pattern LINK_TAG_MEMBER_PATTERN = Pattern
             .compile("(?:\\w+\\.)*\\w+(?:#\\w+(?:\\([^\\)]*\\))?)?|"
@@ -288,18 +291,22 @@ public class Util {
 
     /**
      * Appends HTML representing a "link" or "linkplain" Javadoc element to a
-     * string buffer.
+     * string buffer.<p>
+     * For some information on this format, see <a
+     * href="http://docs.oracle.com/javase/7/docs/technotes/tools/windows/javadoc.html#see">
+     * http://docs.oracle.com/javase/7/docs/technotes/tools/windows/javadoc.html#see</a>.
      *
      * @param appendTo The buffer to append to.
-     * @param linkContent The content of a "link" or "linkplain" item.
+     * @param linkContent The content of a "link", "linkplain" or "see" item.
      */
     private static final void appendLinkTagText(StringBuilder appendTo,
             String linkContent) {
-        appendTo.append("<a href='");
         linkContent = linkContent.trim(); // If "@link" and text on different lines
         Matcher m = LINK_TAG_MEMBER_PATTERN.matcher(linkContent);
 
         if (m.find() && m.start() == 0) {
+            appendTo.append("<a href='");
+
             String match = m.group(0); // Prevents recalculation
             String link = match;
 
@@ -339,13 +346,15 @@ public class Util {
 
             appendTo./*append("link://").*/append(link).append("'>")
                     .append(text);
-
+            appendTo.append("</a>");
+        }
+        // @see <a href="... is also valid
+        else if (linkContent.startsWith("<a")) {
+            appendTo.append(linkContent);
         } else { // Malformed link tag
             System.out.println("Unmatched linkContent: " + linkContent);
-            appendTo.append("'>").append(linkContent);
+            appendTo.append(linkContent);
         }
-
-        appendTo.append("</a>");
     }
 
     /**
@@ -487,7 +496,7 @@ public class Util {
 
     /**
      * Tidies up a link's display text for use in a &lt;a&gt; tag.
-     * 
+     *
      * @param text The text (a class, method or field signature).
      * @return The display value for the signature.
      */

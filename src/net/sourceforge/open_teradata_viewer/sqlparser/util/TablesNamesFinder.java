@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,15 +37,19 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpress
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.KeepExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.NumericBind;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.UserVariable;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.WithinGroupExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Addition;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseOr;
@@ -73,7 +77,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
@@ -82,6 +86,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectBody;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
@@ -218,8 +223,8 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
         if (plainSelect.getWhere() != null) {
             plainSelect.getWhere().accept(this);
         }
-        if (plainSelect.getTeradataHierarchical() != null) {
-            plainSelect.getTeradataHierarchical().accept(this);
+        if (plainSelect.getOracleHierarchical() != null) {
+            plainSelect.getOracleHierarchical().accept(this);
         }
     }
 
@@ -462,8 +467,8 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     @Override
     public void visit(SetOperationList list) {
-        for (PlainSelect plainSelect : list.getPlainSelects()) {
-            visit(plainSelect);
+        for (ISelectBody plainSelect : list.getSelects()) {
+            plainSelect.accept(this);
         }
     }
 
@@ -501,7 +506,7 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     }
 
     @Override
-    public void visit(TeradataHierarchicalExpression texpr) {
+    public void visit(OracleHierarchicalExpression texpr) {
         if (texpr.getStartExpression() != null) {
             texpr.getStartExpression().accept(this);
         }
@@ -517,7 +522,7 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     }
 
     @Override
-    public void visit(RegExpTeradataOperator rexpr) {
+    public void visit(RegExpMySQLOperator rexpr) {
         visitBinaryExpression(rexpr);
     }
 
@@ -536,5 +541,21 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     @Override
     public void visit(SelectExpressionItem item) {
         item.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(WithinGroupExpression wgexpr) {
+    }
+
+    @Override
+    public void visit(UserVariable var) {
+    }
+
+    @Override
+    public void visit(NumericBind bind) {
+    }
+
+    @Override
+    public void visit(KeepExpression aexpr) {
     }
 }

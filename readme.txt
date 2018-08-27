@@ -1,6 +1,6 @@
-Teradata JDBC Driver 15.00.00.20
+Teradata JDBC Driver 15.10.00.05
 
-Part of the Teradata Tools and Utilities 15.00 product suite
+Part of the Teradata Tools and Utilities 15.10 product suite
 
 
 Get the Latest Software
@@ -24,7 +24,7 @@ Note that IBM WebSphere Application Server 5.0 is not supported, because
 WebSphere 5.0 uses JDK 1.3.1.
 
 This release of the Teradata JDBC Driver supports Teradata Database
-13.00, 13.10, 14.00, 14.10, and 15.00.
+13.10, 14.00, 14.10, 15.00, and 15.10.
 
 
 Release Notes
@@ -33,6 +33,36 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.26:
+
+DR 163202 Improve LOB performance
+DR 174526 Improve ClientProgramName identification
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.25:
+
+DR 159947 Support Primary AMP Index
+DR 173903 Support pass-thru tokens in SQL request text
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.23:
+
+DR 128828 provide Monitor partition connection support for Statement.cancel and Statement.setQueryTimeout
+DR 170226 Enhance Connection.getClientInfo to return profile query band values
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.22:
+
+DR 163170 JDBC 4.0 API changes for DatabaseMetaData getNumericFunctions getStringFunctions getTimeDateFunctions
+DR 170566 Use TD 15.10 string function RIGHT for escape syntax
+DR 170631 Support the INITIATE CHECK command
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.40:
+
+DR 173521 Avoid sending unneeded Continue Request messages with Cancel parcel
 
 This release includes changes to address the following DRs, originally included
 in release 14.10.00.37:
@@ -1184,7 +1214,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.15.00.00.20.zip and TeraJDBC__indep_indep.15.00.00.20.tar
+TeraJDBC__indep_indep.15.10.00.05.zip and TeraJDBC__indep_indep.15.10.00.05.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

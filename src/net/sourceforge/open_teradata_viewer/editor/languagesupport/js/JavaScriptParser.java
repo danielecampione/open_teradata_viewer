@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support js )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.ast.VariableResolver;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.editor.syntax.TextEditorPane;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.AbstractParser;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParseResult;
 import net.sourceforge.open_teradata_viewer.editor.syntax.parser.DefaultParserNotice;
@@ -73,6 +74,7 @@ public class JavaScriptParser extends AbstractParser {
      */
     public static final String PROPERTY_AST = "AST";
 
+    private SyntaxTextArea textArea;
     private AstRoot astRoot;
     private JavaScriptLanguageSupport langSupport;
     private PropertyChangeSupport support;
@@ -82,6 +84,7 @@ public class JavaScriptParser extends AbstractParser {
     /** Ctor. */
     public JavaScriptParser(JavaScriptLanguageSupport langSupport,
             SyntaxTextArea textArea) {
+        this.textArea = textArea;
         this.langSupport = langSupport;
         support = new PropertyChangeSupport(this);
         result = new DefaultParseResult(this);
@@ -134,7 +137,7 @@ public class JavaScriptParser extends AbstractParser {
      */
     private void gatherParserErrorsJsHint(SyntaxDocument doc) {
         try {
-            JsHinter.parse(this, doc, result);
+            JsHinter.parse(this, textArea, result);
         } catch (IOException ioe) {
             String msg = "Error launching jshint: " + ioe.getMessage();
             result.addNotice(new DefaultParserNotice(this, msg, 0));
@@ -188,13 +191,30 @@ public class JavaScriptParser extends AbstractParser {
      * JsHint as your error parser. This property is ignored if {@link
      * #getErrorParser()} does not return {@link JsErrorParser#JSHINT}.
      *
-     * @return The <code>.jshintrc</code> file or <code>null</code> if none; in
+     * @param textArea The text component.
+     * @return The <code>.jshintrc</code> file, or <code>null</code> if none; in
      *         that case, the JsHint defaults will be used.
      * @see #setJsHintRCFile(File)
      * @see #setErrorParser(JsErrorParser)
      */
-    public File getJsHintRCFile() {
-        return langSupport.getJsHintRCFile();
+    public File getJsHintRCFile(SyntaxTextArea textArea) {
+        // First, get the .jshintrc file in the current file's folder hierarchy,
+        // if it exists
+        if (textArea instanceof TextEditorPane) {
+            TextEditorPane tep = (TextEditorPane) textArea;
+            File file = new File(tep.getFileFullPath());
+            File parent = file.getParentFile();
+            while (parent != null) {
+                File possibleJsHintRc = new File(parent, ".jshintrc");
+                if (possibleJsHintRc.isFile()) {
+                    return possibleJsHintRc;
+                }
+                parent = parent.getParentFile();
+            }
+        }
+
+        // If no .jshintrc is found, use the specified fallback
+        return langSupport.getDefaultJsHintRCFile();
     }
 
     /** {@inheritDoc} */

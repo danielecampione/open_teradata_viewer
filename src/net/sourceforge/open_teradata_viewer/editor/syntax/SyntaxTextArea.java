@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,12 +100,15 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *   </td>
  *   <td style="vertical-align: top">
  *    <ul>
+ *       <li>.jshintrc files
  *       <li>JSON
  *       <li>Lisp
  *       <li>NSIS
  *       <li>Perl
  *       <li>PHP
  *       <li>Python
+ *       <li>Ruby
+ *       <li>Scala
  *       <li>SQL
  *       <li>UNIX shell scripts
  *       <li>Windows batch
@@ -340,6 +343,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      */
     public SyntaxTextArea(SyntaxDocument doc) {
         super(doc);
+        setSyntaxEditingStyle(doc.getSyntaxStyle());
     }
 
     /**
@@ -1332,6 +1336,23 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * Returns whether to paint the backgrounds of tokens on the specified line
+     * (assuming they are not obstructed by e.g. selection).
+     *
+     * @param line The line number.
+     * @param y The y-offset of the line. This is used when line wrap is
+     *        enabled, since each logical line can be rendered as several
+     *        physical lines.
+     * @return Whether to paint the token backgrounds on this line.
+     */
+    boolean getPaintTokenBackgrounds(int line, float y) {
+        int iy = (int) y;
+        int curCaretY = getCurrentCaretY();
+        return iy < curCaretY || iy >= curCaretY + getLineHeight()
+                || !getHighlightCurrentLine();
+    }
+
+    /**
      * Returns the specified parser.
      *
      * @param index The {@link IParser} to retrieve.
@@ -1396,7 +1417,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * containing:
      *
      * <pre>
-     * for (int i=0; i<10; i++) {
+     * for (int i=0; i&lt;10; i++) {
      * </pre>
      *
      * the following line should be indented.
@@ -1474,7 +1495,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @see #getHighlightSecondaryLanguages()
      */
     public Color getSecondaryLanguageBackground(int index) {
-        return secondaryLanguageBackgrounds[index];
+        return secondaryLanguageBackgrounds[index - 1];
     }
 
     /**
@@ -2180,6 +2201,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             markOccurrencesSupport.clear();
         }
         super.setDocument(document);
+        setSyntaxEditingStyle(((SyntaxDocument) document).getSyntaxStyle());
         if (markOccurrencesSupport != null) {
             markOccurrencesSupport.doMarkOccurrences();
         }
@@ -2484,6 +2506,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @see #getParserDelay()
      */
     public void setParserDelay(int millis) {
+        if (parserManager == null) {
+            parserManager = new ParserManager(this);
+        }
         parserManager.setDelay(millis);
     }
 

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,21 +22,22 @@ import java.util.List;
 
 /**
  * One of the parts of a "WITH" clause of a "SELECT" statement.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class WithItem implements ISelectBody {
 
     private String name;
     private List<ISelectItem> withItemList;
     private ISelectBody selectBody;
+    private boolean recursive;
 
     /**
      * The name of this WITH item (for example, "myWITH" in "WITH myWITH AS
      * (SELECT A,B,C))".
      *
-     * @return the name of this WITH.
+     * @return The name of this WITH.
      */
     public String getName() {
         return name;
@@ -44,6 +45,14 @@ public class WithItem implements ISelectBody {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isRecursive() {
+        return recursive;
+    }
+
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
     }
 
     /**
@@ -64,7 +73,7 @@ public class WithItem implements ISelectBody {
      * The {@link ISelectItem}s in this WITH (for example the A,B,C in "WITH
      * mywith (A,B,C) AS ...").
      *
-     * @return a list of {@link ISelectItem}s.
+     * @return A list of {@link ISelectItem}s.
      */
     public List<ISelectItem> getWithItemList() {
         return withItemList;
@@ -76,7 +85,8 @@ public class WithItem implements ISelectBody {
 
     @Override
     public String toString() {
-        return name
+        return (recursive ? "RECURSIVE " : "")
+                + name
                 + ((withItemList != null) ? " "
                         + PlainSelect.getStringList(withItemList, true, true)
                         : "") + " AS (" + selectBody + ")";

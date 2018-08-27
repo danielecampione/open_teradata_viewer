@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,9 @@ public interface ISyntaxConstants {
     /** Style for highlighting JavaScript. */
     public static final String SYNTAX_STYLE_JAVASCRIPT = "text/javascript";
 
+    /** Style for highlighting .jshintrc files. */
+    public static final String SYNTAX_STYLE_JSHINTRC = "text/jshintrc";
+
     /** Style for highlighting JSON. */
     public static final String SYNTAX_STYLE_JSON = "text/json";
 
@@ -95,6 +98,12 @@ public interface ISyntaxConstants {
 
     /** Style for highlighting Python. */
     public static final String SYNTAX_STYLE_PYTHON = "text/python";
+
+    /** Style for highlighting Ruby. */
+    public static final String SYNTAX_STYLE_RUBY = "text/ruby";
+
+    /** Style for highlighting Scala. */
+    public static final String SYNTAX_STYLE_SCALA = "text/scala";
 
     /** Style for highlighting SQL. */
     public static final String SYNTAX_STYLE_SQL = "text/sql";

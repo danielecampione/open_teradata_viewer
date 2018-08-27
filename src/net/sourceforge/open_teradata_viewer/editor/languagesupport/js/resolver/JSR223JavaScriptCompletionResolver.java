@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support js resolver )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,27 +122,14 @@ public class JSR223JavaScriptCompletionResolver extends
     }
 
     /**
-     * Test whether the node can be resolved as a static Java class.
-     * Only looks for Token.NAME nodes to test.
-     *
-     * @param node Node to test.
-     */
-    private TypeDeclaration testJavaStaticType(AstNode node) {
-        switch (node.getType()) {
-        case Token.NAME:
-            return findJavaStaticType(node);
-        }
-        return null;
-    }
-
-    /**
      * Try to resolve the Token.NAME AstNode and return a TypeDeclaration.
      *
      * @param node Node to resolve.
      * @return TypeDeclaration if the name can be resolved as a Java Class else
      *         null.
      */
-    private TypeDeclaration findJavaStaticType(AstNode node) {
+    @Override
+    protected TypeDeclaration findJavaStaticType(AstNode node) {
         // Check parent is of type property get
         String testName = null;
         if (node.getParent() != null

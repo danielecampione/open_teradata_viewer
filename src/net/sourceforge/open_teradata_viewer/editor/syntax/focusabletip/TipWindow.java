@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax focusabletip )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * The actual tool tip component.
  *
  * @author D. Campione
- * 
+ *
  */
 class TipWindow extends JWindow implements ActionListener {
 
@@ -101,6 +101,7 @@ class TipWindow extends JWindow implements ActionListener {
         }
         textArea.addMouseListener(tipListener);
         textArea.addHyperlinkListener(new HyperlinkListener() {
+            @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                     TipWindow.this.ft.possiblyDisposeOfTipWindow();
@@ -138,6 +139,7 @@ class TipWindow extends JWindow implements ActionListener {
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         if (!getFocusableWindowState()) {
             setFocusableWindowState(true);
@@ -183,9 +185,12 @@ class TipWindow extends JWindow implements ActionListener {
             // Ensure the text area doesn't start out too tall or wide
             d = textArea.getPreferredSize();
             d.width += 25; // Just a little extra space
-            final int MAX_WINDOW_W = 600;
+            final int MAX_WINDOW_W = ft.getMaxSize() != null ? ft.getMaxSize().width
+                    : 600;
+            final int MAX_WINDOW_H = ft.getMaxSize() != null ? ft.getMaxSize().height
+                    : 400;
             d.width = Math.min(d.width, MAX_WINDOW_W);
-            d.height = Math.min(d.height, 400);
+            d.height = Math.min(d.height, MAX_WINDOW_H);
 
             // Both needed for modelToView() calculation below..
             textArea.setPreferredSize(d);
@@ -196,10 +201,14 @@ class TipWindow extends JWindow implements ActionListener {
             r = textArea.modelToView(textArea.getDocument().getLength() - 1);
             if (r.y + r.height > d.height) {
                 d.height = r.y + r.height + 5;
+                if (ft.getMaxSize() != null) {
+                    d.height = Math.min(d.height, MAX_WINDOW_H);
+                }
                 textArea.setPreferredSize(d);
             }
+
         } catch (BadLocationException ble) { // Never happens
-            ExceptionDialog.notifyException(ble);
+            ExceptionDialog.hideException(ble);
         }
 
         pack(); // Must re-pack to calculate proper size
@@ -220,6 +229,7 @@ class TipWindow extends JWindow implements ActionListener {
             panel.add(sg, BorderLayout.LINE_END);
             MouseInputAdapter adapter = new MouseInputAdapter() {
                 private Point lastPoint;
+
                 @Override
                 public void mouseDragged(MouseEvent e) {
                     Point p = e.getPoint();
@@ -233,6 +243,7 @@ class TipWindow extends JWindow implements ActionListener {
                         lastPoint = p;
                     }
                 }
+
                 @Override
                 public void mousePressed(MouseEvent e) {
                     lastPoint = e.getPoint();
@@ -301,9 +312,9 @@ class TipWindow extends JWindow implements ActionListener {
 
     /**
      * Listens for events in this window.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class TipListener extends MouseAdapter {
 

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.alter;
 
+import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.assertSqlCanBeParsedAndDeparsed;
 import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
 import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
@@ -25,8 +26,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -44,5 +45,13 @@ public class AlterTest extends TestCase {
         assertEquals("mytable", alter.getTable().getFullyQualifiedName());
         assertEquals("mycolumn", alter.getColumnName());
         assertEquals("varchar (255)", alter.getDataType().toString());
+    }
+
+    public void testAlterTablePrimaryKey() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("ALTER TABLE animals ADD PRIMARY KEY (id)");
+    }
+
+    public void testAlterTableUniqueKey() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("ALTER TABLE `schema_migrations` ADD UNIQUE KEY `unique_schema_migrations` (`version`)");
     }
 }

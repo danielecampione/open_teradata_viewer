@@ -1,3 +1,57 @@
+0.23c (28/05/2015)
+    - Added Ruby syntax highlighting.
+    - Added Scala syntax highlighting.
+    - Added support for ORACLE, DB2, MySQL, SQLite, HSQLDB, H2, Derby, SQL
+      Server and other databases.
+    - The scrollbar was not displayed, the tooltip was huge and flowed on the
+      other screen, if the user uses two monitors and a long HTML text is
+      entered in the text editor.
+    - Removed printing to stdout in TextAreaBase.
+    - Removed accidentally added printf for debugging purposes.
+    - Added unit tests for OTVDocument and SyntaxDocument.
+    - Added unit test for Gutter.
+    - FileLocation.create(String) creates URLFileLocations if appropriate;
+      passing a parameter of the form "ftp://user@domain.com/path/file.java"
+      returned an (incorrect) FileFileLocation, not a URLFileLocation.
+    - Improved support for non-opaque editors. Now the rendering engine of the
+      editor paints bracket matching, line highlights etc.., even if the editor
+      is not opaque.
+    - Formatting changes to translucent SyntaxTextAreas.
+    - Added unit tests for Theme class and fixed a couple of bugs in it.
+    - DumbCompleteWordAction didn't allow digits in word names.
+    - Added unit tests.
+    - Added unit tests for SyntaxTextArea and DocumentRange.
+    - .jshintrc files need their own highlighting since they allow EOL comments.
+    - Added unit tests for JavaScript, PHP and plain text scanners.
+    - Code folding was not enabled with specific instantiation pattern.
+    - Added unit tests for UnixShellTokenMaker.
+    - Fixed all doclint errors and some doclint warnings for folks compiling
+      with JDK 8. Only remaining warnings are from JFLex's skeleton file.
+    - Added first support for user variables to the SQL parser.
+    - Added support for within group expressions to the SQL parser, e.g.
+      ORACLE's LISTAGG function.
+    - Added support for inner with statements to the SQL parser.
+    - Improved interval expression support of the SQL parser.
+    - Added support for KEEP to the SQL parser.
+    - Added support for ILIKE to the SQL parser.
+    - Added support for LEFT/RIGHT as function names to the SQL parser.
+    - Added support for UPDATE OF table to the SQL parser.
+    - API changes due to grammar refactoring of the SQL parser.
+    - Added first support for PostgreSQL arrays to the SQL parser. Some quoted
+      identifier rules for SQL Server had to be changed in the SQL parser. 
+    - Added support for with recursive to the SQL parser.
+    - Support for ORACLE's old join syntax has been improved in the SQL parser.
+    - Added first support for numeric bind to the SQL parser.
+    - Added support for keywords as column names in CREATE TABLE statements to
+      the SQL parser.
+    - Included a huge amount of ORACLE test SQLs. There is much room to improve
+      support for the ORACLE special syntax.
+    - Upgraded Teradata JDBC driver 15.00.00.20 -> 15.10.00.05
+    - Upgraded itext library 5.5.4 -> 5.5.6
+    - Upgraded looks library 2.6.0 -> 2.8.0
+    - Upgraded poi library 3.10.1 -> 3.12
+    - Upgraded rhino library 1.7R4 -> 1.7.6
+
 0.23b (16/12/2014)
     - Added Lisp syntax highlighting and code folding.
     - This release fixes a performance problem when painting tokens with
@@ -13,7 +67,7 @@
     - Fixed exception in JavaOutlineTree.
     - Improving comment.
     - Fixed NPE in JavaScriptLanguageSupport tree.
-    - Added support for collections to the SQL parser.
+    - Added support for ORACLE collections to the SQL parser.
     - Upgraded itext library 5.5.3 -> 5.5.4
 
 0.23a (25/11/2014)
@@ -25,7 +79,7 @@
     - Added JSON syntax highlighting and code folding.
     - Added Visual Basic syntax highlighting.
     - Added Windows batch syntax highlighting.
-    - Fixed an issue with the SQL editor: non-layered highlights for selection
+    - Fixed an issue with the text editor: non-layered highlights for selection
       caused an extra character to be painted as in 'selected' region.
     - Added language-specific word selection/navigation.
     - Better keyboard navigation on OS X.
@@ -61,12 +115,13 @@
     - Window functions of the SQL parser now allow simple expressions for
       partition by. 
     - Added support for create table as select syntax to the SQL parser.
-    - Added first simple support of JSON syntax to the SQL parser.
+    - Added first simple support of PostgreSQL's JSON syntax to the SQL parser.
     - Added support for returning for insert statements to the SQL parser.
     - Added support for multitable update statements to the SQL parser.
-    - Added partial support for OFFSET ... FETCH ... to the SQL parser.
+    - Added partial support for SQL Server 2012 and ORACLE 12c OFFSET ... FETCH
+      ... to the SQL parser.
     - Added first support for *FOR UPDATE* to the SQL parser.
-    - Added support for ANY - array syntax to the SQL parser.
+    - Added support for PostgreSQL ANY - array syntax to the SQL parser.
     - Introduced additional parameters for create table statements (deparser
       extended) in the SQL parser.
     - Upgraded Teradata JDBC driver 15.00.00.15 -> 15.00.00.20
@@ -78,7 +133,7 @@
     - Improvements to PHP syntax highlighting.
     - In HTML and XML, "mark occurrences" should match tag names even when the
       caret is in an attribute, not just when it is in the tag name itself.
-    - Java syntax highlighting updated for other Java 8 classes, interfaces, and
+    - Java syntax highlighting updated for other Java 8 classes, interfaces and
       enums.
     - SQL: Matching opening/closing parens are now highlighted.
     - Improvements to CSS code completion.
@@ -95,7 +150,7 @@
     - Added pivot support for subqueries to the SQL parser.
     - Added Character Set support to the SQL parser.
     - Added lax test utils to the SQL parser.
-    - Added some Teradata test SQLs to the SQL parser.
+    - Added some ORACLE test SQLs to the SQL parser.
     - Improved COUNT(ALL expr) support of the SQL parser.
     - Fixed "!=" support to not give "<>" while deparsing with the SQL parser.
     - Fixed toString() for window elements of the SQL parser.
@@ -136,7 +191,7 @@
       parser.
     - Added NULLS FIRST and NULLS LAST to order by clause of the SQL parser.
     - Improved parsing of top clause of the SQL parser.
-    - Improved support for multi-part names of the SQL parser.
+    - Improved support for multi-part names (SQL Server) of the SQL parser.
     - Improved support for signed expressions of the SQL parser. The sign is
       stored in the parse tree.
     - Added CCSqlParserUtil.parseExpression to the SQL parser to parse a simple
@@ -153,7 +208,7 @@
         o addJoin adds a new join to the select.
     - Added support for optional " AS " for aliases to the SQL parser.
     - Added first support for ALTER TABLE statements to the SQL parser.
-    - Added support for Teradata regular expression match operators to the SQL
+    - Added support for PostgreSQL regular expression match operators to the SQL
       parser.
 
 0.2c (27/12/2013)
@@ -183,7 +238,7 @@
     - Added the "FIND.." command to the "Search" menu.
     - Added the "REPLACE.." command to the "Search" menu.
     - Added the capability to open the URLs typed in the comments of the script.
-    - Added the error strip to the right of the SQL editor.
+    - Added the error strip to the right of the text editor.
 
 0.19b (19/11/2013)
     - Improvements in Clojure syntax highlighting.
@@ -196,11 +251,11 @@
     - Other minor bugs fixed.
 
 0.19a (31/10/2013)
-    - Added first support for Teradata hierarchical queries to the SQL parser.
+    - Added first support for ORACLE hierarchical queries to the SQL parser.
 
 0.18c (07/10/2013)
-    - Added support for Teradata truncate function to the SQL parser.
-    - Added support for Teradata type **character varying** to the SQL parser.
+    - Added support for MySQL truncate function to the SQL parser.
+    - Added support for PostgreSQL type **character varying** to the SQL parser.
 
 0.18b (26/09/2013)
     - Painting performance improvements.
@@ -221,7 +276,7 @@
     - Added support for brackets quotation to the SQL parser.
     - Added support for NOT expr IS (expr IS NOT was already supported) to the
       SQL parser.
-    - Added support for Teradata (+) Join Syntax to the SQL parser.
+    - Added support for ORACLE (+) Join Syntax to the SQL parser.
     - Added alias visitor to the SQL parser.
     - Added connect visitor to the SQL parser.
     - TableNamesFinder included in source of SQL parser.
@@ -298,13 +353,13 @@
     - Fixed possible NPE in XmlTreeCellUI for environments where desktop AA
       hints cannot be determined.
     - Added the "TOGGLE CURRENT FOLD" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - Added the "COLLAPSE ALL COMMENT FOLDS" command to the "Edit" menu and to
-      the contextual menu of the SQL editor.
+      the contextual menu of the text editor.
     - Added the "COLLAPSE ALL FOLDS" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - Added the "EXPAND ALL FOLDS" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - The user manual has been updated with the added capabilities.
     - Added the "ACCESS" keyword to the Teradata reserved words.
 
@@ -373,11 +428,11 @@
 0.11b (18/05/2012)
     - Fixed issue with TextScrollPane.
     - Fixed bug in CurlyFoldParser.
-    - The SQL editor now has anti-aliasing enabled by default.
+    - The text editor now has anti-aliasing enabled by default.
 
 0.11a (16/05/2012)
     - Added the animate bracket matching, current line highlight, bookmarks,
-      word wrap, themes for the SQL editor, ...
+      word wrap, themes for the text editor, ...
       Navigate the "Edit" and the "Look & Feel" menus to see all the added
       features.
     - Fixed too large initial screen width on multiple monitors.

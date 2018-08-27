@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@ import net.sourceforge.open_teradata_viewer.actions.CopyCellValueAction;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -156,7 +156,8 @@ public final class ResultSetTable extends JTable {
         int columnType = Context.getInstance().getColumnTypes()[column];
         return Types.LONGVARBINARY == columnType
                 || Types.VARBINARY == columnType || Types.BLOB == columnType
-                || Types.CLOB == columnType || 2007 == columnType;
+                || Types.CLOB == columnType
+                || 2007 /* oracle xmltype */== columnType;
     }
 
     protected void resizeColumns() {
@@ -202,6 +203,8 @@ public final class ResultSetTable extends JTable {
                 try {
                     value = resultSet.getObject(column + 1);
                 } catch (SQLException sqle) {
+                    // e.g. Derby: java.sql.SQLException: Stream or LOB value
+                    // cannot be retrieved more than once
                     ExceptionDialog.hideException(sqle);
                 }
             }
@@ -259,8 +262,8 @@ public final class ResultSetTable extends JTable {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -283,8 +286,8 @@ public final class ResultSetTable extends JTable {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -303,8 +306,7 @@ public final class ResultSetTable extends JTable {
                     .getTableCellRendererComponent(componentTable, value,
                             isSelected, hasFocus, row, column);
             tableCellRendererComponent
-                    .setHorizontalAlignment(value instanceof Number
-                            ? SwingConstants.TRAILING
+                    .setHorizontalAlignment(value instanceof Number ? SwingConstants.TRAILING
                             : SwingConstants.LEADING);
             return tableCellRendererComponent;
         }

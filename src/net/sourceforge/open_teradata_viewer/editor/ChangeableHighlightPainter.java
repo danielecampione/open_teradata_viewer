@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -184,8 +184,8 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
      * Paints a highlight.
      *
      * @param g The graphics context.
-     * @param offs0 The starting model offset >= 0.
-     * @param offs1 The ending model offset >= offs1.
+     * @param offs0 The starting model offset &gt;= 0.
+     * @param offs1 The ending model offset &gt;= offs1.
      * @param bounds The bounding box for the highlight.
      * @param c The editor.
      */
@@ -246,8 +246,8 @@ public class ChangeableHighlightPainter extends LayeredHighlighter.LayerPainter
      * Paints a portion of a highlight.
      *
      * @param g The graphics context.
-     * @param offs0 The starting model offset >= 0.
-     * @param offs1 The ending model offset >= offs1.
+     * @param offs0 The starting model offset &gt;= 0.
+     * @param offs1 The ending model offset &gt;= offs1.
      * @param bounds The bounding box of the view, which is not necessarily the
      *               region to paint.
      * @param c The editor.

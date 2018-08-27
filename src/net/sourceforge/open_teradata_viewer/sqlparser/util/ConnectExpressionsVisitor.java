@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.BinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectBody;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
@@ -40,7 +41,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
  * createBinaryExpression.
  *
  * @author D. Campione
- * 
+ *
  */
 public abstract class ConnectExpressionsVisitor implements ISelectVisitor,
         ISelectItemVisitor {
@@ -94,7 +95,7 @@ public abstract class ConnectExpressionsVisitor implements ISelectVisitor,
 
     @Override
     public void visit(SetOperationList setOpList) {
-        for (PlainSelect select : setOpList.getPlainSelects()) {
+        for (ISelectBody select : setOpList.getSelects()) {
             select.accept(this);
         }
     }

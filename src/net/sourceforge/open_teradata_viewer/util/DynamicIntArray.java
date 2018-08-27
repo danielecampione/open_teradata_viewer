@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import java.util.Arrays;
  * (if necessary) when adding new elements.
  *
  * @author D. Campione
- * 
+ *
  */
 public class DynamicIntArray implements Serializable {
 
@@ -99,8 +99,8 @@ public class DynamicIntArray implements Serializable {
      * @param intArray The array of <code>int</code>s to insert.
      * @throws IndexOutOfBoundsException If <code>index</code> is less than
      *         zero or greater than <code>getSize()</code>.
-     * @throws NullPointerException If <code>intArray<code> is
-     *         <code>null<code>.
+     * @throws NullPointerException If <code>intArray</code> is
+     *         <code>null</code>.
      */
     public void add(int index, int[] intArray) {
         if (index > size) {
@@ -188,8 +188,9 @@ public class DynamicIntArray implements Serializable {
             // Ensures we don't just keep increasing capacity by some small
             // number like 1..
             int newCapacity = (oldCapacity * 3) / 2 + 1;
-            if (newCapacity < minCapacity)
+            if (newCapacity < minCapacity) {
                 newCapacity = minCapacity;
+            }
             data = new int[newCapacity];
             System.arraycopy(oldData, 0, data, 0, size);
         }

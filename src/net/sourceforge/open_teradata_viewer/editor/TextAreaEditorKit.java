@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -303,7 +303,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
      *
      * @param in  The stream to read from
      * @param doc The destination for the insertion.
-     * @param pos The location in the document to place the content >= 0.
+     * @param pos The location in the document to place the content &gt;= 0.
      * @exception IOException on any I/O error.
      * @exception BadLocationException if pos represents an invalid location
      *            within the document.
@@ -1105,29 +1105,26 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                     return;
                 }
 
-                int curWordStart = Utilities.getWordStart(textArea, dot - 1);
+                int curWordStart = getWordStart(textArea, dot);
 
                 if (lastWordStart != curWordStart || dot != lastDot) {
                     lastPrefix = textArea.getText(curWordStart, dot
                             - curWordStart);
                     // Utilities.getWordStart() treats spans of whitespace and
                     // single non-letter chars as "words"
-                    if (lastPrefix.length() == 0
-                            || !Character.isLetter(lastPrefix.charAt(lastPrefix
-                                    .length() - 1))) {
+                    if (!isAcceptablePrefix(lastPrefix)) {
                         UIManager.getLookAndFeel().provideErrorFeedback(
                                 textArea);
                         return;
                     }
                     lastWordStart = dot - lastPrefix.length();
-                    searchOffs = lastWordStart;
+                    searchOffs = Math.max(lastWordStart - 1, 0);
                 }
 
                 while (searchOffs > 0) {
                     int wordStart = 0;
                     try {
-                        wordStart = Utilities.getPreviousWord(textArea,
-                                searchOffs);
+                        wordStart = getPreviousWord(textArea, searchOffs);
                     } catch (BadLocationException ble) {
                         // No more words. Sometimes happens for example if the
                         // document starts off with whitespace - then searchOffs
@@ -1139,7 +1136,7 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                                 textArea);
                         break;
                     }
-                    int end = Utilities.getWordEnd(textArea, wordStart);
+                    int end = getWordEnd(textArea, wordStart);
                     String word = textArea.getText(wordStart, end - wordStart);
                     searchOffs = wordStart;
                     if (word.startsWith(lastPrefix)) {
@@ -1148,15 +1145,44 @@ public class TextAreaEditorKit extends DefaultEditorKit {
                         break;
                     }
                 }
-
             } catch (BadLocationException ble) { // Never happens
-                ExceptionDialog.notifyException(ble);
+                ExceptionDialog.hideException(ble);
             }
         }
 
         @Override
         public final String getMacroID() {
             return getName();
+        }
+
+        public int getPreviousWord(TextArea textArea, int offs)
+                throws BadLocationException {
+            return Utilities.getPreviousWord(textArea, offs);
+        }
+
+        public int getWordEnd(TextArea textArea, int offs)
+                throws BadLocationException {
+            return Utilities.getWordEnd(textArea, offs);
+        }
+
+        public int getWordStart(TextArea textArea, int offs)
+                throws BadLocationException {
+            return Utilities.getWordStart(textArea, offs);
+        }
+
+        /**
+         * <code>Utilities.getWordStart()</code> treats spans of whitespace and
+         * single non-letter chars as "words". This method is used to filter
+         * that kind of thing out - non-words should not be suggested by this
+         * action.
+         *
+         * @param prefix The prefix characters before the caret.
+         * @return Whether the prefix could be part of a "word" in the context
+         *         of the text area's current content.
+         */
+        protected boolean isAcceptablePrefix(String prefix) {
+            return prefix.length() > 0
+                    && Character.isLetter(prefix.charAt(prefix.length() - 1));
         }
     }
 

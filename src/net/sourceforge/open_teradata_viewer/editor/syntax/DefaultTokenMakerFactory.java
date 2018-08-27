@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
         putMapping(SYNTAX_STYLE_HTML, pkg + "HTMLTokenMaker");
         putMapping(SYNTAX_STYLE_JAVA, pkg + "JavaTokenMaker");
         putMapping(SYNTAX_STYLE_JAVASCRIPT, pkg + "JavaScriptTokenMaker");
+        putMapping(SYNTAX_STYLE_JSHINTRC, pkg + "JshintrcTokenMaker");
         putMapping(SYNTAX_STYLE_JSON, pkg + "JsonTokenMaker");
         putMapping(SYNTAX_STYLE_JSP, pkg + "JSPTokenMaker");
         putMapping(SYNTAX_STYLE_LISP, pkg + "LispTokenMaker");
@@ -54,6 +55,8 @@ class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
         putMapping(SYNTAX_STYLE_PERL, pkg + "PerlTokenMaker");
         putMapping(SYNTAX_STYLE_PHP, pkg + "PHPTokenMaker");
         putMapping(SYNTAX_STYLE_PYTHON, pkg + "PythonTokenMaker");
+        putMapping(SYNTAX_STYLE_RUBY, pkg + "RubyTokenMaker");
+        putMapping(SYNTAX_STYLE_SCALA, pkg + "ScalaTokenMaker");
         putMapping(SYNTAX_STYLE_SQL, pkg + "SQLTokenMaker");
         putMapping(SYNTAX_STYLE_UNIX_SHELL, pkg + "UnixShellTokenMaker");
         putMapping(SYNTAX_STYLE_VISUAL_BASIC, pkg + "VisualBasicTokenMaker");

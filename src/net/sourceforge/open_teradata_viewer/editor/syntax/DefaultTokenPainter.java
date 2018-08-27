@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.text.TabExpander;
@@ -59,6 +60,13 @@ class DefaultTokenPainter implements ITokenPainter {
     public float paint(IToken token, Graphics2D g, float x, float y,
             SyntaxTextArea host, TabExpander e, float clipStart) {
         return paintImpl(token, g, x, y, host, e, clipStart, false, false);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public float paint(IToken token, Graphics2D g, float x, float y,
+            SyntaxTextArea host, TabExpander e, float clipStart, boolean paintBG) {
+        return paintImpl(token, g, x, y, host, e, clipStart, !paintBG, false);
     }
 
     /**
@@ -122,11 +130,16 @@ class DefaultTokenPainter implements ITokenPainter {
         }
 
         nextX = x + fm.charsWidth(text, flushIndex, flushLen);
+        Rectangle r = host.getMatchRectangle();
 
         if (flushLen > 0 && nextX >= clipStart) {
             if (bg != null) {
                 paintBackground(x, y, nextX - x, fm.getHeight(), g,
                         fm.getAscent(), host, bg);
+            }
+            if (token.length() == 1 && r != null && r.x == x) {
+                ((SyntaxTextAreaUI) host.getUI()).paintMatchedBracketImpl(g,
+                        host, r);
             }
             g.setColor(fg);
             g.drawChars(text, flushIndex, flushLen, (int) x, (int) y);
@@ -138,8 +151,8 @@ class DefaultTokenPainter implements ITokenPainter {
             g.drawLine(origX, y2, (int) nextX, y2);
         }
 
-        // Don't check if it's whitespace - some TokenMakers may return types
-        // other than Token.WHITESPACE for spaces (such as Token.IDENTIFIER).
+        // Don't check if it's whitespace - some ITokenMakers may return types
+        // other than IToken.WHITESPACE for spaces (such as IToken.IDENTIFIER).
         // This also allows us to paint tab lines for MLC's
         if (host.getPaintTabLines() && origX == host.getMargin().left) {// && isWhitespace()) {
             paintTabLines(token, origX, (int) y, (int) nextX, g, e, host);

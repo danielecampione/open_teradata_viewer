@@ -2,7 +2,7 @@
 /* JavaCCOptions: */
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,4 +162,4 @@ public class TokenMgrError extends Error
     this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
   }
 }
-/* JavaCC - OriginalChecksum=798854f2c54c46e9cae18cee49689840 (do not edit this line) */
+/* JavaCC - OriginalChecksum=12beaebb7a8238a84c52207e3cca9238 (do not edit this line) */

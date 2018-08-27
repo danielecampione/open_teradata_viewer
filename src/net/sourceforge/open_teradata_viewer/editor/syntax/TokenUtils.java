@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import javax.swing.text.TabExpander;
  * Utility methods for dealing with tokens.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TokenUtils {
 
@@ -36,13 +36,13 @@ public class TokenUtils {
      * For example, if the token list covered positions 20-60 in the document
      * (inclusive) like so:
      * <pre>
-     *   [token1] -> [token2] -> [token3] -> [token4]
+     *   [token1] -&gt; [token2] -&gt; [token3] -&gt; [token4]
      *   20     30   31     40   41     50   51     60
      * </pre>
      * and you used this method to make the token list start at position 44,
      * then the token list would be modified to be the following:
      * <pre>
-     *   [part-of-old-token3] -> [token4]
+     *   [part-of-old-token3] -&gt; [token4]
      *   44                 50   51     60
      * </pre>
      * Tokens that come before the specified position are forever lost, and the
@@ -77,13 +77,13 @@ public class TokenUtils {
      * For example, if the token list covered positions 20-60 in the document
      * (inclusive) like so:
      * <pre>
-     *   [token1] -> [token2] -> [token3] -> [token4]
+     *   [token1] -&gt; [token2] -&gt; [token3] -&gt; [token4]
      *   20     30   31     40   41     50   51     60
      * </pre>
      * and you used this method to make the token list start at position 44,
      * then the token list would be modified to be the following:
      * <pre>
-     *   [part-of-old-token3] -> [token4]
+     *   [part-of-old-token3] -&gt; [token4]
      *   44                 50   51     60
      * </pre>
      * Tokens that come before the specified position are forever lost, and the
@@ -147,8 +147,8 @@ public class TokenUtils {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

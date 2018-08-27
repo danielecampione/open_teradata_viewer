@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ import javax.swing.JTextArea;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public final class ExceptionDialog {
 
@@ -52,11 +52,10 @@ public final class ExceptionDialog {
             ExceptionDialog.hideException(e);
         }
         notifyException(t);
-        if ("Details"
-                .equals(Dialog.show(t.getClass().getName(),
-                        t.getMessage() != null ? t.getMessage() : "Error",
-                        Dialog.ERROR_MESSAGE, new Object[]{"Close", "Details"},
-                        "Close"))) {
+        if ("Details".equals(Dialog.show(t.getClass().getName(),
+                t.getMessage() != null ? t.getMessage() : "Error",
+                Dialog.ERROR_MESSAGE, new Object[] { "Close", "Details" },
+                "Close"))) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             t.printStackTrace(new PrintStream(out));
             JTextArea textArea = new JTextArea(new String(out.toByteArray()));
@@ -92,8 +91,8 @@ public final class ExceptionDialog {
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
             if ("Copy to clipboard".equals(Dialog.show(t.getClass().getName(),
-                    scrollPane, Dialog.ERROR_MESSAGE, new Object[]{"Close",
-                            "Copy to clipboard"}, "Close"))) {
+                    scrollPane, Dialog.ERROR_MESSAGE, new Object[] { "Close",
+                            "Copy to clipboard" }, "Close"))) {
                 try {
                     Toolkit.getDefaultToolkit()
                             .getSystemClipboard()
@@ -126,10 +125,26 @@ public final class ExceptionDialog {
                     msg.append("Updating a resultset mostly fails when the ORDER BY clause is used.\n");
                     msg.append("Try the select without ORDER BY and sort the column afterwards.");
                 }
-            } else if (t instanceof OutOfMemoryError) {
-                msg.append(Main.APPLICATION_NAME
-                        + " has a memory limit of 512 MB.\n");
+            } else if (Context.getInstance().getConnectionData() != null
+                    && Context.getInstance().getConnectionData().isIbm()) {
+                if (t.getMessage().contains(
+                        "Invalid operation: result set is closed.")) {
+                    int length = Context.getInstance().getColumnTypes().length;
+                    for (int i = 0; i < length; i++) {
+                        if (ResultSetTable.isLob(i)) {
+                            msg.append("The IBM JDBC driver doesn't support modifying rows with BLOB's or CLOB's ");
+                            msg.append("in the resultset yet.\n");
+                            msg.append("Please execute the update statement manually ");
+                            msg.append("or try the DataDirect DB2 driver.\n");
+                            msg.append("http://www.datadirect.com/products/jdbc/");
+                            break;
+                        }
+                    }
+                }
             }
+        } else if (t instanceof OutOfMemoryError) {
+            msg.append(Main.APPLICATION_NAME
+                    + " has a memory limit of 512 MB.\n");
         }
         if (msg.length() > 0) {
             Dialog.show("Tip", msg, Dialog.INFORMATION_MESSAGE,

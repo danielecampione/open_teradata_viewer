@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class SetOperationList implements ISelectBody {
 
-    private List<PlainSelect> plainSelects;
+    private List<ISelectBody> selects;
     private List<SetOperation> operations;
     private List<OrderByElement> orderByElements;
     private Limit limit;
@@ -46,8 +46,8 @@ public class SetOperationList implements ISelectBody {
         return orderByElements;
     }
 
-    public List<PlainSelect> getPlainSelects() {
-        return plainSelects;
+    public List<ISelectBody> getSelects() {
+        return selects;
     }
 
     public List<SetOperation> getOperations() {
@@ -58,9 +58,9 @@ public class SetOperationList implements ISelectBody {
         this.orderByElements = orderByElements;
     }
 
-    public void setOpsAndSelects(List<PlainSelect> select,
+    public void setOpsAndSelects(List<ISelectBody> select,
             List<SetOperation> ops) {
-        plainSelects = select;
+        selects = select;
         operations = ops;
 
         if (select.size() - 1 != ops.size()) {
@@ -96,13 +96,12 @@ public class SetOperationList implements ISelectBody {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
 
-        for (int i = 0; i < plainSelects.size(); i++) {
+        for (int i = 0; i < selects.size(); i++) {
             if (i != 0) {
                 buffer.append(" ").append(operations.get(i - 1).toString())
                         .append(" ");
             }
-            buffer.append("(").append(plainSelects.get(i).toString())
-                    .append(")");
+            buffer.append("(").append(selects.get(i).toString()).append(")");
         }
 
         if (orderByElements != null) {

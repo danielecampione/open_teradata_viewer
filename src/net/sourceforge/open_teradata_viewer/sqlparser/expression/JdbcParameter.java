@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,22 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- * A '?' in a statement.
- * 
+ * A '?' in a statement or a ?<number> e.g. ?4
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JdbcParameter implements IExpression {
+
+    private Integer index;
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
 
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
@@ -33,6 +43,6 @@ public class JdbcParameter implements IExpression {
 
     @Override
     public String toString() {
-        return "?";
+        return "?" + (index == null ? "" : index);
     }
 }

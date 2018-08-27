@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax modes )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenImpl;
  * Scanner for the Python programming language.
  *
  * @author D. Campione
- * 
+ *
  */
 public class PythonTokenMaker extends AbstractJFlexTokenMaker {
 
@@ -708,13 +708,13 @@ public class PythonTokenMaker extends AbstractJFlexTokenMaker {
      * Resets the scanner to read from a new input stream.
      * Does not close the old reader.
      *
-     * All internal variables are reset, the old input stream 
+     * All internal variables are reset, the old input stream
      * <b>cannot</b> be reused (internal buffer is discarded and lost).
      * Lexical state is set to <tt>YY_INITIAL</tt>.
      *
      * @param reader   The new input stream.
      */
-    public final void yyreset(Reader reader) throws IOException {
+    public final void yyreset(Reader reader) {
         // 's' has been updated
         zzBuffer = s.array;
         /*
@@ -737,9 +737,8 @@ public class PythonTokenMaker extends AbstractJFlexTokenMaker {
      *
      * @return      <code>true</code> if EOF was reached, otherwise
      *              <code>false</code>.
-     * @exception   IOException  if any I/O-Error occurs.
      */
-    private boolean zzRefill() throws IOException {
+    private boolean zzRefill() {
         return zzCurrentPos >= s.offset + s.count;
     }
 
@@ -763,7 +762,7 @@ public class PythonTokenMaker extends AbstractJFlexTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed   The packed character translation table.
@@ -814,11 +813,11 @@ public class PythonTokenMaker extends AbstractJFlexTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos) but faster.
      *
-     * @param pos The position of the character to fetch. 
+     * @param pos The position of the character to fetch.
      *            A value from 0 to yylength()-1.
      * @return The character at position pos.
      */

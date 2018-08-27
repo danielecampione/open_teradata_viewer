@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -416,7 +416,7 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
-    public void testLimitTeradata1() throws SQLParserException {
+    public void testLimitSqlServer1() throws SQLParserException {
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROWS FETCH NEXT 5 ROWS ONLY";
 
         Select select = (Select) parserManager
@@ -441,7 +441,7 @@ public class SelectTest extends TestCase {
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
-    public void testLimitTeradata2() throws SQLParserException {
+    public void testLimitSqlServer2() throws SQLParserException {
         // Alternative with the other keywords
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROW FETCH FIRST 5 ROW ONLY";
 
@@ -463,7 +463,7 @@ public class SelectTest extends TestCase {
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
-    public void testLimitTeradata3() throws SQLParserException {
+    public void testLimitSqlServer3() throws SQLParserException {
         // Query with no Fetch
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET 3 ROWS";
 
@@ -479,8 +479,8 @@ public class SelectTest extends TestCase {
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
-    public void testLimitTeradata4() throws SQLParserException {
-        // For Teradata syntax, query with no offset
+    public void testLimitSqlServer4() throws SQLParserException {
+        // For SQL Server syntax, query with no offset
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id FETCH NEXT 5 ROWS ONLY";
 
         Select select = (Select) parserManager
@@ -497,7 +497,7 @@ public class SelectTest extends TestCase {
         assertStatementCanBeDeparsedAs(select, statement);
     }
 
-    public void testLimitTeradataJdbcParameters() throws SQLParserException {
+    public void testLimitSqlServerJdbcParameters() throws SQLParserException {
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 ORDER BY mytable.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         Select select = (Select) parserManager
@@ -611,14 +611,15 @@ public class SelectTest extends TestCase {
         Select select = (Select) parserManager
                 .parse(new StringReader(statement));
         SetOperationList setList = (SetOperationList) select.getSelectBody();
-        assertEquals(3, setList.getPlainSelects().size());
-        assertEquals("mytable", ((Table) setList.getPlainSelects().get(0)
-                .getFromItem()).getName());
-        assertEquals("mytable3", ((Table) setList.getPlainSelects().get(1)
-                .getFromItem()).getName());
-        assertEquals("mytable2", ((Table) setList.getPlainSelects().get(2)
-                .getFromItem()).getName());
-        assertEquals(3, setList.getPlainSelects().get(2).getLimit().getOffset());
+        assertEquals(3, setList.getSelects().size());
+        assertEquals("mytable", ((Table) ((PlainSelect) setList.getSelects()
+                .get(0)).getFromItem()).getName());
+        assertEquals("mytable3", ((Table) ((PlainSelect) setList.getSelects()
+                .get(1)).getFromItem()).getName());
+        assertEquals("mytable2", ((Table) ((PlainSelect) setList.getSelects()
+                .get(2)).getFromItem()).getName());
+        assertEquals(3, ((PlainSelect) setList.getSelects().get(2)).getLimit()
+                .getOffset());
 
         // use brakets for toString
         // use standard limit syntax
@@ -1027,6 +1028,11 @@ public class SelectTest extends TestCase {
                 ((LikeExpression) plainSelect.getWhere()).getEscape());
     }
 
+    public void testIlike() throws SQLParserException {
+        String statement = "SELECT col1 FROM table1 WHERE col1 ILIKE '%hello%'";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
     public void testSelectOrderHaving() throws SQLParserException {
         String statement = "SELECT units, count(units) AS num FROM currency GROUP BY units HAVING count(units) > 1 ORDER BY num";
         assertSqlCanBeParsedAndDeparsed(statement);
@@ -1114,6 +1120,10 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
+    public void testWithRecursive() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("WITH RECURSIVE t (n) AS ((SELECT 1) UNION ALL (SELECT n + 1 FROM t WHERE n < 100)) SELECT sum(n) FROM t");
+    }
+
     public void testSelectAliasInQuotes() throws SQLParserException {
         String statement = "SELECT mycolumn AS \"My Column Name\" FROM mytable";
         assertSqlCanBeParsedAndDeparsed(statement);
@@ -1147,7 +1157,7 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed("SELECT count(ALL col1 + col2) FROM mytable");
     }
 
-    public void testTeradataQuote() throws SQLParserException {
+    public void testMysqlQuote() throws SQLParserException {
         String statement = "SELECT `a.OWNERLASTNAME`, `OWNERFIRSTNAME` "
                 + "FROM `ANTIQUEOWNERS` AS a, ANTIQUES AS b "
                 + "WHERE b.BUYERID = a.OWNERID AND b.ITEM = 'Chair'";
@@ -1433,27 +1443,57 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
-    public void testTeradataJoin() throws SQLParserException {
+    public void testFunctionLeft() throws SQLParserException {
+        String statement = "SELECT left(table1.col1, 4) FROM table1";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testFunctionRight() throws SQLParserException {
+        String statement = "SELECT right(table1.col1, 4) FROM table1";
+        assertSqlCanBeParsedAndDeparsed(statement);
+    }
+
+    public void testOracleJoin() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a = tabelle2.b(+)";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataJoin2() throws SQLParserException {
+    public void testOracleJoin2() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a(+) = tabelle2.b";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataJoin3() throws SQLParserException {
+    public void testOracleJoin2_1() throws SQLParserException {
+        String[] values = new String[] { "(+)", "( +)", "(+ )", "( + )",
+                " (+) " };
+        for (String value : values) {
+            assertSqlCanBeParsedAndDeparsed(
+                    "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a" + value
+                            + " = tabelle2.b", true);
+        }
+    }
+
+    public void testOracleJoin2_2() throws SQLParserException {
+        String[] values = new String[] { "(+)", "( +)", "(+ )", "( + )",
+                " (+) " };
+        for (String value : values) {
+            assertSqlCanBeParsedAndDeparsed(
+                    "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a = tabelle2.b"
+                            + value, true);
+        }
+    }
+
+    public void testOracleJoin3() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a(+) > tabelle2.b";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataJoin3_1() throws SQLParserException {
+    public void testOracleJoin3_1() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a > tabelle2.b(+)";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataJoin4() throws SQLParserException {
+    public void testOracleJoin4() throws SQLParserException {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a(+) = tabelle2.b AND tabelle1.b(+) IN ('A', 'B')";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
@@ -1668,6 +1708,11 @@ public class SelectTest extends TestCase {
         assertEquals("'45 MINUTE'", iexpr.getParameter());
     }
 
+    public void testInterval3() throws SQLParserException {
+        String stmt = "SELECT 5 + INTERVAL '3' day";
+        assertSqlCanBeParsedAndDeparsed(stmt);
+    }
+
     public void testMultiValueIn() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE (a, b, c) IN (SELECT a, b, c FROM mytable2)";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1722,6 +1767,10 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM (SELECT times_purchased, state_code FROM customers t) PIVOT (count(state_code) FOR state_code IN ('NY', 'CT', 'NJ', 'FL', 'MO')) ORDER BY times_purchased");
     }
 
+    public void testPivotFunction() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT to_char((SELECT col1 FROM (SELECT times_purchased, state_code FROM customers t) PIVOT (count(state_code) FOR state_code IN ('NY', 'CT', 'NJ', 'FL', 'MO')) ORDER BY times_purchased)) FROM DUAL");
+    }
+
     public void testRegexpLike1() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE REGEXP_LIKE(first_name, '^Ste(v|ph)en$')";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1732,12 +1781,12 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testRegexpTeradata() throws SQLParserException {
+    public void testRegexpMySQL() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE first_name REGEXP '^Ste(v|ph)en$'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testRegexpBinaryTeradata() throws SQLParserException {
+    public void testRegexpBinaryMySQL() throws SQLParserException {
         String stmt = "SELECT * FROM mytable WHERE first_name REGEXP BINARY '^Ste(v|ph)en$'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
@@ -1801,40 +1850,40 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataHierarchicalQuery() throws SQLParserException {
+    public void testOracleHierarchicalQuery() throws SQLParserException {
         String stmt = "SELECT last_name, employee_id, manager_id FROM employees CONNECT BY employee_id = manager_id ORDER BY last_name";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataHierarchicalQuery2() throws SQLParserException {
+    public void testOracleHierarchicalQuery2() throws SQLParserException {
         String stmt = "SELECT employee_id, last_name, manager_id FROM employees CONNECT BY PRIOR employee_id = manager_id";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataHierarchicalQuery3() throws SQLParserException {
+    public void testOracleHierarchicalQuery3() throws SQLParserException {
         String stmt = "SELECT last_name, employee_id, manager_id, LEVEL FROM employees START WITH employee_id = 100 CONNECT BY PRIOR employee_id = manager_id ORDER SIBLINGS BY last_name";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataRegExpCaseSensitiveMatch()
+    public void testPostgreSQLRegExpCaseSensitiveMatch()
             throws SQLParserException {
         String stmt = "SELECT a, b FROM foo WHERE a ~ '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataRegExpCaseSensitiveMatch2()
+    public void testPostgreSQLRegExpCaseSensitiveMatch2()
             throws SQLParserException {
         String stmt = "SELECT a, b FROM foo WHERE a ~* '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataRegExpCaseSensitiveMatch3()
+    public void testPostgreSQLRegExpCaseSensitiveMatch3()
             throws SQLParserException {
         String stmt = "SELECT a, b FROM foo WHERE a !~ '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
-    public void testTeradataRegExpCaseSensitiveMatch4()
+    public void testPostgreSQLRegExpCaseSensitiveMatch4()
             throws SQLParserException {
         String stmt = "SELECT a, b FROM foo WHERE a !~* '[help].*'";
         assertSqlCanBeParsedAndDeparsed(stmt);
@@ -1845,6 +1894,11 @@ public class SelectTest extends TestCase {
         final Select select = (Select) parserManager.parse(new StringReader(
                 statement));
         assertStatementCanBeDeparsedAs(select, statement);
+    }
+
+    public void testReservedKeyword2() throws SQLParserException {
+        final String stmt = "SELECT open FROM tableName";
+        assertSqlCanBeParsedAndDeparsed(stmt);
     }
 
     public void testCharacterSetClause() throws SQLParserException {
@@ -1881,7 +1935,71 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM pg_constraint WHERE pg_attribute.attnum = ANY(pg_constraint.conkey)");
     }
 
-    public void testSelectTeradataColl() throws SQLParserException {
+    public void testSelectOracleColl() throws SQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM the_table tt WHERE TT.COL1 = lines(idx).COL1");
+    }
+
+    public void testSelectInnerWith() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM (WITH actor AS (SELECT 'a' aid FROM DUAL) SELECT aid FROM actor)");
+    }
+
+    public void testSelectWithinGroup() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT LISTAGG(col1, '##') WITHIN GROUP (ORDER BY col1) FROM table1");
+    }
+
+    public void testSelectUserVariable() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT @col FROM t1");
+    }
+
+    public void testSelectNumericBind() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT a FROM b WHERE c = :1");
+    }
+
+    public void testSelectBrackets() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT avg((123.250)::numeric)");
+    }
+
+    public void testSelectBrackets2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT (EXTRACT(epoch FROM age(d1, d2)) / 2)::numeric");
+    }
+
+    public void testSelectBrackets3() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT avg((EXTRACT(epoch FROM age(d1, d2)) / 2)::numeric)");
+    }
+
+    public void testSelectBrackets4() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT (1 / 2)::numeric");
+    }
+
+    public void testSelectForUpdateOfTable() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT foo.*, bar.* FROM foo, bar WHERE foo.id = bar.foo_id FOR UPDATE OF foo");
+    }
+
+    public void testSelectWithBrackets() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("(SELECT 1 FROM mytable)");
+    }
+
+    public void testSelectWithBrackets2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("(SELECT 1)");
+    }
+
+    public void testSelectWithoutFrom() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT footable.foocolumn");
+    }
+
+    public void testSelectKeywordPercent() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT percent FROM MY_TABLE");
+    }
+
+    public void testSelectJPQLPositionalParameter() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT email FROM users WHERE (type LIKE 'B') AND (username LIKE ?1)");
+    }
+
+    public void testSelectKeep() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT col1, min(col2) KEEP (DENSE_RANK FIRST ORDER BY col3), col4 FROM table1 GROUP BY col5 ORDER BY col3");
+    }
+
+    public void testSelectKeepOver() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT MIN(salary) KEEP (DENSE_RANK FIRST ORDER BY commission_pct) OVER (PARTITION BY department_id ) \"Worst\" FROM employees ORDER BY department_id, salary");
     }
 }

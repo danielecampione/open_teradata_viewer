@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IOrderByVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IPivotVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectBody;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
@@ -82,6 +83,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
     @Override
     public void visit(PlainSelect plainSelect) {
+        if (plainSelect.isUseBrackets()) {
+            buffer.append("(");
+        }
         buffer.append("SELECT ");
         if (plainSelect.getDistinct() != null) {
             buffer.append("DISTINCT ");
@@ -89,8 +93,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
                 buffer.append("ON (");
                 for (Iterator<ISelectItem> iter = plainSelect.getDistinct()
                         .getOnSelectItems().iterator(); iter.hasNext();) {
-                    ISelectItem iSelectItem = iter.next();
-                    iSelectItem.accept(this);
+                    ISelectItem selectItem = iter.next();
+                    selectItem.accept(this);
                     if (iter.hasNext()) {
                         buffer.append(", ");
                     }
@@ -105,8 +109,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
         for (Iterator<ISelectItem> iter = plainSelect.getSelectItems()
                 .iterator(); iter.hasNext();) {
-            ISelectItem iSelectItem = iter.next();
-            iSelectItem.accept(this);
+            ISelectItem selectItem = iter.next();
+            selectItem.accept(this);
             if (iter.hasNext()) {
                 buffer.append(", ");
             }
@@ -139,8 +143,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
             plainSelect.getWhere().accept(expressionVisitor);
         }
 
-        if (plainSelect.getTeradataHierarchical() != null) {
-            plainSelect.getTeradataHierarchical().accept(expressionVisitor);
+        if (plainSelect.getOracleHierarchical() != null) {
+            plainSelect.getOracleHierarchical().accept(expressionVisitor);
         }
 
         if (plainSelect.getGroupByColumnReferences() != null) {
@@ -161,7 +165,7 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         }
 
         if (plainSelect.getOrderByElements() != null) {
-            deparseOrderBy(plainSelect.isTeradataSiblings(),
+            deparseOrderBy(plainSelect.isOracleSiblings(),
                     plainSelect.getOrderByElements());
         }
 
@@ -176,6 +180,12 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         }
         if (plainSelect.isForUpdate()) {
             buffer.append(" FOR UPDATE");
+            if (plainSelect.getForUpdateTable() != null) {
+                buffer.append(" OF ").append(plainSelect.getForUpdateTable());
+            }
+        }
+        if (plainSelect.isUseBrackets()) {
+            buffer.append(")");
         }
     }
 
@@ -215,6 +225,19 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
     @Override
     public void visit(SubSelect subSelect) {
         buffer.append("(");
+        if (subSelect.getWithItemsList() != null
+                && !subSelect.getWithItemsList().isEmpty()) {
+            buffer.append("WITH ");
+            for (Iterator<WithItem> iter = subSelect.getWithItemsList()
+                    .iterator(); iter.hasNext();) {
+                WithItem withItem = iter.next();
+                withItem.accept(this);
+                if (iter.hasNext()) {
+                    buffer.append(",");
+                }
+                buffer.append(" ");
+            }
+        }
         subSelect.getSelectBody().accept(this);
         buffer.append(")");
         Pivot pivot = subSelect.getPivot();
@@ -276,9 +299,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         deparseOrderBy(false, orderByElements);
     }
 
-    public void deparseOrderBy(boolean teradataSiblings,
+    public void deparseOrderBy(boolean oracleSiblings,
             List<OrderByElement> orderByElements) {
-        if (teradataSiblings) {
+        if (oracleSiblings) {
             buffer.append(" ORDER SIBLINGS BY ");
         } else {
             buffer.append(" ORDER BY ");
@@ -417,14 +440,14 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
     @Override
     public void visit(SetOperationList list) {
-        for (int i = 0; i < list.getPlainSelects().size(); i++) {
+        for (int i = 0; i < list.getSelects().size(); i++) {
             if (i != 0) {
                 buffer.append(' ').append(list.getOperations().get(i - 1))
                         .append(' ');
             }
             buffer.append("(");
-            PlainSelect plainSelect = list.getPlainSelects().get(i);
-            plainSelect.accept(this);
+            ISelectBody select = list.getSelects().get(i);
+            select.accept(this);
             buffer.append(")");
         }
         if (list.getOrderByElements() != null) {
@@ -444,6 +467,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
     @Override
     public void visit(WithItem withItem) {
+        if (withItem.isRecursive()) {
+            buffer.append("RECURSIVE ");
+        }
         buffer.append(withItem.getName());
         if (withItem.getWithItemList() != null) {
             buffer.append(" ").append(

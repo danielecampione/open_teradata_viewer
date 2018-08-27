@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,7 +126,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         SpringLayout sl = new SpringLayout();
         JPanel temp = new JPanel(sl);
         JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2014 D. Campione</font></html>");
+                "<html><font style=\"color:gray\">Copyright &copy 2015 D. Campione</font></html>");
         JLabel licenseLabel = new JLabel("GNU General Public License");
         licenseLabel.setForeground(Color.BLUE);
         licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

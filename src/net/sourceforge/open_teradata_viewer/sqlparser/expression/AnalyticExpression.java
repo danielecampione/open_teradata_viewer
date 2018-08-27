@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ public class AnalyticExpression implements IExpression {
     private IExpression defaultValue;
     private boolean allColumns = false;
     private WindowElement windowElement;
+    private KeepExpression keep = null;
 
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
@@ -55,6 +56,14 @@ public class AnalyticExpression implements IExpression {
 
     public void setOrderByElements(List<OrderByElement> orderByElements) {
         this.orderByElements = orderByElements;
+    }
+
+    public KeepExpression getKeep() {
+        return keep;
+    }
+
+    public void setKeep(KeepExpression keep) {
+        this.keep = keep;
     }
 
     public ExpressionList getPartitionExpressionList() {
@@ -122,7 +131,11 @@ public class AnalyticExpression implements IExpression {
         } else if (isAllColumns()) {
             b.append("*");
         }
-        b.append(") OVER (");
+        b.append(") ");
+        if (keep != null) {
+            b.append(keep.toString()).append(" ");
+        }
+        b.append("OVER (");
 
         toStringPartitionBy(b);
         toStringOrderByElements(b);

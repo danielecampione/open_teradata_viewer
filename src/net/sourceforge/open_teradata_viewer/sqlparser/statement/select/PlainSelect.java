@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 
 /**
@@ -48,9 +48,19 @@ public class PlainSelect implements ISelectBody {
     private Offset offset;
     private Fetch fetch;
     private Top top;
-    private TeradataHierarchicalExpression teradataHierarchical = null;
-    private boolean teradataSiblings = false;
+    private OracleHierarchicalExpression oracleHierarchical = null;
+    private boolean oracleSiblings = false;
     private boolean forUpdate = false;
+    private Table forUpdateTable = null;
+    private boolean useBrackets = false;
+
+    public boolean isUseBrackets() {
+        return useBrackets;
+    }
+
+    public void setUseBrackets(boolean useBrackets) {
+        this.useBrackets = useBrackets;
+    }
 
     /**
      * The {@link IFromItem} in this query.
@@ -193,21 +203,21 @@ public class PlainSelect implements ISelectBody {
         groupByColumnReferences.add(expr);
     }
 
-    public TeradataHierarchicalExpression getTeradataHierarchical() {
-        return teradataHierarchical;
+    public OracleHierarchicalExpression getOracleHierarchical() {
+        return oracleHierarchical;
     }
 
-    public void setTeradataHierarchical(
-            TeradataHierarchicalExpression teradataHierarchical) {
-        this.teradataHierarchical = teradataHierarchical;
+    public void setOracleHierarchical(
+            OracleHierarchicalExpression oracleHierarchical) {
+        this.oracleHierarchical = oracleHierarchical;
     }
 
-    public boolean isTeradataSiblings() {
-        return teradataSiblings;
+    public boolean isOracleSiblings() {
+        return oracleSiblings;
     }
 
-    public void setTeradataSiblings(boolean teradataSiblings) {
-        this.teradataSiblings = teradataSiblings;
+    public void setOracleSiblings(boolean oracleSiblings) {
+        this.oracleSiblings = oracleSiblings;
     }
 
     public boolean isForUpdate() {
@@ -218,9 +228,21 @@ public class PlainSelect implements ISelectBody {
         this.forUpdate = forUpdate;
     }
 
+    public Table getForUpdateTable() {
+        return forUpdateTable;
+    }
+
+    public void setForUpdateTable(Table forUpdateTable) {
+        this.forUpdateTable = forUpdateTable;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sql = new StringBuilder("SELECT ");
+        StringBuilder sql = new StringBuilder();
+        if (useBrackets) {
+            sql.append("(");
+        }
+        sql.append("SELECT ");
         if (distinct != null) {
             sql.append(distinct).append(" ");
         }
@@ -255,14 +277,14 @@ public class PlainSelect implements ISelectBody {
             if (where != null) {
                 sql.append(" WHERE ").append(where);
             }
-            if (teradataHierarchical != null) {
-                sql.append(teradataHierarchical.toString());
+            if (oracleHierarchical != null) {
+                sql.append(oracleHierarchical.toString());
             }
             sql.append(getFormatedList(groupByColumnReferences, "GROUP BY"));
             if (having != null) {
                 sql.append(" HAVING ").append(having);
             }
-            sql.append(orderByToString(teradataSiblings, orderByElements));
+            sql.append(orderByToString(oracleSiblings, orderByElements));
             if (limit != null) {
                 sql.append(limit);
             }
@@ -274,7 +296,14 @@ public class PlainSelect implements ISelectBody {
             }
             if (isForUpdate()) {
                 sql.append(" FOR UPDATE");
+
+                if (forUpdateTable != null) {
+                    sql.append(" OF ").append(forUpdateTable);
+                }
             }
+        }
+        if (useBrackets) {
+            sql.append(")");
         }
         return sql.toString();
     }
@@ -283,10 +312,10 @@ public class PlainSelect implements ISelectBody {
         return orderByToString(false, orderByElements);
     }
 
-    public static String orderByToString(boolean teradataSiblings,
+    public static String orderByToString(boolean oracleSiblings,
             List<OrderByElement> orderByElements) {
         return getFormatedList(orderByElements,
-                teradataSiblings ? "ORDER SIBLINGS BY" : "ORDER BY");
+                oracleSiblings ? "ORDER SIBLINGS BY" : "ORDER BY");
     }
 
     public static String getFormatedList(List<?> list, String expression) {

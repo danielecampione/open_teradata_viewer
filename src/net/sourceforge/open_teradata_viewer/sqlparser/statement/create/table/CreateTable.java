@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ public class CreateTable implements IStatement {
     private List<ColumnDefinition> columnDefinitions;
     private List<Index> indexes;
     private Select select;
+    private boolean ifNotExists = false;
 
     @Override
     public void accept(IStatementVisitor statementVisitor) {
@@ -115,6 +116,14 @@ public class CreateTable implements IStatement {
         this.select = select;
     }
 
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
     @Override
     public String toString() {
         String sql = "";
@@ -123,7 +132,7 @@ public class CreateTable implements IStatement {
 
         sql = "CREATE " + (unlogged ? "UNLOGGED " : "")
                 + (!"".equals(createOps) ? createOps + " " : "") + "TABLE "
-                + table;
+                + (ifNotExists ? "IF NOT EXISTS " : "") + table;
 
         if (select != null) {
             sql += " AS " + select.toString();

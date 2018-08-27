@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
  */
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.select;
+
+import java.util.Iterator;
+import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
@@ -35,6 +38,7 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
     private ISelectBody selectBody;
     private Alias alias;
     private boolean useBrackets = true;
+    private List<WithItem> withItemsList;
 
     private Pivot pivot;
 
@@ -84,6 +88,14 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
         this.useBrackets = useBrackets;
     }
 
+    public List<WithItem> getWithItemsList() {
+        return withItemsList;
+    }
+
+    public void setWithItemsList(List<WithItem> withItemsList) {
+        this.withItemsList = withItemsList;
+    }
+
     @Override
     public void accept(IItemsListVisitor iItemsListVisitor) {
         iItemsListVisitor.visit(this);
@@ -91,8 +103,34 @@ public class SubSelect implements IFromItem, IExpression, IItemsList {
 
     @Override
     public String toString() {
-        return (useBrackets ? "(" : "") + selectBody + (useBrackets ? ")" : "")
-                + ((pivot != null) ? " " + pivot : "")
-                + ((alias != null) ? alias.toString() : "");
+        StringBuilder retval = new StringBuilder();
+        if (useBrackets) {
+            retval.append("(");
+        }
+        if (withItemsList != null && !withItemsList.isEmpty()) {
+            retval.append("WITH ");
+            for (Iterator<WithItem> iter = withItemsList.iterator(); iter
+                    .hasNext();) {
+                WithItem withItem = (WithItem) iter.next();
+                retval.append(withItem);
+                if (iter.hasNext()) {
+                    retval.append(",");
+                }
+                retval.append(" ");
+            }
+        }
+        retval.append(selectBody);
+        if (useBrackets) {
+            retval.append(")");
+        }
+
+        if (pivot != null) {
+            retval.append(" ").append(pivot);
+        }
+        if (alias != null) {
+            retval.append(alias.toString());
+        }
+
+        return retval.toString();
     }
 }

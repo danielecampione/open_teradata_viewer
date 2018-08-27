@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ public class Function implements IExpression {
     private boolean distinct = false;
     private boolean isEscaped = false;
     private String attribute;
+    private KeepExpression keep = null;
 
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
@@ -102,6 +103,14 @@ public class Function implements IExpression {
         this.attribute = attribute;
     }
 
+    public KeepExpression getKeep() {
+        return keep;
+    }
+
+    public void setKeep(KeepExpression keep) {
+        this.keep = keep;
+    }
+
     @Override
     public String toString() {
         String params;
@@ -123,6 +132,10 @@ public class Function implements IExpression {
 
         if (attribute != null) {
             ans += "." + attribute;
+        }
+
+        if (keep != null) {
+            ans += " " + keep.toString();
         }
 
         if (isEscaped) {

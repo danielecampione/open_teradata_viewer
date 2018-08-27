@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +186,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * @param y The y-coordinate at which to begin painting.
      */
     protected void drawView(ITokenPainter painter, Graphics2D g, Rectangle r,
-            View view, int fontHeight, int y) {
+            View view, int fontHeight, int y, int line) {
         float x = r.x;
 
         LayeredHighlighter h = (LayeredHighlighter) host.getHighlighter();
@@ -219,7 +219,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
 
             while (token != null && token.isPaintable()
                     && token.getEndOffset() - 1 < p) { // <=p) {
-                x = painter.paint(token, g, x, y, host, this);
+                boolean paintBG = host.getPaintTokenBackgrounds(line, y);
+                x = painter.paint(token, g, x, y, host, this, 0, paintBG);
                 token = token.getNextToken();
             }
 
@@ -228,7 +229,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 tempToken.set(drawSeg.array, tokenOffset - start,
                         p - 1 - start, tokenOffset, token.getType());
                 tempToken.setLanguageIndex(token.getLanguageIndex());
-                painter.paint(tempToken, g, x, y, host, this);
+                boolean paintBG = host.getPaintTokenBackgrounds(line, y);
+                painter.paint(tempToken, g, x, y, host, this, 0, paintBG);
                 tempToken.copyFrom(token);
                 tempToken.makeStartAt(p);
                 token = new TokenImpl(tempToken);
@@ -428,7 +430,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * Fetches the allocation for the given child view.<p> Overridden to account
      * for code folding.
      *
-     * @param index The index of the child, >= 0 && < getViewCount().
+     * @param index The index of the child, &gt;= 0 &amp;&amp;&lt;
+     *        getViewCount().
      * @param a The allocation to this view.
      * @return The allocation to the child; or <code>null</code> if
      *         <code>a</code> is <code>null</code>; or <code>null</code> if the
@@ -455,7 +458,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * Fetches the allocation for the given child view to render into.<p>
      * Overridden to account for lines hidden by collapsed folded regions.
      *
-     * @param line The index of the child, >= 0 && < getViewCount()
+     * @param line The index of the child, &gt;= 0 &amp;&amp;&lt;
+     *        getViewCount().
      * @param a The allocation to this view
      * @return The allocation to the child
      */
@@ -692,7 +696,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * too much for its consumers (implementations of
      * <code>javax.swing.text.Highlighter</code>).
      *
-     * @param p0 the position of the first character (>=0)
+     * @param p0 The position of the first character (&gt;=0).
      * @param b0 The bias of the first character position, toward the previous
      *        character or the next character represented by the offset, in case
      *        the position is a boundary of two views; <code>b0</code> will have
@@ -701,7 +705,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      *    <li> <code>Position.Bias.Forward</code>
      *    <li> <code>Position.Bias.Backward</code>
      * </ul>
-     * @param p1 the position of the last character (>=0).
+     * @param p1 the position of the last character (&gt;=0).
      * @param b1 the bias for the second character position, defined one of the
      *        legal values shown above.
      * @param a the area of the view, which encompasses the requested region.
@@ -764,10 +768,10 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * implementation does not support things like centering so it ignores the
      * tabOffset argument.
      *
-     * @param x the current position >= 0.
-     * @param tabOffset the position within the text stream that the tab
-     *        occurred at >= 0.
-     * @return the tab stop, measured in points >= 0.
+     * @param x The current position &gt;= 0.
+     * @param tabOffset The position within the text stream that the tab
+     *        occurred at &gt;= 0.
+     * @return The tab stop, measured in points &gt;= 0.
      */
     @Override
     public float nextTabStop(float x, int tabOffset) {
@@ -801,6 +805,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
         // Whether token styles should always be painted, even in selections
         int selStart = host.getSelectionStart();
         int selEnd = host.getSelectionEnd();
+        int curLine = host.getCaretLineNumber();
 
         int n = getViewCount(); // Number of lines
         int x = alloc.x + getLeftInset();
@@ -819,7 +824,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 if (selStart == selEnd || startOffset >= selEnd
                         || endOffset < selStart) {
                     drawView(painter, g2d, alloc, view, fontHeight, tempRect.y
-                            + ascent);
+                            + ascent, i);
                 } else {
                     drawViewWithSelection(painter, g2d, alloc, view,
                             fontHeight, tempRect.y + ascent, selStart, selEnd);
@@ -887,8 +892,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * Sets the size of the view. This should cause layout of the view along the
      * given axis, if it has any layout duties.
      *
-     * @param width the width >= 0
-     * @param height the height >= 0
+     * @param width The width &gt;= 0.
+     * @param height The height &gt;= 0.
      */
     @Override
     public void setSize(float width, float height) {

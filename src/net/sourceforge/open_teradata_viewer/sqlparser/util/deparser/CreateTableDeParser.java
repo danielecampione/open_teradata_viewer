@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class CreateTableDeParser {
 
     private StringBuilder buffer;
 
-    /** @param buffer the buffer that will be filled with the select. */
+    /** @param buffer The buffer that will be filled with the select. */
     public CreateTableDeParser(StringBuilder buffer) {
         this.buffer = buffer;
     }
@@ -52,8 +52,11 @@ public class CreateTableDeParser {
             buffer.append(params).append(' ');
         }
 
-        buffer.append("TABLE ").append(
-                createTable.getTable().getFullyQualifiedName());
+        buffer.append("TABLE ");
+        if (createTable.isIfNotExists()) {
+            buffer.append("IF NOT EXISTS ");
+        }
+        buffer.append(createTable.getTable().getFullyQualifiedName());
         if (createTable.getSelect() != null) {
             buffer.append(" AS ").append(createTable.getSelect().toString());
         } else {

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ public class SearchResult implements Comparable<SearchResult> {
     /**
      * Sets the number of matches found or replaced. For regular "find" and
      * "replace" operations, this should be zero or <code>1</code>. For "replace
-     * all" operations, this should be the number of replacements. 
+     * all" operations, this should be the number of replacements.
      * For "mark all" operations, this should be zero.
      *
      * @param count The count.
@@ -198,7 +198,7 @@ public class SearchResult implements Comparable<SearchResult> {
 
     /**
      * Sets the selected range for this search operation.
-     * 
+     *
      * @param range The new selected range.
      * @see #getMatchRange()
      */
@@ -219,7 +219,7 @@ public class SearchResult implements Comparable<SearchResult> {
 
     /**
      * Returns whether anything was found in this search operation. This is
-     * shorthand for <code>getCount()>0</code>.
+     * shorthand for <code>getCount()&gt;0</code>.
      *
      * @return Whether anything was found in this search operation.
      * @see #getCount()

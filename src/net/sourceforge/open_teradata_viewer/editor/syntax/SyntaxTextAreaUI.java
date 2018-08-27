@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ import net.sourceforge.open_teradata_viewer.editor.TextAreaUI;
  * highlighting.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxTextAreaUI extends TextAreaUI {
 
@@ -137,14 +137,9 @@ public class SyntaxTextAreaUI extends TextAreaUI {
         return map;
     }
 
-    /**
-     * Paints the text area's background.
-     *
-     * @param g The graphics component on which to paint.
-     */
     @Override
-    protected void paintBackground(Graphics g) {
-        super.paintBackground(g);
+    protected void paintEditorAugmentations(Graphics g) {
+        super.paintEditorAugmentations(g);
         paintMatchedBracket(g);
     }
 
@@ -169,7 +164,7 @@ public class SyntaxTextAreaUI extends TextAreaUI {
         }
     }
 
-    private void paintMatchedBracketImpl(Graphics g, SyntaxTextArea sta,
+    protected void paintMatchedBracketImpl(Graphics g, SyntaxTextArea sta,
             Rectangle r) {
         // We must add "-1" to the height because otherwise we'll paint below
         // the region that gets invalidated.

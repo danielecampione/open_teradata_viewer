@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support js )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
  * launched in a separate thread.
  *
  * @author D. Campione
- * 
+ *
  */
 class JsHinter {
 
@@ -77,9 +77,10 @@ class JsHinter {
         this.result = result;
     }
 
-    public static void parse(JavaScriptParser parser, SyntaxDocument doc,
+    public static void parse(JavaScriptParser parser, SyntaxTextArea textArea,
             DefaultParseResult result) throws IOException {
         String stdout = null;
+        SyntaxDocument doc = (SyntaxDocument) textArea.getDocument();
 
         List<String> command = new ArrayList<String>();
         if (File.separatorChar == '\\') {
@@ -90,9 +91,10 @@ class JsHinter {
             command.add("-c");
         }
         command.add("jshint");
-        if (parser.getJsHintRCFile() != null) {
+        File jshintrc = parser.getJsHintRCFile(textArea);
+        if (jshintrc != null) {
             command.add("--config");
-            command.add(parser.getJsHintRCFile().getAbsolutePath());
+            command.add(jshintrc.getAbsolutePath());
         }
         command.add("--verbose"); // Allows to decide error vs. warning
         command.add("-");
@@ -226,9 +228,9 @@ class JsHinter {
      * from <a
      * href="http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps_p.html">
      * this JavaWorld article</a>.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     static class StreamReaderThread extends Thread {
 
@@ -237,7 +239,7 @@ class JsHinter {
 
         /**
          * Ctor.
-         * 
+         *
          * @param in The stream (stdout or stderr) to read from.
          */
         public StreamReaderThread(InputStream in) {
@@ -247,7 +249,7 @@ class JsHinter {
 
         /**
          * Returns the output read from the stream.
-         * 
+         *
          * @return The stream's output, as a <code>String</code>.
          */
         public String getStreamOutput() {
@@ -274,9 +276,9 @@ class JsHinter {
     /**
      * What exactly to mark as the error in the document, based on an error code
      * from JSHint.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private enum MarkStrategy {
         MARK_LINE, MARK_CUR_TOKEN, MARK_PREV_TOKEN, MARK_PREV_NON_WS_TOKEN, IGNORE, STOP_PARSING;

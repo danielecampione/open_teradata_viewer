@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -102,7 +102,9 @@ public class RunAction extends CustomAction {
                 try {
                     if (!executed[0]) {
                         // Don't cancel when we're already going through the
-                        // result set
+                        // result set.
+                        // There's a problem with the Oracle driver
+                        // Over some VPN's, the cancel closes the connection
                         statements[0].cancel();
                     }
                 } catch (Throwable t) {
@@ -224,10 +226,15 @@ public class RunAction extends CustomAction {
         boolean call = sql.trim().toLowerCase().startsWith("call");
         PreparedStatement statement;
         if (query) {
+            if (Context.getInstance().getConnectionData().isOracle()) {
+                // http://download.oracle.com/docs/cd/B19306_01/java.102/b14355/resltset.htm#CIHEJHJI
+                sql = String.format("select x.* from (%s) x where 1 = 1", sql);
+            }
             DatabaseMetaData metaData = connection.getMetaData();
             if (metaData.supportsResultSetConcurrency(
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_UPDATABLE)) {
+                // Oracle, MySQL, DataDirect DB2, HSQLDB, H2, Apache Derby
                 statement = connection.prepareStatement(sql,
                         ResultSet.TYPE_SCROLL_INSENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);
@@ -237,12 +244,14 @@ public class RunAction extends CustomAction {
                             ResultSet.CONCUR_UPDATABLE)) {
                 if (metaData
                         .supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT)) {
+                    // IBM DB2
                     try {
                         statement = connection.prepareStatement(sql,
                                 ResultSet.TYPE_SCROLL_SENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE,
                                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
                     } catch (SQLException sqle) {
+                        // Microsoft (obviously)
                         statement = connection.prepareStatement(sql,
                                 ResultSet.TYPE_SCROLL_SENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
@@ -253,6 +262,7 @@ public class RunAction extends CustomAction {
                             ResultSet.CONCUR_UPDATABLE);
                 }
             } else {
+                // SQLite
                 statement = connection.prepareStatement(sql);
             }
         } else if (call) {

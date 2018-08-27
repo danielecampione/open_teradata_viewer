@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,9 +39,9 @@ import javax.swing.text.TabExpander;
  * should always be treated as immutable. Modifying tokens you did not create
  * yourself can and will result in rendering issues and/or runtime exceptions.
  * You have been warned.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public interface IToken extends ITokenTypes {
 
@@ -108,8 +108,8 @@ public interface IToken extends ITokenTypes {
      * it is up to the caller to ensure valid input.
      *
      * @param pos A position in the document that is represented by this token.
-     * @return The corresponding token position >= <code>textOffset</code> and
-     *         < <code>textOffset+textCount</code>.
+     * @return The corresponding token position &gt;= <code>textOffset</code>
+     *         and &lt; <code>textOffset+textCount</code>.
      * @see #tokenToDocument
      */
     public int documentToToken(int pos);
@@ -127,7 +127,7 @@ public interface IToken extends ITokenTypes {
      * Returns the end offset of this token in the document (exclusive). In
      * other words, the token ranges from
      * <code>[getOffset(), getEndOffset())</code>.
-     * 
+     *
      * @return The end offset of this token.
      * @see #getOffset()
      */
@@ -203,7 +203,7 @@ public interface IToken extends ITokenTypes {
      * @return The position (in the document, NOT into the token list) that
      *         covers the pixel location. If <code>tokenList</code> is
      *         <code>null</code> or has type <code>IToken.NULL</code>, then
-     *         <code>-1</code is returned; the caller should recognize this and
+     *         <code>-1</code> is returned; the caller should recognize this and
      *         return the actual end position of the (empty) line.
      */
     public int getListOffset(SyntaxTextArea textArea, TabExpander e, float x0,

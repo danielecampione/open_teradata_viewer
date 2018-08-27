@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UnicodeWriter;
 import net.sourceforge.open_teradata_viewer.editor.Gutter;
 import net.sourceforge.open_teradata_viewer.editor.TextArea;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -63,7 +64,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * are defined in XML files that are validated against <code>themes.dtd</code>.
  * This provides applications and other consumers with an easy way to style
  * SyntaxTextArea without having to use the API.<p>
- * 
+ *
  * Sample themes are included in the source tree under the <code>/themes</code>
  * folder, but are not a part of the built SyntaxTextArea jar. Hosting
  * applications are free to ship and use these themes as-is, modify them, or
@@ -75,7 +76,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * be retrieved.
  *
  * @author D. Campione
- * 
+ *
  */
 public class Theme {
 
@@ -112,7 +113,7 @@ public class Theme {
 
     /**
      * Private constructor, used when loading from a stream.
-     * 
+     *
      * @param baseFont The default font to use for any "base font" properties
      *        not specified in the theme XML. If this is <code>null</code>, a
      *        default monospaced font will be used.
@@ -442,10 +443,10 @@ public class Theme {
             elem = doc.createElement("lineNumbers");
             elem.setAttribute("fg", colorToString(lineNumberColor));
             if (lineNumberFont != null) {
-                elem.setAttribute("lineNumberFont", lineNumberFont);
+                elem.setAttribute("fontFamily", lineNumberFont);
             }
             if (lineNumberFontSize > 0) {
-                elem.setAttribute("lineNumberFontSize",
+                elem.setAttribute("fontSize",
                         Integer.toString(lineNumberFontSize));
             }
             root.appendChild(elem);
@@ -577,9 +578,9 @@ public class Theme {
 
     /**
      * Loads a <code>SyntaxScheme</code> from an XML file.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class XmlHandler extends DefaultHandler {
 
@@ -611,7 +612,9 @@ public class Theme {
                 is.setEncoding("UTF-8");
                 reader.parse(is);
             } catch (/*SAX|ParserConfiguration*/Exception e) {
-                ExceptionDialog.notifyException(e);
+                String msg = e.getMessage();
+                System.err.println(msg == null ? Utilities.getStackTrace(e)
+                        : msg);
                 throw new IOException(e.toString());
             }
         }

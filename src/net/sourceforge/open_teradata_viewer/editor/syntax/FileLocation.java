@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -29,7 +30,7 @@ import java.net.URL;
  * read, write, and check properties of both local and remote files.
  *
  * @author D. Campione
- * 
+ *
  */
 public abstract class FileLocation {
 
@@ -40,6 +41,16 @@ public abstract class FileLocation {
      * @return The file's location.
      */
     public static FileLocation create(String fileFullPath) {
+        if (fileFullPath.startsWith("http://")
+                || fileFullPath.startsWith("https://")
+                || fileFullPath.startsWith("ftp://")) {
+            try {
+                return new URLFileLocation(new URL(fileFullPath));
+            } catch (MalformedURLException mue) {
+                throw new IllegalArgumentException("Not a valid URL: "
+                        + fileFullPath, mue);
+            }
+        }
         return new FileFileLocation(new File(fileFullPath));
     }
 

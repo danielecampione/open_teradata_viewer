@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@ import java.net.URL;
  * The location of a file at a (remote) URL.
  *
  * @author D. Campione
- * 
+ *
  */
-class URLFileLocation extends FileLocation {
+public class URLFileLocation extends FileLocation {
 
     /** URL of the remote file. */
     private URL url;
@@ -136,7 +136,7 @@ class URLFileLocation extends FileLocation {
     }
 
     /**
-     * Returns whether this file location is a local file and already exists. 
+     * Returns whether this file location is a local file and already exists.
      * This method always returns <code>false</code> since we cannot check this
      * value easily.
      *

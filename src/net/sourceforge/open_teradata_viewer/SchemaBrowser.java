@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -57,8 +57,8 @@ public class SchemaBrowser extends JTree {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */
@@ -174,6 +174,23 @@ public class SchemaBrowser extends JTree {
                                                 new String[] { "TABLE",
                                                         "SYSTEM TABLE" }),
                                 true, 3);
+                    } else if (connectionData.isDataDirect()) {
+                        addQuery("select rtrim(tabname) from syscat.tables "
+                                + "where tabschema = '" + owner
+                                + "' and type = 'T' order by tabname", true);
+                    } else if (connectionData.getConnection().getMetaData()
+                            .supportsSchemasInTableDefinitions()) {
+                        addQuery(
+                                connectionData
+                                        .getConnection()
+                                        .getMetaData()
+                                        .getTables(
+                                                null,
+                                                owner,
+                                                null,
+                                                new String[] { "TABLE",
+                                                        "SYSTEM TABLE" }),
+                                true, 3);
                     } else {
                         addQuery(
                                 connectionData
@@ -240,6 +257,13 @@ public class SchemaBrowser extends JTree {
                 break;
             default:
             }
+        }
+
+        private void addQuery(String query, boolean children)
+                throws SQLException {
+            ResultSet resultSet = connectionData.getConnection()
+                    .createStatement().executeQuery(query);
+            addQuery(resultSet, children, 1);
         }
 
         private void addQuery(ResultSet resultSet, boolean children,

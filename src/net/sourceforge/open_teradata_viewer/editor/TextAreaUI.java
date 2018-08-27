@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ import javax.swing.text.WrappedPlainView;
  * current line, etc..
  *
  * @author D. Campione
- * 
+ *
  */
 public class TextAreaUI extends BasicTextAreaUI {
 
@@ -317,7 +317,7 @@ public class TextAreaUI extends BasicTextAreaUI {
 
     /**
      * Get the InputMap to use for the UI.<p>
-     *  
+     *
      * This method is not named <code>getInputMap()</code> because there is a
      * package-private method in <code>BasicTextAreaUI</code> with that name.
      * Thus, creating a new method with that name causes certain compilers to
@@ -419,11 +419,7 @@ public class TextAreaUI extends BasicTextAreaUI {
             g.fillRect(r.x, r.y, r.width, r.height);
         }
 
-        Rectangle visibleRect = textArea.getVisibleRect();
-
-        paintLineHighlights(g);
-        paintCurrentLineHighlight(g, visibleRect);
-        paintMarginLine(g, visibleRect);
+        paintEditorAugmentations(g);
     }
 
     /**
@@ -464,6 +460,19 @@ public class TextAreaUI extends BasicTextAreaUI {
     }
 
     /**
+     * Paints editor augmentations added by TextArea: highlighted lines, current
+     * line highlight and margin line.
+     *
+     * @param g The graphics context with which to paint.
+     */
+    protected void paintEditorAugmentations(Graphics g) {
+        Rectangle visibleRect = textArea.getVisibleRect();
+        paintLineHighlights(g);
+        paintCurrentLineHighlight(g, visibleRect);
+        paintMarginLine(g, visibleRect);
+    }
+
+    /**
      * Paints any line highlights.
      *
      * @param g The graphics context.
@@ -492,13 +501,23 @@ public class TextAreaUI extends BasicTextAreaUI {
         }
     }
 
+    @Override
+    protected void paintSafely(Graphics g) {
+        // Paint editor augmentations if editor is not opaque because
+        // paintBackground() is not called in this case
+        if (!textArea.isOpaque()) {
+            paintEditorAugmentations(g);
+        }
+        super.paintSafely(g);
+    }
+
     /**
      * Returns the y-coordinate of the specified line.<p>
      *
      * The default implementation is equivalent to:
      * <pre>
      * int startOffs = textArea.getLineStartOffset(line);
-     * return yForLineContaining(startOffs);</code>
+     * return yForLineContaining(startOffs);
      * </pre>
      *
      * Subclasses that can calculate this value more quickly than traditional
@@ -525,7 +544,7 @@ public class TextAreaUI extends BasicTextAreaUI {
      * <pre>
      * int line = textArea.getLineOfOffset(offs);
      * int startOffs = textArea.getLineStartOffset(line);
-     * return modelToView(startOffs).y;</code>
+     * return modelToView(startOffs).y;
      * </pre>
      *
      * Subclasses that can calculate this value more quickly than traditional

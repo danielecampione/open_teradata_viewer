@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisi
  * @author D. Campione
  *
  */
-public class GreaterThanEquals extends OldTeradataJoinBinaryExpression {
+public class GreaterThanEquals extends OldOracleJoinBinaryExpression {
 
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {

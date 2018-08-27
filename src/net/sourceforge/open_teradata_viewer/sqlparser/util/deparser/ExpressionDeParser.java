@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,15 +36,19 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpress
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcNamedParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.KeepExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.NumericBind;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.TeradataHierarchicalExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.UserVariable;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.WhenClause;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.WithinGroupExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.Addition;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.arithmetic.BitwiseOr;
@@ -63,7 +67,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.GreaterThan;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IItemsListVisitor;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ISupportsOldTeradataJoinSyntax;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ISupportsOldOracleJoinSyntax;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.InExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.IsNullExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.LikeExpression;
@@ -72,9 +76,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThanEquals;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MultiExpressionList;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.OldTeradataJoinBinaryExpression;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.OldOracleJoinBinaryExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
@@ -151,7 +155,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(EqualsTo equalsTo) {
-        visitOldTeradataJoinBinaryExpression(equalsTo, " = ");
+        visitOldOracleJoinBinaryExpression(equalsTo, " = ");
     }
 
     @Override
@@ -166,30 +170,30 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     }
 
-    public void visitOldTeradataJoinBinaryExpression(
-            OldTeradataJoinBinaryExpression expression, String operator) {
+    public void visitOldOracleJoinBinaryExpression(
+            OldOracleJoinBinaryExpression expression, String operator) {
         if (expression.isNot()) {
             buffer.append(" NOT ");
         }
         expression.getLeftExpression().accept(this);
-        if (expression.getOldTeradataJoinSyntax() == EqualsTo.TERADATA_JOIN_RIGHT) {
+        if (expression.getOldOracleJoinSyntax() == EqualsTo.ORACLE_JOIN_RIGHT) {
             buffer.append("(+)");
         }
         buffer.append(operator);
         expression.getRightExpression().accept(this);
-        if (expression.getOldTeradataJoinSyntax() == EqualsTo.TERADATA_JOIN_LEFT) {
+        if (expression.getOldOracleJoinSyntax() == EqualsTo.ORACLE_JOIN_LEFT) {
             buffer.append("(+)");
         }
     }
 
     @Override
     public void visit(GreaterThan greaterThan) {
-        visitOldTeradataJoinBinaryExpression(greaterThan, " > ");
+        visitOldOracleJoinBinaryExpression(greaterThan, " > ");
     }
 
     @Override
     public void visit(GreaterThanEquals greaterThanEquals) {
-        visitOldTeradataJoinBinaryExpression(greaterThanEquals, " >= ");
+        visitOldOracleJoinBinaryExpression(greaterThanEquals, " >= ");
 
     }
 
@@ -199,7 +203,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
             inExpression.getLeftItemsList().accept(this);
         } else {
             inExpression.getLeftExpression().accept(this);
-            if (inExpression.getOldTeradataJoinSyntax() == ISupportsOldTeradataJoinSyntax.TERADATA_JOIN_RIGHT) {
+            if (inExpression.getOldOracleJoinSyntax() == ISupportsOldOracleJoinSyntax.ORACLE_JOIN_RIGHT) {
                 buffer.append("(+)");
             }
         }
@@ -230,12 +234,15 @@ public class ExpressionDeParser implements IExpressionVisitor,
     @Override
     public void visit(JdbcParameter jdbcParameter) {
         buffer.append("?");
-
+        if (jdbcParameter.getIndex() != null) {
+            buffer.append(jdbcParameter.getIndex());
+        }
     }
 
     @Override
     public void visit(LikeExpression likeExpression) {
-        visitBinaryExpression(likeExpression, " LIKE ");
+        visitBinaryExpression(likeExpression,
+                likeExpression.isCaseInsensitive() ? " ILIKE " : " LIKE ");
         String escape = likeExpression.getEscape();
         if (escape != null) {
             buffer.append(" ESCAPE '").append(escape).append('\'');
@@ -260,13 +267,13 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(MinorThan minorThan) {
-        visitOldTeradataJoinBinaryExpression(minorThan, " < ");
+        visitOldOracleJoinBinaryExpression(minorThan, " < ");
 
     }
 
     @Override
     public void visit(MinorThanEquals minorThanEquals) {
-        visitOldTeradataJoinBinaryExpression(minorThanEquals, " <= ");
+        visitOldOracleJoinBinaryExpression(minorThanEquals, " <= ");
 
     }
 
@@ -278,7 +285,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(NotEqualsTo notEqualsTo) {
-        visitOldTeradataJoinBinaryExpression(notEqualsTo,
+        visitOldOracleJoinBinaryExpression(notEqualsTo,
                 " " + notEqualsTo.getStringExpression() + " ");
 
     }
@@ -384,6 +391,9 @@ public class ExpressionDeParser implements IExpressionVisitor,
         if (function.getAttribute() != null) {
             buffer.append(".").append(function.getAttribute());
         }
+        if (function.getKeep() != null) {
+            buffer.append(" ").append(function.getKeep());
+        }
 
         if (function.isEscaped()) {
             buffer.append("}");
@@ -487,7 +497,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(Matches matches) {
-        visitOldTeradataJoinBinaryExpression(matches, " @@ ");
+        visitOldOracleJoinBinaryExpression(matches, " @@ ");
     }
 
     @Override
@@ -557,7 +567,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
     }
 
     @Override
-    public void visit(TeradataHierarchicalExpression texpr) {
+    public void visit(OracleHierarchicalExpression texpr) {
         buffer.append(texpr.toString());
     }
 
@@ -567,12 +577,32 @@ public class ExpressionDeParser implements IExpressionVisitor,
     }
 
     @Override
-    public void visit(RegExpTeradataOperator rexpr) {
+    public void visit(RegExpMySQLOperator rexpr) {
         visitBinaryExpression(rexpr, " " + rexpr.getStringExpression() + " ");
     }
 
     @Override
     public void visit(JsonExpression jsonExpr) {
         buffer.append(jsonExpr.toString());
+    }
+
+    @Override
+    public void visit(WithinGroupExpression wgexpr) {
+        buffer.append(wgexpr.toString());
+    }
+
+    @Override
+    public void visit(UserVariable var) {
+        buffer.append(var.toString());
+    }
+
+    @Override
+    public void visit(NumericBind bind) {
+        buffer.append(bind.toString());
+    }
+
+    @Override
+    public void visit(KeepExpression aexpr) {
+        buffer.append(aexpr.toString());
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.sqlparser.util.deparser;
 import java.util.Iterator;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.SetStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statements;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
@@ -159,6 +160,8 @@ public class StatementDeParser implements IStatementVisitor {
 
     @Override
     public void visit(Alter alter) {
+        AlterDeParser alterDeParser = new AlterDeParser(buffer);
+        alterDeParser.deParse(alter);
     }
 
     @Override
@@ -176,5 +179,17 @@ public class StatementDeParser implements IStatementVisitor {
                 expressionDeParser, buffer);
         selectDeParser.setExpressionVisitor(expressionDeParser);
         executeDeParser.deParse(execute);
+    }
+
+    @Override
+    public void visit(SetStatement set) {
+        SelectDeParser selectDeParser = new SelectDeParser();
+        selectDeParser.setBuffer(buffer);
+        ExpressionDeParser expressionDeParser = new ExpressionDeParser(
+                selectDeParser, buffer);
+        SetStatementDeParser setStatementDeparser = new SetStatementDeParser(
+                expressionDeParser, buffer);
+        selectDeParser.setExpressionVisitor(expressionDeParser);
+        setStatementDeparser.deParse(set);
     }
 }

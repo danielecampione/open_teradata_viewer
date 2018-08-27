@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.Crea
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -77,7 +77,7 @@ public class CreateViewTest extends TestCase {
 
     public void testCreateView5() throws SQLParserException {
         String statement = "CREATE VIEW myview AS (SELECT * FROM mytab)";
-        String statement2 = "CREATE VIEW myview AS SELECT * FROM mytab";
+        String statement2 = "CREATE VIEW myview AS (SELECT * FROM mytab)";
         CreateView createView = (CreateView) parserManager
                 .parse(new StringReader(statement));
         assertFalse(createView.isOrReplace());

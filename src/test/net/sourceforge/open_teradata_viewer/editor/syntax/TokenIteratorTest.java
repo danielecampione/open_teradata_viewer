@@ -1,6 +1,6 @@
 /*
- * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Open Teradata Viewer ( editor syntax )
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import org.junit.Test;
  * Unit tests for the iterator returned from a {@link SyntaxDocument}.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TokenIteratorTest {
 

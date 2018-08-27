@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,6 +155,14 @@ public class IconRowHeader extends AbstractGutterComponent implements
      */
     public IGutterIconInfo addOffsetTrackingIcon(int offs, Icon icon, String tip)
             throws BadLocationException {
+        // Despite its documentation, AbstractDocument does *not* throw BLEs
+        // when creating sticky positions for offsets that do not exist.
+        // We must check for that ourselves
+        if (offs < 0 || offs > textArea.getDocument().getLength()) {
+            throw new BadLocationException("Offset " + offs + " not in "
+                    + "required range of 0-"
+                    + textArea.getDocument().getLength(), offs);
+        }
         Position pos = textArea.getDocument().createPosition(offs);
         GutterIconImpl ti = new GutterIconImpl(icon, pos, tip);
         if (trackingIcons == null) {

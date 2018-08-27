@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,11 +180,14 @@ public class SyntaxView extends View implements TabExpander,
      * @return The x-coordinate representing the end of the painted text.
      */
     private float drawLine(ITokenPainter painter, IToken token, Graphics2D g,
-            float x, float y) {
+            float x, float y, int line) {
+
         float nextX = x; // The x-value at the end of our text
+        boolean paintBG = host.getPaintTokenBackgrounds(line, y);
 
         while (token != null && token.isPaintable() && nextX < clipEnd) {
-            nextX = painter.paint(token, g, nextX, y, host, this, clipStart);
+            nextX = painter.paint(token, g, nextX, y, host, this, clipStart,
+                    paintBG);
             token = token.getNextToken();
         }
 
@@ -194,7 +197,7 @@ public class SyntaxView extends View implements TabExpander,
             g.drawString("\u00B6", nextX, y);
         }
 
-        // Return the x-coordinate at the end of the painted text.
+        // Return the x-coordinate at the end of the painted text
         return nextX;
     }
 
@@ -306,17 +309,17 @@ public class SyntaxView extends View implements TabExpander,
      * not be in the same order found in the model, or they just might not allow
      * access to some of the locations in the model.
      *
-     * @param pos the position to convert >= 0
-     * @param a the allocated region to render into
+     * @param pos The position to convert &gt;= 0.
+     * @param a The allocated region to render into.
      * @param direction The direction from the current position that can be
      *                  thought of as the arrow keys typically found on a
      *                  keyboard. This may be SwingConstants.WEST,
      *                  SwingConstants.EAST, SwingConstants.NORTH, or
      *                  SwingConstants.SOUTH.
-     * @return the location within the model that best represents the next
+     * @return The location within the model that best represents the next
      *         location visual position.
      * @exception BadLocationException
-     * @exception IllegalArgumentException for an invalid direction
+     * @exception IllegalArgumentException for an invalid direction.
      */
     @Override
     public int getNextVisualPositionFrom(int pos, Position.Bias b, Shape a,
@@ -328,12 +331,12 @@ public class SyntaxView extends View implements TabExpander,
     /**
      * Determines the preferred span for this view along an axis.
      *
-     * @param axis may be either View.X_AXIS or View.Y_AXIS
-     * @return the span the view would like to be rendered into >= 0. Typically
-     *         the view is told to render into the span that is returned,
-     *         although there is no guarantee. The parent may choose to resize
-     *         or break the view.
-     * @exception IllegalArgumentException for an invalid axis
+     * @param axis May be either View.X_AXIS or View.Y_AXIS.
+     * @return   The span the view would like to be rendered into &gt;= 0.
+     *           Typically the view is told to render into the span that is
+     *           returned, although there is no guarantee.
+     *           The parent may choose to resize or break the view.
+     * @exception IllegalArgumentException for an invalid axis.
      */
     @Override
     public float getPreferredSpan(int axis) {
@@ -494,11 +497,11 @@ public class SyntaxView extends View implements TabExpander,
      * Provides a mapping from the document model coordinate space to the
      * coordinate space of the view mapped to it.
      *
-     * @param pos the position to convert >= 0
-     * @param a the allocated region to render into
-     * @return the bounding box of the given position
+     * @param pos The position to convert &gt;= 0.
+     * @param a The allocated region to render into
+     * @return The bounding box of the given position
      * @exception BadLocationException  if the given position does not represent
-     *            a valid location in the associated document
+     *            a valid location in the associated document.
      * @see View#modelToView
      */
     @Override
@@ -533,7 +536,7 @@ public class SyntaxView extends View implements TabExpander,
      * too much for its consumers (implementations of
      * <code>javax.swing.text.Highlighter</code>).
      *
-     * @param p0 the position of the first character (>=0)
+     * @param p0 The position of the first character (&gt;=0).
      * @param b0 The bias of the first character position, toward the previous
      *           character or the next character represented by the offset, in
      *           case the position is a boundary of two views; <code>b0</code>
@@ -542,11 +545,11 @@ public class SyntaxView extends View implements TabExpander,
      *    <li> <code>Position.Bias.Forward</code>
      *    <li> <code>Position.Bias.Backward</code>
      * </ul>
-     * @param p1 the position of the last character (>=0).
-     * @param b1 the bias for the second character position, defined one of the
+     * @param p1 The position of the last character (&gt;=0).
+     * @param b1 The bias for the second character position, defined one of the
      *           legal values shown above.
-     * @param a the area of the view, which encompasses the requested region.
-     * @return the bounding box which is a union of the region specified
+     * @param a The area of the view, which encompasses the requested region.
+     * @return The bounding box which is a union of the region specified
      *		   by the first and last character positions.
      * @exception BadLocationException if the given position does not represent
      *            a valid location in the associated document.
@@ -607,10 +610,10 @@ public class SyntaxView extends View implements TabExpander,
      * implementation does not support things like centering so it ignores the
      * tabOffset argument.
      *
-     * @param x the current position >= 0.
-     * @param tabOffset the position within the text stream that the tab
-     *                  occurred at >= 0.
-     * @return the tab stop, measured in points >= 0.
+     * @param x The current position &gt;= 0.
+     * @param tabOffset The position within the text stream that the tab
+     *        occurred at &gt;= 0.
+     * @return The tab stop, measured in points &gt;= 0.
      */
     @Override
     public float nextTabStop(float x, int tabOffset) {
@@ -680,7 +683,7 @@ public class SyntaxView extends View implements TabExpander,
             token = document.getTokenListForLine(line);
             if (selStart == selEnd || startOffset >= selEnd
                     || endOffset < selStart) {
-                drawLine(painter, token, g2d, x, y);
+                drawLine(painter, token, g2d, x, y, line);
             } else {
                 drawLineWithSelection(painter, token, g2d, x, y, selStart,
                         selEnd);
@@ -837,11 +840,11 @@ public class SyntaxView extends View implements TabExpander,
      * Provides a mapping from the view coordinate space to the logical
      * coordinate space of the model.
      *
-     * @param fx the X coordinate >= 0.
-     * @param fy the Y coordinate >= 0.
-     * @param a the allocated region to render into.
-     * @return the location within the model that best represents the
-     *         given point in the view >= 0.
+     * @param fx The X coordinate &gt;= 0.
+     * @param fy The Y coordinate &gt;= 0.
+     * @param a The allocated region to render into.
+     * @return The location within the model that best represents the given
+     *         point in the view &gt;= 0.
      */
     @Override
     public int viewToModel(float fx, float fy, Shape a, Position.Bias[] bias) {

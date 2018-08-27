@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -25,8 +26,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -137,9 +138,8 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
         Properties properties = new Properties();
         if (user.length() > 0) {
             properties.setProperty("user", user);
-            properties.setProperty("password", password.isEmpty()
-                    ? transientPassword
-                    : password);
+            properties.setProperty("password",
+                    password.isEmpty() ? transientPassword : password);
         }
         addExtraProperties(properties);
         connection = driver.connect(url, properties);
@@ -154,12 +154,40 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     }
 
     private void addExtraProperties(Properties properties) {
+        if (isOracle()) {
+            addProperty(properties, "v$session.program", Main.APPLICATION_NAME);
+        } else if (isIbm()) {
+            addProperty(properties, "clientProgramName", Main.APPLICATION_NAME);
+            addProperty(properties, "retrieveMessagesFromServerOnGetMessage",
+                    "true");
+        } else if (isDataDirect()) {
+            addProperty(properties, "applicationName", Main.APPLICATION_NAME);
+            addProperty(properties, "connectionRetryCount", "0");
+        } else if (isHSQLDB()) {
+            addProperty(properties, "shutdown", "true");
+        }
     }
 
     private void addProperty(Properties properties, String name, String value) {
         if (!url.toLowerCase().contains(name.toLowerCase())) {
             properties.setProperty(name, value);
         }
+    }
+
+    public boolean isOracle() {
+        return url.toLowerCase().trim().startsWith("jdbc:oracle");
+    }
+
+    public boolean isIbm() {
+        return url.toLowerCase().trim().startsWith("jdbc:db2");
+    }
+
+    public boolean isDataDirect() {
+        return url.toLowerCase().trim().startsWith("jdbc:datadirect");
+    }
+
+    public boolean isHSQLDB() {
+        return url.toLowerCase().trim().startsWith("jdbc:hsqldb");
     }
 
     private void setMixedCaseQuotedIdentifiers() {
@@ -202,4 +230,15 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
+    public static final OutputStream DERBY_LOG_FILE_ELIMINATOR = new OutputStream() {
+        {
+            System.setProperty("derby.stream.error.field",
+                    "net.sourceforge.open_teradata_viewer.ConnectionData.DERBY_LOG_FILE_ELIMINATOR");
+        }
+
+        @Override
+        public void write(int b) {
+        }
+    };
 }

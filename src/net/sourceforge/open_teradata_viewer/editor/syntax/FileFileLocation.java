@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ import java.io.OutputStream;
 /**
  * The location of a local file.
  *
- * @author D. Campione 
+ * @author D. Campione
  */
-class FileFileLocation extends FileLocation {
+public class FileFileLocation extends FileLocation {
 
     /** The file. This may or may not actually exist. */
     private File file;

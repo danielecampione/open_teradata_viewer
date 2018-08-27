@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support java buildpath )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,12 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.Util;
+import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.PackageMapNode;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classreader.ClassFile;
 
 /**
@@ -39,7 +37,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * @author D. Campione
  * @see DirLibraryInfo
  * @see ClasspathLibraryInfo
- * 
+ *
  */
 public class JarLibraryInfo extends LibraryInfo {
 
@@ -85,13 +83,13 @@ public class JarLibraryInfo extends LibraryInfo {
      * @return The sort order of these two library infos.
      */
     @Override
-    public int compareTo(Object o) {
-        if (o == this) {
+    public int compareTo(LibraryInfo info) {
+        if (info == this) {
             return 0;
         }
         int result = -1;
-        if (o instanceof JarLibraryInfo) {
-            result = jarFile.compareTo(((JarLibraryInfo) o).jarFile);
+        if (info instanceof JarLibraryInfo) {
+            result = jarFile.compareTo(((JarLibraryInfo) info).jarFile);
         }
         return result;
     }
@@ -130,8 +128,8 @@ public class JarLibraryInfo extends LibraryInfo {
     }
 
     @Override
-    public TreeMap createPackageMap() throws IOException {
-        TreeMap packageMap = new TreeMap();
+    public PackageMapNode createPackageMap() throws IOException {
+        PackageMapNode root = new PackageMapNode();
         JarFile jar = new JarFile(jarFile);
 
         try {
@@ -140,26 +138,14 @@ public class JarLibraryInfo extends LibraryInfo {
                 ZipEntry entry = e.nextElement();
                 String entryName = entry.getName();
                 if (entryName.endsWith(".class")) {
-                    entryName = entryName.substring(0, entryName.length() - 6);
-                    String[] items = Util.splitOnChar(entryName, '/');
-                    Map m = packageMap;
-                    for (int i = 0; i < items.length - 1; i++) {
-                        TreeMap submap = (TreeMap) m.get(items[i]);
-                        if (submap == null) {
-                            submap = new TreeMap();
-                            m.put(items[i], submap);
-                        }
-                        m = submap;
-                    }
-                    String className = items[items.length - 1];
-                    m.put(className, null); // Lazily set value to ClassFile later
+                    root.add(entryName);
                 }
             }
         } finally {
             jar.close();
         }
 
-        return packageMap;
+        return root;
     }
 
     @Override

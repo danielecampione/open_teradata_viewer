@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,14 @@
 
 package net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -33,6 +34,7 @@ public class ColDataType {
     private String dataType;
     private List<String> argumentsStringList;
     private String characterSet;
+    private List<Integer> arrayData = new ArrayList<Integer>();
 
     public List<String> getArgumentsStringList() {
         return argumentsStringList;
@@ -58,12 +60,29 @@ public class ColDataType {
         this.characterSet = characterSet;
     }
 
+    public List<Integer> getArrayData() {
+        return arrayData;
+    }
+
+    public void setArrayData(List<Integer> arrayData) {
+        this.arrayData = arrayData;
+    }
+
     @Override
     public String toString() {
+        StringBuilder arraySpec = new StringBuilder();
+        for (Integer item : arrayData) {
+            arraySpec.append("[");
+            if (item != null) {
+                arraySpec.append(item);
+            }
+            arraySpec.append("]");
+        }
         return dataType
                 + (argumentsStringList != null ? " "
                         + PlainSelect.getStringList(argumentsStringList, true,
                                 true) : "")
+                + arraySpec.toString()
                 + (characterSet != null ? " CHARACTER SET " + characterSet : "");
     }
 }

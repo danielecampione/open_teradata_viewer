@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +39,12 @@ import net.sourceforge.open_teradata_viewer.editor.ChangeableHighlightPainter;
  * This class must be used as a <code>LayerPainter</code>.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SquiggleUnderlineHighlightPainter extends
         ChangeableHighlightPainter {
+
+    private static final long serialVersionUID = -7819521744309443790L;
 
     private static final int AMT = 2;
 
@@ -59,14 +61,14 @@ public class SquiggleUnderlineHighlightPainter extends
     /**
      * Paints a portion of a highlight.
      *
-     * @param g the graphics context
-     * @param offs0 the starting model offset >= 0
-     * @param offs1 the ending model offset >= offs1
-     * @param bounds the bounding box of the view, which is not necessarily the
+     * @param g The graphics context.
+     * @param offs0 The starting model offset &gt;= 0.
+     * @param offs1 The ending model offset &gt;= offs1.
+     * @param bounds The bounding box of the view, which is not necessarily the
      *               region to paint.
-     * @param c the editor
-     * @param view View painting for
-     * @return region drawing occurred in
+     * @param c The editor.
+     * @param view View painting for.
+     * @return Region drawing occurred in.
      */
     @Override
     public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds,

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -263,6 +263,7 @@ public class Gutter extends JPanel {
      *
      * @return The bookmarks. If there are no bookmarks, an empty array is
      *         returned.
+     * @see #toggleBookmark(int)
      */
     public IGutterIconInfo[] getBookmarks() {
         return iconArea.getBookmarks();
@@ -406,6 +407,16 @@ public class Gutter extends JPanel {
     }
 
     /**
+     * Removes all tracking icons.
+     *
+     * @see #removeTrackingIcon(IGutterIconInfo)
+     * @see #addOffsetTrackingIcon(int, Icon)
+     */
+    public void removeAllTrackingIcons() {
+        iconArea.removeAllTrackingIcons();
+    }
+
+    /**
      * Removes the specified tracking icon.
      *
      * @param tag A tag for an icon in the gutter, as returned from either
@@ -417,16 +428,6 @@ public class Gutter extends JPanel {
      */
     public void removeTrackingIcon(IGutterIconInfo tag) {
         iconArea.removeTrackingIcon(tag);
-    }
-
-    /**
-     * Removes all tracking icons.
-     *
-     * @see #removeTrackingIcon(IGutterIconInfo)
-     * @see #addOffsetTrackingIcon(int, Icon)
-     */
-    public void removeAllTrackingIcons() {
-        iconArea.removeAllTrackingIcons();
     }
 
     /**
@@ -568,7 +569,7 @@ public class Gutter extends JPanel {
      * @param enabled Whether the icon row header is enabled.
      * @see #isIconRowHeaderEnabled()
      */
-    void setIconRowHeaderEnabled(boolean enabled) {
+    public void setIconRowHeaderEnabled(boolean enabled) {
         if (iconArea != null) {
             if (enabled) {
                 add(iconArea, BorderLayout.LINE_START);
@@ -651,7 +652,7 @@ public class Gutter extends JPanel {
      * @param enabled Whether or not line numbers should be visible.
      * @see #getLineNumbersEnabled()
      */
-    void setLineNumbersEnabled(boolean enabled) {
+    public void setLineNumbersEnabled(boolean enabled) {
         if (lineNumberList != null) {
             if (enabled) {
                 add(lineNumberList);
@@ -725,6 +726,7 @@ public class Gutter extends JPanel {
      * @return Whether a bookmark is now at the specified line.
      * @throws BadLocationException If <code>line</code> is an invalid line
      *         number in the text area.
+     * @see #getBookmarks()
      */
     public boolean toggleBookmark(int line) throws BadLocationException {
         return iconArea.toggleBookmark(line);

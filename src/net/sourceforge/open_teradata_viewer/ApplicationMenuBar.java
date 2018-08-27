@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -333,6 +333,8 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("PHP", ISyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
         addSyntaxItem("Python", ISyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
                 subMenu);
+        addSyntaxItem("Ruby", ISyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
+        addSyntaxItem("Scala", ISyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu);
         addSyntaxItem("Unix Shell", ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
                 bg, subMenu);
         addSyntaxItem("Visual Basic",

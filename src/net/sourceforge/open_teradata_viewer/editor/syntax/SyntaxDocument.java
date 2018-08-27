@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -327,12 +327,12 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
      * @return Whether tokens of this type should have "mark occurrences"
      *         enabled.
      */
-    boolean getMarkOccurrencesOfTokenType(int type) {
+    public boolean getMarkOccurrencesOfTokenType(int type) {
         return tokenMaker.getMarkOccurrencesOfTokenType(type);
     }
 
     /** @return The occurrence marker for the current language. */
-    IOccurrenceMarker getOccurrenceMarker() {
+    public IOccurrenceMarker getOccurrenceMarker() {
         return tokenMaker.getOccurrenceMarker();
     }
 
@@ -350,12 +350,23 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
     }
 
     /**
+     * Returns the syntax style being used.
+     *
+     * @return The syntax style.
+     * @see #setSyntaxStyle(String)
+     */
+    public String getSyntaxStyle() {
+        return syntaxStyle;
+    }
+
+    /**
      * Returns a token list for the specified segment of text representing the
      * specified line number. This method is basically a wrapper for
-     * <code>ITokenMaker.getTokenList</code> that takes into account the last
+     * <code>tokenMaker.getTokenList</code> that takes into account the last
      * token on the previous line to assure token accuracy.
      *
-     * @param line The line number of <code>text</code> in the document, >= 0.
+     * @param line The line number of <code>text</code> in the document,
+     *        &gt;= 0.
      * @return A token list representing the specified line.
      */
     public final IToken getTokenListForLine(int line) {
@@ -394,7 +405,7 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
         return cachedTokenList;
     }
 
-    boolean insertBreakSpecialHandling(ActionEvent e) {
+    public boolean insertBreakSpecialHandling(ActionEvent e) {
         Action a = tokenMaker.getInsertBreakAction();
         if (a != null) {
             a.actionPerformed(e);
@@ -484,10 +495,12 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
      * {@link TokenMakerFactory}. By default, all <code>SyntaxDocument</code>s
      * support all languages built into <code>SyntaxTextArea</code>.
      *
-     * @param styleKey The new style to use. If this style is not known or
+     * @param styleKey The new style to use, such as {@link
+     *        ISyntaxConstants#SYNTAX_STYLE_JAVA}. If this style is not known or
      *        supported by this document, then {@link
      *        ISyntaxConstants#SYNTAX_STYLE_NONE} is used.
      * @see #setSyntaxStyle(ITokenMaker)
+     * @see #getSyntaxStyle()
      */
     public void setSyntaxStyle(String styleKey) {
         tokenMaker = tokenMakerFactory.getTokenMaker(styleKey);
@@ -507,6 +520,7 @@ public class SyntaxDocument extends OTVDocument implements Iterable<IToken>,
     public void setSyntaxStyle(ITokenMaker tokenMaker) {
         this.tokenMaker = tokenMaker;
         updateSyntaxHighlightingInformation();
+        this.syntaxStyle = "text/unknown";
     }
 
     /**

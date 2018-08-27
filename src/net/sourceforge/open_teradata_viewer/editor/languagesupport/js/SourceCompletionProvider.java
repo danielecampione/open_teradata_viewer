@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor language support js )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -278,6 +278,7 @@ public class SourceCompletionProvider extends DefaultCompletionProvider {
         return resolveCompletions(text, set);
     }
 
+    @SuppressWarnings("unchecked")
     private List<ICompletion> resolveCompletions(String text,
             Set<ICompletion> set) {
         completions.addAll(set);

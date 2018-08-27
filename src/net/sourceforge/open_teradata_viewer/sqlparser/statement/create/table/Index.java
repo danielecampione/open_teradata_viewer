@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSele
 
 /**
  * An index (unique, primary etc..) in a CREATE TABLE statement.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class Index {
 
@@ -62,7 +62,7 @@ public class Index {
 
     @Override
     public String toString() {
-        return type + " " + PlainSelect.getStringList(columnsNames, true, true)
-                + (name != null ? " " + name : "");
+        return type + (name != null ? " " + name : "") + " "
+                + PlainSelect.getStringList(columnsNames, true, true);
     }
 }

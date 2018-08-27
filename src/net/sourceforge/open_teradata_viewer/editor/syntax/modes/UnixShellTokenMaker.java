@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor syntax modes )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.syntax.AbstractTokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
@@ -31,7 +30,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.TokenMap;
  * syntax highlighting UNIX shell scripts.
  *
  * @author D. Campione
- * 
+ *
  */
 public class UnixShellTokenMaker extends AbstractTokenMaker {
 
@@ -83,8 +82,6 @@ public class UnixShellTokenMaker extends AbstractTokenMaker {
             break;
 
         default:
-            ExceptionDialog.hideException(new Exception("Unknown tokenType: '"
-                    + tokenType + "'"));
             tokenType = IToken.IDENTIFIER;
             break;
         }

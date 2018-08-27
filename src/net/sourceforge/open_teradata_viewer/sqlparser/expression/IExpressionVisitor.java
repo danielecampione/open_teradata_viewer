@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( sql parser )
- * Copyright (C) 2014, D. Campione
+ * Copyright (C) 2015, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.MinorThanEquals;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.NotEqualsTo;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpTeradataOperator;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
@@ -140,15 +140,23 @@ public interface IExpressionVisitor {
 
     void visit(AnalyticExpression aexpr);
 
+    void visit(WithinGroupExpression wgexpr);
+
     void visit(ExtractExpression eexpr);
 
     void visit(IntervalExpression iexpr);
 
-    void visit(TeradataHierarchicalExpression texpr);
+    void visit(OracleHierarchicalExpression texpr);
 
     void visit(RegExpMatchOperator rexpr);
 
     void visit(JsonExpression jsonExpr);
 
-    void visit(RegExpTeradataOperator regExpTeradataOperator);
+    void visit(RegExpMySQLOperator regExpMySQLOperator);
+
+    void visit(UserVariable var);
+
+    void visit(NumericBind bind);
+
+    void visit(KeepExpression aexpr);
 }
