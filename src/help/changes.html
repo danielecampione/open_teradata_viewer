@@ -5,7 +5,25 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.23c (28/05/2015)
+<PRE>0.24a (26/06/2015)
+    - Added MXML syntax highlighting and code folding.
+    - Added unit tests.
+    - Added unit tests for Ruby.
+    - Added unit tests for D, Dart and Groovy.
+    - Fixed some doclint errors.
+    - JavaScript: jshint support now allows scanning parent directory tree for
+      .jshintrc.
+    - Global types such as 'Math' were not recognized.
+    - Added a message to stdout when java.net.URI is selected in code completion
+      window.
+    - Java: Fixed most compiler warnings.
+    - Fixed Java 8 signatures parsing.
+    - Added bootstrap support.
+    - Added support for Java 8 invoke dynamic constants.
+    - CSS: Added completions for font-related and other miscellaneous
+      properties.
+
+0.23c (28/05/2015)
     - Added Ruby syntax highlighting.
     - Added Scala syntax highlighting.
     - Added support for ORACLE, DB2, MySQL, SQLite, HSQLDB, H2, Derby, SQL
@@ -50,7 +68,7 @@
     - Support for ORACLE's old join syntax has been improved in the SQL parser.
     - Added first support for numeric bind to the SQL parser.
     - Added support for keywords as column names in CREATE TABLE statements to
-      the SQL parser..
+      the SQL parser.
     - Included a huge amount of ORACLE test SQLs. There is much room to improve
       support for the ORACLE special syntax.
     - Upgraded Teradata JDBC driver 15.00.00.20 -> 15.10.00.05

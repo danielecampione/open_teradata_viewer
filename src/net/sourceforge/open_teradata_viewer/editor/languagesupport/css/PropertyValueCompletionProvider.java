@@ -62,7 +62,7 @@ import org.xml.sax.SAXException;
  * The completion provider used for CSS properties and values.
  *
  * @author D. Campione
- * 
+ *
  */
 class PropertyValueCompletionProvider extends CompletionProviderBase {
 
@@ -467,6 +467,9 @@ class PropertyValueCompletionProvider extends CompletionProviderBase {
                     } else if ("*time*".equals(token)) {
                         add(valueCompletionGenerators, prop,
                                 new TimeCompletionGenerator());
+                    } else if ("*common-fonts*".equals(token)) {
+                        add(valueCompletionGenerators, prop,
+                                new CommonFontCompletionGenerator());
                     } else {
                         completion = new BasicCssCompletion(this, tokens[i],
                                 "css_propertyvalue_identifier");

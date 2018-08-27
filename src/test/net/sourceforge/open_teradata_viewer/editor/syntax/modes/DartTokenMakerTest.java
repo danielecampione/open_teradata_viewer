@@ -23,18 +23,18 @@ import javax.swing.text.Segment;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
-import net.sourceforge.open_teradata_viewer.editor.syntax.modes.CTokenMaker;
+import net.sourceforge.open_teradata_viewer.editor.syntax.modes.DartTokenMaker;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Unit tests for the {@link CTokenMaker} class.
+ * Unit tests for the {@link DartTokenMaker} class.
  *
  * @author D. Campione
  *
  */
-public class CTokenMakerTest {
+public class DartTokenMakerTest {
 
     /**
      * Returns a new instance of the <code>ITokenMaker</code> to test.
@@ -42,7 +42,19 @@ public class CTokenMakerTest {
      * @return The <code>ITokenMaker</code> to test.
      */
     private ITokenMaker createTokenMaker() {
-        return new CTokenMaker();
+        return new DartTokenMaker();
+    }
+
+    @Test
+    public void testBooleanLiterals() {
+        String[] booleans = { "true", "false" };
+
+        for (String code : booleans) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            ITokenMaker tm = createTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertTrue(token.is(ITokenTypes.LITERAL_BOOLEAN, code));
+        }
     }
 
     @Test
@@ -62,26 +74,14 @@ public class CTokenMakerTest {
 
     @Test
     public void testDataTypes() {
-        String code = "char div_t double float int ldiv_t long short signed size_t unsigned void wchar_t";
+        String[] dataTypes = { "bool", "int", "double", "num", "void", };
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
-        ITokenMaker tm = createTokenMaker();
-        IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-
-        String[] keywords = code.split(" +");
-        for (int i = 0; i < keywords.length; i++) {
-            Assert.assertEquals(keywords[i], token.getLexeme());
-            Assert.assertEquals(ITokenTypes.DATA_TYPE, token.getType());
-            if (i < keywords.length - 1) {
-                token = token.getNextToken();
-                Assert.assertTrue("Not a whitespace token: " + token,
-                        token.isWhitespace());
-                Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
-            }
-            token = token.getNextToken();
+        for (String code : dataTypes) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            ITokenMaker tm = createTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertTrue(token.is(ITokenTypes.DATA_TYPE, code));
         }
-
-        Assert.assertTrue(token.getType() == ITokenTypes.NULL);
     }
 
     @Test
@@ -159,13 +159,7 @@ public class CTokenMakerTest {
     public void testHexLiterals() {
         String code = "0x1 0xfe 0x333333333333 0X1 0Xfe 0X33333333333 0xFE 0XFE "
                 + "0x1l 0xfel 0x333333333333l 0X1l 0Xfel 0X33333333333l 0xFEl 0XFEl "
-                + "0x1L 0xfeL 0x333333333333L 0X1L 0XfeL 0X33333333333L 0xFEL 0XFEL "
-                + "0x1u 0xfeu 0x333333333333u 0X1u 0Xfeu 0X33333333333u 0xFEu 0XFEu "
-                + "0x1U 0xfeU 0x333333333333U 0X1U 0XfeU 0X33333333333U 0xFEU 0XFEU "
-                + "0x1lu 0xfelu 0x333333333333lu 0X1lu 0Xfelu 0X33333333333lu 0xFElu 0XFElu "
-                + "0x1LU 0xfeLU 0x333333333333LU 0X1LU 0XfeLU 0X33333333333LU 0xFELU 0XFELU "
-                + "0x1ul 0xfeul 0x333333333333ul 0X1ul 0Xfeul 0X33333333333ul 0xFEul 0XFEul "
-                + "0x1UL 0xfeUL 0x333333333333UL 0X1UL 0XfeUL 0X33333333333UL 0xFEUL 0XFEUL";
+                + "0x1L 0xfeL 0x333333333333L 0X1L 0XfeL 0X33333333333L 0xFEL 0XFEL";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
         ITokenMaker tm = createTokenMaker();
@@ -190,82 +184,66 @@ public class CTokenMakerTest {
 
     @Test
     public void testStandardFunctions() {
-        String[] functions = { "abort", "abs", "acos", "asctime", "asin",
-                "assert", "atan2", "atan", "atexit", "atof", "atoi", "atol",
-                "bsearch", "btowc", "calloc", "ceil", "clearerr", "clock",
-                "cosh", "cos", "ctime", "difftime", "div", "errno", "exit",
-                "exp", "fabs", "fclose", "feof", "ferror", "fflush", "fgetc",
-                "fgetpos", "fgetwc", "fgets", "fgetws", "floor", "fmod",
-                "fopen", "fprintf", "fputc", "fputs", "fputwc", "fputws",
-                "fread", "free", "freopen", "frexp", "fscanf", "fseek",
-                "fsetpos", "ftell", "fwprintf", "fwrite", "fwscanf", "getchar",
-                "getc", "getenv", "gets", "getwc", "getwchar", "gmtime",
-                "isalnum", "isalpha", "iscntrl", "isdigit", "isgraph",
-                "islower", "isprint", "ispunct", "isspace", "isupper",
-                "isxdigit", "labs", "ldexp", "ldiv", "localeconv", "localtime",
-                "log10", "log", "longjmp", "malloc", "mblen", "mbrlen",
-                "mbrtowc", "mbsinit", "mbsrtowcs", "mbstowcs", "mbtowc",
-                "memchr", "memcmp", "memcpy", "memmove", "memset", "mktime",
-                "modf", "offsetof", "perror", "pow", "printf", "putchar",
-                "putc", "puts", "putwc", "putwchar", "qsort", "raise", "rand",
-                "realloc", "remove", "rename", "rewind", "scanf", "setbuf",
-                "setjmp", "setlocale", "setvbuf", "setvbuf", "signal", "sinh",
-                "sin", "sprintf", "sqrt", "srand", "sscanf", "strcat",
-                "strchr", "strcmp", "strcmp", "strcoll", "strcpy", "strcspn",
-                "strerror", "strftime", "strlen", "strncat", "strncmp",
-                "strncpy", "strpbrk", "strrchr", "strspn", "strstr", "strtod",
-                "strtok", "strtol", "strtoul", "strxfrm", "swprintf",
-                "swscanf", "system", "tanh", "tan", "time", "tmpfile",
-                "tmpnam", "tolower", "toupper", "ungetc", "ungetwc", "va_arg",
-                "va_end", "va_start", "vfprintf", "vfwprintf", "vprintf",
-                "vsprintf", "vswprintf", "vwprintf", "wcrtomb", "wcscat",
-                "wcschr", "wcscmp", "wcscoll", "wcscpy", "wcscspn", "wcsftime",
-                "wcslen", "wcsncat", "wcsncmp", "wcsncpy", "wcspbrk",
-                "wcsrchr", "wcsrtombs", "wcsspn", "wcsstr", "wcstod", "wcstok",
-                "wcstol", "wcstombs", "wcstoul", "wcsxfrm", "wctob", "wctomb",
-                "wmemchr", "wmemcmp", "wmemcpy", "wmemmove", "wmemset",
-                "wprintf", "wscanf", };
+        String[] functions = {
+                // stdlib types
+                "AssertionError", "Clock", "Collection", "Comparable", "Date",
+                "Dispatcher", "Duration", "Expect", "FallThroughError",
+                "Function", "HashMap", "HashSet", "Hashable", "Isolate",
+                "Iterable", "Iterator", "LinkedHashMap", "List", "Map",
+                "Match", "Math", "Object", "Pattern", "Promise", "Proxy",
+                "Queue", "ReceivePort",
+                "RegExp",
+                "SendPort",
+                "Set",
+                "StopWatch",
+                "String",
+                "StringBuffer",
+                "Strings",
+                "TimeZone",
+                "TypeError",
+
+                // stdlib exceptions
+                "BadNumberFormatException", "ClosureArgumentMismatchException",
+                "EmptyQueueException", "Exception", "ExpectException",
+                "IllegalAccessException", "IllegalArgumentException",
+                "IllegalJSRegExpException", "IndexOutOfRangeException",
+                "IntegerDivisionByZeroException", "NoMoreElementsException",
+                "NoSuchMethodException", "NotImplementedException",
+                "NullPointerException", "ObjectNotClosureException",
+                "OutOfMemoryException", "StackOverflowException",
+                "UnsupportedOperationException", "WrongArgumentCountException" };
 
         for (String code : functions) {
             Segment segment = new Segment(code.toCharArray(), 0, code.length());
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertEquals(ITokenTypes.FUNCTION, token.getType());
+            Assert.assertEquals("Not a standard function: " + token,
+                    ITokenTypes.FUNCTION, token.getType());
         }
     }
 
     @Test
     public void testKeywords() {
-        String code = "auto break case const continue default do else enum "
-                + "extern for goto if register sizeof static struct "
-                + "switch typedef union volatile while";
+        String[] keywords = { "abstract", "assert", "class", "const",
+                "extends", "factory", "get", "implements", "import",
+                "interface", "library", "negate", "new", "null", "operator",
+                "set", "source", "static", "super", "this", "typedef", "var",
+                "final", "if", "else", "for", "in", "is", "while", "do",
+                "switch", "case", "default", "in", "try", "catch", "finally",
+                "break", "continue", "throw", "assert", "NaN", "Infinity", };
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
-        ITokenMaker tm = createTokenMaker();
-        IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-
-        String[] keywords = code.split(" +");
-        for (int i = 0; i < keywords.length; i++) {
-            Assert.assertEquals(keywords[i], token.getLexeme());
-            Assert.assertEquals("Not a keyword: " + token,
-                    ITokenTypes.RESERVED_WORD, token.getType());
-            if (i < keywords.length - 1) {
-                token = token.getNextToken();
-                Assert.assertTrue("Not a whitespace token: " + token,
-                        token.isWhitespace());
-                Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
-            }
-            token = token.getNextToken();
+        for (String code : keywords) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            ITokenMaker tm = createTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, code));
         }
 
-        Assert.assertTrue(token.getType() == ITokenTypes.NULL);
-
-        segment = new Segment("return".toCharArray(), 0, "return".length());
-        token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-        Assert.assertEquals("return", token.getLexeme());
-        Assert.assertEquals(ITokenTypes.RESERVED_WORD_2, token.getType());
-        token = token.getNextToken();
-        Assert.assertTrue(token.getType() == ITokenTypes.NULL);
+        Segment segment = new Segment("return".toCharArray(), 0,
+                "return".length());
+        ITokenMaker tm = createTokenMaker();
+        IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD_2, "return"));
     }
 
     @Test
@@ -304,8 +282,8 @@ public class CTokenMakerTest {
 
     @Test
     public void testOperators() {
-        String assignmentOperators = "+ - <= ^ ++ < * >= % -- > / != ? >> ! & == : >> ~ | &&";
-        String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>=";
+        String assignmentOperators = "+ - <= ^ ++ < * >= % -- > / != ? >> ! & == : >> ~ && >>>";
+        String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>= >>>=";
         String code = assignmentOperators + " " + nonAssignmentOperators;
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());

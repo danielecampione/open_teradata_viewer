@@ -116,6 +116,7 @@ public class ClassFile implements IAccessFlags {
     public static final String RUNTIME_VISIBLE_ANNOTATIONS = "RuntimeVisibleAnnotations";
     public static final String SIGNATURE = "Signature";
     public static final String SOURCE_FILE = "SourceFile";
+    public static final String BOOTSTRAP_METHODS = "BootstrapMethods";
 
     /** The 4-byte class file header, "<code>CAFEBABE</code>". */
     private static final byte[] HEADER = { (byte) 0xCA, (byte) 0xFE,
@@ -498,6 +499,8 @@ public class ClassFile implements IAccessFlags {
             int sourceFileIndex = in.readUnsignedShort();
             SourceFile sf = new SourceFile(this, sourceFileIndex);
             ai = sf;
+        } else if (BOOTSTRAP_METHODS.equals(attrName)) { // 4.7.23
+            Util.skipBytes(in, attributeLength);
         } else if (SIGNATURE.equals(attrName)) { // 4.8.8
             int signatureIndex = in.readUnsignedShort();
             String sig = getUtf8ValueFromConstantPool(signatureIndex);

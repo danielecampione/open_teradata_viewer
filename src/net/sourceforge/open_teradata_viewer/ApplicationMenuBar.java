@@ -328,6 +328,7 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("JSON", ISyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
         addSyntaxItem("JSP", ISyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
         addSyntaxItem("Lisp", ISyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu);
+        addSyntaxItem("MXML", ISyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu);
         addSyntaxItem("NSIS", ISyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
         addSyntaxItem("Perl", ISyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
         addSyntaxItem("PHP", ISyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);

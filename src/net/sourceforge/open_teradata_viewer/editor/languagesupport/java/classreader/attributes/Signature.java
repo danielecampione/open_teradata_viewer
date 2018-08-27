@@ -31,7 +31,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.classrea
  * attribute table of the ClassFile, field_info and method_info structures.
  *
  * @author D. Campione
- * 
+ *
  */
 public class Signature extends AttributeInfo {
 
@@ -56,9 +56,14 @@ public class Signature extends AttributeInfo {
             int colon = temp.indexOf(':', offs);
             while (offs < temp.length() && colon > -1) {
                 String ident = temp.substring(offs, colon);
-                char ch = temp.charAt(colon + 1);
+                int colonCount = 1;
+                char ch = temp.charAt(colon + colonCount);
+                if (ch == ':') { // sometimes, there is another ':'
+                    colonCount++;
+                    ch = temp.charAt(colon + colonCount);
+                }
                 if (ch == 'L') { // A ClassTypeSignature
-                    int semicolon = temp.indexOf(';', colon + 2);
+                    int semicolon = temp.indexOf(';', colon + colonCount + 1);
                     if (semicolon > -1) {
                         types.add(ident);
                         offs = semicolon + 1;
@@ -373,8 +378,8 @@ public class Signature extends AttributeInfo {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author D. Campione
      *
      */

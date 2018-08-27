@@ -24,7 +24,10 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.JavaScriptTokenMaker;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -35,8 +38,60 @@ import org.junit.Test;
  */
 public class JavaScriptTokenMakerTest {
 
+    @Before
+    public void setUp() {
+        JavaScriptTokenMaker.setE4xSupported(false);
+        JavaScriptTokenMaker.setJavaScriptVersion("1.7");
+    }
+
+    @After
+    public void tearDown() {
+        JavaScriptTokenMaker.setE4xSupported(false);
+        JavaScriptTokenMaker.setJavaScriptVersion("1.7");
+    }
+
     @Test
-    public void testBooleanLiterals() {
+    @Ignore("Not yet implemented")
+    public void testJS_api_getClosestStandardTokenTypeForInternalType() {
+    }
+
+    @Test
+    public void testJS_api_getJavaScriptVersion() {
+        Assert.assertEquals("1.7", JavaScriptTokenMaker.getJavaScriptVersion());
+        JavaScriptTokenMaker.setJavaScriptVersion("1.6");
+        Assert.assertEquals("1.6", JavaScriptTokenMaker.getJavaScriptVersion());
+    }
+
+    @Test
+    public void testJS_api_getLineCommentStartAndEnd() {
+        JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+        Assert.assertEquals("//", tm.getLineCommentStartAndEnd(0)[0]);
+        Assert.assertNull(tm.getLineCommentStartAndEnd(0)[1]);
+    }
+
+    @Test
+    public void testJS_api_isE4XSupported() {
+        Assert.assertFalse(JavaScriptTokenMaker.isE4xSupported());
+        JavaScriptTokenMaker.setE4xSupported(true);
+        Assert.assertTrue(JavaScriptTokenMaker.isE4xSupported());
+    }
+
+    @Test
+    public void testJS_api_setJavaScriptVersion() {
+        Assert.assertEquals("1.7", JavaScriptTokenMaker.getJavaScriptVersion());
+        JavaScriptTokenMaker.setJavaScriptVersion("1.6");
+        Assert.assertEquals("1.6", JavaScriptTokenMaker.getJavaScriptVersion());
+    }
+
+    @Test
+    public void testJS_api_setE4XSupported() {
+        Assert.assertFalse(JavaScriptTokenMaker.isE4xSupported());
+        JavaScriptTokenMaker.setE4xSupported(true);
+        Assert.assertTrue(JavaScriptTokenMaker.isE4xSupported());
+    }
+
+    @Test
+    public void testJS_BooleanLiterals() {
         String code = "true false";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -60,12 +115,30 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testCharLiterals() {
-        String[] chars = { "'a'", "'\\b'", "'\\t'", "'\\r'", "'\\f'", "'\\n'",
-                "'\\u00fe'", "'\\u00FE'", "'\\111'", "'\\222'", "'\\333'",
-                "'\\11'", "'\\22'", "'\\33'", "'\\1'", };
+    public void testJS_CharLiterals_invalid() {
+        String[] charLiterals = { "'\\xG7'", // Invalid hex/octal escape
+                "'foo\\ubar'", "'\\u00fg'", // Invalid Unicode escape
+                "'My name is \\ubar and I \\", // Continued onto another line
+                "'This is unterminated and ", // Unterminated string
+        };
 
-        for (String code : chars) {
+        for (String code : charLiterals) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.ERROR_CHAR, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_CharLiterals_valid() {
+        String[] charLiterals = { "'a'", "'\\b'", "'\\t'", "'\\r'", "'\\f'",
+                "'\\n'", "'\\u00fe'", "'\\u00FE'", "'\\111'", "'\\222'",
+                "'\\333'", "'\\x77'", "'\\11'", "'\\22'", "'\\33'", "'\\1'",
+                "'My name is Daniel and I \\", // Continued onto another line
+        };
+
+        for (String code : charLiterals) {
             Segment segment = new Segment(code.toCharArray(), 0, code.length());
             JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
@@ -74,7 +147,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testDataTypes() {
+    public void testJS_DataTypes() {
         String code = "boolean byte char double float int long short";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -98,7 +171,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testDocComments() {
+    public void testJS_DocComments() {
         String[] docCommentLiterals = { "/** Hello world */", };
 
         for (String code : docCommentLiterals) {
@@ -111,7 +184,74 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testDocComments_URL() {
+    public void testJS_DocComments_BlockTags() {
+        String[] blockTags = { "abstract", "access", "alias", "augments",
+                "author", "borrows", "callback", "classdesc", "constant",
+                "constructor", "constructs", "copyright", "default",
+                "deprecated", "desc", "enum", "event", "example", "exports",
+                "external", "file", "fires", "global", "ignore", "inner",
+                "instance", "kind", "lends", "license", "link", "member",
+                "memberof", "method", "mixes", "mixin", "module", "name",
+                "namespace", "param", "private", "property", "protected",
+                "public", "readonly", "requires", "return", "returns", "see",
+                "since", "static", "summary", "this", "throws", "todo", "type",
+                "typedef", "variation", "version" };
+
+        for (String blockTag : blockTags) {
+            blockTag = "@" + blockTag;
+            Segment segment = new Segment(blockTag.toCharArray(), 0,
+                    blockTag.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            final int INTERNAL_IN_JS_COMMENT_DOCUMENTATION = -9;
+            IToken token = tm.getTokenList(segment,
+                    INTERNAL_IN_JS_COMMENT_DOCUMENTATION, 0);
+            // Can sometimes produce empty tokens, if e.g. @foo is first token
+            // on a line. We could technically make that better, but it is not
+            // the common case
+            token = token.getNextToken();
+            Assert.assertEquals("Invalid block tag: " + blockTag,
+                    ITokenTypes.COMMENT_KEYWORD, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_DocComments_InlineTags() {
+        String[] inlineTags = { "link", "linkplain", "linkcode", "tutorial" };
+
+        for (String inlineTag : inlineTags) {
+            inlineTag = "{@" + inlineTag + "}";
+            Segment segment = new Segment(inlineTag.toCharArray(), 0,
+                    inlineTag.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            final int INTERNAL_IN_JS_COMMENT_DOCUMENTATION = -9;
+            IToken token = tm.getTokenList(segment,
+                    INTERNAL_IN_JS_COMMENT_DOCUMENTATION, 0);
+            // Can sometimes produce empty tokens, if e.g. {@foo} is first token
+            // on a line. We could technically make that better, but it is not
+            // the common case
+            token = token.getNextToken();
+            Assert.assertEquals("Invalid inline tag: " + inlineTag,
+                    ITokenTypes.COMMENT_KEYWORD, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_DocComments_Markup() {
+        String text = "<code>";
+        Segment segment = new Segment(text.toCharArray(), 0, text.length());
+        JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+        final int INTERNAL_IN_JS_COMMENT_DOCUMENTATION = -9;
+        IToken token = tm.getTokenList(segment,
+                INTERNAL_IN_JS_COMMENT_DOCUMENTATION, 0);
+        // Can sometimes produce empty tokens, if e.g. @foo is first token on a
+        // line. We could technically make that better, but it is not the common
+        // case
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.COMMENT_MARKUP, "<code>"));
+    }
+
+    @Test
+    public void testJS_DocComments_URL() {
         String[] docCommentLiterals = { "/** Hello world http://www.sas.com */", };
 
         for (String code : docCommentLiterals) {
@@ -136,7 +276,221 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testEolComments() {
+    public void testJS_e4x() {
+        JavaScriptTokenMaker.setE4xSupported(true);
+
+        // Simple XML
+        String e4x = "var foo = <one attr1=\"yes\" attr2='no'>foobar</one>;";
+        Segment seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+        IToken token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_DELIMITER, "<"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_NAME, "one"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE, "attr1"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE_VALUE,
+                "\"yes\""));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE, "attr2"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE_VALUE,
+                "'no'"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_DELIMITER, ">"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foobar"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_DELIMITER, "</"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_NAME, "one"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_DELIMITER, ">"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // Comment
+        e4x = "var foo = <!-- Hello world -->;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT,
+                "<!-- Hello world -->"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // Comment with URL
+        e4x = "var foo = <!-- http://www.google.com -->;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT, "<!-- "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.isHyperlink());
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT,
+                "http://www.google.com"));
+        token = token.getNextToken();
+        Assert.assertFalse(token.isHyperlink());
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT, " -->"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // CDATA
+        e4x = "var foo = <![CDATA[foo]]>;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_CDATA_DELIMITER,
+                "<![CDATA["));
+        token = token.getNextToken();
+        Assert.assertTrue("nope - " + token,
+                token.is(ITokenTypes.MARKUP_CDATA, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_CDATA_DELIMITER, "]]>"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // DTD
+        e4x = "var foo = <!doctype FOO>;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_DTD, "<!doctype FOO>"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // DTD containing a comment
+        e4x = "var foo = <!doctype FOO <!-- foo -->>;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_DTD, "<!doctype FOO "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT, "<!-- foo -->"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_DTD, ">"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // Processing instruction
+        e4x = "var foo = <?xml version=\"1.0\"?>;";
+        seg = new Segment(e4x.toCharArray(), 0, e4x.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "var"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, "foo"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.OPERATOR, "="));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_PROCESSING_INSTRUCTION,
+                "<?xml version=\"1.0\"?>"));
+        token = token.getNextToken();
+        Assert.assertTrue(token.is(ITokenTypes.IDENTIFIER, ";"));
+
+        // "each" keyword, valid when e4x is enabled
+        seg = new Segment("each".toCharArray(), 0, 4);
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "each"));
+
+        // e4x attribute
+        String attr = "@foo";
+        seg = new Segment(attr.toCharArray(), 0, attr.length());
+        tm = new JavaScriptTokenMaker();
+        token = tm.getTokenList(seg, ITokenTypes.NULL, 0);
+        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE, attr));
+    }
+
+    @Test
+    public void testJS_EolComments() {
         String[] eolCommentLiterals = { "// Hello world", };
 
         for (String code : eolCommentLiterals) {
@@ -148,8 +502,12 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testEolComments_URL() {
-        String[] eolCommentLiterals = { "// Hello world http://www.sas.com", };
+    public void testJS_EolComments_URL() {
+        String[] eolCommentLiterals = {
+                // Note: The 0-length token at the end of the first example is a
+                // minor bug/performance thing
+                "// Hello world http://www.sas.com",
+                "// Hello world http://www.sas.com extra", };
 
         for (String code : eolCommentLiterals) {
             Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -162,11 +520,19 @@ public class JavaScriptTokenMakerTest {
             Assert.assertTrue(token.isHyperlink());
             Assert.assertEquals(ITokenTypes.COMMENT_EOL, token.getType());
             Assert.assertEquals("http://www.sas.com", token.getLexeme());
+
+            token = token.getNextToken();
+            // Note: The 0-length token at the end of the first example is a
+            // minor bug/performance thing
+            if (token != null && token.isPaintable() && token.length() > 0) {
+                Assert.assertFalse(token.isHyperlink());
+                Assert.assertTrue(token.is(ITokenTypes.COMMENT_EOL, " extra"));
+            }
         }
     }
 
     @Test
-    public void testFloatingPointLiterals() {
+    public void testJS_FloatingPointLiterals() {
         String code =
         // Basic doubles
         "3.0 4.2 3.0 4.2 .111 "
@@ -214,7 +580,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testFunctions() {
+    public void testJS_Functions() {
         String code = "eval parseInt parseFloat escape unescape isNaN isFinite";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -239,7 +605,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testHexLiterals() {
+    public void testJS_HexLiterals() {
         String code = "0x1 0xfe 0x333333333333 0X1 0Xfe 0X33333333333 0xFE 0XFE "
                 + "0x1l 0xfel 0x333333333333l 0X1l 0Xfel 0X33333333333l 0xFEl 0XFEl "
                 + "0x1L 0xfeL 0x333333333333L 0X1L 0XfeL 0X33333333333L 0xFEL 0XFEL ";
@@ -264,11 +630,12 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testKeywords() {
+    public void testJS_Keywords() {
         String code = "break case catch class const continue "
                 + "debugger default delete do else export extends finally for function if "
                 + "import in instanceof let new super switch "
-                + "this throw try typeof void while with " + "NaN Infinity";
+                + "this throw try typeof void while with " + "NaN Infinity "
+                + "let"; // As of 1.7, which is our default version
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
         JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
@@ -299,7 +666,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testMultiLineComments() {
+    public void testJS_MultiLineComments() {
         String[] mlcLiterals = { "/* Hello world */", };
 
         for (String code : mlcLiterals) {
@@ -311,7 +678,7 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testMultiLineComments_URL() {
+    public void testJS_MultiLineComments_URL() {
         String[] mlcLiterals = { "/* Hello world http://www.sas.com */", };
 
         for (String code : mlcLiterals) {
@@ -333,7 +700,51 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testOperators() {
+    public void testJS_Numbers() {
+        String[] ints = { "0", "42", /*"-7",*/
+        "0l", "42l", "0L", "42L", };
+
+        for (String code : ints) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.LITERAL_NUMBER_DECIMAL_INT,
+                    token.getType());
+        }
+
+        String[] floats = { "1e17", "3.14159", "5.7e-8", "2f", "2d", };
+
+        for (String code : floats) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.LITERAL_NUMBER_FLOAT,
+                    token.getType());
+        }
+
+        String[] hex = { "0x1f", "0X1f", "0x1F", "0X1F", };
+
+        for (String code : hex) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.LITERAL_NUMBER_HEXADECIMAL,
+                    token.getType());
+        }
+
+        String[] errors = { "42foo", "1e17foo", "0x1ffoo", };
+
+        for (String code : errors) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.ERROR_NUMBER_FORMAT,
+                    token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_Operators() {
         String assignmentOperators = "+ - <= ^ ++ < * >= % -- > / != ? >> ! & == : >> ~ && >>>";
         String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>= >>>=";
         String code = assignmentOperators + " " + nonAssignmentOperators;
@@ -361,7 +772,19 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testSeparators() {
+    public void testJS_Regexes() {
+        String[] regexes = { "/foobar/", "/foobar/gim", "/foo\\/bar\\/bas/g", };
+
+        for (String code : regexes) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.REGEX, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_Separators() {
         String code = "( ) [ ] { }";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -389,9 +812,39 @@ public class JavaScriptTokenMakerTest {
     }
 
     @Test
-    public void testStringLiterals() {
-        String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\u00fe\"",
-                "\"\\\"\"", };
+    public void testJS_Separators_renderedAsIdentifiers() {
+        String[] separators2 = { ";", ",", "." };
+
+        for (String code : separators2) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.IDENTIFIER, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_StringLiterals_invalid() {
+        String[] stringLiterals = { "\"\\xG7\"", // Invalid hex/octal escape
+                "\"foo\\ubar\"", "\"\\u00fg\"", // Invalid Unicode escape
+                "\"My name is \\ubar and I \\", // Continued onto another line
+                "\"This is unterminated and ", // Unterminated string
+        };
+
+        for (String code : stringLiterals) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals("Not an ERROR_STRING_DOUBLE: " + token,
+                    ITokenTypes.ERROR_STRING_DOUBLE, token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_StringLiterals_valid() {
+        String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\x77\"",
+                "\"\\u00fe\"", "\"\\\"\"", "\"My name is Daniel and I \\", // String continued on another line
+        };
 
         for (String code : stringLiterals) {
             Segment segment = new Segment(code.toCharArray(), 0, code.length());
@@ -399,6 +852,18 @@ public class JavaScriptTokenMakerTest {
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
                     token.getType());
+        }
+    }
+
+    @Test
+    public void testJS_Whitespace() {
+        String[] whitespace = { " ", "\t", "\f", "   \t   ", };
+
+        for (String code : whitespace) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            JavaScriptTokenMaker tm = new JavaScriptTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertEquals(ITokenTypes.WHITESPACE, token.getType());
         }
     }
 }

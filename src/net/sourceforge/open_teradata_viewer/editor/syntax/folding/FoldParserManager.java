@@ -81,6 +81,7 @@ public class FoldParserManager implements ISyntaxConstants {
         map.put(SYNTAX_STYLE_JSP, new HtmlFoldParser(
                 HtmlFoldParser.LANGUAGE_JSP));
         map.put(SYNTAX_STYLE_LISP, new LispFoldParser());
+        map.put(SYNTAX_STYLE_MXML, new XmlFoldParser());
         map.put(SYNTAX_STYLE_SQL, new CurlyFoldParser(true, false));
         map.put(SYNTAX_STYLE_NSIS, new NsisFoldParser());
         map.put(SYNTAX_STYLE_PERL, new CurlyFoldParser());

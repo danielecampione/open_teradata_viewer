@@ -94,8 +94,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *       <li>HTML
  *       <li>Java
  *       <li>JavaScript
+ *       <li>.jshintrc
  *       <li>JSP
- *       <li>Visual Basic
  *    </ul>
  *   </td>
  *   <td style="vertical-align: top">
@@ -103,14 +103,17 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *       <li>.jshintrc files
  *       <li>JSON
  *       <li>Lisp
+ *       <li>MXML
  *       <li>NSIS
  *       <li>Perl
  *       <li>PHP
+ *       <li>Properties files
  *       <li>Python
  *       <li>Ruby
  *       <li>Scala
  *       <li>SQL
  *       <li>UNIX shell scripts
+ *       <li>Visual Basic
  *       <li>Windows batch
  *       <li>XML files
  *    </ul>

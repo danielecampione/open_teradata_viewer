@@ -68,7 +68,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  *
  * Depending on the {@link ICompletionProvider} installed, the following
  * auto-completion features may be enabled:
- * 
+ *
  * <ul>
  *    <li>An auto-complete choices list made visible via e.g. Ctrl+Space</li>
  *    <li>A "description" window displayed alongside the choices list that
@@ -82,7 +82,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * </ul>
  *
  * @author D. Campione
- * 
+ *
  */
 /*
  * This class handles intercepting window and hierarchy events from the text
@@ -264,7 +264,7 @@ public class AutoCompletion {
 
     /**
      * Ctor.
-     * 
+     *
      * @param provider The completion provider. This cannot be
      *        <code>null</code>.
      */
@@ -332,7 +332,7 @@ public class AutoCompletion {
     /**
      * Returns the delay between when the user types a character and when the
      * code completion popup should automatically appear (if applicable).
-     * 
+     *
      * @return The delay, in milliseconds.
      * @see #setAutoActivationDelay(int)
      */
@@ -343,7 +343,7 @@ public class AutoCompletion {
     /**
      * Returns whether, if a single auto-complete choice is available, it should
      * be automatically inserted, without displaying the popup menu.
-     * 
+     *
      * @return Whether to auto-complete single choices.
      * @see #setAutoCompleteSingleChoices(boolean)
      */
@@ -358,7 +358,7 @@ public class AutoCompletion {
 
     /**
      * Returns whether debug is enabled for AutoCompletion.
-     * 
+     *
      * @return Whether debug is enabled.
      */
     static boolean getDebug() {
@@ -368,7 +368,7 @@ public class AutoCompletion {
     /**
      * Returns the default auto-complete "trigger key" for this OS. For Windows,
      * for example, it is Ctrl+Space.
-     * 
+     *
      * @return The default auto-complete trigger key.
      */
     public static KeyStroke getDefaultTriggerKey() {
@@ -380,7 +380,7 @@ public class AutoCompletion {
     /**
      * Returns the handler to use when an external URL is clicked in the
      * description window.
-     * 
+     *
      * @return The handler.
      * @see #setExternalURLHandler(IExternalURLHandler)
      * @see #getLinkRedirector()
@@ -397,7 +397,7 @@ public class AutoCompletion {
 
     /**
      * Returns the link redirector, if any.
-     * 
+     *
      * @return The link redirector or <code>null</code> if none.
      * @see #setLinkRedirector(ILinkRedirector)
      */
@@ -408,7 +408,7 @@ public class AutoCompletion {
     /**
      * Returns the default list cell renderer used when a completion provider
      * does not supply its own.
-     * 
+     *
      * @return The default list cell renderer.
      * @see #setListCellRenderer(ListCellRenderer)
      */
@@ -421,7 +421,7 @@ public class AutoCompletion {
      * parameter choices popup window (displayed when a {@link
      * IParameterizedCompletion} is code-completed). If this returns
      * <code>null</code>, a default renderer is used.
-     * 
+     *
      * @return The renderer to use.
      * @see #setParamChoicesRenderer(ListCellRenderer)
      * @see #isParameterAssistanceEnabled()
@@ -436,7 +436,7 @@ public class AutoCompletion {
      * inserted. The default implementation simply returns
      * <tt>c.getReplacementText()</tt>. You usually will not need to modify this
      * method.
-     * 
+     *
      * @param c The completion being inserted.
      * @param doc The document being modified.
      * @param start The start of the text being replaced.
@@ -451,7 +451,7 @@ public class AutoCompletion {
     /**
      * Returns whether the "description window" should be shown alongside the
      * completion window.
-     * 
+     *
      * @return Whether the description window should be shown.
      * @see #setShowDescWindow(boolean)
      */
@@ -462,7 +462,7 @@ public class AutoCompletion {
     /**
      * Returns the style context describing how auto-completion related
      * highlights in the editor are rendered.
-     * 
+     *
      * @return The style context.
      */
     public static AutoCompletionStyleContext getStyleContext() {
@@ -471,7 +471,7 @@ public class AutoCompletion {
 
     /**
      * Returns the text component for which auto-completion is enabled.
-     * 
+     *
      * @return The text component or <code>null</code> if this {@link
      *         AutoCompletion} is not installed on any text component.
      * @see #install(JTextComponent)
@@ -482,7 +482,7 @@ public class AutoCompletion {
 
     /**
      * Returns the orientation of the text component we're installed to.
-     * 
+     *
      * @return The orientation of the text component, or <code>null</code> if we
      *         are not installed on one.
      */
@@ -493,7 +493,7 @@ public class AutoCompletion {
 
     /**
      * Returns the "trigger key" used for auto-complete.
-     * 
+     *
      * @return The trigger key.
      * @see #setTriggerKey(KeyStroke)
      */
@@ -503,7 +503,7 @@ public class AutoCompletion {
 
     /**
      * Hides any child windows being displayed by the auto-completion system.
-     * 
+     *
      * @return Whether any windows were visible.
      */
     public boolean hideChildWindows() {
@@ -514,7 +514,7 @@ public class AutoCompletion {
 
     /**
      * Hides and disposes of any parameter completion-related popups.
-     * 
+     *
      * @return Whether any such windows were visible (and thus hidden).
      */
     private boolean hideParameterCompletionPopups() {
@@ -528,7 +528,7 @@ public class AutoCompletion {
 
     /**
      * Hides the popup window, if it is visible.
-     * 
+     *
      * @return Whether the popup window was visible.
      */
     protected boolean hidePopupWindow() {
@@ -545,7 +545,7 @@ public class AutoCompletion {
      * Determines whether debug should be enabled for the AutoCompletion
      * library. This method checks a system property, but takes care of {@link
      * SecurityException}s in case we're in an applet or WebStart.
-     * 
+     *
      * @return Whether debug should be enabled.
      */
     private static final boolean initDebug() {
@@ -561,7 +561,7 @@ public class AutoCompletion {
     /**
      * Inserts a completion. Any time a code completion event occurs, the actual
      * text insertion happens through this method.
-     * 
+     *
      * @param c A completion to insert. This cannot be <code>null</code>.
      */
     protected final void insertCompletion(ICompletion c) {
@@ -571,7 +571,7 @@ public class AutoCompletion {
     /**
      * Inserts a completion. Any time a code completion event occurs, the actual
      * text insertion happens through this method.
-     * 
+     *
      * @param c A completion to insert. This cannot be <code>null</code>.
      * @param typedParamListStartChar Whether the parameterized completion start
      *        character was typed (typically <code>'('</code>).
@@ -604,7 +604,7 @@ public class AutoCompletion {
      * Installs this auto-completion on a text component. If this {@link
      * AutoCompletion} is already installed on another text component, it is
      * uninstalled first.
-     * 
+     *
      * @param c The text component.
      * @see #uninstall()
      */
@@ -647,7 +647,7 @@ public class AutoCompletion {
 
     /**
      * Installs a "trigger key" action onto the current text component.
-     * 
+     *
      * @param ks The keystroke that should trigger the action.
      * @see #uninstallTriggerKey()
      */
@@ -665,7 +665,7 @@ public class AutoCompletion {
      * auto-completion trigger key (e.g. ctrl+space). This is a hook for
      * subclasses that want to provide their own behavior in this scenario.
      * The default implementation returns an {@link AutoCompleteAction}.
-     * 
+     *
      * @return The action to use.
      * @see AutoCompleteAction
      */
@@ -678,7 +678,7 @@ public class AutoCompletion {
      * completion popup will automatically appear after a delay when the user
      * types an appropriate character). Note that this parameter will be ignored
      * if auto-completion is disabled.
-     * 
+     *
      * @return Whether auto-activation is enabled.
      * @see #setAutoActivationEnabled(boolean)
      * @see #getAutoActivationDelay()
@@ -690,7 +690,7 @@ public class AutoCompletion {
 
     /**
      * Returns whether auto-completion is enabled.
-     * 
+     *
      * @return Whether auto-completion is enabled.
      * @see #setAutoCompleteEnabled(boolean)
      */
@@ -703,6 +703,8 @@ public class AutoCompletion {
      * changes. If set to false, caller has to ensure refresh of the popup
      * content.
      *
+     * @return Whether the popup should be hidden when the completion provider
+     *         changes.
      * @see #setHideOnCompletionProviderChange(boolean)
      */
     protected boolean isHideOnCompletionProviderChange() {
@@ -712,7 +714,9 @@ public class AutoCompletion {
     /**
      * Whether or not the popup should be hidden when user types a space (or any
      * character that resets the completion list to "all completions").
-     * 
+     *
+     * @return Whether the popup should be hidden when the completion list is
+     * reset to show all completions.
      * @see #setHideOnNoText(boolean)
      */
     protected boolean isHideOnNoText() {
@@ -739,7 +743,7 @@ public class AutoCompletion {
      * popup is hidden, it is made visible and made to display the completions.
      * If there are some completions and the popup is visible, its list is
      * updated to the current set of completions.
-     * 
+     *
      * @return The current line number of the caret.
      */
     protected int refreshPopupWindow() {
@@ -832,7 +836,7 @@ public class AutoCompletion {
     /**
      * Sets the delay between when the user types a character and when the code
      * completion popup should automatically appear (if applicable).
-     * 
+     *
      * @param ms The delay, in milliseconds. This should be greater than zero.
      * @see #getAutoActivationDelay()
      */
@@ -845,7 +849,7 @@ public class AutoCompletion {
     /**
      * Toggles whether auto-activation is enabled. Note that auto-activation
      * also depends on auto-completion itself being enabled.
-     * 
+     *
      * @param enabled Whether auto-activation is enabled.
      * @see #isAutoActivationEnabled()
      * @see #setAutoActivationDelay(int)
@@ -865,7 +869,7 @@ public class AutoCompletion {
 
     /**
      * Sets whether auto-completion is enabled.
-     * 
+     *
      * @param enabled Whether auto-completion is enabled.
      * @see #isAutoCompleteEnabled()
      */
@@ -879,7 +883,7 @@ public class AutoCompletion {
     /**
      * Sets whether, if a single auto-complete choice is available, it should be
      * automatically inserted, without displaying the popup menu.
-     * 
+     *
      * @param autoComplete Whether to auto-complete single choices.
      * @see #getAutoCompleteSingleChoices()
      */
@@ -889,7 +893,7 @@ public class AutoCompletion {
 
     /**
      * Sets the completion provider being used.
-     * 
+     *
      * @param provider The new completion provider. This cannot be
      *        <code>null</code>.
      * @throws IllegalArgumentException If <code>provider</code> is
@@ -907,7 +911,7 @@ public class AutoCompletion {
 
     /**
      * Sets the size of the completion choices window.
-     * 
+     *
      * @param w The new width.
      * @param h The new height.
      * @see #setDescriptionWindowSize(int, int)
@@ -921,7 +925,7 @@ public class AutoCompletion {
 
     /**
      * Sets the size of the description window.
-     * 
+     *
      * @param w The new width.
      * @param h The new height.
      * @see #setChoicesWindowSize(int, int)
@@ -938,7 +942,7 @@ public class AutoCompletion {
      * description window. This handler can perform some action, such as open
      * the URL in a Web browser. The default implementation will open the URL in
      * a browser, but only if running in Java 6.
-     * 
+     *
      * @param handler The new handler.
      * @see #getExternalURLHandler()
      */
@@ -951,6 +955,8 @@ public class AutoCompletion {
      * ICompletionProvider changes. If set to false, caller has to ensure
      * refresh of the popup content.
      *
+     * @param hideOnCompletionProviderChange Whether the popup should be hidden
+     *        when the completion provider changes.
      * @see #isHideOnCompletionProviderChange()
      */
     protected void setHideOnCompletionProviderChange(
@@ -962,6 +968,8 @@ public class AutoCompletion {
      * Sets whether or not the popup should be hidden when user types a space
      * (or any character that resets the completion list to "all completions").
      *
+     * @param hideOnNoText Whether the popup sh ould be hidden when the
+     *        completion list is reset to show all completions.
      * @see #isHideOnNoText()
      */
     protected void setHideOnNoText(boolean hideOnNoText) {
@@ -973,7 +981,7 @@ public class AutoCompletion {
      * documentation. When a non-local link in completion popups is clicked,
      * this redirector is given the chance to modify the URL fetched and
      * displayed.
-     * 
+     *
      * @param linkRedirector The link redirector or <code>null</code> for none.
      * @see #getLinkRedirector()
      */
@@ -984,7 +992,7 @@ public class AutoCompletion {
     /**
      * Sets the default list cell renderer to use when a completion provider
      * does not supply its own.
-     * 
+     *
      * @param renderer The renderer to use. If this is <code>null</code>, a
      *        default renderer is used.
      * @see #getListCellRenderer()
@@ -1002,7 +1010,7 @@ public class AutoCompletion {
      * parameter choices popup window (displayed when a {@link
      * IParameterizedCompletion} is code-completed). If this isn't set, a
      * default renderer is used.
-     * 
+     *
      * @param r The renderer to use.
      * @see #getParamChoicesRenderer()
      * @see #setParameterAssistanceEnabled(boolean)
@@ -1017,7 +1025,7 @@ public class AutoCompletion {
      * is inserted, the user will get "assistance" in inserting the parameters
      * in the form of a popup window with documentation and easy tabbing through
      * the arguments (as seen in Eclipse and NetBeans).
-     * 
+     *
      * @param enabled Whether parameter assistance should be enabled.
      * @see #isParameterAssistanceEnabled()
      */
@@ -1041,7 +1049,7 @@ public class AutoCompletion {
     /**
      * Sets whether the "description window" should be shown beside the
      * completion window.
-     * 
+     *
      * @param show Whether to show the description window.
      * @see #getShowDescWindow()
      */
@@ -1053,7 +1061,7 @@ public class AutoCompletion {
     /**
      * Sets the keystroke that should be used to trigger the auto-complete popup
      * window.
-     * 
+     *
      * @param ks The keystroke.
      * @throws IllegalArgumentException If <code>ks</code> is <code>null</code>.
      * @see #getTriggerKey()
@@ -1075,7 +1083,7 @@ public class AutoCompletion {
 
     /**
      * Displays a "tool tip" detailing the inputs to the function just entered.
-     * 
+     *
      * @param pc The completion.
      * @param typedParamListStartChar Whether the parameterized completion list
      *        starting character was typed.
@@ -1112,7 +1120,7 @@ public class AutoCompletion {
     /**
      * Uninstalls this auto-completion from its text component. If it is not
      * installed on any text component, nothing happens.
-     * 
+     *
      * @see #install(JTextComponent)
      */
     public void uninstall() {
@@ -1151,7 +1159,7 @@ public class AutoCompletion {
     /**
      * Replaces the "trigger key" action with the one that was there before
      * auto-completion was installed.
-     * 
+     *
      * @see #installTriggerKey(KeyStroke)
      */
     private void uninstallTriggerKey() {
@@ -1182,9 +1190,9 @@ public class AutoCompletion {
     /**
      * Listens for events in the text component to auto-activate the code
      * completion popup.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class AutoActivationListener extends FocusAdapter implements
             DocumentListener, CaretListener, ActionListener {
@@ -1261,9 +1269,9 @@ public class AutoCompletion {
     /**
      * The <code>Action</code> that displays the popup window if auto-completion
      * is enabled.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     protected class AutoCompleteAction extends AbstractAction {
 
@@ -1282,9 +1290,9 @@ public class AutoCompletion {
     /**
      * Listens for LookAndFeel changes and updates the various popup windows
      * involved in auto-completion accordingly.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class LookAndFeelChangeListener implements PropertyChangeListener {
 
@@ -1300,9 +1308,9 @@ public class AutoCompletion {
 
     /**
      * Action that starts a parameterized completion, e.g. after '(' is typed.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class ParameterizedCompletionStartAction extends AbstractAction {
 
@@ -1336,9 +1344,9 @@ public class AutoCompletion {
     /**
      * Listens for events in the parent window of the text component with
      * auto-completion enabled.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class ParentWindowListener extends ComponentAdapter implements
             WindowFocusListener {
@@ -1380,9 +1388,9 @@ public class AutoCompletion {
 
     /**
      * Listens for events from the popup window.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class PopupWindowListener extends ComponentAdapter {
 
@@ -1409,9 +1417,9 @@ public class AutoCompletion {
 
     /**
      * Listens for events from the text component we're installed on.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class TextComponentListener extends FocusAdapter implements
             HierarchyListener {
@@ -1433,7 +1441,7 @@ public class AutoCompletion {
          * Called when the component hierarchy for our text component changes.
          * When the text component is added to a new {@link Window}, this method
          * registers listeners on that <code>Window</code>.
-         * 
+         *
          * @param e The event.
          */
         @Override

@@ -23,18 +23,18 @@ import javax.swing.text.Segment;
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
-import net.sourceforge.open_teradata_viewer.editor.syntax.modes.JavaTokenMaker;
+import net.sourceforge.open_teradata_viewer.editor.syntax.modes.GroovyTokenMaker;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Unit tests for the {@link JavaTokenMaker} class.
+ * Unit tests for the {@link GroovyTokenMaker} class.
  *
  * @author D. Campione
  *
  */
-public class JavaTokenMakerTest {
+public class GroovyTokenMakerTest {
 
     /**
      * Returns a new instance of the <code>ITokenMaker</code> to test.
@@ -42,7 +42,7 @@ public class JavaTokenMakerTest {
      * @return The <code>ITokenMaker</code> to test.
      */
     private ITokenMaker createTokenMaker() {
-        return new JavaTokenMaker();
+        return new GroovyTokenMaker();
     }
 
     @Test
@@ -234,7 +234,7 @@ public class JavaTokenMakerTest {
                 // Basic floats ending in f, F, d, or D
                 "3f 3F 3d 3D 3.f 3.F 3.d 3.D 3.0f 3.0F 3.0d 3.0D .111f .111F .111d .111D "
                 +
-                // lower-case exponent, no sign
+                // Lower-case exponent, no sign
                 "3e7f 3e7F 3e7d 3e7D 3.e7f 3.e7F 3.e7d 3.e7D 3.0e7f 3.0e7F 3.0e7d 3.0e7D .111e7f .111e7F .111e7d .111e7D "
                 +
                 // Upper-case exponent, no sign
@@ -352,11 +352,15 @@ public class JavaTokenMakerTest {
 
     @Test
     public void testKeywords() {
+        // Java keywords
         String code = "abstract assert break case catch class const continue "
                 + "default do else enum extends final finally for goto if "
                 + "implements import instanceof interface native new null package "
                 + "private protected public static strictfp super switch "
                 + "synchronized this throw throws transient try void volatile while";
+
+        // Add Groovy-specific keywords
+        code += " as assert def mixin property test using in";
 
         Segment segment = new Segment(code.toCharArray(), 0, code.length());
         ITokenMaker tm = createTokenMaker();
@@ -365,7 +369,8 @@ public class JavaTokenMakerTest {
         String[] keywords = code.split(" +");
         for (int i = 0; i < keywords.length; i++) {
             Assert.assertEquals(keywords[i], token.getLexeme());
-            Assert.assertEquals(ITokenTypes.RESERVED_WORD, token.getType());
+            Assert.assertEquals("Not a keyword: " + token,
+                    ITokenTypes.RESERVED_WORD, token.getType());
             if (i < keywords.length - 1) {
                 token = token.getNextToken();
                 Assert.assertTrue("Not a whitespace token: " + token,
@@ -449,6 +454,26 @@ public class JavaTokenMakerTest {
         }
 
         Assert.assertTrue(token.getType() == ITokenTypes.NULL);
+    }
+
+    @Test
+    public void testObjectClassMethodAdditions() {
+        String[] additions = { "addShutdownHook", "any", "asBoolean", "asType",
+                "collect", "dump", "each", "eachWithIndex", "every", "find",
+                "findAll", "findIndexOf", "findIndexValues", "findLastIndexOf",
+                "getAt", "getMetaClass", "getMetaPropertyValues",
+                "getProperties", "grep", "hasProperty", "identity", "inject",
+                "inspect", "invokeMethod", "is", "isCase", "iterator",
+                "metaClass", "print", "printf", "println", "putAt",
+                "respondsTo", "setMetaClass", "sleep", "split", "sprintf",
+                "toString", "use", "with", };
+
+        for (String code : additions) {
+            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            ITokenMaker tm = createTokenMaker();
+            IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
+            Assert.assertTrue(token.is(ITokenTypes.FUNCTION, code));
+        }
     }
 
     @Test

@@ -555,7 +555,7 @@ public class XMLTokenMaker extends AbstractMarkupTokenMaker {
      *
      * All internal variables are reset, the old input stream <b>cannot</b> be
      * reused (internal buffer is discarded and lost).
-     * Lexical state is set to <tt>YY_INITIAL</tt>.
+     * Lexical state is set to <code>YY_INITIAL</code>.
      *
      * @param reader   The new input stream.
      */
@@ -597,7 +597,7 @@ public class XMLTokenMaker extends AbstractMarkupTokenMaker {
         this(new InputStreamReader(in));
     }
 
-    /** 
+    /**
      * Unpacks the compressed character translation table.
      *
      * @param packed   The packed character translation table.
@@ -648,11 +648,11 @@ public class XMLTokenMaker extends AbstractMarkupTokenMaker {
     }
 
     /**
-     * Returns the character at position <tt>pos</tt> from the matched text. 
-     * 
+     * Returns the character at position <tt>pos</tt> from the matched text.
+     *
      * It is equivalent to yytext().charAt(pos), but faster.
      *
-     * @param pos The position of the character to fetch. 
+     * @param pos The position of the character to fetch.
      *            A value from 0 to yylength()-1.
      * @return The character at position pos.
      */

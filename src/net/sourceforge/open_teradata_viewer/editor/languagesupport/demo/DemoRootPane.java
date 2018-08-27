@@ -18,7 +18,6 @@
 
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.demo;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -185,7 +184,6 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         textArea.setCodeFoldingEnabled(true);
         textArea.setTabsEmulated(true);
         textArea.setTabSize(3);
-        textArea.setBackground(new Color(224, 255, 224));
         ToolTipManager.sharedInstance().registerComponent(textArea);
         return textArea;
     }

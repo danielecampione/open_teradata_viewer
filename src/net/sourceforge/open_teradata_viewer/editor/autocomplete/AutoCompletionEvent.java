@@ -26,7 +26,7 @@ import java.util.EventObject;
  * showing and hiding.
  *
  * @author D. Campione
- * 
+ *
  */
 public class AutoCompletionEvent extends EventObject {
 
@@ -38,7 +38,7 @@ public class AutoCompletionEvent extends EventObject {
     /**
      * Ctor.
      *
-     * @param source The <coded>AutoCompletion</code> instance that fired this
+     * @param source The <code>AutoCompletion</code> instance that fired this
      *        event.
      * @param type The event type.
      */
@@ -64,9 +64,9 @@ public class AutoCompletionEvent extends EventObject {
 
     /**
      * Enumeration of the various types of this event.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static enum Type {
         POPUP_SHOWN, POPUP_HIDDEN
