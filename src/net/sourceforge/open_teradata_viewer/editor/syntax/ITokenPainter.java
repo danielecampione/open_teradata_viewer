@@ -28,7 +28,7 @@ import javax.swing.text.TabExpander;
  * example.
  *
  * @author D. Campione
- * 
+ *
  */
 interface ITokenPainter {
 
@@ -74,10 +74,11 @@ interface ITokenPainter {
      * @param y The y-coordinate at which to paint.
      * @param host The text area this token is in.
      * @param e How to expand tabs.
+     * @param useSTC Whether to use the text area's "selected text color".
      * @return The x-coordinate representing the end of the painted text.
      */
     public float paintSelected(IToken token, Graphics2D g, float x, float y,
-            SyntaxTextArea host, TabExpander e);
+            SyntaxTextArea host, TabExpander e, boolean useSTC);
 
     /**
      * Paints this token as it should appear in a selected region of text
@@ -93,8 +94,9 @@ interface ITokenPainter {
      * @param clipStart The left boundary of the clip rectangle in which we're
      *        painting. This optimizes painting by allowing us to not paint when
      *        this token is "to the left" of the clip rectangle.
+     * @param useSTC Whether to use the text area's "selected text color".
      * @return The x-coordinate representing the end of the painted text.
      */
     public float paintSelected(IToken token, Graphics2D g, float x, float y,
-            SyntaxTextArea host, TabExpander e, float clipStart);
+            SyntaxTextArea host, TabExpander e, float clipStart, boolean useSTC);
 }

@@ -43,7 +43,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParser;
  * Manages code folding in an instance of SyntaxTextArea.
  *
  * @author D. Campione
- * 
+ *
  */
 public class FoldManager {
 
@@ -52,6 +52,7 @@ public class FoldManager {
     private List<Fold> folds;
     private boolean codeFoldingEnabled;
     private PropertyChangeSupport support;
+    private Listener l;
 
     /** Property fired when folds have been updated. */
     public static final String PROPERTY_FOLDS_UPDATED = "FoldsUpdated";
@@ -64,10 +65,11 @@ public class FoldManager {
     public FoldManager(SyntaxTextArea textArea) {
         this.textArea = textArea;
         support = new PropertyChangeSupport(this);
-        Listener l = new Listener();
+        l = new Listener();
         textArea.getDocument().addDocumentListener(l);
         textArea.addPropertyChangeListener(
                 SyntaxTextArea.SYNTAX_STYLE_PROPERTY, l);
+        textArea.addPropertyChangeListener("document", l);
         folds = new ArrayList<Fold>();
         updateFoldParser();
     }
@@ -535,6 +537,7 @@ public class FoldManager {
             }
             if (enabled) {
                 tempParser = new AbstractParser() {
+                    @Override
                     public IParseResult parse(SyntaxDocument doc, String style) {
                         reparse();
                         return new DefaultParseResult(this);
@@ -549,6 +552,7 @@ public class FoldManager {
             }
         }
     }
+
     private IParser tempParser;
 
     /**
@@ -571,15 +575,17 @@ public class FoldManager {
 
     /**
      * Listens for events in the text editor.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private class Listener implements DocumentListener, PropertyChangeListener {
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             // Adding text containing a newline to the visible line of a folded
             // Fold causes that Fold to unfold. Check only start offset of
@@ -598,11 +604,29 @@ public class FoldManager {
             }
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
-            // Syntax style changed in editor
-            updateFoldParser();
-            reparse(); // Even if no fold parser change, highlighting did
+            String name = e.getPropertyName();
+
+            if (SyntaxTextArea.SYNTAX_STYLE_PROPERTY.equals(name)) {
+                // Syntax style changed in editor
+                updateFoldParser();
+                reparse(); // Even if no fold parser change, highlighting did
+            } else if ("document".equals(name)) {
+                // The document switched out from under us
+                Document old = (Document) e.getOldValue();
+                if (old != null) {
+                    old.removeDocumentListener(this);
+                }
+                Document newDoc = (Document) e.getNewValue();
+                if (newDoc != null) {
+                    newDoc.addDocumentListener(this);
+                }
+                reparse();
+            }
         }
+
+        @Override
         public void removeUpdate(DocumentEvent e) {
             // Removing text from the visible line of a folded Fold causes that
             // Fold to unfold. We only need to check the removal offset since

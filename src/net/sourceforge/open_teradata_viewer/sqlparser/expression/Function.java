@@ -21,10 +21,10 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.ExpressionList;
 
 /**
- * A function as MAX,COUNT..
- * 
+ * A function as MAX, COUNT...
+ *
  * @author D. Campione
- * 
+ *
  */
 public class Function implements IExpression {
 
@@ -33,6 +33,7 @@ public class Function implements IExpression {
     private boolean allColumns = false;
     private boolean distinct = false;
     private boolean isEscaped = false;
+    private String attribute;
 
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
@@ -93,6 +94,14 @@ public class Function implements IExpression {
         this.isEscaped = isEscaped;
     }
 
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
+    }
+
     @Override
     public String toString() {
         String params;
@@ -111,6 +120,10 @@ public class Function implements IExpression {
         }
 
         String ans = name + "" + params + "";
+
+        if (attribute != null) {
+            ans += "." + attribute;
+        }
 
         if (isEscaped) {
             ans = "{fn " + ans + "}";

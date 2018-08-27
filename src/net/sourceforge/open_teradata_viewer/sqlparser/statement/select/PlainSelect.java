@@ -186,6 +186,13 @@ public class PlainSelect implements ISelectBody {
         groupByColumnReferences = list;
     }
 
+    public void addGroupByColumnReference(IExpression expr) {
+        if (groupByColumnReferences == null) {
+            groupByColumnReferences = new ArrayList<IExpression>();
+        }
+        groupByColumnReferences.add(expr);
+    }
+
     public TeradataHierarchicalExpression getTeradataHierarchical() {
         return teradataHierarchical;
     }

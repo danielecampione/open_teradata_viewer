@@ -37,7 +37,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * A completion provider for the C programming language (and other languages
  * with similar syntax). This provider simply delegates to another provider,
  * depending on whether the caret is in:
- * 
+ *
  * <ul>
  *    <li>Code (plain text)</li>
  *    <li>A string</li>
@@ -57,7 +57,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
  * registered with the <tt>javax.swing.ToolTipManager</tt>).
  *
  * @author D. Campione
- * 
+ *
  */
 public class LanguageAwareCompletionProvider extends CompletionProviderBase
         implements IToolTipSupplier {
@@ -213,7 +213,7 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      * @return The completion provider to use.
      */
     private ICompletionProvider getProviderFor(JTextComponent comp) {
-        OTVSyntaxTextArea sta = (OTVSyntaxTextArea) comp;
+        SyntaxTextArea sta = (SyntaxTextArea) comp;
         SyntaxDocument doc = (SyntaxDocument) sta.getDocument();
         int line = sta.getCaretLineNumber();
         IToken t = doc.getTokenListForLine(line);
@@ -364,7 +364,7 @@ public class LanguageAwareCompletionProvider extends CompletionProviderBase
      *
      * For this method to be called, the <tt>OTVSyntaxTextArea</tt> must be
      * registered with the <tt>javax.swing.ToolTipManager</tt> like so:
-     * 
+     *
      * <pre>
      * ToolTipManager.sharedInstance().registerComponent(textArea);
      * </pre>

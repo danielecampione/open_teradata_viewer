@@ -403,6 +403,9 @@ class ClipboardHistoryPopup extends JWindow {
      * Entries in the choices list are of this type. This truncates entries that
      * are too long. In the future it can provide more information (line count
      * for multi-line pastes, etc..).
+     *
+     * @author D. Campione
+     *
      */
     private static class LabelValuePair {
 

@@ -35,9 +35,9 @@ import javax.swing.text.Utilities;
  * immutable. They should not be cast to <code>TokenImpl</code> and modified.
  * Modifying tokens you did not create yourself can and will result in
  * rendering issues and/or runtime exceptions. You have been warned.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TokenImpl implements IToken {
 
@@ -89,9 +89,11 @@ public class TokenImpl implements IToken {
      * @param startOffset The offset into the document at which this token
      *        begins.
      * @param type A token type listed as "generic" above.
+     * @param languageIndex The language index for this token.
      */
-    public TokenImpl(Segment line, int beg, int end, int startOffset, int type) {
-        this(line.array, beg, end, startOffset, type);
+    public TokenImpl(Segment line, int beg, int end, int startOffset, int type,
+            int languageIndex) {
+        this(line.array, beg, end, startOffset, type, languageIndex);
     }
 
     /**
@@ -103,10 +105,13 @@ public class TokenImpl implements IToken {
      * @param startOffset The offset into the document at which this
      *        token begins.
      * @param type A token type listed as "generic" above.
+     * @param languageIndex The language index for this token.
      */
-    public TokenImpl(char[] line, int beg, int end, int startOffset, int type) {
+    public TokenImpl(char[] line, int beg, int end, int startOffset, int type,
+            int languageIndex) {
         this();
         set(line, beg, end, startOffset, type);
+        setLanguageIndex(languageIndex);
     }
 
     /**
@@ -142,18 +147,23 @@ public class TokenImpl implements IToken {
             sb.append("<u>");
         }
 
-        sb.append("<font");
-        if (fontFamily) {
-            sb.append(" face=\"").append(font.getFamily()).append("\"");
+        if (!isWhitespace()) {
+            sb.append("<font");
+            if (fontFamily) {
+                sb.append(" face=\"").append(font.getFamily()).append("\"");
+            }
+            sb.append(" color=\"")
+                    .append(getHTMLFormatForColor(scheme.foreground))
+                    .append("\">");
         }
-        sb.append(" color=\"").append(getHTMLFormatForColor(scheme.foreground))
-                .append("\">");
 
         // NOTE: Don't use getLexeme().trim() because whitespace tokens will be
         // turned into NOTHING
         appendHtmlLexeme(textArea, sb, tabsToSpaces);
 
-        sb.append("</font>");
+        if (!isWhitespace()) {
+            sb.append("</font>");
+        }
         if (scheme.underline || isHyperlink()) {
             sb.append("</u>");
         }
@@ -672,10 +682,10 @@ public class TokenImpl implements IToken {
 
     /**
      * Makes this token start at the specified offset into the document.<p>
-     * 
+     *
      * <b>Note:</b> You should not modify <code>IToken</code> instances you did
      * not create yourself (e.g., came from an <code>SyntaxDocument</code>). If
-     * you do, rendering issues and/or runtime exceptions will likely occur. 
+     * you do, rendering issues and/or runtime exceptions will likely occur.
      * You have been warned.
      *
      * @param pos The offset into the document this token should start at.
@@ -699,7 +709,7 @@ public class TokenImpl implements IToken {
 
     /**
      * Moves the starting offset of this token.<p>
-     * 
+     *
      * <b>Note:</b> You should not modify <code>IToken</code> instances you
      * did not create yourself (e.g., came from an <code>SyntaxDocument</code>).
      * If you do, rendering issues and/or runtime exceptions will likely occur.

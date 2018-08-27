@@ -249,27 +249,29 @@ public interface CCSqlParserConstants {
   /** RegularExpression Id. */
   int K_COMMIT = 114;
   /** RegularExpression Id. */
-  int S_DOUBLE = 115;
+  int K_UNIQUE = 115;
   /** RegularExpression Id. */
-  int S_LONG = 116;
+  int S_DOUBLE = 116;
   /** RegularExpression Id. */
-  int DIGIT = 117;
+  int S_LONG = 117;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 118;
+  int DIGIT = 118;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 119;
+  int LINE_COMMENT = 119;
   /** RegularExpression Id. */
-  int S_IDENTIFIER = 120;
+  int MULTI_LINE_COMMENT = 120;
   /** RegularExpression Id. */
-  int LETTER = 121;
+  int S_IDENTIFIER = 121;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 122;
+  int LETTER = 122;
   /** RegularExpression Id. */
-  int S_CHAR_LITERAL = 123;
+  int SPECIAL_CHARS = 123;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 124;
+  int S_CHAR_LITERAL = 124;
   /** RegularExpression Id. */
-  int ADDITIONAL_LETTERS = 125;
+  int S_QUOTED_IDENTIFIER = 125;
+  /** RegularExpression Id. */
+  int ADDITIONAL_LETTERS = 126;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -391,6 +393,7 @@ public interface CCSqlParserConstants {
     "\"NEXT\"",
     "\"ONLY\"",
     "\"COMMIT\"",
+    "\"UNIQUE\"",
     "<S_DOUBLE>",
     "<S_LONG>",
     "<DIGIT>",

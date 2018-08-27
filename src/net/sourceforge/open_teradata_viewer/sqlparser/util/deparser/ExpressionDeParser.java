@@ -381,6 +381,10 @@ public class ExpressionDeParser implements IExpressionVisitor,
             }
         }
 
+        if (function.getAttribute() != null) {
+            buffer.append(".").append(function.getAttribute());
+        }
+
         if (function.isEscaped()) {
             buffer.append("}");
         }

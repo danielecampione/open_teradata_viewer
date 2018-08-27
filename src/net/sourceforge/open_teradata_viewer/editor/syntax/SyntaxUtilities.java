@@ -807,7 +807,7 @@ public class SyntaxUtilities implements SwingConstants {
             int line = c.getLineOfOffset(offs);
             return c.getLineStartOffset(line - 1);
         } else {
-            return token.getListOffset(c, e, 0, x);
+            return token.getListOffset(c, e, c.getMargin().left, x);
         }
     }
 
@@ -836,7 +836,7 @@ public class SyntaxUtilities implements SwingConstants {
             line = fm.getVisibleLineBelow(line);
             return c.getLineStartOffset(line);
         } else {
-            return token.getListOffset(c, e, 0, x);
+            return token.getListOffset(c, e, c.getMargin().left, x);
         }
     }
 
@@ -1269,8 +1269,8 @@ public class SyntaxUtilities implements SwingConstants {
 
         boolean foldsExpanded = false;
         if (textArea instanceof SyntaxTextArea) {
-            SyntaxTextArea rsta = (SyntaxTextArea) textArea;
-            FoldManager fm = rsta.getFoldManager();
+            SyntaxTextArea sta = (SyntaxTextArea) textArea;
+            FoldManager fm = sta.getFoldManager();
             if (fm.isCodeFoldingSupportedAndEnabled()) {
                 foldsExpanded = fm.ensureOffsetNotInClosedFold(start);
                 foldsExpanded |= fm.ensureOffsetNotInClosedFold(end);

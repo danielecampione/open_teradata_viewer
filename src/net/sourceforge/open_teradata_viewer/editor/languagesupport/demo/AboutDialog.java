@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( kernel )
+ * Open Teradata Viewer ( editor language support demo )
  * Copyright (C) 2014, D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.open_teradata_viewer;
+package net.sourceforge.open_teradata_viewer.editor.languagesupport.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.DatabaseMetaData;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -46,7 +37,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Spring;
@@ -58,22 +48,21 @@ import javax.swing.border.Border;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpath.JarLibraryInfo;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpath.LibraryInfo;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.perl.PerlLanguageSupport;
-import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * The "About" dialog for the application.
+ * The "About" dialog for the demo application.
  *
  * @author D. Campione
  *
  */
-public class AboutDialog extends JDialog implements MouseListener {
+public class AboutDialog extends JDialog {
 
-    private static final long serialVersionUID = 5497242522081970155L;
+    private static final long serialVersionUID = 275544414461806018L;
 
     private final Border empty5Border = BorderFactory.createEmptyBorder(5, 5,
             5, 5);
 
-    public AboutDialog(ApplicationFrame parent) {
+    public AboutDialog(DemoApp parent) {
         super(parent);
 
         JPanel cp = new JPanel(new BorderLayout());
@@ -88,7 +77,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         box2.setBackground(Color.white);
         box2.setBorder(new TopBorder());
 
-        JLabel label = new JLabel(Main.APPLICATION_NAME);
+        JLabel label = new JLabel("Language Support Demo");
         label.setOpaque(true);
         label.setBackground(Color.white);
         Font labelFont = label.getFont();
@@ -99,20 +88,12 @@ public class AboutDialog extends JDialog implements MouseListener {
         JTextArea textArea = new JTextArea(6, 60);
         // Windows LAF picks a bad font for text areas, for some reason
         textArea.setFont(labelFont);
-        try {
-            textArea.setText("Version "
-                    + Config.getVersion()
-                    + "\n\n"
-                    + "A database administration tool, suitable as front-end for your Teradata "
-                    + "relational database. Used to easily query, update and administer your "
-                    + "database, create reports and synchronize data.\n\n"
-                    + "Note that some features for some languages may not work unless your system "
-                    + "is set up properly.\nFor example, Java code completion requries a JRE on "
-                    + "your PATH and Perl completion requires the Perl executable to be on your "
-                    + "PATH.");
-        } catch (IOException ioe) {
-            ExceptionDialog.hideException(ioe);
-        }
+        textArea.setText("Copyright (C) 2014, D. Campione\n\n"
+                + "Demonstrates basic features of the STALanguageSupport library.\n"
+                + "Note that some features for some languages may not work unless your system "
+                + "is set up properly.\nFor example, Java code completion requries a JRE on "
+                + "your PATH, and Perl completion requires the Perl executable to be on your "
+                + "PATH.");
         textArea.setEditable(false);
         textArea.setBackground(Color.white);
         textArea.setLineWrap(true);
@@ -125,19 +106,6 @@ public class AboutDialog extends JDialog implements MouseListener {
 
         SpringLayout sl = new SpringLayout();
         JPanel temp = new JPanel(sl);
-        JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2014 D. Campione</font></html>");
-        JLabel licenseLabel = new JLabel("GNU General Public License");
-        licenseLabel.setForeground(Color.BLUE);
-        licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        licenseLabel.addMouseListener(this);
-        JLabel homePageLabel = new JLabel(Config.HOME_PAGE);
-        homePageLabel.setForeground(Color.BLUE);
-        homePageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        homePageLabel.addMouseListener(this);
-        JLabel javaVMLabel = new JLabel("Java VM: ");
-        JTextField javaVMField = createTextField(System
-                .getProperty("java.version"));
         JLabel perlLabel = new JLabel("Perl install location:");
         File loc = PerlLanguageSupport.getDefaultPerlInstallLocation();
         String text = loc == null ? null : loc.getAbsolutePath();
@@ -152,66 +120,18 @@ public class AboutDialog extends JDialog implements MouseListener {
         JTextField javaField = createTextField(jre);
 
         if (getComponentOrientation().isLeftToRight()) {
-            temp.add(copyrightLabel);
-            temp.add(new JLabel());
-            temp.add(licenseLabel);
-            temp.add(new JLabel());
-            temp.add(homePageLabel);
-            temp.add(new JLabel());
-            temp.add(javaVMLabel);
-            temp.add(javaVMField);
             temp.add(perlLabel);
             temp.add(perlField);
             temp.add(javaLabel);
             temp.add(javaField);
         } else {
-            temp.add(new JLabel());
-            temp.add(copyrightLabel);
-            temp.add(new JLabel());
-            temp.add(licenseLabel);
-            temp.add(new JLabel());
-            temp.add(homePageLabel);
-            temp.add(javaVMField);
-            temp.add(javaVMLabel);
             temp.add(perlField);
             temp.add(perlLabel);
             temp.add(javaField);
             temp.add(javaLabel);
         }
-        makeSpringCompactGrid(temp, 6, 2, 5, 5, 15, 5);
+        makeSpringCompactGrid(temp, 2, 2, 5, 5, 15, 5);
         box.add(temp);
-
-        temp = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(2, 2, 2, 2);
-        c.gridwidth = 2;
-        c.anchor = GridBagConstraints.SOUTHWEST;
-        boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (isConnected) {
-            try {
-                DatabaseMetaData metaData = Context.getInstance()
-                        .getConnectionData().getConnection().getMetaData();
-                c.gridy++;
-                temp.add(new JLabel("Database: "), c);
-                temp.add(createTextField(metaData.getDatabaseProductName()), c);
-                c.gridy++;
-                temp.add(new JLabel(""), c);
-                String databaseProductVersion = metaData
-                        .getDatabaseProductVersion().replaceAll("\n", "<br>");
-                temp.add(
-                        new JLabel(String.format("<html>%s</html>",
-                                databaseProductVersion)), c);
-                c.gridy++;
-                temp.add(new JLabel("Driver: "), c);
-                temp.add(createTextField(metaData.getDriverName()), c);
-                c.gridy++;
-                temp.add(new JLabel(""), c);
-                temp.add(createTextField(metaData.getDriverVersion()), c);
-            } catch (Throwable t) {
-                ExceptionDialog.hideException(t);
-            }
-            box.add(temp);
-        }
 
         box.add(Box.createVerticalGlue());
 
@@ -219,13 +139,10 @@ public class AboutDialog extends JDialog implements MouseListener {
 
         JButton okButton = new JButton("OK");
         okButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                dispose();
             }
-
         });
         temp = new JPanel(new BorderLayout());
         temp.setBorder(empty5Border);
@@ -233,7 +150,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         cp.add(temp, BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(okButton);
-        setTitle("About " + Main.APPLICATION_NAME);
+        setTitle("About STALanguageSupport Demo");
         setContentPane(cp);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setModal(true);
@@ -262,8 +179,8 @@ public class AboutDialog extends JDialog implements MouseListener {
      *
      * @param parent The container whose layout must be an instance of
      *        <code>SpringLayout</code>.
-     * @return The spring constraints for the specified component contained
-     *         in <code>parent</code>.
+     * @return The spring constraints for the specified component contained in
+     *         <code>parent</code>.
      */
     private static final SpringLayout.Constraints getConstraintsForCell(
             int row, int col, Container parent, int cols) {
@@ -350,7 +267,7 @@ public class AboutDialog extends JDialog implements MouseListener {
      */
     private static class TopBorder extends AbstractBorder {
 
-        private static final long serialVersionUID = 5485691579345543789L;
+        private static final long serialVersionUID = 1922622488107637245L;
 
         @Override
         public Insets getBorderInsets(Component c) {
@@ -374,52 +291,5 @@ public class AboutDialog extends JDialog implements MouseListener {
             g.setColor(color);
             g.drawLine(x, y + height - 1, x + width, y + height - 1);
         }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent me) {
-        if (me.getSource() instanceof JLabel) {
-            JLabel label = (JLabel) me.getSource();
-            try {
-                if (label.getText().startsWith("GNU")) {
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    InputStream in = Config.class
-                            .getResourceAsStream("/license.txt");
-                    byte[] bytes = new byte[1024];
-                    int length = in.read(bytes);
-                    while (length != -1) {
-                        out.write(bytes, 0, length);
-                        length = in.read(bytes);
-                    }
-                    in.close();
-                    JTextArea textArea = new JTextArea(new String(
-                            out.toByteArray()));
-                    textArea.setEditable(false);
-                    JScrollPane scrollPane = new JScrollPane(textArea);
-                    Dialog.show("License", scrollPane, Dialog.PLAIN_MESSAGE,
-                            Dialog.DEFAULT_OPTION);
-                } else {
-                    Utilities.openURLWithDefaultBrowser(label.getText());
-                }
-            } catch (Exception e) {
-                ExceptionDialog.showException(e);
-            }
-        }
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
     }
 }

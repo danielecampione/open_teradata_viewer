@@ -1880,4 +1880,8 @@ public class SelectTest extends TestCase {
     public void testSelectJoin2() throws SQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM pg_constraint WHERE pg_attribute.attnum = ANY(pg_constraint.conkey)");
     }
+
+    public void testSelectTeradataColl() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM the_table tt WHERE TT.COL1 = lines(idx).COL1");
+    }
 }

@@ -35,7 +35,7 @@ import net.sourceforge.open_teradata_viewer.editor.SmartHighlightPainter;
  *
  * @author D. Campione
  * @see IOccurrenceMarker
- * 
+ *
  */
 class MarkOccurrencesSupport implements CaretListener, ActionListener {
 
@@ -84,9 +84,13 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
     /**
      * Called after the caret has been moved and a fixed time delay has elapsed.
      * This locates and highlights all occurrences of the identifier at the
-     * caret position, if any.
+     * caret position, if any.<p>
+     *
+     * Callers should not call this method directly but should rather prefer
+     * {@link #doMarkOccurrences()} to mark occurrences.
      *
      * @param e The event.
+     * @see #doMarkOccurrences()
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -107,7 +111,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
 
                 if (t != null && occurrenceMarker.isValidType(textArea, t)
                         && !SyntaxUtilities.isNonWordChar(t)) {
-                    removeHighlights();
+                    clear();
                     SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
                             .getHighlighter();
                     occurrenceMarker.markOccurrences(doc, t, h, p);
@@ -131,6 +135,24 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
     @Override
     public void caretUpdate(CaretEvent e) {
         timer.restart();
+    }
+
+    /** Removes all highlights added to the text area by this listener. */
+    void clear() {
+        if (textArea != null) {
+            SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
+                    .getHighlighter();
+            h.clearMarkOccurrencesHighlights();
+        }
+    }
+
+    /**
+     * Immediately marks all occurrences of the token at the current caret
+     * position.
+     */
+    public void doMarkOccurrences() {
+        timer.stop();
+        actionPerformed(null);
     }
 
     /**
@@ -181,15 +203,6 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
         }
     }
 
-    /** Removes all highlights added to the text area by this listener. */
-    private void removeHighlights() {
-        if (textArea != null) {
-            SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) textArea
-                    .getHighlighter();
-            h.clearMarkOccurrencesHighlights();
-        }
-    }
-
     /**
      * Sets the color to use when marking occurrences.
      *
@@ -200,7 +213,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
     public void setColor(Color color) {
         p.setPaint(color);
         if (textArea != null) {
-            removeHighlights();
+            clear();
             caretUpdate(null); // Force a highlight repaint
         }
     }
@@ -241,7 +254,7 @@ class MarkOccurrencesSupport implements CaretListener, ActionListener {
      */
     public void uninstall() {
         if (textArea != null) {
-            removeHighlights();
+            clear();
             textArea.removeCaretListener(this);
         }
     }

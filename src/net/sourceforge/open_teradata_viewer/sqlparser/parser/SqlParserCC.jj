@@ -1,10 +1,10 @@
 options{
     IGNORE_CASE=true ;
     STATIC=false;
-//	DEBUG_PARSER=true;
-//  DEBUG_LOOKAHEAD=true ;
+    DEBUG_PARSER=false;
+    DEBUG_LOOKAHEAD=false;
+    DEBUG_TOKEN_MANAGER=false;
 //  FORCE_LA_CHECK=true;
-//  DEBUG_TOKEN_MANAGER=true;
     UNICODE_INPUT=true;
 }
 
@@ -177,6 +177,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_NEXT:"NEXT">
 |   <K_ONLY:"ONLY">
 |   <K_COMMIT:"COMMIT">
+|   <K_UNIQUE:"UNIQUE">
 }
 
 TOKEN : /* Numeric Constants */
@@ -485,7 +486,8 @@ String RelObjectName():
       | tk=<K_CAST> | tk=<K_DO> | tk=<K_EXTRACT> | tk=<K_FIRST> | tk=<K_FOLLOWING> 
       | tk=<K_LAST> | tk=<K_MATERIALIZED> | tk=<K_NULLS> | tk=<K_PARTITION> | tk=<K_RANGE> 
       | tk=<K_ROW> | tk=<K_ROWS> | tk=<K_SIBLINGS> | tk=<K_VALUE> | tk=<K_XML>
-      | tk=<K_COLUMN> | tk=<K_REPLACE> | tk=<K_TRUNCATE> | tk=<K_KEY> | tk=<K_ANY>)
+      | tk=<K_COLUMN> | tk=<K_REPLACE> | tk=<K_TRUNCATE> | tk=<K_KEY> | tk=<K_ANY>
+      )
 
     { return tk.image; }
 }
@@ -2004,6 +2006,8 @@ Function Function():
     [ "." tmp=RelObjectName() { funcName+= "." + tmp; } ["." tmp=RelObjectName() { funcName+= "." + tmp; }]]
     "(" [ [<K_DISTINCT> { retval.setDistinct(true); } | <K_ALL> { retval.setAllColumns(true); }] (expressionList=SimpleExpressionList() | "*" { retval.setAllColumns(true); }) ] ")"
 
+    [ "." tmp=RelObjectName() { retval.setAttribute(tmp); }]
+
     ["}"]
     {
         retval.setParameters(expressionList);
@@ -2156,10 +2160,11 @@ CreateTable CreateTable():
                         index = new NamedConstraint();
                     }
                     [<K_CONSTRAINT> tk3=<S_IDENTIFIER> {index.setName(tk3.image);} ]
-                    tk=<K_PRIMARY> tk2=<K_KEY>
+                    
+                    (tk=<K_PRIMARY> tk2=<K_KEY> {index.setType(tk.image + " " + tk2.image);}
+                     | tk=<K_UNIQUE> {index.setType(tk.image);} )
                         colNames=ColumnsNamesList()
                         {
-                            index.setType(tk.image + " "+ tk2.image);
                             index.setColumnsNames(colNames);
                             indexes.add(index);
                         }
@@ -2288,8 +2293,9 @@ CreateView CreateView():
 
 String CreateParameter():
 {
-    String retval = null;
+    String retval = "";
     Token tk = null;
+    Token sign = null;
 }
 {
         (
@@ -2305,15 +2311,20 @@ String CreateParameter():
             |
             tk=<S_CHAR_LITERAL> { retval = tk.image; }
             |
-            tk=<S_LONG> { retval = tk.image; }
-            |
-            tk=<S_DOUBLE> { retval = tk.image; }
+              ("+" {retval = "+";} | "-" {retval = "-";})?
+              (
+               tk=<S_LONG> { retval += tk.image; }
+               |
+               tk=<S_DOUBLE> { retval += tk.image; }
+              )
             |
             tk=<K_ON> { retval = tk.image; } 
             |
             tk=<K_COMMIT> { retval = tk.image; } 
             |
             tk=<K_ROWS> { retval = tk.image; } 
+            |
+            tk=<K_UNIQUE> { retval = tk.image; } 
             |
             "=" { retval = "="; }
             |

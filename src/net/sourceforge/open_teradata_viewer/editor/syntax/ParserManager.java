@@ -24,6 +24,8 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -57,7 +59,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *
  */
 class ParserManager implements DocumentListener, ActionListener,
-        HyperlinkListener {
+        HyperlinkListener, PropertyChangeListener {
 
     private SyntaxTextArea textArea;
     private List<IParser> parsers;
@@ -114,6 +116,7 @@ class ParserManager implements DocumentListener, ActionListener,
     public ParserManager(int delay, SyntaxTextArea textArea) {
         this.textArea = textArea;
         textArea.getDocument().addDocumentListener(this);
+        textArea.addPropertyChangeListener("document", this);
         parsers = new ArrayList<IParser>(1); // Usually small
         timer = new Timer(delay, this);
         timer.setRepeats(false);
@@ -554,6 +557,28 @@ class ParserManager implements DocumentListener, ActionListener,
             // Give them the benefit of the doubt, should 99% of the time be
             // true anyway
             return true;
+        }
+    }
+
+    /**
+     * Called when a property we're interested in changes.
+     *
+     * @param e The property change event.
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent e) {
+        String name = e.getPropertyName();
+
+        if ("document".equals(name)) {
+            // The document switched out from under us
+            Document old = (Document) e.getOldValue();
+            if (old != null) {
+                old.removeDocumentListener(this);
+            }
+            Document newDoc = (Document) e.getNewValue();
+            if (newDoc != null) {
+                newDoc.addDocumentListener(this);
+            }
         }
     }
 

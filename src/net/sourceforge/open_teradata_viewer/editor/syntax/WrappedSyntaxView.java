@@ -52,7 +52,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * The view used by {@link SyntaxTextArea} when word wrap is enabled.
  *
  * @author D. Campione
- * 
+ *
  */
 public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView {
 
@@ -227,6 +227,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 int tokenOffset = token.getOffset();
                 tempToken.set(drawSeg.array, tokenOffset - start,
                         p - 1 - start, tokenOffset, token.getType());
+                tempToken.setLanguageIndex(token.getLanguageIndex());
                 painter.paint(tempToken, g, x, y, host, this);
                 tempToken.copyFrom(token);
                 tempToken.makeStartAt(p);
@@ -262,6 +263,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
             Rectangle r, View view, int fontHeight, int y, int selStart,
             int selEnd) {
         float x = r.x;
+        boolean useSTC = host.getUseSelectedTextColor();
 
         LayeredHighlighter h = (LayeredHighlighter) host.getHighlighter();
 
@@ -309,12 +311,13 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                     int selCount = Math.min(token.length(),
                             selEnd - token.getOffset());
                     if (selCount == token.length()) {
-                        x = painter.paintSelected(token, g, x, y, host, this);
+                        x = painter.paintSelected(token, g, x, y, host, this,
+                                useSTC);
                     } else {
                         tempToken.copyFrom(token);
                         tempToken.textCount = selCount;
                         x = painter.paintSelected(tempToken, g, x, y, host,
-                                this);
+                                this, useSTC);
                         tempToken.textCount = token.length();
                         tempToken.makeStartAt(token.getOffset() + selCount);
                         token = tempToken;
@@ -325,7 +328,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 else if (token.containsPosition(selEnd)) {
                     tempToken.copyFrom(token);
                     tempToken.textCount = selEnd - tempToken.getOffset();
-                    x = painter.paintSelected(tempToken, g, x, y, host, this);
+                    x = painter.paintSelected(tempToken, g, x, y, host, this,
+                            useSTC);
                     tempToken.textCount = token.length();
                     tempToken.makeStartAt(selEnd);
                     token = tempToken;
@@ -334,7 +338,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 // This token is entirely selected
                 else if (token.getOffset() >= selStart
                         && token.getEndOffset() <= selEnd) {
-                    x = painter.paintSelected(token, g, x, y, host, this);
+                    x = painter.paintSelected(token, g, x, y, host, this,
+                            useSTC);
                 }
                 // This token is entirely unselected
                 else {
@@ -349,7 +354,9 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 int tokenOffset = token.getOffset();
                 IToken orig = token;
                 token = new TokenImpl(drawSeg, tokenOffset - start, p - 1
-                        - start, tokenOffset, token.getType());
+                        - start, tokenOffset, token.getType(),
+                        token.getLanguageIndex());
+                token.setLanguageIndex(token.getLanguageIndex());
 
                 // Selection starts in this token
                 if (token.containsPosition(selStart)) {
@@ -367,12 +374,13 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                     int selCount = Math.min(token.length(),
                             selEnd - token.getOffset());
                     if (selCount == token.length()) {
-                        x = painter.paintSelected(token, g, x, y, host, this);
+                        x = painter.paintSelected(token, g, x, y, host, this,
+                                useSTC);
                     } else {
                         tempToken.copyFrom(token);
                         tempToken.textCount = selCount;
                         x = painter.paintSelected(tempToken, g, x, y, host,
-                                this);
+                                this, useSTC);
                         tempToken.textCount = token.length();
                         tempToken.makeStartAt(token.getOffset() + selCount);
                         token = tempToken;
@@ -383,7 +391,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 else if (token.containsPosition(selEnd)) {
                     tempToken.copyFrom(token);
                     tempToken.textCount = selEnd - tempToken.getOffset();
-                    x = painter.paintSelected(tempToken, g, x, y, host, this);
+                    x = painter.paintSelected(tempToken, g, x, y, host, this,
+                            useSTC);
                     tempToken.textCount = token.length();
                     tempToken.makeStartAt(selEnd);
                     token = tempToken;
@@ -392,7 +401,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 // This token is entirely selected
                 else if (token.getOffset() >= selStart
                         && token.getEndOffset() <= selEnd) {
-                    x = painter.paintSelected(token, g, x, y, host, this);
+                    x = painter.paintSelected(token, g, x, y, host, this,
+                            useSTC);
                 }
                 // This token is entirely unselected
                 else {
@@ -417,7 +427,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
     /**
      * Fetches the allocation for the given child view.<p> Overridden to account
      * for code folding.
-     * 
+     *
      * @param index The index of the child, >= 0 && < getViewCount().
      * @param a The allocation to this view.
      * @return The allocation to the child; or <code>null</code> if
@@ -444,7 +454,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
     /**
      * Fetches the allocation for the given child view to render into.<p>
      * Overridden to account for lines hidden by collapsed folded regions.
-     * 
+     *
      * @param line The index of the child, >= 0 && < getViewCount()
      * @param a The allocation to this view
      * @return The allocation to the child
@@ -791,7 +801,6 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
         // Whether token styles should always be painted, even in selections
         int selStart = host.getSelectionStart();
         int selEnd = host.getSelectionEnd();
-        boolean useSelectedTextColor = host.getUseSelectedTextColor();
 
         int n = getViewCount(); // Number of lines
         int x = alloc.x + getLeftInset();
@@ -807,8 +816,8 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
                 int startOffset = lineElement.getStartOffset();
                 int endOffset = lineElement.getEndOffset() - 1;
                 View view = getView(i);
-                if (!useSelectedTextColor || selStart == selEnd
-                        || (startOffset >= selEnd || endOffset < selStart)) {
+                if (selStart == selEnd || startOffset >= selEnd
+                        || endOffset < selStart) {
                     drawView(painter, g2d, alloc, view, fontHeight, tempRect.y
                             + ascent);
                 } else {
@@ -834,7 +843,7 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
     }
 
     /**
-     * Gives notification that something was removed from the 
+     * Gives notification that something was removed from the
      * document in a location that this view is responsible for.
      * This is implemented to simply update the children.
      *
@@ -991,9 +1000,9 @@ public class WrappedSyntaxView extends BoxView implements TabExpander, ISTAView 
      * space allocated.
      * This class tries to be lightweight by carrying little state of it's own
      * and sharing the state of the outer class with it's siblings.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     class WrappedLine extends View {
 

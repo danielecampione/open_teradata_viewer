@@ -39,7 +39,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
  * Utility function for select statements.
  *
  * @author D. Campione
- * 
+ *
  */
 public final class SelectUtils {
 
@@ -127,5 +127,26 @@ public final class SelectUtils {
             return join;
         }
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /** Adds group by to a plain select statement. */
+    public static void addGroupBy(Select select, final IExpression expr) {
+        select.getSelectBody().accept(new ISelectVisitor() {
+
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                plainSelect.addGroupByColumnReference(expr);
+            }
+
+            @Override
+            public void visit(SetOperationList setOpList) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void visit(WithItem withItem) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
     }
 }

@@ -147,8 +147,11 @@
       Various text editing features are provided by OTVSyntaxTextArea.<br />
       Right click the editor to use them.<br /><br />
       <img src="images/textarea_contextual_menu.png" alt="" width="204" height="260" /><br /><br />
-      Clipboard History popup can be activated via Ctrl+Shift+V (Cmd+Shift+V on Mac).<br /><br />
+      Clipboard History popup can be activated via Ctrl+Shift+V (Cmd+Shift+V on OS X).<br /><br />
       <img src="images/textarea_clipboard_history.png" alt="" width="239" height="124" /><br /><br />
+      Pressing Ctrl+Shift+V will cause the "clipboard history" popup to appear below the current caret position.<br />
+      This popup displays the most recent snippets of text added to the clipboard. This allows you to paste any text that was *recently* on the clipboard, not just what's *currently* in the clipboard buffer. This is pretty useful if you're a frequent copy-paster.<br />
+      The clipboard history is implemented as a singleton instance of the net.sourceforge.open_teradata_viewer.editor.ClipboardHistory class. You can access it, but currently the only interesting thing you can do is set its maximum size. By default, it only remembers the twelve most recent entries on the clipboard that can be interpreted as plain text.<br /><br />
       <h4>
         How to enable the Spell Checking feature
       </h4>

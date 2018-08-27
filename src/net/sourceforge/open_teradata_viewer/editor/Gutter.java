@@ -64,7 +64,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * lines a user can cycle through via F2 and Shift+F2. Bookmarked lines are
  * toggled via Ctrl+F2. In order to enable bookmarking, you must first assign an
  * icon to represent a bookmarked line, then actually enable the feature:
- * 
+ *
  * <pre>
  * Gutter gutter = scrollPane.getGutter();
  * gutter.setBookmarkIcon(new ImageIcon("bookmark.png"));
@@ -73,7 +73,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  *
  * @author D. Campione
  * @see IGutterIconInfo
- * 
+ *
  */
 public class Gutter extends JPanel {
 
@@ -739,9 +739,9 @@ public class Gutter extends JPanel {
 
     /**
      * The border used by the gutter.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class GutterBorder extends EmptyBorder {
 
@@ -791,9 +791,9 @@ public class Gutter extends JPanel {
 
     /**
      * Listens for the text area resizing.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     /*
      * This is necessary to keep child components the same height as the text
@@ -871,7 +871,6 @@ public class Gutter extends JPanel {
                     agc.lineHeightsChanged();
                 }
             }
-
             // If they toggle whether code folding is enabled..
             else if (SyntaxTextArea.CODE_FOLDING_PROPERTY.equals(name)) {
                 boolean foldingEnabled = ((Boolean) e.getNewValue())
@@ -881,10 +880,19 @@ public class Gutter extends JPanel {
                 }
                 setFoldIndicatorEnabled(foldingEnabled);
             }
-
             // If code folds are updated..
             else if (FoldManager.PROPERTY_FOLDS_UPDATED.equals(name)) {
                 repaint();
+            } else if ("document".equals(name)) {
+                // The document switched out from under us
+                OTVDocument old = (OTVDocument) e.getOldValue();
+                if (old != null) {
+                    old.removeDocumentListener(this);
+                }
+                OTVDocument newDoc = (OTVDocument) e.getNewValue();
+                if (newDoc != null) {
+                    newDoc.addDocumentListener(this);
+                }
             }
         }
 
@@ -897,6 +905,7 @@ public class Gutter extends JPanel {
             if (installed) {
                 textArea.removeComponentListener(this);
                 textArea.getDocument().removeDocumentListener(this);
+                textArea.removePropertyChangeListener(this);
                 if (textArea instanceof SyntaxTextArea) {
                     SyntaxTextArea sta = (SyntaxTextArea) textArea;
                     sta.removeActiveLineRangeListener(this);

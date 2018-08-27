@@ -49,6 +49,7 @@ class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
         putMapping(SYNTAX_STYLE_JAVASCRIPT, pkg + "JavaScriptTokenMaker");
         putMapping(SYNTAX_STYLE_JSON, pkg + "JsonTokenMaker");
         putMapping(SYNTAX_STYLE_JSP, pkg + "JSPTokenMaker");
+        putMapping(SYNTAX_STYLE_LISP, pkg + "LispTokenMaker");
         putMapping(SYNTAX_STYLE_NSIS, pkg + "NSISTokenMaker");
         putMapping(SYNTAX_STYLE_PERL, pkg + "PerlTokenMaker");
         putMapping(SYNTAX_STYLE_PHP, pkg + "PHPTokenMaker");

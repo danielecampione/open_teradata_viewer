@@ -31,7 +31,7 @@ import net.sourceforge.open_teradata_viewer.editor.autocomplete.VariableCompleti
  * The cell renderer used for CSS.
  *
  * @author D. Campione
- * 
+ *
  */
 class CssCellRenderer extends CompletionCellRenderer {
 
@@ -41,7 +41,7 @@ class CssCellRenderer extends CompletionCellRenderer {
 
     /** Ctor. */
     public CssCellRenderer() {
-        tagIcon = getIcon("img/tag.png");
+        tagIcon = getIcon("../html/tag.png");
     }
 
     /** {@inheritDoc} */

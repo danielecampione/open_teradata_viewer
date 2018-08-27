@@ -101,6 +101,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *   <td style="vertical-align: top">
  *    <ul>
  *       <li>JSON
+ *       <li>Lisp
  *       <li>NSIS
  *       <li>Perl
  *       <li>PHP
@@ -1532,7 +1533,7 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                 // getTokenListFor()
                 int docOffs = map.getElement(line).getEndOffset() - 1;
                 t = new TokenImpl(new char[] { '\n' }, 0, 0, docOffs,
-                        IToken.WHITESPACE);
+                        IToken.WHITESPACE, 0);
                 lastToken.setNextToken(t);
                 lastToken = t;
             }
@@ -2175,7 +2176,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
                     + "SyntaxTextArea must be instances of "
                     + "SyntaxDocument.");
         }
+        if (markOccurrencesSupport != null) {
+            markOccurrencesSupport.clear();
+        }
         super.setDocument(document);
+        if (markOccurrencesSupport != null) {
+            markOccurrencesSupport.doMarkOccurrences();
+        }
     }
 
     /**

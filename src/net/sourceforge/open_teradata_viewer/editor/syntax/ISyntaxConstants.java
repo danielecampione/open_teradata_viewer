@@ -81,6 +81,9 @@ public interface ISyntaxConstants {
     /** Style for highlighting JSP. */
     public static final String SYNTAX_STYLE_JSP = "text/jsp";
 
+    /** Style for highlighting Lisp. */
+    public static final String SYNTAX_STYLE_LISP = "text/lisp";
+
     /** Style for highlighting NSIS install scripts. */
     public static final String SYNTAX_STYLE_NSIS = "text/nsis";
 

@@ -53,7 +53,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.folding.FoldManager;
  * from the text area's {@link SyntaxDocument}.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxView extends View implements TabExpander,
         ITokenOrientedView, ISTAView {
@@ -215,6 +215,7 @@ public class SyntaxView extends View implements TabExpander,
     private float drawLineWithSelection(ITokenPainter painter, IToken token,
             Graphics2D g, float x, float y, int selStart, int selEnd) {
         float nextX = x; // The x-value at the end of our text
+        boolean useSTC = host.getUseSelectedTextColor();
 
         while (token != null && token.isPaintable() && nextX < clipEnd) {
             // Selection starts in this token
@@ -235,12 +236,12 @@ public class SyntaxView extends View implements TabExpander,
                 int selCount = Math.min(tokenLen, selEnd - token.getOffset());
                 if (selCount == tokenLen) {
                     nextX = painter.paintSelected(token, g, nextX, y, host,
-                            this, clipStart);
+                            this, clipStart, useSTC);
                 } else {
                     tempToken.copyFrom(token);
                     tempToken.textCount = selCount;
                     nextX = painter.paintSelected(tempToken, g, nextX, y, host,
-                            this, clipStart);
+                            this, clipStart, useSTC);
                     tempToken.textCount = token.length();
                     tempToken.makeStartAt(token.getOffset() + selCount);
                     token = tempToken;
@@ -253,7 +254,7 @@ public class SyntaxView extends View implements TabExpander,
                 tempToken.copyFrom(token);
                 tempToken.textCount = selEnd - tempToken.getOffset();
                 nextX = painter.paintSelected(tempToken, g, nextX, y, host,
-                        this, clipStart);
+                        this, clipStart, useSTC);
                 tempToken.textCount = token.length();
                 tempToken.makeStartAt(selEnd);
                 token = tempToken;
@@ -264,7 +265,7 @@ public class SyntaxView extends View implements TabExpander,
             else if (token.getOffset() >= selStart
                     && token.getEndOffset() <= selEnd) {
                 nextX = painter.paintSelected(token, g, nextX, y, host, this,
-                        clipStart);
+                        clipStart, useSTC);
             }
             // This token is entirely unselected
             else {
@@ -311,7 +312,7 @@ public class SyntaxView extends View implements TabExpander,
      *                  thought of as the arrow keys typically found on a
      *                  keyboard. This may be SwingConstants.WEST,
      *                  SwingConstants.EAST, SwingConstants.NORTH, or
-     *                  SwingConstants.SOUTH.  
+     *                  SwingConstants.SOUTH.
      * @return the location within the model that best represents the next
      *         location visual position.
      * @exception BadLocationException
@@ -659,7 +660,6 @@ public class SyntaxView extends View implements TabExpander,
         // Whether token styles should always be painted, even in selections
         int selStart = host.getSelectionStart();
         int selEnd = host.getSelectionEnd();
-        boolean useSelectedTextColor = host.getUseSelectedTextColor();
 
         SyntaxTextAreaHighlighter h = (SyntaxTextAreaHighlighter) host
                 .getHighlighter();
@@ -678,8 +678,8 @@ public class SyntaxView extends View implements TabExpander,
 
             // Paint a line of text
             token = document.getTokenListForLine(line);
-            if (!useSelectedTextColor || selStart == selEnd
-                    || (startOffset >= selEnd || endOffset < selStart)) {
+            if (selStart == selEnd || startOffset >= selEnd
+                    || endOffset < selStart) {
                 drawLine(painter, token, g2d, x, y);
             } else {
                 drawLineWithSelection(painter, token, g2d, x, y, selStart,

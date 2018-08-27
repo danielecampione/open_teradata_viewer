@@ -5,7 +5,25 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.23a (25/11/2014)
+<PRE>0.23b (16/12/2014)
+    - Added Lisp syntax highlighting and code folding.
+    - This release fixes a performance problem when painting tokens with
+      background colors specified on OS X; token background color painting was
+      slow on OS X.
+    - Minor improvements to dark theme.
+    - Fixed the cursor problem after SyntaxTextArea.setMargin.
+    - Line numbers, code folds and marked occurrences now update appropriately
+      if an STA instance's document is switched out via setDocument\(\).
+    - Tokens don't need to specify &lt;font/&gt; tags in their HTML representations if
+      they are whitespace.
+    - Added a LanguageSupport Demo to more easily test layered highlights.
+    - Fixed exception in JavaOutlineTree.
+    - Improving comment.
+    - Fixed NPE in JavaScriptLanguageSupport tree.
+    - Added support for collections to the SQL parser.
+    - Upgraded itext library 5.5.3 -> 5.5.4
+
+0.23a (25/11/2014)
     - Added x86 assembly syntax highlighting.
     - Added C++ syntax highlighting and code folding.
     - Added C# syntax highlighting.
