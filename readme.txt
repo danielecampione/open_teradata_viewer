@@ -1,4 +1,4 @@
-Teradata JDBC Driver 16.20.00.04
+Teradata JDBC Driver 16.20.00.06
 
 Part of the Teradata Tools and Utilities 16.20 product suite
 
@@ -29,6 +29,17 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 16.20.00.06:
+
+DR 186581 Support the SET TRANSFORM GROUP command
+
+This release includes changes to address the following DRs, originally included
+in release 16.20.00.05:
+
+DR 187572 Support Function Mapping
+DR 188137 Use additional built-in functions for escape syntax
 
 This release includes changes to address the following DRs, originally included
 in release 16.20.00.03:
@@ -1307,7 +1318,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.16.20.00.04.zip and TeraJDBC__indep_indep.16.20.00.04.tar
+TeraJDBC__indep_indep.16.20.00.06.zip and TeraJDBC__indep_indep.16.20.00.06.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

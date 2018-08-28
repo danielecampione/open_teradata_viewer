@@ -1,3 +1,11 @@
+0.25b (26/03/2018)
+    - Added the "Pretty print (XML only - with line breaks)" action and the
+      suited menu voice.
+    - Added unit tests for the "Pretty print (XML only - with line breaks)"
+      functionality.
+    - Tabs are emulated by spaces initially.
+    - Upgraded Teradata JDBC driver 16.20.00.04 -> 16.20.00.06
+
 0.25a (26/02/2018)
     - Fixed a bug of the UI: if the user interrupts the execution of the SQL
       statement by clicking the Cancel command button, the client can execute

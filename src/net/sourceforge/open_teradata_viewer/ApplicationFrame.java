@@ -92,6 +92,7 @@ import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
+import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.UndoMgr;
@@ -111,8 +112,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  *
  */
-public class ApplicationFrame extends JFrame implements SyntaxConstants,
-        SearchListener, HyperlinkListener {
+public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchListener, HyperlinkListener {
 
     private static final long serialVersionUID = -8572855678886323789L;
 
@@ -192,19 +192,15 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
         // The PluginFactory is instantiated
         PluginFactory pluginFactory = new PluginFactory(pluginsPath);
         // The application obtains the loaded EntryDescriptors
-        Collection<EntryDescriptor> pluginsCollection = pluginFactory
-                .getAllEntryDescriptor();
+        Collection<EntryDescriptor> pluginsCollection = pluginFactory.getAllEntryDescriptor();
         if (pluginsCollection == null) { // No JAR file in the plugins path
             return;
         }
-        Iterator<EntryDescriptor> pluginsIterator = pluginsCollection
-                .iterator();
+        Iterator<EntryDescriptor> pluginsIterator = pluginsCollection.iterator();
         // Searching for plugins..
         while (pluginsIterator.hasNext()) {
-            EntryDescriptor entryDescriptor = pluginsIterator
-                    .next();
-            IPluginEntry pluginEntry = pluginFactory
-                    .getPluginEntry(entryDescriptor.getId());
+            EntryDescriptor entryDescriptor = pluginsIterator.next();
+            IPluginEntry pluginEntry = pluginFactory.getPluginEntry(entryDescriptor.getId());
         }
     }
 
@@ -239,8 +235,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     }
 
     private JSplitPane createWorkArea() {
-        JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                createEditor(), createTable());
+        JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createEditor(), createTable());
         queryArea.setOneTouchExpandable(true);
         queryArea.setDividerSize(4);
         queryArea.setDividerLocation(200);
@@ -249,7 +244,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
     private OTVSyntaxTextArea createTextArea() {
         OTVSyntaxTextArea textArea = new OTVSyntaxTextArea();
-        textArea.setTabSize(4);
+        textArea.setTabsEmulated(true);
+        textArea.setTabSize(XMLBeautifier.DEFAULT_TAB_SIZE);
         textArea.setCaretPosition(0);
         textArea.requestFocusInWindow();
         textArea.setMarkOccurrences(true);
@@ -280,14 +276,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
         textArea = createTextArea();
         LanguageSupportFactory.get().register(textArea);
         ToolTipManager.sharedInstance().registerComponent(textArea);
-        
+
         textScrollPane = new RTextScrollPane(textArea, true);
         textScrollPane.setIconRowHeaderEnabled(true);
 
         LayerUI<JComponent> layerUI = new WallpaperLayerUI();
         JLayer<JComponent> jlayer = new JLayer<JComponent>(treeSP, layerUI);
-        final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                jlayer, textScrollPane);
+        final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jlayer, textScrollPane);
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -298,14 +293,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
         Gutter gutter = textScrollPane.getGutter();
         gutter.setBookmarkingEnabled(true);
         gutter.setBookmarkIcon(ImageManager.getImage("/icons/bookmark.png"));
-        textScrollPane
-                .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        textScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         csp.add(sp);
         ErrorStrip errorStrip = new ErrorStrip(textArea);
         contentPane.add(csp, BorderLayout.CENTER);
         contentPane.add(errorStrip, BorderLayout.LINE_END);
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, contentPane,
-                null);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, contentPane, null);
 
         globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
 
@@ -419,9 +412,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
     public void updateTitle() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        setTitle(isConnected ? Context.getInstance().getConnectionData()
-                .getName()
-                + " - " + Main.APPLICATION_NAME : Main.APPLICATION_NAME);
+        setTitle(isConnected ? Context.getInstance().getConnectionData().getName() + " - " + Main.APPLICATION_NAME
+                : Main.APPLICATION_NAME);
     }
 
     /** Handles the window closing. */
@@ -486,10 +478,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     }
 
     private void deleteHelpFiles() {
-        String tmpDir = Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"));
-        String dirToDelete[] = {
-                tmpDir + "help" + File.separator + "images" + File.separator,
+        String tmpDir = Utilities.conformizePath(System.getProperty("java.io.tmpdir"));
+        String dirToDelete[] = { tmpDir + "help" + File.separator + "images" + File.separator,
                 tmpDir + "help" + File.separator };
 
         for (String element : dirToDelete) {
@@ -518,16 +508,14 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
             @Override
             public void run() {
                 try {
-                    final SchemaBrowser schemaBrowser = new SchemaBrowser(
-                            connectionData);
+                    final SchemaBrowser schemaBrowser = new SchemaBrowser(connectionData);
                     if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
                         SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
                         schemaBrowser.addKeyListener(schemaBrowserAction);
                         schemaBrowser.addMouseListener(schemaBrowserAction);
                     }
                     rightComponent = new JScrollPane(schemaBrowser);
-                    schemaBrowser.expand(new String[] {
-                            connectionData.getName(), "username", "TABLES" });
+                    schemaBrowser.expand(new String[] { connectionData.getName(), "username", "TABLES" });
                     Actions.SCHEMA_BROWSER.setEnabled(true);
                 } catch (IllegalStateException ise) {
                     // Ignore: connection has been closed
@@ -540,10 +528,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     public void showHideObjectChooser() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            getConsole()
-                    .println(
-                            "Connect to a Teradata database to use the Schema Browser functionality.",
-                            WARNING_FOREGROUND_COLOR_LOG);
+            getConsole().println("Connect to a Teradata database to use the Schema Browser functionality.",
+                    WARNING_FOREGROUND_COLOR_LOG);
             splitPane.setRightComponent(null);
             splitPane.setDividerSize(0);
             schemaBrowserToggleButton.setSelected(false);
@@ -619,8 +605,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
         CompletionProvider commentCP = createCommentCompletionProvider();
 
         // Create the "parent" completion provider
-        LanguageAwareCompletionProvider provider = new LanguageAwareCompletionProvider(
-                codeCP);
+        LanguageAwareCompletionProvider provider = new LanguageAwareCompletionProvider(codeCP);
         provider.setStringCompletionProvider(stringCP);
         provider.setCommentCompletionProvider(commentCP);
 
@@ -665,18 +650,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
      */
     private CompletionProvider createStringCompletionProvider() {
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
-        cp.addCompletion(new BasicCompletion(cp, "%c", "char",
-                "Prints a character"));
-        cp.addCompletion(new BasicCompletion(cp, "%i", "signed int",
-                "Prints a signed integer"));
-        cp.addCompletion(new BasicCompletion(cp, "%f", "float",
-                "Prints a float"));
-        cp.addCompletion(new BasicCompletion(cp, "%s", "string",
-                "Prints a string"));
-        cp.addCompletion(new BasicCompletion(cp, "%u", "unsigned int",
-                "Prints an unsigned integer"));
-        cp.addCompletion(new BasicCompletion(cp, "\\n", "Newline",
-                "Prints a newline"));
+        cp.addCompletion(new BasicCompletion(cp, "%c", "char", "Prints a character"));
+        cp.addCompletion(new BasicCompletion(cp, "%i", "signed int", "Prints a signed integer"));
+        cp.addCompletion(new BasicCompletion(cp, "%f", "float", "Prints a float"));
+        cp.addCompletion(new BasicCompletion(cp, "%s", "string", "Prints a string"));
+        cp.addCompletion(new BasicCompletion(cp, "%u", "unsigned int", "Prints an unsigned integer"));
+        cp.addCompletion(new BasicCompletion(cp, "\\n", "Newline", "Prints a newline"));
         return cp;
     }
 
@@ -690,8 +669,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     private CompletionProvider createCommentCompletionProvider() {
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
         cp.addCompletion(new BasicCompletion(cp, "TODO:", "A to-do reminder"));
-        cp.addCompletion(new BasicCompletion(cp, "FIXME:",
-                "A bug that needs to be fixed"));
+        cp.addCompletion(new BasicCompletion(cp, "FIXME:", "A bug that needs to be fixed"));
         return cp;
     }
 
@@ -724,8 +702,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
             break;
         case REPLACE_ALL:
             result = SearchEngine.replaceAll(textArea, context);
-            UISupport.getDialogs().showInfoMessage(
-                    result.getCount() + " occurrences replaced.");
+            UISupport.getDialogs().showInfoMessage(result.getCount() + " occurrences replaced.");
             break;
         }
 
@@ -762,18 +739,14 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
                 spellingParser = createSpellingParser();
                 if (spellingParser != null) {
                     try {
-                        File userDict = File
-                                .createTempFile("spellDemo", ".txt");
+                        File userDict = File.createTempFile("spellDemo", ".txt");
                         userDict.deleteOnExit();
                         spellingParser.setUserDictionary(userDict);
-                        System.out.println("User dictionary: "
-                                + userDict.getAbsolutePath());
+                        System.out.println("User dictionary: " + userDict.getAbsolutePath());
                     } catch (IOException ioe) { // Applets, IO errors
-                        System.err.println("Can't open user dictionary: "
-                                + ioe.getMessage());
+                        System.err.println("Can't open user dictionary: " + ioe.getMessage());
                     } catch (SecurityException se) { // Applets
-                        System.err.println("Can't open user dictionary: "
-                                + se.getMessage());
+                        System.err.println("Can't open user dictionary: " + se.getMessage());
                     }
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -790,8 +763,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     private SpellingParser createSpellingParser() {
         File zip = new File("english_dic.zip");
         try {
-            SpellingParser spellingParser = SpellingParser
-                    .createEnglishSpellingParser(zip, true);
+            SpellingParser spellingParser = SpellingParser.createEnglishSpellingParser(zip, true);
             return spellingParser;
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
@@ -856,8 +828,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
     }
 
     public String getText() {
-        return getSelectedText() != null ? getSelectedText() : textArea
-                .getText();
+        return getSelectedText() != null ? getSelectedText() : textArea.getText();
     }
 
     public AutoCompletion getAutoCompletion() {
@@ -897,13 +868,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
                 // the only troublemaker here (Metal, for example, supports
                 // window decorations, but works fine without special logic)
                 boolean curSubstance = SubstanceUtil.isSubstanceInstalled();
-                boolean nextSubstance = SubstanceUtil
-                        .isASubstanceLookAndFeel(lnf);
+                boolean nextSubstance = SubstanceUtil.isASubstanceLookAndFeel(lnf);
                 if (curSubstance != nextSubstance) {
                     String startupLookAndFeelProperty = "startup_lookandfeel_class";
                     try {
-                        Config.saveSetting(startupLookAndFeelProperty,
-                                lnfClassName);
+                        Config.saveSetting(startupLookAndFeelProperty, lnfClassName);
                     } catch (Exception e) {
                         ExceptionDialog.ignoreException(e);
                     }
@@ -968,13 +937,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
      * @see #initLookAndFeelManager(ThirdPartyLookAndFeelManager)
      */
     public ExtendedLookAndFeelInfo[] get3rdPartyLookAndFeelInfo() {
-        return lafManager != null ? lafManager.get3rdPartyLookAndFeelInfo()
-                : null;
+        return lafManager != null ? lafManager.get3rdPartyLookAndFeelInfo() : null;
     }
 
     public SchemaBrowser getObjectChooser() {
-        return rightComponent == null ? null : (SchemaBrowser) rightComponent
-                .getViewport().getComponent(0);
+        return rightComponent == null ? null : (SchemaBrowser) rightComponent.getViewport().getComponent(0);
     }
 
     /** Sets the content in the text area. */
@@ -1153,8 +1120,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
         @Override
         public void run() {
-            splashScreen.updateStatus(
-                    "The LookAndFeel has been installed successfully.", 10);
+            splashScreen.updateStatus("The LookAndFeel has been installed successfully.", 10);
 
             setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
 
@@ -1164,8 +1130,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
             splashScreen.updateStatus("Initializing the goto dialog..", 25);
             setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
-            splashScreen
-                    .updateStatus("Initializing the search tool bars..", 35);
+            splashScreen.updateStatus("Initializing the search tool bars..", 35);
             initSearchDialogs();
             setCollapsibleSectionPanel(new CollapsibleSectionPanel());
 
@@ -1188,15 +1153,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
             splashScreen.updateStatus("Initializing the console..", 45);
             setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
             getConsole().setEditable(true);
-            getConsole().setCaretPosition(
-                    getConsole().getDocument().getLength());
+            getConsole().setCaretPosition(getConsole().getDocument().getLength());
             DefaultCaret caret = (DefaultCaret) getConsole().getCaret();
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
 
             splashScreen.updateStatus("Initializing the work panels..", 50);
-            JSplitPane mainSplitPane = new JSplitPane(
-                    JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
+            JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
             mainSplitPane.setOneTouchExpandable(true);
             mainSplitPane.setDividerSize(4);
             mainSplitPane.setDividerLocation(510);
@@ -1205,16 +1168,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
             splashScreen.updateStatus("Initializing the graphic viewer..", 60);
             graphicViewer = new GraphicViewer();
 
-            splashScreen.updateStatus(
-                    "Initializing the graphic viewer undo manager..", 65);
-            GraphicViewerDocument graphicViewerDocument = graphicViewer.myView
-                    .getDocument();
+            splashScreen.updateStatus("Initializing the graphic viewer undo manager..", 65);
+            GraphicViewerDocument graphicViewerDocument = graphicViewer.myView.getDocument();
             graphicViewerDocument.addDocumentListener(graphicViewer);
             graphicViewerDocument.setUndoManager(new UndoMgr());
 
             splashScreen.updateStatus("Initializing the status bar..", 75);
-            getContentPane().add(new ApplicationStatusBar(),
-                    BorderLayout.PAGE_END);
+            getContentPane().add(new ApplicationStatusBar(), BorderLayout.PAGE_END);
 
             try {
                 if (StringUtil.isEmpty(Config.getDrivers())) {
@@ -1237,14 +1197,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
             splashScreen.updateStatus("Configuring the main window..", 98);
             pack();
-            double screenWidth = Toolkit.getDefaultToolkit().getScreenSize()
-                    .getWidth();
-            double screenHeight = Toolkit.getDefaultToolkit().getScreenSize()
-                    .getHeight();
-            setSize(Math.min(1150, (int) (screenWidth * .8)),
-                    Math.min(720, (int) (screenHeight * .8)));
-            setMinimumSize(new Dimension((int) (screenWidth * .2),
-                    (int) (screenHeight * .2)));
+            double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+            double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+            setSize(Math.min(1150, (int) (screenWidth * .8)), Math.min(720, (int) (screenHeight * .8)));
+            setMinimumSize(new Dimension((int) (screenWidth * .2), (int) (screenHeight * .2)));
             SwingUtil.centerWithinScreen(ApplicationFrame.this);
             splashScreen.updateStatus("Done.", 100);
 
@@ -1277,10 +1233,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants,
 
             int w = c.getWidth();
             int h = c.getHeight();
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    .2f));
-            g2.setPaint(new GradientPaint(0, 0, c.getBackground().darker(),
-                    w - 50, 0, c.getBackground().brighter().brighter()));
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .2f));
+            g2.setPaint(new GradientPaint(0, 0, c.getBackground().darker(), w - 50, 0,
+                    c.getBackground().brighter().brighter()));
             g2.fillRect(0, 0, w, h);
 
             g2.dispose();

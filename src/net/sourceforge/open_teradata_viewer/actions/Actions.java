@@ -37,8 +37,7 @@ import net.sourceforge.open_teradata_viewer.ResultSetTable;
  * @author D. Campione
  * 
  */
-public final class Actions implements ListSelectionListener,
-        TableColumnModelListener {
+public final class Actions implements ListSelectionListener, TableColumnModelListener {
 
     public static final CustomAction CONNECT = new ConnectAction();
     public static final CustomAction DISCONNECT = new DisconnectAction();
@@ -84,6 +83,7 @@ public final class Actions implements ListSelectionListener,
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
     public static final CustomAction HISTORY_NEXT = new HistoryNextAction();
     public static final CustomAction FORMAT_SQL = new FormatSQLAction();
+    public static final CustomAction INDENT_XML = new IndentXMLAction();
     public static final CustomAction INSERT = new InsertAction();
     public static final CustomAction EDIT = new EditAction();
     public static final CustomAction DUPLICATE = new DuplicateAction();
@@ -173,8 +173,7 @@ public final class Actions implements ListSelectionListener,
         SHOW_OBJECT_GROUP.setEnabled(isConnected);
         EXPLAIN_REQUEST.setEnabled(isConnected);
 
-        boolean hasResultSet = isConnected
-                && Context.getInstance().getResultSet() != null;
+        boolean hasResultSet = isConnected && Context.getInstance().getResultSet() != null;
         EXPORT_EXCEL.setEnabled(hasResultSet);
         EXPORT_PDF.setEnabled(hasResultSet);
         EXPORT_FLAT_FILE.setEnabled(hasResultSet);
@@ -190,31 +189,24 @@ public final class Actions implements ListSelectionListener,
         }
         INSERT.setEnabled(hasUpdatableResultSet);
 
-        boolean isRowSelected = hasResultSet
-                && !ResultSetTable.getInstance().getSelectionModel()
-                        .isSelectionEmpty();
+        boolean isRowSelected = hasResultSet && !ResultSetTable.getInstance().getSelectionModel().isSelectionEmpty();
         EDIT.setEnabled(isRowSelected);
 
         boolean isUpdatableRowSelected = hasUpdatableResultSet && isRowSelected;
         DUPLICATE.setEnabled(isUpdatableRowSelected);
         DELETE.setEnabled(isUpdatableRowSelected);
 
-        boolean isLobSelected = hasResultSet
-                && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+        boolean isLobSelected = hasResultSet && ResultSetTable.isLob(ResultSetTable.getInstance().getSelectedColumn());
         LOB_EXPORT.setEnabled(isLobSelected);
         LOB_COPY.setEnabled(isLobSelected);
         LOB_GROUP.setEnabled(isLobSelected);
 
         boolean isUpdatableLobSelected = hasUpdatableResultSet
-                && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+                && ResultSetTable.isLob(ResultSetTable.getInstance().getSelectedColumn());
         LOB_IMPORT.setEnabled(isUpdatableLobSelected);
 
-        boolean canImportFromMemory = Context.getInstance().getSavedLobs() != null
-                && isUpdatableLobSelected
-                && ResultSetTable.getInstance().getSelectedRowCount() == Context
-                        .getInstance().getSavedLobs().length;
+        boolean canImportFromMemory = Context.getInstance().getSavedLobs() != null && isUpdatableLobSelected
+                && ResultSetTable.getInstance().getSelectedRowCount() == Context.getInstance().getSavedLobs().length;
         LOB_PASTE.setEnabled(canImportFromMemory);
     }
 }

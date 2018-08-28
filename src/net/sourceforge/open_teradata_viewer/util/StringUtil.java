@@ -62,6 +62,15 @@ public class StringUtil {
         return addStringChar(text, addText, "<br>");
     }
 
+    public static String recursiveReplaceAll(String text, String toReplace,
+            String replacement) {
+        while (text.indexOf(toReplace) > -1) {
+            text = text.replaceAll(toReplace, replacement);
+        }
+
+        return text;
+    }
+    
     public static String replaceString(String text, String oldStr,
             String newStr) {
         if (oldStr == null || newStr == null) {

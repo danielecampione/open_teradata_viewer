@@ -62,43 +62,29 @@ public class ApplicationMenuBar extends JMenuBar {
 
     private static final long serialVersionUID = -3435078396857591267L;
 
-    JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(
-            Actions.VIEW_LINE_HIGHLIGHT);
-    JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(
-            Actions.FADE_CURRENT_LINE_HIGHLIGHT);
-    JCheckBoxMenuItem cbViewLineNumbers = new JCheckBoxMenuItem(
-            Actions.VIEW_LINE_NUMBERS);
+    JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(Actions.VIEW_LINE_HIGHLIGHT);
+    JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(Actions.FADE_CURRENT_LINE_HIGHLIGHT);
+    JCheckBoxMenuItem cbViewLineNumbers = new JCheckBoxMenuItem(Actions.VIEW_LINE_NUMBERS);
     JCheckBoxMenuItem cbBookmarks = new JCheckBoxMenuItem(Actions.BOOKMARKS);
     JCheckBoxMenuItem cbWordWrap = new JCheckBoxMenuItem(Actions.WORD_WRAP);
-    JCheckBoxMenuItem cbAntialiasing = new JCheckBoxMenuItem(
-            Actions.ANTIALIASING);
-    JCheckBoxMenuItem cbMarkOccurrences = new JCheckBoxMenuItem(
-            Actions.MARK_OCCURRENCES);
-    JCheckBoxMenuItem cbRightToLeft = new JCheckBoxMenuItem(
-            Actions.RIGHT_TO_LEFT);
+    JCheckBoxMenuItem cbAntialiasing = new JCheckBoxMenuItem(Actions.ANTIALIASING);
+    JCheckBoxMenuItem cbMarkOccurrences = new JCheckBoxMenuItem(Actions.MARK_OCCURRENCES);
+    JCheckBoxMenuItem cbRightToLeft = new JCheckBoxMenuItem(Actions.RIGHT_TO_LEFT);
     JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
-    JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(
-            Actions.ANIMATE_BRACKET_MATCHING);
-    JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(
-            Actions.PAINT_MATCHED_BRACKET_PAIR);
-    JCheckBoxMenuItem cbTabsEmulatedBySpaces = new JCheckBoxMenuItem(
-            Actions.TABS_EMULATED_BY_SPACES);
-    private JCheckBoxMenuItem cbCellRendering = new JCheckBoxMenuItem(
-            Actions.FANCY_CELL_RENDERING);
-    private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(
-            Actions.SHOW_DESCRIPTION_WINDOW);
-    private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(
-            Actions.PARAMETER_ASSISTANCE);
-    private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(
-            Actions.MATCHED_BRACKET_POPUP);
+    JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(Actions.ANIMATE_BRACKET_MATCHING);
+    JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(Actions.PAINT_MATCHED_BRACKET_PAIR);
+    JCheckBoxMenuItem cbTabsEmulatedBySpaces = new JCheckBoxMenuItem(Actions.TABS_EMULATED_BY_SPACES);
+    private JCheckBoxMenuItem cbCellRendering = new JCheckBoxMenuItem(Actions.FANCY_CELL_RENDERING);
+    private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(Actions.SHOW_DESCRIPTION_WINDOW);
+    private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(Actions.PARAMETER_ASSISTANCE);
+    private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(Actions.MATCHED_BRACKET_POPUP);
 
     public ApplicationMenuBar() {
         JMenu menu;
         JMenu subMenu;
 
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        CollapsibleSectionPanel csp = applicationFrame
-                .getCollapsibleSectionPanel();
+        CollapsibleSectionPanel csp = applicationFrame.getCollapsibleSectionPanel();
 
         menu = new JMenu("Connection");
         add(menu);
@@ -132,12 +118,14 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu = new JMenu("Folding");
         menu.add(subMenu);
         subMenu.add(new RSyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
-        subMenu.add(
-                new RSyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
+        subMenu.add(new RSyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
         subMenu.add(new RSyntaxTextAreaEditorKit.CollapseAllFoldsAction());
         subMenu.add(new RSyntaxTextAreaEditorKit.ExpandAllFoldsAction());
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
+        subMenu = new JMenu("XML Tools");
+        menu.add(subMenu);
+        subMenu.add(Actions.INDENT_XML);
         menu.addSeparator();
         subMenu = new JMenu("View");
         menu.add(subMenu);
@@ -169,8 +157,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.INCREASE_FONT_SIZES);
         menu.add(Actions.DECREASE_FONT_SIZES);
         menu.addSeparator();
-        JCheckBoxMenuItem cbItemToggleSpellingParser = new JCheckBoxMenuItem(
-                Actions.TOGGLE_SPELLING_PARSER);
+        JCheckBoxMenuItem cbItemToggleSpellingParser = new JCheckBoxMenuItem(Actions.TOGGLE_SPELLING_PARSER);
         cbItemToggleSpellingParser.setSelected(true);
         menu.add(cbItemToggleSpellingParser);
         menu.addSeparator();
@@ -186,8 +173,7 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         int default_modifier = getToolkit().getMenuShortcutKeyMask();
         KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
-        Action a = csp.addBottomComponent(ks,
-                applicationFrame.getFindToolBar());
+        Action a = csp.addBottomComponent(ks, applicationFrame.getFindToolBar());
         a.putValue(Action.NAME, "Show Find Search Bar");
         menu.add(new JMenuItem(a));
         ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, default_modifier);
@@ -239,70 +225,47 @@ public class ApplicationMenuBar extends JMenuBar {
         add(menu);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
         subMenu = new JMenu("Editor Theme");
-        addThemeItem("Default", "/res/themes/default.xml",
-                buttonGroupEditorTheme, subMenu, true);
-        addThemeItem("Default (Alternative Version)",
-                "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
-        addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme,
-                subMenu);
-        addThemeItem("Eclipse", "/res/themes/eclipse.xml",
-                buttonGroupEditorTheme, subMenu);
-        addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme,
-                subMenu);
-        addThemeItem("Monokai", "/res/themes/monokai.xml", buttonGroupEditorTheme,
-                subMenu);
-        addThemeItem("Visual Studio", "/res/themes/vs.xml",
-                buttonGroupEditorTheme, subMenu);
+        addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu, true);
+        addThemeItem("Default (Alternative Version)", "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Eclipse", "/res/themes/eclipse.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Monokai", "/res/themes/monokai.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Visual Studio", "/res/themes/vs.xml", buttonGroupEditorTheme, subMenu);
         menu.add(subMenu);
         menu.addSeparator();
-        UIManager.LookAndFeelInfo[] lafInfo = UIManager
-                .getInstalledLookAndFeels();
-        StringList completePathOfLafClasses = new StringList(true,
-                lafInfo.length);
+        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
+        StringList completePathOfLafClasses = new StringList(true, lafInfo.length);
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
-        Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<JRadioButtonMenuItem>(
-                lafInfo.length, 1);
+        Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<JRadioButtonMenuItem>(lafInfo.length, 1);
         for (int i = 0; i < lafInfo.length; i++) {
             String name = lafInfo[i].getName();
             _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(name));
             completePathOfLafClasses.add(lafInfo[i].getClassName());
             buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(i));
             menu.add(_mnuAvailableLookAndFeel.elementAt(i));
-            _mnuAvailableLookAndFeel.elementAt(i).addActionListener(
-                    new LookAndFeelAction(completePathOfLafClasses.get(i)));
+            _mnuAvailableLookAndFeel.elementAt(i)
+                    .addActionListener(new LookAndFeelAction(completePathOfLafClasses.get(i)));
             if (completePathOfLafClasses.get(i)
-                    .equals(UIManager.getLookAndFeel().getClass().toString()
-                            .substring("class ".length()))) {
+                    .equals(UIManager.getLookAndFeel().getClass().toString().substring("class ".length()))) {
                 _mnuAvailableLookAndFeel.elementAt(i).setSelected(true);
             }
         }
 
         // Add any 3rd party Look and Feels in the installation directory
-        ExtendedLookAndFeelInfo[] info = applicationFrame
-                .get3rdPartyLookAndFeelInfo();
+        ExtendedLookAndFeelInfo[] info = applicationFrame.get3rdPartyLookAndFeelInfo();
         if (info != null) {
             for (int i = 0; i < info.length; i++) {
                 if (!completePathOfLafClasses.exists(info[i].getClassName())) {
-                    _mnuAvailableLookAndFeel
-                            .add(new JRadioButtonMenuItem(info[i].getName()));
+                    _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(info[i].getName()));
                     completePathOfLafClasses.add(info[i].getClassName());
-                    buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel
-                            .elementAt(completePathOfLafClasses.size() - 1));
-                    menu.add(_mnuAvailableLookAndFeel
-                            .elementAt(completePathOfLafClasses.size() - 1));
-                    _mnuAvailableLookAndFeel
-                            .elementAt(completePathOfLafClasses.size() - 1)
-                            .addActionListener(new LookAndFeelAction(
-                                    completePathOfLafClasses
-                                            .get(completePathOfLafClasses.size()
-                                                    - 1)));
-                    if (completePathOfLafClasses
-                            .get(completePathOfLafClasses.size() - 1)
-                            .equals(UIManager.getLookAndFeel().getClass()
-                                    .toString().substring("class ".length()))) {
-                        _mnuAvailableLookAndFeel
-                                .elementAt(completePathOfLafClasses.size() - 1)
-                                .setSelected(true);
+                    buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1));
+                    menu.add(_mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1));
+                    _mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1).addActionListener(
+                            new LookAndFeelAction(completePathOfLafClasses.get(completePathOfLafClasses.size() - 1)));
+                    if (completePathOfLafClasses.get(completePathOfLafClasses.size() - 1)
+                            .equals(UIManager.getLookAndFeel().getClass().toString().substring("class ".length()))) {
+                        _mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1).setSelected(true);
                     }
                 }
             }
@@ -313,26 +276,21 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu = new JMenu("View As (Highlighting File Type)");
         ButtonGroup bg = new ButtonGroup();
         addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
-        addSyntaxItem("Assembler (x86)",
-                SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu);
+        addSyntaxItem("Assembler (x86)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu);
         addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
-        addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg,
-                subMenu);
+        addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg, subMenu);
         addSyntaxItem("CSS", SyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
         addSyntaxItem("C#", SyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu);
-        addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
-                subMenu);
+        addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg, subMenu);
         addSyntaxItem("D", SyntaxConstants.SYNTAX_STYLE_D, bg, subMenu);
         addSyntaxItem("Dart", SyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu);
         addSyntaxItem("Docker", SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, bg, subMenu);
-        addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg,
-                subMenu);
+        addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg, subMenu);
         addSyntaxItem("Hosts", SyntaxConstants.SYNTAX_STYLE_HOSTS, bg, subMenu);
         addSyntaxItem("HTML", SyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
         addSyntaxItem("INI", SyntaxConstants.SYNTAX_STYLE_INI, bg, subMenu);
         addSyntaxItem("Java", SyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
-        addSyntaxItem("JavaScript", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
-                bg, subMenu);
+        addSyntaxItem("JavaScript", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, bg, subMenu);
         addSyntaxItem("JSON", SyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
         addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
         addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu);
@@ -341,45 +299,33 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
         addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
         addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
-        addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
-                subMenu);
+        addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu);
         addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
-        addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg,
-                subMenu);
-        addSyntaxItem("TypeScript", SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT, bg,
-                subMenu);
-        addSyntaxItem("Unix Shell", SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
-                bg, subMenu);
-        addSyntaxItem("Visual Basic",
-                SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
-        addSyntaxItem("Windows batch",
-                SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
+        addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu);
+        addSyntaxItem("TypeScript", SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT, bg, subMenu);
+        addSyntaxItem("Unix Shell", SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, bg, subMenu);
+        addSyntaxItem("Visual Basic", SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
+        addSyntaxItem("Windows batch", SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
         addSyntaxItem("XML", SyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
         addSyntaxItem("YAML", SyntaxConstants.SYNTAX_STYLE_YAML, bg, subMenu);
-        addSyntaxItem("No Highlighting", SyntaxConstants.SYNTAX_STYLE_NONE, bg,
-                subMenu);
+        addSyntaxItem("No Highlighting", SyntaxConstants.SYNTAX_STYLE_NONE, bg, subMenu);
         subMenu.getItem(0).setSelected(true);
         menu.add(subMenu);
         menu.addSeparator();
-        cbCellRendering.setSelected(
-                ((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
-                        .isFancyCellRenderingActivated());
+        cbCellRendering
+                .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING).isFancyCellRenderingActivated());
         menu.add(cbCellRendering);
-        cbShowDescriptionWindow.setSelected(
-                ((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW)
-                        .isVisible());
+        cbShowDescriptionWindow
+                .setSelected(((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW).isVisible());
         menu.add(cbShowDescriptionWindow);
-        cbParamAssistanceItem.setSelected(
-                ((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE)
-                        .isParameterAssistanceEnabled());
+        cbParamAssistanceItem
+                .setSelected(((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE).isParameterAssistanceEnabled());
         menu.add(cbParamAssistanceItem);
         cbMatchedBracketPopupItem.setSelected(
-                ((MatchedBracketPopupAction) Actions.MATCHED_BRACKET_POPUP)
-                        .isMatchedBracketPopupEnabled());
+                ((MatchedBracketPopupAction) Actions.MATCHED_BRACKET_POPUP).isMatchedBracketPopupEnabled());
         menu.add(cbMatchedBracketPopupItem);
         menu.addSeparator();
-        JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
-                Actions.FULL_SCREEN);
+        JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(Actions.FULL_SCREEN);
         menu.add(fullScreenMenuItem);
 
         menu = new JMenu("?");
@@ -413,48 +359,36 @@ public class ApplicationMenuBar extends JMenuBar {
 
     public void refreshEditOptions() {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        RSyntaxTextArea _OTVSyntaxTextArea = applicationFrame
-                .getTextComponent();
+        RSyntaxTextArea _OTVSyntaxTextArea = applicationFrame.getTextComponent();
         RTextScrollPane textScrollPane = applicationFrame.getTextScrollPane();
 
-        cbViewLineHighlight
-                .setSelected(_OTVSyntaxTextArea.getHighlightCurrentLine());
-        cbFadeCurrentLineHighlight
-                .setSelected(_OTVSyntaxTextArea.getFadeCurrentLineHighlight());
+        cbViewLineHighlight.setSelected(_OTVSyntaxTextArea.getHighlightCurrentLine());
+        cbFadeCurrentLineHighlight.setSelected(_OTVSyntaxTextArea.getFadeCurrentLineHighlight());
         cbViewLineNumbers.setSelected(textScrollPane.getLineNumbersEnabled());
         cbBookmarks.setSelected(textScrollPane.isIconRowHeaderEnabled());
         cbWordWrap.setSelected(_OTVSyntaxTextArea.getLineWrap());
         cbAntialiasing.setSelected(_OTVSyntaxTextArea.getAntiAliasingEnabled());
         cbMarkOccurrences.setSelected(_OTVSyntaxTextArea.getMarkOccurrences());
-        cbRightToLeft.setSelected(
-                !textScrollPane.getComponentOrientation().isLeftToRight());
+        cbRightToLeft.setSelected(!textScrollPane.getComponentOrientation().isLeftToRight());
         cbTabLines.setSelected(_OTVSyntaxTextArea.getPaintTabLines());
-        cbAnimateBracketMatching
-                .setSelected(_OTVSyntaxTextArea.getAnimateBracketMatching());
-        cbPaintMatchedBracketPair
-                .setSelected(_OTVSyntaxTextArea.getPaintMatchedBracketPair());
-        cbTabsEmulatedBySpaces
-                .setSelected(_OTVSyntaxTextArea.getTabsEmulated());
+        cbAnimateBracketMatching.setSelected(_OTVSyntaxTextArea.getAnimateBracketMatching());
+        cbPaintMatchedBracketPair.setSelected(_OTVSyntaxTextArea.getPaintMatchedBracketPair());
+        cbTabsEmulatedBySpaces.setSelected(_OTVSyntaxTextArea.getTabsEmulated());
     }
 
-    private void addThemeItem(String name, String themeXml, ButtonGroup bg,
-            JMenu menu, boolean isSelected) {
-        JRadioButtonMenuItem item = new JRadioButtonMenuItem(
-                new ThemeAction(name, themeXml));
+    private void addThemeItem(String name, String themeXml, ButtonGroup bg, JMenu menu, boolean isSelected) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ThemeAction(name, themeXml));
         bg.add(item);
         item.setSelected(isSelected);
         menu.add(item);
     }
 
-    private void addThemeItem(String name, String themeXml, ButtonGroup bg,
-            JMenu menu) {
+    private void addThemeItem(String name, String themeXml, ButtonGroup bg, JMenu menu) {
         addThemeItem(name, themeXml, bg, menu, false);
     }
 
-    private void addSyntaxItem(String name, String style, ButtonGroup bg,
-            JMenu menu) {
-        JRadioButtonMenuItem item = new JRadioButtonMenuItem(
-                new ChangeSyntaxStyleAction(name, style));
+    private void addSyntaxItem(String name, String style, ButtonGroup bg, JMenu menu) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ChangeSyntaxStyleAction(name, style));
         bg.add(item);
         menu.add(item);
     }
