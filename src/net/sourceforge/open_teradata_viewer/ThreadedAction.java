@@ -1,6 +1,6 @@
 /*
- * Open Teradata Viewer ( kernel )
- * Copyright (C), D. Campione
+ * DBEdit 2
+ * Copyright (C) 2006-2012 Jef Van Den Ouweland
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Component;
@@ -25,17 +24,6 @@ import java.awt.event.MouseAdapter;
 
 import javax.swing.SwingUtilities;
 
-import net.sourceforge.open_teradata_viewer.actions.CustomAction;
-import net.sourceforge.open_teradata_viewer.util.SwingUtil;
-import net.sourceforge.open_teradata_viewer.util.task.Task;
-import net.sourceforge.open_teradata_viewer.util.task.TaskPool;
-
-/**
- * 
- *
- * @author D. Campione
- * 
- */
 public abstract class ThreadedAction implements Runnable {
 
     public ThreadedAction() {
@@ -46,10 +34,10 @@ public abstract class ThreadedAction implements Runnable {
     public final void run() {
         final Component focusOwner = KeyboardFocusManager
                 .getCurrentKeyboardFocusManager().getFocusOwner();
-        final Component glassPane = ApplicationFrame.getInstance()
-                .getRootPane().getGlassPane();
+        final Component glassPane = ApplicationFrame.getInstance().getRootPane()
+                .getGlassPane();
         try {
-            if (!SwingUtil.isVisible(glassPane)) {
+            if (!glassPane.isVisible()) {
                 SwingUtilities.invokeAndWait(new Runnable() {
                     @Override
                     public void run() {
@@ -63,25 +51,11 @@ public abstract class ThreadedAction implements Runnable {
                     }
                 });
             }
-            TaskPool.getTaskPool().addTask(new Task(Main.APPLICATION_NAME) {
-                public void run() {
-                    try {
-                        execute();
-                    } catch (final Exception e) {
-                        java.awt.EventQueue.invokeLater(new Runnable() {
-                            public void run() {
-                                ExceptionDialog.showException(e);
-                            }
-                        });
-                    }
-                }
-            });
+            execute();
         } catch (Throwable t) {
             ExceptionDialog.showException(t);
         } finally {
-            CustomAction.inProgress = false;
-
-            if (SwingUtil.isVisible(glassPane)) {
+            if (glassPane.isVisible()) {
                 try {
                     SwingUtilities.invokeAndWait(new Runnable() {
                         @Override

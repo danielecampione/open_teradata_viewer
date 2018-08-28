@@ -1,6 +1,6 @@
-Teradata JDBC Driver 16.10.00.03
+Teradata JDBC Driver 16.20.00.04
 
-Part of the Teradata Tools and Utilities 16.00 product suite
+Part of the Teradata Tools and Utilities 16.20 product suite
 
 
 Get the Latest Software
@@ -17,10 +17,10 @@ http://downloads.teradata.com/download/connectivity/jdbc-driver
 System Requirements
 -------------------
 
-This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5.0, 6.0, 7.0, or 8.0.
+This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5, 6, 7, 8, or 9.
 
 This release of the Teradata JDBC Driver supports Teradata Database
-14.00, 14.10, 15.00, 15.10, and 16.00.
+14.10, 15.00, 15.10, 16.10, and 16.20.
 
 
 Release Notes
@@ -29,6 +29,22 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 16.20.00.03:
+
+DR 187399 54 second login delay using TD2
+
+This release includes changes to address the following DRs, originally included
+in release 16.10.00.05:
+
+DR 184179 Support Kerberos authentication on AIX, HP-UX, MacOS, and Solaris
+DR 187763 Support JDK 9
+
+This release includes changes to address the following DRs, originally included
+in release 16.10.00.04:
+
+DR 184941 Support DATASET STORAGE FORMAT CSV data type
 
 This release includes changes to address the following DRs, originally included
 in release 16.00.00.31:
@@ -62,6 +78,17 @@ in release 16.00.00.24:
 
 DR 154936 Support Stored Password Protection
 DR 184352 Translate new JDBC 16.0 error messages into Japanese
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.37:
+
+DR 188567 Conditional QVCI usage per flag provided by DBS DR 188341
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.36:
+
+DR 187689 TeraGSSJava support for MessageDigest algorithms SHA-256 and SHA-512
+DR 187798 Avoid DBS DR 187498 QVCI fails to push down LIKE predicates
 
 This release includes changes to address the following DRs, originally included
 in release 15.10.00.34:
@@ -1273,33 +1300,6 @@ earliest convenience, because the old class names will only be supported
 for a limited number of future releases.
 
 
-Unable to connect to database when using HPUX 11.23 JDK 5.0
------------------------------------------------------------
-
-When attempting to connect to the Teradata Database when HPUX 11.23 JDK 5.0,
-you may receive an exception similar to: TeraEncrypt: Error
-tdgss-stack-trace-begin>>> GSSException: Failure unspecified at GSS-API
-level (Mechanism level: Failure during key generation by algorithm layer.)
-
-This is a known problem with HPUX 11.23 JDK 5.0. HP's web site states
-the following:
-
- SecureRandom engine implementation (11i HP Integrity and HP9000 PA-RISC) 
-
-  Beginning with 5.0, Sun Microsystems' SecureRandom engine implementation 
-  supports a new algorithm, NativePRNG, in addition to SHA1PRNG. NativePRNG 
-  will only be available if /dev/random and /dev/urandom are installed in 
-  your system. Because HP-UX does not support seeding entropy generating 
-  devices such as /dev/random, applications that rely on this will not be 
-  able to use NativePRNG. An attempt to seed the device will cause an 
-  exception. This defect is expected to be fixed in a future release.
-
-
-Solution:
-
-No solution is available for this issue at the present time.
-
-
 Installation
 ------------
 
@@ -1307,7 +1307,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.16.10.00.03.zip and TeraJDBC__indep_indep.16.10.00.03.tar
+TeraJDBC__indep_indep.16.20.00.04.zip and TeraJDBC__indep_indep.16.20.00.04.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

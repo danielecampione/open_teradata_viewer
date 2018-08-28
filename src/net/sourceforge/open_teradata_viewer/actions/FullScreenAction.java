@@ -38,8 +38,9 @@ public class FullScreenAction extends CustomAction {
     private static final long serialVersionUID = 1052503682296759923L;
 
     public FullScreenAction() {
-        super("Full Screen", null, KeyStroke.getKeyStroke(KeyEvent.VK_F11,
-                KeyEvent.VK_UNDEFINED), null);
+        super("Full Screen", null,
+                KeyStroke.getKeyStroke(KeyEvent.VK_F11, KeyEvent.VK_UNDEFINED),
+                null);
         setEnabled(true);
     }
 
@@ -67,24 +68,10 @@ public class FullScreenAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "switch to full screen mode" process can be performed only if
-        // other processes are NOT running. No ThreadAction object must be
-        // instantiated
-        if (!inProgress) {
-            inProgress = true;
-            try {
-                performThreaded(e);
-            } catch (Throwable t) {
-                ExceptionDialog.showException(t);
-            } finally {
-                CustomAction.inProgress = false;
-            }
-        } else {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("Another process is already running..",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+        try {
+            performThreaded(e);
+        } catch (Throwable t) {
+            ExceptionDialog.showException(t);
         }
     }
 }

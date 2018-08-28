@@ -29,7 +29,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ImageManager;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 
@@ -39,12 +38,10 @@ import net.sourceforge.open_teradata_viewer.ThreadedAction;
  * @author D. Campione
  *
  */
-public abstract class CustomAction extends AbstractAction implements
-        MouseListener {
+public abstract class CustomAction extends AbstractAction
+        implements MouseListener {
 
     private static final long serialVersionUID = 1753928583474033071L;
-
-    public static boolean inProgress;
 
     private KeyStroke altKey;
 
@@ -69,22 +66,12 @@ public abstract class CustomAction extends AbstractAction implements
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        if (!inProgress) {
-            inProgress = true;
-
-            new ThreadedAction() {
-                @Override
-                protected void execute() throws Exception {
-                    performThreaded(e);
-                }
-            };
-        } else {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("Another process is already running..",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-        }
+        new ThreadedAction() {
+            @Override
+            protected void execute() throws Exception {
+                performThreaded(e);
+            }
+        };
     }
 
     protected abstract void performThreaded(ActionEvent e) throws Exception;

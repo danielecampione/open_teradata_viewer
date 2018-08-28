@@ -39,6 +39,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 /**
  * 
@@ -86,11 +88,11 @@ public class ExportExcelAction extends CustomAction {
         HSSFSheet sheet = workbook.createSheet();
         HSSFRow row = sheet.createRow(0);
         HSSFCellStyle style = workbook.createCellStyle();
-        style.setFillForegroundColor(HSSFColor.GREY_40_PERCENT.index);
-        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         HSSFFont font = workbook.createFont();
-        font.setColor(HSSFColor.WHITE.index);
-        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font.setColor(IndexedColors.WHITE.getIndex());
+        font.setBold(true);
         style.setFont(font);
         for (int i = 0; i < table.getColumnCount(); i++) {
             HSSFCell cell = row.createCell(i);

@@ -50,22 +50,10 @@ public class LookAndFeelAction extends CustomAction {
     public void actionPerformed(final ActionEvent e) {
         // The "l&f" process can be performed only if other processes are NOT
         // running. No ThreadAction object must be instantiated
-        if (!inProgress) {
-            inProgress = true;
-            try {
-                performThreaded(e);
-            } catch (Throwable t) {
-                ExceptionDialog.showException(t);
-            } finally {
-                CustomAction.inProgress = false;
-            }
-        } else {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("Another process is already running..",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            selectPrecedingLookAndFeelMenuItem();
+        try {
+            performThreaded(e);
+        } catch (Throwable t) {
+            ExceptionDialog.showException(t);
         }
     }
 
@@ -79,9 +67,10 @@ public class LookAndFeelAction extends CustomAction {
     }
 
     private void selectPrecedingLookAndFeelMenuItem() {
-        StringTokenizer stringTokenizer = new StringTokenizer(UIManager
-                .getLookAndFeel().getClass().toString()
-                .substring("class ".length()), ".");
+        StringTokenizer stringTokenizer = new StringTokenizer(
+                UIManager.getLookAndFeel().getClass().toString()
+                        .substring("class ".length()),
+                ".");
         String strSelectedLookAndFeel = "";
         while (stringTokenizer.hasMoreElements()) {
             strSelectedLookAndFeel = (String) stringTokenizer.nextElement();
@@ -92,8 +81,8 @@ public class LookAndFeelAction extends CustomAction {
         int lookAndFeelMenuPosition = -1;
         for (int i = 0; i < menuBar.getMenuCount(); i++) {
             JMenu currentMenu = menuBar.getMenu(i);
-            if (currentMenu.getActionCommand().equals(
-                    ApplicationFrame.LAF_MENU_LABEL)) {
+            if (currentMenu.getActionCommand()
+                    .equals(ApplicationFrame.LAF_MENU_LABEL)) {
                 lookAndFeelMenuPosition = i;
                 break;
             }

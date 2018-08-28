@@ -127,7 +127,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         SpringLayout sl = new SpringLayout();
         JPanel temp = new JPanel(sl);
         JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2017 D. Campione</font></html>");
+                "<html><font style=\"color:gray\">Copyright &copy 2018 D. Campione</font></html>");
         JLabel licenseLabel = new JLabel("GNU General Public License");
         licenseLabel.setForeground(Color.BLUE);
         licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

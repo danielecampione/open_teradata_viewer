@@ -48,23 +48,10 @@ public class ThemeAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "editor theme" process can be performed only if other processes
-        // are NOT running. No ThreadAction object must be instantiated
-        if (!inProgress) {
-            inProgress = true;
-            try {
-                performThreaded(e);
-            } catch (Throwable t) {
-                ExceptionDialog.hideException(t);
-            } finally {
-                CustomAction.inProgress = false;
-            }
-        } else {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("Another process is already running..",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+        try {
+            performThreaded(e);
+        } catch (Throwable t) {
+            ExceptionDialog.hideException(t);
         }
     }
 
