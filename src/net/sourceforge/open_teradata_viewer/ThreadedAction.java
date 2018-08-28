@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import java.awt.event.MouseAdapter;
 import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.actions.CustomAction;
-import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.task.Task;
 import net.sourceforge.open_teradata_viewer.util.task.TaskPool;
@@ -66,25 +65,12 @@ public abstract class ThreadedAction implements Runnable {
             }
             TaskPool.getTaskPool().addTask(new Task(Main.APPLICATION_NAME) {
                 public void run() {
-                    final AnimatedAssistant animatedAssistant = new AnimatedAssistant(
-                            ImageManager.getImage("/icons/logo32.png"),
-                            getDescription());
-                    ApplicationFrame.getInstance().startAnimatedAssistant(
-                            animatedAssistant);
                     try {
                         execute();
                     } catch (final Exception e) {
                         java.awt.EventQueue.invokeLater(new Runnable() {
                             public void run() {
                                 ExceptionDialog.showException(e);
-                            }
-                        });
-                    } finally {
-                        java.awt.EventQueue.invokeLater(new Runnable() {
-                            public void run() {
-                                ApplicationFrame.getInstance()
-                                        .stopAnimatedAssistant(
-                                                animatedAssistant);
                             }
                         });
                     }

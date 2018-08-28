@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 
-import net.sourceforge.open_teradata_viewer.editor.TextAreaEditorKit;
+import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
 /**
  * 
@@ -39,7 +39,7 @@ public class InvertSelectionCaseAction extends CustomAction {
     protected InvertSelectionCaseAction() {
         super("Invert case", null, null,
                 "Inverts the case of all letters in the current selection.");
-        invertSelectionCase = new TextAreaEditorKit.InvertSelectionCaseAction();
+        invertSelectionCase = new RTextAreaEditorKit.InvertSelectionCaseAction();
         setEnabled(true);
     }
 

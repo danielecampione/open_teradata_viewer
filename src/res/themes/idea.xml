@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
+<!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-    Theme that mimics IntelliJ IDEA's defaults.
-    See theme.dtd and net.sourceforge.open_teradata_viewer.editor.syntax.Theme
-    for more information.
+	Theme that mimics IntelliJ IDEA's defaults.
+	See theme.dtd and org.fife.ui.rsyntaxtextarea.Theme for more information.
 -->
-<SyntaxTheme version="1.0">
+<RSyntaxTheme version="1.0">
 
    <!-- Omitting baseFont will use a system-appropriate monospaced. -->
    <!--<baseFont family="..." size="13"/>-->
@@ -76,4 +75,4 @@
       <style token="ERROR_CHAR" fg="ff0000" />
    </tokenStyles>
 
-</SyntaxTheme>
+</RSyntaxTheme>

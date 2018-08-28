@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
 /**
  * 
@@ -43,7 +43,7 @@ public class DecreaseIndentAction extends CustomAction {
         super("Decrease indentation", "format_decreaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK),
                 "Decreases the indentation amount for all selected lines.");
-        decreaseIndent = new SyntaxTextAreaEditorKit.DecreaseIndentAction();
+        decreaseIndent = new RSyntaxTextAreaEditorKit.DecreaseIndentAction();
         setEnabled(true);
     }
 

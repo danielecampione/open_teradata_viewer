@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class Main {
 
     public static void main(final String[] args) {
         // Check if the used JDK is supported
-        if (!Utilities.isJDK16OrAbove()) {
+        if (!Utilities.isJDK18OrAbove()) {
             System.err.println("The installed JDK version is NOT supported.\n"
                     + "The program will be terminated.");
             System.exit(-1);
@@ -68,6 +68,9 @@ public class Main {
         // implementations
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
+        // Make Metal not use bold fonts
+        UIManager.put("swing.boldMetal", Boolean.FALSE);
+        
         // Catch any uncaught Throwables on the EDT and log them
         AWTExceptionHandler.register();
 
@@ -126,8 +129,6 @@ public class Main {
                 }
                 UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
                         Font.PLAIN, 12));
-                // Turn off metal's use of bold fonts
-                // UIManager.put("swing.boldMetal", Boolean.FALSE);
 
                 // Allow Substance to paint window titles, etc.. We don't allow
                 // Metal (for example) to do this, because setting these
@@ -202,8 +203,8 @@ public class Main {
             try {
                 clazz = cl.loadClass(lafName);
             } catch (UnsupportedClassVersionError ucve) {
-                // Previously opened with e.g. Java 7/Substance, now
-                // restarting with a previous Java version
+                // A LookAndFeel requiring Java X or later, but we're
+                // now restarting with a Java version earlier than X
                 lafName = UIManager.getSystemLookAndFeelClassName();
                 clazz = cl.loadClass(lafName);
             }

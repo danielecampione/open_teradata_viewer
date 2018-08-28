@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
+<!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-    Theme that mimics Eclipse's defaults.
-    See theme.dtd and net.sourceforge.open_teradata_viewer.editor.syntax.Theme
-    for more information.
+	Theme that mimics Eclipse's defaults.
+	See theme.dtd and org.fife.ui.rsyntaxtextarea.Theme for more information.
 -->
-<SyntaxTheme version="1.0">
+<RSyntaxTheme version="1.0">
 
    <!-- Omitting baseFont will use a system-appropriate monospaced. -->
    <!--<baseFont family="..." size="13"/>-->
    
-   <!-- General editor colors. -->
+   <!--  General editor colors. -->
    <background color="ffffff"/>
    <caret color="000000"/>
    <selection bg="default" fg="default"/>
    <currentLineHighlight color="e8f2fe" fade="false"/>
    <marginLine fg="b0b4b9"/>
-   <markAllHighlight color="6b8189"/>
+   <markAllHighlight color="6b8189"/> <!-- TODO: Fix me -->
    <markOccurrencesHighlight color="d4d4d4" border="false"/>
-   <matchedBracket fg="c0c0c0" highlightBoth="true" animate="false"/>
+   <matchedBracket fg="c0c0c0" highlightBoth="false" animate="false"/>
    <hyperlinks fg="0000ff"/>
    <secondaryLanguages>
       <language index="1" bg="fff0cc"/>
@@ -70,10 +69,10 @@
       <style token="VARIABLE" fg="ff9900" bold="true"/>
       <style token="WHITESPACE" fg="000000"/>
       
-      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffffff"/>
-      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffffff"/>
-      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffffff"/>
-      <style token="ERROR_CHAR" fg="2900ff" bg="ffffff"/>
+      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_CHAR" fg="000000" bg="ffcccc"/>
    </tokenStyles>
 
-</SyntaxTheme>
+</RSyntaxTheme>

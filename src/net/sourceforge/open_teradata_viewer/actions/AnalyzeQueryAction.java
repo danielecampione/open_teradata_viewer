@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,16 +25,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.util.TablesNamesFinder;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.AnimatedLink;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
-import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
-import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
-import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
 
 /**
  *
@@ -72,17 +72,17 @@ public class AnalyzeQueryAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         try {
-            CCSqlParserManager pm = new CCSqlParserManager();
+            CCJSqlParserManager pm = new CCJSqlParserManager();
             String sql = ApplicationFrame.getInstance().getText();
             if (sql.trim().length() > 0) {
-                IStatement statement = pm.parse(new StringReader(sql));
+                Statement statement = pm.parse(new StringReader(sql));
 
                 // Now you should use a class that implements IStatementVisitor
                 // to decide what to do based on the kind of the statement, that
                 // is SELECT or INSERT etc.. but here we are only interested in
                 // SELECTS
                 if (statement instanceof Select) {
-                    Select selectStatement = (Select) statement;
+                	Select selectStatement = (Select) statement;
                     TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
                     List<String> tableList = tablesNamesFinder
                             .getTableList(selectStatement);

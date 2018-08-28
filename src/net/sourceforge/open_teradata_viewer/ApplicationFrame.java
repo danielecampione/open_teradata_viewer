@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,42 +58,40 @@ import javax.swing.plaf.LayerUI;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreeNode;
 
+import org.fife.rsta.ac.AbstractSourceTree;
+import org.fife.rsta.ac.LanguageSupport;
+import org.fife.rsta.ac.LanguageSupportFactory;
+import org.fife.rsta.ac.java.JavaLanguageSupport;
+import org.fife.rsta.ac.java.tree.JavaOutlineTree;
+import org.fife.rsta.ac.js.tree.JavaScriptOutlineTree;
+import org.fife.rsta.ac.xml.tree.XmlOutlineTree;
+import org.fife.rsta.ui.CollapsibleSectionPanel;
+import org.fife.rsta.ui.search.FindDialog;
+import org.fife.rsta.ui.search.FindToolBar;
+import org.fife.rsta.ui.search.ReplaceDialog;
+import org.fife.rsta.ui.search.ReplaceToolBar;
+import org.fife.rsta.ui.search.SearchEvent;
+import org.fife.rsta.ui.search.SearchListener;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.BasicCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
+import org.fife.ui.rsyntaxtextarea.ErrorStrip;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.spell.SpellingParser;
+import org.fife.ui.rtextarea.Gutter;
+import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
+import org.fife.ui.rtextarea.ToolTipSupplier;
+
 import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
-import net.sourceforge.open_teradata_viewer.animated_assistant.AnimatedAssistant;
-import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
-import net.sourceforge.open_teradata_viewer.editor.Gutter;
-import net.sourceforge.open_teradata_viewer.editor.IToolTipSupplier;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.SearchContext;
-import net.sourceforge.open_teradata_viewer.editor.SearchEngine;
-import net.sourceforge.open_teradata_viewer.editor.SearchResult;
-import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.AutoCompletion;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.BasicCompletion;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.DefaultCompletionProvider;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.ICompletionProvider;
-import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCompletionProvider;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.AbstractSourceTree;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.ILanguageSupport;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.LanguageSupportFactory;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JavaLanguageSupport;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.tree.JavaOutlineTree;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree.JavaScriptOutlineTree;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.tree.XmlOutlineTree;
-import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
-import net.sourceforge.open_teradata_viewer.editor.search.FindToolBar;
-import net.sourceforge.open_teradata_viewer.editor.search.ISearchListener;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
-import net.sourceforge.open_teradata_viewer.editor.search.ReplaceDialog;
-import net.sourceforge.open_teradata_viewer.editor.search.ReplaceToolBar;
-import net.sourceforge.open_teradata_viewer.editor.search.SearchEvent;
-import net.sourceforge.open_teradata_viewer.editor.spell.SpellingParser;
-import net.sourceforge.open_teradata_viewer.editor.syntax.ErrorStrip;
-import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.UndoMgr;
@@ -113,8 +111,8 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  *
  */
-public class ApplicationFrame extends JFrame implements ISyntaxConstants,
-        ISearchListener, HyperlinkListener {
+public class ApplicationFrame extends JFrame implements SyntaxConstants,
+        SearchListener, HyperlinkListener {
 
     private static final long serialVersionUID = -8572855678886323789L;
 
@@ -144,12 +142,10 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     /** The scrollpane containing the schema browser. */
     private JScrollPane rightComponent;
 
-    private TextScrollPane textScrollPane;
+    private RTextScrollPane textScrollPane;
 
     private boolean fullScreenMode;
     private DisplayChanger displayChanger;
-
-    private GlassPane glassPane;
 
     private FindDialog findDialog;
     private ReplaceDialog replaceDialog;
@@ -184,16 +180,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         SwingUtilities.invokeLater(new StartupRunnable(splashScreen));
     }
 
-    public AnimatedAssistant startAnimatedAssistant(
-            AnimatedAssistant animatedAssistant) {
-        getGlassPane().addAnimatedAssistant(animatedAssistant);
-        return animatedAssistant;
-    }
-
-    public void stopAnimatedAssistant(AnimatedAssistant animatedAssistant) {
-        getGlassPane().removeAnimatedAssistant(animatedAssistant);
-    }
-
     public void installPlugins() {
         Drivers.setInitialized(false);
         try {
@@ -215,9 +201,9 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                 .iterator();
         // Searching for plugins..
         while (pluginsIterator.hasNext()) {
-            EntryDescriptor entryDescriptor = (EntryDescriptor) pluginsIterator
+            EntryDescriptor entryDescriptor = pluginsIterator
                     .next();
-            IPluginEntry pluginEntry = (IPluginEntry) pluginFactory
+            IPluginEntry pluginEntry = pluginFactory
                     .getPluginEntry(entryDescriptor.getId());
         }
     }
@@ -279,7 +265,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         globalQueryEditorPanel.add(getToolbar(), BorderLayout.NORTH);
 
         LanguageSupportFactory lsf = LanguageSupportFactory.get();
-        ILanguageSupport support = lsf.getSupportFor(SYNTAX_STYLE_JAVA);
+        LanguageSupport support = lsf.getSupportFor(SYNTAX_STYLE_JAVA);
         JavaLanguageSupport jls = (JavaLanguageSupport) support;
         try {
             jls.getJarManager().addCurrentJreClassFileSource();
@@ -294,8 +280,8 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         textArea = createTextArea();
         LanguageSupportFactory.get().register(textArea);
         ToolTipManager.sharedInstance().registerComponent(textArea);
-
-        textScrollPane = new TextScrollPane(textArea, true);
+        
+        textScrollPane = new RTextScrollPane(textArea, true);
         textScrollPane.setIconRowHeaderEnabled(true);
 
         LayerUI<JComponent> layerUI = new WallpaperLayerUI();
@@ -407,13 +393,13 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         //        http://code.google.com/p/jsyntaxpane/
         //        Good work, but a customizable editor is better
 
-        //      9 OTVSyntaxTextArea
-        //        @see net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea
+        //      9 RSyntaxTextArea
+        //        @see org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
         //        Looks great, let's use it!
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
         textArea.setCodeFoldingEnabled(true);
 
-        ICompletionProvider provider = createCompletionProvider();
+        CompletionProvider provider = createCompletionProvider();
         // Install auto-completion onto our text area
         autoCompletion = new AutoCompletion(provider);
         autoCompletion.setListCellRenderer(new SQLCellRenderer());
@@ -421,7 +407,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         autoCompletion.setParameterAssistanceEnabled(true);
         autoCompletion.install(textArea);
 
-        textArea.setToolTipSupplier((IToolTipSupplier) provider);
+        textArea.setToolTipSupplier((ToolTipSupplier) provider);
         ToolTipManager.sharedInstance().registerComponent(textArea);
 
         textArea.addHyperlinkListener(this);
@@ -622,15 +608,15 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
      *
      * @return The provider.
      */
-    private ICompletionProvider createCompletionProvider() {
+    private CompletionProvider createCompletionProvider() {
         // Create the provider used when typing code
-        ICompletionProvider codeCP = createCodeCompletionProvider();
+        CompletionProvider codeCP = createCodeCompletionProvider();
 
         // The provider used when typing a string
-        ICompletionProvider stringCP = createStringCompletionProvider();
+        CompletionProvider stringCP = createStringCompletionProvider();
 
         // The provider used when typing a comment
-        ICompletionProvider commentCP = createCommentCompletionProvider();
+        CompletionProvider commentCP = createCommentCompletionProvider();
 
         // Create the "parent" completion provider
         LanguageAwareCompletionProvider provider = new LanguageAwareCompletionProvider(
@@ -648,7 +634,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
      * @see #createCommentCompletionProvider()
      * @see #createStringCompletionProvider()
      */
-    private ICompletionProvider createCodeCompletionProvider() {
+    private CompletionProvider createCodeCompletionProvider() {
         // Add completions for the SQL standard library
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
 
@@ -677,7 +663,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
      * @see #createCodeCompletionProvider()
      * @see #createCommentCompletionProvider()
      */
-    private ICompletionProvider createStringCompletionProvider() {
+    private CompletionProvider createStringCompletionProvider() {
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
         cp.addCompletion(new BasicCompletion(cp, "%c", "char",
                 "Prints a character"));
@@ -701,7 +687,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
      * @see #createCodeCompletionProvider()
      * @see #createStringCompletionProvider()
      */
-    private ICompletionProvider createCommentCompletionProvider() {
+    private CompletionProvider createCommentCompletionProvider() {
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
         cp.addCompletion(new BasicCompletion(cp, "TODO:", "A to-do reminder"));
         cp.addCompletion(new BasicCompletion(cp, "FIXME:",
@@ -835,11 +821,11 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
         }
 
         String language = textArea.getSyntaxEditingStyle();
-        if (ISyntaxConstants.SYNTAX_STYLE_JAVA.equals(language)) {
+        if (SyntaxConstants.SYNTAX_STYLE_JAVA.equals(language)) {
             tree = new JavaOutlineTree();
-        } else if (ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT.equals(language)) {
+        } else if (SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT.equals(language)) {
             tree = new JavaScriptOutlineTree();
-        } else if (ISyntaxConstants.SYNTAX_STYLE_XML.equals(language)) {
+        } else if (SyntaxConstants.SYNTAX_STYLE_XML.equals(language)) {
             tree = new XmlOutlineTree();
         } else {
             tree = null;
@@ -876,11 +862,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
 
     public AutoCompletion getAutoCompletion() {
         return autoCompletion;
-    }
-
-    @Override
-    public GlassPane getGlassPane() {
-        return glassPane;
     }
 
     /**
@@ -1052,7 +1033,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
     }
 
     /** @return The textScrollPane */
-    public TextScrollPane getTextScrollPane() {
+    public RTextScrollPane getTextScrollPane() {
         return textScrollPane;
     }
 
@@ -1176,7 +1157,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                     "The LookAndFeel has been installed successfully.", 10);
 
             setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
-            getRootPane().setGlassPane(glassPane = new GlassPane());
 
             splashScreen.updateStatus("Initializing the main window..", 20);
             getContentPane().setLayout(new BorderLayout());
@@ -1232,7 +1212,7 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
             graphicViewerDocument.addDocumentListener(graphicViewer);
             graphicViewerDocument.setUndoManager(new UndoMgr());
 
-            splashScreen.updateStatus("Initializing the status bar..", 70);
+            splashScreen.updateStatus("Initializing the status bar..", 75);
             getContentPane().add(new ApplicationStatusBar(),
                     BorderLayout.PAGE_END);
 
@@ -1241,20 +1221,6 @@ public class ApplicationFrame extends JFrame implements ISyntaxConstants,
                     Config.saveDrivers("com.teradata.jdbc.TeraDriver");
                 }
 
-                splashScreen.updateStatus(
-                        "Initializing the animated assistant..", 75);
-                String animatedAssistantProperty = "animated_assistant_activated";
-                String strAnimatedAssistantActivated = Config
-                        .getSetting(animatedAssistantProperty);
-                if (StringUtil.isEmpty(strAnimatedAssistantActivated)) {
-                    Config.saveSetting(animatedAssistantProperty, "false");
-                    ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                            .setAnimatedAssistantActivated(false);
-                } else {
-                    ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                            .setAnimatedAssistantActivated(strAnimatedAssistantActivated
-                                    .equalsIgnoreCase("true"));
-                }
             } catch (Exception e) {
                 ExceptionDialog.ignoreException(e);
             }

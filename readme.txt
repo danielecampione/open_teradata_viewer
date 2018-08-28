@@ -1,6 +1,6 @@
-Teradata JDBC Driver 15.10.00.09
+Teradata JDBC Driver 16.10.00.03
 
-Part of the Teradata Tools and Utilities 15.10 product suite
+Part of the Teradata Tools and Utilities 16.00 product suite
 
 
 Get the Latest Software
@@ -10,21 +10,17 @@ We are always adding new features to the Teradata JDBC Driver, and
 fixing issues that might affect your application.
 
 If you obtained this release of the Teradata JDBC Driver from
-physical media, please check whether a newer version is available
-on the http://www.teradata.com Teradata Download Center in the
-Teradata JDBC Driver section.
+physical media, please check whether a newer version is available at
+http://downloads.teradata.com/download/connectivity/jdbc-driver
 
 
 System Requirements
 -------------------
 
-This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5.0, 6.0, or 7.0.
-
-Note that IBM WebSphere Application Server 5.0 is not supported, because
-WebSphere 5.0 uses JDK 1.3.1.
+This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5.0, 6.0, 7.0, or 8.0.
 
 This release of the Teradata JDBC Driver supports Teradata Database
-13.10, 14.00, 14.10, 15.00, and 15.10.
+14.00, 14.10, 15.00, 15.10, and 16.00.
 
 
 Release Notes
@@ -33,6 +29,164 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 16.00.00.31:
+
+DR 171880 JDBC FastLoad and JDBC FastLoad CSV connection parameters for error tables
+DR 184577 improve error handling for null or invalid Struct SQLTypeName and incompatible number of Struct attributes
+
+This release includes changes to address the following DRs, originally included
+in release 16.00.00.30:
+
+DR 124424 Support Java Stored Procedure parameters that are UDTs, Periods, XML, ST_Geometry, and Array
+DR 181323 Improve performance of Blob.getBytes and Clob.getSubString methods
+DR 186070 JDBC MonitorPreparedStatement.execute needs to close the current open response spool
+
+This release includes changes to address the following DRs, originally included
+in release 16.00.00.26:
+
+DR 114050 validate URL connection parameters and throw exception for invalid parameter names and/or argument values
+DR 118928 provide complete connection URL from DatabaseMetaData.getURL
+DR 177754 Connection parameter COPLAST=ON to enable DNS lookup of coplast IP address
+DR 183490 Connection parameter MAYBENULL for ResultSetMetaData.isNullable variant behavior
+DR 185106 Connection parameter COLUMN_NAME to control ResultSetMetaData getColumnName and getColumnLabel
+
+This release includes changes to address the following DRs, originally included
+in release 16.00.00.25:
+
+DR 174213 Support Teradata Database multiple hash maps
+
+This release includes changes to address the following DRs, originally included
+in release 16.00.00.24:
+
+DR 154936 Support Stored Password Protection
+DR 184352 Translate new JDBC 16.0 error messages into Japanese
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.34:
+
+DR 185088 completes work of adding row number to JDBC FastLoad USING clause to aid in identifying bad row
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.33:
+
+DR 143102 DatabaseMetaData methods can use DBC.UDTInfoV view provided by DBS DR 142702
+DR 170532 DatabaseMetaData methods can use DBC.UDTTransformV view provided by DBS RFC 170531
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.32:
+
+DR 156332 JDBC 4.0 API behavior for ParameterMetaData.getPrecision and ResultSetMetaData.getPrecision
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.29:
+
+DR 165187 Support TeraGSSJava DR 165186 for integrated logging
+DR 180947 Improve code of TDNEGO java and other modules
+DR 181373 Incorrect logging information in tdnegojava
+DR 181448 The global logging level of teragssjava doesn't work
+DR 181712 tdnego throws null pointer exception if server is not in kerberos database
+DR 182119 TeraGSSJava TDNEGO fails to establish context when LDAP is given higher priority than Kerberos in tdgss server
+DR 182628 tdgssjava throws an exception during a JDBC test when the tdgss debug logging is enabled
+DR 182944 Modify the TdgssLogger Interface to use the JDBC logging levels for a connection
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.28:
+
+DR 163135 Implement JDBC 4.0 APIs DatabaseMetaData getFunctions, getFunctionColumns, getSchemas(String,String)
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.27:
+
+DR 168339 Support additional connection parameters for Java Stored Procedure jdbc:default:connection
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.25:
+
+DR 115666 Support 1MB result set rows
+DR 177261 Support 16MB messages
+DR 177265 SQL connection support for 1MB permanent table rows
+DR 177267 JDBC FastLoad support for 1MB permanent table rows
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.24:
+
+DR 177470 add row number to JDBC FastLoad USING clause to aid in identifying bad row
+DR 180342 Add access rights descriptions
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.23:
+
+DR 176193 Support DATASET data type
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.22:
+
+DR 181231 Provide incremental fetch for Monitor connection result sets
+DR 181560 Support account string with LDAP and KRB5 logon mechanisms
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.21:
+
+DR 182658 Improve performance of ResultSet cursor movement methods
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.20:
+
+DR 154823 DatabaseMetaData methods query column information for views as an alternative to HELP commands
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.19:
+
+DR 182168 Avoid reverse DNS lookup when IP address specified for Teradata Database
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.17:
+
+DR 181611 getMoreResults advance to second and subsequent ResultSetMetaData from prepare before execute
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.16:
+
+DR 154836 Use logon mechanism specified by centralized administration
+DR 161033 TeraGSSJava Single Mechanism to Log-On
+DR 165186 Provide logger interface, change all logging to use the logger interface, eliminate all direct ex.printStackTrace
+DR 165378 All GSSExceptions should use the initCause option if they are the result of an exception
+DR 168648 A non-zero offset for wrap greater than 16 throws an ArrayIndexOutOfBoundsException
+DR 175759 TeraGSSJava error handling cleanup
+DR 176636 TeraGSSJava Eliminate a token exchange in the LDAP method
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.14:
+
+DR 179996 Connection parameter LITERAL_UNDERSCORE=ON/OFF for DatabaseMetaData pattern arguments
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.12:
+
+DR 177757 Skip when possible non-COP hostname lookup before COP Discovery
+
+This release includes changes to address the following DRs, originally included
+in release 15.10.00.11:
+
+DR 179413 DatabaseMetaData getImportedKeys/getExportedKeys provide PK_NAME if available
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.34:
+
+DR 180574 NullPointerException from execute method with scrollable result set enabled for create/drop/replace object
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.33:
+
+DR 121720 Local escape function teradata_provide
+DR 179976 Dynamic RS has -1 activity count (a.k.a. 18446744073709551615) when Java SP fetches past last row
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.32:
+
+DR 179083 Coverity found null pointer dereferences & resource leaks in JDBC Driver
 
 This release includes changes to address the following DRs, originally included
 in release 15.00.00.30:
@@ -80,6 +234,17 @@ in release 15.00.00.22:
 DR 163170 JDBC 4.0 API changes for DatabaseMetaData getNumericFunctions getStringFunctions getTimeDateFunctions
 DR 170566 Use TD 15.10 string function RIGHT for escape syntax
 DR 170631 Support the INITIATE CHECK command
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.44:
+
+DR 181141 JDBC Reconnect can fail when Encryption enabled and Redrive is on
+
+This release includes changes to address the following DRs, originally included
+in release 14.10.00.43:
+
+DR 180154 Accommodate relocation of JSON support flag in Config Response parcel
+DR 180517 Validate the 64KB maximum size for each insert parameter set with JDBC FastLoad
 
 This release includes changes to address the following DRs, originally included
 in release 14.10.00.40:
@@ -164,6 +329,21 @@ This release includes changes to address the following DRs, originally included
 in release 14.10.00.18:
 
 DR 144415 STRICT_ENCODE connection parameter
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.44:
+
+DR 181582 Limit send and receive message size
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.43:
+
+DR 180518 Dynamic limit for ciphertext expansion sanity check
+
+This release includes changes to address the following DRs, originally included
+in release 14.00.00.42:
+
+DR 173198 remove obsolete JDBC FastLoad support for V2R6.1 and earlier
 
 This release includes changes to address the following DRs, originally included
 in release 14.00.00.41:
@@ -331,6 +511,12 @@ This release includes changes to address the following DRs, originally included
 in release 14.00.00.04:
 
 DR 138098 support the SQL ARRAY data type and the java.sql.Array data type
+
+This release includes changes to address the following DRs, originally included
+in release 13.10.00.37:
+
+DR 172943 Support insert without return of Structured UDT values using getGeneratedKeys with column list
+DR 178409 Log the Teradata JDBC Driver version number
 
 This release includes changes to address the following DRs, originally included
 in release 13.10.00.31:
@@ -1087,45 +1273,6 @@ earliest convenience, because the old class names will only be supported
 for a limited number of future releases.
 
 
-Error 2665, 2673, or 3944 when using PreparedStatement setDate
---------------------------------------------------------------
-After upgrading to this release of the Teradata JDBC Driver, you may
-encounter one of the following Teradata Database errors when using the
-PreparedStatement setDate method with Teradata Database releases between
-TD 12.00.00.00 and TD 12.00.01.01:
-
-Teradata Database Error 2665 Invalid Date.
-Teradata Database Error 2673 The source parcel length does not match data that was defined.
-Teradata Database Error 3944 Data length is invalid for the data type.
-
-
-Solution:
-
-If using Teradata Database releases between TD 12.00.00.00 and TD 12.00.01.01,
-then upgrade to Teradata Database 12.00.01.02 or later, in order to obtain
-the fix for DBS DR 119554.
-
-
-Incorrect values from getColumnDisplaySize for CLOB columns
------------------------------------------------------------
-When using Teradata Database releases V2R06.00.02.00 through V2R06.00.02.07
-or Teradata Database releases V2R06.01.00.00 through V2R06.01.00.08, you may
-encounter the problem described by DBS DR 100397 ("PrepInfoX returns
-incorrect Length for CLOB columns"), which may cause incorrect values to be
-returned for CLOB columns from ResultSetMetaData.getColumnDisplaySize.
-
-
-Solution:
-
-If using Teradata Database releases V2R06.00.02.00 through V2R06.00.02.07,
-then upgrade to release V2R06.00.02.08 or later, which contains the fix
-for DR 100397.
-
-If using Teradata Database releases V2R06.01.00.00 through V2R06.01.00.08,
-then upgrade to release V2R06.01.00.09 or later, which contains the fix
-for DR 100397.
-
-
 Unable to connect to database when using HPUX 11.23 JDK 5.0
 -----------------------------------------------------------
 
@@ -1153,82 +1300,6 @@ Solution:
 No solution is available for this issue at the present time.
 
 
-Modifying SQL Statements
-------------------------
-
-In the Teradata JDBC Driver, version 3.1 and earlier releases, the Teradata
-JDBC driver modified the SQL statement text of PreparedStatements, replacing
-all occurrences of "?" with "IS NULL" whenever the application called setNull()
-for the "?" in a WHERE clause. For example, if the SQL statement was:
-
-  select * from table1 where colid = ?
-
-and the application called setNull(1), then the Teradata JDBC driver would
-change the SQL statement to:
-
-  select * from table1 where colid IS NULL
-
-This was an incorrect procedure to use. The problem was fixed in the Teradata 
-JDBC Driver version 3.2, but the fix could change the output of some applications.
-
-
-Solution:
-
-Refer to the Teradata JDBC Driver User Guide for details on how to change
-the application to work correctly with the Teradata JDBC Driver.
-
-
-Calling Stored Procedures
--------------------------
-
-In the Teradata JDBC Driver, version 3.1 and earlier releases,  the Teradata
-JDBC driver permitted stored procedures to be called using the PreparedStatement
-interface, and the stored procedure's INOUT and OUT parameter output values
-were returned as a single-row result set from the executeQuery method.
-
-Note that the JDBC standard only supports calling stored procedures using the
-CallableStatement interface. Also, because stored procedures do not return a
-result set, only the execute and executeUpdate methods are supported for calling
-a stored procedure. The JDBC 3.0 specification requires a JDBC driver to throw
-a SQLException from executeQuery when that method is used to execute a SQL
-statement that does not return a result set.
-
-The Teradata JDBC Driver is evolving towards full compliance with that JDBC 3.0
-specification requirement:
-
- - This release of the Teradata JDBC Driver no longer returns a stored 
-   procedure's INOUT and OUT parameter output values as a single-row result
-   set from the PreparedStatement.executeQuery method. Instead, an empty result
-   set is returned.
-
- - A future release of the Teradata JDBC Driver will throw a SQLException from
-   executeQuery when that method is used to execute a SQL statement that does
-   not return a result set, such as a SQL CALL statement.
-
-Applications using the PreparedStatement interface to call a stored procedure
-may encounter the difference in behavior.
-
-
-Solution:
-
-Modify the application to call stored procedures by using the CallableStatement
-interface, and either the execute or executeUpdate methods.
-
-According to the JDBC standard, the proper sequence for calling a stored
-procedure is as follows:
- - Use Escape Syntax curly braces: {call storedproc(arg1, arg2, arg3)}
- - Call Connection.prepareCall to use the CallableStatement interface.
- - Prior to executing the statement, bind all input values for IN and INOUT
-   parameters using the CallableStatement setter methods setInt, setString, etc.
- - Prior to executing the statement, register all stored procedure INOUT and OUT
-   parameters with the CallableStatement.registerOutParameter method.
- - Use either the CallableStatement.execute or CallableStatement.executeUpdate
-   method to execute the SQL CALL statement.
- - After executing the statement, use the CallableStatement getter methods such
-   as getInt, getString, etc. to obtain the stored procedure's INOUT and OUT
-   parameter output values.
-
-
 Installation
 ------------
 
@@ -1236,7 +1307,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.15.10.00.09.zip and TeraJDBC__indep_indep.15.10.00.09.tar
+TeraJDBC__indep_indep.16.10.00.03.zip and TeraJDBC__indep_indep.16.10.00.03.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file
@@ -1257,23 +1328,9 @@ the Teradata JDBC Driver. It is recommended, but not required, that any
 previous release of the Teradata JDBC Driver be uninstalled prior to
 downloading and using this release of the Teradata JDBC Driver.
 
-For systems running only Java applications that use the Teradata JDBC Driver, 
-the tdgssconfig.jar file replaces the TdgssUserConfigFile.xml file from the 
-previous release of the Teradata JDBC Driver. If the TdgssUserConfigFile.xml 
-file has not been customized for the site, then the TdgssUserConfigFile.xml 
-file is no longer needed and can be removed.
-
-For systems running both C/C++ and Java applications that access the Teradata 
-Database, it is possible to share the TeraGSS security configuration. This is 
-appropriate if the TdgssUserConfigFile.xml file has been customized for the 
-site. To enable sharing, the Java classpath should include the TeraGSS
-directory that contains the TdgssUserConfigFile.xml file, and the classpath
-should not include the tdgssconfig.jar file.
-
 
 Documentation
 -------------
 
-Documentation for how to use the Teradata JDBC Driver with supported application
-servers is available on the http://www.teradata.com Teradata Download Center in
-the Teradata JDBC Driver section.
+Documentation for how to use the Teradata JDBC Driver is available at
+http://developer.teradata.com/connectivity/reference/jdbc-driver

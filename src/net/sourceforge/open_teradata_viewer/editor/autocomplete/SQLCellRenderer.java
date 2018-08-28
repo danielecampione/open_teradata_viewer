@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor autocomplete )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ import java.net.URL;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
+
+import org.fife.ui.autocomplete.Completion;
+import org.fife.ui.autocomplete.CompletionCellRenderer;
+import org.fife.ui.autocomplete.EmptyIcon;
+import org.fife.ui.autocomplete.FunctionCompletion;
+import org.fife.ui.autocomplete.VariableCompletion;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 
@@ -73,7 +79,7 @@ public class SQLCellRenderer extends CompletionCellRenderer {
 
     /** {@inheritDoc} */
     @Override
-    protected void prepareForOtherCompletion(JList list, ICompletion c,
+    protected void prepareForOtherCompletion(JList list, Completion c,
             int index, boolean selected, boolean hasFocus) {
         super.prepareForOtherCompletion(list, c, index, selected, hasFocus);
         setIcon(emptyIcon);

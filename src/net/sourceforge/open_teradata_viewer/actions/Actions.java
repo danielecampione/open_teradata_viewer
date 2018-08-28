@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ public final class Actions implements ListSelectionListener,
     public static final CustomAction FANCY_CELL_RENDERING = new FancyCellRenderingAction();
     public static final CustomAction SHOW_DESCRIPTION_WINDOW = new ShowDescriptionWindowAction();
     public static final CustomAction PARAMETER_ASSISTANCE = new ParameterAssistanceAction();
-    public static final CustomAction ANIMATED_ASSISTANT = new AnimatedAssistantAction();
+    public static final CustomAction MATCHED_BRACKET_POPUP = new MatchedBracketPopupAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
 
     private static final Actions ACTIONS = new Actions();

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,11 @@ import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 
+import org.fife.rsta.ac.AbstractSourceTree;
+import org.fife.rsta.ac.GoToMemberWindow;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.AbstractSourceTree;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.GoToMemberWindow;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * Displays a popup dialog with the "Go to member" tree. Language support
@@ -74,8 +75,8 @@ public class GoToMemberAction extends TextAction {
             return;
         }
         JTextComponent tc = getTextComponent(e);
-        if (tc instanceof SyntaxTextArea) {
-            SyntaxTextArea textArea = (SyntaxTextArea) tc;
+        if (tc instanceof RSyntaxTextArea) {
+            RSyntaxTextArea textArea = (RSyntaxTextArea) tc;
             Window parent = SwingUtilities.getWindowAncestor(textArea);
             GoToMemberWindow gtmw = new GoToMemberWindow(parent, textArea, tree);
             setLocationBasedOn(gtmw, textArea);
@@ -110,7 +111,7 @@ public class GoToMemberAction extends TextAction {
      * @param textArea The parent text area to center it in.
      */
     private void setLocationBasedOn(GoToMemberWindow gtmw,
-            SyntaxTextArea textArea) {
+            RSyntaxTextArea textArea) {
         Rectangle visibleRect = textArea.getVisibleRect();
         Dimension gtmwPS = gtmw.getPreferredSize();
         int x = visibleRect.x + (visibleRect.width - gtmwPS.width) / 2;

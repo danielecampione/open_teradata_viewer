@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,10 +49,11 @@ import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.ListCellRenderer;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxUtilities;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -118,7 +119,7 @@ public class Utilities {
                     .setText(StreamUtil.stream2String(Utilities.class
                             .getResourceAsStream("/res/teradata_reserved_words.list")));
             for (int i = 0; i < teradataReservedWords.size(); i++) {
-                if (StringUtil.isEmpty((String) teradataReservedWords.get(i))) {
+                if (StringUtil.isEmpty(teradataReservedWords.get(i))) {
                     continue;
                 }
             }
@@ -757,10 +758,10 @@ public class Utilities {
     }
 
     /** Check the installed JDK version */
-    public static boolean isJDK16OrAbove() {
+    public static boolean isJDK18OrAbove() {
         String vmVer = System.getProperty("java.vm.version").substring(0, 3);
 
-        return (vmVer.compareTo("1.6") >= 0);
+        return (vmVer.compareTo("1.8") >= 0);
     }
 
     public static void openURLWithDefaultBrowser(String url) {
@@ -779,14 +780,14 @@ public class Utilities {
             // invoking java.awt.Desktop.getDesktop().browse()
         } catch (Exception e) {
             // Library not available or failed attempt
-            int os = SyntaxUtilities.getOS();
+            int os = RSyntaxUtilities.getOS();
             try {
-                if (os == SyntaxUtilities.OS_MAC_OSX) {
+                if (os == RSyntaxUtilities.OS_MAC_OSX) {
                     Class.forName("com.apple.eio.FileManager")
                             .getDeclaredMethod("openURL",
                                     new Class[] { String.class })
                             .invoke(null, new Object[] { url });
-                } else if (os == SyntaxUtilities.OS_WINDOWS) {
+                } else if (os == RSyntaxUtilities.OS_WINDOWS) {
                     Runtime.getRuntime().exec(
                             "rundll32 url.dll,FileProtocolHandler " + url);
                 } else {

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,9 @@ import java.io.PrintWriter;
 
 import javax.swing.JFileChooser;
 
-import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Token;
+
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -136,7 +137,7 @@ public class FileIO {
     }
 
     private static void writeFileAsWebPage(String path) throws IOException {
-        String[] styles = new String[IToken.DEFAULT_NUM_TOKEN_TYPES];
+        String[] styles = new String[Token.DEFAULT_NUM_TOKEN_TYPES];
         StringBuilder temp = new StringBuilder();
         StringBuilder sb = new StringBuilder();
 
@@ -149,11 +150,11 @@ public class FileIO {
         out.println("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
         out.println("<title>" + path + "</title>");
 
-        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance()
+        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
         int lineCount = textArea.getLineCount();
         for (int i = 0; i < lineCount; i++) {
-            IToken token = textArea.getTokenListForLine(i);
+            Token token = textArea.getTokenListForLine(i);
             while (token != null && token.isPaintable()) {
                 if (styles[token.getType()] == null) {
                     temp.setLength(0);

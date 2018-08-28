@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,13 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.fife.rsta.ui.CollapsibleSectionPanel;
+import org.fife.rsta.ui.search.FindDialog;
+import org.fife.rsta.ui.search.ReplaceDialog;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.search.FindDialog;
-import net.sourceforge.open_teradata_viewer.editor.search.ReplaceDialog;
 
 /**
  * 

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( editor )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,17 @@
 
 package net.sourceforge.open_teradata_viewer.editor;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
+
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
+import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVSyntaxSearchEngine;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * 
@@ -29,12 +36,14 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * @author D. Campione
  * 
  */
-public class OTVSyntaxTextArea extends SyntaxTextArea {
+public class OTVSyntaxTextArea extends RSyntaxTextArea {
 
     private static final long serialVersionUID = -4500559841244366663L;
 
     private OTVSyntaxSearchEngine _OTVSyntaxSearchEngine;
 
+    int defaultModifier = getDefaultModifier();
+    
     public OTVSyntaxTextArea() {
         this(0, 0);
     }
@@ -42,6 +51,11 @@ public class OTVSyntaxTextArea extends SyntaxTextArea {
     public OTVSyntaxTextArea(int rows, int cols) {
         super(rows, cols);
         _OTVSyntaxSearchEngine = new OTVSyntaxSearchEngine(this);
+        
+        InputMap inputMap = getInputMap();
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, defaultModifier),
+                Actions.RUN);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), Actions.RUN);
     }
 
     public void showGoToLineDialog(ActionEvent evt) {
@@ -130,5 +144,15 @@ public class OTVSyntaxTextArea extends SyntaxTextArea {
 
             ++ix;
         }
+    }
+    
+    /**
+     * Returns the default modifier key for a system. For example, on Windows
+     * this would be the CTRL key (<code>InputEvent.CTRL_MASK</code>).
+     *
+     * @return The default modifier key.
+     */
+    protected static final int getDefaultModifier() {
+        return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     }
 }

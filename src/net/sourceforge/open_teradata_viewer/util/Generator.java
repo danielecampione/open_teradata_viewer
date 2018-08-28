@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.animated_assistant.GeneratorException;
+import net.sourceforge.open_teradata_viewer.GeneratorException;
 import net.sourceforge.open_teradata_viewer.util.variant.IVariantConnectable;
 import net.sourceforge.open_teradata_viewer.util.variant.Variant;
 

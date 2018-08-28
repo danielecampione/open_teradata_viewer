@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util task )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,7 @@ public class TaskPool {
         return TaskPoolManager.getTaskPool(name);
     }
 
-    /**
-     * Globally accessible TaskPool.
-     */
+    /** Globally accessible TaskPool. */
     public static TaskPool getTaskPool() {
         return getTaskPool(GLOBAL);
     }
@@ -96,7 +94,8 @@ public class TaskPool {
     public void addTask(final Action action) {
         Object name = action.getValue(Action.NAME);
         addTask(new Task(name == null ? "Noname" : name.toString()) {
-            public void run() {
+            @Override
+			public void run() {
                 action.actionPerformed(new ActionEvent(this, 0, action
                         .getValue(Action.NAME).toString()));
             }

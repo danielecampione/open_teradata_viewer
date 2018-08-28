@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.ComponentOrientation;
 import java.awt.event.ActionEvent;
 
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
-import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
 
 /**
  * 
@@ -57,7 +58,7 @@ public class RightToLeftAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        TextScrollPane scrollPane = ApplicationFrame.getInstance()
+        RTextScrollPane scrollPane = ApplicationFrame.getInstance()
                 .getTextScrollPane();
         if (scrollPane.getComponentOrientation().isLeftToRight()) {
             scrollPane

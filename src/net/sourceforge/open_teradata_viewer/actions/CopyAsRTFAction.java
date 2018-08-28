@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
 /**
  * 
@@ -46,7 +46,7 @@ public class CopyAsRTFAction extends CustomAction {
                 KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.SHIFT_DOWN_MASK
                         + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 "Copies the current selection to the clipboard as RTF.");
-        copyAsRTF = new SyntaxTextAreaEditorKit.CopyAsRtfAction();
+        copyAsRTF = new RSyntaxTextAreaEditorKit.CopyAsRtfAction();
         setEnabled(true);
     }
 

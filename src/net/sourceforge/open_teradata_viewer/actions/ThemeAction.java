@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,11 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Theme;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.syntax.Theme;
 
 /**
  * 
@@ -72,7 +73,7 @@ public class ThemeAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        SyntaxTextArea textArea = ApplicationFrame.getInstance()
+        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
         InputStream in = getClass().getResourceAsStream(xml);
         try {

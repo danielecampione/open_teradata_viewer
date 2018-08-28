@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,9 +55,10 @@ import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpath.JarLibraryInfo;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.buildpath.LibraryInfo;
-import net.sourceforge.open_teradata_viewer.editor.languagesupport.perl.PerlLanguageSupport;
+import org.fife.rsta.ac.java.buildpath.JarLibraryInfo;
+import org.fife.rsta.ac.java.buildpath.LibraryInfo;
+import org.fife.rsta.ac.perl.PerlLanguageSupport;
+
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -126,7 +127,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         SpringLayout sl = new SpringLayout();
         JPanel temp = new JPanel(sl);
         JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2015 D. Campione</font></html>");
+                "<html><font style=\"color:gray\">Copyright &copy 2017 D. Campione</font></html>");
         JLabel licenseLabel = new JLabel("GNU General Public License");
         licenseLabel.setForeground(Color.BLUE);
         licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@ import java.io.File;
 import javax.swing.TransferHandler;
 import javax.swing.TransferHandler.TransferSupport;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.FileIO;
-import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * 
@@ -37,7 +38,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * @author D. Campione
  *
  */
-public class FileOpenAction extends CustomAction implements ISyntaxConstants {
+public class FileOpenAction extends CustomAction implements SyntaxConstants {
 
     private static final long serialVersionUID = -2948843917732757209L;
 
@@ -53,7 +54,7 @@ public class FileOpenAction extends CustomAction implements ISyntaxConstants {
         if (file != null) {
             applicationFrame.setText("");
             Context.getInstance().setOpenedFile(file);
-            SyntaxTextArea textArea = ApplicationFrame.getInstance()
+            RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                     .getTextComponent();
             TransferHandler transferHandler = textArea.getTransferHandler();
             StringSelection stringSelection = new StringSelection(new String(

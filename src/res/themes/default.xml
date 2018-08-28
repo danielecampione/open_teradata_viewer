@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE SyntaxTheme SYSTEM "theme.dtd">
+<!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-    OTVSyntaxTextArea's default theme.
-    See theme.dtd and net.sourceforge.open_teradata_viewer.editor.syntax.Theme
-    for more information.
+	RSyntaxTextArea's default theme.
+	See theme.dtd and org.fife.ui.rsyntaxtextarea.Theme for more information.
 -->
-<SyntaxTheme version="1.0">
+<RSyntaxTheme version="1.0">
 
    <!-- Omitting baseFont will use a system-appropriate monospaced. -->
    <!--<baseFont family="..." size="13"/>-->
@@ -70,10 +69,10 @@
       <style token="VARIABLE" fg="ee8800" bold="true"/>
       <style token="WHITESPACE" fg="000000"/>
       
-      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffffff"/>
-      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffffff"/>
-      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffffff"/>
-      <style token="ERROR_CHAR" fg="dc009c" bg="ffffff"/>
+      <style token="ERROR_IDENTIFIER" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffcccc"/>
+      <style token="ERROR_CHAR" fg="000000" bg="ffcccc"/>
    </tokenStyles>
 
-</SyntaxTheme>
+</RSyntaxTheme>

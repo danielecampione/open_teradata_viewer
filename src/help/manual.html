@@ -33,7 +33,10 @@
       <a href="#favorites"><img src="images/favorites.png" alt="" width="16" height="16" /> Favorites</a><br /><br />
       <h4>
         Editor
-      </h4><a href="#editing">Text Editing</a><br /><br />
+      </h4>
+      <a href="#editing">Text Editing</a><br />
+      <a href="#moveblocksoflines">Move blocks of line</a><br />
+      <a href="#matchedbracketpopup">Matched Bracket Popup</a><br />
       <a href="#history"><img src="images/back.png" alt="" width="16" height="16" /> History <img src="images/next.png" alt="" width="16" height="16" /></a><br />
       <a href="#format"><img src="images/format.png" alt="" width="16" height="16" /> Format SQL</a><br /><br />
       <h4>
@@ -232,14 +235,29 @@
       <div class="shortcut">
         (Right click)
       </div><br />
-      Various text editing features are provided by OTVSyntaxTextArea.<br />
+      Various text editing features are provided by RSyntaxTextArea.<br />
       Right click the editor to use them.<br /><br />
       <img src="images/textarea_contextual_menu.png" alt="" width="204" height="260" /><br /><br />
       Clipboard History popup can be activated via Ctrl+Shift+V (Cmd+Shift+V on OS X).<br /><br />
       <img src="images/textarea_clipboard_history.png" alt="" width="239" height="124" /><br /><br />
       Pressing Ctrl+Shift+V will cause the "clipboard history" popup to appear below the current caret position.<br />
       This popup displays the most recent snippets of text added to the clipboard. This allows you to paste any text that was *recently* on the clipboard, not just what's *currently* in the clipboard buffer. This is pretty useful if you're a frequent copy-paster.<br />
-      The clipboard history is implemented as a singleton instance of the net.sourceforge.open_teradata_viewer.editor.ClipboardHistory class. You can access it, but currently the only interesting thing you can do is set its maximum size. By default, it only remembers the twelve most recent entries on the clipboard that can be interpreted as plain text.<br /><br />
+      The clipboard history is implemented as a singleton instance of the <code>org.fife.ui.rtextarea.ClipboardHistory</code> class. You can access it, but currently the only interesting thing you can do is set its maximum size. By default, it only remembers the twelve most recent entries on the clipboard that can be interpreted as plain text.<br /><br />
+      <h4>
+        <a name="moveblocksoflines" id=""moveblocksoflines""></a>Move blocks of lines
+      </h4>
+      <div class="shortcut">
+        (Alt+up/down arrows)
+      </div><br />
+      Alt+up/down arrows moves blocks of lines, not just single lines. Select the text that you want to move and press Alt+up/down arrows.<br /><br />
+      <h4>
+        <a name="matchedbracketpopup" id="matchedbracketpopup"></a>Matched Bracket Popup
+      </h4>
+      When the caret is on a bracket and the matched bracket is "above" the current one and scrolled off of the screen, RSyntaxTextArea will render the line containing the parent bracket in a small popup window after a small delay:<br />
+      <br />
+      <img src="images/textarea_matched_bracket_popup.png" alt="" width="408" height="186" /><br /><br />
+      This allows you to quickly see the scope of the block your caret is around, without having to scroll up in the editor. If the line containing the matching brace is only whitespace and the curly brace, the line prior to that one will be in the tool tip as well (for code written in K&R style, for example).<br />
+      This feature is enabled by default, but can be disabled by unselecting the "Matched Bracket Popup" option of the "View" menu or by calling <code>textArea.setShowMatchedBracketPopup(false)</code> programmatically.<br /><br />
       <h4>
         How to enable the Spell Checking feature
       </h4>

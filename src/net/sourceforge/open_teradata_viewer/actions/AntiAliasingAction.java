@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
 /**
  * 
@@ -61,7 +62,7 @@ public class AntiAliasingAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        SyntaxTextArea textArea = ApplicationFrame.getInstance()
+        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
         textArea.setAntiAliasingEnabled(!textArea.getAntiAliasingEnabled());
     }

@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( util )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -46,7 +46,8 @@ public class StringUtil {
     public static final long TERABYTE_1000 = GIGABYTE_1000 * 1000;
     public static final long PETABYTE_1000 = TERABYTE_1000 * 1000;
 
-    public static String addStringChar(String text, String addText, String chr) {
+    public static String addStringChar(String text, String addText,
+            String chr) {
         if (!text.equals("")) {
             text = text + chr;
         }
@@ -61,7 +62,8 @@ public class StringUtil {
         return addStringChar(text, addText, "<br>");
     }
 
-    public static String replaceString(String text, String oldStr, String newStr) {
+    public static String replaceString(String text, String oldStr,
+            String newStr) {
         if (oldStr == null || newStr == null) {
             throw new IllegalArgumentException(
                     "oldStr == null or newStr == null");
@@ -125,7 +127,8 @@ public class StringUtil {
         return anyOfString(str, strs, ignoreCase) >= 0;
     }
 
-    public static int anyOfString(String str, String[] strs, boolean ignoreCase) {
+    public static int anyOfString(String str, String[] strs,
+            boolean ignoreCase) {
         if (!ignoreCase) {
             return anyOfString(str, strs);
         }
@@ -489,8 +492,9 @@ public class StringUtil {
         ArrayList<String> strings = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
         int start = boundary.first();
-        for (int end = boundary.next(); end != BreakIterator.DONE; start = end, end = boundary
-                .next()) {
+        for (int end = boundary
+                .next(); end != BreakIterator.DONE; start = end, end = boundary
+                        .next()) {
             String word = text.substring(start, end);
             if (sb.length() + word.length() > maxLineLength) {
                 if (sb.length() == 0) {
@@ -587,7 +591,8 @@ public class StringUtil {
      * net.sourceforge.open_teradata_viewer.util.StringUtil#split(String)}<b>
      * @return  Array of split strings. Guaranteeded to be not null.
      */
-    public static String[] split(String str, char delimiter, boolean removeEmpty) {
+    public static String[] split(String str, char delimiter,
+            boolean removeEmpty) {
         // Return empty list if source string is empty.
         final int len = (str == null) ? 0 : str.length();
         if (len == 0) {
@@ -618,7 +623,8 @@ public class StringUtil {
      *        If this is <code>null</code>, they are simply removed.
      * @return The escaped version of <code>s</code>.
      */
-    public static final String escapeForHTML(String s, String newlineReplacement) {
+    public static final String escapeForHTML(String s,
+            String newlineReplacement) {
         return escapeForHTML(s, newlineReplacement, false);
     }
 
@@ -643,7 +649,7 @@ public class StringUtil {
         String tabString = "   ";
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < s.length(); i++) {
+        for (int i = 0; i < (s == null ? 0 : s.length()); i++) {
             char ch = s.charAt(i);
             switch (ch) {
             case ' ':
@@ -733,7 +739,7 @@ public class StringUtil {
                 sumb = b & 0x03;
                 more = 4;
                 // Expect 4 more bytes
-            } else /* if ((b & 0xfe) == 0xfc) */{
+            } else /* if ((b & 0xfe) == 0xfc) */ {
                 // 1111110x (yields 1 bit)
                 sumb = b & 0x01;
                 more = 5;

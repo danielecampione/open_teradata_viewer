@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
 /**
  * 
@@ -42,7 +42,7 @@ public class IncreaseIndentAction extends CustomAction {
         super("Increase indentation", "format_increaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, 0),
                 "Increases the indentation amount for all selected lines.");
-        increaseIndent = new SyntaxTextAreaEditorKit.InsertTabAction();
+        increaseIndent = new RSyntaxTextAreaEditorKit.InsertTabAction();
         setEnabled(true);
     }
 

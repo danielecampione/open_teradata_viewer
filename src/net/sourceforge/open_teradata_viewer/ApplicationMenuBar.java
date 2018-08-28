@@ -1,6 +1,6 @@
 /*
  * Open Teradata Viewer ( kernel )
- * Copyright (C) 2015, D. Campione
+ * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,20 +35,21 @@ import javax.swing.KeyStroke;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
 
+import org.fife.rsta.ui.CollapsibleSectionPanel;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextArea;
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 import net.sourceforge.open_teradata_viewer.actions.Actions;
-import net.sourceforge.open_teradata_viewer.actions.AnimatedAssistantAction;
 import net.sourceforge.open_teradata_viewer.actions.ChangeSyntaxStyleAction;
 import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
+import net.sourceforge.open_teradata_viewer.actions.MatchedBracketPopupAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
-import net.sourceforge.open_teradata_viewer.editor.CollapsibleSectionPanel;
-import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
-import net.sourceforge.open_teradata_viewer.editor.TextArea;
-import net.sourceforge.open_teradata_viewer.editor.TextScrollPane;
-import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
-import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextAreaEditorKit;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -88,6 +89,8 @@ public class ApplicationMenuBar extends JMenuBar {
             Actions.SHOW_DESCRIPTION_WINDOW);
     private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(
             Actions.PARAMETER_ASSISTANCE);
+    private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(
+            Actions.MATCHED_BRACKET_POPUP);
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -121,18 +124,18 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.add(Actions.COPY_AS_RTF);
         menu.add(Actions.PASTE);
         menu.addSeparator();
-        menu.add(TextArea.getAction(TextArea.DELETE_ACTION));
-        menu.add(TextArea.getAction(TextArea.SELECT_ALL_ACTION));
+        menu.add(RTextArea.getAction(RTextArea.DELETE_ACTION));
+        menu.add(RTextArea.getAction(RTextArea.SELECT_ALL_ACTION));
         menu.addSeparator();
         menu.add(Actions.DATE_TIME);
         menu.addSeparator();
         subMenu = new JMenu("Folding");
         menu.add(subMenu);
-        subMenu.add(new SyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
+        subMenu.add(new RSyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
         subMenu.add(
-                new SyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
-        subMenu.add(new SyntaxTextAreaEditorKit.CollapseAllFoldsAction());
-        subMenu.add(new SyntaxTextAreaEditorKit.ExpandAllFoldsAction());
+                new RSyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
+        subMenu.add(new RSyntaxTextAreaEditorKit.CollapseAllFoldsAction());
+        subMenu.add(new RSyntaxTextAreaEditorKit.ExpandAllFoldsAction());
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
         menu.addSeparator();
@@ -246,6 +249,8 @@ public class ApplicationMenuBar extends JMenuBar {
                 buttonGroupEditorTheme, subMenu);
         addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme,
                 subMenu);
+        addThemeItem("Monokai", "/res/themes/monokai.xml", buttonGroupEditorTheme,
+                subMenu);
         addThemeItem("Visual Studio", "/res/themes/vs.xml",
                 buttonGroupEditorTheme, subMenu);
         menu.add(subMenu);
@@ -307,45 +312,51 @@ public class ApplicationMenuBar extends JMenuBar {
         add(menu);
         subMenu = new JMenu("View As (Highlighting File Type)");
         ButtonGroup bg = new ButtonGroup();
-        addSyntaxItem("SQL", ISyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
-        addSyntaxItem("Assembly (x86)",
-                ISyntaxConstants.SYNTAX_STYLE_ASSEMBLY_X86, bg, subMenu);
-        addSyntaxItem("C", ISyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
-        addSyntaxItem("C++", ISyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg,
+        addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
+        addSyntaxItem("Assembler (x86)",
+                SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu);
+        addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
+        addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg,
                 subMenu);
-        addSyntaxItem("CSS", ISyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
-        addSyntaxItem("C#", ISyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu);
-        addSyntaxItem("Clojure", ISyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
+        addSyntaxItem("CSS", SyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
+        addSyntaxItem("C#", SyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu);
+        addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg,
                 subMenu);
-        addSyntaxItem("D", ISyntaxConstants.SYNTAX_STYLE_D, bg, subMenu);
-        addSyntaxItem("Dart", ISyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu);
-        addSyntaxItem("Groovy", ISyntaxConstants.SYNTAX_STYLE_GROOVY, bg,
+        addSyntaxItem("D", SyntaxConstants.SYNTAX_STYLE_D, bg, subMenu);
+        addSyntaxItem("Dart", SyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu);
+        addSyntaxItem("Docker", SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, bg, subMenu);
+        addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg,
                 subMenu);
-        addSyntaxItem("HTML", ISyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
-        addSyntaxItem("Java", ISyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
-        addSyntaxItem("JavaScript", ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
+        addSyntaxItem("Hosts", SyntaxConstants.SYNTAX_STYLE_HOSTS, bg, subMenu);
+        addSyntaxItem("HTML", SyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
+        addSyntaxItem("INI", SyntaxConstants.SYNTAX_STYLE_INI, bg, subMenu);
+        addSyntaxItem("Java", SyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
+        addSyntaxItem("JavaScript", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
                 bg, subMenu);
-        addSyntaxItem("JSON", ISyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
-        addSyntaxItem("JSP", ISyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
-        addSyntaxItem("Less", ISyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu);
-        addSyntaxItem("Lisp", ISyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu);
-        addSyntaxItem("MXML", ISyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu);
-        addSyntaxItem("NSIS", ISyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
-        addSyntaxItem("Perl", ISyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
-        addSyntaxItem("PHP", ISyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
-        addSyntaxItem("Python", ISyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
+        addSyntaxItem("JSON", SyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
+        addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
+        addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu);
+        addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu);
+        addSyntaxItem("MXML", SyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu);
+        addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
+        addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
+        addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
+        addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
                 subMenu);
-        addSyntaxItem("Ruby", ISyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
-        addSyntaxItem("Scala", ISyntaxConstants.SYNTAX_STYLE_SCALA, bg,
+        addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
+        addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg,
                 subMenu);
-        addSyntaxItem("Unix Shell", ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+        addSyntaxItem("TypeScript", SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT, bg,
+                subMenu);
+        addSyntaxItem("Unix Shell", SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
                 bg, subMenu);
         addSyntaxItem("Visual Basic",
-                ISyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
+                SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
         addSyntaxItem("Windows batch",
-                ISyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
-        addSyntaxItem("XML", ISyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
-        addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE, bg,
+                SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
+        addSyntaxItem("XML", SyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
+        addSyntaxItem("YAML", SyntaxConstants.SYNTAX_STYLE_YAML, bg, subMenu);
+        addSyntaxItem("No Highlighting", SyntaxConstants.SYNTAX_STYLE_NONE, bg,
                 subMenu);
         subMenu.getItem(0).setSelected(true);
         menu.add(subMenu);
@@ -362,13 +373,11 @@ public class ApplicationMenuBar extends JMenuBar {
                 ((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE)
                         .isParameterAssistanceEnabled());
         menu.add(cbParamAssistanceItem);
+        cbMatchedBracketPopupItem.setSelected(
+                ((MatchedBracketPopupAction) Actions.MATCHED_BRACKET_POPUP)
+                        .isMatchedBracketPopupEnabled());
+        menu.add(cbMatchedBracketPopupItem);
         menu.addSeparator();
-        JCheckBoxMenuItem mniAnimatedAssistant = new JCheckBoxMenuItem(
-                Actions.ANIMATED_ASSISTANT);
-        mniAnimatedAssistant.setSelected(
-                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
-                        .isAnimatedAssistantActivated());
-        menu.add(mniAnimatedAssistant);
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
                 Actions.FULL_SCREEN);
         menu.add(fullScreenMenuItem);
@@ -404,9 +413,9 @@ public class ApplicationMenuBar extends JMenuBar {
 
     public void refreshEditOptions() {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        OTVSyntaxTextArea _OTVSyntaxTextArea = applicationFrame
+        RSyntaxTextArea _OTVSyntaxTextArea = applicationFrame
                 .getTextComponent();
-        TextScrollPane textScrollPane = applicationFrame.getTextScrollPane();
+        RTextScrollPane textScrollPane = applicationFrame.getTextScrollPane();
 
         cbViewLineHighlight
                 .setSelected(_OTVSyntaxTextArea.getHighlightCurrentLine());

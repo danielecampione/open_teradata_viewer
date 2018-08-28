@@ -1,3 +1,35 @@
+0.24c (14/07/2017)
+    - Added TypeScript syntax highlighting and code folding.
+    - Added the syntax highlighting for Dockerfiles.
+    - Added YAML syntax highlighting.
+    - Added .ini file syntax highlighting.
+    - Added the syntax highlighting for the hosts file.
+    - Added another "dark" theme, Monokai.
+    - The OTVSyntaxTextArea has been replaced by the RSyntaxTextArea library
+      (2.6.1).
+    - The autocomplete module of the OTVSyntaxTextArea has been replaced by the
+      autocomplete library of RSyntaxTextArea (2.6.1).
+    - The languagesupport module of the OTVSyntaxTextArea has been replaced by
+      the languagesupport library of RSyntaxTextArea (2.6.0).
+    - The staui module of the OTVSyntaxTextArea has been replaced by the rstaui
+      library of RSyntaxTextArea (2.6.1).
+    - The spellchecker module of the OTVSyntaxTextArea has been replaced by the
+      spellchecker library of RSyntaxTextArea (2.6.0).
+    - Added the "matched bracket" popup, showing the line containing a matched
+      bracket, if it is scrolled off-screen; added the suited menu voice.
+    - Alt+up/down arrows can move blocks of lines, not just single lines.
+    - RSTAUI: This release fixes a minor localization issue with the context
+      menu in Italian.
+    - The SQL parser has been replaced by the JSqlParser library (1.1).
+    - Other minor bugs fixed.
+    - Removed the animated assistant.
+    - Removed the commons-io library.
+    - The user manual has been updated with the added capabilities.
+    - Upgraded Teradata JDBC driver 15.10.00.09 -> 16.10.00.03
+    - Upgraded itext library 5.5.7 -> 5.5.11
+    - Upgraded poi library 3.12 -> 3.16
+    - Upgraded rhino library 1.7.6 -> 1.7.7.1
+
 0.24b (07/10/2015)
     - Added less syntax highlighting and code folding.
     - Improved default key bindings on OS X.
@@ -38,8 +70,8 @@
     - Established JJTree nodes for columns and tables (look at SelectASTTest)
       for first usages of the SQL parser.
     - Added support for MySQL GROUP_CONCAT to the SQL parser.
-    - Upgraded itext library 5.5.6 -> 5.5.7    
     - Upgraded Teradata JDBC driver 15.10.00.05 -> 15.10.00.09
+    - Upgraded itext library 5.5.6 -> 5.5.7
 
 0.24a (26/06/2015)
     - Added MXML syntax highlighting and code folding.
