@@ -20,20 +20,21 @@ package net.sourceforge.open_teradata_viewer.sqlparser.statement.drop;
 
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
 public class Drop implements IStatement {
 
     private String type;
-    private String name;
+    private Table name;
     private List<String> parameters;
 
     @Override
@@ -41,7 +42,7 @@ public class Drop implements IStatement {
         statementVisitor.visit(this);
     }
 
-    public String getName() {
+    public Table getName() {
         return name;
     }
 
@@ -53,7 +54,7 @@ public class Drop implements IStatement {
         return type;
     }
 
-    public void setName(String string) {
+    public void setName(Table string) {
         name = string;
     }
 
@@ -67,7 +68,7 @@ public class Drop implements IStatement {
 
     @Override
     public String toString() {
-        String sql = "DROP " + type + " " + name;
+        String sql = "DROP " + type + " " + name.toString();
 
         if (parameters != null && parameters.size() > 0) {
             sql += " " + PlainSelect.getStringList(parameters);

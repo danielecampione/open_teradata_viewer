@@ -18,13 +18,12 @@
 
 package test.net.sourceforge.open_teradata_viewer.sqlparser.schema;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Server;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -36,8 +35,8 @@ public class ServerTest extends TestCase {
         final String fullServerName = String.format("[%s]", serverName);
         final Server server = new Server(fullServerName);
 
-        Assert.assertEquals(serverName, server.getServerName());
-        Assert.assertEquals(fullServerName, server.toString());
+        assertEquals(serverName, server.getServerName());
+        assertEquals(fullServerName, server.toString());
     }
 
     public void testServerNameAndInstanceParsing() throws Exception {
@@ -48,8 +47,8 @@ public class ServerTest extends TestCase {
                 serverInstanceName);
         final Server server = new Server(fullServerName);
 
-        Assert.assertEquals(serverName, server.getServerName());
-        Assert.assertEquals(serverInstanceName, server.getInstanceName());
-        Assert.assertEquals(fullServerName, server.toString());
+        assertEquals(serverName, server.getServerName());
+        assertEquals(serverInstanceName, server.getInstanceName());
+        assertEquals(fullServerName, server.toString());
     }
 }

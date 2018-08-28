@@ -5,7 +5,50 @@
         </TITLE>
     </HEAD>
     <BODY bgcolor="#FFFFFF">
-<PRE>0.24a (26/06/2015)
+<PRE>0.24b (07/10/2015)
+    - Added less syntax highlighting and code folding.
+    - Improved default key bindings on OS X.
+    - Adds removed TextArea constructors.
+    - Added unit tests for CSS syntax highlighting.
+    - SyntaxTextArea.setBackground(null) throw NPE.
+    - setBackground() does not work on ErrorStrip.
+    - ErrorStrip marked occurrences on line 0 have top 2 pixels cut off.
+    - Fixed error marker displacement in TaskTagParser.
+    - Added support for highlighting JSON keys as IToken.VARIABLE.
+    - Fix: macro name is lost at saving to file.
+    - Cleaned up warnings in previously generated JSONTokenMaker source file.
+    - Added 'mark occurrences' of variables in less files.
+    - Fixed broken unit test of the text editor.
+    - Fixed infinite loop in HtmlFoldParser.
+    - Fix: accidentally forgot code folding for .jshintrc files.
+    - Removed some compiler warnings.
+    - Removed System.out.println from HTML fold parser.
+    - Fixes an occasional sorting bug when there were many completions
+      representing functions or methods. FunctionCompletions with the same name
+      should compare based on number of arguments as well.
+    - Added code completions for standard Less functions.
+    - Don't print IOExceptions to the application console.
+    - Fixed a minor issue.
+    - Improved interval expression syntax of the SQL parser.
+    - Added support of hex values (0xabc54, x'abc567') to the SQL parser.
+    - Added support of system parameters (e.g. @@SPID) to the SQL parser.
+    - Added support of signed parameters to the SQL parser.
+    - Added support for SELECT SKIP FIRST ... to the SQL parser.
+    - Completely rewritten S_IDENTIFIER rule of the SQL parser to accept
+      hopefully all possible UTF-8 letters without specifying some additional
+      rules.
+    - Allow Server within multipart names of the SQL parser to act as database
+      link.
+    - Added support for row constructors in conditions to the SQL parser.
+    - Some refactorings for TablesNamesFinder to improve usability of the SQL
+      parser.
+    - Established JJTree nodes for columns and tables (look at SelectASTTest)
+      for first usages of the SQL parser.
+    - Added support for MySQL GROUP_CONCAT to the SQL parser.
+    - Upgraded itext library 5.5.6 -> 5.5.7    
+    - Upgraded Teradata JDBC driver 15.10.00.05 -> 15.10.00.09
+
+0.24a (26/06/2015)
     - Added MXML syntax highlighting and code folding.
     - Added unit tests.
     - Added unit tests for Ruby.

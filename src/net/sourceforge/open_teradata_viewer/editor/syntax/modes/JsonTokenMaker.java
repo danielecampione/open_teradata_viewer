@@ -93,11 +93,11 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
 
     private static final String ZZ_ACTION_PACKED_0 = "\2\0\1\1\1\2\1\3\2\1\1\4\4\1\1\5"
             + "\1\6\1\7\3\6\2\0\1\4\1\10\1\4\1\1"
-            + "\1\11\2\1\4\0\2\12\1\0\1\13\2\4\3\1"
-            + "\4\0\1\4\1\14\1\15\2\0\1\16\1\4\2\0" + "\1\4";
+            + "\1\11\2\1\4\0\2\12\1\0\1\13\1\4\1\14"
+            + "\1\4\3\1\4\0\1\4\1\15\1\16\2\0\1\17" + "\1\4\2\0\1\4";
 
     private static int[] zzUnpackAction() {
-        int[] result = new int[54];
+        int[] result = new int[55];
         int offset = 0;
         offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
         return result;
@@ -122,14 +122,14 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
 
     private static final String ZZ_ROWMAP_PACKED_0 = "\0\0\0\40\0\100\0\140\0\200\0\240\0\300\0\340"
             + "\0\u0100\0\u0120\0\u0140\0\u0160\0\240\0\u0180\0\240\0\u01a0"
-            + "\0\u01c0\0\u01e0\0\u0200\0\u0220\0\u0240\0\240\0\u0260\0\u0280"
-            + "\0\240\0\u02a0\0\u02c0\0\u02e0\0\u0300\0\u0320\0\u0340\0\u0360"
-            + "\0\u0380\0\u0380\0\240\0\u03a0\0\u03c0\0\u03e0\0\u0400\0\u0420"
-            + "\0\u0440\0\u0460\0\u0480\0\u04a0\0\u04c0\0\100\0\100\0\u04e0"
-            + "\0\u0500\0\u0520\0\u0540\0\u0560\0\u0520\0\u0580";
+            + "\0\u01c0\0\u01e0\0\u0200\0\u0220\0\u0240\0\u0260\0\u0280\0\u02a0"
+            + "\0\240\0\u02c0\0\u02e0\0\u0300\0\u0320\0\u0340\0\u0360\0\u0380"
+            + "\0\u03a0\0\u03a0\0\240\0\u03c0\0\240\0\u03e0\0\u0400\0\u0420"
+            + "\0\u0440\0\u0460\0\u0480\0\u04a0\0\u04c0\0\u04e0\0\100\0\100"
+            + "\0\u0500\0\u0520\0\u0540\0\u0560\0\u0580\0\u0540\0\u05a0";
 
     private static int[] zzUnpackRowMap() {
-        int[] result = new int[54];
+        int[] result = new int[55];
         int offset = 0;
         offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
         return result;
@@ -164,33 +164,34 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
             + "\2\3\3\0\4\3\10\16\1\0\14\16\1\0\6\16"
             + "\1\0\2\16\23\0\1\34\13\0\1\35\23\0\1\36"
             + "\54\0\1\37\4\0\1\40\37\0\1\41\2\0\1\42"
-            + "\11\0\1\42\16\0\11\25\1\43\1\25\1\44\34\25"
-            + "\1\0\1\10\1\45\4\10\3\25\2\10\1\25\1\10"
-            + "\12\25\1\3\1\0\4\3\1\0\2\3\1\0\4\3"
-            + "\1\0\10\3\1\46\1\3\3\0\5\3\1\0\4\3"
-            + "\1\0\2\3\1\0\1\47\3\3\1\0\12\3\3\0"
-            + "\5\3\1\0\4\3\1\0\2\3\1\0\4\3\1\0"
-            + "\10\3\1\50\1\3\3\0\4\3\35\0\1\51\31\0"
-            + "\1\52\32\0\1\53\54\0\1\54\4\0\1\40\13\0"
-            + "\1\24\3\0\1\24\17\0\1\41\33\0\10\25\1\0"
-            + "\33\25\2\55\3\25\1\43\1\25\1\44\1\25\1\55"
-            + "\2\25\1\55\3\25\3\55\11\25\1\3\1\0\4\3"
-            + "\1\0\2\3\1\0\4\3\1\0\10\3\1\56\1\3"
+            + "\11\0\1\42\16\0\11\25\1\43\1\25\1\44\24\25"
+            + "\32\0\1\45\5\0\10\25\1\0\1\10\1\46\4\10"
+            + "\3\25\2\10\1\25\1\10\12\25\1\3\1\0\4\3"
+            + "\1\0\2\3\1\0\4\3\1\0\10\3\1\47\1\3"
+            + "\3\0\5\3\1\0\4\3\1\0\2\3\1\0\1\50"
+            + "\3\3\1\0\12\3\3\0\5\3\1\0\4\3\1\0"
+            + "\2\3\1\0\4\3\1\0\10\3\1\51\1\3\3\0"
+            + "\4\3\35\0\1\52\31\0\1\53\32\0\1\54\54\0"
+            + "\1\55\4\0\1\40\13\0\1\24\3\0\1\24\17\0"
+            + "\1\41\33\0\10\25\1\0\33\25\2\56\3\25\1\43"
+            + "\1\25\1\44\1\25\1\56\2\25\1\56\3\25\3\56"
+            + "\11\25\1\3\1\0\4\3\1\0\2\3\1\0\4\3"
+            + "\1\0\10\3\1\57\1\3\3\0\5\3\1\0\4\3"
+            + "\1\0\2\3\1\0\4\3\1\0\5\3\1\60\4\3"
             + "\3\0\5\3\1\0\4\3\1\0\2\3\1\0\4\3"
-            + "\1\0\5\3\1\57\4\3\3\0\5\3\1\0\4\3"
-            + "\1\0\2\3\1\0\4\3\1\0\11\3\1\47\3\0"
-            + "\4\3\32\0\1\60\31\0\1\51\50\0\1\61\21\0"
-            + "\1\62\20\0\4\25\2\63\3\25\1\43\1\25\1\44"
-            + "\1\25\1\63\2\25\1\63\3\25\3\63\11\25\16\0"
-            + "\1\64\51\0\1\51\1\0\1\60\7\0\1\62\1\65"
-            + "\2\62\2\65\2\0\1\62\1\0\3\62\1\65\1\62"
-            + "\1\65\7\62\1\0\2\65\4\62\4\25\2\66\3\25"
-            + "\1\43\1\25\1\44\1\25\1\66\2\25\1\66\3\25"
-            + "\3\66\11\25\16\0\1\62\21\0\4\25\2\10\3\25"
-            + "\1\43\1\25\1\44\1\25\1\10\2\25\1\10\3\25" + "\3\10\11\25";
+            + "\1\0\11\3\1\50\3\0\4\3\32\0\1\61\31\0"
+            + "\1\52\50\0\1\62\21\0\1\63\20\0\4\25\2\64"
+            + "\3\25\1\43\1\25\1\44\1\25\1\64\2\25\1\64"
+            + "\3\25\3\64\11\25\16\0\1\65\51\0\1\52\1\0"
+            + "\1\61\7\0\1\63\1\66\2\63\2\66\2\0\1\63"
+            + "\1\0\3\63\1\66\1\63\1\66\7\63\1\0\2\66"
+            + "\4\63\4\25\2\67\3\25\1\43\1\25\1\44\1\25"
+            + "\1\67\2\25\1\67\3\25\3\67\11\25\16\0\1\63"
+            + "\21\0\4\25\2\10\3\25\1\43\1\25\1\44\1\25"
+            + "\1\10\2\25\1\10\3\25\3\10\11\25";
 
     private static int[] zzUnpackTrans() {
-        int[] result = new int[1440];
+        int[] result = new int[1472];
         int offset = 0;
         offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
         return result;
@@ -228,17 +229,18 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
     private static final int[] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
     private static final String ZZ_ATTRIBUTE_PACKED_0 = "\2\0\3\1\1\11\6\1\1\11\1\1\1\11\3\1"
-            + "\2\0\1\1\1\11\2\1\1\11\2\1\4\0\2\1"
-            + "\1\0\1\11\5\1\4\0\3\1\2\0\2\1\2\0" + "\1\1";
+            + "\2\0\1\1\1\3\2\1\1\11\2\1\4\0\2\1"
+            + "\1\0\1\11\1\1\1\15\4\1\4\0\3\1\2\0" + "\2\1\2\0\1\1";
 
     private static int[] zzUnpackAttribute() {
-        int[] result = new int[54];
+        int[] result = new int[55];
         int offset = 0;
         offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
         return result;
     }
 
-    private static int zzUnpackAttribute(String packed, int offset, int[] result) {
+    private static int zzUnpackAttribute(String packed, int offset,
+            int[] result) {
         int i = 0; /* Index in packed string */
         int j = offset; /* Index in unpacked array */
         int l = packed.length();
@@ -269,6 +271,9 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
 
     /** The text position at the last accepting state. */
     private int zzMarkedPos;
+
+    /** The text position at the last state to be included in yytext. */
+    private int zzPushbackPos;
 
     /** The current text position in the buffer. */
     private int zzCurrentPos;
@@ -592,6 +597,8 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
         int[] zzTransL = ZZ_TRANS;
         int[] zzRowMapL = ZZ_ROWMAP;
         int[] zzAttrL = ZZ_ATTRIBUTE;
+        int zzPushbackPosL = zzPushbackPos = -1;
+        boolean zzWasPushback;
 
         while (true) {
             zzMarkedPosL = zzMarkedPos;
@@ -601,6 +608,8 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
             zzCurrentPosL = zzCurrentPos = zzStartRead = zzMarkedPosL;
 
             zzState = zzLexicalState;
+
+            zzWasPushback = false;
 
             zzForAction: {
                 while (true) {
@@ -613,12 +622,14 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
                         // Store back cached positions
                         zzCurrentPos = zzCurrentPosL;
                         zzMarkedPos = zzMarkedPosL;
+                        zzPushbackPos = zzPushbackPosL;
                         boolean eof = zzRefill();
                         // Get translated positions and possibly new buffer
                         zzCurrentPosL = zzCurrentPos;
                         zzMarkedPosL = zzMarkedPos;
                         zzBufferL = zzBuffer;
                         zzEndReadL = zzEndRead;
+                        zzPushbackPosL = zzPushbackPos;
                         if (eof) {
                             zzInput = YYEOF;
                             break zzForAction;
@@ -626,14 +637,20 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
                             zzInput = zzBufferL[zzCurrentPosL++];
                         }
                     }
-                    int zzNext = zzTransL[zzRowMapL[zzState] + zzCMapL[zzInput]];
+                    int zzNext = zzTransL[zzRowMapL[zzState]
+                            + zzCMapL[zzInput]];
                     if (zzNext == -1) {
                         break zzForAction;
                     }
                     zzState = zzNext;
 
                     int zzAttributes = zzAttrL[zzState];
+                    if ((zzAttributes & 2) == 2) {
+                        zzPushbackPosL = zzCurrentPosL;
+                    }
+
                     if ((zzAttributes & 1) == 1) {
+                        zzWasPushback = (zzAttributes & 4) == 4;
                         zzAction = zzState;
                         zzMarkedPosL = zzCurrentPosL;
                         if ((zzAttributes & 8) == 8) {
@@ -645,27 +662,35 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
 
             // Store back cached position
             zzMarkedPos = zzMarkedPosL;
+            if (zzWasPushback) {
+                zzMarkedPos = zzPushbackPosL;
+            }
 
             switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-            case 12: {
+            case 13: {
                 addToken(IToken.RESERVED_WORD);
             }
-            case 15:
+            case 16:
                 break;
             case 1: {
                 addToken(IToken.IDENTIFIER);
             }
-            case 16:
+            case 17:
                 break;
             case 10: {
                 addToken(IToken.LITERAL_NUMBER_FLOAT);
             }
-            case 17:
+            case 18:
                 break;
             case 8: {
                 addToken(IToken.LITERAL_STRING_DOUBLE_QUOTE);
             }
-            case 18:
+            case 19:
+                break;
+            case 12: {
+                addToken(IToken.VARIABLE);
+            }
+            case 20:
                 break;
             case 9: {
                 if (highlightEolComments) {
@@ -675,58 +700,58 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
                     addToken(IToken.IDENTIFIER);
                 }
             }
-            case 19:
+            case 21:
                 break;
             case 2: {
                 addToken(IToken.WHITESPACE);
             }
-            case 20:
+            case 22:
                 break;
-            case 14: {
+            case 15: {
                 int temp = zzStartRead;
                 addToken(start, zzStartRead - 1, IToken.COMMENT_EOL);
                 addHyperlinkToken(temp, zzMarkedPos - 1, IToken.COMMENT_EOL);
                 start = zzMarkedPos;
             }
-            case 21:
+            case 23:
                 break;
             case 3: {
                 addToken(IToken.LITERAL_NUMBER_DECIMAL_INT);
             }
-            case 22:
+            case 24:
                 break;
-            case 13: {
+            case 14: {
                 addToken(IToken.LITERAL_BOOLEAN);
             }
-            case 23:
+            case 25:
                 break;
             case 4: {
                 addToken(IToken.ERROR_STRING_DOUBLE);
                 addNullToken();
                 return firstToken;
             }
-            case 24:
+            case 26:
                 break;
             case 7: {
                 addToken(start, zzStartRead - 1, IToken.COMMENT_EOL);
                 addNullToken();
                 return firstToken;
             }
-            case 25:
+            case 27:
                 break;
             case 11: {
                 addToken(IToken.ERROR_STRING_DOUBLE);
             }
-            case 26:
+            case 28:
                 break;
             case 6: {
             }
-            case 27:
+            case 29:
                 break;
             case 5: {
                 addToken(IToken.SEPARATOR);
             }
-            case 28:
+            case 30:
                 break;
             default:
                 if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
@@ -737,13 +762,13 @@ public class JsonTokenMaker extends AbstractJFlexTokenMaker {
                         addNullToken();
                         return firstToken;
                     }
-                    case 55:
+                    case 56:
                         break;
                     case YYINITIAL: {
                         addNullToken();
                         return firstToken;
                     }
-                    case 56:
+                    case 57:
                         break;
                     default:
                         return null;

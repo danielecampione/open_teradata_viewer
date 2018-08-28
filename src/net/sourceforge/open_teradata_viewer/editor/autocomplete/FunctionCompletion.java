@@ -31,16 +31,19 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * A completion choice representing a function.
  *
  * @author D. Campione
- * 
+ *
  */
-public class FunctionCompletion extends VariableCompletion implements
-        IParameterizedCompletion {
+public class FunctionCompletion extends VariableCompletion
+        implements IParameterizedCompletion {
 
     /** Parameters to the function. */
     private List<Parameter> params;
 
     /** A description of the return value of this function. */
     private String returnValDesc;
+
+    /** Used to improve performance of sorting FunctionCompletions. */
+    private String compareString;
 
     /**
      * Ctor.
@@ -74,8 +77,8 @@ public class FunctionCompletion extends VariableCompletion implements
             for (int i = 0; i < paramCount; i++) {
                 Parameter param = getParam(i);
                 sb.append("<b>");
-                sb.append(param.getName() != null ? param.getName() : param
-                        .getType());
+                sb.append(param.getName() != null ? param.getName()
+                        : param.getType());
                 sb.append("</b>&nbsp;");
                 String desc = param.getDescription();
                 if (desc != null) {
@@ -94,10 +97,67 @@ public class FunctionCompletion extends VariableCompletion implements
     }
 
     /**
+     * Overridden to compare methods by their comparison strings.
+     *
+     * @param c2 A <code>ICompletion</code> to compare to.
+     * @return The sort order.
+     */
+    @Override
+    public int compareTo(ICompletion c2) {
+        int rc = -1;
+
+        if (c2 == this) {
+            rc = 0;
+        } else if (c2 instanceof FunctionCompletion) {
+            rc = getCompareString()
+                    .compareTo(((FunctionCompletion) c2).getCompareString());
+        } else {
+            rc = super.compareTo(c2);
+        }
+
+        return rc;
+    }
+
+    /**
+     * Returns a string used to compare this method completion to another.
+     *
+     * @return The comparison string.
+     */
+    private String getCompareString() {
+        /*
+         * This string compares the following parts of methods in this order, to
+         * optimize sort order in completion lists.
+         *
+         * 1. First, by name
+         * 2. Next, by number of parameters.
+         * 3. Finally, by parameter type.
+         */
+        if (compareString == null) {
+            StringBuilder sb = new StringBuilder(getName());
+            // NOTE: This will fail if a method has > 99 parameters
+            int paramCount = getParamCount();
+            if (paramCount < 10) {
+                sb.append('0');
+            }
+            sb.append(paramCount);
+            for (int i = 0; i < paramCount; i++) {
+                String type = getParam(i).getType();
+                sb.append(type);
+                if (i < paramCount - 1) {
+                    sb.append(',');
+                }
+            }
+            compareString = sb.toString();
+        }
+
+        return compareString;
+    }
+
+    /**
      * Returns the "definition string" for this function completion. For
      * example, for the C "<code>printf</code>" function, this would return
      * "<code>int printf(const char *, ...)</code>".
-     * 
+     *
      * @return The definition string.
      */
     @Override

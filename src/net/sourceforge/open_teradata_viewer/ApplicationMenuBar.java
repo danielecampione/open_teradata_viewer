@@ -129,7 +129,8 @@ public class ApplicationMenuBar extends JMenuBar {
         subMenu = new JMenu("Folding");
         menu.add(subMenu);
         subMenu.add(new SyntaxTextAreaEditorKit.ToggleCurrentFoldAction());
-        subMenu.add(new SyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
+        subMenu.add(
+                new SyntaxTextAreaEditorKit.CollapseAllCommentFoldsAction());
         subMenu.add(new SyntaxTextAreaEditorKit.CollapseAllFoldsAction());
         subMenu.add(new SyntaxTextAreaEditorKit.ExpandAllFoldsAction());
         menu.addSeparator();
@@ -182,8 +183,8 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         int default_modifier = getToolkit().getMenuShortcutKeyMask();
         KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
-        Action a = csp
-                .addBottomComponent(ks, applicationFrame.getFindToolBar());
+        Action a = csp.addBottomComponent(ks,
+                applicationFrame.getFindToolBar());
         a.putValue(Action.NAME, "Show Find Search Bar");
         menu.add(new JMenuItem(a));
         ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, default_modifier);
@@ -264,8 +265,8 @@ public class ApplicationMenuBar extends JMenuBar {
             menu.add(_mnuAvailableLookAndFeel.elementAt(i));
             _mnuAvailableLookAndFeel.elementAt(i).addActionListener(
                     new LookAndFeelAction(completePathOfLafClasses.get(i)));
-            if (completePathOfLafClasses.get(i).equals(
-                    UIManager.getLookAndFeel().getClass().toString()
+            if (completePathOfLafClasses.get(i)
+                    .equals(UIManager.getLookAndFeel().getClass().toString()
                             .substring("class ".length()))) {
                 _mnuAvailableLookAndFeel.elementAt(i).setSelected(true);
             }
@@ -277,8 +278,8 @@ public class ApplicationMenuBar extends JMenuBar {
         if (info != null) {
             for (int i = 0; i < info.length; i++) {
                 if (!completePathOfLafClasses.exists(info[i].getClassName())) {
-                    _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(
-                            info[i].getName()));
+                    _mnuAvailableLookAndFeel
+                            .add(new JRadioButtonMenuItem(info[i].getName()));
                     completePathOfLafClasses.add(info[i].getClassName());
                     buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel
                             .elementAt(completePathOfLafClasses.size() - 1));
@@ -286,17 +287,16 @@ public class ApplicationMenuBar extends JMenuBar {
                             .elementAt(completePathOfLafClasses.size() - 1));
                     _mnuAvailableLookAndFeel
                             .elementAt(completePathOfLafClasses.size() - 1)
-                            .addActionListener(
-                                    new LookAndFeelAction(
-                                            completePathOfLafClasses
-                                                    .get(completePathOfLafClasses
-                                                            .size() - 1)));
-                    if (completePathOfLafClasses.get(
-                            completePathOfLafClasses.size() - 1).equals(
-                            UIManager.getLookAndFeel().getClass().toString()
-                                    .substring("class ".length()))) {
-                        _mnuAvailableLookAndFeel.elementAt(
-                                completePathOfLafClasses.size() - 1)
+                            .addActionListener(new LookAndFeelAction(
+                                    completePathOfLafClasses
+                                            .get(completePathOfLafClasses.size()
+                                                    - 1)));
+                    if (completePathOfLafClasses
+                            .get(completePathOfLafClasses.size() - 1)
+                            .equals(UIManager.getLookAndFeel().getClass()
+                                    .toString().substring("class ".length()))) {
+                        _mnuAvailableLookAndFeel
+                                .elementAt(completePathOfLafClasses.size() - 1)
                                 .setSelected(true);
                     }
                 }
@@ -327,6 +327,7 @@ public class ApplicationMenuBar extends JMenuBar {
                 bg, subMenu);
         addSyntaxItem("JSON", ISyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
         addSyntaxItem("JSP", ISyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
+        addSyntaxItem("Less", ISyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu);
         addSyntaxItem("Lisp", ISyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu);
         addSyntaxItem("MXML", ISyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu);
         addSyntaxItem("NSIS", ISyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
@@ -335,7 +336,8 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("Python", ISyntaxConstants.SYNTAX_STYLE_PYTHON, bg,
                 subMenu);
         addSyntaxItem("Ruby", ISyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
-        addSyntaxItem("Scala", ISyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu);
+        addSyntaxItem("Scala", ISyntaxConstants.SYNTAX_STYLE_SCALA, bg,
+                subMenu);
         addSyntaxItem("Unix Shell", ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
                 bg, subMenu);
         addSyntaxItem("Visual Basic",
@@ -343,28 +345,28 @@ public class ApplicationMenuBar extends JMenuBar {
         addSyntaxItem("Windows batch",
                 ISyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
         addSyntaxItem("XML", ISyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
-        addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE,
-                bg, subMenu);
+        addSyntaxItem("No Highlighting", ISyntaxConstants.SYNTAX_STYLE_NONE, bg,
+                subMenu);
         subMenu.getItem(0).setSelected(true);
         menu.add(subMenu);
         menu.addSeparator();
-        cbCellRendering
-                .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
+        cbCellRendering.setSelected(
+                ((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING)
                         .isFancyCellRenderingActivated());
         menu.add(cbCellRendering);
-        cbShowDescriptionWindow
-                .setSelected(((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW)
+        cbShowDescriptionWindow.setSelected(
+                ((ShowDescriptionWindowAction) Actions.SHOW_DESCRIPTION_WINDOW)
                         .isVisible());
         menu.add(cbShowDescriptionWindow);
-        cbParamAssistanceItem
-                .setSelected(((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE)
+        cbParamAssistanceItem.setSelected(
+                ((ParameterAssistanceAction) Actions.PARAMETER_ASSISTANCE)
                         .isParameterAssistanceEnabled());
         menu.add(cbParamAssistanceItem);
         menu.addSeparator();
         JCheckBoxMenuItem mniAnimatedAssistant = new JCheckBoxMenuItem(
                 Actions.ANIMATED_ASSISTANT);
-        mniAnimatedAssistant
-                .setSelected(((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
+        mniAnimatedAssistant.setSelected(
+                ((AnimatedAssistantAction) Actions.ANIMATED_ASSISTANT)
                         .isAnimatedAssistantActivated());
         menu.add(mniAnimatedAssistant);
         JCheckBoxMenuItem fullScreenMenuItem = new JCheckBoxMenuItem(
@@ -406,30 +408,30 @@ public class ApplicationMenuBar extends JMenuBar {
                 .getTextComponent();
         TextScrollPane textScrollPane = applicationFrame.getTextScrollPane();
 
-        cbViewLineHighlight.setSelected(_OTVSyntaxTextArea
-                .getHighlightCurrentLine());
-        cbFadeCurrentLineHighlight.setSelected(_OTVSyntaxTextArea
-                .getFadeCurrentLineHighlight());
+        cbViewLineHighlight
+                .setSelected(_OTVSyntaxTextArea.getHighlightCurrentLine());
+        cbFadeCurrentLineHighlight
+                .setSelected(_OTVSyntaxTextArea.getFadeCurrentLineHighlight());
         cbViewLineNumbers.setSelected(textScrollPane.getLineNumbersEnabled());
         cbBookmarks.setSelected(textScrollPane.isIconRowHeaderEnabled());
         cbWordWrap.setSelected(_OTVSyntaxTextArea.getLineWrap());
         cbAntialiasing.setSelected(_OTVSyntaxTextArea.getAntiAliasingEnabled());
         cbMarkOccurrences.setSelected(_OTVSyntaxTextArea.getMarkOccurrences());
-        cbRightToLeft.setSelected(!textScrollPane.getComponentOrientation()
-                .isLeftToRight());
+        cbRightToLeft.setSelected(
+                !textScrollPane.getComponentOrientation().isLeftToRight());
         cbTabLines.setSelected(_OTVSyntaxTextArea.getPaintTabLines());
-        cbAnimateBracketMatching.setSelected(_OTVSyntaxTextArea
-                .getAnimateBracketMatching());
-        cbPaintMatchedBracketPair.setSelected(_OTVSyntaxTextArea
-                .getPaintMatchedBracketPair());
+        cbAnimateBracketMatching
+                .setSelected(_OTVSyntaxTextArea.getAnimateBracketMatching());
+        cbPaintMatchedBracketPair
+                .setSelected(_OTVSyntaxTextArea.getPaintMatchedBracketPair());
         cbTabsEmulatedBySpaces
                 .setSelected(_OTVSyntaxTextArea.getTabsEmulated());
     }
 
     private void addThemeItem(String name, String themeXml, ButtonGroup bg,
             JMenu menu, boolean isSelected) {
-        JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ThemeAction(
-                name, themeXml));
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(
+                new ThemeAction(name, themeXml));
         bg.add(item);
         item.setSelected(isSelected);
         menu.add(item);

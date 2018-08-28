@@ -20,14 +20,16 @@ package net.sourceforge.open_teradata_viewer.sqlparser.schema;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * A column. It can have the table name it belongs to.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
-public final class Column implements IExpression, IMultiPartName {
+public final class Column extends ASTNodeAccessImpl
+        implements IExpression, IMultiPartName {
 
     private Table table;
     private String columnName;

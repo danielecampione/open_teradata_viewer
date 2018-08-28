@@ -20,13 +20,13 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.DTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link DTokenMaker} class.
@@ -34,7 +34,7 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class DTokenMakerTest {
+public class DTokenMakerTest extends AbstractTokenMakerTest {
 
     /**
      * Returns a new instance of the <code>ITokenMaker</code> to test.
@@ -50,7 +50,7 @@ public class DTokenMakerTest {
         String[] booleans = { "true", "false" };
 
         for (String code : booleans) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.LITERAL_BOOLEAN, code));
@@ -64,7 +64,7 @@ public class DTokenMakerTest {
                 "'\\1'", };
 
         for (String code : chars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Invalid char literal: " + token,
@@ -81,7 +81,7 @@ public class DTokenMakerTest {
                 "ucent", "uint", "ulong", "ushort", "wchar", };
 
         for (String code : dataTypes) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.DATA_TYPE, code));
@@ -93,7 +93,7 @@ public class DTokenMakerTest {
         String[] eolCommentLiterals = { "// Hello world", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_EOL, token.getType());
@@ -105,7 +105,7 @@ public class DTokenMakerTest {
         String[] eolCommentLiterals = { "// Hello world http://www.sas.com", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
 
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
@@ -123,7 +123,7 @@ public class DTokenMakerTest {
         String code =
         // Basic doubles
         "3.0 4.2 3.0 4.2 .111 " +
-        // Basic floats ending in f, F, d, or D
+                // Basic floats ending in f, F, d, or D
                 "3.f 3.F 3.0f 3.0F .111f .111F " +
                 // Lower-case exponent, no sign
                 "3.e7f 3.e7F 3.0e7f 3.0e7F .111e7f .111e7F " +
@@ -138,7 +138,7 @@ public class DTokenMakerTest {
                 // Upper-case exponent, negative
                 "3.E-7f 3.E-7F 3.0E-7f 3.0E-7F .111E-7f .111E-7F";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -171,7 +171,7 @@ public class DTokenMakerTest {
                 + "0x1ul 0xfeul 0x333333333333ul 0X1ul 0Xfeul 0X33333333333ul 0xFEul 0XFEul "
                 + "0x1UL 0xfeUL 0x333333333333UL 0X1UL 0XfeUL 0X33333333333UL 0xFEUL 0XFEUL";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -195,11 +195,11 @@ public class DTokenMakerTest {
     @Test
     public void testStandardFunctions() {
         String[] functions = {
-        // Currently none
+                // Currently none
         };
 
         for (String code : functions) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Not a standard function: " + token,
@@ -212,28 +212,27 @@ public class DTokenMakerTest {
         String[] keywords = { "abstract", "alias", "align", "asm", "assert",
                 "auto", "body", "break", "case", "cast", "catch", "class",
                 "const", "continue", "debug", "default", "delegate", "delete",
-                "deprecated", "do", "else", "enum", "export", "extern",
-                "final", "finally", "for", "foreach", "foreach_reverse",
-                "function", "goto", "if", "immutable", "import", "in", "inout",
-                "interface", "invariant", "is", "lazy", "macro", "mixin",
-                "module", "new", "nothrow", "null", "out", "override",
-                "package", "pragma", "private", "protected", "public", "pure",
-                "ref", "scope", "shared", "static", "struct", "super",
-                "switch", "synchronized", "template", "this", "throw", "try",
-                "typedef", "typeid", "typeof", "union", "unittest", "version",
-                "void", "volatile", "while", "with", "__FILE__", "__MODULE__",
-                "__LINE__", "__FUNCTION__", "__PRETTY_FUNCTION__", "__gshared",
-                "__traits", "__vector", "__parameters" };
+                "deprecated", "do", "else", "enum", "export", "extern", "final",
+                "finally", "for", "foreach", "foreach_reverse", "function",
+                "goto", "if", "immutable", "import", "in", "inout", "interface",
+                "invariant", "is", "lazy", "macro", "mixin", "module", "new",
+                "nothrow", "null", "out", "override", "package", "pragma",
+                "private", "protected", "public", "pure", "ref", "scope",
+                "shared", "static", "struct", "super", "switch", "synchronized",
+                "template", "this", "throw", "try", "typedef", "typeid",
+                "typeof", "union", "unittest", "version", "void", "volatile",
+                "while", "with", "__FILE__", "__MODULE__", "__LINE__",
+                "__FUNCTION__", "__PRETTY_FUNCTION__", "__gshared", "__traits",
+                "__vector", "__parameters" };
 
         for (String code : keywords) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, code));
         }
 
-        Segment segment = new Segment("return".toCharArray(), 0,
-                "return".length());
+        Segment segment = createSegment("return");
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD_2, "return"));
@@ -244,7 +243,7 @@ public class DTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_MULTILINE, token.getType());
@@ -256,7 +255,7 @@ public class DTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world http://www.sas.com */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
 
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
@@ -279,7 +278,7 @@ public class DTokenMakerTest {
         String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>=";
         String code = assignmentOperators + " " + nonAssignmentOperators;
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -304,7 +303,7 @@ public class DTokenMakerTest {
     public void testSeparators() {
         String code = "( ) [ ] { }";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -333,7 +332,7 @@ public class DTokenMakerTest {
         String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\\"\"", };
 
         for (String code : stringLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,

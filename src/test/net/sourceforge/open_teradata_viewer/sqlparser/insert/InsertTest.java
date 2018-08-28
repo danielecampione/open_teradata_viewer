@@ -27,6 +27,8 @@ import static test.net.sourceforge.open_teradata_viewer.sqlparser.TestUtils.asse
 
 import java.io.StringReader;
 
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
@@ -38,8 +40,6 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
-
-import org.junit.Test;
 
 /**
  *
@@ -77,15 +77,16 @@ public class InsertTest {
 
         statement = "INSERT INTO myschema.mytable VALUES (?, ?, 2.3)";
         insert = (Insert) parserManager.parse(new StringReader(statement));
-        assertEquals("myschema.mytable", insert.getTable()
-                .getFullyQualifiedName());
+        assertEquals("myschema.mytable",
+                insert.getTable().getFullyQualifiedName());
         assertEquals(3, ((ExpressionList) insert.getItemsList())
                 .getExpressions().size());
         assertTrue(((ExpressionList) insert.getItemsList()).getExpressions()
                 .get(0) instanceof JdbcParameter);
         assertEquals(2.3,
                 ((DoubleValue) ((ExpressionList) insert.getItemsList())
-                        .getExpressions().get(2)).getValue(), 0.0);
+                        .getExpressions().get(2)).getValue(),
+                0.0);
         assertEquals(statement, "" + insert);
 
     }
@@ -121,8 +122,9 @@ public class InsertTest {
                 ((Column) insert.getColumns().get(2)).getColumnName());
         assertNull(insert.getItemsList());
         assertNotNull(insert.getSelect());
-        assertEquals("mytable2", ((Table) ((PlainSelect) insert.getSelect()
-                .getSelectBody()).getFromItem()).getName());
+        assertEquals("mytable2",
+                ((Table) ((PlainSelect) insert.getSelect().getSelectBody())
+                        .getFromItem()).getName());
 
         // toString uses brakets
         String statementToString = "INSERT INTO mytable (col1, col2, col3) SELECT * FROM mytable2";
@@ -131,13 +133,15 @@ public class InsertTest {
 
     @Test
     public void testInsertMultiRowValue() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e)");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e)");
     }
 
     @Test
     public void testInsertMultiRowValueDifferent() throws SQLParserException {
         try {
-            assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
+            assertSqlCanBeParsedAndDeparsed(
+                    "INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
         } catch (Exception e) {
             return;
         }
@@ -147,38 +151,65 @@ public class InsertTest {
 
     @Test
     public void testSimpleInsert() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO example (num, name, address, tel) VALUES (1, 'name', 'test ', '1234-1234')");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO example (num, name, address, tel) VALUES (1, 'name', 'test ', '1234-1234')");
     }
 
     @Test
     public void testInsertWithReturning() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id");
     }
 
     @Test
     public void testInsertWithReturning2() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING *");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING *");
     }
 
     @Test
     public void testInsertWithReturning3() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id AS a1, id2 AS a2");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) VALUES ('1') RETURNING id AS a1, id2 AS a2");
     }
 
     @Test
     public void testInsertSelect() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) SELECT mycolumn FROM mytable");
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) (SELECT mycolumn FROM mytable)");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) SELECT mycolumn FROM mytable");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) (SELECT mycolumn FROM mytable)");
     }
 
     @Test
     public void testInsertWithSelect() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a");
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO mytable (mycolumn) (WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a)");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO mytable (mycolumn) (WITH a AS (SELECT mycolumn FROM mytable) SELECT mycolumn FROM a)");
     }
 
     @Test
     public void testInsertWithKeywords() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("INSERT INTO kvPair (value, key) VALUES (?, ?)");
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO kvPair (value, key) VALUES (?, ?)");
+    }
+
+    @Test
+    public void testHexValues() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO TABLE2 VALUES ('1', \"DSDD\", x'EFBFBDC7AB')");
+    }
+
+    @Test
+    public void testHexValues2() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO TABLE2 VALUES ('1', \"DSDD\", 0xEFBFBDC7AB)");
+    }
+
+    @Test
+    public void testHexValues3() throws SQLParserException {
+        assertSqlCanBeParsedAndDeparsed(
+                "INSERT INTO TABLE2 VALUES ('1', \"DSDD\", 0xabcde)");
     }
 }

@@ -47,8 +47,19 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ExpressionListItem;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.FunctionItem;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IPivotVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectItemVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ISelectVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.OrderByElement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PivotXml;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
 
 /**
  *
@@ -57,7 +68,17 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  *
  */
 public class ExpressionVisitorAdapter implements IExpressionVisitor,
-        IItemsListVisitor {
+        IItemsListVisitor, IPivotVisitor, ISelectItemVisitor {
+
+    private ISelectVisitor selectVisitor;
+
+    public ISelectVisitor getSelectVisitor() {
+        return selectVisitor;
+    }
+
+    public void setSelectVisitor(ISelectVisitor selectVisitor) {
+        this.selectVisitor = selectVisitor;
+    }
 
     @Override
     public void visit(NullValue value) {
@@ -65,6 +86,12 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
 
     @Override
     public void visit(Function function) {
+        if (function.getParameters() != null) {
+            function.getParameters().accept(this);
+        }
+        if (function.getKeep() != null) {
+            function.getKeep().accept(this);
+        }
     }
 
     @Override
@@ -163,8 +190,11 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
 
     @Override
     public void visit(InExpression expr) {
-        expr.getLeftExpression().accept(this);
-        expr.getLeftItemsList().accept(this);
+        if (expr.getLeftExpression() != null) {
+            expr.getLeftExpression().accept(this);
+        } else if (expr.getLeftItemsList() != null) {
+            expr.getLeftItemsList().accept(this);
+        }
         expr.getRightItemsList().accept(this);
     }
 
@@ -199,6 +229,15 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
 
     @Override
     public void visit(SubSelect subSelect) {
+        if (selectVisitor != null) {
+            for (WithItem item : subSelect.getWithItemsList()) {
+                item.accept(selectVisitor);
+            }
+            subSelect.getSelectBody().accept(selectVisitor);
+        }
+        if (subSelect.getPivot() != null) {
+            subSelect.getPivot().accept(this);
+        }
     }
 
     @Override
@@ -353,5 +392,80 @@ public class ExpressionVisitorAdapter implements IExpressionVisitor,
         for (OrderByElement element : expr.getOrderByElements()) {
             element.getExpression().accept(this);
         }
+    }
+
+    @Override
+    public void visit(MySQLGroupConcat groupConcat) {
+        for (IExpression expr : groupConcat.getExpressionList()
+                .getExpressions()) {
+            expr.accept(this);
+        }
+        if (groupConcat.getOrderByElements() != null) {
+            for (OrderByElement element : groupConcat.getOrderByElements()) {
+                element.getExpression().accept(this);
+            }
+        }
+    }
+
+    @Override
+    public void visit(Pivot pivot) {
+        for (FunctionItem item : pivot.getFunctionItems()) {
+            item.getFunction().accept(this);
+        }
+        for (Column col : pivot.getForColumns()) {
+            col.accept(this);
+        }
+        if (pivot.getSingleInItems() != null) {
+            for (SelectExpressionItem item : pivot.getSingleInItems()) {
+                item.accept(this);
+            }
+        }
+
+        if (pivot.getMultiInItems() != null) {
+            for (ExpressionListItem item : pivot.getMultiInItems()) {
+                item.getExpressionList().accept(this);
+            }
+        }
+    }
+
+    @Override
+    public void visit(PivotXml pivot) {
+        for (FunctionItem item : pivot.getFunctionItems()) {
+            item.getFunction().accept(this);
+        }
+        for (Column col : pivot.getForColumns()) {
+            col.accept(this);
+        }
+        if (pivot.getInSelect() != null) {
+            if (selectVisitor != null) {
+                pivot.getInSelect().accept(selectVisitor);
+            }
+        }
+    }
+
+    @Override
+    public void visit(AllColumns allColumns) {
+
+    }
+
+    @Override
+    public void visit(AllTableColumns allTableColumns) {
+
+    }
+
+    @Override
+    public void visit(SelectExpressionItem selectExpressionItem) {
+        selectExpressionItem.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(RowConstructor rowConstructor) {
+        for (IExpression expr : rowConstructor.getExprList().getExpressions()) {
+            expr.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(HexValue hexValue) {
     }
 }

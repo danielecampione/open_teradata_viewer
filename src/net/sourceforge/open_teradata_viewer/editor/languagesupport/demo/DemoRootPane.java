@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.editor.languagesupport.demo;
 
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
@@ -54,6 +56,7 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.JavaLang
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.tree.JavaOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.js.tree.JavaScriptOutlineTree;
 import net.sourceforge.open_teradata_viewer.editor.languagesupport.xml.tree.XmlOutlineTree;
+import net.sourceforge.open_teradata_viewer.editor.syntax.ErrorStrip;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ISyntaxConstants;
 import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
 
@@ -64,8 +67,8 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * @author D. Campione
  *
  */
-class DemoRootPane extends JRootPane implements HyperlinkListener,
-        ISyntaxConstants, IActions {
+class DemoRootPane extends JRootPane
+        implements HyperlinkListener, ISyntaxConstants, IActions {
 
     private static final long serialVersionUID = 7642909140270118508L;
 
@@ -103,9 +106,14 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
             }
         });
         sp.setContinuousLayout(true);
-        setContentPane(sp);
 
         setJMenuBar(createMenuBar());
+
+        ErrorStrip errorStrip = new ErrorStrip(textArea);
+        JPanel cp = new JPanel(new BorderLayout());
+        cp.add(sp);
+        cp.add(errorStrip, BorderLayout.LINE_END);
+        setContentPane(cp);
     }
 
     private void addItem(Action a, ButtonGroup bg, JMenu menu) {
@@ -127,26 +135,28 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         ButtonGroup bg = new ButtonGroup();
         addItem(new StyleAction(this, "C", "CExample.txt", SYNTAX_STYLE_C), bg,
                 menu);
-        addItem(new StyleAction(this, "CSS", "CssExample.txt", SYNTAX_STYLE_CSS),
-                bg, menu);
+        addItem(new StyleAction(this, "CSS", "CssExample.txt",
+                SYNTAX_STYLE_CSS), bg, menu);
         addItem(new StyleAction(this, "Groovy", "GroovyExample.txt",
                 SYNTAX_STYLE_GROOVY), bg, menu);
         addItem(new StyleAction(this, "Java", "JavaExample.txt",
                 SYNTAX_STYLE_JAVA), bg, menu);
         addItem(new StyleAction(this, "JavaScript", "JSExample.txt",
                 SYNTAX_STYLE_JAVASCRIPT), bg, menu);
-        addItem(new StyleAction(this, "JSP", "JspExample.txt", SYNTAX_STYLE_JSP),
-                bg, menu);
+        addItem(new StyleAction(this, "JSP", "JspExample.txt",
+                SYNTAX_STYLE_JSP), bg, menu);
+        addItem(new StyleAction(this, "Less", "LessExample.txt",
+                SYNTAX_STYLE_LESS), bg, menu);
         addItem(new StyleAction(this, "Perl", "PerlExample.txt",
                 SYNTAX_STYLE_PERL), bg, menu);
         addItem(new StyleAction(this, "HTML", "HtmlExample.txt",
                 SYNTAX_STYLE_HTML), bg, menu);
-        addItem(new StyleAction(this, "PHP", "PhpExample.txt", SYNTAX_STYLE_PHP),
-                bg, menu);
+        addItem(new StyleAction(this, "PHP", "PhpExample.txt",
+                SYNTAX_STYLE_PHP), bg, menu);
         addItem(new StyleAction(this, "sh", "ShellExample.txt",
                 SYNTAX_STYLE_UNIX_SHELL), bg, menu);
-        addItem(new StyleAction(this, "XML", "XMLExample.txt", SYNTAX_STYLE_XML),
-                bg, menu);
+        addItem(new StyleAction(this, "XML", "XMLExample.txt",
+                SYNTAX_STYLE_XML), bg, menu);
         menu.getItem(0).setSelected(true);
         mb.add(menu);
 
@@ -159,7 +169,8 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         mb.add(menu);
 
         menu = new JMenu("View");
-        menu.add(new JCheckBoxMenuItem(new ToggleLayeredHighlightsAction(this)));
+        menu.add(
+                new JCheckBoxMenuItem(new ToggleLayeredHighlightsAction(this)));
         mb.add(menu);
 
         menu = new JMenu("Help");
@@ -276,10 +287,9 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         ClassLoader cl = getClass().getClassLoader();
         BufferedReader r = null;
         try {
-            r = new BufferedReader(
-                    new InputStreamReader(
-                            cl.getResourceAsStream("res/examples/" + resource),
-                            "UTF-8"));
+            r = new BufferedReader(new InputStreamReader(
+                    cl.getResourceAsStream("res/examples/" + resource),
+                    "UTF-8"));
             textArea.read(r, null);
             r.close();
             textArea.setCaretPosition(0);

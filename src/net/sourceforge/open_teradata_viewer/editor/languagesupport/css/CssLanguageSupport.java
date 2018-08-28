@@ -28,7 +28,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * Language support for CSS files.
  *
  * @author D. Campione
- * 
+ *
  */
 public class CssLanguageSupport extends AbstractLanguageSupport {
 
@@ -47,9 +47,18 @@ public class CssLanguageSupport extends AbstractLanguageSupport {
         return new CssCellRenderer();
     }
 
+    /**
+     * Creates a completion provider for this language. Subclasses can override.
+     *
+     * @return A completion provider to use for this language.
+     */
+    protected CssCompletionProvider createProvider() {
+        return new CssCompletionProvider();
+    }
+
     private CssCompletionProvider getProvider() {
         if (provider == null) {
-            provider = new CssCompletionProvider();
+            provider = createProvider();
         }
         return provider;
     }

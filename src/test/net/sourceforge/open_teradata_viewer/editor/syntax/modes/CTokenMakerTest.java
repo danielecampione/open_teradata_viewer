@@ -20,13 +20,13 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.CTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link CTokenMaker} class.
@@ -34,7 +34,7 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class CTokenMakerTest {
+public class CTokenMakerTest extends AbstractTokenMakerTest {
 
     /**
      * Returns a new instance of the <code>ITokenMaker</code> to test.
@@ -52,7 +52,7 @@ public class CTokenMakerTest {
                 "'\\1'", };
 
         for (String code : chars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Invalid char literal: " + token,
@@ -64,7 +64,7 @@ public class CTokenMakerTest {
     public void testDataTypes() {
         String code = "char div_t double float int ldiv_t long short signed size_t unsigned void wchar_t";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -89,7 +89,7 @@ public class CTokenMakerTest {
         String[] eolCommentLiterals = { "// Hello world", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_EOL, token.getType());
@@ -101,7 +101,7 @@ public class CTokenMakerTest {
         String[] eolCommentLiterals = { "// Hello world http://www.sas.com", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
 
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
@@ -119,7 +119,7 @@ public class CTokenMakerTest {
         String code =
         // Basic doubles
         "3.0 4.2 3.0 4.2 .111 " +
-        // Basic floats ending in f, F, d, or D
+                // Basic floats ending in f, F, d, or D
                 "3.f 3.F 3.0f 3.0F .111f .111F " +
                 // Lower-case exponent, no sign
                 "3.e7f 3.e7F 3.0e7f 3.0e7F .111e7f .111e7F " +
@@ -134,7 +134,7 @@ public class CTokenMakerTest {
                 // Upper-case exponent, negative
                 "3.E-7f 3.E-7F 3.0E-7f 3.0E-7F .111E-7f .111E-7F";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -167,7 +167,7 @@ public class CTokenMakerTest {
                 + "0x1ul 0xfeul 0x333333333333ul 0X1ul 0Xfeul 0X33333333333ul 0xFEul 0XFEul "
                 + "0x1UL 0xfeUL 0x333333333333UL 0X1UL 0XfeUL 0X33333333333UL 0xFEUL 0XFEUL";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -210,24 +210,23 @@ public class CTokenMakerTest {
                 "putc", "puts", "putwc", "putwchar", "qsort", "raise", "rand",
                 "realloc", "remove", "rename", "rewind", "scanf", "setbuf",
                 "setjmp", "setlocale", "setvbuf", "setvbuf", "signal", "sinh",
-                "sin", "sprintf", "sqrt", "srand", "sscanf", "strcat",
-                "strchr", "strcmp", "strcmp", "strcoll", "strcpy", "strcspn",
-                "strerror", "strftime", "strlen", "strncat", "strncmp",
-                "strncpy", "strpbrk", "strrchr", "strspn", "strstr", "strtod",
-                "strtok", "strtol", "strtoul", "strxfrm", "swprintf",
-                "swscanf", "system", "tanh", "tan", "time", "tmpfile",
-                "tmpnam", "tolower", "toupper", "ungetc", "ungetwc", "va_arg",
-                "va_end", "va_start", "vfprintf", "vfwprintf", "vprintf",
-                "vsprintf", "vswprintf", "vwprintf", "wcrtomb", "wcscat",
-                "wcschr", "wcscmp", "wcscoll", "wcscpy", "wcscspn", "wcsftime",
-                "wcslen", "wcsncat", "wcsncmp", "wcsncpy", "wcspbrk",
-                "wcsrchr", "wcsrtombs", "wcsspn", "wcsstr", "wcstod", "wcstok",
-                "wcstol", "wcstombs", "wcstoul", "wcsxfrm", "wctob", "wctomb",
-                "wmemchr", "wmemcmp", "wmemcpy", "wmemmove", "wmemset",
-                "wprintf", "wscanf", };
+                "sin", "sprintf", "sqrt", "srand", "sscanf", "strcat", "strchr",
+                "strcmp", "strcmp", "strcoll", "strcpy", "strcspn", "strerror",
+                "strftime", "strlen", "strncat", "strncmp", "strncpy",
+                "strpbrk", "strrchr", "strspn", "strstr", "strtod", "strtok",
+                "strtol", "strtoul", "strxfrm", "swprintf", "swscanf", "system",
+                "tanh", "tan", "time", "tmpfile", "tmpnam", "tolower",
+                "toupper", "ungetc", "ungetwc", "va_arg", "va_end", "va_start",
+                "vfprintf", "vfwprintf", "vprintf", "vsprintf", "vswprintf",
+                "vwprintf", "wcrtomb", "wcscat", "wcschr", "wcscmp", "wcscoll",
+                "wcscpy", "wcscspn", "wcsftime", "wcslen", "wcsncat", "wcsncmp",
+                "wcsncpy", "wcspbrk", "wcsrchr", "wcsrtombs", "wcsspn",
+                "wcsstr", "wcstod", "wcstok", "wcstol", "wcstombs", "wcstoul",
+                "wcsxfrm", "wctob", "wctomb", "wmemchr", "wmemcmp", "wmemcpy",
+                "wmemmove", "wmemset", "wprintf", "wscanf", };
 
         for (String code : functions) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.FUNCTION, token.getType());
@@ -240,7 +239,7 @@ public class CTokenMakerTest {
                 + "extern for goto if register sizeof static struct "
                 + "switch typedef union volatile while";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -260,7 +259,7 @@ public class CTokenMakerTest {
 
         Assert.assertTrue(token.getType() == ITokenTypes.NULL);
 
-        segment = new Segment("return".toCharArray(), 0, "return".length());
+        segment = createSegment("return");
         token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertEquals("return", token.getLexeme());
         Assert.assertEquals(ITokenTypes.RESERVED_WORD_2, token.getType());
@@ -273,7 +272,7 @@ public class CTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_MULTILINE, token.getType());
@@ -285,7 +284,7 @@ public class CTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world http://www.sas.com */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
 
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
@@ -308,7 +307,7 @@ public class CTokenMakerTest {
         String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>=";
         String code = assignmentOperators + " " + nonAssignmentOperators;
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -333,7 +332,7 @@ public class CTokenMakerTest {
     public void testSeparators() {
         String code = "( ) [ ] { }";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         ITokenMaker tm = createTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -362,7 +361,7 @@ public class CTokenMakerTest {
         String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\\"\"", };
 
         for (String code : stringLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,

@@ -20,12 +20,12 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.XMLTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link XMLTokenMaker} class.
@@ -33,14 +33,14 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class XMLTokenMakerTest {
+public class XMLTokenMakerTest extends AbstractTokenMakerTest {
 
     @Test
     public void testXML_comment() {
         String[] commentLiterals = { "<!-- Hello world -->", };
 
         for (String code : commentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             XMLTokenMaker tm = new XMLTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.MARKUP_COMMENT, token.getType());
@@ -50,7 +50,7 @@ public class XMLTokenMakerTest {
     @Test
     public void testXML_comment_URL() {
         String code = "<!-- Hello world http://www.google.com -->";
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         XMLTokenMaker tm = new XMLTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -59,8 +59,8 @@ public class XMLTokenMakerTest {
                 token.is(ITokenTypes.MARKUP_COMMENT, "<!-- Hello world "));
         token = token.getNextToken();
         Assert.assertTrue(token.isHyperlink());
-        Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT,
-                "http://www.google.com"));
+        Assert.assertTrue(
+                token.is(ITokenTypes.MARKUP_COMMENT, "http://www.google.com"));
         token = token.getNextToken();
         Assert.assertFalse(token.isHyperlink());
         Assert.assertTrue(token.is(ITokenTypes.MARKUP_COMMENT, " -->"));
@@ -68,13 +68,12 @@ public class XMLTokenMakerTest {
 
     @Test
     public void testXML_doctype() {
-        String[] doctypes = {
-                "<!doctype html>",
+        String[] doctypes = { "<!doctype html>",
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">",
                 "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">", };
 
         for (String code : doctypes) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             XMLTokenMaker tm = new XMLTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.MARKUP_DTD, token.getType());
@@ -86,7 +85,7 @@ public class XMLTokenMakerTest {
         String[] entityReferences = { "&nbsp;", "&lt;", "&gt;", "&#4012", };
 
         for (String code : entityReferences) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             XMLTokenMaker tm = new XMLTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.MARKUP_ENTITY_REFERENCE,
@@ -97,12 +96,12 @@ public class XMLTokenMakerTest {
     @Test
     public void testXML_happyPath_tagWithAttributes() {
         String code = "<body onload=\"doSomething()\" data-extra='true'>";
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         XMLTokenMaker tm = new XMLTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
-        Assert.assertTrue(token.isSingleChar(ITokenTypes.MARKUP_TAG_DELIMITER,
-                '<'));
+        Assert.assertTrue(
+                token.isSingleChar(ITokenTypes.MARKUP_TAG_DELIMITER, '<'));
         token = token.getNextToken();
         Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_NAME, "body"));
         token = token.getNextToken();
@@ -117,16 +116,16 @@ public class XMLTokenMakerTest {
         token = token.getNextToken();
         Assert.assertTrue(token.is(ITokenTypes.WHITESPACE, " "));
         token = token.getNextToken();
-        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE,
-                "data-extra"));
+        Assert.assertTrue(
+                token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE, "data-extra"));
         token = token.getNextToken();
         Assert.assertTrue(token.isSingleChar(ITokenTypes.OPERATOR, '='));
         token = token.getNextToken();
-        Assert.assertTrue(token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE_VALUE,
-                "'true'"));
+        Assert.assertTrue(
+                token.is(ITokenTypes.MARKUP_TAG_ATTRIBUTE_VALUE, "'true'"));
         token = token.getNextToken();
-        Assert.assertTrue(token.isSingleChar(ITokenTypes.MARKUP_TAG_DELIMITER,
-                '>'));
+        Assert.assertTrue(
+                token.isSingleChar(ITokenTypes.MARKUP_TAG_DELIMITER, '>'));
     }
 
     @Test
@@ -136,7 +135,7 @@ public class XMLTokenMakerTest {
                 "<?xml-stylesheet type=\"text/css\" href=\"style.css\"?>", };
 
         for (String code : doctypes) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             XMLTokenMaker tm = new XMLTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.MARKUP_PROCESSING_INSTRUCTION,

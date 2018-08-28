@@ -27,7 +27,7 @@ import net.sourceforge.open_teradata_viewer.editor.autocomplete.LanguageAwareCom
  * A completion provider for CSS files.
  *
  * @author D. Campione
- * 
+ *
  */
 public class CssCompletionProvider extends LanguageAwareCompletionProvider {
 
@@ -44,7 +44,7 @@ public class CssCompletionProvider extends LanguageAwareCompletionProvider {
      * @see #createCommentCompletionProvider()
      */
     protected ICompletionProvider createCodeCompletionProvider() {
-        return new PropertyValueCompletionProvider();
+        return new PropertyValueCompletionProvider(false);
     }
 
     /**

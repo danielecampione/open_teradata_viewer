@@ -20,12 +20,12 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.PHPTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link PHPTokenMaker} class.
@@ -33,13 +33,13 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class PhpTokenMakerTest {
+public class PhpTokenMakerTest extends AbstractTokenMakerTest {
 
     @Test
     public void testBooleanLiterals() {
         String code = "<?php true false TRUE FALSE ?>";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         PHPTokenMaker tm = new PHPTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -73,7 +73,7 @@ public class PhpTokenMakerTest {
                 "'\\11'", "'\\22'", "'\\33'", "'\\1'", };
 
         for (String code : chars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
             IToken token = tm.getTokenList(segment,
                     PHPTokenMaker.INTERNAL_IN_PHP, 0);
@@ -86,7 +86,7 @@ public class PhpTokenMakerTest {
         String[] eolCommentLiterals = { "// Hello world", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
             IToken token = tm.getTokenList(segment,
                     PHPTokenMaker.INTERNAL_IN_PHP, 0);
@@ -98,8 +98,7 @@ public class PhpTokenMakerTest {
     public void testFloatingPointLiterals() {
         String code =
         // Basic doubles
-        "3.0 4.2 3.0 4.2 .111 "
-                +
+        "3.0 4.2 3.0 4.2 .111 " +
                 // Basic floats ending in f, F, d, or D
                 "3f 3F 3d 3D 3.f 3.F 3.d 3.D 3.0f 3.0F 3.0d 3.0D .111f .111F .111d .111D "
                 +
@@ -121,7 +120,7 @@ public class PhpTokenMakerTest {
                 // Upper-case exponent, negative
                 "3E-7f 3E-7F 3E-7d 3E-7D 3.E-7f 3.E-7F 3.E-7d 3.E-7D 3.0E-7f 3.0E-7F 3.0E-7d 3.0E-7D .111E-7f .111E-7F .111E-7d .111E-7D";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         PHPTokenMaker tm = new PHPTokenMaker();
         IToken token = tm.getTokenList(segment, PHPTokenMaker.INTERNAL_IN_PHP,
                 0);
@@ -152,15 +151,15 @@ public class PhpTokenMakerTest {
                 "die", "do", "echo", "else", "elseif", "empty", "enddeclare",
                 "endfor", "endforeach", "endif", "endswitch", "endwhile",
                 "eval", "extends", "final", "for", "foreach", "function",
-                "global", "goto", "if", "implements", "include",
-                "include_once", "interface", "instanceof", "isset", "list",
-                "namespace", "new", "old_function", "or", "print", "private",
-                "protected", "public", "require", "require_once", "static",
-                "switch", "throw", "try", "unset", "use", "var", "while",
-                "xor", "parent", "self", "stdClass", };
+                "global", "goto", "if", "implements", "include", "include_once",
+                "interface", "instanceof", "isset", "list", "namespace", "new",
+                "old_function", "or", "print", "private", "protected", "public",
+                "require", "require_once", "static", "switch", "throw", "try",
+                "unset", "use", "var", "while", "xor", "parent", "self",
+                "stdClass", };
 
         for (String code : keywords) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
             IToken token = tm.getTokenList(segment,
                     PHPTokenMaker.INTERNAL_IN_PHP, 0);
@@ -172,7 +171,7 @@ public class PhpTokenMakerTest {
     public void testKeywords2() {
         String code = "exit return";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         PHPTokenMaker tm = new PHPTokenMaker();
         IToken token = tm.getTokenList(segment, PHPTokenMaker.INTERNAL_IN_PHP,
                 0);
@@ -198,7 +197,7 @@ public class PhpTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
             IToken token = tm.getTokenList(segment,
                     PHPTokenMaker.INTERNAL_IN_PHP, 0);
@@ -211,7 +210,7 @@ public class PhpTokenMakerTest {
         String[] mlcLiterals = { "/* Hello world http://www.sas.com */", };
 
         for (String code : mlcLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
 
             IToken token = tm.getTokenList(segment,
@@ -235,7 +234,7 @@ public class PhpTokenMakerTest {
         String nonAssignmentOperators = "= -= *= /= |= &= ^= += %= <<= >>= >>>=";
         String code = assignmentOperators + " " + nonAssignmentOperators;
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         PHPTokenMaker tm = new PHPTokenMaker();
         IToken token = tm.getTokenList(segment, PHPTokenMaker.INTERNAL_IN_PHP,
                 0);
@@ -262,7 +261,7 @@ public class PhpTokenMakerTest {
     public void testSeparators() {
         String code = "( ) [ ] { }";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         PHPTokenMaker tm = new PHPTokenMaker();
         IToken token = tm.getTokenList(segment, PHPTokenMaker.INTERNAL_IN_PHP,
                 0);
@@ -293,7 +292,7 @@ public class PhpTokenMakerTest {
                 "\"\\\"\"", };
 
         for (String code : stringLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             PHPTokenMaker tm = new PHPTokenMaker();
             IToken token = tm.getTokenList(segment,
                     PHPTokenMaker.INTERNAL_IN_PHP, 0);

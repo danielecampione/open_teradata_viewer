@@ -70,16 +70,17 @@ public class TADefaultInputMap extends InputMap {
                 isOSX ? DefaultEditorKit.beginAction
                         : DefaultEditorKit.beginLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, shift),
-                DefaultEditorKit.selectionBeginLineAction);
+                isOSX ? DefaultEditorKit.selectionBeginAction
+                        : DefaultEditorKit.selectionBeginLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, defaultModifier),
                 DefaultEditorKit.beginAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, defaultModifier | shift),
                 DefaultEditorKit.selectionBeginAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0),
-                isOSX ? DefaultEditorKit.endAction
-                        : DefaultEditorKit.endLineAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), isOSX
+                ? DefaultEditorKit.endAction : DefaultEditorKit.endLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, shift),
-                DefaultEditorKit.selectionEndLineAction);
+                isOSX ? DefaultEditorKit.selectionEndAction
+                        : DefaultEditorKit.selectionEndLineAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, defaultModifier),
                 DefaultEditorKit.endAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_END, defaultModifier | shift),
@@ -122,15 +123,16 @@ public class TADefaultInputMap extends InputMap {
                 DefaultEditorKit.pageUpAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, shift),
                 TextAreaEditorKit.taSelectionPageUpAction);
-        put(KeyStroke
-                .getKeyStroke(KeyEvent.VK_PAGE_UP, defaultModifier | shift),
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP,
+                defaultModifier | shift),
                 TextAreaEditorKit.taSelectionPageLeftAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0),
                 DefaultEditorKit.pageDownAction);
         put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, shift),
                 TextAreaEditorKit.taSelectionPageDownAction);
-        put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, defaultModifier
-                | shift), TextAreaEditorKit.taSelectionPageRightAction);
+        put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+                defaultModifier | shift),
+                TextAreaEditorKit.taSelectionPageRightAction);
 
         put(KeyStroke.getKeyStroke(KeyEvent.VK_CUT, 0),
                 DefaultEditorKit.cutAction);
@@ -202,6 +204,12 @@ public class TADefaultInputMap extends InputMap {
                     DefaultEditorKit.beginLineAction);
             put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, defaultModifier),
                     DefaultEditorKit.endLineAction);
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
+                    defaultModifier | shift),
+                    DefaultEditorKit.selectionBeginLineAction);
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
+                    defaultModifier | shift),
+                    DefaultEditorKit.selectionEndLineAction);
         }
 
         // NOTE: Currently, macros aren't part of the default input map for

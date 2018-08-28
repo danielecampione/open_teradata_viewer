@@ -1,4 +1,4 @@
-Teradata JDBC Driver 15.10.00.05
+Teradata JDBC Driver 15.10.00.09
 
 Part of the Teradata Tools and Utilities 15.10 product suite
 
@@ -33,6 +33,28 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.30:
+
+DR 178714 Escape functions {fn teradata_call_param_rs} and {fn teradata_auto_out_param}
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.29:
+
+DR 174886 Support Unicode Pass Through
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.28:
+
+DR 148961 Support backslash ( \ ) as LIKE ESCAPE character in pattern arguments of DatabaseMetaData methods
+DR 161165 Use equals (=) rather than LIKE for DatabaseMetaData method pattern arguments not containing a pattern
+
+This release includes changes to address the following DRs, originally included
+in release 15.00.00.27:
+
+DR 167410 Provide ResultSet SQLWarning when row count exceeds Integer.MAX_VALUE
+DR 176246 Translate new JDBC 15.10 error messages into Japanese
 
 This release includes changes to address the following DRs, originally included
 in release 15.00.00.26:
@@ -1214,7 +1236,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.15.10.00.05.zip and TeraJDBC__indep_indep.15.10.00.05.tar
+TeraJDBC__indep_indep.15.10.00.09.zip and TeraJDBC__indep_indep.15.10.00.09.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file

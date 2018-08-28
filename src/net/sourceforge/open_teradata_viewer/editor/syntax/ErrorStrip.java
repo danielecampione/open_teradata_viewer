@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.CaretEvent;
@@ -75,7 +76,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.TaskTagParser.T
  * @author D. Campione
  *
  */
-public class ErrorStrip extends JComponent {
+public class ErrorStrip extends JPanel {
 
     private static final long serialVersionUID = 2920372562117101472L;
 
@@ -272,7 +273,7 @@ public class ErrorStrip extends JComponent {
     private int lineToY(int line) {
         int h = textArea.getVisibleRect().height;
         float lineCount = textArea.getLineCount();
-        return (int) (((line - 1) / (lineCount - 1)) * h) - 2;
+        return (int) (((line - 1) / (lineCount - 1)) * (h - 2));
     }
 
     /**
@@ -489,8 +490,8 @@ public class ErrorStrip extends JComponent {
      * @author D. Campione
      *
      */
-    private class Listener extends MouseAdapter implements
-            PropertyChangeListener, CaretListener {
+    private class Listener extends MouseAdapter
+            implements PropertyChangeListener, CaretListener {
 
         private Rectangle visibleRect = new Rectangle();
 
@@ -538,7 +539,8 @@ public class ErrorStrip extends JComponent {
                 if (getShowMarkedOccurrences()) {
                     refreshMarkers();
                 }
-            } else if (SyntaxTextArea.PARSER_NOTICES_PROPERTY.equals(propName)) { // If parser notices changed
+            } else
+                if (SyntaxTextArea.PARSER_NOTICES_PROPERTY.equals(propName)) { // If parser notices changed
                 refreshMarkers();
             } else if (SyntaxTextArea.MARKED_OCCURRENCES_CHANGED_PROPERTY // If marked occurrences changed
                     .equals(propName)) {

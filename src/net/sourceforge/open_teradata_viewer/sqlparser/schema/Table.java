@@ -19,6 +19,7 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.schema;
 
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Alias;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.ASTNodeAccessImpl;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IIntoTableVisitor;
@@ -26,11 +27,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Pivot;
 
 /**
  * A table. It can have an alias and the schema name it belongs to.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
-public class Table implements IFromItem, IMultiPartName {
+public class Table extends ASTNodeAccessImpl
+        implements IFromItem, IMultiPartName {
 
     private Database database;
     private String schemaName;

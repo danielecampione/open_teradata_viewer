@@ -31,6 +31,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.DateValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExtractExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.HexValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
@@ -39,12 +40,14 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.KeepExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.MySQLGroupConcat;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NumericBind;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.RowConstructor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.UserVariable;
@@ -80,7 +83,16 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relat
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Column;
 import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatementVisitor;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.SetStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statements;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.alter.Alter;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.index.CreateIndex;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.view.CreateView;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.execute.Execute;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
@@ -100,6 +112,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubJoin;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.ValuesList;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.WithItem;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.truncate.Truncate;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 
 /**
@@ -108,8 +121,9 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
  * @author D. Campione
  *
  */
-public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
-        IExpressionVisitor, IItemsListVisitor, ISelectItemVisitor {
+public class TablesNamesFinder
+        implements ISelectVisitor, IFromItemVisitor, IExpressionVisitor,
+        IItemsListVisitor, ISelectItemVisitor, IStatementVisitor {
 
     private List<String> tables;
     /**
@@ -122,80 +136,57 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Delete delete) {
         init();
-        tables.add(delete.getTable().getName());
-        if (delete.getWhere() != null) {
-            delete.getWhere().accept(this);
-        }
-
+        delete.accept(this);
         return tables;
     }
 
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Insert insert) {
         init();
-        tables.add(insert.getTable().getName());
-        if (insert.getItemsList() != null) {
-            insert.getItemsList().accept(this);
-        }
-
+        insert.accept(this);
         return tables;
     }
 
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Replace replace) {
         init();
-        tables.add(replace.getTable().getName());
-        if (replace.getExpressions() != null) {
-            for (IExpression expression : replace.getExpressions()) {
-                expression.accept(this);
-            }
-        }
-        if (replace.getItemsList() != null) {
-            replace.getItemsList().accept(this);
-        }
-
+        replace.accept(this);
         return tables;
     }
 
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Select select) {
         init();
+        select.accept(this);
+        return tables;
+    }
+
+    @Override
+    public void visit(Select select) {
         if (select.getWithItemsList() != null) {
             for (WithItem withItem : select.getWithItemsList()) {
                 withItem.accept(this);
             }
         }
         select.getSelectBody().accept(this);
-
-        return tables;
     }
 
     /** Main entry for this Tool class. A list of found tables is returned. */
     public List<String> getTableList(Update update) {
         init();
-        for (Table table : update.getTables()) {
-            tables.add(table.getName());
-        }
-        if (update.getExpressions() != null) {
-            for (IExpression expression : update.getExpressions()) {
-                expression.accept(this);
-            }
-        }
+        update.accept(this);
+        return tables;
+    }
 
-        if (update.getFromItem() != null) {
-            update.getFromItem().accept(this);
-        }
+    public List<String> getTableList(CreateTable create) {
+        init();
+        create.accept(this);
+        return tables;
+    }
 
-        if (update.getJoins() != null) {
-            for (Join join : update.getJoins()) {
-                join.getRightItem().accept(this);
-            }
-        }
-
-        if (update.getWhere() != null) {
-            update.getWhere().accept(this);
-        }
-
+    public List<String> getTableList(IExpression expr) {
+        init();
+        expr.accept(this);
         return tables;
     }
 
@@ -492,7 +483,8 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
     public void visit(ValuesList valuesList) {
     }
 
-    private void init() {
+    /** Initializes table names collector. */
+    protected void init() {
         otherItemNames = new ArrayList<String>();
         tables = new ArrayList<String>();
     }
@@ -557,5 +549,126 @@ public class TablesNamesFinder implements ISelectVisitor, IFromItemVisitor,
 
     @Override
     public void visit(KeepExpression aexpr) {
+    }
+
+    @Override
+    public void visit(MySQLGroupConcat groupConcat) {
+    }
+
+    @Override
+    public void visit(Delete delete) {
+        tables.add(delete.getTable().getName());
+        if (delete.getWhere() != null) {
+            delete.getWhere().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(Update update) {
+        for (Table table : update.getTables()) {
+            tables.add(table.getName());
+        }
+        if (update.getExpressions() != null) {
+            for (IExpression expression : update.getExpressions()) {
+                expression.accept(this);
+            }
+        }
+
+        if (update.getFromItem() != null) {
+            update.getFromItem().accept(this);
+        }
+
+        if (update.getJoins() != null) {
+            for (Join join : update.getJoins()) {
+                join.getRightItem().accept(this);
+            }
+        }
+
+        if (update.getWhere() != null) {
+            update.getWhere().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(Insert insert) {
+        tables.add(insert.getTable().getName());
+        if (insert.getItemsList() != null) {
+            insert.getItemsList().accept(this);
+        }
+        if (insert.getSelect() != null) {
+            visit(insert.getSelect());
+        }
+    }
+
+    @Override
+    public void visit(Replace replace) {
+        tables.add(replace.getTable().getName());
+        if (replace.getExpressions() != null) {
+            for (IExpression expression : replace.getExpressions()) {
+                expression.accept(this);
+            }
+        }
+        if (replace.getItemsList() != null) {
+            replace.getItemsList().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(Drop drop) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(Truncate truncate) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(CreateIndex createIndex) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(CreateTable create) {
+        tables.add(create.getTable().getFullyQualifiedName());
+        if (create.getSelect() != null) {
+            create.getSelect().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(CreateView createView) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(Alter alter) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(Statements stmts) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(Execute execute) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(SetStatement set) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void visit(RowConstructor rowConstructor) {
+        for (IExpression expr : rowConstructor.getExprList().getExpressions()) {
+            expr.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(HexValue hexValue) {
     }
 }

@@ -35,7 +35,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxDocument;
  * "<code>FIXME</code>", etc. in source code comments.
  *
  * @author D. Campione
- * 
+ *
  */
 public class TaskTagParser extends AbstractParser {
 
@@ -106,7 +106,7 @@ public class TaskTagParser extends AbstractParser {
             if (start > -1) {
                 text = text.substring(start);
                 int len = text.length();
-                TaskNotice pn = new TaskNotice(this, text, line, offs, len);
+                TaskNotice pn = new TaskNotice(this, text, line + 1, offs, len);
                 pn.setLevel(IParserNotice.Level.INFO);
                 pn.setShowInEditor(false);
                 pn.setColor(COLOR);
@@ -140,9 +140,9 @@ public class TaskTagParser extends AbstractParser {
      * A parser notice that signifies a task. This class is here so we can treat
      * tasks specially and show them in the {@link ErrorStrip} even though they
      * are <code>INFO</code>-level and marked as "don't show in editor".
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     public static class TaskNotice extends DefaultParserNotice {
 

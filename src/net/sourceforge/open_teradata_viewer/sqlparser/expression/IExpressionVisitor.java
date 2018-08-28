@@ -68,6 +68,8 @@ public interface IExpressionVisitor {
 
     void visit(LongValue longValue);
 
+    void visit(HexValue hexValue);
+
     void visit(DateValue dateValue);
 
     void visit(TimeValue timeValue);
@@ -159,4 +161,8 @@ public interface IExpressionVisitor {
     void visit(NumericBind bind);
 
     void visit(KeepExpression aexpr);
+
+    void visit(MySQLGroupConcat groupConcat);
+
+    void visit(RowConstructor rowConstructor);
 }

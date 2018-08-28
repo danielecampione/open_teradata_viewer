@@ -30,6 +30,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.DateValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.DoubleValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.ExtractExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Function;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.HexValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpressionVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.IntervalExpression;
@@ -38,12 +39,14 @@ import net.sourceforge.open_teradata_viewer.sqlparser.expression.JdbcParameter;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.JsonExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.KeepExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.LongValue;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.MySQLGroupConcat;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NullValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.NumericBind;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.Parenthesis;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.RowConstructor;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.SignedExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.StringValue;
-import net.sourceforge.open_teradata_viewer.sqlparser.expression.OracleHierarchicalExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimeValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.TimestampValue;
 import net.sourceforge.open_teradata_viewer.sqlparser.expression.UserVariable;
@@ -91,8 +94,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect
  * @author D. Campione
  *
  */
-public class ExpressionDeParser implements IExpressionVisitor,
-        IItemsListVisitor {
+public class ExpressionDeParser
+        implements IExpressionVisitor, IItemsListVisitor {
 
     private StringBuilder buffer;
     private ISelectVisitor selectVisitor;
@@ -116,7 +119,8 @@ public class ExpressionDeParser implements IExpressionVisitor,
      *
      * @param buffer the buffer that will be filled with the expression.
      */
-    public ExpressionDeParser(ISelectVisitor selectVisitor, StringBuilder buffer) {
+    public ExpressionDeParser(ISelectVisitor selectVisitor,
+            StringBuilder buffer) {
         this.selectVisitor = selectVisitor;
         this.buffer = buffer;
     }
@@ -161,13 +165,16 @@ public class ExpressionDeParser implements IExpressionVisitor,
     @Override
     public void visit(Division division) {
         visitBinaryExpression(division, " / ");
-
     }
 
     @Override
     public void visit(DoubleValue doubleValue) {
         buffer.append(doubleValue.toString());
+    }
 
+    @Override
+    public void visit(HexValue hexValue) {
+        buffer.append(hexValue.toString());
     }
 
     public void visitOldOracleJoinBinaryExpression(
@@ -203,7 +210,8 @@ public class ExpressionDeParser implements IExpressionVisitor,
             inExpression.getLeftItemsList().accept(this);
         } else {
             inExpression.getLeftExpression().accept(this);
-            if (inExpression.getOldOracleJoinSyntax() == ISupportsOldOracleJoinSyntax.ORACLE_JOIN_RIGHT) {
+            if (inExpression
+                    .getOldOracleJoinSyntax() == ISupportsOldOracleJoinSyntax.ORACLE_JOIN_RIGHT) {
                 buffer.append("(+)");
             }
         }
@@ -292,8 +300,7 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(NullValue nullValue) {
-        buffer.append("NULL");
-
+        buffer.append(nullValue.toString());
     }
 
     @Override
@@ -478,14 +485,14 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(AllComparisonExpression allComparisonExpression) {
-        buffer.append(" ALL ");
+        buffer.append("ALL ");
         allComparisonExpression.getSubSelect()
                 .accept((IExpressionVisitor) this);
     }
 
     @Override
     public void visit(AnyComparisonExpression anyComparisonExpression) {
-        buffer.append(" ANY ");
+        buffer.append(anyComparisonExpression.getAnyType().name()).append(" ");
         anyComparisonExpression.getSubSelect()
                 .accept((IExpressionVisitor) this);
     }
@@ -542,7 +549,10 @@ public class ExpressionDeParser implements IExpressionVisitor,
 
     @Override
     public void visit(ExtractExpression eexpr) {
-        buffer.append(eexpr.toString());
+        buffer.append("EXTRACT(").append(eexpr.getName());
+        buffer.append(" FROM ");
+        eexpr.getExpression().accept(this);
+        buffer.append(')');
     }
 
     @Override
@@ -604,5 +614,28 @@ public class ExpressionDeParser implements IExpressionVisitor,
     @Override
     public void visit(KeepExpression aexpr) {
         buffer.append(aexpr.toString());
+    }
+
+    @Override
+    public void visit(MySQLGroupConcat groupConcat) {
+        buffer.append(groupConcat.toString());
+    }
+
+    @Override
+    public void visit(RowConstructor rowConstructor) {
+        if (rowConstructor.getName() != null) {
+            buffer.append(rowConstructor.getName());
+        }
+        buffer.append("(");
+        boolean first = true;
+        for (IExpression expr : rowConstructor.getExprList().getExpressions()) {
+            if (first) {
+                first = false;
+            } else {
+                buffer.append(", ");
+            }
+            expr.accept(this);
+        }
+        buffer.append(")");
     }
 }

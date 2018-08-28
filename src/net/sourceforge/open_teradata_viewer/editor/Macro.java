@@ -33,9 +33,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.UnicodeReader;
-
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,20 +41,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.UnicodeReader;
+
 /**
  * A macro as recorded/played back by an {@link TextArea}.<p>
- * 
+ *
  * <code>Macro</code>s are static; when a Macro is loaded, it can be run by any
  * instance of <code>TextArea</code> in the application. To activate and play
  * back a macro, use the following methods:
- * 
+ *
  * <ul>
  *    <li>{@link TextArea#loadMacro(Macro)}
  *    <li>{@link TextArea#playbackLastMacro()}
  * </ul>
  *
  * To record and save a new macro, you'd use the following methods:
- * 
+ *
  * <ul>
  *    <li>{@link TextArea#beginRecordingMacro()} (this discards the previous
  *        "current" macro, if any)
@@ -66,13 +66,13 @@ import org.xml.sax.InputSource;
  *        desired)
  *    <li>{@link TextArea#getCurrentMacro()}.{@link #saveToFile(File)}
  * </ul>
- * 
+ *
  * As <code>Macro</code>s save themselves as XML files, a common technique is to
  * save all macros in files named "<code>{@link #getName()}.xml</code>", and
  * place them all in a common directory.
  *
  * @author D. Campione
- * 
+ *
  */
 public class Macro {
 
@@ -329,6 +329,7 @@ public class Macro {
 
             // Write the name of the macro
             Element nameElement = doc.createElement(MACRO_NAME);
+            nameElement.appendChild(doc.createCDATASection(name));
             rootElement.appendChild(nameElement);
 
             // Write all actions (the meat) in the macro
@@ -385,9 +386,9 @@ public class Macro {
      * key type and some action in the editor, such as a letter inserted into
      * the document, scrolling one page down, selecting the current line,
      * etc..).
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     static class MacroRecord {
 

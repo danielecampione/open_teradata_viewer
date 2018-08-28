@@ -21,16 +21,18 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
- * 
- * 
+ * Combines ANY and SOME expressions.
+ *
  * @author D. Campione
  *
  */
 public class AnyComparisonExpression implements IExpression {
 
-    private SubSelect subSelect;
+    private final SubSelect subSelect;
+    private final AnyType anyType;
 
-    public AnyComparisonExpression(SubSelect subSelect) {
+    public AnyComparisonExpression(AnyType anyType, SubSelect subSelect) {
+        this.anyType = anyType;
         this.subSelect = subSelect;
     }
 
@@ -41,5 +43,14 @@ public class AnyComparisonExpression implements IExpression {
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
+    }
+
+    public AnyType getAnyType() {
+        return anyType;
+    }
+
+    @Override
+    public String toString() {
+        return anyType.name() + " " + subSelect.toString();
     }
 }

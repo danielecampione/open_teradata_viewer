@@ -26,8 +26,8 @@ import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.drop.Drop;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -43,14 +43,21 @@ public class DropTest extends TestCase {
         String statement = "DROP TABLE mytab";
         Drop drop = (Drop) parserManager.parse(new StringReader(statement));
         assertEquals("TABLE", drop.getType());
-        assertEquals("mytab", drop.getName());
+        assertEquals("mytab", drop.getName().getFullyQualifiedName());
         assertEquals(statement, "" + drop);
 
         statement = "DROP INDEX myindex CASCADE";
         drop = (Drop) parserManager.parse(new StringReader(statement));
         assertEquals("INDEX", drop.getType());
-        assertEquals("myindex", drop.getName());
+        assertEquals("myindex", drop.getName().getFullyQualifiedName());
         assertEquals("CASCADE", drop.getParameters().get(0));
         assertEquals(statement, "" + drop);
+    }
+
+    public void testDrop2() throws SQLParserException {
+        Drop drop = (Drop) parserManager
+                .parse(new StringReader("DROP TABLE \"testtable\""));
+        assertEquals("TABLE", drop.getType());
+        assertEquals("\"testtable\"", drop.getName().getFullyQualifiedName());
     }
 }

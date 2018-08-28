@@ -21,14 +21,14 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
 public class AllComparisonExpression implements IExpression {
 
-    private SubSelect subSelect;
+    private final SubSelect subSelect;
 
     public AllComparisonExpression(SubSelect subSelect) {
         this.subSelect = subSelect;
@@ -41,5 +41,10 @@ public class AllComparisonExpression implements IExpression {
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "ALL " + subSelect.toString();
     }
 }

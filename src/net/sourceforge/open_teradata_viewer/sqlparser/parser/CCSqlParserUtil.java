@@ -29,11 +29,12 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.Statements;
 
 /**
  * Toolfunctions to start and use ISqlParser.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public final class CCSqlParserUtil {
+
     public static IStatement parse(Reader statementReader)
             throws SQLParserException {
         CCSqlParser parser = new CCSqlParser(statementReader);
@@ -48,6 +49,16 @@ public final class CCSqlParserUtil {
         CCSqlParser parser = new CCSqlParser(new StringReader(sql));
         try {
             return parser.Statement();
+        } catch (Exception ex) {
+            throw new SQLParserException(ex);
+        }
+    }
+
+    public static Node parseAST(String sql) throws SQLParserException {
+        CCSqlParser parser = new CCSqlParser(new StringReader(sql));
+        try {
+            parser.Statement();
+            return parser.jjtree.rootNode();
         } catch (Exception ex) {
             throw new SQLParserException(ex);
         }
@@ -85,7 +96,7 @@ public final class CCSqlParserUtil {
 
     /**
      * Parse a conditional expression. This is the expression after a where
-     * clause. 
+     * clause.
      */
     public static IExpression parseCondExpression(String condExpr)
             throws SQLParserException {

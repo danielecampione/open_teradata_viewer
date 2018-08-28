@@ -78,10 +78,12 @@ public class CreateTableTest extends TestCase {
                 .parse(new StringReader(statement));
         assertEquals(2, createTable.getColumnDefinitions().size());
         assertFalse(createTable.isUnlogged());
-        assertEquals("mycol", ((ColumnDefinition) createTable
-                .getColumnDefinitions().get(0)).getColumnName());
-        assertEquals("mycol2", ((ColumnDefinition) createTable
-                .getColumnDefinitions().get(1)).getColumnName());
+        assertEquals("mycol",
+                ((ColumnDefinition) createTable.getColumnDefinitions().get(0))
+                        .getColumnName());
+        assertEquals("mycol2",
+                ((ColumnDefinition) createTable.getColumnDefinitions().get(1))
+                        .getColumnName());
         assertEquals("PRIMARY KEY",
                 ((Index) createTable.getIndexes().get(0)).getType());
         assertEquals("mycol", ((Index) createTable.getIndexes().get(0))
@@ -96,10 +98,12 @@ public class CreateTableTest extends TestCase {
                 .parse(new StringReader(statement));
         assertEquals(2, createTable.getColumnDefinitions().size());
         assertTrue(createTable.isUnlogged());
-        assertEquals("mycol", ((ColumnDefinition) createTable
-                .getColumnDefinitions().get(0)).getColumnName());
-        assertEquals("mycol2", ((ColumnDefinition) createTable
-                .getColumnDefinitions().get(1)).getColumnName());
+        assertEquals("mycol",
+                ((ColumnDefinition) createTable.getColumnDefinitions().get(0))
+                        .getColumnName());
+        assertEquals("mycol2",
+                ((ColumnDefinition) createTable.getColumnDefinitions().get(1))
+                        .getColumnName());
         assertEquals("PRIMARY KEY",
                 ((Index) createTable.getIndexes().get(0)).getType());
         assertEquals("mycol", ((Index) createTable.getIndexes().get(0))
@@ -122,13 +126,24 @@ public class CreateTableTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
+    public void testCreateTableForeignKey3() throws SQLParserException {
+        String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED REFERENCES ra_user(id), PRIMARY KEY (id))";
+        assertSqlCanBeParsedAndDeparsed(statement, true);
+    }
+
+    public void testCreateTableForeignKey4() throws SQLParserException {
+        String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED FOREIGN KEY REFERENCES ra_user(id), PRIMARY KEY (id))";
+        assertSqlCanBeParsedAndDeparsed(statement, true);
+    }
+
     public void testCreateTablePrimaryKey() throws SQLParserException {
         String statement = "CREATE TABLE test (id INT UNSIGNED NOT NULL AUTO_INCREMENT, string VARCHAR (20), user_id INT UNSIGNED, CONSTRAINT pk_name PRIMARY KEY (id))";
         assertSqlCanBeParsedAndDeparsed(statement);
     }
 
     public void testCreateTableParams() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TEMPORARY TABLE T1 (PROCESSID VARCHAR (32)) ON COMMIT PRESERVE ROWS");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TEMPORARY TABLE T1 (PROCESSID VARCHAR (32)) ON COMMIT PRESERVE ROWS");
     }
 
     public void testCreateTableUniqueConstraint() throws SQLParserException {
@@ -138,31 +153,38 @@ public class CreateTableTest extends TestCase {
     }
 
     public void testCreateTableDefault() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE T1 (id integer default -1)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE T1 (id integer default -1)");
     }
 
     public void testCreateTableDefault2() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE T1 (id integer default 1)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE T1 (id integer default 1)");
     }
 
     public void testCreateTableIfNotExists() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE IF NOT EXISTS animals (id INT NOT NULL)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE IF NOT EXISTS animals (id INT NOT NULL)");
     }
 
     public void testCreateTableInlinePrimaryKey() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE animals (id INT PRIMARY KEY NOT NULL)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE animals (id INT PRIMARY KEY NOT NULL)");
     }
 
     public void testCreateTableWithRange() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE foo (name character varying (255), range character varying (255), start_range integer, end_range integer)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE foo (name character varying (255), range character varying (255), start_range integer, end_range integer)");
     }
 
     public void testCreateTableWithKey() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE bar (key character varying (255) NOT NULL)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE bar (key character varying (255) NOT NULL)");
     }
 
     public void testCreateTableWithUniqueKey() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE animals (id INT NOT NULL, name VARCHAR (100) UNIQUE KEY (id))");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE animals (id INT NOT NULL, name VARCHAR (100) UNIQUE KEY (id))");
     }
 
     public void testCreateTableVeryComplex() throws SQLParserException {
@@ -202,26 +224,29 @@ public class CreateTableTest extends TestCase {
     }
 
     public void testCreateTableArrays() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE sal_emp (name text, pay_by_quarter integer[], schedule text[][])");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE sal_emp (name text, pay_by_quarter integer[], schedule text[][])");
     }
 
     public void testCreateTableArrays2() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE sal_emp (name text, pay_by_quarter integer[5], schedule text[3][2])");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE sal_emp (name text, pay_by_quarter integer[5], schedule text[3][2])");
     }
 
     public void testCreateTableColumnValues() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE mytable1 (values INTEGER)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE mytable1 (values INTEGER)");
     }
 
     public void testCreateTableColumnValue() throws SQLParserException {
-        assertSqlCanBeParsedAndDeparsed("CREATE TABLE mytable1 (value INTEGER)");
+        assertSqlCanBeParsedAndDeparsed(
+                "CREATE TABLE mytable1 (value INTEGER)");
     }
 
     public void testRUBiSCreateList() throws Exception {
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                        CreateTableTest.class
-                                .getResourceAsStream("/res/testfiles/sqlparser/RUBiS-create-requests.txt")));
+                new InputStreamReader(CreateTableTest.class.getResourceAsStream(
+                        "/res/testfiles/sqlparser/RUBiS-create-requests.txt")));
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 
         try {
@@ -283,10 +308,11 @@ public class CreateTableTest extends TestCase {
                             if (createTable.getIndexes() != null) {
                                 for (Iterator iterator = createTable
                                         .getIndexes().iterator(); iterator
-                                        .hasNext();) {
+                                                .hasNext();) {
                                     Index index = (Index) iterator.next();
                                     if (index.getType().equals("PRIMARY KEY")
-                                            && index.getColumnsNames().size() == 1
+                                            && index.getColumnsNames()
+                                                    .size() == 1
                                             && index.getColumnsNames().get(0)
                                                     .equals(colName)) {
                                         unique = true;
@@ -296,10 +322,11 @@ public class CreateTableTest extends TestCase {
                             }
 
                             if (!unique) {
-                                if (columnDefinition.getColumnSpecStrings() != null) {
+                                if (columnDefinition
+                                        .getColumnSpecStrings() != null) {
                                     for (Iterator iterator = columnDefinition
-                                            .getColumnSpecStrings().iterator(); iterator
-                                            .hasNext();) {
+                                            .getColumnSpecStrings()
+                                            .iterator(); iterator.hasNext();) {
                                         String par = (String) iterator.next();
                                         if (par.equals("UNIQUE")) {
                                             unique = true;
@@ -328,8 +355,8 @@ public class CreateTableTest extends TestCase {
 
                     }
                 } catch (Exception e) {
-                    throw new TestException("error at stm num: " + numSt + "  "
-                            + query, e);
+                    throw new TestException(
+                            "error at stm num: " + numSt + "  " + query, e);
                 }
                 numSt++;
 
@@ -347,9 +374,9 @@ public class CreateTableTest extends TestCase {
             line = in.readLine();
             if (line != null) {
                 line.trim();
-                if ((line.length() != 0)
-                        && ((line.length() < 2) || (line.length() >= 2)
-                                && !(line.charAt(0) == '/' && line.charAt(1) == '/'))) {
+                if ((line.length() != 0) && ((line.length() < 2)
+                        || (line.length() >= 2) && !(line.charAt(0) == '/'
+                                && line.charAt(1) == '/'))) {
                     break;
                 }
             } else {

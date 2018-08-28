@@ -26,8 +26,8 @@ package net.sourceforge.open_teradata_viewer.editor.syntax;
  * @author D. Campione
  *
  */
-class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
-        ISyntaxConstants {
+class DefaultTokenMakerFactory extends AbstractTokenMakerFactory
+        implements ISyntaxConstants {
 
     /** {@inheritDoc} */
     @Override
@@ -50,6 +50,7 @@ class DefaultTokenMakerFactory extends AbstractTokenMakerFactory implements
         putMapping(SYNTAX_STYLE_JSHINTRC, pkg + "JshintrcTokenMaker");
         putMapping(SYNTAX_STYLE_JSON, pkg + "JsonTokenMaker");
         putMapping(SYNTAX_STYLE_JSP, pkg + "JSPTokenMaker");
+        putMapping(SYNTAX_STYLE_LESS, pkg + "LessTokenMaker");
         putMapping(SYNTAX_STYLE_LISP, pkg + "LispTokenMaker");
         putMapping(SYNTAX_STYLE_MXML, pkg + "MxmlTokenMaker");
         putMapping(SYNTAX_STYLE_NSIS, pkg + "NSISTokenMaker");

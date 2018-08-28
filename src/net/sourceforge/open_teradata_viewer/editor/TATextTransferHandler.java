@@ -50,6 +50,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  * @author D. Campione
  *
  */
+@SuppressWarnings("deprecation")
 public class TATextTransferHandler extends TransferHandler {
 
     private static final long serialVersionUID = 757855115236312688L;
@@ -77,7 +78,8 @@ public class TATextTransferHandler extends TransferHandler {
      * @param c The text component to see whether it will accept any of the
      *        specified data flavors as input.
      */
-    protected DataFlavor getImportFlavor(DataFlavor[] flavors, JTextComponent c) {
+    protected DataFlavor getImportFlavor(DataFlavor[] flavors,
+            JTextComponent c) {
         DataFlavor refFlavor = null;
         DataFlavor stringFlavor = null;
 
@@ -227,7 +229,8 @@ public class TATextTransferHandler extends TransferHandler {
      * @param action The actual action that was performed.
      */
     @Override
-    protected void exportDone(JComponent source, Transferable data, int action) {
+    protected void exportDone(JComponent source, Transferable data,
+            int action) {
         // Only remove the text if shouldRemove has not been set to false by
         // importData and only if the action is a move
         if (shouldRemove && action == MOVE) {
@@ -272,7 +275,8 @@ public class TATextTransferHandler extends TransferHandler {
         }
 
         boolean imported = false;
-        DataFlavor importFlavor = getImportFlavor(t.getTransferDataFlavors(), c);
+        DataFlavor importFlavor = getImportFlavor(t.getTransferDataFlavors(),
+                c);
         if (importFlavor != null) {
             try {
                 InputContext ic = c.getInputContext();
@@ -367,10 +371,11 @@ public class TATextTransferHandler extends TransferHandler {
                 data = (data == null) ? "" : data;
                 if (String.class.equals(flavor.getRepresentationClass())) {
                     return data;
-                } else if (Reader.class.equals(flavor.getRepresentationClass())) {
+                } else
+                    if (Reader.class.equals(flavor.getRepresentationClass())) {
                     return new StringReader(data);
-                } else if (InputStream.class.equals(flavor
-                        .getRepresentationClass())) {
+                } else if (InputStream.class
+                        .equals(flavor.getRepresentationClass())) {
                     return new StringBufferInputStream(data);
                 }
                 // Fall through to unsupported
@@ -503,12 +508,9 @@ public class TATextTransferHandler extends TransferHandler {
                                 + ";class=java.lang.String");
                 stringFlavors[1] = DataFlavor.stringFlavor;
             } catch (ClassNotFoundException cnfe) {
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(
-                                "Error initializing net.sourceforge.open_teradata_viewer.editor.TATextTransferHandler.",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println(
+                        "Error initializing net.sourceforge.open_teradata_viewer.editor.TATextTransferHandler.",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
         }
     }

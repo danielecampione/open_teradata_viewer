@@ -20,12 +20,12 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.JshintrcTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link JshintrcTokenMaker} class.
@@ -33,13 +33,13 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class JshintrcTokenMakerTest {
+public class JshintrcTokenMakerTest extends AbstractTokenMakerTest {
 
     @Test
     public void testBooleanLiterals() {
         String code = "true false";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -64,7 +64,7 @@ public class JshintrcTokenMakerTest {
         String code =
         // Basic doubles
         "3.0 4.2 3.000 4.2 0.111 " +
-        // lower-case exponent, no sign
+                // lower-case exponent, no sign
                 "3e7 3.0e7 0.111e7 -3e7 -3.0e7 -0.111e7 " +
                 // Upper-case exponent, no sign
                 "3E7 3.0E7 0.111E7 -3E7 -3.0E7 -0.111E7 " +
@@ -77,14 +77,14 @@ public class JshintrcTokenMakerTest {
                 // Upper-case exponent, negative
                 "3E-7 3.0E-7 0.111E-7 -3E-7 -3.0E-7 -0.111E-7";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
         String[] keywords = code.split(" +");
         for (int i = 0; i < keywords.length; i++) {
-            Assert.assertEquals("Unexpected number for token " + i,
-                    keywords[i], token.getLexeme());
+            Assert.assertEquals("Unexpected number for token " + i, keywords[i],
+                    token.getLexeme());
             Assert.assertEquals("Invalid float: " + token,
                     ITokenTypes.LITERAL_NUMBER_FLOAT, token.getType());
             if (i < keywords.length - 1) {
@@ -103,14 +103,14 @@ public class JshintrcTokenMakerTest {
     public void testIntegerLiterals() {
         String code = "1 42 0 -1 -42";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
         String[] keywords = code.split(" +");
         for (int i = 0; i < keywords.length; i++) {
-            Assert.assertEquals("Unexpected number for token " + i,
-                    keywords[i], token.getLexeme());
+            Assert.assertEquals("Unexpected number for token " + i, keywords[i],
+                    token.getLexeme());
             Assert.assertEquals(ITokenTypes.LITERAL_NUMBER_DECIMAL_INT,
                     token.getType());
             if (i < keywords.length - 1) {
@@ -128,7 +128,7 @@ public class JshintrcTokenMakerTest {
     @Test
     public void testMultiLineComments() {
         String code = "// Hello world";
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.is(IToken.COMMENT_EOL, code));
@@ -137,7 +137,7 @@ public class JshintrcTokenMakerTest {
     @Test
     public void testNullLiterals() {
         String code = "null";
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.is(ITokenTypes.RESERVED_WORD, "null"));
@@ -147,7 +147,7 @@ public class JshintrcTokenMakerTest {
     public void testSeparators() {
         String code = "[ ] { }";
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
         JshintrcTokenMaker tm = new JshintrcTokenMaker();
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
 
@@ -173,11 +173,11 @@ public class JshintrcTokenMakerTest {
 
     @Test
     public void testStringLiterals() {
-        String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\u00fe\"",
-                "\"\\\"\"", "\"\\\\/\\b\\f\\n\\r\\t\"", };
+        String[] stringLiterals = { "\"\"", "\"hi\"", "\"\\u00fe\"", "\"\\\"\"",
+                "\"\\\\/\\b\\f\\n\\r\\t\"", };
 
         for (String code : stringLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             JshintrcTokenMaker tm = new JshintrcTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Invalid string: " + token,
@@ -191,7 +191,7 @@ public class JshintrcTokenMakerTest {
                 "\"foo unterminated string", };
 
         for (String code : stringLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             JshintrcTokenMaker tm = new JshintrcTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Invalid error-string: " + token,

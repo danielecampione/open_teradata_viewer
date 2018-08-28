@@ -22,8 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -34,18 +34,18 @@ public final class Server implements IMultiPartName {
 
     private String serverName;
     private String instanceName;
+    private String simpleName;
 
     public Server(String serverAndInstanceName) {
         if (serverAndInstanceName != null) {
             final Matcher matcher = SERVER_PATTERN
                     .matcher(serverAndInstanceName);
             if (!matcher.find()) {
-                throw new IllegalArgumentException(String.format(
-                        "%s is not a valid database reference",
-                        serverAndInstanceName));
+                simpleName = serverAndInstanceName;
+            } else {
+                setServerName(matcher.group(1));
+                setInstanceName(matcher.group(2));
             }
-            setServerName(matcher.group(1));
-            setInstanceName(matcher.group(2));
         }
     }
 
@@ -77,6 +77,8 @@ public final class Server implements IMultiPartName {
             return String.format("[%s\\%s]", serverName, instanceName);
         } else if (serverName != null && !serverName.isEmpty()) {
             return String.format("[%s]", serverName);
+        } else if (simpleName != null && !simpleName.isEmpty()) {
+            return simpleName;
         } else {
             return "";
         }

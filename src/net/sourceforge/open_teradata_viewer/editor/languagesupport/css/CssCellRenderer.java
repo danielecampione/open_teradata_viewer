@@ -47,15 +47,17 @@ class CssCellRenderer extends CompletionCellRenderer {
     /** {@inheritDoc} */
     @Override
     protected void prepareForFunctionCompletion(JList list,
-            FunctionCompletion fc, int index, boolean selected, boolean hasFocus) {
+            FunctionCompletion fc, int index, boolean selected,
+            boolean hasFocus) {
         super.prepareForFunctionCompletion(list, fc, index, selected, hasFocus);
-        setIcon(getEmptyIcon());
+        setIconWithDefault(fc);
     }
 
     /** {@inheritDoc} */
     @Override
     protected void prepareForMarkupTagCompletion(JList list,
-            MarkupTagCompletion c, int index, boolean selected, boolean hasFocus) {
+            MarkupTagCompletion c, int index, boolean selected,
+            boolean hasFocus) {
         super.prepareForMarkupTagCompletion(list, c, index, selected, hasFocus);
         setIcon(tagIcon);
     }
@@ -71,7 +73,8 @@ class CssCellRenderer extends CompletionCellRenderer {
     /** {@inheritDoc} */
     @Override
     protected void prepareForVariableCompletion(JList list,
-            VariableCompletion vc, int index, boolean selected, boolean hasFocus) {
+            VariableCompletion vc, int index, boolean selected,
+            boolean hasFocus) {
         super.prepareForVariableCompletion(list, vc, index, selected, hasFocus);
         setIcon(getEmptyIcon());
     }

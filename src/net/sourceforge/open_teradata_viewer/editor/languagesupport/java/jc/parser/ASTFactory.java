@@ -51,9 +51,9 @@ import net.sourceforge.open_teradata_viewer.editor.languagesupport.java.jc.notic
 
 /**
  * Generates an abstract syntax tree for a Java source file.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ASTFactory implements ITokenTypes {
 
@@ -113,8 +113,8 @@ public class ASTFactory implements ITokenTypes {
                 for (int i = 0; i < m.getParameterCount(); i++) {
                     FormalParameter param = m.getParameter(i);
                     if (name.equals(param.getName())) {
-                        cu.addParserNotice(lVar, "Duplicate local variable: "
-                                + name);
+                        cu.addParserNotice(lVar,
+                                "Duplicate local variable: " + name);
                         break;
                     }
                 }
@@ -166,7 +166,8 @@ public class ASTFactory implements ITokenTypes {
         log("Entering _getBlock() (" + depth + ")");
 
         IJavaLexicalToken t = s.yylexNonNull(SEPARATOR_LBRACE, "'{' expected");
-        CodeBlock block = new CodeBlock(isStatic, s.createOffset(t.getOffset()));
+        CodeBlock block = new CodeBlock(isStatic,
+                s.createOffset(t.getOffset()));
         block.setParent(parent);
         boolean atStatementStart = true;
 
@@ -293,8 +294,7 @@ public class ASTFactory implements ITokenTypes {
                         break;
                     }
                     if (s.yyPeekCheckType() == IDENTIFIER) {
-                        while ((t = s.yylexNonNull(
-                                IDENTIFIER,
+                        while ((t = s.yylexNonNull(IDENTIFIER,
                                 "Variable name expected (type=="
                                         + varType.toString() + ")")) != null) {
                             int arrayDepth = s.skipBracketPairs();
@@ -326,7 +326,8 @@ public class ASTFactory implements ITokenTypes {
                             // var. Otherwise, whether or not it's valid, eat
                             // until the end of the statement
                             if (nextType != SEPARATOR_COMMA) {
-                                s.eatThroughNextSkippingBlocks(SEPARATOR_SEMICOLON);
+                                s.eatThroughNextSkippingBlocks(
+                                        SEPARATOR_SEMICOLON);
                                 break;
                             }
                             s.yylex(); // Eat the comma (does nothing if EOS)
@@ -404,9 +405,9 @@ public class ASTFactory implements ITokenTypes {
         log("Exiting _getClassBody");
     }
 
-    private ITypeDeclaration _getClassOrInterfaceDeclaration(
-            CompilationUnit cu, Scanner s, ITypeDeclarationContainer addTo,
-            Modifiers modList) throws IOException {
+    private ITypeDeclaration _getClassOrInterfaceDeclaration(CompilationUnit cu,
+            Scanner s, ITypeDeclarationContainer addTo, Modifiers modList)
+                    throws IOException {
         log("Entering _getClassOrInterfaceDeclaration");
         IJavaLexicalToken t = s
                 .yyPeekNonNull("class, enum, interface or @interface expected");
@@ -455,7 +456,7 @@ public class ASTFactory implements ITokenTypes {
     /**
      * Reads tokens for a Java source file from the specified lexer and returns
      * the structure of the source as an AST.
-     * 
+     *
      * @param scanner The scanner to read from.
      * @return The root node of the AST.
      */
@@ -505,9 +506,8 @@ public class ASTFactory implements ITokenTypes {
                 }
 
                 if (!t.isIdentifier()) {
-                    cu.addParserNotice(t,
-                            "Expected identifier, found: \"" + t.getLexeme()
-                                    + "\"");
+                    cu.addParserNotice(t, "Expected identifier, found: \""
+                            + t.getLexeme() + "\"");
                     scanner.eatThroughNextSkippingBlocks(SEPARATOR_SEMICOLON);
                     // We expect "t" to be the semicolon below
                     t = scanner.getMostRecentToken();
@@ -565,12 +565,10 @@ public class ASTFactory implements ITokenTypes {
                 // Done when the type declarations are created
             }
         } catch (IOException ioe) {
-            if (!(ioe instanceof EOFException)) { // Not just "end of file"
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(ioe.getMessage(),
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            if (isDebug() && !(ioe instanceof EOFException)) { // Not just "end of file"
+                ApplicationFrame.getInstance().getConsole().println(
+                        ioe.getMessage(),
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
             ParserNotice notice = null;
             IJavaLexicalToken lastTokenLexed = scanner.getMostRecentToken();
@@ -720,7 +718,7 @@ public class ASTFactory implements ITokenTypes {
      */
     private void _getInterfaceMemberDecl(CompilationUnit cu, Scanner s,
             NormalInterfaceDeclaration iDec, Modifiers modList)
-            throws IOException {
+                    throws IOException {
         log("Entering _getInterfaceMemberDecl");
 
         List<IJavaLexicalToken> tokenList = new ArrayList<IJavaLexicalToken>(1);
@@ -823,8 +821,8 @@ public class ASTFactory implements ITokenTypes {
                 for (int i = tokenList.size() - 1; i >= 0; i--) {
                     s.yyPushback(tokenList.get(i));
                 }
-                /*ITypeDeclaration type = */_getClassOrInterfaceDeclaration(
-                        cu, s, iDec, modList);
+                /*ITypeDeclaration type = */_getClassOrInterfaceDeclaration(cu,
+                        s, iDec, modList);
             }
         }
 
@@ -842,7 +840,7 @@ public class ASTFactory implements ITokenTypes {
      */
     private void _getMemberDecl(CompilationUnit cu, Scanner s,
             NormalClassDeclaration classDec, Modifiers modList)
-            throws IOException {
+                    throws IOException {
         log("Entering _getMemberDecl");
 
         List<IJavaLexicalToken> tokenList = new ArrayList<IJavaLexicalToken>(1);
@@ -959,8 +957,8 @@ public class ASTFactory implements ITokenTypes {
                 for (int i = tokenList.size() - 1; i >= 0; i--) {
                     s.yyPushback(tokenList.get(i));
                 }
-                /*ITypeDeclaration type = */_getClassOrInterfaceDeclaration(
-                        cu, s, classDec, modList);
+                /*ITypeDeclaration type = */_getClassOrInterfaceDeclaration(cu,
+                        s, classDec, modList);
             }
         }
 
@@ -1002,7 +1000,7 @@ public class ASTFactory implements ITokenTypes {
 
     private NormalClassDeclaration _getNormalClassDeclaration(
             CompilationUnit cu, Scanner s, ITypeDeclarationContainer addTo)
-            throws IOException {
+                    throws IOException {
         log("Entering _getNormalClassDeclaration");
         String className = null;
 
@@ -1021,7 +1019,8 @@ public class ASTFactory implements ITokenTypes {
         classDec.setPackage(cu.getPackage());
         addTo.addTypeDeclaration(classDec);
 
-        t = s.yylexNonNull("TypeParameters, extends, implements or '{' expected");
+        t = s.yylexNonNull(
+                "TypeParameters, extends, implements or '{' expected");
         if (t.isType(OPERATOR_LT)) {
             s.yyPushback(t);
             List<TypeParameter> typeParams = _getTypeParameters(cu, s);
@@ -1054,7 +1053,7 @@ public class ASTFactory implements ITokenTypes {
 
     private NormalInterfaceDeclaration _getNormalInterfaceDeclaration(
             CompilationUnit cu, Scanner s, ITypeDeclarationContainer addTo)
-            throws IOException {
+                    throws IOException {
         String iName = null;
 
         IJavaLexicalToken t = s.yylexNonNull("Identifier expected");
@@ -1313,10 +1312,11 @@ public class ASTFactory implements ITokenTypes {
         return typeParam;
     }
 
-    private List<TypeParameter> _getTypeParameters(CompilationUnit cu, Scanner s)
-            throws IOException {
+    private List<TypeParameter> _getTypeParameters(CompilationUnit cu,
+            Scanner s) throws IOException {
         s.increaseTypeArgumentsLevel();
-        log("Entering _getTypeParameters() (" + s.getTypeArgumentsLevel() + ")");
+        log("Entering _getTypeParameters() (" + s.getTypeArgumentsLevel()
+                + ")");
 
         s.markResetPosition();
         IJavaLexicalToken t = s.yylexNonNull(OPERATOR_LT,
@@ -1335,6 +1335,10 @@ public class ASTFactory implements ITokenTypes {
         s.decreaseTypeArgumentsLevel();
 
         return typeParams;
+    }
+
+    private static final boolean isDebug() {
+        return DEBUG;
     }
 
     private int isModifier(IJavaLexicalToken t) {

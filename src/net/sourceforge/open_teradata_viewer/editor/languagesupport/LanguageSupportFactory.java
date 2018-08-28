@@ -32,7 +32,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * in SyntaxTextArea. Different languages may have varying levels of "support".
  *
  * @author D. Campione
- * 
+ *
  */
 public class LanguageSupportFactory implements PropertyChangeListener {
 
@@ -64,7 +64,7 @@ public class LanguageSupportFactory implements PropertyChangeListener {
      *
      * @param style The language to add support for. This should be one of the
      *        values defined in {@link ISyntaxConstants}. Any previous language
-     *        support for this language is removed. 
+     *        support for this language is removed.
      * @param lsClassName The class name of the <code>ILanguageSupport</code>.
      */
     public void addLanguageSupport(String style, String lsClassName) {
@@ -78,28 +78,30 @@ public class LanguageSupportFactory implements PropertyChangeListener {
 
         String prefix = "net.sourceforge.open_teradata_viewer.editor.languagesupport.";
 
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_C, prefix
-                + "c.CLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_CSS, prefix
-                + "css.CssLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_GROOVY, prefix
-                + "groovy.GroovyLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_HTML, prefix
-                + "html.HtmlLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVA, prefix
-                + "java.JavaLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, prefix
-                + "js.JavaScriptLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JSP, prefix
-                + "jsp.JspLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_PERL, prefix
-                + "perl.PerlLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_PHP, prefix
-                + "php.PhpLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, prefix
-                + "sh.ShellLanguageSupport");
-        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_XML, prefix
-                + "xml.XmlLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_C,
+                prefix + "c.CLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_CSS,
+                prefix + "css.CssLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_GROOVY,
+                prefix + "groovy.GroovyLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_HTML,
+                prefix + "html.HtmlLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVA,
+                prefix + "java.JavaLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JAVASCRIPT,
+                prefix + "js.JavaScriptLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_JSP,
+                prefix + "jsp.JspLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_LESS,
+                prefix + "less.LessLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_PERL,
+                prefix + "perl.PerlLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_PHP,
+                prefix + "php.PhpLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+                prefix + "sh.ShellLanguageSupport");
+        addLanguageSupport(ISyntaxConstants.SYNTAX_STYLE_XML,
+                prefix + "xml.XmlLanguageSupport");
     }
 
     /**
@@ -182,8 +184,8 @@ public class LanguageSupportFactory implements PropertyChangeListener {
      */
     public void register(SyntaxTextArea textArea) {
         installSupport(textArea);
-        textArea.addPropertyChangeListener(
-                SyntaxTextArea.SYNTAX_STYLE_PROPERTY, this);
+        textArea.addPropertyChangeListener(SyntaxTextArea.SYNTAX_STYLE_PROPERTY,
+                this);
     }
 
     /**

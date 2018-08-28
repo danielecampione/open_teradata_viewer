@@ -29,6 +29,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.schema.Table;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.AllTableColumns;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Fetch;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.First;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IFromItemVisitor;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.IOrderByVisitor;
@@ -47,6 +48,7 @@ import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PivotXml;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.PlainSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SelectExpressionItem;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SetOperationList;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Skip;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubJoin;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.SubSelect;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Top;
@@ -87,6 +89,17 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
             buffer.append("(");
         }
         buffer.append("SELECT ");
+
+        Skip skip = plainSelect.getSkip();
+        if (skip != null) {
+            buffer.append(skip).append(" ");
+        }
+
+        First first = plainSelect.getFirst();
+        if (first != null) {
+            buffer.append(first).append(" ");
+        }
+
         if (plainSelect.getDistinct() != null) {
             buffer.append("DISTINCT ");
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
@@ -118,8 +131,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
 
         if (plainSelect.getIntoTables() != null) {
             buffer.append(" INTO ");
-            for (Iterator<Table> iter = plainSelect.getIntoTables().iterator(); iter
-                    .hasNext();) {
+            for (Iterator<Table> iter = plainSelect.getIntoTables()
+                    .iterator(); iter.hasNext();) {
                 visit(iter.next());
                 if (iter.hasNext()) {
                     buffer.append(", ");
@@ -199,8 +212,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         }
         if (orderBy.getNullOrdering() != null) {
             buffer.append(' ');
-            buffer.append(orderBy.getNullOrdering() == OrderByElement.NullOrdering.NULLS_FIRST ? "NULLS FIRST"
-                    : "NULLS LAST");
+            buffer.append(
+                    orderBy.getNullOrdering() == OrderByElement.NullOrdering.NULLS_FIRST
+                            ? "NULLS FIRST" : "NULLS LAST");
         }
     }
 
@@ -271,9 +285,9 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
                 .append(" FOR ")
                 .append(PlainSelect.getStringList(forColumns, true,
                         forColumns != null && forColumns.size() > 1))
-                .append(" IN ")
-                .append(PlainSelect.getStringList(pivot.getInItems(), true,
-                        true)).append(")");
+                .append(" IN ").append(PlainSelect
+                        .getStringList(pivot.getInItems(), true, true))
+                .append(")");
     }
 
     @Override
@@ -426,8 +440,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         }
         if (join.getUsingColumns() != null) {
             buffer.append(" USING (");
-            for (Iterator<Column> iterator = join.getUsingColumns().iterator(); iterator
-                    .hasNext();) {
+            for (Iterator<Column> iterator = join.getUsingColumns()
+                    .iterator(); iterator.hasNext();) {
                 Column column = iterator.next();
                 buffer.append(column.getFullyQualifiedName());
                 if (iterator.hasNext()) {
@@ -472,9 +486,8 @@ public class SelectDeParser implements ISelectVisitor, IOrderByVisitor,
         }
         buffer.append(withItem.getName());
         if (withItem.getWithItemList() != null) {
-            buffer.append(" ").append(
-                    PlainSelect.getStringList(withItem.getWithItemList(), true,
-                            true));
+            buffer.append(" ").append(PlainSelect
+                    .getStringList(withItem.getWithItemList(), true, true));
         }
         buffer.append(" AS (");
         withItem.getSelectBody().accept(this);

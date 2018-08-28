@@ -20,12 +20,12 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.TokenMap;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.WindowsBatchTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link WindowsBatchTokenMaker} class.
@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class WindowsBatchTokenMakerTest {
+public class WindowsBatchTokenMakerTest extends AbstractTokenMakerTest {
 
     /**
      * Checks for a token in a token map and makes sure it is mapped to the
@@ -43,7 +43,8 @@ public class WindowsBatchTokenMakerTest {
      * @param token The token.
      * @param tokenType The expected token type.
      */
-    private void assertTokenMapContains(TokenMap tm, String token, int tokenType) {
+    private void assertTokenMapContains(TokenMap tm, String token,
+            int tokenType) {
         int actualType = tm.get(token.toCharArray(), 0, token.length() - 1);
         Assert.assertEquals("Token mapped to unexpected type: " + token,
                 tokenType, actualType);
@@ -53,8 +54,7 @@ public class WindowsBatchTokenMakerTest {
     public void testAddToken_identifier() {
         AddTokenCatchingWindowsBatchTokenMaker tm = new AddTokenCatchingWindowsBatchTokenMaker();
         String identifier = "foo";
-        Segment seg = new Segment(identifier.toCharArray(), 0,
-                identifier.length());
+        Segment seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, ITokenTypes.IDENTIFIER, 0);
 
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
@@ -66,14 +66,13 @@ public class WindowsBatchTokenMakerTest {
         AddTokenCatchingWindowsBatchTokenMaker tm = new AddTokenCatchingWindowsBatchTokenMaker();
 
         String identifier = "do";
-        Segment seg = new Segment(identifier.toCharArray(), 0,
-                identifier.length());
+        Segment seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, ITokenTypes.IDENTIFIER, 0);
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
         Assert.assertEquals(ITokenTypes.RESERVED_WORD, tm.lastTokenType);
 
         identifier = "echo";
-        seg = new Segment(identifier.toCharArray(), 0, identifier.length());
+        seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, ITokenTypes.IDENTIFIER, 0);
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
         Assert.assertEquals(ITokenTypes.RESERVED_WORD, tm.lastTokenType);
@@ -84,8 +83,7 @@ public class WindowsBatchTokenMakerTest {
         AddTokenCatchingWindowsBatchTokenMaker tm = new AddTokenCatchingWindowsBatchTokenMaker();
 
         String identifier = "foobar";
-        Segment seg = new Segment(identifier.toCharArray(), 0,
-                identifier.length());
+        Segment seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, -42, 0);
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
         Assert.assertEquals(-42, tm.lastTokenType);
@@ -96,14 +94,13 @@ public class WindowsBatchTokenMakerTest {
         AddTokenCatchingWindowsBatchTokenMaker tm = new AddTokenCatchingWindowsBatchTokenMaker();
 
         String identifier = " ";
-        Segment seg = new Segment(identifier.toCharArray(), 0,
-                identifier.length());
+        Segment seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, ITokenTypes.WHITESPACE, 0);
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
         Assert.assertEquals(ITokenTypes.WHITESPACE, tm.lastTokenType);
 
         identifier = "\t";
-        seg = new Segment(identifier.toCharArray(), 0, identifier.length());
+        seg = createSegment(identifier);
         tm.addToken(seg, 0, identifier.length() - 1, ITokenTypes.WHITESPACE, 0);
         Assert.assertEquals(identifier, tm.lastTokenLexeme);
         Assert.assertEquals(ITokenTypes.WHITESPACE, tm.lastTokenType);
@@ -268,8 +265,8 @@ public class WindowsBatchTokenMakerTest {
      * @author D. Campione
      *
      */
-    private static class AddTokenCatchingWindowsBatchTokenMaker extends
-            WindowsBatchTokenMaker {
+    private static class AddTokenCatchingWindowsBatchTokenMaker
+            extends WindowsBatchTokenMaker {
 
         private String lastTokenLexeme;
         private int lastTokenType;
@@ -283,7 +280,8 @@ public class WindowsBatchTokenMakerTest {
                 int startOffset, boolean hyperlink) {
             this.lastTokenLexeme = new String(array, start, end - start + 1);
             this.lastTokenType = tokenType;
-            super.addToken(array, start, end, tokenType, startOffset, hyperlink);
+            super.addToken(array, start, end, tokenType, startOffset,
+                    hyperlink);
         }
     }
 }

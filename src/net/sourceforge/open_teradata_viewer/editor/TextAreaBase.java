@@ -329,8 +329,9 @@ public abstract class TextAreaBase extends JTextArea {
         if (backgroundPainter == null) {
             return null;
         }
-        return (backgroundPainter instanceof ImageBackgroundPainterStrategy) ? (Object) ((ImageBackgroundPainterStrategy) backgroundPainter)
-                .getMasterImage()
+        return (backgroundPainter instanceof ImageBackgroundPainterStrategy)
+                ? (Object) ((ImageBackgroundPainterStrategy) backgroundPainter)
+                        .getMasterImage()
                 : (Object) ((ColorBackgroundPainterStrategy) backgroundPainter)
                         .getColor();
     }
@@ -704,12 +705,13 @@ public abstract class TextAreaBase extends JTextArea {
      * equivalent to calling <code>setBackgroundObject(bg)</code>.<p>
      *
      * NOTE: the opaque property is set to <code>true</code> when the background
-     * is set to a color (by this method). When an image is used for the
-     * background, opaque is set to false. This is because we perform better
-     * when setOpaque is true, but if we use an image for the background when
-     * opaque is true, we get on-screen garbage when the user scrolls via the
-     * arrow keys. Thus we need setOpaque to be false in that case.<p> You never
-     * have to change the opaque property yourself; it is always done for you.
+     * is set to a color with 1.0 alpha (by this method). When an image is used
+     * for the background, opaque is set to false. This is because we perform
+     * better when setOpaque is true, but if we use an image for the background
+     * when opaque is true, we get on-screen garbage when the user scrolls via
+     * the arrow keys. Thus we need setOpaque to be false in that case.<p>
+     * You never have to change the opaque property yourself; it is always done
+     * for you.
      *
      * @param bg The color to use as the background color.
      */
@@ -721,7 +723,7 @@ public abstract class TextAreaBase extends JTextArea {
         } else { // Was an image painter..
             backgroundPainter = new ColorBackgroundPainterStrategy(bg);
         }
-        setOpaque(bg.getAlpha() == 0xff);
+        setOpaque(bg == null || bg.getAlpha() == 0xff);
         firePropertyChange("background", oldBG, bg);
         repaint();
     }
@@ -1053,8 +1055,8 @@ public abstract class TextAreaBase extends JTextArea {
      * @author D. Campione
      *
      */
-    protected class TAMouseListener extends CaretEvent implements
-            MouseListener, MouseMotionListener, FocusListener {
+    protected class TAMouseListener extends CaretEvent
+            implements MouseListener, MouseMotionListener, FocusListener {
 
         private static final long serialVersionUID = -6346308896782464836L;
 

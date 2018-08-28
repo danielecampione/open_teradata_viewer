@@ -22,13 +22,13 @@ import java.util.Arrays;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenMaker;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.RubyTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link RubyTokenMaker} class.
@@ -36,7 +36,7 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class RubyTokenMakerTest {
+public class RubyTokenMakerTest extends AbstractTokenMakerTest {
 
     /**
      * Returns a new instance of the <code>ITokenMaker</code> to test.
@@ -63,7 +63,8 @@ public class RubyTokenMakerTest {
 
         for (int i = 0; i < ITokenTypes.DEFAULT_NUM_TOKEN_TYPES; i++) {
             boolean shouldMark = Arrays.binarySearch(expected, i) >= 0;
-            Assert.assertEquals(shouldMark, tm.getMarkOccurrencesOfTokenType(i));
+            Assert.assertEquals(shouldMark,
+                    tm.getMarkOccurrencesOfTokenType(i));
         }
     }
 
@@ -74,7 +75,7 @@ public class RubyTokenMakerTest {
                 "``", };
 
         for (String code : chars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.LITERAL_BACKQUOTE, token.getType());
@@ -86,7 +87,7 @@ public class RubyTokenMakerTest {
         String[] booleans = { "true", "false" };
 
         for (String code : booleans) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.LITERAL_BOOLEAN, code));
@@ -100,7 +101,7 @@ public class RubyTokenMakerTest {
                 "''", };
 
         for (String code : chars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.LITERAL_CHAR, token.getType());
@@ -112,7 +113,7 @@ public class RubyTokenMakerTest {
         String[] docCommentLiterals = { "=begin Hello world =end" };
 
         for (String code : docCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_DOCUMENTATION,
@@ -125,7 +126,7 @@ public class RubyTokenMakerTest {
         String[] eolCommentLiterals = { "# Hello world", };
 
         for (String code : eolCommentLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.COMMENT_EOL, token.getType());
@@ -138,7 +139,7 @@ public class RubyTokenMakerTest {
                 "3e1_0", "3E1_0", };
 
         for (String code : floats) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue("Nope: " + token,
@@ -148,18 +149,18 @@ public class RubyTokenMakerTest {
 
     @Test
     public void testFunctions() {
-        String[] functions = { "Array", "Float", "Integer", "String",
-                "at_exit", "autoload", "binding", "caller", "catch", "chop",
-                "chop!", "chomp", "chomp!", "eval", "exec", "exit", "exit!",
-                "fail", "fork", "format", "gets", "global_variables", "gsub",
-                "gsub!", "iterator?", "lambda", "load", "local_variables",
-                "loop", "open", "p", "print", "printf", "proc", "putc", "puts",
-                "raise", "rand", "readline", "readlines", "require", "select",
-                "sleep", "split", "sprintf", "srand", "sub", "sub!", "syscall",
-                "system", "test", "trace_var", "trap", "untrace_var", };
+        String[] functions = { "Array", "Float", "Integer", "String", "at_exit",
+                "autoload", "binding", "caller", "catch", "chop", "chop!",
+                "chomp", "chomp!", "eval", "exec", "exit", "exit!", "fail",
+                "fork", "format", "gets", "global_variables", "gsub", "gsub!",
+                "iterator?", "lambda", "load", "local_variables", "loop",
+                "open", "p", "print", "printf", "proc", "putc", "puts", "raise",
+                "rand", "readline", "readlines", "require", "select", "sleep",
+                "split", "sprintf", "srand", "sub", "sub!", "syscall", "system",
+                "test", "trace_var", "trap", "untrace_var", };
 
         for (String code : functions) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.FUNCTION, token.getType());
@@ -170,12 +171,12 @@ public class RubyTokenMakerTest {
     public void testHeredoc_EOF() {
         // Note that the terminating "EOF" should be on another line in real
         // Ruby scripts, but our lexer does not discern that
-        String[] eofs = { "<<EOF Hello world EOF",
-                "<< \"EOF\" Hello world EOF", "<<   \t\"EOF\" Hello world EOF",
-                "<< 'EOF' Hello world EOF", "<<   \t'EOF' Hello world EOF", };
+        String[] eofs = { "<<EOF Hello world EOF", "<< \"EOF\" Hello world EOF",
+                "<<   \t\"EOF\" Hello world EOF", "<< 'EOF' Hello world EOF",
+                "<<   \t'EOF' Hello world EOF", };
 
         for (String code : eofs) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.PREPROCESSOR, code));
@@ -186,12 +187,12 @@ public class RubyTokenMakerTest {
     public void testHeredoc_EOT() {
         // Note that the terminating "EOT" should be on another line in real
         // Ruby scripts, but our lexer does not discern that
-        String[] eofs = { "<<EOT Hello world EOT",
-                "<< \"EOT\" Hello world EOT", "<<   \t\"EOT\" Hello world EOT",
-                "<< 'EOT' Hello world EOT", "<<   \t'EOT' Hello world EOT", };
+        String[] eofs = { "<<EOT Hello world EOT", "<< \"EOT\" Hello world EOT",
+                "<<   \t\"EOT\" Hello world EOT", "<< 'EOT' Hello world EOT",
+                "<<   \t'EOT' Hello world EOT", };
 
         for (String code : eofs) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue(token.is(ITokenTypes.PREPROCESSOR, code));
@@ -205,7 +206,7 @@ public class RubyTokenMakerTest {
         };
 
         for (String code : hexLiterals) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals("Invalid hex literal: " + token,
@@ -218,7 +219,7 @@ public class RubyTokenMakerTest {
         String[] identifiers = { "foo", "_foo", "foo9", "_foo9", };
 
         for (String code : identifiers) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.IDENTIFIER, token.getType());
@@ -229,7 +230,7 @@ public class RubyTokenMakerTest {
     public void testIntegerLiterals() {
         String[] binaryInts = { "0b0", "0b111", "0b001", "0b10_01", };
         for (String code : binaryInts) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue("Nope: " + token,
@@ -238,7 +239,7 @@ public class RubyTokenMakerTest {
 
         String[] octalInts = { "0", "0777", "017", "0_54", "07_7____7", };
         for (String code : octalInts) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue("Nope: " + token,
@@ -248,7 +249,7 @@ public class RubyTokenMakerTest {
         String[] decimalInts = { "1", "333", "3_3____3", "0d1", "0d333",
                 "0d3_3___3", };
         for (String code : decimalInts) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertTrue("Nope: " + token,
@@ -265,7 +266,7 @@ public class RubyTokenMakerTest {
                 "unless", "until", "when", "while", "yield", };
 
         for (String code : keywords) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.RESERVED_WORD, token.getType());
@@ -280,7 +281,7 @@ public class RubyTokenMakerTest {
                 "||", "..", "...", "=", "+=", "-=", "*=", "/=", "%=", };
 
         for (String code : operators) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.OPERATOR, token.getType());
@@ -294,7 +295,7 @@ public class RubyTokenMakerTest {
                 "$LOAD_PATH", "$stderr", "$stdin", "$stdout", "$VERBOSE", };
 
         for (String code : predefinedVars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.VARIABLE, token.getType());
@@ -306,7 +307,7 @@ public class RubyTokenMakerTest {
         String[] separators = { "(", ")", "{", "}", };
 
         for (String code : separators) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.SEPARATOR, token.getType());
@@ -319,95 +320,83 @@ public class RubyTokenMakerTest {
                 "\"Hello \\q world\"", // Any escapes are ignored
                 "\"\"", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%(\"Hello world\")",
-                "%(\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%(\"Hello world\")", "%(\"Hello world", // Unterminated not yet flagged as errors
                 "%Q(\"Hello world\")", "%q(\"Hello world\")",
                 "%W(\"Hello world\")", "%w(\"Hello world\")",
                 "%x(\"Hello world\")", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%{\"Hello world\"}",
-                "%{\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%{\"Hello world\"}", "%{\"Hello world", // Unterminated not yet flagged as errors
                 "%Q{\"Hello world\"}", "%q{\"Hello world\"}",
                 "%W{\"Hello world\"}", "%w{\"Hello world\"}",
                 "%x{\"Hello world\"}", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%[\"Hello world\"]",
-                "%[\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%[\"Hello world\"]", "%[\"Hello world", // Unterminated not yet flagged as errors
                 "%Q[\"Hello world\"]", "%q[\"Hello world\"]",
                 "%W[\"Hello world\"]", "%w[\"Hello world\"]",
                 "%x[\"Hello world\"]", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%<\"Hello world\">",
-                "%<\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%<\"Hello world\">", "%<\"Hello world", // Unterminated not yet flagged as errors
                 "%Q<\"Hello world\">", "%q<\"Hello world\">",
                 "%W<\"Hello world\">", "%w<\"Hello world\">",
                 "%x<\"Hello world\">", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%!\"Hello world\"!",
-                "%!\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%!\"Hello world\"!", "%!\"Hello world", // Unterminated not yet flagged as errors
                 "%Q!\"Hello world\"!", "%q!\"Hello world\"!",
                 "%W!\"Hello world\"!", "%w!\"Hello world\"!",
                 "%x!\"Hello world\"!", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
 
-        strings = new String[] {
-                "%/\"Hello world\"/",
-                "%/\"Hello world", // Unterminated not yet flagged as errors
+        strings = new String[] { "%/\"Hello world\"/", "%/\"Hello world", // Unterminated not yet flagged as errors
                 "%Q/\"Hello world\"/", "%q/\"Hello world\"/",
                 "%W/\"Hello world\"/", "%w/\"Hello world\"/",
                 "%x/\"Hello world\"/", };
         for (String code : strings) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
-            Assert.assertTrue(token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE,
-                    code));
+            Assert.assertTrue(
+                    token.is(ITokenTypes.LITERAL_STRING_DOUBLE_QUOTE, code));
         }
     }
 
@@ -416,7 +405,7 @@ public class RubyTokenMakerTest {
         String[] vars = { "$foo", "@foo", "@@foo", };
 
         for (String code : vars) {
-            Segment segment = new Segment(code.toCharArray(), 0, code.length());
+            Segment segment = createSegment(code);
             ITokenMaker tm = createTokenMaker();
             IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
             Assert.assertEquals(ITokenTypes.VARIABLE, token.getType());

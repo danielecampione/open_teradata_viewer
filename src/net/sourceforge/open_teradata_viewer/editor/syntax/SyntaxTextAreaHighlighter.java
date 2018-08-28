@@ -46,7 +46,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.IParserNotice;
  * unfortunately, we cannot re-use much of it since it is package private.
  *
  * @author D. Campione
- * 
+ *
  */
 public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
 
@@ -159,7 +159,7 @@ public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
      */
     void clearParserHighlights() {
         // Don't remove via an iterator; since our List is an ArrayList, this
-        // implies tons of System.arrayCopy()s 
+        // implies tons of System.arrayCopy()s
         for (int i = 0; i < parserHighlights.size(); i++) {
             repaintListHighlight(parserHighlights.get(i));
         }
@@ -207,8 +207,14 @@ public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
         for (IHighlightInfo info : markedOccurrences) {
             int start = info.getStartOffset();
             int end = info.getEndOffset() + 1; // HACK
-            DocumentRange range = new DocumentRange(start, end);
-            list.add(range);
+            if (start <= end) {
+                // Occasionally a Marked Occurrence can have a lost end offset
+                // but not start offset (replacing entire text content with new
+                // content and a marked occurrence is on the last token in the
+                // document)
+                DocumentRange range = new DocumentRange(start, end);
+                list.add(range);
+            }
         }
         return list;
     }
@@ -238,12 +244,12 @@ public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
     /**
      * Highlight info implementation used for parser notices and marked
      * occurrences.
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
-    private static class SyntaxLayeredHighlightInfoImpl extends
-            LayeredHighlightInfoImpl {
+    private static class SyntaxLayeredHighlightInfoImpl
+            extends LayeredHighlightInfoImpl {
         IParserNotice notice;//Color color; // Used only by Parser highlights
 
         @Override
@@ -256,6 +262,13 @@ public class SyntaxTextAreaHighlighter extends TextAreaHighlighter {
                 }
             }
             return color;
+        }
+
+        @Override
+        public String toString() {
+            return "[SyntaxLayeredHighlightInfoImpl: " + "startOffs="
+                    + getStartOffset() + ", endOffs=" + getEndOffset()
+                    + ", color=" + getColor() + "]";
         }
     }
 }

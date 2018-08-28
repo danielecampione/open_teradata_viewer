@@ -19,7 +19,7 @@
 package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 
 /**
- *
+ * Simple uservariables like @test.
  *
  * @author D. Campione
  *
@@ -27,12 +27,9 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
 public class UserVariable implements IExpression {
 
     private String name;
+    private boolean doubleAdd = false;
 
-    /**
-     * The name of the parameter.
-     *
-     * @return The name of the parameter.
-     */
+    /** @return The name of the parameter. */
     public String getName() {
         return name;
     }
@@ -46,8 +43,16 @@ public class UserVariable implements IExpression {
         expressionVisitor.visit(this);
     }
 
+    public boolean isDoubleAdd() {
+        return doubleAdd;
+    }
+
+    public void setDoubleAdd(boolean doubleAdd) {
+        this.doubleAdd = doubleAdd;
+    }
+
     @Override
     public String toString() {
-        return "@" + name;
+        return "@" + (doubleAdd ? "@" : "") + name;
     }
 }

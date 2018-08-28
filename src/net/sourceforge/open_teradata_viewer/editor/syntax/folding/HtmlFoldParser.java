@@ -38,7 +38,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.SyntaxTextArea;
  * actual Java code.
  *
  * @author D. Campione
- * 
+ *
  */
 public class HtmlFoldParser implements IFoldParser {
 
@@ -133,8 +133,8 @@ public class HtmlFoldParser implements IFoldParser {
                         // <?, <?php, <%, <%!, ...
                         if (t.startsWith(LANG_START[language])) {
                             if (currentFold == null) {
-                                currentFold = new Fold(IFoldType.CODE,
-                                        textArea, t.getOffset());
+                                currentFold = new Fold(IFoldType.CODE, textArea,
+                                        t.getOffset());
                                 folds.add(currentFold);
                             } else {
                                 currentFold = currentFold.createChild(
@@ -228,8 +228,8 @@ public class HtmlFoldParser implements IFoldParser {
                             IToken tagStartToken = t;
                             IToken tagNameToken = t.getNextToken();
                             if (isFoldableTag(tagNameToken)) {
-                                getTagCloseInfo(tagNameToken, textArea, line,
-                                        tci);
+                                int newLine = getTagCloseInfo(tagNameToken,
+                                        textArea, line, tci);
                                 if (tci.line == -1) { // EOF reached before end of tag
                                     return folds;
                                 }
@@ -250,6 +250,7 @@ public class HtmlFoldParser implements IFoldParser {
                                     tagNameStack.push(tagNameToken.getLexeme());
                                 }
                                 t = tagCloseToken; // Continue parsing after tag
+                                line = newLine;
                             }
                         }
                         // If we've found a closing tag (e.g. "</div>")
@@ -289,14 +290,15 @@ public class HtmlFoldParser implements IFoldParser {
      * "<code>&gt;</code>" or "<code>/&gt;</code>"). This should only be called
      * after a tag name has been parsed, to ensure the "closing" of other tags
      * is not identified.
-     * 
+     *
      * @param tagNameToken The token denoting the name of the tag.
      * @param textArea The text area whose contents are being parsed.
      * @param line The line we're currently on.
      * @param info On return, information about the closing of the tag is
      *        returned in this object.
+     * @return The line number of the closing tag token.
      */
-    private void getTagCloseInfo(IToken tagNameToken, SyntaxTextArea textArea,
+    private int getTagCloseInfo(IToken tagNameToken, SyntaxTextArea textArea,
             int line, TagCloseInfo info) {
         info.reset();
         IToken t = tagNameToken.getNextToken();
@@ -313,6 +315,8 @@ public class HtmlFoldParser implements IFoldParser {
             }
         } while (++line < textArea.getLineCount()
                 && (t = textArea.getTokenListForLine(line)) != null);
+
+        return line;
     }
 
     /**
@@ -326,8 +330,8 @@ public class HtmlFoldParser implements IFoldParser {
     private static final boolean isEndOfLastFold(Stack<String> tagNameStack,
             IToken tagNameToken) {
         if (tagNameToken != null && !tagNameStack.isEmpty()) {
-            return tagNameToken.getLexeme().equalsIgnoreCase(
-                    tagNameStack.peek());
+            return tagNameToken.getLexeme()
+                    .equalsIgnoreCase(tagNameStack.peek());
         }
         return false;
     }
@@ -339,9 +343,8 @@ public class HtmlFoldParser implements IFoldParser {
      * @return Whether this tag can be a foldable region.
      */
     private static final boolean isFoldableTag(IToken tagNameToken) {
-        return tagNameToken != null
-                && FOLDABLE_TAGS.contains(tagNameToken.getLexeme()
-                        .toLowerCase());
+        return tagNameToken != null && FOLDABLE_TAGS
+                .contains(tagNameToken.getLexeme().toLowerCase());
     }
 
     /**
@@ -361,9 +364,9 @@ public class HtmlFoldParser implements IFoldParser {
     /**
      * A simple wrapper for the token denoting the closing of a tag (i.e.
      * "<code>&gt;</code>" or "<code>/&gt;</code>").
-     * 
+     *
      * @author D. Campione
-     * 
+     *
      */
     private static class TagCloseInfo {
 

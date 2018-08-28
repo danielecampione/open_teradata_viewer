@@ -22,13 +22,14 @@ package net.sourceforge.open_teradata_viewer.sqlparser.expression;
  *
  *
  * @author D. Campione
- * 
+ *
  */
 public class OracleHierarchicalExpression implements IExpression {
 
     private IExpression startExpression;
     private IExpression connectExpression;
     private boolean noCycle = false;
+    boolean connectFirst = false;
 
     public IExpression getStartExpression() {
         return startExpression;
@@ -54,6 +55,14 @@ public class OracleHierarchicalExpression implements IExpression {
         this.noCycle = noCycle;
     }
 
+    public boolean isConnectFirst() {
+        return connectFirst;
+    }
+
+    public void setConnectFirst(boolean connectFirst) {
+        this.connectFirst = connectFirst;
+    }
+
     @Override
     public void accept(IExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
@@ -62,14 +71,25 @@ public class OracleHierarchicalExpression implements IExpression {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        if (startExpression != null) {
-            b.append(" START WITH ").append(startExpression.toString());
+        if (isConnectFirst()) {
+            b.append(" CONNECT BY ");
+            if (isNoCycle()) {
+                b.append("NOCYCLE ");
+            }
+            b.append(connectExpression.toString());
+            if (startExpression != null) {
+                b.append(" START WITH ").append(startExpression.toString());
+            }
+        } else {
+            if (startExpression != null) {
+                b.append(" START WITH ").append(startExpression.toString());
+            }
+            b.append(" CONNECT BY ");
+            if (isNoCycle()) {
+                b.append("NOCYCLE ");
+            }
+            b.append(connectExpression.toString());
         }
-        b.append(" CONNECT BY ");
-        if (isNoCycle()) {
-            b.append("NOCYCLE ");
-        }
-        b.append(connectExpression.toString());
         return b.toString();
     }
 }

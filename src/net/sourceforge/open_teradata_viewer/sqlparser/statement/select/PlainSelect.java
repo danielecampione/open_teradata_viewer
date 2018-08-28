@@ -47,6 +47,8 @@ public class PlainSelect implements ISelectBody {
     private Limit limit;
     private Offset offset;
     private Fetch fetch;
+    private Skip skip;
+    private First first;
     private Top top;
     private OracleHierarchicalExpression oracleHierarchical = null;
     private boolean oracleSiblings = false;
@@ -166,6 +168,22 @@ public class PlainSelect implements ISelectBody {
         this.top = top;
     }
 
+    public Skip getSkip() {
+        return skip;
+    }
+
+    public void setSkip(Skip skip) {
+        this.skip = skip;
+    }
+
+    public First getFirst() {
+        return first;
+    }
+
+    public void setFirst(First first) {
+        this.first = first;
+    }
+
     public Distinct getDistinct() {
         return distinct;
     }
@@ -243,6 +261,15 @@ public class PlainSelect implements ISelectBody {
             sql.append("(");
         }
         sql.append("SELECT ");
+
+        if (skip != null) {
+            sql.append(skip).append(" ");
+        }
+
+        if (first != null) {
+            sql.append(first).append(" ");
+        }
+
         if (distinct != null) {
             sql.append(distinct).append(" ");
         }
@@ -253,7 +280,8 @@ public class PlainSelect implements ISelectBody {
 
         if (intoTables != null) {
             sql.append(" INTO ");
-            for (Iterator<Table> iter = intoTables.iterator(); iter.hasNext();) {
+            for (Iterator<Table> iter = intoTables.iterator(); iter
+                    .hasNext();) {
                 sql.append(iter.next().toString());
                 if (iter.hasNext()) {
                     sql.append(", ");
@@ -300,6 +328,11 @@ public class PlainSelect implements ISelectBody {
                 if (forUpdateTable != null) {
                     sql.append(" OF ").append(forUpdateTable);
                 }
+            }
+        } else {
+            // Without from
+            if (where != null) {
+                sql.append(" WHERE ").append(where);
             }
         }
         if (useBrackets) {

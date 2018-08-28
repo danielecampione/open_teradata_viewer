@@ -26,11 +26,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
-import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
 
 /**
  * Tries to parse and deparse all statments in
@@ -49,8 +49,8 @@ public class SpecialOracleTest {
 
     private static final File SQLS_DIR = new File(
             "./src/res/testfiles/sqlparser/oracle-tests/");
-    private static final Logger LOG = Logger.getLogger(SpecialOracleTest.class
-            .getName());
+    private static final Logger LOG = Logger
+            .getLogger(SpecialOracleTest.class.getName());
 
     @Test
     public void testAllSqlsParseDeparse() throws IOException {
@@ -68,15 +68,16 @@ public class SpecialOracleTest {
                     success++;
                     LOG.info("   -> SUCCESS");
                 } catch (SQLParserException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                    LOG.info("   -> PROBLEM");
+                    LOG.log(Level.INFO, "   -> PROBLEM {0}", ex.toString());
+                } catch (Exception ex) {
+                    LOG.log(Level.INFO, "   -> PROBLEM {0}", ex.toString());
                 }
             }
         }
 
         LOG.log(Level.INFO, "tested {0} files. got {1} correct parse results",
                 new Object[] { count, success });
-        assertTrue(success >= 128);
+        assertTrue(success >= 129);
     }
 
     @Test

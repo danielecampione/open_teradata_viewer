@@ -20,12 +20,12 @@ package test.net.sourceforge.open_teradata_viewer.editor.syntax.modes;
 
 import javax.swing.text.Segment;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.sourceforge.open_teradata_viewer.editor.syntax.IToken;
 import net.sourceforge.open_teradata_viewer.editor.syntax.ITokenTypes;
 import net.sourceforge.open_teradata_viewer.editor.syntax.modes.PlainTextTokenMaker;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link PlainTextTokenMaker} class.
@@ -33,14 +33,14 @@ import org.junit.Test;
  * @author D. Campione
  *
  */
-public class PlainTextTokenMakerTest {
+public class PlainTextTokenMakerTest extends AbstractTokenMakerTest {
 
     @Test
     public void testIdentifiers() {
         String code = "   foo bar\t\tbas\t  \tbaz ";
         PlainTextTokenMaker tm = new PlainTextTokenMaker();
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
 
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.isWhitespace());
@@ -60,7 +60,7 @@ public class PlainTextTokenMakerTest {
         String code = "http://www.sas.com foo ftp://ftp.microsoft.com bar https://google.com goo www.yahoo.com ber file://test.txt";
         PlainTextTokenMaker tm = new PlainTextTokenMaker();
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
 
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.isHyperlink());
@@ -125,7 +125,7 @@ public class PlainTextTokenMakerTest {
         String code = "   foo bar\t\tbas\t  \tbaz ";
         PlainTextTokenMaker tm = new PlainTextTokenMaker();
 
-        Segment segment = new Segment(code.toCharArray(), 0, code.length());
+        Segment segment = createSegment(code);
 
         IToken token = tm.getTokenList(segment, ITokenTypes.NULL, 0);
         Assert.assertTrue(token.isWhitespace());

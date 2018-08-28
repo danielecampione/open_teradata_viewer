@@ -29,17 +29,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.junit.Test;
+
+import net.sourceforge.open_teradata_viewer.sqlparser.SQLParserException;
+import net.sourceforge.open_teradata_viewer.sqlparser.expression.IExpression;
 import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserManager;
+import net.sourceforge.open_teradata_viewer.sqlparser.parser.CCSqlParserUtil;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.IStatement;
+import net.sourceforge.open_teradata_viewer.sqlparser.statement.create.table.CreateTable;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.delete.Delete;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.insert.Insert;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.replace.Replace;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.select.Select;
 import net.sourceforge.open_teradata_viewer.sqlparser.statement.update.Update;
 import net.sourceforge.open_teradata_viewer.sqlparser.util.TablesNamesFinder;
-
-import org.junit.Test;
-
 import test.net.sourceforge.open_teradata_viewer.sqlparser.TestException;
 import test.net.sourceforge.open_teradata_viewer.sqlparser.simpleparsing.CCSqlParserManagerTest;
 
@@ -60,7 +63,8 @@ public class TablesNamesFinderTest {
 
     @Test
     public void testMoreComplexExamples() throws Exception {
-        runTestOnResource("/res/testfiles/sqlparser/complex-select-requests.txt");
+        runTestOnResource(
+                "/res/testfiles/sqlparser/complex-select-requests.txt");
     }
 
     private void runTestOnResource(String resPath) throws Exception {
@@ -105,7 +109,8 @@ public class TablesNamesFinderTest {
                 String type = getLine(in);
                 try {
                     Select select = (Select) pm.parse(new StringReader(query));
-                    StringTokenizer tokenizer = new StringTokenizer(tables, " ");
+                    StringTokenizer tokenizer = new StringTokenizer(tables,
+                            " ");
                     List tablesList = new ArrayList();
                     while (tokenizer.hasMoreTokens()) {
                         tablesList.add(tokenizer.nextToken());
@@ -325,6 +330,55 @@ public class TablesNamesFinderTest {
         assertTrue(tableList.contains("tbl0"));
         assertTrue(tableList.contains("tbl"));
         assertTrue(tableList.contains("tbl2"));
+    }
+
+    @Test
+    public void testInsertSelect() throws Exception {
+        String sql = "INSERT INTO mytable (mycolumn) SELECT mycolumn FROM mytable2";
+        IStatement statement = pm.parse(new StringReader(sql));
+
+        Insert insertStatement = (Insert) statement;
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder
+                .getTableList(insertStatement);
+        assertEquals(2, tableList.size());
+        assertTrue(tableList.contains("mytable"));
+        assertTrue(tableList.contains("mytable2"));
+    }
+
+    @Test
+    public void testCreateSelect() throws Exception {
+        String sql = "CREATE TABLE mytable AS SELECT mycolumn FROM mytable2";
+        IStatement statement = pm.parse(new StringReader(sql));
+
+        CreateTable createTable = (CreateTable) statement;
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder.getTableList(createTable);
+        assertEquals(2, tableList.size());
+        assertTrue(tableList.contains("mytable"));
+        assertTrue(tableList.contains("mytable2"));
+    }
+
+    @Test
+    public void testInsertSubSelect() throws SQLParserException {
+        String sql = "INSERT INTO Customers (CustomerName, Country) SELECT SupplierName, Country FROM Suppliers WHERE Country='Germany'";
+        Insert insert = (Insert) pm.parse(new StringReader(sql));
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder.getTableList(insert);
+        assertEquals(2, tableList.size());
+        assertTrue(tableList.contains("Customers"));
+        assertTrue(tableList.contains("Suppliers"));
+    }
+
+    @Test
+    public void testExpr() throws SQLParserException {
+        String sql = "mycol in (select col2 from mytable)";
+        IExpression expr = (IExpression) CCSqlParserUtil
+                .parseCondExpression(sql);
+        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+        List<String> tableList = tablesNamesFinder.getTableList(expr);
+        assertEquals(1, tableList.size());
+        assertTrue(tableList.contains("mytable"));
     }
 
     private String getLine(BufferedReader in) throws Exception {

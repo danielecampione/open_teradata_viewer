@@ -102,6 +102,7 @@ import net.sourceforge.open_teradata_viewer.editor.syntax.parser.ToolTipInfo;
  *    <ul>
  *       <li>.jshintrc files
  *       <li>JSON
+ *       <li>Less
  *       <li>Lisp
  *       <li>MXML
  *       <li>NSIS
@@ -170,8 +171,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
 
     private static final Color DEFAULT_BRACKET_MATCH_BG_COLOR = new Color(234,
             234, 255);
-    private static final Color DEFAULT_BRACKET_MATCH_BORDER_COLOR = new Color(
-            0, 0, 128);
+    private static final Color DEFAULT_BRACKET_MATCH_BORDER_COLOR = new Color(0,
+            0, 128);
     private static final Color DEFAULT_SELECTION_COLOR = new Color(200, 200,
             255);
 
@@ -577,8 +578,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         // They may have overridden createPopupMenu()..
         if (popupMenu != null && popupMenu.getComponentCount() > 0
                 && foldingMenu != null) {
-            foldingMenu.setEnabled(foldManager
-                    .isCodeFoldingSupportedAndEnabled());
+            foldingMenu
+                    .setEnabled(foldManager.isCodeFoldingSupportedAndEnabled());
         }
     }
 
@@ -726,8 +727,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         int lastCaretBracketPos = bracketInfo == null ? -1 : bracketInfo.x;
         bracketInfo = SyntaxUtilities.getMatchingBracketPosition(this,
                 bracketInfo);
-        if (bracketInfo.y > -1
-                && (bracketInfo.y != lastBracketMatchPos || bracketInfo.x != lastCaretBracketPos)) {
+        if (bracketInfo.y > -1 && (bracketInfo.y != lastBracketMatchPos
+                || bracketInfo.x != lastCaretBracketPos)) {
             try {
                 match = modelToView(bracketInfo.y);
                 if (match != null) { // Happens if we're not yet visible
@@ -1683,8 +1684,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @return Whether the specified token should be underlined.
      */
     public boolean getUnderlineForToken(IToken t) {
-        return (getHyperlinksEnabled() && (t.isHyperlink() || (linkGeneratorResult != null && linkGeneratorResult
-                .getSourceOffset() == t.getOffset())))
+        return (getHyperlinksEnabled() && (t.isHyperlink()
+                || (linkGeneratorResult != null && linkGeneratorResult
+                        .getSourceOffset() == t.getOffset())))
                 || syntaxScheme.getStyle(t.getType()).underline;
     }
 
@@ -1875,6 +1877,23 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
             SyntaxView sv = (SyntaxView) getUI().getRootView(this).getView(0);
             sv.calculateLongestLine();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void redoLastAction() {
+        super.redoLastAction();
+        // Occasionally marked occurrences' Positions are in invalid states due
+        // to how javax.swing.text.AbstractDocument tracks the start and end
+        // offsets. This is usually not needed, but can be when the last token
+        // in the Document is a marked occurrence, and an undo or redo occurs
+        // which clears most of the document text. In that case it is possible
+        // for the end Position to be reset to something small, but the start
+        // offset to be its prior valid (start > end)
+        ((SyntaxTextAreaHighlighter) getHighlighter())
+                .clearMarkOccurrencesHighlights();
     }
 
     /**
@@ -2196,9 +2215,9 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     @Override
     public void setDocument(Document document) {
         if (!(document instanceof SyntaxDocument)) {
-            throw new IllegalArgumentException("Documents for "
-                    + "SyntaxTextArea must be instances of "
-                    + "SyntaxDocument.");
+            throw new IllegalArgumentException(
+                    "Documents for " + "SyntaxTextArea must be instances of "
+                            + "SyntaxDocument.");
         }
         if (markOccurrencesSupport != null) {
             markOccurrencesSupport.clear();
@@ -2644,11 +2663,13 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
         if (getTemplatesEnabled() && dir != null) {
             File directory = new File(dir);
             if (directory.isDirectory()) {
-                return getCodeTemplateManager().setTemplateDirectory(directory) > -1;
+                return getCodeTemplateManager()
+                        .setTemplateDirectory(directory) > -1;
             }
             boolean created = directory.mkdir();
             if (created) {
-                return getCodeTemplateManager().setTemplateDirectory(directory) > -1;
+                return getCodeTemplateManager()
+                        .setTemplateDirectory(directory) > -1;
             }
         }
         return false;
@@ -2777,6 +2798,23 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void undoLastAction() {
+        super.undoLastAction();
+        // Occasionally marked occurrences' Positions are in invalid states
+        // due to how javax.swing.text.AbstractDocument tracks the start and
+        // end offsets. This is usually not needed, but can be when the last
+        // token in the Document is a marked occurrence, and an undo or redo
+        // occurs which clears most of the document text. In that case it is
+        // possible for the end Position to be reset to something small, but
+        // the start offset to be its prior valid (start > end)
+        ((SyntaxTextAreaHighlighter) getHighlighter())
+                .clearMarkOccurrencesHighlights();
+    }
+
+    /**
      * Returns the token at the specified position in the view.
      *
      * @param p The position in the view.
@@ -2860,8 +2898,8 @@ public class SyntaxTextArea extends TextArea implements ISyntaxConstants {
      * @author D. Campione
      *
      */
-    private class SyntaxTextAreaMutableCaretEvent extends
-            TextAreaMutableCaretEvent {
+    private class SyntaxTextAreaMutableCaretEvent
+            extends TextAreaMutableCaretEvent {
 
         private static final long serialVersionUID = 6206194038047121719L;
 

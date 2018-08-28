@@ -44,7 +44,7 @@ import javax.swing.JScrollPane;
  * features is being used (line numbering, folding, and/or icons).
  *
  * @author D. Campione
- * 
+ *
  */
 public class TextScrollPane extends JScrollPane {
 
@@ -63,6 +63,16 @@ public class TextScrollPane extends JScrollPane {
 
     /**
      * Creates a scroll pane. A default value will be used for line number color
+     * (gray) and the current line's line number will be highlighted.
+     *
+     * @param textArea The text area this scroll pane will contain.
+     */
+    public TextScrollPane(TextArea textArea) {
+        this(textArea, true);
+    }
+
+    /**
+     * Creates a scroll pane. A default value will be used for line number color
      * (gray), and the current line's line number will be highlighted.
      *
      * @param comp The component this scroll pane should display. This should be
@@ -75,6 +85,20 @@ public class TextScrollPane extends JScrollPane {
      */
     public TextScrollPane(Component comp) {
         this(comp, true);
+    }
+
+    /**
+     * Creates a scroll pane. A default value will be used for line number color
+     * (gray) and the current line's line number will be highlighted.
+     *
+     * @param textArea The text area this scroll pane will contain. If this is
+     *        <code>null</code>, you must call
+     *        {@link #setViewportView(Component)}, passing in an
+     *        {@link TextArea}.
+     * @param lineNumbers Whether line numbers should be enabled.
+     */
+    public TextScrollPane(TextArea textArea, boolean lineNumbers) {
+        this(textArea, lineNumbers, Color.GRAY);
     }
 
     /**
@@ -243,7 +267,7 @@ public class TextScrollPane extends JScrollPane {
      * Returns the first descendant of a component that is an
      * <code>TextArea</code>. This is primarily here to support
      * <code>javax.swing.JLayer</code>s that wrap <code>TextArea</code>s.
-     * 
+     *
      * @param comp The component to recursively look through.
      * @return The first descendant text area, or <code>null</code> if none is
      *         found.

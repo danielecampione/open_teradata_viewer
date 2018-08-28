@@ -162,8 +162,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    protected static class BeginWordAction extends
-            TextAreaEditorKit.BeginWordAction {
+    protected static class BeginWordAction
+            extends TextAreaEditorKit.BeginWordAction {
 
         private static final long serialVersionUID = 9158506996459873455L;
         private Segment seg;
@@ -204,7 +204,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             // The "word" is a group of letters and/or digits
             int languageIndex = 0;
             if (doc.isIdentifierChar(languageIndex, ch)) {
-                if (offs != end && !doc.isIdentifierChar(languageIndex, nextCh)) {
+                if (offs != end
+                        && !doc.isIdentifierChar(languageIndex, nextCh)) {
                     return offs;
                 }
                 do {
@@ -341,12 +342,12 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // Locate the matching '{' bracket, and replace the leading
                     // whitespace for the '}' to match that of the '{' char's
                     // line
-                    bracketInfo = SyntaxUtilities.getMatchingBracketPosition(
-                            sta, bracketInfo);
+                    bracketInfo = SyntaxUtilities
+                            .getMatchingBracketPosition(sta, bracketInfo);
                     if (bracketInfo.y > -1) {
                         try {
-                            String ws = SyntaxUtilities.getLeadingWhitespace(
-                                    doc, bracketInfo.y);
+                            String ws = SyntaxUtilities
+                                    .getLeadingWhitespace(doc, bracketInfo.y);
                             sta.replaceRange(ws, start, dot);
                         } catch (BadLocationException ble) {
                             ExceptionDialog.hideException(ble);
@@ -404,8 +405,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                     // Check actual char before token type, since it's quicker
                     char ch = doc.charAt(dot - 2);
                     if (ch == '<' || ch == '[') {
-                        IToken t = doc.getTokenListForLine(sta
-                                .getCaretLineNumber());
+                        IToken t = doc
+                                .getTokenListForLine(sta.getCaretLineNumber());
                         t = SyntaxUtilities.getTokenAtOffset(t, dot - 1);
                         if (t != null
                                 && t.getType() == IToken.MARKUP_TAG_DELIMITER) {
@@ -447,11 +448,11 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                             t = t.getNextToken();
                             while (t != null && t.isPaintable()) {
                                 if (t.getType() == IToken.MARKUP_TAG_NAME ||
-                                // Being lenient here and also checking for
-                                // attributes, in case they (incorrectly) have
-                                // whitespace between the '<' char and the
-                                // element name
-                                        t.getType() == IToken.MARKUP_TAG_ATTRIBUTE) {
+                                        // Being lenient here and also checking for
+                                        // attributes, in case they (incorrectly) have
+                                        // whitespace between the '<' char and the
+                                        // element name
+                                t.getType() == IToken.MARKUP_TAG_ATTRIBUTE) {
                                     stack.push(t.getLexeme());
                                     break;
                                 }
@@ -462,9 +463,11 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                             if (!stack.isEmpty()) { // Always true for valid XML
                                 stack.pop();
                             }
-                        } else if (t.length() == 2
-                                && (t.charAt(0) == '<' || t.charAt(0) == '[')
-                                && t.charAt(1) == '/') {
+                        } else
+                            if (t.length() == 2
+                                    && (t.charAt(0) == '<'
+                                            || t.charAt(0) == '[')
+                                    && t.charAt(1) == '/') {
                             String tagName = null;
                             if (!stack.isEmpty()) { // Always true for valid XML
                                 tagName = stack.pop();
@@ -494,7 +497,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class CollapseAllCommentFoldsAction extends FoldRelatedAction {
+    public static class CollapseAllCommentFoldsAction
+            extends FoldRelatedAction {
 
         private static final long serialVersionUID = 5756304038608483906L;
 
@@ -610,8 +614,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class DecreaseFontSizeAction extends
-            TextAreaEditorKit.DecreaseFontSizeAction {
+    public static class DecreaseFontSizeAction
+            extends TextAreaEditorKit.DecreaseFontSizeAction {
 
         private static final long serialVersionUID = -8170319818124509819L;
 
@@ -828,8 +832,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class DeletePrevWordAction extends
-            TextAreaEditorKit.DeletePrevWordAction {
+    public static class DeletePrevWordAction
+            extends TextAreaEditorKit.DeletePrevWordAction {
 
         private static final long serialVersionUID = -3722509041510238421L;
 
@@ -901,8 +905,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class DumbCompleteWordAction extends
-            TextAreaEditorKit.DumbCompleteWordAction {
+    public static class DumbCompleteWordAction
+            extends TextAreaEditorKit.DumbCompleteWordAction {
 
         private static final long serialVersionUID = -6609967108000557355L;
 
@@ -941,8 +945,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
             return prevWordStart;
         }
 
-        private int getPreviousWordStartInLine(SyntaxDocument doc,
-                Element elem, int offs) throws BadLocationException {
+        private int getPreviousWordStartInLine(SyntaxDocument doc, Element elem,
+                int offs) throws BadLocationException {
             int start = elem.getStartOffset();
             int cur = offs;
 
@@ -1042,14 +1046,13 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    protected static class EndWordAction extends
-            TextAreaEditorKit.EndWordAction {
+    public static class EndWordAction extends TextAreaEditorKit.EndWordAction {
 
         private static final long serialVersionUID = -3860390771911403912L;
 
         private Segment seg;
 
-        protected EndWordAction(String name, boolean select) {
+        public EndWordAction(String name, boolean select) {
             super(name, select);
             seg = new Segment();
         }
@@ -1262,8 +1265,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class IncreaseFontSizeAction extends
-            TextAreaEditorKit.IncreaseFontSizeAction {
+    public static class IncreaseFontSizeAction
+            extends TextAreaEditorKit.IncreaseFontSizeAction {
 
         private static final long serialVersionUID = -4731681872750673857L;
 
@@ -1351,8 +1354,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class InsertBreakAction extends
-            TextAreaEditorKit.InsertBreakAction {
+    public static class InsertBreakAction
+            extends TextAreaEditorKit.InsertBreakAction {
 
         private static final long serialVersionUID = 4504481252627624845L;
 
@@ -1621,7 +1624,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class NextWordAction extends TextAreaEditorKit.NextWordAction {
+    public static class NextWordAction
+            extends TextAreaEditorKit.NextWordAction {
 
         private static final long serialVersionUID = -73979318608886742L;
 
@@ -1679,8 +1683,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 do {
                     ch = seg.next();
                 } while (ch != Segment.DONE
-                        && !(doc.isIdentifierChar(languageIndex, ch) || Character
-                                .isWhitespace(ch)));
+                        && !(doc.isIdentifierChar(languageIndex, ch)
+                                || Character.isWhitespace(ch)));
             }
 
             // Skip any trailing whitespace
@@ -1701,8 +1705,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class PossiblyInsertTemplateAction extends
-            RecordableTextAction {
+    public static class PossiblyInsertTemplateAction
+            extends RecordableTextAction {
 
         private static final long serialVersionUID = 1288772638117428457L;
 
@@ -1738,8 +1742,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                             doDefaultInsert(sta);
                         }
                     } catch (BadLocationException ble) {
-                        UIManager.getLookAndFeel().provideErrorFeedback(
-                                textArea);
+                        UIManager.getLookAndFeel()
+                                .provideErrorFeedback(textArea);
                     }
                 } // End of if (doc!=null)
             } // End of if (textArea.getTemplatesEnabled())
@@ -1767,8 +1771,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class PreviousWordAction extends
-            TextAreaEditorKit.PreviousWordAction {
+    public static class PreviousWordAction
+            extends TextAreaEditorKit.PreviousWordAction {
 
         private static final long serialVersionUID = 8745518206677338482L;
 
@@ -1830,8 +1834,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
                 do {
                     ch = seg.previous();
                 } while (ch != Segment.DONE
-                        && !(doc.isIdentifierChar(languageIndex, ch) || Character
-                                .isWhitespace(ch)));
+                        && !(doc.isIdentifierChar(languageIndex, ch)
+                                || Character.isWhitespace(ch)));
             }
 
             offs -= seg.getEndIndex() - seg.getIndex();
@@ -1850,8 +1854,8 @@ public class SyntaxTextAreaEditorKit extends TextAreaEditorKit {
      * @author D. Campione
      *
      */
-    public static class SelectWordAction extends
-            TextAreaEditorKit.SelectWordAction {
+    public static class SelectWordAction
+            extends TextAreaEditorKit.SelectWordAction {
 
         private static final long serialVersionUID = -6969112358471092026L;
 
