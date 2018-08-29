@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ApplicationMenuBar;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
@@ -90,10 +91,13 @@ public class RunMacroAction extends CustomAction {
             String text = "The script associated with this macro no longer exists:\n\n{0}\n\nDo you want to remove this macro?";
             text = MessageFormat.format(text, file.getAbsolutePath());
             String title = "An error occured";
-            int rc = JOptionPane.showConfirmDialog(ApplicationFrame.getInstance(), text, title,
-                    JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+            ApplicationFrame app = ApplicationFrame.getInstance();
+            int rc = JOptionPane.showConfirmDialog(app, text, title, JOptionPane.YES_NO_OPTION,
+                    JOptionPane.ERROR_MESSAGE);
             if (rc == JOptionPane.YES_OPTION) {
                 MacroManager.get().removeMacro(macro);
+                ApplicationMenuBar menuBar = app.getApplicationMenuBar();
+                menuBar.refreshMacrosMenu();
             }
             return;
         }
