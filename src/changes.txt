@@ -1,3 +1,8 @@
+0.26c (09/05/2018)
+    - The "Look and Feel" menu is scrollable.
+    - The "View As (Highlighting File Type)" sub-menu is scrollable.
+    - The "Macros" menu is scrollable.
+
 0.26b (08/05/2018)
     - Fixed an issue with the "Save file" functionality: if the selected file in
       the Save Dialog isn't available, the error message isn't shown.

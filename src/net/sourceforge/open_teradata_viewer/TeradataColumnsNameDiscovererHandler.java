@@ -29,8 +29,7 @@ package net.sourceforge.open_teradata_viewer;
  * @author D. Campione
  *
  */
-public class TeradataColumnsNameDiscovererHandler extends
-        ColumnsNameDiscovererHandlerFactoryMethod {
+public class TeradataColumnsNameDiscovererHandler extends ColumnsNameDiscovererHandlerFactoryMethod {
 
     @Override
     public IColumnsNameDiscovererElement newElement() {

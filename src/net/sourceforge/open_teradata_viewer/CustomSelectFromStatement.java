@@ -42,8 +42,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  *
  */
-public class CustomSelectFromStatement extends
-        SelectFromStatementTemplateMethod {
+public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod {
 
     private String relationName;
 
@@ -63,10 +62,8 @@ public class CustomSelectFromStatement extends
         String sqlQuery = columnsNameDiscoverer.getSQLQuery();
 
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData()
-                .getConnection();
-        final PreparedStatement statement = connection
-                .prepareStatement(sqlQuery);
+        Connection connection = Context.getInstance().getConnectionData().getConnection();
+        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -93,8 +90,7 @@ public class CustomSelectFromStatement extends
         String text = "SELECT ";
         while (resultSet.next()) {
             String columnName = resultSet.getString(1);
-            if (Utilities.isEmpty(columnName)
-                    || columnName.trim().length() == 0) {
+            if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
                 columnName = "";
             }
             text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;

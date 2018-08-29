@@ -84,7 +84,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
     private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(Actions.SHOW_DESCRIPTION_WINDOW);
     private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(Actions.PARAMETER_ASSISTANCE);
     private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(Actions.MATCHED_BRACKET_POPUP);
-    private JMenu macrosMenu;
+    private JScrollMenu macrosMenu;
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -228,8 +228,8 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(Actions.RUN);
         menu.add(Actions.RUN_SCRIPT);
 
-        menu = new JMenu(ApplicationFrame.LAF_MENU_LABEL);
-        add(menu);
+        JScrollMenu menu2 = new JScrollMenu(ApplicationFrame.LAF_MENU_LABEL);
+        add(menu2);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
         subMenu = new JMenu("Editor Theme");
         addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu, true);
@@ -239,8 +239,8 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Monokai", "/res/themes/monokai.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Visual Studio", "/res/themes/vs.xml", buttonGroupEditorTheme, subMenu);
-        menu.add(subMenu);
-        menu.addSeparator();
+        menu2.add(subMenu);
+        menu2.addSeparator();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
         StringList completePathOfLafClasses = new StringList(true, lafInfo.length);
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
@@ -250,7 +250,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
             _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(name));
             completePathOfLafClasses.add(lafInfo[i].getClassName());
             buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(i));
-            menu.add(_mnuAvailableLookAndFeel.elementAt(i));
+            menu2.add(_mnuAvailableLookAndFeel.elementAt(i));
             _mnuAvailableLookAndFeel.elementAt(i)
                     .addActionListener(new LookAndFeelAction(completePathOfLafClasses.get(i)));
             if (completePathOfLafClasses.get(i)
@@ -267,7 +267,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
                     _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(info[i].getName()));
                     completePathOfLafClasses.add(info[i].getClassName());
                     buttonGroupLookAndFeel.add(_mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1));
-                    menu.add(_mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1));
+                    menu2.add(_mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1));
                     _mnuAvailableLookAndFeel.elementAt(completePathOfLafClasses.size() - 1).addActionListener(
                             new LookAndFeelAction(completePathOfLafClasses.get(completePathOfLafClasses.size() - 1)));
                     if (completePathOfLafClasses.get(completePathOfLafClasses.size() - 1)
@@ -280,44 +280,45 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
 
         menu = new JMenu("View");
         add(menu);
-        subMenu = new JMenu("View As (Highlighting File Type)");
+        JScrollMenu subMenu2 = new JScrollMenu("View As (Highlighting File Type)");
         ButtonGroup bg = new ButtonGroup();
-        addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu);
-        addSyntaxItem("Assembler (x86)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu);
-        addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu);
-        addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg, subMenu);
-        addSyntaxItem("CSS", SyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu);
-        addSyntaxItem("C#", SyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu);
-        addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg, subMenu);
-        addSyntaxItem("D", SyntaxConstants.SYNTAX_STYLE_D, bg, subMenu);
-        addSyntaxItem("Dart", SyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu);
-        addSyntaxItem("Docker", SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, bg, subMenu);
-        addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg, subMenu);
-        addSyntaxItem("Hosts", SyntaxConstants.SYNTAX_STYLE_HOSTS, bg, subMenu);
-        addSyntaxItem("HTML", SyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu);
-        addSyntaxItem("INI", SyntaxConstants.SYNTAX_STYLE_INI, bg, subMenu);
-        addSyntaxItem("Java", SyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu);
-        addSyntaxItem("JavaScript", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, bg, subMenu);
-        addSyntaxItem("JSON", SyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu);
-        addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu);
-        addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu);
-        addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu);
-        addSyntaxItem("MXML", SyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu);
-        addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu);
-        addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu);
-        addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu);
-        addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu);
-        addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu);
-        addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu);
-        addSyntaxItem("TypeScript", SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT, bg, subMenu);
-        addSyntaxItem("Unix Shell", SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, bg, subMenu);
-        addSyntaxItem("Visual Basic", SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu);
-        addSyntaxItem("Windows batch", SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu);
-        addSyntaxItem("XML", SyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu);
-        addSyntaxItem("YAML", SyntaxConstants.SYNTAX_STYLE_YAML, bg, subMenu);
-        addSyntaxItem("No Highlighting", SyntaxConstants.SYNTAX_STYLE_NONE, bg, subMenu);
-        subMenu.getItem(0).setSelected(true);
-        menu.add(subMenu);
+        addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu2);
+        addSyntaxItem("Assembler (x86)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu2);
+        addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu2);
+        addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg, subMenu2);
+        addSyntaxItem("CSS", SyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu2);
+        addSyntaxItem("C#", SyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu2);
+        addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg, subMenu2);
+        addSyntaxItem("D", SyntaxConstants.SYNTAX_STYLE_D, bg, subMenu2);
+        addSyntaxItem("Dart", SyntaxConstants.SYNTAX_STYLE_DART, bg, subMenu2);
+        addSyntaxItem("Docker", SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, bg, subMenu2);
+        addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg, subMenu2);
+        addSyntaxItem("Hosts", SyntaxConstants.SYNTAX_STYLE_HOSTS, bg, subMenu2);
+        addSyntaxItem("HTML", SyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu2);
+        addSyntaxItem("INI", SyntaxConstants.SYNTAX_STYLE_INI, bg, subMenu2);
+        addSyntaxItem("Java", SyntaxConstants.SYNTAX_STYLE_JAVA, bg, subMenu2);
+        addSyntaxItem("JavaScript", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, bg, subMenu2);
+        addSyntaxItem("JSON", SyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu2);
+        addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu2);
+        addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu2);
+        addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu2);
+        addSyntaxItem("MXML", SyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu2);
+        addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu2);
+        addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu2);
+        addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu2);
+        addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu2);
+        addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu2);
+        addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu2);
+        addSyntaxItem("TypeScript", SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT, bg, subMenu2);
+        addSyntaxItem("Unix Shell", SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, bg, subMenu2);
+        addSyntaxItem("Visual Basic", SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC, bg, subMenu2);
+        addSyntaxItem("Windows batch", SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH, bg, subMenu2);
+        addSyntaxItem("XML", SyntaxConstants.SYNTAX_STYLE_XML, bg, subMenu2);
+        addSyntaxItem("YAML", SyntaxConstants.SYNTAX_STYLE_YAML, bg, subMenu2);
+        addSyntaxItem("No Highlighting", SyntaxConstants.SYNTAX_STYLE_NONE, bg, subMenu2);
+        JRadioButtonMenuItem radioButtonMenu = (JRadioButtonMenuItem) subMenu2.getSubElements()[0].getSubElements()[0];
+        radioButtonMenu.setSelected(true);
+        menu.add(subMenu2);
         menu.addSeparator();
         cbCellRendering
                 .setSelected(((FancyCellRenderingAction) Actions.FANCY_CELL_RENDERING).isFancyCellRenderingActivated());
@@ -341,11 +342,10 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.addSeparator();
         menu.add(Actions.ABOUT);
 
-        macrosMenu = new JMenu("Macros");
+        macrosMenu = new JScrollMenu("Macros");
         add(macrosMenu);
         macrosMenu.add(Actions.NEW_MACRO);
         macrosMenu.add(Actions.EDIT_MACRO);
-        macrosMenu.addSeparator();
         applicationFrame.loadMacros();
         refreshMacrosMenu();
 
@@ -402,7 +402,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addThemeItem(name, themeXml, bg, menu, false);
     }
 
-    private void addSyntaxItem(String name, String style, ButtonGroup bg, JMenu menu) {
+    private void addSyntaxItem(String name, String style, ButtonGroup bg, JScrollMenu menu) {
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ChangeSyntaxStyleAction(name, style));
         bg.add(item);
         menu.add(item);
@@ -423,10 +423,12 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
      * the user has defined.
      */
     public void refreshMacrosMenu() {
-        while (macrosMenu.getMenuComponentCount() > 3) {
-            macrosMenu.remove(3);
+        JScrollPopupMenu menu = (JScrollPopupMenu) macrosMenu.getSubElements()[0];
+        while (menu.getSubElements().length > 2) {
+            menu.remove(2);
         }
 
+        macrosMenu.addSeparator();
         if (MacroManager.get().getMacroCount() > 0) {
             Iterator<Macro> i = MacroManager.get().getMacroIterator();
             while (i.hasNext()) {

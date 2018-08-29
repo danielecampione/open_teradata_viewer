@@ -29,8 +29,7 @@ package net.sourceforge.open_teradata_viewer;
  * @author D. Campione
  *
  */
-public class TeradataColumnsNameDiscoverer implements
-        IColumnsNameDiscovererElement {
+public class TeradataColumnsNameDiscoverer implements IColumnsNameDiscovererElement {
 
     private String relationName;
 
