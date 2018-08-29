@@ -1,6 +1,11 @@
+0.26b (08/05/2018)
+    - Fixed an issue with the "Save file" functionality: if the selected file in
+      the Save Dialog isn't available, the error message isn't shown.
+    - Upgraded groovy library 2.5.0 alpha 1 -> 3.0.0 alpha 1
+
 0.26a (07/05/2018)
-    - Fixed an issue with the macros menu: non-available scripts
-      are deleted from the macros menu, if the user decides to delete them.
+    - Fixed an issue with the macros menu: non-available scripts are deleted
+      from the macros menu, if the user decides to delete them.
     - Upgraded rhino library 1.7.6 -> 1.7.9
 
 0.25c (03/05/2018)

@@ -69,7 +69,12 @@ public class FileIO {
 
     public static File saveFile(String fileName, byte[] bytes) throws Exception {
         JFileChooser fileChooser = getFileChooser();
-        fileChooser.setSelectedFile(new File(fileName));
+        File file = new File(fileName);
+        try {
+            fileChooser.setSelectedFile(file);
+        } catch (IndexOutOfBoundsException ioobe) {
+            // Do nothing.
+        }
         if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(ApplicationFrame.getInstance())) {
             Config.saveLastUsedDir(fileChooser.getCurrentDirectory().getCanonicalPath());
             File selectedFile = fileChooser.getSelectedFile();

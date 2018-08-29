@@ -81,7 +81,7 @@ public class RunMacroAction extends CustomAction {
     }
 
     private File getGroovyJar() {
-        return new File("groovy-all-2.5.0-alpha-1.jar");
+        return new File("groovy-all-3.0.0-alpha-1.jar");
     }
 
     private void handleSubmit(Macro macro) {
