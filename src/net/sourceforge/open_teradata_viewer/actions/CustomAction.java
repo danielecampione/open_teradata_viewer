@@ -38,8 +38,7 @@ import net.sourceforge.open_teradata_viewer.ThreadedAction;
  * @author D. Campione
  *
  */
-public abstract class CustomAction extends AbstractAction
-        implements MouseListener {
+public abstract class CustomAction extends AbstractAction implements MouseListener {
 
     private static final long serialVersionUID = 1753928583474033071L;
 
@@ -49,8 +48,7 @@ public abstract class CustomAction extends AbstractAction
         this(name, null, null, null);
     }
 
-    protected CustomAction(String name, String icon, KeyStroke accelerator,
-            String shortDescription) {
+    protected CustomAction(String name, String icon, KeyStroke accelerator, String shortDescription) {
         super(name);
         if (icon != null) {
             putValue(SMALL_ICON, ImageManager.getImage("/icons/" + icon));
@@ -120,5 +118,25 @@ public abstract class CustomAction extends AbstractAction
     /** @see SwingUtil.addAction() */
     public void setAltShortCut(int keyCode, int modifiers) {
         altKey = KeyStroke.getKeyStroke(keyCode, modifiers);
+    }
+
+    /**
+     * Sets the accelerator for this action.
+     *
+     * @param accelerator The new accelerator, or <code>null</code> for none.
+     * @see #getAccelerator()
+     */
+    public void setAccelerator(KeyStroke accelerator) {
+        putValue(ACCELERATOR_KEY, accelerator);
+    }
+
+    /**
+     * Returns the accelerator for this action.
+     *
+     * @return The accelerator.
+     * @see #setAccelerator(KeyStroke)
+     */
+    public KeyStroke getAccelerator() {
+        return (KeyStroke) getValue(ACCELERATOR_KEY);
     }
 }

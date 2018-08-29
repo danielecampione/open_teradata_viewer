@@ -19,7 +19,10 @@
 package net.sourceforge.open_teradata_viewer;
 
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -48,8 +51,11 @@ import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
 import net.sourceforge.open_teradata_viewer.actions.MatchedBracketPopupAction;
 import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
+import net.sourceforge.open_teradata_viewer.actions.RunMacroAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
+import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
+import net.sourceforge.open_teradata_viewer.editor.macros.MacroManager;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
@@ -58,26 +64,27 @@ import net.sourceforge.open_teradata_viewer.util.array.StringList;
  * @author D. Campione
  *
  */
-public class ApplicationMenuBar extends JMenuBar {
+public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListener {
 
     private static final long serialVersionUID = -3435078396857591267L;
 
-    JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(Actions.VIEW_LINE_HIGHLIGHT);
-    JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(Actions.FADE_CURRENT_LINE_HIGHLIGHT);
-    JCheckBoxMenuItem cbViewLineNumbers = new JCheckBoxMenuItem(Actions.VIEW_LINE_NUMBERS);
-    JCheckBoxMenuItem cbBookmarks = new JCheckBoxMenuItem(Actions.BOOKMARKS);
-    JCheckBoxMenuItem cbWordWrap = new JCheckBoxMenuItem(Actions.WORD_WRAP);
-    JCheckBoxMenuItem cbAntialiasing = new JCheckBoxMenuItem(Actions.ANTIALIASING);
-    JCheckBoxMenuItem cbMarkOccurrences = new JCheckBoxMenuItem(Actions.MARK_OCCURRENCES);
-    JCheckBoxMenuItem cbRightToLeft = new JCheckBoxMenuItem(Actions.RIGHT_TO_LEFT);
-    JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
-    JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(Actions.ANIMATE_BRACKET_MATCHING);
-    JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(Actions.PAINT_MATCHED_BRACKET_PAIR);
-    JCheckBoxMenuItem cbTabsEmulatedBySpaces = new JCheckBoxMenuItem(Actions.TABS_EMULATED_BY_SPACES);
+    protected JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(Actions.VIEW_LINE_HIGHLIGHT);
+    protected JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(Actions.FADE_CURRENT_LINE_HIGHLIGHT);
+    protected JCheckBoxMenuItem cbViewLineNumbers = new JCheckBoxMenuItem(Actions.VIEW_LINE_NUMBERS);
+    protected JCheckBoxMenuItem cbBookmarks = new JCheckBoxMenuItem(Actions.BOOKMARKS);
+    protected JCheckBoxMenuItem cbWordWrap = new JCheckBoxMenuItem(Actions.WORD_WRAP);
+    protected JCheckBoxMenuItem cbAntialiasing = new JCheckBoxMenuItem(Actions.ANTIALIASING);
+    protected JCheckBoxMenuItem cbMarkOccurrences = new JCheckBoxMenuItem(Actions.MARK_OCCURRENCES);
+    protected JCheckBoxMenuItem cbRightToLeft = new JCheckBoxMenuItem(Actions.RIGHT_TO_LEFT);
+    protected JCheckBoxMenuItem cbTabLines = new JCheckBoxMenuItem(Actions.TAB_LINES);
+    protected JCheckBoxMenuItem cbAnimateBracketMatching = new JCheckBoxMenuItem(Actions.ANIMATE_BRACKET_MATCHING);
+    protected JCheckBoxMenuItem cbPaintMatchedBracketPair = new JCheckBoxMenuItem(Actions.PAINT_MATCHED_BRACKET_PAIR);
+    protected JCheckBoxMenuItem cbTabsEmulatedBySpaces = new JCheckBoxMenuItem(Actions.TABS_EMULATED_BY_SPACES);
     private JCheckBoxMenuItem cbCellRendering = new JCheckBoxMenuItem(Actions.FANCY_CELL_RENDERING);
     private JCheckBoxMenuItem cbShowDescriptionWindow = new JCheckBoxMenuItem(Actions.SHOW_DESCRIPTION_WINDOW);
     private JCheckBoxMenuItem cbParamAssistanceItem = new JCheckBoxMenuItem(Actions.PARAMETER_ASSISTANCE);
     private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(Actions.MATCHED_BRACKET_POPUP);
+    private JMenu macrosMenu;
 
     public ApplicationMenuBar() {
         JMenu menu;
@@ -334,6 +341,14 @@ public class ApplicationMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(Actions.ABOUT);
 
+        macrosMenu = new JMenu("Macros");
+        add(macrosMenu);
+        macrosMenu.add(Actions.NEW_MACRO);
+        macrosMenu.add(Actions.EDIT_MACRO);
+        macrosMenu.addSeparator();
+        applicationFrame.loadMacros();
+        refreshMacrosMenu();
+
         new UpdateChecker(this).check();
 
         setMnemonics(this);
@@ -391,5 +406,58 @@ public class ApplicationMenuBar extends JMenuBar {
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ChangeSyntaxStyleAction(name, style));
         bg.add(item);
         menu.add(item);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void propertyChange(PropertyChangeEvent e) {
+        String prop = e.getPropertyName();
+
+        if (MacroManager.PROPERTY_MACROS.equals(prop)) {
+            refreshMacrosMenu();
+        }
+    }
+
+    /**
+     * Refreshes the elements in the Macros menu to be in sync with the macros
+     * the user has defined.
+     */
+    public void refreshMacrosMenu() {
+        while (macrosMenu.getMenuComponentCount() > 3) {
+            macrosMenu.remove(3);
+        }
+
+        if (MacroManager.get().getMacroCount() > 0) {
+            Iterator<Macro> i = MacroManager.get().getMacroIterator();
+            while (i.hasNext()) {
+                Macro macro = i.next();
+                RunMacroAction a = new RunMacroAction(macro);
+                macrosMenu.add(createMenuItem(a));
+            }
+        } else {
+            String text = "No Macros Defined";
+            JMenuItem item = new JMenuItem(text);
+            item.setEnabled(false);
+            macrosMenu.add(item);
+        }
+
+        remove(macrosMenu);
+        add(macrosMenu);
+    }
+
+    public JMenu getMacrosMenu() {
+        return macrosMenu;
+    }
+
+    /**
+     * Creates a menu item from an action, with no tool tip.
+     *
+     * @param a The action.
+     * @return The menu item.
+     */
+    private static final JMenuItem createMenuItem(Action a) {
+        JMenuItem item = new JMenuItem(a);
+        item.setToolTipText(null);
+        return item;
     }
 }

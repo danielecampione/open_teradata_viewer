@@ -39,31 +39,22 @@ public class LobImportAction extends CustomAction {
     protected LobImportAction() {
         super("Import Lob..", "import.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        boolean hasResultSet = isConnected
-                && Context.getInstance().getResultSet() != null;
-        boolean isLobSelected = hasResultSet
-                && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+        boolean hasResultSet = isConnected && Context.getInstance().getResultSet() != null;
+        boolean isLobSelected = hasResultSet && ResultSetTable.isLob(ResultSetTable.getInstance().getSelectedColumn());
         setEnabled(isLobSelected);
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        boolean hasResultSet = isConnected
-                && Context.getInstance().getResultSet() != null;
-        boolean isLobSelected = hasResultSet
-                && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+        boolean hasResultSet = isConnected && Context.getInstance().getResultSet() != null;
+        boolean isLobSelected = hasResultSet && ResultSetTable.isLob(ResultSetTable.getInstance().getSelectedColumn());
         if (!isLobSelected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("The field is NOT a Lob.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("The field is NOT a Lob.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
-        File file = FileIO.openFile();
+        File file = FileIO.chooseFile();
         if (file != null) {
             ResultSetTable.getInstance().setTableValue(FileIO.readFile(file));
             ResultSetTable.getInstance().editingStopped(null);

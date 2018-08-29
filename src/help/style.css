@@ -56,3 +56,26 @@ table,td,tr,th,thead {
 pre, h4 {
   margin-top: 0;
 }
+.s2 {
+font-style: italic;
+color: #008000;
+}
+.s6 {
+font-weight: bold;
+color: #0000ff;
+}
+.s13 {
+color: #dc009c;
+}
+.s20 {
+color: #000000;
+}
+.s21 {
+color: #808080;
+}
+.s22 {
+color: #ff0000;
+}
+.s23 {
+color: #804040;
+}

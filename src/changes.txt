@@ -1,3 +1,8 @@
+0.25c (03/05/2018)
+    - Added the macro support and the suited menu voices. You can write the
+      macros in JavaScript and Groovy.
+    - The user manual has been updated with the added capabilities.
+
 0.25b (26/03/2018)
     - Added the "Pretty print (XML only - with line breaks)" action and the
       suited menu voice.

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,8 +105,7 @@ public class HelpViewerWindow extends JFrame {
 
     /** @param fileWrapperFactory the fileWrapperFactory to set. */
     public void setFileWrapperFactory(IFileWrapperFactory fileWrapperFactory) {
-        Utilities.checkNull("setFileWrapperFactory", "fileWrapperFactory",
-                fileWrapperFactory);
+        Utilities.checkNull("setFileWrapperFactory", "fileWrapperFactory", fileWrapperFactory);
         this.fileWrapperFactory = fileWrapperFactory;
     }
 
@@ -212,8 +212,7 @@ public class HelpViewerWindow extends JFrame {
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
         renderer.setLeafIcon(ImageManager.getImage("/icons/help_topic.png"));
         renderer.setOpenIcon(ImageManager.getImage("/icons/help_toc_open.png"));
-        renderer.setClosedIcon(ImageManager
-                .getImage("/icons/help_toc_closed.png"));
+        renderer.setClosedIcon(ImageManager.getImage("/icons/help_toc_closed.png"));
         _tree.setCellRenderer(renderer);
 
         // Add Help, Licence and Change Log nodes to the tree
@@ -226,6 +225,9 @@ public class HelpViewerWindow extends JFrame {
         final FolderNode changeLogRoot = new FolderNode("ChangeLog");
         root.add(changeLogRoot);
         _nodes.put(changeLogRoot.getURL().toString(), changeLogRoot);
+        final FolderNode macrosRoot = new FolderNode("Macros");
+        root.add(macrosRoot);
+        _nodes.put(macrosRoot.getURL().toString(), macrosRoot);
 
         // Add the Manual node
         IFileWrapper file = helpFiles.getQuickStartGuideFile();
@@ -237,29 +239,22 @@ public class HelpViewerWindow extends JFrame {
         } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
             String errorMsg = "Load help file not found.\n" + msg;
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(errorMsg,
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
         // Add the Licence node
         file = helpFiles.getLicenceFile();
         try {
-            DocumentNode dn = new DocumentNode(
-                    "GNU General Public License (GPL)", file);
+            DocumentNode dn = new DocumentNode("GNU General Public License (GPL)", file);
             licenceRoot.add(dn);
             _nodes.put(dn.getURL().toString(), dn);
         } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
             String errorMsg = "Load license file not found." + msg;
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(errorMsg,
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
@@ -272,11 +267,38 @@ public class HelpViewerWindow extends JFrame {
         } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
             String errorMsg = "Load change log file not found.\n" + msg;
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(errorMsg,
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            UISupport.getDialogs().showErrorMessage(errorMsg);
+        }
+
+        // Add the macros node
+        // Groovy macros
+        file = helpFiles.getGroovyMacrosFile();
+        try {
+            DocumentNode dn = new DocumentNode("Groovy macros examples", file);
+            macrosRoot.add(dn);
+            _nodes.put(dn.getURL().toString(), dn);
+        } catch (MalformedURLException murle) {
+            String msg = file.getAbsolutePath();
+            String errorMsg = "Load Groovy macros file not found.\n{0}";
+            errorMsg = MessageFormat.format(errorMsg, msg);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            UISupport.getDialogs().showErrorMessage(errorMsg);
+        }
+        // JavaScript macros
+        file = helpFiles.getJavaScriptMacrosFile();
+        try {
+            DocumentNode dn = new DocumentNode("JavaScript macros examples", file);
+            macrosRoot.add(dn);
+            _nodes.put(dn.getURL().toString(), dn);
+        } catch (MalformedURLException murle) {
+            String msg = file.getAbsolutePath();
+            String errorMsg = "Load JavaScript macros file not found.\n{0}";
+            errorMsg = MessageFormat.format(errorMsg, msg);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
@@ -288,12 +310,10 @@ public class HelpViewerWindow extends JFrame {
             _nodes.put(dn.getURL().toString(), dn);
         } catch (MalformedURLException murle) {
             String msg = file.getAbsolutePath();
-            String errorMsg = "Load FAQ file not found.\n" + msg;
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(errorMsg,
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            String errorMsg = "Load FAQ file not found.\n{0}";
+            errorMsg = MessageFormat.format(errorMsg, msg);
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             UISupport.getDialogs().showErrorMessage(errorMsg);
         }
 
@@ -325,8 +345,7 @@ public class HelpViewerWindow extends JFrame {
 
         private URL _url;
 
-        DocumentNode(String title, IFileWrapper file)
-                throws MalformedURLException {
+        DocumentNode(String title, IFileWrapper file) throws MalformedURLException {
             super(title, false);
             setFile(file);
         }
@@ -360,8 +379,7 @@ public class HelpViewerWindow extends JFrame {
 
         FolderNode(String title) throws IOException {
             super(title, true);
-            _contentsFile = fileWrapperFactory
-                    .createTempFile("otvhelp", "html");
+            _contentsFile = fileWrapperFactory.createTempFile("otvhelp", "html");
             _contentsFile.deleteOnExit();
             setFile(_contentsFile);
         }
@@ -385,18 +403,16 @@ public class HelpViewerWindow extends JFrame {
 
         synchronized void generateContentsFile() {
             try {
-                final PrintWriter pw = new PrintWriter(
-                        _contentsFile.getFileWriter());
+                final PrintWriter pw = new PrintWriter(_contentsFile.getFileWriter());
                 try {
                     StringBuilder buf = new StringBuilder(50);
-                    buf.append("<HTML><BODY bgcolor=\"#FFFFFF\"><H1>")
-                            .append(toString()).append("</H1>");
+                    buf.append("<HTML><BODY bgcolor=\"#FFFFFF\"><H1>").append(toString()).append("</H1>");
                     pw.println(buf.toString());
                     for (int i = 0, limit = _docTitles.size(); i < limit; ++i) {
                         final URL docUrl = _docURLs.get(i);
                         buf = new StringBuilder(50);
-                        buf.append("<A HREF=\"").append(docUrl).append("\">")
-                                .append(_docTitles.get(i)).append("</A><BR>");
+                        buf.append("<A HREF=\"").append(docUrl).append("\">").append(_docTitles.get(i))
+                                .append("</A><BR>");
                         pw.println(buf.toString());
                     }
                     pw.println("</BODY></HTML");
@@ -405,11 +421,8 @@ public class HelpViewerWindow extends JFrame {
                 }
             } catch (IOException ioe) {
                 String errorMsg = "Error: congen.";
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(errorMsg,
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 UISupport.getDialogs().showErrorMessage(errorMsg);
             }
         }
@@ -422,8 +435,7 @@ public class HelpViewerWindow extends JFrame {
      * @author D. Campione
      * 
      */
-    private final class ObjectTreeSelectionListener implements
-            TreeSelectionListener {
+    private final class ObjectTreeSelectionListener implements TreeSelectionListener {
 
         @Override
         public void valueChanged(TreeSelectionEvent evt) {

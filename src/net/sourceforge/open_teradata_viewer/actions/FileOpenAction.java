@@ -18,18 +18,13 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
-import javax.swing.TransferHandler;
-import javax.swing.TransferHandler.TransferSupport;
-
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.FileIO;
 
 /**
@@ -49,19 +44,11 @@ public class FileOpenAction extends CustomAction implements SyntaxConstants {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        File file = FileIO.openFile();
+        File file = FileIO.chooseFile();
         if (file != null) {
-            applicationFrame.setText("");
-            Context.getInstance().setOpenedFile(file);
-            RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                    .getTextComponent();
-            TransferHandler transferHandler = textArea.getTransferHandler();
-            StringSelection stringSelection = new StringSelection(new String(
-                    FileIO.readFile(file)));
-            transferHandler.importData(new TransferSupport(textArea,
-                    stringSelection));
-            textArea.setCaretPosition(0);
+            ApplicationFrame app = ApplicationFrame.getInstance();
+            FileLocation loc = FileLocation.create(file);
+            app.openFile(loc);
         }
     }
 }

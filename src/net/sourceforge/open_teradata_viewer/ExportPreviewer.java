@@ -54,7 +54,7 @@ public class ExportPreviewer {
             String fileName = isXml ? "export.xml" : "export.txt";
             File file = FileIO.saveFile(fileName, bytes != null ? bytes : text.getBytes());
             if (file != null) {
-                FileIO.openFile(file);
+                FileIO.openFile(file, true);
             }
         } else if ("Copy to clipboard".equals(value)) {
             try {

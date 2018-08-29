@@ -36,12 +36,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Properties;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayer;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -78,6 +81,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
+import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.spell.SpellingParser;
 import org.fife.ui.rtextarea.Gutter;
@@ -91,6 +95,8 @@ import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
+import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
+import net.sourceforge.open_teradata_viewer.editor.macros.MacroManager;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVGoToDialog;
 import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
@@ -162,6 +168,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     private JScrollPane treeSP;
     private AbstractSourceTree tree;
+
+    private boolean doFileSizeCheck;
+    private float maxFileSize; // In MB
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -253,6 +262,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     private JPanel createEditor() {
+        doFileSizeCheck = true;
+        maxFileSize = 1;
+
         JPanel globalQueryEditorPanel = new JPanel(new BorderLayout());
         JPanel contentPane = new JPanel(new BorderLayout());
         boolean isConnected = Context.getInstance().getConnectionData() != null;
@@ -478,7 +490,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     private void deleteHelpFiles() {
-        String tmpDir = Utilities.conformizePath(System.getProperty("java.io.tmpdir"));
+        String tmpDir = Utilities.normalizePath(System.getProperty("java.io.tmpdir"));
         String dirToDelete[] = { tmpDir + "help" + File.separator + "images" + File.separator,
                 tmpDir + "help" + File.separator };
 
@@ -1100,6 +1112,128 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         super.setVisible(visible);
         if (visible) {
             focusTextArea();
+        }
+    }
+
+    public String getUserDirectory() {
+        Properties properties = System.getProperties();
+        String value = properties.getProperty("user.dir");
+        return value;
+    }
+
+    public String getMacrosDirectory() {
+        return getUserDirectory() + "/macros";
+    }
+
+    void loadMacros() {
+        File macrosDirectory = new File(getInstance().getMacrosDirectory());
+        if (macrosDirectory.exists()) {
+            String[] macrosRelativePath = macrosDirectory.list();
+            for (String macroRelativePath : macrosRelativePath) {
+                String macroAbsolutePath = macrosDirectory + File.separator + macroRelativePath;
+                File macroFile = new File(macroAbsolutePath);
+                if (macroFile.exists()) {
+                    Macro macro = new Macro();
+                    macro.setFile(macroAbsolutePath);
+                    macro.setName(macroRelativePath);
+                    MacroManager.get().addMacro(macro);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns whether a file's size should be checked before it is opened.
+     *
+     * @return Whether a file's size is checked before it is opened.
+     * @see #setDoFileSizeCheck(boolean)
+     */
+    public boolean getDoFileSizeCheck() {
+        return doFileSizeCheck;
+    }
+
+    /**
+     * Sets whether a file's size is checked before it is opened.
+     *
+     * @param doCheck Whether to check a file's size.
+     * @see #getDoFileSizeCheck()
+     */
+    public void setDoFileSizeCheck(boolean doCheck) {
+        if (doCheck != doFileSizeCheck) {
+            doFileSizeCheck = doCheck;
+        }
+    }
+
+    /**
+     * If the user has set a maximum file size to open, they are prompted
+     * whether they are "sure" they want to open the file if it is over
+     * their set size.
+     *
+     * @param fileName The file to check.
+     * @return If they do not want to check files of a certain size, this
+     *         method will return <code>false</code>. Otherwise, it will
+     *         return <code>true</code> if and only if this file is larger
+     *         than their threshold and they chose not to open it.
+     */
+    private boolean getFileIsTooLarge(String fileName) {
+        if (getDoFileSizeCheck()) {
+            File file = new File(fileName);
+            float fileSizeMB = file.length() / 1000000.0f;
+            float maxFileSizeMB = getMaxFileSize();
+            if (fileSizeMB > maxFileSizeMB) {
+                String desc = String.format(
+                        "The following file is very large and may cause problems in the editor:\n{0}\nAre you sure you want to open it?");
+                desc = MessageFormat.format(desc, file.getAbsolutePath());
+                int rc = JOptionPane.showConfirmDialog(this, desc, Main.APPLICATION_NAME + " - Confirmation",
+                        JOptionPane.YES_NO_OPTION);
+                if (rc != JOptionPane.YES_OPTION) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * If file-size checking is enabled, this is the maximum size a
+     * file can be before the user is prompted before opening it.
+     *
+     * @return The maximum file size.
+     * @see #setMaxFileSize(float)
+     * @see #getDoFileSizeCheck()
+     */
+    public float getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    /**
+     * If file size checking is enabled, this is the maximum size a file
+     * can be before the user is prompted before opening it.
+     *
+     * @param size The new maximum size for a file before the user is
+     *        prompted before opening it.
+     * @see #getMaxFileSize()
+     * @see #setDoFileSizeCheck(boolean)
+     */
+    public void setMaxFileSize(float size) {
+        if (maxFileSize != size) {
+            maxFileSize = size;
+        }
+    }
+
+    public void openFile(String filePath) throws Exception {
+        FileLocation loc = FileLocation.create(filePath);
+        openFile(loc);
+    }
+
+    public void openFile(FileLocation loc) throws Exception {
+        String fileFullPath = loc.getFileFullPath();
+        // If opening a local file that exists, or a remote file..
+        if (loc.isLocalAndExists()) {
+            if (loc.isLocal() && getFileIsTooLarge(fileFullPath)) {
+                return;
+            }
+            FileIO.openFile(new File(fileFullPath));
         }
     }
 

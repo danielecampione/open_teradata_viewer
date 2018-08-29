@@ -67,6 +67,20 @@ public class HelpFileWrappersImpl implements IHelpFileWrappers {
     }
 
     /**
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getGroovyMacrosFile()
+     */
+    public IFileWrapper getGroovyMacrosFile() {
+        return _fileWrapperFactory.create(_helpFiles.getGroovyMacrosFile());
+    }
+
+    /**
+     * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getJavaScriptMacrosFile()
+     */
+    public IFileWrapper getJavaScriptMacrosFile() {
+        return _fileWrapperFactory.create(_helpFiles.getJavaScriptMacrosFile());
+    }
+
+    /**
      * @see net.sourceforge.open_teradata_viewer.util.IHelpFileWrappers#getChangeLogFile()
      */
     public IFileWrapper getChangeLogFile() {

@@ -68,10 +68,9 @@ public class Utilities {
      * through 9, the underscore (_), $, and #. A name in double quotation marks
      * can contain any characters except double quotation marks.
      */
-    public static String[] teradataLegalChars = { "A", "B", "C", "D", "E", "F",
-            "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-            "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "_", "$", "#", "." };
+    public static String[] teradataLegalChars = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+            "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8",
+            "9", "_", "$", "#", "." };
 
     /** An object name cannot be a Teradata reserved word. */
     public static StringList teradataReservedWords = new StringList();
@@ -115,9 +114,8 @@ public class Utilities {
 
     static {
         try {
-            teradataReservedWords
-                    .setText(StreamUtil.stream2String(Utilities.class
-                            .getResourceAsStream("/res/teradata_reserved_words.list")));
+            teradataReservedWords.setText(
+                    StreamUtil.stream2String(Utilities.class.getResourceAsStream("/res/teradata_reserved_words.list")));
             for (int i = 0; i < teradataReservedWords.size(); i++) {
                 if (StringUtil.isEmpty(teradataReservedWords.get(i))) {
                     continue;
@@ -181,11 +179,8 @@ public class Utilities {
             try {
                 sw.close();
             } catch (IOException ioe) {
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println("Unexpected error closing StringWriter.",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println("Unexpected error closing StringWriter.",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             }
         }
     }
@@ -353,8 +348,7 @@ public class Utilities {
      * @return Array of split strings. Guaranteeded to be not null.
      */
     @Deprecated
-    public static String[] splitString(String str, char delimiter,
-            boolean removeEmpty) {
+    public static String[] splitString(String str, char delimiter, boolean removeEmpty) {
         return StringUtil.split(str, delimiter, removeEmpty);
     }
 
@@ -365,8 +359,7 @@ public class Utilities {
      * Caution super class members are not cloned if a super class is not
      * serializable.
      */
-    public static Object cloneObject(Object toClone,
-            final ClassLoader classLoader) {
+    public static Object cloneObject(Object toClone, final ClassLoader classLoader) {
         if (null == toClone) {
             return null;
         } else {
@@ -375,15 +368,12 @@ public class Utilities {
                 ObjectOutputStream oOut = new ObjectOutputStream(bOut);
                 oOut.writeObject(toClone);
                 oOut.close();
-                ByteArrayInputStream bIn = new ByteArrayInputStream(
-                        bOut.toByteArray());
+                ByteArrayInputStream bIn = new ByteArrayInputStream(bOut.toByteArray());
                 bOut.close();
                 ObjectInputStream oIn = new ObjectInputStream(bIn) {
                     @Override
-                    protected Class<?> resolveClass(ObjectStreamClass desc)
-                            throws IOException, ClassNotFoundException {
-                        return Class
-                                .forName(desc.getName(), false, classLoader);
+                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                        return Class.forName(desc.getName(), false, classLoader);
                     }
                 };
                 bIn.close();
@@ -418,15 +408,13 @@ public class Utilities {
      */
     public static void checkNull(String methodName, Object... arguments) {
         if (arguments.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "Args must be specified in name/value pairs");
+            throw new IllegalArgumentException("Args must be specified in name/value pairs");
         }
         for (int i = 0; i < arguments.length - 1; i += 2) {
             String name = (String) arguments[i];
             Object value = arguments[i + 1];
             if (value == null) {
-                throw new IllegalArgumentException(methodName + ": Argument "
-                        + name + " cannot be null");
+                throw new IllegalArgumentException(methodName + ": Argument " + name + " cannot be null");
             }
         }
     }
@@ -444,11 +432,8 @@ public class Utilities {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ie) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(ie.getMessage(),
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println(ie.getMessage(),
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
         }
     }
 
@@ -466,58 +451,43 @@ public class Utilities {
             text = text.trim();
             // A Teradata object name must be from 1 to 30 characters long
             int lastTokenIndex = text.lastIndexOf(".");
-            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
-                    text.length()).length() > 30) {
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(
-                                "A Teradata object name must be from 1 to 30 characters long.",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1, text.length()).length() > 30) {
+                ApplicationFrame.getInstance().getConsole().println(
+                        "A Teradata object name must be from 1 to 30 characters long.",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             }
             int numRetries;
             for (int i = 0; i < text.length(); i++) {
                 numRetries = 0;
                 for (int j = 0; j < teradataLegalChars.length; j++) {
-                    if (text.toUpperCase().charAt(i) != teradataLegalChars[j]
-                            .charAt(0)) {
+                    if (text.toUpperCase().charAt(i) != teradataLegalChars[j].charAt(0)) {
                         numRetries++;
                     } else {
                         break;
                     }
                 }
                 if (numRetries == teradataLegalChars.length) {
-                    ApplicationFrame
-                            .getInstance()
-                            .getConsole()
-                            .println(
-                                    "You're trying to perform a SQL command using an illegal character.",
-                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                    ApplicationFrame.getInstance().getConsole().println(
+                            "You're trying to perform a SQL command using an illegal character.",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                     return false;
                 }
             }
             for (int i = 0; i < teradataReservedWords.size(); i++) {
                 if (text.equalsIgnoreCase(teradataReservedWords.get(i))) {
-                    ApplicationFrame
-                            .getInstance()
-                            .getConsole()
-                            .println(
-                                    "You're trying to perform a SQL command using a Teradata reserved word: \""
-                                            + teradataReservedWords.get(i)
-                                            + "\".",
-                                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                    ApplicationFrame.getInstance().getConsole().println(
+                            "You're trying to perform a SQL command using a Teradata reserved word: \""
+                                    + teradataReservedWords.get(i) + "\".",
+                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                     return false;
                 }
             }
             // A Teradata object name cannot be a number
             try {
                 Double.parseDouble(text);
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println("A Teradata object name cannot be a number.",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println("A Teradata object name cannot be a number.",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             } catch (NumberFormatException nfe) {
                 return true;
@@ -549,8 +519,7 @@ public class Utilities {
         // name in the classpath string, and if it isn't there, it must be in
         // the current directory
         if (index > -1) {
-            int pathBeginning = classPath.lastIndexOf(File.pathSeparator,
-                    index - 1) + 1;
+            int pathBeginning = classPath.lastIndexOf(File.pathSeparator, index - 1) + 1;
             String loc = classPath.substring(pathBeginning, index);
             File file = new File(loc);
             return file.getAbsolutePath();
@@ -731,7 +700,7 @@ public class Utilities {
      * @param path.
      * @return path in line with expectations.
      */
-    public static String conformizePath(String path) {
+    public static String normalizePath(String path) {
         if (path == null) {
             return null;
         }
@@ -765,17 +734,15 @@ public class Utilities {
     }
 
     public static void openURLWithDefaultBrowser(String url) {
-        final String[] browsers = { "google-chrome", "firefox", "opera",
-                "epiphany", "konqueror", "conkeror", "midori", "kazehakase",
-                "mozilla" };
+        final String[] browsers = { "google-chrome", "firefox", "opera", "epiphany", "konqueror", "conkeror", "midori",
+                "kazehakase", "mozilla" };
 
         try {
             // Trying to use the Desktop library, available from the JDK
             // versions up to 1.6
             Class<?> d = Class.forName("java.awt.Desktop");
             d.getDeclaredMethod("browse", new Class[] { java.net.URI.class })
-                    .invoke(d.getDeclaredMethod("getDesktop").invoke(null),
-                            new Object[] { java.net.URI.create(url) });
+                    .invoke(d.getDeclaredMethod("getDesktop").invoke(null), new Object[] { java.net.URI.create(url) });
             // The above code performs the same operations carried out by
             // invoking java.awt.Desktop.getDesktop().browse()
         } catch (Exception e) {
@@ -784,22 +751,17 @@ public class Utilities {
             try {
                 if (os == RSyntaxUtilities.OS_MAC_OSX) {
                     Class.forName("com.apple.eio.FileManager")
-                            .getDeclaredMethod("openURL",
-                                    new Class[] { String.class })
+                            .getDeclaredMethod("openURL", new Class[] { String.class })
                             .invoke(null, new Object[] { url });
                 } else if (os == RSyntaxUtilities.OS_WINDOWS) {
-                    Runtime.getRuntime().exec(
-                            "rundll32 url.dll,FileProtocolHandler " + url);
+                    Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
                 } else {
                     // Otherwise it is assumed it is a Unix or Linux
                     String browser = null;
                     for (String b : browsers) {
-                        if ((browser == null)
-                                && (Runtime.getRuntime()
-                                        .exec(new String[] { "which", b })
-                                        .getInputStream().read() != -1)) {
-                            Runtime.getRuntime().exec(
-                                    new String[] { browser = b, url });
+                        if ((browser == null) && (Runtime.getRuntime().exec(new String[] { "which", b })
+                                .getInputStream().read() != -1)) {
+                            Runtime.getRuntime().exec(new String[] { browser = b, url });
                         }
                     }
                     if (browser == null) {
@@ -815,18 +777,15 @@ public class Utilities {
     public static void writeLocallyJARInternalFile(String relativeFileName) {
         if (relativeFileName.contains(File.separator)) {
             String suppRelativeFileName = File.separator + relativeFileName;
-            StringTokenizer relativePath = new StringTokenizer(
-                    suppRelativeFileName, File.separator);
+            StringTokenizer relativePath = new StringTokenizer(suppRelativeFileName, File.separator);
             File folder = new File(
-                    conformizePath(System.getProperty("java.io.tmpdir"))
-                            + relativePath.nextElement().toString());
+                    normalizePath(System.getProperty("java.io.tmpdir")) + relativePath.nextElement().toString());
             if (!folder.exists()) {
                 folder.mkdir();
                 folder.deleteOnExit();
             }
             for (int i = 0; i < relativePath.countTokens() - 1; i++) {
-                folder = new File(folder.getAbsolutePath() + File.separator
-                        + relativePath.nextElement().toString());
+                folder = new File(folder.getAbsolutePath() + File.separator + relativePath.nextElement().toString());
                 if (!folder.exists()) {
                     folder.mkdir();
                     folder.deleteOnExit();
@@ -834,8 +793,7 @@ public class Utilities {
             }
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        InputStream in = Utilities.class.getResourceAsStream("/"
-                + relativeFileName.replaceAll("\\\\", "/"));
+        InputStream in = Utilities.class.getResourceAsStream("/" + relativeFileName.replaceAll("\\\\", "/"));
         byte[] bytes = new byte[1024];
         int length;
         try {
@@ -849,9 +807,7 @@ public class Utilities {
             UISupport.getDialogs().showErrorMessage(e.getMessage());
         }
 
-        File localLicenseFile = new File(
-                conformizePath(System.getProperty("java.io.tmpdir"))
-                        + relativeFileName);
+        File localLicenseFile = new File(normalizePath(System.getProperty("java.io.tmpdir")) + relativeFileName);
         localLicenseFile.deleteOnExit();
         FileOutputStream fileOutputStream;
         try {
@@ -917,7 +873,7 @@ public class Utilities {
             File executableFile = new File(javaClassPath);
             rootDir = getLocationOfJar(executableFile.getName());
         }
-        return conformizePath(rootDir);
+        return normalizePath(rootDir);
     }
 
     /**
@@ -964,8 +920,7 @@ public class Utilities {
     public static void fixComboOrientation(JComboBox combo) {
         ListCellRenderer r = combo.getRenderer();
         if (r instanceof Component) {
-            ComponentOrientation o = ComponentOrientation.getOrientation(Locale
-                    .getDefault());
+            ComponentOrientation o = ComponentOrientation.getOrientation(Locale.getDefault());
             ((Component) r).setComponentOrientation(o);
         }
     }

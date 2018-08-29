@@ -44,9 +44,10 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import net.sourceforge.open_teradata_viewer.EscapableDialog;
+import org.fife.rsta.ui.EscapableDialog;
+import org.fife.rsta.ui.ResizableFrameContentPane;
+
 import net.sourceforge.open_teradata_viewer.UISupport;
-import net.sourceforge.open_teradata_viewer.editor.ResizableFrameContentPane;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
@@ -102,8 +103,7 @@ public class OTVGoToDialog extends EscapableDialog {
     }
 
     private void init() {
-        ComponentOrientation orientation = ComponentOrientation
-                .getOrientation(getLocale());
+        ComponentOrientation orientation = ComponentOrientation.getOrientation(getLocale());
 
         lineNumber = -1;
         maxLineNumberAllowed = 1; // Empty document has 1 line
@@ -116,8 +116,7 @@ public class OTVGoToDialog extends EscapableDialog {
 
         // Make a panel containing the "Line number" edit box
         Box enterLineNumberPane = new Box(BoxLayout.LINE_AXIS);
-        enterLineNumberPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 20,
-                0));
+        enterLineNumberPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         lineNumberField = new JTextField(16);
         lineNumberField.setText("1");
         AbstractDocument doc = (AbstractDocument) lineNumberField.getDocument();
@@ -200,8 +199,7 @@ public class OTVGoToDialog extends EscapableDialog {
      * override.
      */
     protected void displayInvalidLineNumberMessage() {
-        UISupport.getDialogs().showErrorMessage(
-                "Manimum line number allowed is " + maxLineNumberAllowed + ".");
+        UISupport.getDialogs().showErrorMessage("Manimum line number allowed is " + maxLineNumberAllowed + ".");
     }
 
     /**
@@ -316,22 +314,20 @@ public class OTVGoToDialog extends EscapableDialog {
                     }
                 }
                 if (origLength != str.length()) {
-                    UIManager.getLookAndFeel().provideErrorFeedback(
-                            OTVGoToDialog.this);
+                    UIManager.getLookAndFeel().provideErrorFeedback(OTVGoToDialog.this);
                 }
             }
             return str;
         }
 
         @Override
-        public void insertString(FilterBypass fb, int offset, String string,
-                AttributeSet attr) throws BadLocationException {
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+                throws BadLocationException {
             fb.insertString(offset, fix(string), attr);
         }
 
         @Override
-        public void replace(DocumentFilter.FilterBypass fb, int offset,
-                int length, String text, AttributeSet attr)
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attr)
                 throws BadLocationException {
             fb.replace(offset, length, fix(text), attr);
         }

@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+      <meta name="author" content="D. Campione" />
+      <meta name="description" content="JavaScript macros of Open Teradata Viewer. A database editor, suitable as front-end for your Teradata relational database." />
+      <meta name="keywords" content="open teradata viewer,teradata,java,jdbc,database,gui,front-end,tool,edit,editing,reporting,synchronization,blob,clob" />
+      <link rel="stylesheet" type="text/css" href="style_js_macros.css" />
+      <title>
+          Open Teradata Viewer - JavaScript macros
+      </title>
+    </head>
+    <body bgcolor="#FFFFFF">
+        <div id="header">
+            <div id="title">
+            </div>
+            <div id="menu">
+                <a class="headerselected"><img src="images/logo.png" alt="Open Teradata Viewer" width="500" height="61" /></a>
+            </div>
+        </div>
+        <div id="content">
+            <h4>
+                Open a file in the editor (or a URL in the default Web browser)
+            </h4>
+<pre>
+<span class="s6">var</span><span class="s21"> </span><span class="s20">fileName</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">app</span><span class="s20">.</span><span class="s20">getSelectedText</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">fileName</span><span class="s23">==</span><span class="s6">null</span><span class="s21"> </span><span class="s23">||</span><span class="s21"> </span><span class="s20">fileName</span><span class="s20">.</span><span class="s20">length</span><span class="s22">(</span><span class="s22">)</span><span class="s23">==</span><span class="s10">0</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">showMessageDialog</span><span class="s22">(</span><span class="s20">app</span><span class="s20">,</span>
+<span class="s21">            </span><span class="s13">"Couldn't open the file: No selection.\n"</span><span class="s21"> </span><span class="s23">+</span>
+<span class="s21">            </span><span class="s13">"A path (or a URL) must be selected in the active editor to open a file (or a Web site)."</span><span class="s20">,</span>
+<span class="s21">            </span><span class="s13">"Error"</span><span class="s20">,</span><span class="s21"> </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">ERROR_MESSAGE</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+<span class="s6">else</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">isUrl</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">fileName</span><span class="s20">.</span><span class="s20">startsWith</span><span class="s22">(</span><span class="s13">"http://"</span><span class="s22">)</span><span class="s20">;</span>
+
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">file</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s6">new</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">io</span><span class="s20">.</span><span class="s20">File</span><span class="s22">(</span><span class="s20">fileName</span><span class="s22">)</span><span class="s20">;</span>
+
+<span class="s21">    </span><span class="s1">// If this is a URL, open it in a browser</span>
+<span class="s21">    </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">isUrl</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s20">java</span><span class="s20">.</span><span class="s20">awt</span><span class="s20">.</span><span class="s20">Desktop</span><span class="s20">.</span><span class="s20">getDesktop</span><span class="s22">(</span><span class="s22">)</span><span class="s20">.</span><span class="s20">browse</span><span class="s22">(</span><span class="s6">new</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">net</span><span class="s20">.</span><span class="s20">URL</span><span class="s22">(</span><span class="s20">fileName</span><span class="s22">)</span><span class="s20">.</span><span class="s20">toURI</span><span class="s22">(</span><span class="s22">)</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s6">else</span><span class="s21"> </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">file</span><span class="s20">.</span><span class="s20">isFile</span><span class="s22">(</span><span class="s22">)</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s20">app</span><span class="s20">.</span><span class="s20">openFile</span><span class="s22">(</span><span class="s20">file</span><span class="s20">.</span><span class="s20">absolutePath</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s6">else</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">showMessageDialog</span><span class="s22">(</span><span class="s20">app</span><span class="s20">,</span>
+<span class="s21">                </span><span class="s13">"File does not exist:\n"</span><span class="s21"> </span><span class="s23">+</span><span class="s21"> </span><span class="s20">file</span><span class="s20">.</span><span class="s20">absolutePath</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"Error"</span><span class="s20">,</span>
+<span class="s21">                </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">ERROR_MESSAGE</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s22">}</span>
+
+</pre><br /><br />
+            <h4>
+                Order the lines
+            </h4>
+<pre>
+<span class="s6">var</span><span class="s21"> </span><span class="s20">removeDuplicates</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s9">true</span><span class="s20">;</span><span class="s21"> </span><span class="s1">// Change to "false" if you want to keep duplicates</span>
+
+<span class="s6">function</span><span class="s21"> </span><span class="s20">join</span><span class="s22">(</span><span class="s20">lines</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">sb</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s6">new</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">lang</span><span class="s20">.</span><span class="s20">StringBuffer</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">lines</span><span class="s23">!=</span><span class="s6">null</span><span class="s21"> </span><span class="s23">&amp;&amp;</span><span class="s21"> </span><span class="s20">lines</span><span class="s20">.</span><span class="s20">length</span><span class="s23">&gt;</span><span class="s10">0</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s6">for</span><span class="s21"> </span><span class="s22">(</span><span class="s6">var</span><span class="s21"> </span><span class="s20">i</span><span class="s23">=</span><span class="s10">0</span><span class="s20">;</span><span class="s21"> </span><span class="s20">i</span><span class="s23">&lt;</span><span class="s20">lines</span><span class="s20">.</span><span class="s20">length</span><span class="s20">;</span><span class="s21"> </span><span class="s20">i</span><span class="s23">++</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">            </span><span class="s1">//System.out.println(lines[i]);</span>
+<span class="s21">            </span><span class="s20">sb</span><span class="s20">.</span><span class="s20">append</span><span class="s22">(</span><span class="s20">lines</span><span class="s22">[</span><span class="s20">i</span><span class="s22">]</span><span class="s22">)</span><span class="s20">.</span><span class="s20">append</span><span class="s22">(</span><span class="s14">'\n'</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s7">return</span><span class="s21"> </span><span class="s20">sb</span><span class="s20">.</span><span class="s20">toString</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+
+<span class="s1">// Note: You'll want to consider wrapping your scripts inside calls to</span>
+<span class="s1">// beginAtomicEdit() and endAtomicEdit(), so the actions they perform can</span>
+<span class="s1">// be undone with a single Undo action.</span>
+<span class="s20">textArea</span><span class="s20">.</span><span class="s20">beginAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s6">try</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">lines</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">text</span><span class="s20">.</span><span class="s20">split</span><span class="s22">(</span><span class="s13">"\n"</span><span class="s22">)</span><span class="s20">;</span>
+
+<span class="s21">    </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">removeDuplicates</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s6">var</span><span class="s21"> </span><span class="s20">ts</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s6">new</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">util</span><span class="s20">.</span><span class="s20">TreeSet</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s6">for</span><span class="s21"> </span><span class="s22">(</span><span class="s6">var</span><span class="s21"> </span><span class="s20">i</span><span class="s23">=</span><span class="s10">0</span><span class="s20">;</span><span class="s21"> </span><span class="s20">i</span><span class="s23">&lt;</span><span class="s20">lines</span><span class="s20">.</span><span class="s20">length</span><span class="s20">;</span><span class="s21"> </span><span class="s20">i</span><span class="s23">++</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">            </span><span class="s20">ts</span><span class="s20">.</span><span class="s20">add</span><span class="s22">(</span><span class="s20">lines</span><span class="s22">[</span><span class="s20">i</span><span class="s22">]</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s22">}</span>
+<span class="s21">        </span><span class="s20">lines</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">ts</span><span class="s20">.</span><span class="s20">toArray</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+
+<span class="s21">    </span><span class="s20">java</span><span class="s20">.</span><span class="s20">util</span><span class="s20">.</span><span class="s20">Arrays</span><span class="s20">.</span><span class="s20">sort</span><span class="s22">(</span><span class="s20">lines</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">text</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">join</span><span class="s22">(</span><span class="s20">lines</span><span class="s22">)</span><span class="s20">;</span>
+
+<span class="s22">}</span><span class="s21"> </span><span class="s6">finally</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">endAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+
+</pre><br /><br />
+            <h4>
+                Escape HTML characters
+            </h4>
+<pre>
+<span class="s6">function</span><span class="s21"> </span><span class="s20">replaceMultipleSpaces</span><span class="s22">(</span><span class="s20">text</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">p</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">util</span><span class="s20">.</span><span class="s20">regex</span><span class="s20">.</span><span class="s20">Pattern</span><span class="s20">.</span><span class="s20">compile</span><span class="s22">(</span><span class="s13">"  +"</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">m</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">p</span><span class="s20">.</span><span class="s20">matcher</span><span class="s22">(</span><span class="s20">text</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">sb</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s6">new</span><span class="s21"> </span><span class="s20">java</span><span class="s20">.</span><span class="s20">lang</span><span class="s20">.</span><span class="s20">StringBuffer</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s6">while</span><span class="s21"> </span><span class="s22">(</span><span class="s20">m</span><span class="s20">.</span><span class="s20">find</span><span class="s22">(</span><span class="s22">)</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s6">var</span><span class="s21"> </span><span class="s20">spaces</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">m</span><span class="s20">.</span><span class="s20">group</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s20">m</span><span class="s20">.</span><span class="s20">appendReplacement</span><span class="s22">(</span><span class="s20">sb</span><span class="s20">,</span><span class="s21"> </span><span class="s20">spaces</span><span class="s20">.</span><span class="s20">replace</span><span class="s22">(</span><span class="s13">" "</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;nbsp;"</span><span class="s22">)</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s20">m</span><span class="s20">.</span><span class="s20">appendTail</span><span class="s22">(</span><span class="s20">sb</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s7">return</span><span class="s21"> </span><span class="s20">sb</span><span class="s20">.</span><span class="s20">toString</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+
+<span class="s20">textArea</span><span class="s20">.</span><span class="s20">beginAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s6">try</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s6">var</span><span class="s21"> </span><span class="s20">text</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">selectedText</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">text</span><span class="s23">==</span><span class="s6">null</span><span class="s21"> </span><span class="s23">||</span><span class="s21"> </span><span class="s20">text</span><span class="s20">.</span><span class="s20">length</span><span class="s22">(</span><span class="s22">)</span><span class="s23">==</span><span class="s10">0</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">showMessageDialog</span><span class="s22">(</span><span class="s20">app</span><span class="s20">,</span>
+<span class="s21">                </span><span class="s13">"Error:  No selection.\n"</span><span class="s21"> </span><span class="s23">+</span>
+<span class="s21">                </span><span class="s13">"Text must be selected to HTML-ify."</span><span class="s20">,</span>
+<span class="s21">                </span><span class="s13">"Error"</span><span class="s20">,</span><span class="s21"> </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">ERROR_MESSAGE</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s21">    </span><span class="s6">else</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">        </span><span class="s20">text</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">text</span><span class="s20">.</span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"&amp;"</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;amp;"</span><span class="s22">)</span><span class="s20">.</span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"\""</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;quot;"</span><span class="s22">)</span><span class="s20">.</span>
+<span class="s21">                </span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"&lt;"</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;lt;"</span><span class="s22">)</span><span class="s20">.</span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"&gt;"</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;gt;"</span><span class="s22">)</span><span class="s20">.</span>
+<span class="s21">                </span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"\t"</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&amp;#009;"</span><span class="s22">)</span><span class="s20">.</span><span class="s20">replace</span><span class="s22">(</span><span class="s13">"\n"</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"&lt;br /&gt;\n"</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s6">if</span><span class="s21"> </span><span class="s22">(</span><span class="s20">text</span><span class="s20">.</span><span class="s20">contains</span><span class="s22">(</span><span class="s13">"  "</span><span class="s22">)</span><span class="s22">)</span><span class="s21"> </span><span class="s22">{</span><span class="s21"> </span><span class="s1">// Replace multiple spaces with &amp;nbsp; sequences</span>
+<span class="s21">            </span><span class="s20">text</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">replaceMultipleSpaces</span><span class="s22">(</span><span class="s20">text</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s22">}</span>
+<span class="s21">        </span><span class="s6">var</span><span class="s21"> </span><span class="s20">start</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">getSelectionStart</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">replaceSelection</span><span class="s22">(</span><span class="s20">text</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">setSelectionStart</span><span class="s22">(</span><span class="s20">start</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">        </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">setSelectionEnd</span><span class="s22">(</span><span class="s20">start</span><span class="s23">+</span><span class="s20">text</span><span class="s20">.</span><span class="s20">length</span><span class="s22">(</span><span class="s22">)</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s22">}</span>
+<span class="s22">}</span><span class="s21"> </span><span class="s6">finally</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">endAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+
+</pre>
+        </div>
+    </body>
+</html>

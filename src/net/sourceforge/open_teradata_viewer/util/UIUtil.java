@@ -18,12 +18,17 @@
 
 package net.sourceforge.open_teradata_viewer.util;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.Locale;
 import java.util.Map;
 
@@ -31,7 +36,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
@@ -52,8 +59,19 @@ import javax.swing.text.JTextComponent;
 public class UIUtil {
 
     /** A very common border that can be shared across many components. */
-    private static final Border EMPTY_5_BORDER = BorderFactory
-            .createEmptyBorder(5, 5, 5, 5);
+    private static final Border EMPTY_5_BORDER = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+
+    /**
+     * Buttons look better when they have a minimum width. Windows does this
+     * automatically, for example.
+     */
+    private static final int DEFAULT_BUTTON_SIZE = 85;
+
+    /**
+     * Used for the color of hyperlinks when a LookAndFeel uses light text
+     * against a dark background.
+     */
+    private static final Color LIGHT_HYPERLINK_FG = new Color(0xd8ffff);
 
     /**
      * Fixes the orientation of the renderer of a combo box. Swing standard LaFs
@@ -64,9 +82,348 @@ public class UIUtil {
     public static void fixComboOrientation(JComboBox combo) {
         ListCellRenderer r = combo.getRenderer();
         if (r instanceof Component) {
-            ComponentOrientation o = ComponentOrientation.getOrientation(Locale
-                    .getDefault());
+            ComponentOrientation o = ComponentOrientation.getOrientation(Locale.getDefault());
             ((Component) r).setComponentOrientation(o);
+        }
+    }
+
+    /**
+     * Used by makeSpringCompactGrid. This is ripped off directly from
+     * <code>SpringUtilities.java</code> in the Sun Java Tutorial.
+     *
+     * @param parent The container whose layout must be an instance of
+     *        <code>SpringLayout</code>.
+     * @return The spring constraints for the specified component contained in
+     *         <code>parent</code>.
+     */
+    private static final SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols) {
+        SpringLayout layout = (SpringLayout) parent.getLayout();
+        Component c = parent.getComponent(row * cols + col);
+        return layout.getConstraints(c);
+    }
+
+    /**
+     * Returns an empty border of width 5 on all sides. Since this is a very
+     * common border in GUI's, the border returned is a singleton.
+     *
+     * @return The border.
+     */
+    public static Border getEmpty5Border() {
+        return EMPTY_5_BORDER;
+    }
+
+    /**
+     * Returns a color to use for "error" text in a text field. This will
+     * pick red for dark-text-on-light-background LookAndFeels, and a
+     * brighter color for light-text-on-dark-background LookAndFeels.
+     *
+     * @return The color to use.
+     */
+    public static final Color getErrorTextForeground() {
+        Color defaultFG = UIManager.getColor("TextField.foreground");
+        if (defaultFG.getRed() >= 160 && defaultFG.getGreen() >= 160 && defaultFG.getBlue() >= 160) {
+            return new Color(255, 160, 160);
+        }
+        return Color.red;
+    }
+
+    public static char getMnemonic(String mnemonic) {
+        if (mnemonic == null) {
+            return '\0';
+        }
+        return mnemonic.charAt(0);
+    }
+
+    /**
+     * Returns the text editor component for the specified combo box.
+     *
+     * @param combo The combo box.
+     * @return The text component.
+     */
+    public static final JTextComponent getTextComponent(JComboBox combo) {
+        return (JTextComponent) combo.getEditor().getEditorComponent();
+    }
+
+    /**
+     * This method is ripped off from <code>SpringUtilities.java</code> found on
+     * Sun's Java Tutorial pages. It takes a component whose layout is
+     * <code>SpringLayout</code> and organizes the components it contains into
+     * a nice grid.
+     * Aligns the first <code>rows</code> * <code>cols</code> components of
+     * <code>parent</code> in a grid. Each component in a column is as wide as
+     * the maximum preferred width of the components in that column; height is
+     * similarly determined for each row. The parent is made just big enough to
+     * fit them all.
+     *
+     * @param parent The container whose layout is <code>SpringLayout</code>.
+     * @param rows The number of rows of components to make in the container.
+     * @param cols The number of columns of components to make.
+     * @param initialX The x-location to start the grid at.
+     * @param initialY The y-location to start the grid at.
+     * @param xPad The x-padding between cells.
+     * @param yPad The y-padding between cells.
+     */
+    public static final void makeSpringCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
+            int xPad, int yPad) {
+        SpringLayout layout;
+        try {
+            layout = (SpringLayout) parent.getLayout();
+        } catch (ClassCastException cce) {
+            System.err.println("The first argument to makeCompactGrid must use SpringLayout.");
+            return;
+        }
+
+        // Align all cells in each column and make them the same width
+        Spring x = Spring.constant(initialX);
+        for (int c = 0; c < cols; c++) {
+            Spring width = Spring.constant(0);
+            for (int r = 0; r < rows; r++) {
+                width = Spring.max(width, getConstraintsForCell(r, c, parent, cols).getWidth());
+            }
+            for (int r = 0; r < rows; r++) {
+                SpringLayout.Constraints constraints = getConstraintsForCell(r, c, parent, cols);
+                constraints.setX(x);
+                constraints.setWidth(width);
+            }
+            x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
+        }
+
+        // Align all cells in each row and make them the same height
+        Spring y = Spring.constant(initialY);
+        for (int r = 0; r < rows; r++) {
+            Spring height = Spring.constant(0);
+            for (int c = 0; c < cols; c++) {
+                height = Spring.max(height, getConstraintsForCell(r, c, parent, cols).getHeight());
+            }
+            for (int c = 0; c < cols; c++) {
+                SpringLayout.Constraints constraints = getConstraintsForCell(r, c, parent, cols);
+                constraints.setY(y);
+                constraints.setHeight(height);
+            }
+            y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
+        }
+
+        // Set the parent's size
+        SpringLayout.Constraints pCons = layout.getConstraints(parent);
+        pCons.setConstraint(SpringLayout.SOUTH, y);
+        pCons.setConstraint(SpringLayout.EAST, x);
+    }
+
+    /**
+     * Returns a button with the specified text.
+     *
+     * @param text The string text value.
+     * @return The button.
+     * @see #newButton(String, String)
+     * @see #newButton(String, ActionListener)
+     * @see #newButton(String, String, ActionListener)
+     */
+    public static JButton newButton(String text) {
+        return newButton(text, null);
+    }
+
+    /**
+     * Returns a button with the specified text and mnemonic.
+     *
+     * @param text The string text value.
+     * @param mnemonic The key containing a single-char
+     *        <code>String</code> value for the mnemonic.
+     * @return The button.
+     * @see #newButton(String)
+     */
+    public static JButton newButton(String text, String mnemonic) {
+        return newButton(text, mnemonic, null);
+    }
+
+    /**
+     * Returns a button with the specified text and mnemonic.
+     *
+     * @param text The string text value.
+     * @param mnemonic The key containing a single-char
+     *        <code>String</code> value for the mnemonic.
+     * @param listener If non-<code>null</code>, this listener will be
+     *        added to the button.
+     * @return The button.
+     * @see #newButton(String)
+     * @see #newButton(String, ActionListener)
+     */
+    public static JButton newButton(String text, String mnemonic, ActionListener listener) {
+        JButton b = new JButton(text);
+        b.setMnemonic(getMnemonic(mnemonic));
+        if (listener != null) {
+            b.addActionListener(listener);
+        }
+        return b;
+    }
+
+    /**
+     * Returns an <code>JLabel</code> with the specified text.
+     *
+     * @param key The key containing the string text value.
+     * @return The <code>JLabel</code>.
+     */
+    public static JLabel newLabel(String key) {
+        return newLabel(key, null);
+    }
+
+    /**
+     * Returns an <code>JLabel</code> with the specified text.
+     *
+     * @param key The key containing the string text value.
+     * @param labelFor If non-<code>null</code>, the label is a label for
+     *        that specific component.
+     * @return The <code>JLabel</code>.
+     */
+    public static JLabel newLabel(String key, Component labelFor) {
+        JLabel label = new JLabel(key);
+        label.setDisplayedMnemonic(getMnemonic(key));
+        if (labelFor != null) {
+            label.setLabelFor(labelFor);
+        }
+        return label;
+    }
+
+    /**
+     * Creates a "footer" containing two buttons (typically OK and Cancel)
+     * for a dialog.
+     *
+     * @param ok The OK button.
+     * @param cancel The Cancel button.
+     * @return The footer component for the dialog.
+     * @see #createButtonFooter(Container)
+     */
+    public static Container createButtonFooter(JButton ok, JButton cancel) {
+        return createButtonFooter(ok, cancel, -1);
+    }
+
+    /**
+     * Creates a "footer" containing two buttons (typically OK and Cancel)
+     * for a dialog.
+     *
+     * @param ok The OK button.
+     * @param cancel The Cancel button.
+     * @param topPadding The amount of padding to place above the buttons. If
+     *        this is less than <code>0</code>, a default value of 10 pixels
+     *        is used.
+     * @return The footer component for the dialog.
+     * @see #createButtonFooter(Container)
+     */
+    public static Container createButtonFooter(JButton ok, JButton cancel, int topPadding) {
+        JPanel temp = new JPanel(new GridLayout(1, 2, 5, 5));
+        temp.add(ok);
+        temp.add(cancel);
+        // The GridLayout forces the two buttons to be the same size, so we
+        // ensure that at least one of the buttons is >= 85 pixels.
+        Dimension prefSize = ok.getPreferredSize();
+        if (prefSize.width < DEFAULT_BUTTON_SIZE) {
+            ensureDefaultButtonWidth(cancel);
+        }
+        return createButtonFooter(temp, topPadding);
+    }
+
+    /**
+     * Creates a "footer" component, typically containing buttons, for a
+     * dialog.
+     *
+     * @param buttons The container of buttons, or whatever components that
+     *        should be in the footer component.
+     * @return The footer component for the dialog.
+     * @see #createButtonFooter(JButton, JButton)
+     */
+    public static Container createButtonFooter(Container buttons) {
+        return createButtonFooter(buttons, -1);
+    }
+
+    /**
+     * Creates a "footer" component, typically containing buttons, for a
+     * dialog.
+     *
+     * @param buttons The container of buttons, or whatever components that
+     *        should be in the footer component.
+     * @param topPadding The amount of padding to place above the buttons. If
+     *        this is less than <code>0</code>, a default value of 10 pixels
+     *        is used.
+     * @return The footer component for the dialog.
+     * @see #createButtonFooter(JButton, JButton)
+     * @see #createButtonFooter(Container, int, int)
+     */
+    public static Container createButtonFooter(Container buttons, int topPadding) {
+        return createButtonFooter(buttons, topPadding, -1);
+    }
+
+    /**
+     * Creates a "footer" component, typically containing buttons, for a
+     * dialog.
+     *
+     * @param buttons The container of buttons, or whatever components that
+     *        should be in the footer component.
+     * @param topPadding The amount of padding to place above the buttons. If
+     *        this is less than <code>0</code>, a default value of 10 pixels
+     *        is used.
+     * @param sidePadding The amount of padding to place to the side of the
+     *        buttons. If this is less than <code>0</code>, a default value of
+     *        8 pixels is used.
+     * @return The footer component for the dialog.
+     * @see #createButtonFooter(JButton, JButton)
+     * @see #createButtonFooter(Container, int)
+     */
+    public static Container createButtonFooter(Container buttons, int topPadding, int sidePadding) {
+        if (topPadding < 0) {
+            topPadding = 10;
+        }
+        if (sidePadding < 0) {
+            sidePadding = 8;
+        }
+
+        // If it's just a single button, size it
+        if (buttons instanceof JButton) {
+            JButton button = (JButton) buttons;
+            Dimension preferredSize = button.getPreferredSize();
+            if (preferredSize.width < DEFAULT_BUTTON_SIZE) {
+                preferredSize.width = DEFAULT_BUTTON_SIZE;
+                button.setPreferredSize(preferredSize);
+            }
+        }
+
+        JPanel panel = new JPanel(new BorderLayout());
+        ComponentOrientation o = buttons.getComponentOrientation();
+        int left = o.isLeftToRight() ? 0 : sidePadding;
+        int right = o.isLeftToRight() ? sidePadding : 0;
+
+        panel.setBorder(BorderFactory.createEmptyBorder(topPadding, left, 0, right));
+        panel.add(buttons, BorderLayout.LINE_END);
+
+        return panel;
+
+    }
+
+    /**
+     * Ensures a button has a specific minimum width, similar to what Windows
+     * does. This usually makes the UI look a little better, especially with
+     * small buttons such as those displaying an "OK" label, for example.
+     *
+     * @param button The button to possibly elongate.
+     * @see #ensureButtonWidth(JButton, int)
+     */
+    public static void ensureDefaultButtonWidth(JButton button) {
+        ensureButtonWidth(button, DEFAULT_BUTTON_SIZE);
+    }
+
+    /**
+     * Ensures a button has a specific minimum width. This can be useful if
+     * you have a dialog with very small-labeled buttons, such as "OK", for
+     * example. Often, very small buttons look unprofessional, so artificially
+     * widening them helps.
+     *
+     * @param button The button to possibly elongate.
+     * @param width The minimum (preferred) width for the button.
+     * @see #ensureDefaultButtonWidth(JButton)
+     */
+    public static void ensureButtonWidth(JButton button, int width) {
+        Dimension prefSize = button.getPreferredSize();
+        if (prefSize.width < width) {
+            prefSize.width = width;
+            button.setPreferredSize(prefSize);
         }
     }
 
@@ -85,8 +442,7 @@ public class UIUtil {
      * 
      */
     public static void fixJTableRendererOrientations(JTable table) {
-        ComponentOrientation o = ComponentOrientation.getOrientation(table
-                .getLocale());
+        ComponentOrientation o = ComponentOrientation.getOrientation(table.getLocale());
         TableCellRenderer r = table.getDefaultRenderer(Object.class);
         if (r instanceof Component) { // Never null for JTable
             Component c = (Component) r;
@@ -108,16 +464,6 @@ public class UIUtil {
                 ((Component) r).applyComponentOrientation(o);
             }
         }
-    }
-
-    /**
-     * Returns an empty border of width 5 on all sides. Since this is a very
-     * common border in GUI's, the border returned is a singleton.
-     *
-     * @return The border.
-     */
-    public static Border getEmpty5Border() {
-        return EMPTY_5_BORDER;
     }
 
     /**
@@ -160,8 +506,7 @@ public class UIUtil {
      * like the native Look.
      */
     public static void installOsSpecificLafTweaks() {
-        String lafName = UIManager.getLookAndFeel().getName()
-                .toLowerCase(Locale.ENGLISH);
+        String lafName = UIManager.getLookAndFeel().getName().toLowerCase(Locale.ENGLISH);
         String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
         // XP has insets between the edge of popup menus and the selection
@@ -170,8 +515,7 @@ public class UIUtil {
 
             String key = "PopupMenu.border";
             Border origBorder = UIManager.getBorder(key);
-            UIResource res = new BorderUIResource.CompoundBorderUIResource(
-                    origBorder, insetsBorder);
+            UIResource res = new BorderUIResource.CompoundBorderUIResource(origBorder, insetsBorder);
             UIManager.getLookAndFeelDefaults().put(key, res);
         }
     }
@@ -185,94 +529,7 @@ public class UIUtil {
      * @return Whether it is a "light" foreground color.
      */
     public static final boolean isLightForeground(Color fg) {
-        return fg.getRed() > 0xa0 && fg.getGreen() > 0xa0
-                && fg.getBlue() > 0xa0;
-    }
-
-    /**
-     * Used by makeSpringCompactGrid. This is ripped off directly from
-     * <code>SpringUtilities.java</code> in the Sun Java Tutorial.
-     *
-     * @param parent The container whose layout must be an instance of
-     *        <code>SpringLayout</code>.
-     * @return The spring constraints for the specified component contained in
-     *         <code>parent</code>.
-     */
-    private static final SpringLayout.Constraints getConstraintsForCell(
-            int row, int col, Container parent, int cols) {
-        SpringLayout layout = (SpringLayout) parent.getLayout();
-        Component c = parent.getComponent(row * cols + col);
-        return layout.getConstraints(c);
-    }
-
-    /**
-     * This method is ripped off from <code>SpringUtilities.java</code> found on
-     * Sun's Java Tutorial pages. It takes a component whose layout is
-     * <code>SpringLayout</code> and organizes the components it contains into
-     * a nice grid.
-     * Aligns the first <code>rows</code> * <code>cols</code> components of
-     * <code>parent</code> in a grid. Each component in a column is as wide as
-     * the maximum preferred width of the components in that column; height is
-     * similarly determined for each row. The parent is made just big enough to
-     * fit them all.
-     *
-     * @param parent The container whose layout is <code>SpringLayout</code>.
-     * @param rows The number of rows of components to make in the container.
-     * @param cols The number of columns of components to make.
-     * @param initialX The x-location to start the grid at.
-     * @param initialY The y-location to start the grid at.
-     * @param xPad The x-padding between cells.
-     * @param yPad The y-padding between cells.
-     */
-    public static final void makeSpringCompactGrid(Container parent, int rows,
-            int cols, int initialX, int initialY, int xPad, int yPad) {
-        SpringLayout layout;
-        try {
-            layout = (SpringLayout) parent.getLayout();
-        } catch (ClassCastException cce) {
-            System.err.println("The first argument to makeCompactGrid "
-                    + "must use SpringLayout.");
-            return;
-        }
-
-        // Align all cells in each column and make them the same width
-        Spring x = Spring.constant(initialX);
-        for (int c = 0; c < cols; c++) {
-            Spring width = Spring.constant(0);
-            for (int r = 0; r < rows; r++) {
-                width = Spring.max(width,
-                        getConstraintsForCell(r, c, parent, cols).getWidth());
-            }
-            for (int r = 0; r < rows; r++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
-                constraints.setX(x);
-                constraints.setWidth(width);
-            }
-            x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
-        }
-
-        // Align all cells in each row and make them the same height
-        Spring y = Spring.constant(initialY);
-        for (int r = 0; r < rows; r++) {
-            Spring height = Spring.constant(0);
-            for (int c = 0; c < cols; c++) {
-                height = Spring.max(height,
-                        getConstraintsForCell(r, c, parent, cols).getHeight());
-            }
-            for (int c = 0; c < cols; c++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
-                constraints.setY(y);
-                constraints.setHeight(height);
-            }
-            y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
-        }
-
-        // Set the parent's size
-        SpringLayout.Constraints pCons = layout.getConstraints(parent);
-        pCons.setConstraint(SpringLayout.SOUTH, y);
-        pCons.setConstraint(SpringLayout.EAST, x);
+        return fg.getRed() > 0xa0 && fg.getGreen() > 0xa0 && fg.getBlue() > 0xa0;
     }
 
     /**
@@ -308,8 +565,7 @@ public class UIUtil {
         Map old = g2d.getRenderingHints();
 
         // Try to use the rendering hint set that is "native"
-        Map hints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty(
-                "awt.font.desktophints");
+        Map hints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
         if (hints != null) {
             g2d.addRenderingHints(hints);
         }
@@ -318,54 +574,43 @@ public class UIUtil {
     }
 
     /**
-     * Returns a button with the specified text.
+     * Returns a pretty string value for a KeyStroke, suitable for display as
+     * the keystroke's value in a GUI.
      *
-     * @param text The label for the component.
-     * @return The button.
+     * @param keyStroke The keystroke.
+     * @return The string value of the keystroke.
      */
-    public static final JButton newButton(String text) {
-        JButton b = new JButton(text);
-        return b;
+    public static String getPrettyStringFor(KeyStroke keyStroke) {
+        if (keyStroke == null)
+            return "";
+
+        String string = KeyEvent.getKeyModifiersText(keyStroke.getModifiers());
+        if (string != null && string.length() > 0)
+            string += "+";
+        int keyCode = keyStroke.getKeyCode();
+        if (keyCode != KeyEvent.VK_SHIFT && keyCode != KeyEvent.VK_CONTROL && keyCode != KeyEvent.VK_ALT
+                && keyCode != KeyEvent.VK_META)
+            string += KeyEvent.getKeyText(keyCode);
+        return string;
+
     }
 
     /**
-     * Returns an <code>JLabel</code> with the specified text.
+     * Returns the color to use for hyperlink-style components. This method
+     * will return <code>Color.blue</code> unless it appears that the current
+     * LookAndFeel uses light text on a dark background, in which case a
+     * brighter alternative is returned.
      *
-     * @param text The label for the component.
-     * @param labelFor The component the label is labeling.
-     * @return The <code>JLabel</code>.
+     * @return The color to use for hyperlinks.
      */
-    public static final JLabel newLabel(String text, Component labelFor) {
-        JLabel label = new JLabel(text);
-        if (labelFor != null) {
-            label.setLabelFor(labelFor);
+    public static Color getHyperlinkForeground() {
+        // This property is defined by all standard LaFs, even Nimbus (!),
+        // but you never know what crazy LaFs there are..
+        Color fg = UIManager.getColor("Label.foreground");
+        if (fg == null) {
+            fg = new JLabel().getForeground();
         }
-        return label;
-    }
 
-    /**
-     * Returns the text editor component for the specified combo box.
-     *
-     * @param combo The combo box.
-     * @return The text component.
-     */
-    public static final JTextComponent getTextComponent(JComboBox combo) {
-        return (JTextComponent) combo.getEditor().getEditorComponent();
-    }
-
-    /**
-     * Returns a color to use for "error" text in a text field. This will
-     * pick red for dark-text-on-light-background LookAndFeels, and a
-     * brighter color for light-text-on-dark-background LookAndFeels.
-     *
-     * @return The color to use.
-     */
-    public static final Color getErrorTextForeground() {
-        Color defaultFG = UIManager.getColor("TextField.foreground");
-        if (defaultFG.getRed() >= 160 && defaultFG.getGreen() >= 160
-                && defaultFG.getBlue() >= 160) {
-            return new Color(255, 160, 160);
-        }
-        return Color.red;
+        return isLightForeground(fg) ? LIGHT_HYPERLINK_FG : Color.blue;
     }
 }

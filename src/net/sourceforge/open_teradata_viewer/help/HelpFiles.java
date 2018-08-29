@@ -38,32 +38,37 @@ public class HelpFiles {
 
     /** @return the quickstart guide. */
     public File getQuickStartGuideFile() {
-        return new File(Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"))
-                + HelpFiles.helpFolder
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
                 + File.separator + "manual.html");
     }
 
     /** @return the FAQ. */
     public File getFAQFile() {
-        return new File(Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"))
-                + HelpFiles.helpFolder
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
                 + File.separator + "FAQ.html");
+    }
+
+    /** @return the Groovy macros. */
+    public File getGroovyMacrosFile() {
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
+                + File.separator + "groovy_macros.html");
+    }
+
+    /** @return the JavaScript macros. */
+    public File getJavaScriptMacrosFile() {
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
+                + File.separator + "js_macros.html");
     }
 
     /** @return the changelog. */
     public File getChangeLogFile() {
-        return new File(Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"))
-                + HelpFiles.helpFolder
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
                 + File.separator + "changes.html");
     }
+
     /** @return the licence file. */
     public File getLicenceFile() {
-        return new File(Utilities.conformizePath(System
-                .getProperty("java.io.tmpdir"))
-                + HelpFiles.helpFolder
+        return new File(Utilities.normalizePath(System.getProperty("java.io.tmpdir")) + HelpFiles.helpFolder
                 + File.separator + "license.html");
     }
 }

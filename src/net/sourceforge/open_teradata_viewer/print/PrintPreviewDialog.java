@@ -42,6 +42,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.text.MessageFormat;
 
 import javax.imageio.ImageIO;
 import javax.print.Doc;
@@ -67,10 +68,11 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 
-import net.sourceforge.open_teradata_viewer.EscapableDialog;
+import org.fife.rsta.ui.EscapableDialog;
+
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.StatusBar;
 import net.sourceforge.open_teradata_viewer.ScrollPane;
+import net.sourceforge.open_teradata_viewer.StatusBar;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -80,10 +82,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  * 
  */
-public class PrintPreviewDialog extends EscapableDialog
-        implements
-            ActionListener,
-            ItemListener {
+public class PrintPreviewDialog extends EscapableDialog implements ActionListener, ItemListener {
 
     private static final long serialVersionUID = -4233626624758858399L;
 
@@ -124,8 +123,7 @@ public class PrintPreviewDialog extends EscapableDialog
     public PrintPreviewDialog(Frame owner, Printable printable) {
         super(owner);
 
-        ComponentOrientation orientation = ComponentOrientation
-                .getOrientation(getLocale());
+        ComponentOrientation orientation = ComponentOrientation.getOrientation(getLocale());
 
         // Get the page format to use when generating a preview image
         PrinterJob prnJob = PrinterJob.getPrinterJob();
@@ -163,12 +161,11 @@ public class PrintPreviewDialog extends EscapableDialog
         closeButton.setActionCommand("Close");
         closeButton.addActionListener(this);
         toolBarPanel.add(closeButton);
-        sizeComboBox = new JComboBox(new String[]{"10%", "25%", "33%", "50%",
-                "66%", "75%", "100%", "150%", "200%"});
+        sizeComboBox = new JComboBox(new String[] { "10%", "25%", "33%", "50%", "66%", "75%", "100%", "150%", "200%" });
         Utilities.fixComboOrientation(sizeComboBox);
         sizeComboBox.addItemListener(this);
         toolBarPanel.add(sizeComboBox);
-        numPagesComboBox = new JComboBox(new String[]{"1", "2", "3", "4"});
+        numPagesComboBox = new JComboBox(new String[] { "1", "2", "3", "4" });
         Utilities.fixComboOrientation(numPagesComboBox);
         numPagesComboBox.addItemListener(this);
         toolBarPanel.add(numPagesComboBox);
@@ -237,20 +234,19 @@ public class PrintPreviewDialog extends EscapableDialog
             attributeSet.add(new Copies(1));
             attributeSet.add(Sides.ONE_SIDED);
             attributeSet.add(OrientationRequested.PORTRAIT);
-            PrintService[] services = PrintServiceLookup.lookupPrintServices(
-                    flavor, null);
-            PrintService defaultService = PrintServiceLookup
-                    .lookupDefaultPrintService();
-            PrintService chosenService = ServiceUI.printDialog(null, 200, 200,
-                    services, defaultService, flavor, attributeSet);
+            PrintService[] services = PrintServiceLookup.lookupPrintServices(flavor, null);
+            PrintService defaultService = PrintServiceLookup.lookupDefaultPrintService();
+            PrintService chosenService = ServiceUI.printDialog(null, 200, 200, services, defaultService, flavor,
+                    attributeSet);
             if (chosenService != null) {
                 DocPrintJob job = chosenService.createPrintJob();
                 Doc myDoc = new SimpleDoc(masterImage, flavor, null);
                 try {
                     job.print(myDoc, attributeSet);
                 } catch (PrintException pe) {
-                    UISupport.getDialogs().showErrorMessage(
-                            "Error attempting to print: " + pe + ".");
+                    String errorMessage = "Error attempting to print: {0}.";
+                    errorMessage = MessageFormat.format(errorMessage, pe);
+                    UISupport.getDialogs().showErrorMessage(errorMessage);
                 }
             }
 
@@ -270,18 +266,15 @@ public class PrintPreviewDialog extends EscapableDialog
             zoomOutCursor1 = ImageIO.read(cl.getResource("icons/zoomout.gif"));
         } catch (Exception e) { // IOException or MalformedURLException
             ExceptionDialog.hideException(e);
-            Cursor defaultCursor = Cursor
-                    .getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+            Cursor defaultCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
             zoomInCursor = defaultCursor;
             zoomOutCursor = defaultCursor;
             return;
         }
 
         Point hotspot = new Point(0, 0);
-        zoomInCursor = getCustomCursor(zoomInCursor1, hotspot, "ZoomInCursor",
-                32, 32);
-        zoomOutCursor = getCustomCursor(zoomOutCursor1, hotspot,
-                "ZoomOutCursor", 32, 32);
+        zoomInCursor = getCustomCursor(zoomInCursor1, hotspot, "ZoomInCursor", 32, 32);
+        zoomOutCursor = getCustomCursor(zoomOutCursor1, hotspot, "ZoomOutCursor", 32, 32);
     }
 
     /**
@@ -368,18 +361,17 @@ public class PrintPreviewDialog extends EscapableDialog
      *        shorter cursor than this value.
      * @return The cursor.
      */
-    private static final Cursor getCustomCursor(Image image, Point hotspot,
-            String name, int preferredWidth, int preferredHeight) {
+    private static final Cursor getCustomCursor(Image image, Point hotspot, String name, int preferredWidth,
+            int preferredHeight) {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension bestCursorSize = toolkit.getBestCursorSize(preferredWidth,
-                preferredHeight);
+        Dimension bestCursorSize = toolkit.getBestCursorSize(preferredWidth, preferredHeight);
         int width = image.getWidth(null);
         int height = image.getHeight(null);
         if (bestCursorSize.width == width && bestCursorSize.height == height) {
             return toolkit.createCustomCursor(image, hotspot, name);
         }
-        BufferedImage cursorImage = new BufferedImage(bestCursorSize.width,
-                bestCursorSize.height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage cursorImage = new BufferedImage(bestCursorSize.width, bestCursorSize.height,
+                BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = cursorImage.createGraphics();
         g2d.drawImage(image, 0, 0, null);
         return toolkit.createCustomCursor(cursorImage, hotspot, name);
@@ -452,8 +444,7 @@ public class PrintPreviewDialog extends EscapableDialog
             Graphics g = tempImage.getGraphics();
             g.setColor(Color.white);
             g.fillRect(0, 0, pageWidth, pageHeight);
-            if (masterImage.print(g, pageFormat, currentPage + numVisiblePages
-                    - 1) == Printable.PAGE_EXISTS) {
+            if (masterImage.print(g, pageFormat, currentPage + numVisiblePages - 1) == Printable.PAGE_EXISTS) {
                 int w = (int) (pageWidth * scale / 100.0);
                 int h = (int) (pageHeight * scale / 100.0);
                 pp.setScaledSize(w, h); // Re-initialize the scaled (displayed) version
@@ -588,8 +579,7 @@ public class PrintPreviewDialog extends EscapableDialog
             Cursor cursorToUse = getCursorForScale(scale);
 
             for (int i = 0; i < numVisiblePages; i++) {
-                BufferedImage img = new BufferedImage(pageWidth, pageHeight,
-                        BufferedImage.TYPE_INT_RGB);
+                BufferedImage img = new BufferedImage(pageWidth, pageHeight, BufferedImage.TYPE_INT_RGB);
                 Graphics g = img.getGraphics();
                 g.setColor(Color.white);
                 g.fillRect(0, 0, pageWidth, pageHeight);
@@ -641,8 +631,7 @@ public class PrintPreviewDialog extends EscapableDialog
         protected BufferedImage sourceImage;
         protected Image drawImage;
 
-        public PagePreview(int width, int height, BufferedImage source,
-                Cursor cursorToUse) {
+        public PagePreview(int width, int height, BufferedImage source, Cursor cursorToUse) {
             sourceImage = source;
             setScaledSize(width, height);
             setBorder(getPagePreviewBorder());
@@ -660,8 +649,7 @@ public class PrintPreviewDialog extends EscapableDialog
 
         public Dimension getPreferredSize() {
             Insets ins = getInsets();
-            return new Dimension(width + ins.left + ins.right, height + ins.top
-                    + ins.bottom);
+            return new Dimension(width + ins.left + ins.right, height + ins.top + ins.bottom);
         }
 
         public BufferedImage getSourceImage() {
@@ -683,8 +671,7 @@ public class PrintPreviewDialog extends EscapableDialog
         public void setScaledSize(int width, int height) {
             this.width = width;
             this.height = height;
-            drawImage = sourceImage.getScaledInstance(width, height,
-                    Image.SCALE_SMOOTH);
+            drawImage = sourceImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
             repaint();
         }
     }

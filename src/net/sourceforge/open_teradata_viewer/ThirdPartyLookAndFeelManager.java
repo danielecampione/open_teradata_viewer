@@ -44,10 +44,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sourceforge.open_teradata_viewer.util.StreamUtil;
-import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.Utilities;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -55,6 +51,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
+import net.sourceforge.open_teradata_viewer.util.StreamUtil;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * NOTE: Specifying LookAndFeels in this XML file is done at your own risk. If a
@@ -120,8 +120,7 @@ public class ThirdPartyLookAndFeelManager {
             if (count > 0) {
                 List lnfJarUrlList = new ArrayList();
                 for (Iterator i = lnfInfo.iterator(); i.hasNext();) {
-                    ExtendedLookAndFeelInfo info = (ExtendedLookAndFeelInfo) i
-                            .next();
+                    ExtendedLookAndFeelInfo info = (ExtendedLookAndFeelInfo) i.next();
                     for (int j = 0; j < urls.length; j++) {
                         if (!lnfJarUrlList.contains(urls[j])) {
                             lnfJarUrlList.add(urls[j]);
@@ -156,8 +155,7 @@ public class ThirdPartyLookAndFeelManager {
         if (lnfInfo == null) {
             return new ExtendedLookAndFeelInfo[0];
         }
-        ExtendedLookAndFeelInfo[] array = new ExtendedLookAndFeelInfo[lnfInfo
-                .size()];
+        ExtendedLookAndFeelInfo[] array = new ExtendedLookAndFeelInfo[lnfInfo.size()];
         return (ExtendedLookAndFeelInfo[]) lnfInfo.toArray(array);
     }
 
@@ -173,26 +171,21 @@ public class ThirdPartyLookAndFeelManager {
      * @return A list of {@link ExtendedLookAndFeelInfo}s.
      */
     private List load3rdPartyLookAndFeelInfo(String xmlFile) {
-        File file = new File(Utilities.conformizePath(System
-                .getProperty("user.home")), xmlFile);
+        File file = new File(Utilities.normalizePath(System.getProperty("user.home")), xmlFile);
         if (!file.isFile()) {
             try {
-                String defaultThirdPartyLookAndFeelsFileContent = StreamUtil
-                        .stream2String(ThirdPartyLookAndFeelManager.class
-                                .getResourceAsStream("/res/default_3rd_party_lnfs.list"));
-                String[] defaultThirdPartyLookAndFeels = StringUtil.split(
-                        defaultThirdPartyLookAndFeelsFileContent, System
-                                .getProperty("line.separator").charAt(0));
+                String defaultThirdPartyLookAndFeelsFileContent = StreamUtil.stream2String(
+                        ThirdPartyLookAndFeelManager.class.getResourceAsStream("/res/default_3rd_party_lnfs.list"));
+                String[] defaultThirdPartyLookAndFeels = StringUtil.split(defaultThirdPartyLookAndFeelsFileContent,
+                        System.getProperty("line.separator").charAt(0));
 
-                DocumentBuilderFactory docFactory = DocumentBuilderFactory
-                        .newInstance();
+                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                 Document doc = docBuilder.newDocument();
-                Element rootElement = doc
-                        .createElement("ThirdPartyLookAndFeels");
+                Element rootElement = doc.createElement("ThirdPartyLookAndFeels");
                 doc.appendChild(rootElement);
 
-                String[] attributeNames = {NAME, CLASS, MIN_JAVA_VERSION};
+                String[] attributeNames = { NAME, CLASS, MIN_JAVA_VERSION };
                 for (String line : defaultThirdPartyLookAndFeels) {
                     String[] attributes = line.split(";");
                     Element element = doc.createElement("LookAndFeel");
@@ -200,8 +193,7 @@ public class ThirdPartyLookAndFeelManager {
                     for (int i = 0; i < attributeNames.length; i++) {
                         String attributeName = attributeNames[i];
                         Attr attr = doc.createAttribute(attributeName);
-                        initAttribute(doc, attr, element, attributeName,
-                                attributes[i].trim());
+                        initAttribute(doc, attr, element, attributeName, attributes[i].trim());
                     }
                 }
 
@@ -209,14 +201,11 @@ public class ThirdPartyLookAndFeelManager {
                 StreamResult result = new StreamResult(file);
 
                 // Write the content into XML file
-                TransformerFactory transformerFactory = TransformerFactory
-                        .newInstance();
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
                 Transformer transformer = transformerFactory.newTransformer();
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty(
-                        "{http://xml.apache.org/xslt}indent-amount", "4");
-                transformer.transform(source, new StreamResult(
-                        new ByteArrayOutputStream())); // Test first
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                transformer.transform(source, new StreamResult(new ByteArrayOutputStream())); // Test first
                 transformer.transform(source, result);
             } catch (ParserConfigurationException pce) {
                 ExceptionDialog.ignoreException(pce);
@@ -235,8 +224,7 @@ public class ThirdPartyLookAndFeelManager {
         try {
             db = dbf.newDocumentBuilder();
             InputStream inputStream = new FileInputStream(file);
-            InputSource is = new InputSource(new BufferedReader(
-                    new InputStreamReader(inputStream)));
+            InputSource is = new InputSource(new BufferedReader(new InputStreamReader(inputStream)));
             is.setEncoding("UTF-8");
             doc = db.parse(is);
         } catch (RuntimeException re) {
@@ -264,8 +252,7 @@ public class ThirdPartyLookAndFeelManager {
      * @param lafInfo An array list of <code>ExtendedLookAndFeelInfo</code>s.
      * @throws IOException If an error occurs while parsing the XML.
      */
-    private static void loadFromXML(Element root, ArrayList lafInfo)
-            throws IOException {
+    private static void loadFromXML(Element root, ArrayList lafInfo) throws IOException {
         if (root == null) {
             throw new IOException("XML error: node==null.");
         }
@@ -281,13 +268,11 @@ public class ThirdPartyLookAndFeelManager {
                     // Shouldn't have any children
                     NodeList childNodes = child.getChildNodes();
                     if (childNodes != null && childNodes.getLength() > 0) {
-                        throw new IOException("XML error: LookAndFeel "
-                                + "tags shouldn't have children.");
+                        throw new IOException("XML error: LookAndFeel " + "tags shouldn't have children.");
                     }
                     NamedNodeMap attributes = child.getAttributes();
                     if (attributes == null || attributes.getLength() < 2) {
-                        throw new IOException("XML error: LookAndFeel "
-                                + "tags should have at least two attributes.");
+                        throw new IOException("XML error: LookAndFeel " + "tags should have at least two attributes.");
                     }
                     String name = null;
                     String className = null;
@@ -301,43 +286,31 @@ public class ThirdPartyLookAndFeelManager {
                             className = node2.getNodeValue();
                         } else if (MIN_JAVA_VERSION.equals(attr)) {
                             try {
-                                minVersion = Double.parseDouble(node2
-                                        .getNodeValue());
+                                minVersion = Double.parseDouble(node2.getNodeValue());
                             } catch (NumberFormatException nfe) {
                                 ExceptionDialog.hideException(nfe);
                             }
                         } else {
-                            throw new IOException("XML error: unknown "
-                                    + "attribute: '" + attr + "'.");
+                            throw new IOException("XML error: unknown " + "attribute: '" + attr + "'.");
                         }
                     }
                     if (name == null) {
-                        throw new IOException(
-                                "open_teradata_viewer_lookandfeels.xml: At least one "
-                                        + "LookAndFeel had no '" + NAME
-                                        + "' attribute.");
+                        throw new IOException("open_teradata_viewer_lookandfeels.xml: At least one "
+                                + "LookAndFeel had no '" + NAME + "' attribute.");
                     }
                     if (className == null) {
-                        throw new IOException(
-                                "open_teradata_viewer_lookandfeels.xml: LookAndFeel "
-                                        + name + " is missing required '"
-                                        + CLASS + "' attribute.");
+                        throw new IOException("open_teradata_viewer_lookandfeels.xml: LookAndFeel " + name
+                                + " is missing required '" + CLASS + "' attribute.");
                     }
                     if (minVersion <= 0) {
-                        throw new IOException(
-                                "open_teradata_viewer_lookandfeels.xml: LookAndFeel "
-                                        + name
-                                        + " is missing required '"
-                                        + MIN_JAVA_VERSION
-                                        + "' attribute or the value of this "
-                                        + "property isn't strictly greater than 0.");
+                        throw new IOException("open_teradata_viewer_lookandfeels.xml: LookAndFeel " + name
+                                + " is missing required '" + MIN_JAVA_VERSION + "' attribute or the value of this "
+                                + "property isn't strictly greater than 0.");
                     }
                     boolean add = true;
-                    String javaSpecVersion = System
-                            .getProperty("java.specification.version");
+                    String javaSpecVersion = System.getProperty("java.specification.version");
                     try {
-                        double javaSpecVersionVal = Double
-                                .parseDouble(javaSpecVersion);
+                        double javaSpecVersionVal = Double.parseDouble(javaSpecVersion);
                         add = javaSpecVersionVal >= minVersion;
                     } catch (NumberFormatException nfe) {
                         ExceptionDialog.hideException(nfe);
@@ -346,15 +319,13 @@ public class ThirdPartyLookAndFeelManager {
                         lafInfo.add(new ExtendedLookAndFeelInfo(name, className));
                     }
                 } else { // Anything else is an error
-                    throw new IOException("XML error:  Unknown element "
-                            + "node: " + elemName);
+                    throw new IOException("XML error:  Unknown element " + "node: " + elemName);
                 }
             }
         }
     }
 
-    private void initAttribute(Document doc, Attr attr, Element element,
-            String attributeName, String attributeValue) {
+    private void initAttribute(Document doc, Attr attr, Element element, String attributeName, String attributeValue) {
         attr = doc.createAttribute(attributeName);
         attr.setValue(attributeValue);
         element.setAttributeNode(attr);

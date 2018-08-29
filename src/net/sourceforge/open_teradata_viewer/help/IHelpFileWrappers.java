@@ -37,6 +37,10 @@ public interface IHelpFileWrappers {
 
     IFileWrapper getFAQFile();
 
+    IFileWrapper getGroovyMacrosFile();
+
+    IFileWrapper getJavaScriptMacrosFile();
+
     IFileWrapper getChangeLogFile();
 
     IFileWrapper getLicenceFile();

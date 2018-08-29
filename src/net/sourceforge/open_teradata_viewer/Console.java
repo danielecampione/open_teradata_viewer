@@ -32,10 +32,10 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
+import org.joda.time.DateTime;
+
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
-
-import org.joda.time.DateTime;
 
 /**
  * 
@@ -61,21 +61,15 @@ public class Console extends JTextPane {
 
         fileIndex = getGreatestFileIndex();
         DateTime dateTime = new DateTime(new java.util.Date());
-        logFile = new File(Utilities.conformizePath(System
-                .getProperty("user.home"))
-                + "open_teradata_viewer_"
-                + String.format("%04d", dateTime.getYear())
-                + "-"
-                + String.format("%02d", dateTime.getMonthOfYear())
-                + "-"
-                + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
+        logFile = new File(Utilities.normalizePath(System.getProperty("user.home")) + "open_teradata_viewer_"
+                + String.format("%04d", dateTime.getYear()) + "-" + String.format("%02d", dateTime.getMonthOfYear())
+                + "-" + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
             } catch (IOException ioe) {
                 ExceptionDialog.notifyException(ioe);
-                UISupport.getDialogs().showErrorMessage(
-                        "Unable to create the log file.");
+                UISupport.getDialogs().showErrorMessage("Unable to create the log file.");
             }
         }
         try {
@@ -96,8 +90,7 @@ public class Console extends JTextPane {
         int len = getDocument().getLength(); // same value as getText().length();
         setCaretPosition(len); // place caret at the end (with no selection)
         if (!curSubstance) {
-            AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-                    StyleConstants.Foreground, foregroundColor);
+            AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
             setCharacterAttributes(aset, false);
         }
         replaceSelection(text); // there is no selection, so inserts at caret
@@ -110,24 +103,17 @@ public class Console extends JTextPane {
                 } catch (IOException ioe) {
                     ExceptionDialog.ignoreException(ioe);
                 }
-                logFile.renameTo(new File(logFile.getAbsolutePath() + "-"
-                        + fileIndex++));
+                logFile.renameTo(new File(logFile.getAbsolutePath() + "-" + fileIndex++));
                 DateTime dateTime = new DateTime(new java.util.Date());
-                logFile = new File(Utilities.conformizePath(System
-                        .getProperty("user.home"))
-                        + "open_teradata_viewer_"
-                        + String.format("%04d", dateTime.getYear())
-                        + "-"
-                        + String.format("%02d", dateTime.getMonthOfYear())
-                        + "-"
-                        + String.format("%02d", dateTime.getDayOfMonth())
-                        + ".log");
+                logFile = new File(Utilities.normalizePath(System.getProperty("user.home")) + "open_teradata_viewer_"
+                        + String.format("%04d", dateTime.getYear()) + "-"
+                        + String.format("%02d", dateTime.getMonthOfYear()) + "-"
+                        + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
                 try {
                     logFile.createNewFile();
                 } catch (IOException ioe) {
                     ExceptionDialog.notifyException(ioe);
-                    UISupport.getDialogs().showErrorMessage(
-                            "Unable to create the log file.");
+                    UISupport.getDialogs().showErrorMessage("Unable to create the log file.");
                 }
 
                 try {
@@ -150,8 +136,7 @@ public class Console extends JTextPane {
     }
 
     public void println(String text) {
-        print(text + System.getProperty("line.separator"),
-                ApplicationFrame.DEFAULT_FOREGROUND_COLOR_LOG);
+        print(text + System.getProperty("line.separator"), ApplicationFrame.DEFAULT_FOREGROUND_COLOR_LOG);
     }
 
     public void println(String text, Color foregroundColor) {
@@ -176,22 +161,18 @@ public class Console extends JTextPane {
 
     private int getGreatestFileIndex() {
         DateTime dateTime = new DateTime(new java.util.Date());
-        String fileName = "open_teradata_viewer_"
-                + String.format("%04d", dateTime.getYear()) + "-"
+        String fileName = "open_teradata_viewer_" + String.format("%04d", dateTime.getYear()) + "-"
                 + String.format("%02d", dateTime.getMonthOfYear()) + "-"
                 + String.format("%02d", dateTime.getDayOfMonth()) + ".log-";
-        File userHome = new File(Utilities.conformizePath(System
-                .getProperty("user.home")));
+        File userHome = new File(Utilities.normalizePath(System.getProperty("user.home")));
         File[] listedFiles = Utilities.listFiles(userHome);
         Vector<Integer> listedFilesIndexVector = new Vector<Integer>(1, 1);
         for (int i = 0; i < listedFiles.length; i++) {
             if (!listedFiles[i].isDirectory()) {
                 if (listedFiles[i].getName().startsWith(fileName)
-                        && listedFiles[i].getName().length() > (fileName)
-                                .length()) {
-                    listedFilesIndexVector.add(new Integer(listedFiles[i]
-                            .getName().substring((fileName).length(),
-                                    listedFiles[i].getName().length())));
+                        && listedFiles[i].getName().length() > (fileName).length()) {
+                    listedFilesIndexVector.add(new Integer(listedFiles[i].getName().substring((fileName).length(),
+                            listedFiles[i].getName().length())));
                 }
             }
         }

@@ -67,6 +67,9 @@
       </h4><a href="#manual">Manual</a><br />
       <a href="#about">About</a><br /><br />
       <h4>
+        Macros
+      </h4><a href="#macros">Macros</a><br /><br />
+      <h4>
         <a name="connect" id="connect"></a><img src="images/connect.png" alt="" width="16" height="16" /> Connect
       </h4>
       At startup, the connection manager is shown.<br />
@@ -242,7 +245,8 @@
       <img src="images/textarea_clipboard_history.png" alt="" width="239" height="124" /><br /><br />
       Pressing Ctrl+Shift+V will cause the "clipboard history" popup to appear below the current caret position.<br />
       This popup displays the most recent snippets of text added to the clipboard. This allows you to paste any text that was *recently* on the clipboard, not just what's *currently* in the clipboard buffer. This is pretty useful if you're a frequent copy-paster.<br />
-      The clipboard history is implemented as a singleton instance of the <code>org.fife.ui.rtextarea.ClipboardHistory</code> class. You can access it, but currently the only interesting thing you can do is set its maximum size. By default, it only remembers the twelve most recent entries on the clipboard that can be interpreted as plain text.<br /><br />
+      The clipboard history is implemented as a singleton instance of the <code>org.fife.ui.rtextarea.ClipboardHistory</code> class. You can access it, but currently the only interesting thing you can do is set its maximum size. By default, it only remembers the twelve most recent entries on the clipboard that can be interpreted as plain text.<br />
+      To indent the XML code in the editor, you can use the "Pretty print" functionality. The "Pretty print (XML only - with line breaks)" menu voice is included in the "XML Tools" sub-menu of the "Edit" menu.<br /><br /> 
       <h4>
         <a name="moveblocksoflines" id=""moveblocksoflines""></a>Move blocks of lines
       </h4>
@@ -398,7 +402,52 @@
       <h4>
         <a name="about" id="about"></a>About
       </h4>
-      When connected, this dialog shows some version information about the database and driver.
+      When connected, this dialog shows some version information about the database and driver.<br /><br />
+      <h4>
+        <a name="macros" id="macros"></a>Macros
+      </h4>
+      Macros are a powerful feature of Open Teradata Viewer that allow you to group several editing actions into one, so you can automate common complex editing tasks.<br />
+      Macros are played back via the Macros menu. You can manage previously-implemented macros via the Macros menu.<br /><br />
+      Scripted Macros in Open Teradata Viewer<br />
+      In Open Teradata Viewer there is the macro functionality. You are able to write scripts in JavaScript (Rhino) or Groovy, assign them shortcuts, then use them like any other action in the Open Teradata Viewer menu bar. These scripts will run in the main Open Teradata Viewer process and will have programmatic access to the entire application. This truly allows you to extend Open Teradata Viewer in any way you can think of.<br /><br />
+      To create a scripted macro, choose “New macro...” from the “Macros“ menu:<br /><br />
+      The name of your macro must be unique among all macros and will be the menu item text. The description field is optional. Give the macro a keyboard shortcut (if you want to), select the scripting language you want to use and click OK to begin creating your macro. Rhino works out-of-the-box with Java 6+ JVM’s since it comes standard).<br /><br />
+      A script template will open in Open Teradata Viewer.<br /><br />
+      A rather large comment at the top describes the macro functionality, as well as two pre-defined variables you can use to manipulate the running Open Teradata Viewer instance.<br /><br />
+      app: The parent Open Teradata Viewer instance<br />
+      textArea: The currently active RSyntaxTextArea instance<br />
+      The API of RSyntaxTextArea is available here: <a href="http://javadoc.fifesoft.com/rsyntaxtextarea/org/fife/ui/rsyntaxtextarea/RSyntaxTextArea.html">http://javadoc.fifesoft.com/rsyntaxtextarea/org/fife/ui/rsyntaxtextarea/RSyntaxTextArea.html</a><br />
+      In this file, you simply write out your macro. As an example, below is simple Rhino script for a (very crude) macro. It appends some text after the existing text in the current editor and displays a popup dialog. Note the focus here isn’t on the actual correctness of the algorithm, but rather the overall macro structure:<br /><br />
+<pre>
+<span class="s2">/*</span>
+<span class="s2"> * This is a JavaScript macro for Open Teradata Viewer.</span>
+<span class="s2"> *</span>
+<span class="s2"> * Global variables include:</span>
+<span class="s2"> *   - app:       The focused application window, an instance of</span>
+<span class="s2"> *                net.sourceforge.open_teradata_viewer.ApplicationFrame.</span>
+<span class="s2"> *   - textArea:  The active text area, an instance of</span>
+<span class="s2"> *                net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea.</span>
+<span class="s2"> *</span>
+<span class="s2"> * You can use the entire Open Teradata Viewer and OTVSyntaxTextArea public API's:</span>
+<span class="s2"> *   </span><span class="s2">http://javadoc.fifesoft.com/rsyntaxtextarea/</span><span class="s2"></span>
+<span class="s2"> */</span>
+
+<span class="s6">try</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">beginAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">append</span><span class="s22">(</span><span class="s13">"\nThis is new text\n"</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">caretPosition</span><span class="s21"> </span><span class="s23">=</span><span class="s21"> </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">document</span><span class="s20">.</span><span class="s20">length</span><span class="s20">;</span>
+<span class="s21">    </span><span class="s20">javax</span><span class="s20">.</span><span class="s20">swing</span><span class="s20">.</span><span class="s20">JOptionPane</span><span class="s20">.</span><span class="s20">showMessageDialog</span><span class="s22">(</span><span class="s20">app</span><span class="s20">,</span><span class="s21"> </span><span class="s13">"Text has been appended!"</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span><span class="s21"> </span><span class="s6">finally</span><span class="s21"> </span><span class="s22">{</span>
+<span class="s21">    </span><span class="s20">textArea</span><span class="s20">.</span><span class="s20">endAtomicEdit</span><span class="s22">(</span><span class="s22">)</span><span class="s20">;</span>
+<span class="s22">}</span>
+
+</pre><br />
+      Important things to take away are:<br />
+      Macros are run on the EDT, so you are free to call any Swing-related methods you want without wrapping them in SwingUtilities.invokeLater().<br />
+      It’s a good idea to wrap your macros in calls to textArea.beginAtomicEdit() and textArea.endAtomicEdit() if you will be manipulating the text in textArea. The latter method should also be in a “finally” block, in case any unexpected exceptions are thrown. These methods cause any action done in your macro to be remembered as a “single operation” for undo/redo purposes. Failure to do this simply means that, if you edit the text in the text component, you may have to press Ctrl+Z multiple times to get what the macro did un-done, depending on what exactly you’re doing. In the example above, we actually edited the text area’s contents, so beginAtomicEdit()/endAtomicEdit() were strictly necessary, so I left them there.<br />
+      If you assigned this macro a shortcut, you can run it by simply typing said shortcut.<br /><br />
+      Editing macros can be easily be done in the “Macros” menu. This functionality is easily accessed via the “Macros” menu - “Edit macros…” menu item.<br /><br />
+      Here you can modify the absolute path of the script of the existing macros.<br />
     </div>
   </body>
 </html>

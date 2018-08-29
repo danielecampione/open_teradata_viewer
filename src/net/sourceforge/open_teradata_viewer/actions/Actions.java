@@ -116,6 +116,8 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction PARAMETER_ASSISTANCE = new ParameterAssistanceAction();
     public static final CustomAction MATCHED_BRACKET_POPUP = new MatchedBracketPopupAction();
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
+    public static final CustomAction NEW_MACRO = new NewMacroAction();
+    public static final CustomAction EDIT_MACRO = new EditMacroAction();
 
     private static final Actions ACTIONS = new Actions();
 

@@ -53,8 +53,8 @@ public class RunAction extends CustomAction {
     private static final long serialVersionUID = -502870390309110470L;
 
     protected RunAction() {
-        super("Run", "run.png", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
+        super("Run", "run.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
     }
@@ -64,19 +64,15 @@ public class RunAction extends CustomAction {
         String sql = ApplicationFrame.getInstance().getText();
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("NOT connected.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         if (sql.trim().length() == 0) {
             return;
         }
         if (sql.trim().endsWith(";")) {
-            String sqlWithoutSemicolon = sql.trim().substring(0,
-                    sql.trim().length() - 1);
+            String sqlWithoutSemicolon = sql.trim().substring(0, sql.trim().length() - 1);
             if (!sqlWithoutSemicolon.trim().toLowerCase().endsWith("end")) {
                 sql = sqlWithoutSemicolon;
             }
@@ -88,8 +84,7 @@ public class RunAction extends CustomAction {
         Vector<Vector> dataVector = new Vector<Vector>();
         int[] columnTypes;
         String[] columnTypeNames;
-        PreparedStatement statement = createStatement(Context.getInstance()
-                .getConnectionData().getConnection(), sql);
+        PreparedStatement statement = createStatement(Context.getInstance().getConnectionData().getConnection(), sql);
         statement.setMaxRows(Context.getInstance().getFetchLimit());
 
         String[] bindVariables = handleBindVariables(statement);
@@ -121,8 +116,7 @@ public class RunAction extends CustomAction {
             } catch (SQLException sqle) {
                 if (statement.getResultSetConcurrency() != ResultSet.CONCUR_READ_ONLY) {
                     // Try read-only and without modifications
-                    statement = Context.getInstance().getConnectionData()
-                            .getConnection().prepareStatement(originalSql);
+                    statement = Context.getInstance().getConnectionData().getConnection().prepareStatement(originalSql);
                     // Bind variables
                     handleBindVariables(statement, bindVariables);
                     statements[0] = statement;
@@ -139,12 +133,9 @@ public class RunAction extends CustomAction {
                 columnTypes = new int[columnCount];
                 columnTypeNames = new String[columnCount];
                 for (int i = 0; i < columnCount; i++) {
-                    columnIdentifiers.add(resultSet.getMetaData()
-                            .getColumnName(i + 1));
-                    columnTypes[i] = resultSet.getMetaData().getColumnType(
-                            i + 1);
-                    columnTypeNames[i] = resultSet.getMetaData()
-                            .getColumnTypeName(i + 1);
+                    columnIdentifiers.add(resultSet.getMetaData().getColumnName(i + 1));
+                    columnTypes[i] = resultSet.getMetaData().getColumnType(i + 1);
+                    columnTypeNames[i] = resultSet.getMetaData().getColumnTypeName(i + 1);
                 }
                 while (waitingDialog.isVisible() && resultSet.next()) {
                     Vector<Object> row = new Vector<Object>(columnCount + 1);
@@ -159,22 +150,16 @@ public class RunAction extends CustomAction {
                             row.add(object);
                         } catch (Exception e) {
                             row.add("###");
-                            System.err
-                                    .format("Unable to retrieve value for row %s col %s",
-                                            dataVector.size() + 1, i + 1);
+                            System.err.format("Unable to retrieve value for row %s col %s", dataVector.size() + 1,
+                                    i + 1);
                             ExceptionDialog.hideException(e);
                         }
                     }
                     dataVector.add(row);
-                    waitingDialog.setText(String.format("%d rows retrieved",
-                            dataVector.size()));
+                    waitingDialog.setText(String.format("%d rows retrieved", dataVector.size()));
                 }
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(
-                                String.format("[%d rows retrieved]",
-                                        dataVector.size()));
+                ApplicationFrame.getInstance().getConsole()
+                        .println(String.format("[%d rows retrieved]", dataVector.size()));
             } else {
                 Context.getInstance().setResultSet(null);
                 int updateCount = statement.getUpdateCount();
@@ -188,8 +173,7 @@ public class RunAction extends CustomAction {
                 } else if (statement instanceof CallableStatement) {
                     for (int i = 0; i < bindVariables.length; i++) {
                         try {
-                            Object o = ((CallableStatement) statement)
-                                    .getObject(i + 1);
+                            Object o = ((CallableStatement) statement).getObject(i + 1);
                             Vector<Object> row = new Vector<Object>(1);
                             row.add(o);
                             dataVector.add(row);
@@ -214,15 +198,12 @@ public class RunAction extends CustomAction {
         Context.getInstance().setQuery(originalSql);
         Context.getInstance().setColumnTypes(columnTypes);
         Context.getInstance().setColumnTypeNames(columnTypeNames);
-        ResultSetTable.getInstance().setDataVector(dataVector,
-                columnIdentifiers, waitingDialog.getExecutionTime());
+        ResultSetTable.getInstance().setDataVector(dataVector, columnIdentifiers, waitingDialog.getExecutionTime());
         Actions.getInstance().validateActions();
     }
 
-    private PreparedStatement createStatement(Connection connection, String sql)
-            throws SQLException {
-        boolean query = sql.trim().toLowerCase().startsWith("sel")
-                || sql.trim().toLowerCase().startsWith("with");
+    private PreparedStatement createStatement(Connection connection, String sql) throws SQLException {
+        boolean query = sql.trim().toLowerCase().startsWith("sel") || sql.trim().toLowerCase().startsWith("with");
         boolean call = sql.trim().toLowerCase().startsWith("call");
         PreparedStatement statement;
         if (query) {
@@ -231,34 +212,24 @@ public class RunAction extends CustomAction {
                 sql = String.format("select x.* from (%s) x where 1 = 1", sql);
             }
             DatabaseMetaData metaData = connection.getMetaData();
-            if (metaData.supportsResultSetConcurrency(
-                    ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE)) {
+            if (metaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
                 // Oracle, MySQL, DataDirect DB2, HSQLDB, H2, Apache Derby
-                statement = connection.prepareStatement(sql,
-                        ResultSet.TYPE_SCROLL_INSENSITIVE,
+                statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);
-            } else if (metaData
-                    .supportsResultSetConcurrency(
-                            ResultSet.TYPE_SCROLL_SENSITIVE,
-                            ResultSet.CONCUR_UPDATABLE)) {
-                if (metaData
-                        .supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT)) {
+            } else if (metaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE)) {
+                if (metaData.supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT)) {
                     // IBM DB2
                     try {
-                        statement = connection.prepareStatement(sql,
-                                ResultSet.TYPE_SCROLL_SENSITIVE,
-                                ResultSet.CONCUR_UPDATABLE,
-                                ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                        statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
                     } catch (SQLException sqle) {
                         // Microsoft (obviously)
-                        statement = connection.prepareStatement(sql,
-                                ResultSet.TYPE_SCROLL_SENSITIVE,
+                        statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
                     }
                 } else {
-                    statement = connection.prepareStatement(sql,
-                            ResultSet.TYPE_SCROLL_SENSITIVE,
+                    statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE,
                             ResultSet.CONCUR_UPDATABLE);
                 }
             } else {
@@ -278,8 +249,7 @@ public class RunAction extends CustomAction {
             ParameterMetaData metaData = statement.getParameterMetaData();
             String[] bindVariables = new String[metaData.getParameterCount()];
             for (int i = 0; i < metaData.getParameterCount(); i++) {
-                bindVariables[i] = JOptionPane.showInputDialog(String.format(
-                        "Bind variable %d", i + 1));
+                bindVariables[i] = JOptionPane.showInputDialog(String.format("Bind variable %d", i + 1));
             }
             handleBindVariables(statement, bindVariables);
             return bindVariables;
@@ -288,8 +258,7 @@ public class RunAction extends CustomAction {
         }
     }
 
-    private void handleBindVariables(PreparedStatement statement,
-            String[] bindVariables) throws SQLException {
+    private void handleBindVariables(PreparedStatement statement, String[] bindVariables) throws SQLException {
         for (int i = 0; i < bindVariables.length; i++) {
             statement.setObject(i + 1, bindVariables[i]);
         }

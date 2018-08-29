@@ -47,8 +47,8 @@ public class HelpAction extends CustomAction {
     private static final long serialVersionUID = 1572333979959917847L;
 
     public HelpAction() {
-        super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1,
-                KeyEvent.VK_UNDEFINED), "Shows the user manual.");
+        super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1, KeyEvent.VK_UNDEFINED),
+                "Shows the user manual.");
         setEnabled(true);
     }
 
@@ -66,61 +66,49 @@ public class HelpAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         if (ApplicationFrame.getInstance().getHelpFrame() != null
-                && SwingUtil.isVisible(ApplicationFrame.getInstance()
-                        .getHelpFrame())) {
+                && SwingUtil.isVisible(ApplicationFrame.getInstance().getHelpFrame())) {
             return;
         }
         Utilities.writeLocallyJARInternalFile("license.txt");
         Utilities.writeLocallyJARInternalFile("changes.txt");
 
         // Guide files
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                + File.separator + "manual.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "manual.html");
 
         StringList sl = new StringList();
-        sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream(
-                "/res/help_files.list")));
+        sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream("/res/help_files.list")));
         for (int i = 0; i < sl.size(); i++) {
             if (StringUtil.isEmpty((String) sl.get(i))) {
                 continue;
             }
             try {
-            	Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                        + File.separator + "images"  + File.separator + (String) sl.get(i));
+                Utilities.writeLocallyJARInternalFile(
+                        HelpFiles.helpFolder + File.separator + "images" + File.separator + (String) sl.get(i));
             } catch (Throwable ex) {
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println("Missing resource: " + (String) sl.get(i),
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println("Missing resource: " + (String) sl.get(i),
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return;
             }
         }
 
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                + File.separator + "style.css");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                + File.separator + "license.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                + File.separator + "changes.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder
-                + File.separator + "FAQ.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style.css");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "license.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "changes.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "FAQ.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style_groovy_macros.css");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "groovy_macros.html");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style_js_macros.css");
+        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "js_macros.html");
 
         try {
             ApplicationFrame.getInstance().setHelpFrame(new HelpViewerWindow());
-            ApplicationFrame.getInstance().getHelpFrame()
-                    .setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            ApplicationFrame.getInstance().getHelpFrame().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             ApplicationFrame.getInstance().getHelpFrame().setVisible(true);
         } catch (IOException ioe) {
             String errorMsg = "Unable to start the Help module.";
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println(errorMsg,
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            UISupport.getDialogs().showErrorMessage(
-                    "Unable to start the Help module.\n" + ioe.getMessage()
-                            + "\n");
+            ApplicationFrame.getInstance().getConsole().println(errorMsg,
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            UISupport.getDialogs().showErrorMessage("Unable to start the Help module.\n" + ioe.getMessage() + "\n");
         }
     }
 }

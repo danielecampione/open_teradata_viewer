@@ -1,0 +1,21 @@
+/*
+ * This is a JavaScript macro for Open Teradata Viewer.
+ *
+ * Global variables include:
+ *   - app:       The focused application window, an instance of
+ *                net.sourceforge.open_teradata_viewer.ApplicationFrame.
+ *   - textArea:  The active text area, an instance of
+ *                net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea.
+ *
+ * You can use the entire Open Teradata Viewer and OTVSyntaxTextArea public API's:
+ *   http://javadoc.fifesoft.com/rsyntaxtextarea/
+ */
+
+try {
+    textArea.beginAtomicEdit();
+    textArea.append("\nThis is new text\n");
+    textArea.caretPosition = textArea.document.length;
+    javax.swing.JOptionPane.showMessageDialog(app, "Text has been appended!");
+} finally {
+    textArea.endAtomicEdit();
+}

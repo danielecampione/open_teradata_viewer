@@ -46,14 +46,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sourceforge.open_teradata_viewer.util.Utilities;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.itextpdf.text.pdf.codec.Base64;
+
+import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * 
@@ -79,10 +79,12 @@ public final class Config {
         public byte[] getEncoded() {
             return "$GeHeiM^".getBytes();
         }
+
         @Override
         public String getAlgorithm() {
             return "DES";
         }
+
         @Override
         public String getFormat() {
             return "RAW";
@@ -91,8 +93,7 @@ public final class Config {
 
     public static String getVersion() throws IOException {
         if (version == null) {
-            version = new BufferedReader(new InputStreamReader(
-                    Config.class.getResourceAsStream("/changes.txt")))
+            version = new BufferedReader(new InputStreamReader(Config.class.getResourceAsStream("/changes.txt")))
                     .readLine();
         }
         return version;
@@ -124,24 +125,19 @@ public final class Config {
         return getDatabases(config);
     }
 
-    public static Vector<ConnectionData> getDatabases(Element config)
-            throws Exception {
+    public static Vector<ConnectionData> getDatabases(Element config) throws Exception {
         Vector<ConnectionData> connectionDatas = new Vector<ConnectionData>();
         NodeList nodeList = config.getElementsByTagName("database");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element element = (Element) nodeList.item(i);
-            connectionDatas.add(new ConnectionData(
-                    element.getAttribute("name"), element
-                            .getAttribute("connection"), element
-                            .getAttribute("user"), Config.decrypt(element
-                            .getAttribute("password")), element
-                            .getAttribute("defaultOwner")));
+            connectionDatas.add(new ConnectionData(element.getAttribute("name"), element.getAttribute("connection"),
+                    element.getAttribute("user"), Config.decrypt(element.getAttribute("password")),
+                    element.getAttribute("defaultOwner")));
         }
         return connectionDatas;
     }
 
-    public static void saveDatabases(List<ConnectionData> connectionDatas)
-            throws Exception {
+    public static void saveDatabases(List<ConnectionData> connectionDatas) throws Exception {
         Collections.sort(connectionDatas);
         Element config = getConfig();
         NodeList nodeList = config.getElementsByTagName("database");
@@ -149,36 +145,30 @@ public final class Config {
             config.removeChild(nodeList.item(i));
         }
         for (ConnectionData connectionData : connectionDatas) {
-            Element element = config.getOwnerDocument().createElement(
-                    "database");
+            Element element = config.getOwnerDocument().createElement("database");
             element.setAttribute("name", connectionData.getName());
             element.setAttribute("user", connectionData.getUser());
-            element.setAttribute("password",
-                    Config.encrypt(connectionData.getPassword()));
+            element.setAttribute("password", Config.encrypt(connectionData.getPassword()));
             element.setAttribute("connection", connectionData.getUrl());
-            element.setAttribute("defaultOwner",
-                    connectionData.getDefaultOwner());
+            element.setAttribute("defaultOwner", connectionData.getDefaultOwner());
             config.appendChild(element);
         }
         Config.saveConfig(config);
     }
 
-    public static Map<String, String> getFavorites()
-            throws ParserConfigurationException, IOException, SAXException {
+    public static Map<String, String> getFavorites() throws ParserConfigurationException, IOException, SAXException {
         Element config = getConfig();
         NodeList favorites = config.getElementsByTagName("favorite");
         Map<String, String> map = new TreeMap<String, String>();
         for (int i = 0; i < favorites.getLength(); i++) {
             Element favorite = (Element) favorites.item(i);
-            map.put(favorite.getAttribute("name"),
-                    favorite.getAttribute("query"));
+            map.put(favorite.getAttribute("name"), favorite.getAttribute("query"));
         }
         return map;
     }
 
     public static void saveFavorites(Map<?, ?> favorites)
-            throws ParserConfigurationException, IOException,
-            TransformerException, SAXException {
+            throws ParserConfigurationException, IOException, TransformerException, SAXException {
         Element config = getConfig();
         NodeList nodeList = config.getElementsByTagName("favorite");
         for (int i = nodeList.getLength() - 1; i > -1; i--) {
@@ -186,8 +176,7 @@ public final class Config {
         }
         for (Object o : favorites.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
-            Element favorite = config.getOwnerDocument().createElement(
-                    "favorite");
+            Element favorite = config.getOwnerDocument().createElement("favorite");
             favorite.setAttribute("name", (String) entry.getKey());
             favorite.setAttribute("query", (String) entry.getValue());
             config.appendChild(favorite);
@@ -208,36 +197,30 @@ public final class Config {
             }
             settings.setAttribute(name, value);
         } else {
-            Element settings = config.getOwnerDocument().createElement(
-                    "settings");
+            Element settings = config.getOwnerDocument().createElement("settings");
             settings.setAttribute(name, value);
             config.appendChild(settings);
         }
         Config.saveConfig(config);
     }
 
-    protected static Element getConfig() throws ParserConfigurationException,
-            IOException, SAXException {
+    protected static Element getConfig() throws ParserConfigurationException, IOException, SAXException {
         Element config;
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance()
-                .newDocumentBuilder();
+        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         try {
-            InputStream inputStream = new FileInputStream(new File(
-                    Utilities.conformizePath(System.getProperty("user.home")),
-                    "open_teradata_viewer.xml"));
+            InputStream inputStream = new FileInputStream(
+                    new File(Utilities.normalizePath(System.getProperty("user.home")), "open_teradata_viewer.xml"));
             config = documentBuilder.parse(inputStream).getDocumentElement();
             inputStream.close();
         } catch (Exception e) {
-            InputStream inputStream = new ByteArrayInputStream(
-                    "<config/>".getBytes());
+            InputStream inputStream = new ByteArrayInputStream("<config/>".getBytes());
             config = documentBuilder.parse(inputStream).getDocumentElement();
             inputStream.close();
         }
         return config;
     }
 
-    protected static void saveConfig(Element config)
-            throws TransformerException {
+    protected static void saveConfig(Element config) throws TransformerException {
         // remove whitespace
         NodeList childNodes = config.getChildNodes();
         for (int i = childNodes.getLength() - 1; i > -1; i--) {
@@ -245,20 +228,15 @@ public final class Config {
                 config.removeChild(childNodes.item(i));
             }
         }
-        Transformer transformer = TransformerFactory.newInstance()
-                .newTransformer();
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.transform(new DOMSource(config), new StreamResult(new ByteArrayOutputStream())); // test first
         transformer.transform(new DOMSource(config), new StreamResult(
-                new ByteArrayOutputStream())); // test first
-        transformer.transform(new DOMSource(config), new StreamResult(new File(
-                Utilities.conformizePath(System.getProperty("user.home")),
-                "open_teradata_viewer.xml")));
+                new File(Utilities.normalizePath(System.getProperty("user.home")), "open_teradata_viewer.xml")));
     }
 
-    protected static String decrypt(String encrypted)
-            throws GeneralSecurityException {
+    protected static String decrypt(String encrypted) throws GeneralSecurityException {
         if (encrypted == null || "".equals(encrypted)) {
             return encrypted;
         }
@@ -268,8 +246,7 @@ public final class Config {
 
     }
 
-    protected static String encrypt(String decrypted)
-            throws GeneralSecurityException {
+    protected static String encrypt(String decrypted) throws GeneralSecurityException {
         if (decrypted == null || "".equals(decrypted)) {
             return decrypted;
         }

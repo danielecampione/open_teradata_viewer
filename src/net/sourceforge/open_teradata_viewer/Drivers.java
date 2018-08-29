@@ -69,33 +69,27 @@ public class Drivers {
     }
 
     static URL[] retrieveAllJars(String path) throws MalformedURLException {
-        File[] files = new File(Utilities.conformizePath(path))
-                .listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String fileName) {
-                        Vector<String> filesToIgnore = new Vector<String>(1, 1);
-                        String currentFileInClassPath = null;
-                        StringTokenizer classesPaths = new StringTokenizer(
-                                Utilities.conformizePath(System
-                                        .getProperty("java.class.path")), ";");
-                        while (classesPaths.hasMoreTokens()) {
-                            StringTokenizer pathTokenizer = new StringTokenizer(
-                                    classesPaths.nextToken(), "\\");
-                            while (pathTokenizer.hasMoreTokens()) {
-                                currentFileInClassPath = pathTokenizer
-                                        .nextToken();
-                            }
-                            if (fileName
-                                    .equalsIgnoreCase(currentFileInClassPath)) {
-                                filesToIgnore.add(currentFileInClassPath);
-                            }
-                        }
-
-                        return !filesToIgnore.contains(fileName)
-                                && fileName.toLowerCase().endsWith(".jar")
-                                || fileName.toLowerCase().endsWith(".zip");
+        File[] files = new File(Utilities.normalizePath(path)).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String fileName) {
+                Vector<String> filesToIgnore = new Vector<String>(1, 1);
+                String currentFileInClassPath = null;
+                StringTokenizer classesPaths = new StringTokenizer(
+                        Utilities.normalizePath(System.getProperty("java.class.path")), ";");
+                while (classesPaths.hasMoreTokens()) {
+                    StringTokenizer pathTokenizer = new StringTokenizer(classesPaths.nextToken(), "\\");
+                    while (pathTokenizer.hasMoreTokens()) {
+                        currentFileInClassPath = pathTokenizer.nextToken();
                     }
-                });
+                    if (fileName.equalsIgnoreCase(currentFileInClassPath)) {
+                        filesToIgnore.add(currentFileInClassPath);
+                    }
+                }
+
+                return !filesToIgnore.contains(fileName) && fileName.toLowerCase().endsWith(".jar")
+                        || fileName.toLowerCase().endsWith(".zip");
+            }
+        });
 
         URL[] urls = new URL[files.length];
         for (int i = 0; i < urls.length; i++) {
@@ -106,8 +100,7 @@ public class Drivers {
 
     static void addAllJarsToClasspath(String path) throws Exception {
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-        Method addURL = URLClassLoader.class.getDeclaredMethod("addURL",
-                URL.class);
+        Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
         addURL.setAccessible(true);
         URL[] urls = retrieveAllJars(path);
         for (URL url1 : urls) {
@@ -146,10 +139,9 @@ public class Drivers {
         c.insets = new Insets(2, 2, 2, 2);
         c.gridy++;
         c.gridwidth = 3;
-        panel.add(
-                new JLabel(String.format(
-                        "The JDBC driver jar files are located in \"%s\".",
-                        new File(".").getCanonicalPath())), c);
+        panel.add(new JLabel(
+                String.format("The JDBC driver jar files are located in \"%s\".", new File(".").getCanonicalPath())),
+                c);
         c.gridy++;
         panel.add(new JLabel(" "), c);
         c.gridy++;
@@ -171,13 +163,11 @@ public class Drivers {
             panel.add(new JLabel(loadedDriver.getClass().getName()), c);
             c.gridx++;
             panel.add(
-                    new JLabel(String.format("v%d.%d",
-                            loadedDriver.getMajorVersion(),
-                            loadedDriver.getMinorVersion())), c);
+                    new JLabel(String.format("v%d.%d", loadedDriver.getMajorVersion(), loadedDriver.getMinorVersion())),
+                    c);
             c.gridx++;
             try {
-                URI uri = loadedDriver.getClass().getProtectionDomain()
-                        .getCodeSource().getLocation().toURI();
+                URI uri = loadedDriver.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
                 String path = new File(uri).getName();
                 panel.add(new JLabel(path), c);
             } catch (Exception e) {
@@ -193,17 +183,15 @@ public class Drivers {
         c.gridy++;
         panel.add(new JLabel(" "), c);
         c.gridy++;
-        panel.add(new JLabel(
-                "Add any driver that couldn't automatically be loaded to the list below,"
-                        + " separated by a comma or a new line."), c);
+        panel.add(new JLabel("Add any driver that couldn't automatically be loaded to the list below,"
+                + " separated by a comma or a new line."), c);
         c.gridy++;
         panel.add(new JLabel(" "), c);
         c.gridy++;
         String drivers = Config.getDrivers();
         JTextArea driverfield = new JTextArea(drivers, 4, 0);
         panel.add(new JScrollPane(driverfield), c);
-        int response = Dialog.show("Drivers", panel, Dialog.PLAIN_MESSAGE,
-                Dialog.OK_CANCEL_OPTION);
+        int response = Dialog.show("Drivers", panel, Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
         if (Dialog.OK_OPTION == response) {
             Config.saveDrivers(driverfield.getText());
             try {
@@ -211,11 +199,8 @@ public class Drivers {
                 initialize();
             } catch (ClassNotFoundException cnfe) {
                 // Show the error only in the text area
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println("Driver NOT found.",
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println("Driver NOT found.",
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
 
             }
         }

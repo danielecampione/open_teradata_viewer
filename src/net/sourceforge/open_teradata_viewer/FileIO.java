@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +31,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import javax.swing.JFileChooser;
+import javax.swing.TransferHandler;
+import javax.swing.TransferHandler.TransferSupport;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -56,32 +59,24 @@ public class FileIO {
     private FileIO() {
     }
 
-    public static void saveAndOpenFile(String fileName, byte[] bytes)
-            throws Exception {
+    public static void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
         File file = saveFile(fileName, bytes);
-        if (file != null
-                && Dialog.YES_OPTION == Dialog.show("Open file",
-                        "Open the file with the associated application?",
-                        Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-            openFile(file);
+        if (file != null && Dialog.YES_OPTION == Dialog.show("Open file",
+                "Open the file with the associated application?", Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+            FileIO.openFile(file, true);
         }
     }
 
     public static File saveFile(String fileName, byte[] bytes) throws Exception {
         JFileChooser fileChooser = getFileChooser();
         fileChooser.setSelectedFile(new File(fileName));
-        if (JFileChooser.APPROVE_OPTION == fileChooser
-                .showSaveDialog(ApplicationFrame.getInstance())) {
-            Config.saveLastUsedDir(fileChooser.getCurrentDirectory()
-                    .getCanonicalPath());
+        if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(ApplicationFrame.getInstance())) {
+            Config.saveLastUsedDir(fileChooser.getCurrentDirectory().getCanonicalPath());
             File selectedFile = fileChooser.getSelectedFile();
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
-            if (!new File(chosenFilePath).exists()
-                    || Dialog.YES_OPTION == Dialog.show("File exists",
-                            "Overwrite existing file?",
-                            Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-                if (chosenFilePath.toLowerCase().endsWith(".htm")
-                        || chosenFilePath.toLowerCase().endsWith(".html")) {
+            if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show("File exists",
+                    "Overwrite existing file?", Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+                if (chosenFilePath.toLowerCase().endsWith(".htm") || chosenFilePath.toLowerCase().endsWith(".html")) {
                     // Write output to the current filename
                     writeFileAsWebPage(chosenFilePath);
                 } else {
@@ -99,16 +94,31 @@ public class FileIO {
         out.close();
     }
 
-    public static void openFile(File file) throws IOException {
-        Desktop.getDesktop().open(file);
+    public static void openFile(File file, boolean openExternally) throws Exception {
+        if (openExternally) {
+            Desktop.getDesktop().open(file);
+        } else {
+            FileIO.openFile(file);
+        }
     }
 
-    public static File openFile() throws Exception {
+    public static void openFile(File file) throws Exception {
+        if (file != null) {
+            ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+            applicationFrame.setText("");
+            Context.getInstance().setOpenedFile(file);
+            RSyntaxTextArea textArea = applicationFrame.getTextComponent();
+            TransferHandler transferHandler = textArea.getTransferHandler();
+            StringSelection stringSelection = new StringSelection(new String(FileIO.readFile(file)));
+            transferHandler.importData(new TransferSupport(textArea, stringSelection));
+            textArea.setCaretPosition(0);
+        }
+    }
+
+    public static File chooseFile() throws Exception {
         JFileChooser fileChooser = getFileChooser();
-        if (JFileChooser.APPROVE_OPTION == fileChooser
-                .showOpenDialog(ApplicationFrame.getInstance())) {
-            Config.saveLastUsedDir(fileChooser.getCurrentDirectory()
-                    .getCanonicalPath());
+        if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(ApplicationFrame.getInstance())) {
+            Config.saveLastUsedDir(fileChooser.getCurrentDirectory().getCanonicalPath());
             return fileChooser.getSelectedFile();
         }
         return null;
@@ -141,17 +151,17 @@ public class FileIO {
         StringBuilder temp = new StringBuilder();
         StringBuilder sb = new StringBuilder();
 
-        PrintWriter out = new PrintWriter(new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(path), "UTF-8")));
-        out.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+        PrintWriter out = new PrintWriter(
+                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8")));
+        out.println(
+                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
         out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
         out.println("<head>");
         out.println("<!-- Generated by " + Main.APPLICATION_NAME + " -->");
         out.println("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
         out.println("<title>" + path + "</title>");
 
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
+        RSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
         int lineCount = textArea.getLineCount();
         for (int i = 0; i < lineCount; i++) {
             Token token = textArea.getTokenListForLine(i);
@@ -167,15 +177,12 @@ public class FileIO {
                         temp.append("font-style: italic;\n");
                     }
                     Color c = textArea.getForegroundForToken(token);
-                    temp.append("color: ")
-                            .append(UIUtil.getHTMLFormatForColor(c))
-                            .append(";\n");
+                    temp.append("color: ").append(UIUtil.getHTMLFormatForColor(c)).append(";\n");
                     temp.append("}");
                     styles[token.getType()] = temp.toString();
                 }
                 sb.append("<span class=\"s" + token.getType() + "\">");
-                sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n",
-                        true));
+                sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n", true));
                 sb.append("</span>");
                 token = token.getNextToken();
             }
