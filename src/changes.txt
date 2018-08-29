@@ -1,3 +1,7 @@
+0.27a (14/05/2018)
+    - Fixed an issue with the macros menu: folders are ignored.
+    - Upgraded jsqlparser library 1.1 -> 1.2
+
 0.26c (09/05/2018)
     - The "Look and Feel" menu is scrollable.
     - The "View As (Highlighting File Type)" sub-menu is scrollable.

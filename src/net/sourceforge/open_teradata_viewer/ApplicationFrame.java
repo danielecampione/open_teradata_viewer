@@ -1132,7 +1132,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             for (String macroRelativePath : macrosRelativePath) {
                 String macroAbsolutePath = macrosDirectory + File.separator + macroRelativePath;
                 File macroFile = new File(macroAbsolutePath);
-                if (macroFile.exists()) {
+                if (macroFile.exists() && !macroFile.isDirectory()) {
                     Macro macro = new Macro();
                     macro.setFile(macroAbsolutePath);
                     macro.setName(macroRelativePath);
