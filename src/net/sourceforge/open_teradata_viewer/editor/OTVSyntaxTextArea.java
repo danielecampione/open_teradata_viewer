@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.editor;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -26,6 +28,8 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.Token;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVSyntaxSearchEngine;
@@ -43,7 +47,7 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
     private OTVSyntaxSearchEngine _OTVSyntaxSearchEngine;
 
     int defaultModifier = getDefaultModifier();
-    
+
     public OTVSyntaxTextArea() {
         this(0, 0);
     }
@@ -51,10 +55,10 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
     public OTVSyntaxTextArea(int rows, int cols) {
         super(rows, cols);
         _OTVSyntaxSearchEngine = new OTVSyntaxSearchEngine(this);
-        
+        changeStyleProgrammatically();
+
         InputMap inputMap = getInputMap();
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, defaultModifier),
-                Actions.RUN);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, defaultModifier), Actions.RUN);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), Actions.RUN);
     }
 
@@ -145,7 +149,7 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
             ++ix;
         }
     }
-    
+
     /**
      * Returns the default modifier key for a system. For example, on Windows
      * this would be the CTRL key (<code>InputEvent.CTRL_MASK</code>).
@@ -154,5 +158,40 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
      */
     protected static final int getDefaultModifier() {
         return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    }
+
+    /** Changes the styles used in the editor programmatically. */
+    private void changeStyleProgrammatically() {
+        // Set the font for all token types
+        setFont(this, new Font("Courier New", Font.PLAIN, 16));
+
+        // Change a few things here and there
+        SyntaxScheme scheme = getSyntaxScheme();
+        scheme.getStyle(Token.RESERVED_WORD).background = Color.yellow;
+        scheme.getStyle(Token.DATA_TYPE).foreground = Color.blue;
+        scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).underline = true;
+        scheme.getStyle(Token.COMMENT_EOL).font = new Font("Georgia", Font.ITALIC, 12);
+
+        revalidate();
+    }
+
+    /**
+     * Set the font for all token types.
+     *
+     * @param textArea The text area to modify.
+     * @param font The font to use.
+     */
+    public static void setFont(RSyntaxTextArea textArea, Font font) {
+        if (font != null) {
+            SyntaxScheme ss = textArea.getSyntaxScheme();
+            ss = (SyntaxScheme) ss.clone();
+            for (int i = 0; i < ss.getStyleCount(); i++) {
+                if (ss.getStyle(i) != null) {
+                    ss.getStyle(i).font = font;
+                }
+            }
+            textArea.setSyntaxScheme(ss);
+            textArea.setFont(font);
+        }
     }
 }

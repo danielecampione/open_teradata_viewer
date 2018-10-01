@@ -1,3 +1,480 @@
+0.27b (01/10/2018)
+    - Changed the style of the text editor programmatically.
+    - Upgraded Teradata JDBC driver 16.20.00.06 -> 16.20.00.08
+    - Upgraded poi library 3.17 -> 4.0.0
+
+0.27a (14/05/2018)
+    - Fixed an issue with the macros menu: folders are ignored.
+    - Upgraded jsqlparser library 1.1 -> 1.2
+
+0.26c (09/05/2018)
+    - The "Look and Feel" menu is scrollable.
+    - The "View As (Highlighting File Type)" sub-menu is scrollable.
+    - The "Macros" menu is scrollable.
+
+0.26b (08/05/2018)
+    - Fixed an issue with the "Save file" functionality: if the selected file in
+      the Save Dialog isn't available, the error message isn't shown.
+    - Upgraded groovy library 2.5.0 alpha 1 -> 3.0.0 alpha 1
+
+0.26a (07/05/2018)
+    - Fixed an issue with the macros menu: non-available scripts are deleted
+      from the macros menu, if the user decides to delete them.
+    - Upgraded rhino library 1.7.6 -> 1.7.9
+
+0.25c (03/05/2018)
+    - Added the macro support and the suited menu voices. You can write the
+      macros in JavaScript and Groovy.
+    - The user manual has been updated with the added capabilities.
+
+0.25b (26/03/2018)
+    - Added the "Pretty print (XML only - with line breaks)" action and the
+      suited menu voice.
+    - Added unit tests for the "Pretty print (XML only - with line breaks)"
+      functionality.
+    - Tabs are emulated by spaces initially.
+    - Upgraded Teradata JDBC driver 16.20.00.04 -> 16.20.00.06
+
+0.25a (26/02/2018)
+    - Fixed a bug of the UI: if the user interrupts the execution of the SQL
+      statement by clicking the Cancel command button, the client can execute
+      another SQL statement.
+    - Upgraded Teradata JDBC driver 16.10.00.03 -> 16.20.00.04
+    - Upgraded itext library 5.5.11 -> 5.5.12
+    - Upgraded joda-time library 2.4 -> 2.9.9
+    - Upgraded poi library 3.16 -> 3.17
+
+0.24c (14/07/2017)
+    - Added TypeScript syntax highlighting and code folding.
+    - Added the syntax highlighting for Dockerfiles.
+    - Added YAML syntax highlighting.
+    - Added .ini file syntax highlighting.
+    - Added the syntax highlighting for the hosts file.
+    - Added another "dark" theme, Monokai.
+    - The OTVSyntaxTextArea has been replaced by the RSyntaxTextArea library
+      (2.6.1).
+    - The autocomplete module of the OTVSyntaxTextArea has been replaced by the
+      autocomplete library of RSyntaxTextArea (2.6.1).
+    - The languagesupport module of the OTVSyntaxTextArea has been replaced by
+      the languagesupport library of RSyntaxTextArea (2.6.0).
+    - The staui module of the OTVSyntaxTextArea has been replaced by the rstaui
+      library of RSyntaxTextArea (2.6.1).
+    - The spellchecker module of the OTVSyntaxTextArea has been replaced by the
+      spellchecker library of RSyntaxTextArea (2.6.0).
+    - Added the "matched bracket" popup, showing the line containing a matched
+      bracket, if it is scrolled off-screen; added the suited menu voice.
+    - Alt+up/down arrows can move blocks of lines, not just single lines.
+    - RSTAUI: This release fixes a minor localization issue with the context
+      menu in Italian.
+    - The SQL parser has been replaced by the JSqlParser library (1.1).
+    - Other minor bugs fixed.
+    - Removed the animated assistant.
+    - Removed the commons-io library.
+    - The user manual has been updated with the added capabilities.
+    - Upgraded Teradata JDBC driver 15.10.00.09 -> 16.10.00.03
+    - Upgraded itext library 5.5.7 -> 5.5.11
+    - Upgraded poi library 3.12 -> 3.16
+    - Upgraded rhino library 1.7.6 -> 1.7.7.1
+
+0.24b (07/10/2015)
+    - Added less syntax highlighting and code folding.
+    - Improved default key bindings on OS X.
+    - Adds removed TextArea constructors.
+    - Added unit tests for CSS syntax highlighting.
+    - SyntaxTextArea.setBackground(null) throw NPE.
+    - setBackground() does not work on ErrorStrip.
+    - ErrorStrip marked occurrences on line 0 have top 2 pixels cut off.
+    - Fixed error marker displacement in TaskTagParser.
+    - Added support for highlighting JSON keys as IToken.VARIABLE.
+    - Fix: macro name is lost at saving to file.
+    - Cleaned up warnings in previously generated JSONTokenMaker source file.
+    - Added 'mark occurrences' of variables in less files.
+    - Fixed broken unit test of the text editor.
+    - Fixed infinite loop in HtmlFoldParser.
+    - Fix: accidentally forgot code folding for .jshintrc files.
+    - Removed some compiler warnings.
+    - Removed System.out.println from HTML fold parser.
+    - Fixes an occasional sorting bug when there were many completions
+      representing functions or methods. FunctionCompletions with the same name
+      should compare based on number of arguments as well.
+    - Added code completions for standard Less functions.
+    - Don't print IOExceptions to the application console.
+    - Fixed a minor issue.
+    - Improved interval expression syntax of the SQL parser.
+    - Added support of hex values (0xabc54, x'abc567') to the SQL parser.
+    - Added support of system parameters (e.g. @@SPID) to the SQL parser.
+    - Added support of signed parameters to the SQL parser.
+    - Added support for SELECT SKIP FIRST ... to the SQL parser.
+    - Completely rewritten S_IDENTIFIER rule of the SQL parser to accept
+      hopefully all possible UTF-8 letters without specifying some additional
+      rules.
+    - Allow Server within multipart names of the SQL parser to act as database
+      link.
+    - Added support for row constructors in conditions to the SQL parser.
+    - Some refactorings for TablesNamesFinder to improve usability of the SQL
+      parser.
+    - Established JJTree nodes for columns and tables (look at SelectASTTest)
+      for first usages of the SQL parser.
+    - Added support for MySQL GROUP_CONCAT to the SQL parser.
+    - Upgraded Teradata JDBC driver 15.10.00.05 -> 15.10.00.09
+    - Upgraded itext library 5.5.6 -> 5.5.7
+
+0.24a (26/06/2015)
+    - Added MXML syntax highlighting and code folding.
+    - Added unit tests.
+    - Added unit tests for Ruby.
+    - Added unit tests for D, Dart and Groovy.
+    - Fixed some doclint errors.
+    - JavaScript: jshint support now allows scanning parent directory tree for
+      .jshintrc.
+    - Global types such as 'Math' were not recognized.
+    - Added a message to stdout when java.net.URI is selected in code completion
+      window.
+    - Java: Fixed most compiler warnings.
+    - Fixed Java 8 signatures parsing.
+    - Added bootstrap support.
+    - Added support for Java 8 invoke dynamic constants.
+    - CSS: Added completions for font-related and other miscellaneous
+      properties.
+
+0.23c (28/05/2015)
+    - Added Ruby syntax highlighting.
+    - Added Scala syntax highlighting.
+    - Added support for ORACLE, DB2, MySQL, SQLite, HSQLDB, H2, Derby, SQL
+      Server and other databases.
+    - The scrollbar was not displayed, the tooltip was huge and flowed on the
+      other screen, if the user uses two monitors and a long HTML text is
+      entered in the text editor.
+    - Removed printing to stdout in TextAreaBase.
+    - Removed accidentally added printf for debugging purposes.
+    - Added unit tests for OTVDocument and SyntaxDocument.
+    - Added unit test for Gutter.
+    - FileLocation.create(String) creates URLFileLocations if appropriate;
+      passing a parameter of the form "ftp://user@domain.com/path/file.java"
+      returned an (incorrect) FileFileLocation, not a URLFileLocation.
+    - Improved support for non-opaque editors. Now the rendering engine of the
+      editor paints bracket matching, line highlights etc.., even if the editor
+      is not opaque.
+    - Formatting changes to translucent SyntaxTextAreas.
+    - Added unit tests for Theme class and fixed a couple of bugs in it.
+    - DumbCompleteWordAction didn't allow digits in word names.
+    - Added unit tests.
+    - Added unit tests for SyntaxTextArea and DocumentRange.
+    - .jshintrc files need their own highlighting since they allow EOL comments.
+    - Added unit tests for JavaScript, PHP and plain text scanners.
+    - Code folding was not enabled with specific instantiation pattern.
+    - Added unit tests for UnixShellTokenMaker.
+    - Fixed all doclint errors and some doclint warnings for folks compiling
+      with JDK 8. Only remaining warnings are from JFLex's skeleton file.
+    - Added first support for user variables to the SQL parser.
+    - Added support for within group expressions to the SQL parser, e.g.
+      ORACLE's LISTAGG function.
+    - Added support for inner with statements to the SQL parser.
+    - Improved interval expression support of the SQL parser.
+    - Added support for KEEP to the SQL parser.
+    - Added support for ILIKE to the SQL parser.
+    - Added support for LEFT/RIGHT as function names to the SQL parser.
+    - Added support for UPDATE OF table to the SQL parser.
+    - API changes due to grammar refactoring of the SQL parser.
+    - Added first support for PostgreSQL arrays to the SQL parser. Some quoted
+      identifier rules for SQL Server had to be changed in the SQL parser. 
+    - Added support for with recursive to the SQL parser.
+    - Support for ORACLE's old join syntax has been improved in the SQL parser.
+    - Added first support for numeric bind to the SQL parser.
+    - Added support for keywords as column names in CREATE TABLE statements to
+      the SQL parser.
+    - Included a huge amount of ORACLE test SQLs. There is much room to improve
+      support for the ORACLE special syntax.
+    - Upgraded Teradata JDBC driver 15.00.00.20 -> 15.10.00.05
+    - Upgraded itext library 5.5.4 -> 5.5.6
+    - Upgraded looks library 2.6.0 -> 2.8.0
+    - Upgraded poi library 3.10.1 -> 3.12
+    - Upgraded rhino library 1.7R4 -> 1.7.6
+
+0.23b (16/12/2014)
+    - Added Lisp syntax highlighting and code folding.
+    - This release fixes a performance problem when painting tokens with
+      background colors specified on OS X; token background color painting was
+      slow on OS X.
+    - Minor improvements to dark theme.
+    - Fixed the cursor problem after SyntaxTextArea.setMargin.
+    - Line numbers, code folds and marked occurrences now update appropriately
+      if an STA instance's document is switched out via setDocument\(\).
+    - Tokens don't need to specify <font/> tags in their HTML representations if
+      they are whitespace.
+    - Added a LanguageSupport Demo to more easily test layered highlights.
+    - Fixed exception in JavaOutlineTree.
+    - Improving comment.
+    - Fixed NPE in JavaScriptLanguageSupport tree.
+    - Added support for ORACLE collections to the SQL parser.
+    - Upgraded itext library 5.5.3 -> 5.5.4
+
+0.23a (25/11/2014)
+    - Added x86 assembly syntax highlighting.
+    - Added C++ syntax highlighting and code folding.
+    - Added C# syntax highlighting.
+    - Added D syntax highlighting.
+    - Added Dart syntax highlighting.
+    - Added JSON syntax highlighting and code folding.
+    - Added Visual Basic syntax highlighting.
+    - Added Windows batch syntax highlighting.
+    - Fixed an issue with the text editor: non-layered highlights for selection
+      caused an extra character to be painted as in 'selected' region.
+    - Added language-specific word selection/navigation.
+    - Better keyboard navigation on OS X.
+    - Allow ITokenMaker implementation from external .jar.
+    - C and C++ should treat '\e' as a valid escape sequence.
+    - JavaScript highlighting doesn't automatically close multi-line comments.
+    - Disallow font being set to size == 0.
+    - Clipboard History popup via Ctrl+Shift+V (Cmd+Shift+V on Mac).
+    - Moving selectAndPossiblyCenter\(\) to a public static method in
+      SyntaxUtilities so others can consume.
+    - Current line highlight not set if STA not yet visible.
+    - Minor documentation update.
+    - Use STA.markOccurencesColor in ErrorStrip instead of hardcoded value.
+    - Added the ability to programmatically change the parser delay.
+    - 'Matched bracket' highlight not updated if displayed when increasing or
+      decreasing font size.
+    - Silent exceptions when using left and right arrow keys in empty document
+      with code folding.
+    - Fixed off-by-one errors in ErrorStrip.
+    - Ensure 'go to member' window's tree has at least a very small top empty
+      border, to keep things looking nice.
+    - Going to text via 'Go to member' popup should call
+      selectAndPossiblyCenter\(\).
+    - Stack trace in JavaScriptOutlineTree.
+    - JS: Removing a few compiler warnings.
+    - XML: Very basic code completion for XML.
+    - XML simple code completion should not suggest attributes already specified
+      for an element.
+    - Added simple support for EXECUTE to the SQL parser.
+    - Improved support for select into clause of the SQL parser.
+    - Improved support for insert table using with clause of the SQL parser.
+    - Added support for "limit 0" and "limit null" clause to the SQL parser.
+    - Window functions of the SQL parser now allow simple expressions for
+      partition by. 
+    - Added support for create table as select syntax to the SQL parser.
+    - Added first simple support of PostgreSQL's JSON syntax to the SQL parser.
+    - Added support for returning for insert statements to the SQL parser.
+    - Added support for multitable update statements to the SQL parser.
+    - Added partial support for SQL Server 2012 and ORACLE 12c OFFSET ... FETCH
+      ... to the SQL parser.
+    - Added first support for *FOR UPDATE* to the SQL parser.
+    - Added support for PostgreSQL ANY - array syntax to the SQL parser.
+    - Introduced additional parameters for create table statements (deparser
+      extended) in the SQL parser.
+    - Upgraded Teradata JDBC driver 15.00.00.15 -> 15.00.00.20
+    - Upgraded poi library 3.10 -> 3.10.1
+    - Upgraded itext library 5.5.1 -> 5.5.3
+    - Upgraded joda-time library 2.3 -> 2.4
+
+0.22c (30/06/2014)
+    - Improvements to PHP syntax highlighting.
+    - In HTML and XML, "mark occurrences" should match tag names even when the
+      caret is in an attribute, not just when it is in the tag name itself.
+    - Java syntax highlighting updated for other Java 8 classes, interfaces and
+      enums.
+    - SQL: Matching opening/closing parens are now highlighted.
+    - Improvements to CSS code completion.
+    - Improvements to PHP code completion. Documentation for many functions is
+      now included.
+    - JavaScriptOutlineTree now understands basic JavaScript OO paradigms much
+      better.
+    - This release brings minor performance improvements to the spell checker.
+    - Added support for some keyword object names to the SQL parser.
+    - Added support for named primary keys to create table statements of the SQL
+      parser.
+    - Added adapter classes for visitor interfaces to the SQL parser to simplify
+      visitor usage.
+    - Added pivot support for subqueries to the SQL parser.
+    - Added Character Set support to the SQL parser.
+    - Added lax test utils to the SQL parser.
+    - Added some ORACLE test SQLs to the SQL parser.
+    - Improved COUNT(ALL expr) support of the SQL parser.
+    - Fixed "!=" support to not give "<>" while deparsing with the SQL parser.
+    - Fixed toString() for window elements of the SQL parser.
+    - Fixed several bugs.
+    - Upgraded itext library 5.5.0 -> 5.5.1
+
+0.22b (06/05/2014)
+    - Added the Python syntax highlighting.
+    - Added the NSIS syntax highlighting.
+    - Added the UNIX shell scripting language syntax highlighting.
+    - Added the Perl syntax highlighting.
+    - Added the Groovy syntax highlighting.
+    - Upgraded Teradata JDBC driver 14.10.00.26 -> 15.00.00.15
+
+0.22a (03/04/2014)
+    - Added the HTML syntax highlighting.
+    - Added the PHP syntax highlighting.
+    - Added the JSP syntax highlighting.
+
+0.21c (14/03/2014)
+    - Added the XML syntax highlighting.
+    - Added the CSS syntax highlighting.
+    - Whether or not curly braces denote code blocks is now handled on a
+      language-index level, not per ITokenMaker.
+    - Java syntax highlighting updated for Java 8 classes, interfaces and enums.
+    - The SearchEngine class now automatically selects the next match after a
+      Replace operation.
+    - The JavaScript language support can now use JSHint for its squiggle
+      underlining of errors and warnings. A .jshintrc file can be specified to
+      override the default JSHint behavior.
+    - Fixed several bugs.
+    - Upgraded forms library 1.7.2 -> 1.8.0
+    - Upgraded looks library 2.5.3 -> 2.6.0
+
+0.21b (27/02/2014)
+    - Added first multi-statements or script support to the SQL parser.
+    - Added backported window option from fork to analytic expression of the SQL
+      parser.
+    - Added NULLS FIRST and NULLS LAST to order by clause of the SQL parser.
+    - Improved parsing of top clause of the SQL parser.
+    - Improved support for multi-part names (SQL Server) of the SQL parser.
+    - Improved support for signed expressions of the SQL parser. The sign is
+      stored in the parse tree.
+    - Added CCSqlParserUtil.parseExpression to the SQL parser to parse a simple
+      expression. Now you can build expressions from a String like "a+b".
+    - Improved SelectUtils of the SQL parser to build simple select statements.
+    - Upgraded Teradata JDBC driver 14.10.00.17 -> 14.10.00.26
+    - Upgraded poi library 3.9 -> 3.10
+    - Upgraded itext library 5.4.5 -> 5.5.0
+
+0.21a (23/01/2014)
+    - Started a simple utility class for the SQL parser, SelectUtils, to collect
+      basic select modification tools:
+        o addExpression adds a new expression to the select list;
+        o addJoin adds a new join to the select.
+    - Added support for optional " AS " for aliases to the SQL parser.
+    - Added first support for ALTER TABLE statements to the SQL parser.
+    - Added support for PostgreSQL regular expression match operators to the SQL
+      parser.
+
+0.2c (27/12/2013)
+    - Added the C syntax highlighting.
+    - Fixed an issue with the Graphic Viewer ports.
+
+0.2b (23/12/2013)
+    - Added the JavaScript syntax highlighting.
+    - The user manual has been updated with the added capabilities.
+
+0.2a (11/12/2013)
+    - Added the Java syntax highlighting.
+    - Added the Outline view.
+    - Added the "Go to member" popup dialog. The preferred keystroke to bind
+      this action to is Ctrl+Shift+O (Cmd+Shift+O on Mac).
+    - Added the "TABS EMULATED BY SPACES" command to the "Edit" menu.
+    - The print margin is visible.
+    - Upgraded itext library 5.0.1 -> 5.4.5
+    - Upgraded forms library 1.0.7 -> 1.7.2
+    - Upgraded joda-time library 1.6.2 -> 2.3
+    - Upgraded looks library 2.2.1 -> 2.5.3
+    - Upgraded poi library 3.6 -> 3.9
+
+0.19c (26/11/2013)
+    - Added the "VIEW AS (SYNTAX HIGHLIGHTING)" command to the "View" menu.
+    - Added the "TOGGLE SPELL CHECKING" command to the "Edit" menu.
+    - Added the "FIND.." command to the "Search" menu.
+    - Added the "REPLACE.." command to the "Search" menu.
+    - Added the capability to open the URLs typed in the comments of the script.
+    - Added the error strip to the right of the text editor.
+
+0.19b (19/11/2013)
+    - Improvements in Clojure syntax highlighting.
+    - Fixed exception in certain scenarios when word wrap and code folding were
+      both enabled.
+    - Fixed rendering bug when visible whitespace was enabled.
+    - TextScrollPane now allows JLayer/JXLayer as its view.
+    - The translucent Find dialog has been replaced by the Find search bar.
+    - Added the "SHOW REPLACE SEARCH BAR" command to the "Edit" menu.
+    - Other minor bugs fixed.
+
+0.19a (31/10/2013)
+    - Added first support for ORACLE hierarchical queries to the SQL parser.
+
+0.18c (07/10/2013)
+    - Added support for MySQL truncate function to the SQL parser.
+    - Added support for PostgreSQL type **character varying** to the SQL parser.
+
+0.18b (26/09/2013)
+    - Painting performance improvements.
+    - Pretty major API changes; "Token" changed from a class to an interface
+      ("IToken"), etc..
+      This allowed for more aggressive caching of syntax highlighting
+      information and thus better performance.
+    - Improvements to Clojure syntax highlighting.
+    - Miscellaneous small bug fixes and changes.
+
+0.18a (06/09/2013)
+    - Added regexp (REGEXP) operator to the SQL parser.
+    - Added support for SELECT without FROM (e.g. "SELECT 1+2") to the SQL
+      parser.
+    - Moved parser from using StringBuffer to using StringBuilder.
+    - Added support for CAST expression to the SQL parser.
+    - Added support for modulo (a % b) to the SQL parser.
+    - Added support for brackets quotation to the SQL parser.
+    - Added support for NOT expr IS (expr IS NOT was already supported) to the
+      SQL parser.
+    - Added support for ORACLE (+) Join Syntax to the SQL parser.
+    - Added alias visitor to the SQL parser.
+    - Added connect visitor to the SQL parser.
+    - TableNamesFinder included in source of SQL parser.
+    - Added proper support for sets (union, intersect) to the SQL parser.
+    - Added support for extract(year from datetime-expr) to the SQL parser.
+    - Start implementation of analytical expressions in the SQL parser.
+    - Expansionpoint for additional letters included in the SQL parser.
+    - The user manual has been updated with the added capabilities.
+
+0.17c (22/07/2013)
+    - Added the Sankey nodes to the tool palette of the Graphic Viewer.
+    - The inspector of the Graphic Viewer is automatically displayed by
+      selecting a component.
+
+0.17b (23/05/2013)
+    - Various code editor fixes and performance improvements.
+
+0.17a (17/05/2013)
+    - setBracketMatchingEnabled(boolean) now checks for brackets "to the right"
+      of the caret if one is not found "to the left".
+    - Added API to create custom hyperlinks in SyntaxTextArea.
+    - Added "mark occurrences" support for XML. Currently just highlights the
+      tag name at the current caret position and its match.
+    - Fixed issue when auto-inserting spaces for tabs.
+    - Major refactoring of rendering code.
+    - "Traditional" selection rendering is now supported; that is, selected text
+      can now be rendered as syntax highlighted tokens with a "selection"
+      background (as it was previously), or as text as a single color with the
+      "selection" background (as standard text components do). See
+      SyntaxTextArea.setUseSelectedTextColor(boolean).
+    - Fixed performance issue in FoldingAwareIconRowHeader when it paints
+      "active regions".
+    - Added some new token types to better differentiate markup tokens from
+      "regular" language tokens. This allows for better syntax highlighting.
+    - Upgraded Teradata JDBC driver 14.00.00.30 -> 14.10.00.17
+
+0.16c (04/02/2013)
+    - Fixed an issue with SQLTokenMaker: the ZEROIFNULL keyword has been
+      categorized as a function.
+    - Upgraded Teradata JDBC driver 14.00.00.21 -> 14.00.00.30
+
+0.16b (23/01/2013)
+    - Make auto-complete related windows use Substance rendering when a
+      Substance Look and Feel is installed.
+    - The default transaction mode for new database connections is set to ANSI,
+      in order to avoid inadvertent data truncations.
+
+0.16a (10/01/2013)
+    - Added the "BIGINT", "CONTAINS", "LDIFF", "MEETS", "PERIOD", "PRECEDES",
+      "P_INTERSECT", "P_NORMALIZE", "RDIFF", "SUCCEEDS" and "UDT" keywords to
+      the Teradata reserved words.
+    - Fixed an issue with SQLTokenMaker.
+
+0.15c (31/12/2012)
+    - Added the auto-completion functionality.
+    - Added the "FANCY CELL RENDERING" command to the "View" menu.
+    - Added the "SHOW DESCRIPTION WINDOW" command to the "View" menu.
+    - Added the "FUNCTION PARAMETER ASSISTANCE" command to the "View" menu.
+
 0.15b (18/12/2012)
     - Fixed an issue with CloseMarkupTagAction on non-QWERTY keyboards.
 
@@ -15,13 +492,13 @@
     - Fixed possible NPE in XmlTreeCellUI for environments where desktop AA
       hints cannot be determined.
     - Added the "TOGGLE CURRENT FOLD" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - Added the "COLLAPSE ALL COMMENT FOLDS" command to the "Edit" menu and to
-      the contextual menu of the SQL editor.
+      the contextual menu of the text editor.
     - Added the "COLLAPSE ALL FOLDS" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - Added the "EXPAND ALL FOLDS" command to the "Edit" menu and to the
-      contextual menu of the SQL editor.
+      contextual menu of the text editor.
     - The user manual has been updated with the added capabilities.
     - Added the "ACCESS" keyword to the Teradata reserved words.
 
@@ -30,7 +507,7 @@
       by the installed LaF).
 
 0.14a (08/11/2012)
-    - Added the "SAVE AS WEB PAGE" option to the "SAVE FILE" command of the
+    - Added the "Save As Web Page" option to the "SAVE FILE" command of the
       "File" menu.
     - Fixed errors due to the maximum limit of responses exceeded.
 
@@ -83,18 +560,18 @@
     - Added the "DECREASE INDENTATION" command to the "Edit" menu.
 
 0.11c (25/05/2012)
-    - Added the possibility to install the 3rd Party Look And Feels defined in
-      the file "open_teradata_viewer_lookandfeels.xml"; this file is located in
-      the user home directory.
+    - Now you can install the 3rd Party Look And Feels defined in the file
+      "open_teradata_viewer_lookandfeels.xml"; this file is located in the user
+      home directory.
 
 0.11b (18/05/2012)
     - Fixed issue with TextScrollPane.
     - Fixed bug in CurlyFoldParser.
-    - The query editor now has anti-aliasing enabled by default.
+    - The text editor now has anti-aliasing enabled by default.
 
 0.11a (16/05/2012)
     - Added the animate bracket matching, current line highlight, bookmarks,
-      word wrap, themes for the SQL editor, ...
+      word wrap, themes for the text editor, ...
       Navigate the "Edit" and the "Look & Feel" menus to see all the added
       features.
     - Fixed too large initial screen width on multiple monitors.
@@ -103,21 +580,22 @@
       of the searched text, the visible portion of the SQL code wasn't the
       expected one.
 
-0.10c (19/03/2012)
+0.1c (19/03/2012)
     - Fixed the text retrieval of the DDL scripts: the returned text was
       partially trimmed.
     - The "SHOW OBJECT" commands have been grouped.
     - Upgraded Teradata JDBC driver 14.00.00.12 -> 14.00.00.13
 
-0.10b (01/03/2012)
+0.1b (01/03/2012)
     - Added the "SHOW MACRO" command to the "Schema Browser" menu.
     - Added the "SHOW TABLE" command to the "Schema Browser" menu.
     - Fixed a bug related to the "SHOW VIEW" command: the text was truncated to
       12500 characters.
     
-0.10a (20/02/2012)
+0.1a (20/02/2012)
     - Fixed semicolons being cut off at the end of PL/SQL blocks.
-    - Fixed the control acting on the length of the name of Teradata objects.
+    - Fixed the mechanism that verifies the length of the name of the Teradata
+      objects.
     - Upgraded Teradata JDBC driver 14.00.00.01 -> 14.00.00.12
 
 0.09c (17/10/2011)
@@ -132,29 +610,29 @@
 
 0.09a (22/09/2011)
     - Some actions have been grouped.
-    - Fixed a bug related to the LOB IMPORT and LOB PASTE operations.
+    - Fixed a bug related to the "LOB IMPORT" and "LOB PASTE" commands.
 
 0.08c (21/09/2011)
-    - Added the EXPLAIN REQUEST command; the corresponding command button has
+    - Added the "EXPLAIN REQUEST" command; the corresponding command button has
       been installed on the "Schema Browser" menu.
     - Fixed a bug related to the lack of JAR files in the plugins directory;
       despite the absence of JAR files (JDBC driver included) in the plugins
       directory, you can run the application.
 
 0.08b (20/09/2011)
-    - Added the COMMIT command; the corresponding command button has been
+    - Added the "COMMIT" command; the corresponding command button has been
       installed on the tool bar and on the "Connection" menu.
-    - Added the ROLLBACK command; the corresponding command button has been
+    - Added the "ROLLBACK" command; the corresponding command button has been
       installed on the tool bar and on the "Connection" menu.
 
 0.08a (19/09/2011)
-    - Added the "Copy" command button to the tool bar.
-    - Added the "Cut" command button to the tool bar.
-    - Added the "Paste" command button to the tool bar.
-    - Fixed a bug relative to the edit actions. These actions were generated by
+    - Added the "COPY" command button to the tool bar.
+    - Added the "CUT" command button to the tool bar.
+    - Added the "PASTE" command button to the tool bar.
+    - Fixed a bug related to the edit actions. These actions were generated by
       the default editor kit, therefore when they were invoked, they acted on
-      the focused text editor. Now these operations act solely on the query
-      area.
+      the focused text editor. Now these operations act solely on the SQL
+      editor.
 
 0.07c (15/09/2011)
     - Fixed a bug related to the execution of the SQL queries: sometimes, with
@@ -174,34 +652,34 @@
 
 0.06b (28/07/2011)
     - The redrawing of the main frame has been enhanced with the animated
-      assistant actived.
+      assistant activated.
 
 0.06a (26/07/2011)
     - The animated assistant is disabled by default.
     - The table sorter repaints the result set also with the animated assistant
-      actived.
+      activated.
 
 0.05c (25/07/2011)
-    - Added the "Insert" action and the relative menu voice.
-    - Added the "Delete" action and the relative menu voice.
-    - Added the "Duplicate" action and the relative menu voice.
+    - Added the "Insert" action and the suited menu voice.
+    - Added the "Delete" action and the suited menu voice.
+    - Added the "Duplicate" action and the suited menu voice.
     - The user manual has been updated with the added capabilities.
 
 0.05b (25/07/2011)
     - Added some animated assistants.
-    - Updated the "CONNECTION PANEL" dialog screenshot in the user manual.
+    - Updated the "Connection Panel" dialog screenshot in the user manual.
 
 0.05a (21/07/2011)
     - Added an animated assistant that is shown while a process is
       running.
     - The "SHOW RECORD" command can be perfomed only if a record has been
       selected.
-    - Updated the "EDIT CONNECTION" dialog screenshot in the user manual.
+    - Updated the "Edit Connection" dialog screenshot in the user manual.
 
 0.04c (19/07/2011)
     - Added the user and password text fields for connections that don't use the
       LDAP logging mechanism. 
-    - Fixed a bug relative to the "EDIT DRIVERS" command. If a JDBC driver was
+    - Fixed a bug related to the "EDIT DRIVERS" command. If a JDBC driver was
       not found and the user closed the drivers dialog box, the returned
       response was causing an error. Now this situation is suitably managed.
 
@@ -215,7 +693,7 @@
     - Removed an unused library.
 
 0.03c (01/07/2011)
-    - Fixed a bug relative to the "SHOW VIEW" command. When the command was
+    - Fixed a bug related to the "SHOW VIEW" command. When the command was
       performed on an object that is not a view, the returned resultset was in
       a null record. Now this situation is suitably managed.
 
@@ -231,7 +709,7 @@
     - Added support for plug-ins.
 
 0.02b (21/06/2011)
-    - Added the historicizing of queries.
+    - Added the historicization of the queries.
 
 0.02a (20/06/2011)
     - The driver is dynamically installed.
@@ -240,17 +718,17 @@
     - Added the capability to store bookmarks.
 
 0.01c (17/06/2011)
-    - Added the "Run Script", "Open File" and "Save File" command buttons to the
+    - Added the "RUN SCRIPT", "OPEN FILE" and "SAVE FILE" command buttons to the
       application toolbar.
     - The memory monitor component has been replaced by the application status
       bar that allows the manual start of the Garbage Collector.
 
 0.01b (16/06/2011)
     - The user manual has been updated with the added capabilities.
-    - Added "Write File" function. The "Save File" command can be found in the
-      "File" menu.
-    - Added "Open File" function. The "Open File" command can be found in the
-      "File" menu.
+    - Added the "Write File" function. The "SAVE FILE" command can be found in
+      the "File" menu.
+    - Added the "Open File" function. The "OPEN FILE" command can be found in
+      the "File" menu.
 
 0.01a (14/06/2011)
     - First release.

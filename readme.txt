@@ -1,4 +1,4 @@
-Teradata JDBC Driver 16.20.00.06
+Teradata JDBC Driver 16.20.00.08
 
 Part of the Teradata Tools and Utilities 16.20 product suite
 
@@ -29,6 +29,20 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following DRs, originally included
+in release 16.20.00.08:
+
+DR 189906 Translate new JDBC 16.20 error messages into Japanese
+
+This release includes changes to address the following DRs, originally included
+in release 16.20.00.07:
+
+DR 184471 Support for AES-GCM Quality of Protection
+DR 187068 TeraGSSJava Support for JWT Authentication Mechanism
+DR 187839 JWT authentication
+DR 188758 TeraGSSJava unable to logon with new QOPs with SHA256 and SHA512
+DR 189125 TeraGSSJava unable to logon with AES GCM using IBM JRE
 
 This release includes changes to address the following DRs, originally included
 in release 16.20.00.06:
@@ -1318,7 +1332,7 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.16.20.00.06.zip and TeraJDBC__indep_indep.16.20.00.06.tar
+TeraJDBC__indep_indep.16.20.00.08.zip and TeraJDBC__indep_indep.16.20.00.08.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file
