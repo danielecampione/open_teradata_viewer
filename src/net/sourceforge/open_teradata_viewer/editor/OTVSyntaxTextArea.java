@@ -170,7 +170,7 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
         scheme.getStyle(Token.RESERVED_WORD).background = Color.yellow;
         scheme.getStyle(Token.DATA_TYPE).foreground = Color.blue;
         scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).underline = true;
-        scheme.getStyle(Token.COMMENT_EOL).font = new Font("Georgia", Font.ITALIC, 12);
+        scheme.getStyle(Token.COMMENT_EOL).font = new Font("Courier New", Font.PLAIN, 16);
 
         revalidate();
     }

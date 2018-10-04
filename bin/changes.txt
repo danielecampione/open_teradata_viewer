@@ -1,3 +1,8 @@
+0.27c (04/10/2018)
+    - Fixed the "Edit" action to edit the selected record of the result set.
+    - Changed the Font of the comments used by the default style of the text
+      editor.
+
 0.27b (01/10/2018)
     - Changed the style of the text editor programmatically.
     - Upgraded Teradata JDBC driver 16.20.00.06 -> 16.20.00.08

@@ -192,7 +192,6 @@ public class RunAction extends CustomAction {
                 }
             }
         } finally {
-            statement.close();
             waitingDialog.hide();
         }
         Context.getInstance().setQuery(originalSql);
