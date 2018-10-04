@@ -3,4 +3,12 @@ Open Teradata Viewer is a database editor, suitable as front-end for your relati
 
 [Web site]
 
+### Screenshots
+![Png](https://image.ibb.co/dursGz/screenshot_01.png)
+![Png](https://image.ibb.co/bwFKwz/screenshot_02.png)
+![Png](https://image.ibb.co/jAw9wz/screenshot_03.png)
+![Png](https://image.ibb.co/iuAKwz/screenshot_04.png)
+![Png](https://image.ibb.co/hL4Uwz/screenshot_05.png)
+
+
 [Web site]: http://openteradata.sourceforge.net/
