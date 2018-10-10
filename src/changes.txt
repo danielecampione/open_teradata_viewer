@@ -1,3 +1,13 @@
+0.28a (10/10/2018)
+    - Changed the default Font size of the Swing components.
+    - The preferred keystroke to bind the action Comment is Ctrl+7 (Cmd+7 on
+      Mac).
+    - The preferred keystroke to bind the action Uncomment is Ctrl+Shift+7
+      (Cmd+Shift+7 on Mac).
+    - The preferred keystroke to bind the action Invert case is Ctrl+Shift+I
+      (Cmd+Shift+I on Mac).
+    - Upgraded jsqlparser library 1.2 -> 1.3
+
 0.27c (04/10/2018)
     - Fixed the "Edit" action to edit the selected record of the result set.
     - Changed the Font of the comments used by the default style of the text

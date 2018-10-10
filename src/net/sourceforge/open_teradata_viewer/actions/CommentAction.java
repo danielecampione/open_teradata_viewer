@@ -18,7 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -37,7 +41,9 @@ public class CommentAction extends CustomAction {
     private static final long serialVersionUID = -2802751406188460908L;
 
     public CommentAction() {
-        super("Comment SQL code", "comment.png", null, null);
+        super("Comment SQL code", "comment.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_7, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                "Comments the selected text.");
         setEnabled(true);
     }
 
@@ -62,8 +68,7 @@ public class CommentAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
+        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
         int[] bounds = textArea.getBoundsOfSQLToBeExecuted();
 
         if (bounds[0] == bounds[1]) {
@@ -72,8 +77,7 @@ public class CommentAction extends CustomAction {
 
         int caretPosition = textArea.getCaretPosition();
 
-        String textToComment = textArea.getText().substring(bounds[0],
-                bounds[1]);
+        String textToComment = textArea.getText().substring(bounds[0], bounds[1]);
 
         String[] lines = textToComment.split("\n");
 
@@ -84,8 +88,7 @@ public class CommentAction extends CustomAction {
                 caretPosition += Utilities.START_OF_LINE_COMMENT.length();
             }
 
-            commentedLines.append(Utilities.START_OF_LINE_COMMENT).append(
-                    lines[i]);
+            commentedLines.append(Utilities.START_OF_LINE_COMMENT).append(lines[i]);
             if (i < lines.length - 1 || textToComment.endsWith("\n")) {
                 commentedLines.append("\n");
             }

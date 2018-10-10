@@ -18,7 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -37,7 +41,10 @@ public class UncommentAction extends CustomAction {
     private static final long serialVersionUID = -7121742231003418327L;
 
     public UncommentAction() {
-        super("Uncomment SQL code", "uncomment.png", null, null);
+        super("Uncomment SQL code", "uncomment.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_7,
+                        KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                "Uncomments the selectd text.");
         setEnabled(true);
     }
 
@@ -62,8 +69,7 @@ public class UncommentAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
+        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
         int[] bounds = textArea.getBoundsOfSQLToBeExecuted();
 
         if (bounds[0] == bounds[1]) {
@@ -72,8 +78,7 @@ public class UncommentAction extends CustomAction {
 
         int caretPosition = textArea.getCaretPosition();
 
-        String textToComment = textArea.getText().substring(bounds[0],
-                bounds[1]);
+        String textToComment = textArea.getText().substring(bounds[0], bounds[1]);
 
         String[] lines = textToComment.split("\n");
 
@@ -87,8 +92,7 @@ public class UncommentAction extends CustomAction {
             }
 
             if (lines[i].startsWith(Utilities.START_OF_LINE_COMMENT)) {
-                uncommentedLines.append(lines[i]
-                        .substring(Utilities.START_OF_LINE_COMMENT.length()));
+                uncommentedLines.append(lines[i].substring(Utilities.START_OF_LINE_COMMENT.length()));
             } else {
                 uncommentedLines.append(lines[i]);
             }

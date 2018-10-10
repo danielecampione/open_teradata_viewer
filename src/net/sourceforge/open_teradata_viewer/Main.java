@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.Set;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -46,15 +47,13 @@ public class Main {
 
     /** Prints a usage statement. */
     private static void printUsage() {
-        System.err
-                .println("Usage: java net.sourceforge.open_teradata_viewer.Main");
+        System.err.println("Usage: java net.sourceforge.open_teradata_viewer.Main");
     }
 
     public static void main(final String[] args) {
         // Check if the used JDK is supported
         if (!Utilities.isJDK18OrAbove()) {
-            System.err.println("The installed JDK version is NOT supported.\n"
-                    + "The program will be terminated.");
+            System.err.println("The installed JDK version is NOT supported.\n" + "The program will be terminated.");
             System.exit(-1);
         }
 
@@ -70,7 +69,7 @@ public class Main {
 
         // Make Metal not use bold fonts
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        
+
         // Catch any uncaught Throwables on the EDT and log them
         AWTExceptionHandler.register();
 
@@ -82,8 +81,7 @@ public class Main {
 
                 try {
                     String startupLookAndFeelProperty = "startup_lookandfeel_class";
-                    String strStartupLookAndFeelClassName = Config
-                            .getSetting(startupLookAndFeelProperty);
+                    String strStartupLookAndFeelClassName = Config.getSetting(startupLookAndFeelProperty);
                     if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
                         Config.saveSetting(startupLookAndFeelProperty, lafName);
                     } else {
@@ -94,8 +92,7 @@ public class Main {
                 }
 
                 String rootDir = Utilities.getRootDir();
-                ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(
-                        rootDir + File.separator);
+                ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(rootDir + File.separator);
 
                 try {
                     installACompatibleLaf(lafManager, lafName);
@@ -117,8 +114,7 @@ public class Main {
                 } catch (NoClassDefFoundError ncdfe) { // For example, the JGoodies Looks library is unavailable
                     ExceptionDialog.hideException(ncdfe);
                     ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                    String message = "The Look And Feel can't be installed.\n"
-                            + "Please restart the application.";
+                    String message = "The Look And Feel can't be installed.\n" + "Please restart the application.";
                     String title = "Look And Feel";
                     UISupport.getDialogs().showInfoMessage(message, title);
                     System.exit(-3);
@@ -127,16 +123,13 @@ public class Main {
                 } catch (Throwable t) {
                     ExceptionDialog.hideException(t);
                 }
-                UIManager.put("TextArea.font", new Font(Font.MONOSPACED,
-                        Font.PLAIN, 12));
 
                 // Allow Substance to paint window titles, etc.. We don't allow
                 // Metal (for example) to do this, because setting these
                 // properties to "true", then toggling to a LAF that doesn't
                 // support this property, such as Windows, causes the
                 // OS-supplied frame to not appear (as of JVM 6u20)
-                lafName = UIManager.getLookAndFeel().getClass()
-                        .getCanonicalName();
+                lafName = UIManager.getLookAndFeel().getClass().getCanonicalName();
                 if (SubstanceUtil.isASubstanceLookAndFeel(lafName)) {
                     JFrame.setDefaultLookAndFeelDecorated(true);
                     JDialog.setDefaultLookAndFeelDecorated(true);
@@ -152,6 +145,8 @@ public class Main {
                     }
                 }
 
+                setDefaultFontSize(14);
+
                 Toolkit.getDefaultToolkit().setDynamicLayout(true);
                 ApplicationFrame applicationFrame = new ApplicationFrame();
                 applicationFrame.initLookAndFeelManager(lafManager);
@@ -166,13 +161,11 @@ public class Main {
      * Java version specified for the current LAF can be downgraded from the
      * last startup) and, if not, it temporary installs the default LAF.
      */
-    private static void installACompatibleLaf(
-            ThirdPartyLookAndFeelManager lafManager, String lafName)
+    private static void installACompatibleLaf(ThirdPartyLookAndFeelManager lafManager, String lafName)
             throws Throwable {
         boolean systemLaf = false;
         boolean compatibleThirdPartyLaf = false;
-        UIManager.LookAndFeelInfo[] lafsInfo = UIManager
-                .getInstalledLookAndFeels();
+        UIManager.LookAndFeelInfo[] lafsInfo = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lafInfo : lafsInfo) {
             if (lafName.trim().equals(lafInfo.getClassName().trim())) {
                 systemLaf = true;
@@ -180,11 +173,9 @@ public class Main {
             }
         }
         if (!systemLaf) {
-            ExtendedLookAndFeelInfo[] extendedLookAndFeelsInfo = lafManager
-                    .get3rdPartyLookAndFeelInfo();
+            ExtendedLookAndFeelInfo[] extendedLookAndFeelsInfo = lafManager.get3rdPartyLookAndFeelInfo();
             for (ExtendedLookAndFeelInfo extendedLookAndFeelInfo : extendedLookAndFeelsInfo) {
-                if (lafName.trim().equals(
-                        extendedLookAndFeelInfo.getClassName().trim())) {
+                if (lafName.trim().equals(extendedLookAndFeelInfo.getClassName().trim())) {
                     compatibleThirdPartyLaf = true;
                     break;
                 }
@@ -212,6 +203,21 @@ public class Main {
             UIManager.setLookAndFeel(laf);
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
             UIUtil.installOsSpecificLafTweaks();
+        }
+    }
+
+    public static void setDefaultFontSize(int size) {
+        Set<Object> keySet = UIManager.getLookAndFeelDefaults().keySet();
+        Object[] keys = keySet.toArray(new Object[keySet.size()]);
+
+        for (Object key : keys) {
+            if (key != null && key.toString().toLowerCase().contains("font")) {
+                Font font = UIManager.getDefaults().getFont(key);
+                if (font != null) {
+                    font = font.deriveFont((float) size);
+                    UIManager.put(key, font);
+                }
+            }
         }
     }
 }

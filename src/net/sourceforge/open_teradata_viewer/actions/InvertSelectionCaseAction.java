@@ -18,9 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
@@ -37,7 +40,9 @@ public class InvertSelectionCaseAction extends CustomAction {
     private Action invertSelectionCase;
 
     protected InvertSelectionCaseAction() {
-        super("Invert case", null, null,
+        super("Invert case", null,
+                KeyStroke.getKeyStroke(KeyEvent.VK_I,
+                        KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 "Inverts the case of all letters in the current selection.");
         invertSelectionCase = new RTextAreaEditorKit.InvertSelectionCaseAction();
         setEnabled(true);
