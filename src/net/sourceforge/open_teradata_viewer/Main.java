@@ -123,6 +123,7 @@ public class Main {
                 } catch (Throwable t) {
                     ExceptionDialog.hideException(t);
                 }
+                UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 12));
 
                 // Allow Substance to paint window titles, etc.. We don't allow
                 // Metal (for example) to do this, because setting these

@@ -1,3 +1,11 @@
+0.28b (12/10/2018)
+    - The preferred keystroke to bind the action To upper case is Ctrl+Shift+U
+      (Cmd+Shift+U on Mac).
+    - The preferred keystroke to bind the action To lower case is Ctrl+Shift+L
+      (Cmd+Shift+L on Mac).
+    - TextArea.font uses the monospaced Font.
+    - Upgraded itext library 5.5.12 -> 5.5.13
+
 0.28a (10/10/2018)
     - Changed the default Font size of the Swing components.
     - The preferred keystroke to bind the action Comment is Ctrl+7 (Cmd+7 on

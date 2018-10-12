@@ -18,9 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
@@ -37,7 +40,9 @@ public class LowerSelectionCaseAction extends CustomAction {
     private Action lowerSelectionCase;
 
     protected LowerSelectionCaseAction() {
-        super("To lower case", null, null,
+        super("To lower case", null,
+                KeyStroke.getKeyStroke(KeyEvent.VK_L,
+                        KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 "Converts all letters in the current selection to lower case.");
         lowerSelectionCase = new RTextAreaEditorKit.LowerSelectionCaseAction();
         setEnabled(true);

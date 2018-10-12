@@ -18,9 +18,12 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
@@ -37,7 +40,9 @@ public class UpperSelectionCaseAction extends CustomAction {
     private Action upperSelectionCase;
 
     protected UpperSelectionCaseAction() {
-        super("To upper case", null, null,
+        super("To upper case", null,
+                KeyStroke.getKeyStroke(KeyEvent.VK_U,
+                        KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 "Converts all letters in the current selection to upper case.");
         upperSelectionCase = new RTextAreaEditorKit.UpperSelectionCaseAction();
         setEnabled(true);
