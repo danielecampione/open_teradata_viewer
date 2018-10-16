@@ -78,6 +78,7 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
+    public static final CustomAction CALCULATE_MD5_CHECKSUM = new CalculateMD5ChecksumAction();
     public static final CustomAction PRINT_PREVIEW = new PrintPreviewAction();
     public static final CustomAction FAVORITES = new FavoritesAction();
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();

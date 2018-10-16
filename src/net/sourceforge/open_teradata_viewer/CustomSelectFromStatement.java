@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -56,54 +57,70 @@ public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod
             return;
         }
 
-        TeradataColumnsNameDiscovererHandler handler = new TeradataColumnsNameDiscovererHandler();
-        TeradataColumnsNameDiscoverer columnsNameDiscoverer = (TeradataColumnsNameDiscoverer) handler
-                .createElement(relationName);
+        ApplicationFrame app = ApplicationFrame.getInstance();
+        DatabaseType databaseType = app.getDatabaseType();
+        ColumnsNameDiscovererHandlerFactoryMethod handler;
+        IColumnsNameDiscovererElement columnsNameDiscoverer;
+
+        if (databaseType == DatabaseType.TERADATA) {
+            handler = new TeradataColumnsNameDiscovererHandler();
+            columnsNameDiscoverer = (TeradataColumnsNameDiscoverer) handler.createElement(relationName);
+        } else if (databaseType == DatabaseType.ORACLE) {
+            handler = new ORACLEColumnsNameDiscovererHandler();
+            columnsNameDiscoverer = (ORACLEColumnsNameDiscoverer) handler.createElement(relationName);
+        } else {
+            handler = new GenericColumnsNameDiscovererHandler();
+            columnsNameDiscoverer = (GenericColumnsNameDiscoverer) handler.createElement(relationName);
+        }
         String sqlQuery = columnsNameDiscoverer.getSQLQuery();
 
-        ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData().getConnection();
-        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
+        if (databaseType != DatabaseType.UNKNOWN) {
+            ResultSet resultSet = null;
+            Connection connection = Context.getInstance().getConnectionData().getConnection();
+            final PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            Runnable onCancel = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        statement.cancel();
+                    } catch (Throwable t) {
+                        ExceptionDialog.ignoreException(t);
+                    }
                 }
+            };
+            WaitingDialog waitingDialog = null;
+            try {
+                waitingDialog = new WaitingDialog(onCancel);
+            } catch (InterruptedException ie) {
+                ExceptionDialog.ignoreException(ie);
             }
-        };
-        WaitingDialog waitingDialog = null;
-        try {
-            waitingDialog = new WaitingDialog(onCancel);
-        } catch (InterruptedException ie) {
-            ExceptionDialog.ignoreException(ie);
-        }
-        waitingDialog.setText("Executing statement..");
-        try {
-            resultSet = statement.executeQuery();
-        } finally {
-            waitingDialog.hide();
-        }
-        final String COLUMN_SEPARATOR = ", ";
-        String text = "SELECT ";
-        while (resultSet.next()) {
-            String columnName = resultSet.getString(1);
-            if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
-                columnName = "";
+            waitingDialog.setText("Executing statement..");
+            try {
+                resultSet = statement.executeQuery();
+            } finally {
+                waitingDialog.hide();
             }
-            text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;
+            final String COLUMN_SEPARATOR = ", ";
+            String text = "SELECT ";
+            while (resultSet.next()) {
+                String columnName = resultSet.getString(1);
+                if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
+                    columnName = "";
+                }
+                text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;
+            }
+            if (text.equals("SELECT ")) {
+                text += "* ";
+            } else if (text.endsWith(COLUMN_SEPARATOR)) {
+                text = text.substring(0, text.length() - COLUMN_SEPARATOR.length());
+            }
+            text += " FROM " + relationName;
+            this.sqlQuery = text;
+            statement.close();
+            resultSet.close();
+        } else {
+            this.sqlQuery = sqlQuery;
         }
-        if (text.equals("SELECT ")) {
-            text += "* ";
-        } else if (text.endsWith(COLUMN_SEPARATOR)) {
-            text = text.substring(0, text.length() - COLUMN_SEPARATOR.length());
-        }
-        text += " FROM " + relationName;
-        this.sqlQuery = text;
-        statement.close();
-        resultSet.close();
     }
 
     public String getRelationName() {

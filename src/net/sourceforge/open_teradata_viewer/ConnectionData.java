@@ -34,6 +34,10 @@ import java.util.Properties;
 
 public class ConnectionData implements Comparable<Object>, Cloneable {
 
+    public enum DatabaseType {
+        TERADATA, ORACLE, DB2, MYSQL, SQLITE, HSQLDB, H2, APACHE_DERBY, SQL_SERVER, UNKNOWN
+    }
+
     private String name;
     private String url;
     private String user;
@@ -50,8 +54,7 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     public ConnectionData() {
     }
 
-    public ConnectionData(String newName, String newUrl, String newUser,
-            String newPassword, String newDefaultOwner) {
+    public ConnectionData(String newName, String newUrl, String newUser, String newPassword, String newDefaultOwner) {
         this.name = newName;
         this.url = newUrl;
         this.user = newUser;
@@ -119,18 +122,15 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
         try {
             driver = DriverManager.getDriver(url);
         } catch (Exception e) {
-            ExceptionDialog.showException(new Exception(String.format(
-                    "No suitable driver for URL \"%s\"", url), e));
+            ExceptionDialog.showException(new Exception(String.format("No suitable driver for URL \"%s\"", url), e));
             int response = Drivers.editDrivers();
             if (Dialog.OK_OPTION == response) {
                 try {
                     driver = DriverManager.getDriver(url);
                 } catch (SQLException sqle) {
-                    throw new Exception(String.format(
-                            "No suitable driver for URL \"%s\"", url), sqle);
+                    throw new Exception(String.format("No suitable driver for URL \"%s\"", url), sqle);
                 }
-            } else if (Dialog.CANCEL_OPTION == response
-                    || Dialog.CLOSED_OPTION == response) {
+            } else if (Dialog.CANCEL_OPTION == response || Dialog.CLOSED_OPTION == response) {
                 return;
             }
         }
@@ -138,16 +138,14 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
         Properties properties = new Properties();
         if (user.length() > 0) {
             properties.setProperty("user", user);
-            properties.setProperty("password",
-                    password.isEmpty() ? transientPassword : password);
+            properties.setProperty("password", password.isEmpty() ? transientPassword : password);
         }
         addExtraProperties(properties);
         connection = driver.connect(url, properties);
 
         if (connection == null) {
-            throw new Exception(String.format(
-                    "Unable to connect.\nURL = %s\nDriver = %s", url, driver
-                            .getClass().getName()));
+            throw new Exception(
+                    String.format("Unable to connect.\nURL = %s\nDriver = %s", url, driver.getClass().getName()));
         }
         connection.setAutoCommit(false);
         setMixedCaseQuotedIdentifiers();
@@ -158,8 +156,7 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
             addProperty(properties, "v$session.program", Main.APPLICATION_NAME);
         } else if (isIbm()) {
             addProperty(properties, "clientProgramName", Main.APPLICATION_NAME);
-            addProperty(properties, "retrieveMessagesFromServerOnGetMessage",
-                    "true");
+            addProperty(properties, "retrieveMessagesFromServerOnGetMessage", "true");
         } else if (isDataDirect()) {
             addProperty(properties, "applicationName", Main.APPLICATION_NAME);
             addProperty(properties, "connectionRetryCount", "0");
@@ -193,10 +190,8 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     private void setMixedCaseQuotedIdentifiers() {
         try {
             if (!connection.getMetaData().supportsMixedCaseIdentifiers()
-                    && connection.getMetaData()
-                            .supportsMixedCaseQuotedIdentifiers()) {
-                identifierQuoteString = connection.getMetaData()
-                        .getIdentifierQuoteString();
+                    && connection.getMetaData().supportsMixedCaseQuotedIdentifiers()) {
+                identifierQuoteString = connection.getMetaData().getIdentifierQuoteString();
             } else {
                 identifierQuoteString = "";
             }
@@ -209,8 +204,7 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     public String checkMixedCaseQuotedIdentifier(String s) {
         boolean hasLowerCase = !s.equals(s.toUpperCase());
         if (hasLowerCase) {
-            s = String.format("%s%s%s", identifierQuoteString, s,
-                    identifierQuoteString);
+            s = String.format("%s%s%s", identifierQuoteString, s, identifierQuoteString);
         }
         return s;
     }

@@ -105,6 +105,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         add(menu);
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
+        menu.add(Actions.CALCULATE_MD5_CHECKSUM);
         menu.addSeparator();
         menu.add(Actions.PRINT_PREVIEW);
         menu.addSeparator();

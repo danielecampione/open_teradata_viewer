@@ -91,6 +91,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.fife.ui.rtextarea.ToolTipSupplier;
 
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
@@ -171,6 +172,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     private boolean doFileSizeCheck;
     private float maxFileSize; // In MB
+
+    private DatabaseType databaseType;
 
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
@@ -1235,6 +1238,14 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             }
             FileIO.openFile(new File(fileFullPath));
         }
+    }
+
+    public void setDatabaseType(DatabaseType databaseType) {
+        this.databaseType = databaseType;
+    }
+
+    public DatabaseType getDatabaseType() {
+        return databaseType;
     }
 
     /**
