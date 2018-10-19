@@ -31,10 +31,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 
-import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -53,8 +51,7 @@ public class EditAction extends CustomAction {
     protected EditAction() {
         super("Edit..", "edit.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        boolean hasResultSet = isConnected
-                && Context.getInstance().getResultSet() != null;
+        boolean hasResultSet = isConnected && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
     }
 
@@ -64,26 +61,14 @@ public class EditAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        JTable table = ResultSetTable.getInstance();
-        if (table.getRowCount() == 0) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("No result to view.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            return;
-        }
         ResultSet resultSet = Context.getInstance().getResultSet();
         JPanel panel = new JPanel(new GridBagLayout());
-        JTextArea[] textAreas = new JTextArea[resultSet.getMetaData()
-                .getColumnCount()];
-        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0,
-                0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                new Insets(5, 5, 5, 5), 0, 0);
+        JTextArea[] textAreas = new JTextArea[resultSet.getMetaData().getColumnCount()];
+        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0, 0, GridBagConstraints.NORTHWEST,
+                GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0);
         List selectedRow = ResultSetTable.getInstance().getSelectedRowData();
         for (int column = 0; column < resultSet.getMetaData().getColumnCount(); column++) {
-            String columnName = resultSet.getMetaData().getColumnName(
-                    column + 1);
+            String columnName = resultSet.getMetaData().getColumnName(column + 1);
             panel.add(new JLabel(columnName), constraints);
             if (column + 1 == resultSet.getMetaData().getColumnCount()) {
                 constraints.weightx = 100;
@@ -98,24 +83,19 @@ public class EditAction extends CustomAction {
             if (resultSet.getConcurrency() == ResultSet.CONCUR_READ_ONLY) {
                 textAreas[column].setEditable(false);
             }
-            textAreas[column].setBorder(BorderFactory
-                    .createLoweredBevelBorder());
+            textAreas[column].setBorder(BorderFactory.createLoweredBevelBorder());
             constraints.gridy++;
         }
         JScrollPane scrollPane = new JScrollPane(panel);
         while (true) {
             try {
-                if (Dialog.OK_OPTION == Dialog.show(
-                        (String) getValue(Action.NAME), scrollPane,
-                        Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION)
-                        && resultSet.getConcurrency() == ResultSet.CONCUR_UPDATABLE) {
+                if (Dialog.OK_OPTION == Dialog.show((String) getValue(Action.NAME), scrollPane, Dialog.PLAIN_MESSAGE,
+                        Dialog.OK_CANCEL_OPTION) && resultSet.getConcurrency() == ResultSet.CONCUR_UPDATABLE) {
                     position(resultSet);
                     boolean changed = false;
                     for (int i = 0; i < textAreas.length; i++) {
                         String text = textAreas[i].getText();
-                        if (textAreas[i].isEnabled()
-                                && change(text,
-                                        getOriginalValue(selectedRow, i))) {
+                        if (textAreas[i].isEnabled() && change(text, getOriginalValue(selectedRow, i))) {
                             ResultSetTable.getInstance().update(i + 1, text);
                             updateSelectedRow(selectedRow, i, text);
                             changed = true;
@@ -137,9 +117,7 @@ public class EditAction extends CustomAction {
     }
 
     private String getOriginalValue(List selectedRow, int column) {
-        return selectedRow == null || selectedRow.get(column) == null
-                ? ""
-                : selectedRow.get(column).toString();
+        return selectedRow == null || selectedRow.get(column) == null ? "" : selectedRow.get(column).toString();
     }
 
     protected boolean change(String text, String originalText) {
