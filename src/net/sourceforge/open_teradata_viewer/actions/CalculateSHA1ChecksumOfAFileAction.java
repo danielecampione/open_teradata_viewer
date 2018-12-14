@@ -39,7 +39,7 @@ import javax.swing.WindowConstants;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.UISupport;
-import net.sourceforge.open_teradata_viewer.editor.md5_sum_tools.MD5SumCalculator;
+import net.sourceforge.open_teradata_viewer.editor.sha1_sum_tools.SHA1SumCalculator;
 
 /**
  * 
@@ -47,14 +47,14 @@ import net.sourceforge.open_teradata_viewer.editor.md5_sum_tools.MD5SumCalculato
  * @author D. Campione
  * 
  */
-public class CalculateMD5ChecksumAction extends CustomAction {
+public class CalculateSHA1ChecksumOfAFileAction extends CustomAction {
 
-    private static final long serialVersionUID = 4640612452891344926L;
+    private static final long serialVersionUID = 8600398409228836371L;
 
     private final Insets insets = new Insets(0, 0, 0, 0);
 
-    public CalculateMD5ChecksumAction() {
-        super("Calculate the MD5 Checksum", null, null, "Calculate the MD5 Checksum of the selected file.");
+    public CalculateSHA1ChecksumOfAFileAction() {
+        super("Calculate the SHA1 Checksum of a file", null, null, "Calculate the SHA1 Checksum of the selected file.");
         setEnabled(true);
     }
 
@@ -66,10 +66,10 @@ public class CalculateMD5ChecksumAction extends CustomAction {
         ApplicationFrame app = ApplicationFrame.getInstance();
         File file = FileIO.chooseFile();
         if (file != null && file.exists()) {
-            MD5SumCalculator md5SumCalculator = new MD5SumCalculator();
+            SHA1SumCalculator sha1SumCalculator = new SHA1SumCalculator();
             JPanel panel = new JPanel(new GridBagLayout());
-            JLabel label = new JLabel("MD5 sum: ");
-            final JTextField textField = new JTextField(md5SumCalculator.calculateMD5Checksum(file));
+            JLabel label = new JLabel("SHA1 sum: ");
+            final JTextField textField = new JTextField(sha1SumCalculator.calculateSHA1ChecksumOfAFile(file));
             JLabel label2 = new JLabel("Compare: ");
             final JTextField textField2 = new JTextField();
             JButton compareButton = new JButton("Compare");
@@ -87,7 +87,7 @@ public class CalculateMD5ChecksumAction extends CustomAction {
             final JOptionPane optionPane = new JOptionPane(panel, JOptionPane.INFORMATION_MESSAGE,
                     JOptionPane.OK_CANCEL_OPTION, null, options, options[0]);
             optionPane.setOptionType(JOptionPane.OK_OPTION);
-            final JDialog dialog = optionPane.createDialog("MD5 Sum");
+            final JDialog dialog = optionPane.createDialog("SHA1 Sum");
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             button.addActionListener(new ActionListener() {
                 @Override
@@ -99,7 +99,7 @@ public class CalculateMD5ChecksumAction extends CustomAction {
             compareButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(app, "MD5 Check Sums are "
+                    JOptionPane.showMessageDialog(app, "SHA1 Check Sums are "
                             + ((textField.getText().equals(textField2.getText())) ? "the same." : "different."));
                 }
             });
