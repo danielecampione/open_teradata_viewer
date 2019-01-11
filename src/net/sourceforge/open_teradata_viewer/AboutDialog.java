@@ -71,8 +71,7 @@ public class AboutDialog extends JDialog implements MouseListener {
 
     private static final long serialVersionUID = 5497242522081970155L;
 
-    private final Border empty5Border = BorderFactory.createEmptyBorder(5, 5,
-            5, 5);
+    private final Border empty5Border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 
     public AboutDialog(ApplicationFrame parent) {
         super(parent);
@@ -101,16 +100,13 @@ public class AboutDialog extends JDialog implements MouseListener {
         // Windows LAF picks a bad font for text areas, for some reason
         textArea.setFont(labelFont);
         try {
-            textArea.setText("Version "
-                    + Config.getVersion()
-                    + "\n\n"
+            textArea.setText("Version " + Config.getVersion() + "\n\n"
                     + "A database administration tool, suitable as front-end for your Teradata "
                     + "relational database. Used to easily query, update and administer your "
                     + "database, create reports and synchronize data.\n\n"
                     + "Note that some features for some languages may not work unless your system "
                     + "is set up properly.\nFor example, Java code completion requries a JRE on "
-                    + "your PATH and Perl completion requires the Perl executable to be on your "
-                    + "PATH.");
+                    + "your PATH and Perl completion requires the Perl executable to be on your " + "PATH.");
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }
@@ -127,7 +123,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         SpringLayout sl = new SpringLayout();
         JPanel temp = new JPanel(sl);
         JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2018 D. Campione</font></html>");
+                "<html><font style=\"color:gray\">Copyright &copy 2019 D. Campione</font></html>");
         JLabel licenseLabel = new JLabel("GNU General Public License");
         licenseLabel.setForeground(Color.BLUE);
         licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -137,8 +133,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         homePageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         homePageLabel.addMouseListener(this);
         JLabel javaVMLabel = new JLabel("Java VM: ");
-        JTextField javaVMField = createTextField(System
-                .getProperty("java.version"));
+        JTextField javaVMField = createTextField(System.getProperty("java.version"));
         JLabel perlLabel = new JLabel("Perl install location:");
         File loc = PerlLanguageSupport.getDefaultPerlInstallLocation();
         String text = loc == null ? null : loc.getAbsolutePath();
@@ -190,18 +185,14 @@ public class AboutDialog extends JDialog implements MouseListener {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (isConnected) {
             try {
-                DatabaseMetaData metaData = Context.getInstance()
-                        .getConnectionData().getConnection().getMetaData();
+                DatabaseMetaData metaData = Context.getInstance().getConnectionData().getConnection().getMetaData();
                 c.gridy++;
                 temp.add(new JLabel("Database: "), c);
                 temp.add(createTextField(metaData.getDatabaseProductName()), c);
                 c.gridy++;
                 temp.add(new JLabel(""), c);
-                String databaseProductVersion = metaData
-                        .getDatabaseProductVersion().replaceAll("\n", "<br>");
-                temp.add(
-                        new JLabel(String.format("<html>%s</html>",
-                                databaseProductVersion)), c);
+                String databaseProductVersion = metaData.getDatabaseProductVersion().replaceAll("\n", "<br>");
+                temp.add(new JLabel(String.format("<html>%s</html>", databaseProductVersion)), c);
                 c.gridy++;
                 temp.add(new JLabel("Driver: "), c);
                 temp.add(createTextField(metaData.getDriverName()), c);
@@ -266,8 +257,7 @@ public class AboutDialog extends JDialog implements MouseListener {
      * @return The spring constraints for the specified component contained
      *         in <code>parent</code>.
      */
-    private static final SpringLayout.Constraints getConstraintsForCell(
-            int row, int col, Container parent, int cols) {
+    private static final SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols) {
         SpringLayout layout = (SpringLayout) parent.getLayout();
         Component c = parent.getComponent(row * cols + col);
         return layout.getConstraints(c);
@@ -292,14 +282,13 @@ public class AboutDialog extends JDialog implements MouseListener {
      * @param xPad The x-padding between cells.
      * @param yPad The y-padding between cells.
      */
-    public static final void makeSpringCompactGrid(Container parent, int rows,
-            int cols, int initialX, int initialY, int xPad, int yPad) {
+    public static final void makeSpringCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
+            int xPad, int yPad) {
         SpringLayout layout;
         try {
             layout = (SpringLayout) parent.getLayout();
         } catch (ClassCastException cce) {
-            System.err.println("The first argument to makeCompactGrid "
-                    + "must use SpringLayout.");
+            System.err.println("The first argument to makeCompactGrid " + "must use SpringLayout.");
             return;
         }
 
@@ -308,12 +297,10 @@ public class AboutDialog extends JDialog implements MouseListener {
         for (int c = 0; c < cols; c++) {
             Spring width = Spring.constant(0);
             for (int r = 0; r < rows; r++) {
-                width = Spring.max(width,
-                        getConstraintsForCell(r, c, parent, cols).getWidth());
+                width = Spring.max(width, getConstraintsForCell(r, c, parent, cols).getWidth());
             }
             for (int r = 0; r < rows; r++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
+                SpringLayout.Constraints constraints = getConstraintsForCell(r, c, parent, cols);
                 constraints.setX(x);
                 constraints.setWidth(width);
             }
@@ -325,12 +312,10 @@ public class AboutDialog extends JDialog implements MouseListener {
         for (int r = 0; r < rows; r++) {
             Spring height = Spring.constant(0);
             for (int c = 0; c < cols; c++) {
-                height = Spring.max(height,
-                        getConstraintsForCell(r, c, parent, cols).getHeight());
+                height = Spring.max(height, getConstraintsForCell(r, c, parent, cols).getHeight());
             }
             for (int c = 0; c < cols; c++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
+                SpringLayout.Constraints constraints = getConstraintsForCell(r, c, parent, cols);
                 constraints.setY(y);
                 constraints.setHeight(height);
             }
@@ -366,8 +351,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         }
 
         @Override
-        public void paintBorder(Component c, Graphics g, int x, int y,
-                int width, int height) {
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             Color color = UIManager.getColor("controlShadow");
             if (color == null) {
                 color = SystemColor.controlShadow;
@@ -384,8 +368,7 @@ public class AboutDialog extends JDialog implements MouseListener {
             try {
                 if (label.getText().startsWith("GNU")) {
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    InputStream in = Config.class
-                            .getResourceAsStream("/license.txt");
+                    InputStream in = Config.class.getResourceAsStream("/license.txt");
                     byte[] bytes = new byte[1024];
                     int length = in.read(bytes);
                     while (length != -1) {
@@ -393,12 +376,10 @@ public class AboutDialog extends JDialog implements MouseListener {
                         length = in.read(bytes);
                     }
                     in.close();
-                    JTextArea textArea = new JTextArea(new String(
-                            out.toByteArray()));
+                    JTextArea textArea = new JTextArea(new String(out.toByteArray()));
                     textArea.setEditable(false);
                     JScrollPane scrollPane = new JScrollPane(textArea);
-                    Dialog.show("License", scrollPane, Dialog.PLAIN_MESSAGE,
-                            Dialog.DEFAULT_OPTION);
+                    Dialog.show("License", scrollPane, Dialog.PLAIN_MESSAGE, Dialog.DEFAULT_OPTION);
                 } else {
                     Utilities.openURLWithDefaultBrowser(label.getText());
                 }

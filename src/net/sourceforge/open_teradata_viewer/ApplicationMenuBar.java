@@ -117,7 +117,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         add(menu);
         menu.add(Actions.CUT);
         menu.add(Actions.COPY);
-        menu.add(Actions.COPY_AS_RTF);
+        menu.add(Actions.COPY_AS_STYLED_TEXT);
         menu.add(Actions.PASTE);
         menu.addSeparator();
         menu.add(RTextArea.getAction(RTextArea.DELETE_ACTION));
@@ -305,6 +305,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu2);
         addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu2);
         addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu2);
+        addSyntaxItem("Lua", SyntaxConstants.SYNTAX_STYLE_LUA, bg, subMenu2);
         addSyntaxItem("MXML", SyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu2);
         addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu2);
         addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu2);

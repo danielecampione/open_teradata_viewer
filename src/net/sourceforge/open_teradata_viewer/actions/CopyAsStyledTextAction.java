@@ -33,26 +33,24 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
  * @author D. Campione
  * 
  */
-public class CopyAsRTFAction extends CustomAction {
+public class CopyAsStyledTextAction extends CustomAction {
 
     private static final long serialVersionUID = -804158889626235212L;
 
-    private Action copyAsRTF;
+    private Action copyAsStyledText;
 
-    protected CopyAsRTFAction() {
-        super(
-                "Copy as RTF",
-                "copy.png",
-                KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.SHIFT_DOWN_MASK
-                        + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Copies the current selection to the clipboard as RTF.");
-        copyAsRTF = new RSyntaxTextAreaEditorKit.CopyAsRtfAction();
+    protected CopyAsStyledTextAction() {
+        super("Copy as Styled Text", "copy.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_C,
+                        KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                "Copies the current selection to the clipboard as styled text.");
+        copyAsStyledText = new RSyntaxTextAreaEditorKit.CopyAsStyledTextAction();
         setEnabled(true);
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        copyAsRTF.actionPerformed(e);
+        copyAsStyledText.actionPerformed(e);
     }
 
     @Override
