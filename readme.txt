@@ -1,4 +1,4 @@
-Teradata JDBC Driver 16.20.00.10
+Teradata JDBC Driver 16.20.00.12
 
 Part of the Teradata Tools and Utilities 16.20 product suite
 
@@ -17,7 +17,7 @@ http://downloads.teradata.com/download/connectivity/jdbc-driver
 System Requirements
 -------------------
 
-This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5, 6, 7, 8, 9, 10, or 11.
+This release of the Teradata JDBC Driver requires JDK/JRE 1.4.2, 5, 6, 7, 8, 9, 10, 11, or 12.
 
 This release of the Teradata JDBC Driver supports Teradata Database
 14.10, 15.00, 15.10, 16.10, and 16.20.
@@ -29,6 +29,14 @@ Release Notes
 This section highlights issues that you should be aware of when upgrading to this release
 of the Teradata JDBC Driver. Please refer to the Teradata JDBC Driver Reference for more
 information about the driver.
+
+This release includes changes to address the following issues, originally included
+in release 16.20.00.11:
+
+JDBC-191761 Eliminate tdgssconfig.jar
+JDBC-191760 Remove AES-GCM from default QoP list to avoid Error 8028
+JDBC-191559 TeraGss Java Build and Unit Test Fail due to new error message added in TDGSS
+JDBC-190984 TeraGssJAVA: TD2 and LDAP logons not working against 13.0 Teradata
 
 This release includes changes to address the following issues, originally included
 in release 16.20.00.10:
@@ -1342,21 +1350,20 @@ This release of the Teradata JDBC Driver is distributed as platform-independent
 jar files. For downloading convenience, the platform-independent jar files are 
 bundled together and provided in both zip format and tar format.
 
-TeraJDBC__indep_indep.16.20.00.10.zip and TeraJDBC__indep_indep.16.20.00.10.tar
+TeraJDBC__indep_indep.16.20.00.12.zip and TeraJDBC__indep_indep.16.20.00.12.tar
 both contain the same set of platform-independent files:
 
   readme.txt               - this file
   terajdbc4.jar            - the Teradata JDBC Driver
-  tdgssconfig.jar          - the Teradata security configuration
 
 Download either the zip file or the tar file, and unzip (or untar) the downloaded
 file into a directory of your choice, and then set your classpath to refer to the
 necessary jar files.
 
-Your classpath must include:
+Your classpath must include terajdbc4.jar.
 
-  terajdbc4.jar
-  tdgssconfig.jar
+Beginning with Teradata JDBC Driver 16.20.00.11, tdgssconfig.jar is no longer part
+of the Teradata JDBC Driver, and your classpath should not include tdgssconfig.jar.
 
 Your classpath must NOT include any jar files from any previous releases of
 the Teradata JDBC Driver. It is recommended, but not required, that any

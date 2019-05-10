@@ -290,6 +290,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu2);
         addSyntaxItem("C++", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, bg, subMenu2);
         addSyntaxItem("CSS", SyntaxConstants.SYNTAX_STYLE_CSS, bg, subMenu2);
+        addSyntaxItem("CSV", SyntaxConstants.SYNTAX_STYLE_CSV, bg, subMenu2);
         addSyntaxItem("C#", SyntaxConstants.SYNTAX_STYLE_CSHARP, bg, subMenu2);
         addSyntaxItem("Clojure", SyntaxConstants.SYNTAX_STYLE_CLOJURE, bg, subMenu2);
         addSyntaxItem("D", SyntaxConstants.SYNTAX_STYLE_D, bg, subMenu2);
