@@ -107,6 +107,7 @@ import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
 import net.sourceforge.open_teradata_viewer.plugin.EntryDescriptor;
 import net.sourceforge.open_teradata_viewer.plugin.IPluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
@@ -119,7 +120,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * @author D. Campione
  *
  */
-public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchListener, HyperlinkListener {
+public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchListener, HyperlinkListener, LanguageManager.LanguageChangeListener {
 
     private static final long serialVersionUID = -8572855678886323789L;
 
@@ -178,6 +179,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
         APPLICATION_FRAME = this;
+        
+        // Register for language change notifications
+        LanguageManager.getInstance().addLanguageChangeListener(this);
     }
 
     public void drawIt() {
@@ -249,8 +253,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     private JSplitPane createWorkArea() {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createEditor(), createTable());
         queryArea.setOneTouchExpandable(true);
-        queryArea.setDividerSize(4);
-        queryArea.setDividerLocation(200);
+        
+        // Fix HiDPI: Scale size and divider position
+        queryArea.setDividerSize(SwingUtil.scale(4));
+        queryArea.setDividerLocation(SwingUtil.scale(200));
+        
         return queryArea;
     }
 
@@ -510,8 +517,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     public void destroyObjectChooser() {
         if (rightComponent != null) {
+            splitPane.setRightComponent(null);
             rightComponent = null;
-            splitPane.setRightComponent(rightComponent);
             splitPane.setDividerSize(0);
             schemaBrowserToggleButton.setSelected(false);
             Actions.SCHEMA_BROWSER.setEnabled(false);
@@ -523,18 +530,31 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             @Override
             public void run() {
                 try {
-                    final SchemaBrowser schemaBrowser = new SchemaBrowser(connectionData);
-                    if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
-                        SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
-                        schemaBrowser.addKeyListener(schemaBrowserAction);
-                        schemaBrowser.addMouseListener(schemaBrowserAction);
-                    }
-                    rightComponent = new JScrollPane(schemaBrowser);
-                    schemaBrowser.expand(new String[] { connectionData.getName(), "username", "TABLES" });
-                    Actions.SCHEMA_BROWSER.setEnabled(true);
-                } catch (IllegalStateException ise) {
-                    // Ignore: connection has been closed
-                    ExceptionDialog.ignoreException(ise);
+                    // SchemaBrowser extends JTree: all Swing component creation
+                    // must happen on the Event Dispatch Thread
+                    SwingUtilities.invokeAndWait(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                final SchemaBrowser schemaBrowser = new SchemaBrowser(connectionData);
+                                if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
+                                    SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
+                                    schemaBrowser.addKeyListener(schemaBrowserAction);
+                                    schemaBrowser.addMouseListener(schemaBrowserAction);
+                                }
+                                rightComponent = new JScrollPane(schemaBrowser);
+                                schemaBrowser.expand(new String[] { connectionData.getName(), "username", "TABLES" });
+                                Actions.SCHEMA_BROWSER.setEnabled(true);
+                            } catch (IllegalStateException ise) {
+                                // Ignore: connection has been closed
+                                ExceptionDialog.ignoreException(ise);
+                            }
+                        }
+                    });
+                } catch (InterruptedException ie) {
+                    ExceptionDialog.ignoreException(ie);
+                } catch (java.lang.reflect.InvocationTargetException ite) {
+                    ExceptionDialog.ignoreException(ite);
                 }
             }
         }).start();
@@ -596,7 +616,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      */
     protected SplashScreen createSplashScreen() {
         String img = "icons/logo.png";
-        return new SplashScreen(img, "Initializing..");
+        LanguageManager langManager = LanguageManager.getInstance();
+        return new SplashScreen(img, langManager.getString("splash.initializing"));
     }
 
     public void focusTextArea() {
@@ -965,9 +986,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             @Override
             public void run() {
                 textArea.setText(t);
+                refreshSourceTree();
             }
         });
-        refreshSourceTree();
     }
 
     public boolean isFullScreenModeActive() {
@@ -1132,6 +1153,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         File macrosDirectory = new File(getInstance().getMacrosDirectory());
         if (macrosDirectory.exists()) {
             String[] macrosRelativePath = macrosDirectory.list();
+            if (macrosRelativePath == null) {
+                return;
+            }
             for (String macroRelativePath : macrosRelativePath) {
                 String macroAbsolutePath = macrosDirectory + File.separator + macroRelativePath;
                 File macroFile = new File(macroAbsolutePath);
@@ -1184,8 +1208,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             float fileSizeMB = file.length() / 1000000.0f;
             float maxFileSizeMB = getMaxFileSize();
             if (fileSizeMB > maxFileSizeMB) {
-                String desc = String.format(
-                        "The following file is very large and may cause problems in the editor:\n{0}\nAre you sure you want to open it?");
+                String desc = "The following file is very large and may cause problems in the editor:\n{0}\nAre you sure you want to open it?";
                 desc = MessageFormat.format(desc, file.getAbsolutePath());
                 int rc = JOptionPane.showConfirmDialog(this, desc, Main.APPLICATION_NAME + " - Confirmation",
                         JOptionPane.YES_NO_OPTION);
@@ -1249,6 +1272,82 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Called when the language changes. Automatically refreshes all GUI components.
+     */
+    @Override
+    public void onLanguageChanged(java.util.Locale newLocale, java.util.ResourceBundle newBundle) {
+        refreshLanguage();
+    }
+    
+    /**
+     * Refreshes the language for all GUI components recursively.
+     */
+    public void refreshLanguage() {
+        LanguageManager langManager = LanguageManager.getInstance();
+        
+        // Update window title
+        setTitle(langManager.getString("app.title"));
+        
+        // Update menu bar - THIS WAS MISSING!
+        if (menubar != null) {
+            menubar.refreshAllComponents();
+        }
+        
+        // Update console title if visible
+        if (console != null) {
+            console.refreshLanguage();
+        }
+        
+        // Update help frame if visible
+        if (helpFrame != null && helpFrame.isVisible()) {
+            helpFrame.refreshLanguage();
+        }
+        
+        // Update graphic viewer if visible
+        if (graphicViewer != null && graphicViewer.isVisible()) {
+            graphicViewer.refreshLanguage();
+        }
+        
+        // Update toolbar
+        if (toolbar != null) {
+            toolbar.refreshLanguage();
+        }
+        
+        // Update dialogs
+        if (findDialog != null) {
+            findDialog.setTitle(langManager.getString("dialog.find.title"));
+            SwingUtilities.updateComponentTreeUI(findDialog);
+        }
+        
+        if (replaceDialog != null) {
+            replaceDialog.setTitle(langManager.getString("dialog.replace.title")); 
+            SwingUtilities.updateComponentTreeUI(replaceDialog);
+        }
+        
+        if (_OTVGoToDialog != null) {
+            _OTVGoToDialog.setTitle(langManager.getString("dialog.goto.title"));
+            SwingUtilities.updateComponentTreeUI(_OTVGoToDialog);
+        }
+
+        // Recursively update all text components in the frame
+        SwingUtilities.updateComponentTreeUI(this);
+        
+        // Force menu bar update
+        if (getJMenuBar() != null) {
+            SwingUtilities.updateComponentTreeUI(getJMenuBar());
+        }
+        
+        // Update owned windows
+        for (Window window : getOwnedWindows()) {
+            SwingUtilities.updateComponentTreeUI(window);
+        }
+        
+        // Refresh the entire frame
+        revalidate();
+        repaint();
+    }
+
+    /**
      * Actually creates the GUI. This is called after the splash screen is
      * displayed via <code>SwingUtilities#invokeLater()</code>.
      *
@@ -1265,21 +1364,22 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
         @Override
         public void run() {
-            splashScreen.updateStatus("The LookAndFeel has been installed successfully.", 10);
+            LanguageManager langManager = LanguageManager.getInstance();
+            splashScreen.updateStatus(langManager.getString("splash.lookandfeel_installed"), 10);
 
             setIconImage(ImageManager.getImage("/icons/logo32.png").getImage());
 
-            splashScreen.updateStatus("Initializing the main window..", 20);
+            splashScreen.updateStatus(langManager.getString("splash.main_window"), 20);
             getContentPane().setLayout(new BorderLayout());
             UISupport.setMainFrame(getInstance());
 
-            splashScreen.updateStatus("Initializing the goto dialog..", 25);
+            splashScreen.updateStatus(langManager.getString("splash.goto_dialog"), 25);
             setGoToDialog(new OTVGoToDialog(ApplicationFrame.this));
-            splashScreen.updateStatus("Initializing the search tool bars..", 35);
+            splashScreen.updateStatus(langManager.getString("splash.search_toolbars"), 35);
             initSearchDialogs();
             setCollapsibleSectionPanel(new CollapsibleSectionPanel());
 
-            splashScreen.updateStatus("Initializing the work area..", 40);
+            splashScreen.updateStatus(langManager.getString("splash.work_area"), 40);
             JPanel globalPanel = new JPanel(new BorderLayout());
             globalPanel.add(createWorkArea(), BorderLayout.CENTER);
             addWindowListener(new WindowAdapter() {
@@ -1295,7 +1395,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             });
 
             // Create the console and configure it
-            splashScreen.updateStatus("Initializing the console..", 45);
+            splashScreen.updateStatus(langManager.getString("splash.console"), 45);
             setConsole(new Console(5, 30, MAX_CHARACTERS_LOG));
             getConsole().setEditable(true);
             getConsole().setCaretPosition(getConsole().getDocument().getLength());
@@ -1303,22 +1403,25 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             JScrollPane scrollPaneConsole = new JScrollPane(getConsole());
 
-            splashScreen.updateStatus("Initializing the work panels..", 50);
+            splashScreen.updateStatus(langManager.getString("splash.work_panels"), 50);
             JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
             mainSplitPane.setOneTouchExpandable(true);
-            mainSplitPane.setDividerSize(4);
-            mainSplitPane.setDividerLocation(510);
+            
+            // Fix HiDPI: scale the main divisor
+            mainSplitPane.setDividerSize(SwingUtil.scale(4));
+            mainSplitPane.setDividerLocation(SwingUtil.scale(510));
+            
             getContentPane().add(mainSplitPane, BorderLayout.CENTER);
 
-            splashScreen.updateStatus("Initializing the graphic viewer..", 60);
+            splashScreen.updateStatus(langManager.getString("splash.graphic_viewer"), 60);
             graphicViewer = new GraphicViewer();
 
-            splashScreen.updateStatus("Initializing the graphic viewer undo manager..", 65);
+            splashScreen.updateStatus(langManager.getString("splash.graphic_viewer_undo"), 65);
             GraphicViewerDocument graphicViewerDocument = graphicViewer.myView.getDocument();
             graphicViewerDocument.addDocumentListener(graphicViewer);
             graphicViewerDocument.setUndoManager(new UndoMgr());
 
-            splashScreen.updateStatus("Initializing the status bar..", 75);
+            splashScreen.updateStatus(langManager.getString("splash.status_bar"), 75);
             getContentPane().add(new ApplicationStatusBar(), BorderLayout.PAGE_END);
 
             try {
@@ -1330,24 +1433,27 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 ExceptionDialog.ignoreException(e);
             }
 
-            splashScreen.updateStatus("Initializing the display changer..", 80);
+            splashScreen.updateStatus(langManager.getString("splash.display_changer"), 80);
             displayChanger = new DisplayChanger(ApplicationFrame.this);
             displayChanger.setExclusiveMode(false);
 
-            splashScreen.updateStatus("Initializing the menu bar..", 85);
+            splashScreen.updateStatus(langManager.getString("splash.menu_bar"), 85);
             setApplicationMenuBar(new ApplicationMenuBar());
 
-            splashScreen.updateStatus("Installing the plugins..", 90);
+            splashScreen.updateStatus(langManager.getString("splash.plugins"), 90);
             installPlugins();
 
-            splashScreen.updateStatus("Configuring the main window..", 98);
+            splashScreen.updateStatus(langManager.getString("splash.configuring"), 98);
             pack();
             double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
             double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-            setSize(Math.min(1150, (int) (screenWidth * .8)), Math.min(720, (int) (screenHeight * .8)));
+            
+            // Fix HiDPI: Scale the hardcoded base size
+            setSize(Math.min(SwingUtil.scale(1150), (int) (screenWidth * .8)), Math.min(SwingUtil.scale(720), (int) (screenHeight * .8)));
+            
             setMinimumSize(new Dimension((int) (screenWidth * .2), (int) (screenHeight * .2)));
             SwingUtil.centerWithinScreen(ApplicationFrame.this);
-            splashScreen.updateStatus("Done.", 100);
+            splashScreen.updateStatus(langManager.getString("splash.done"), 100);
 
             // Clean up the splash screen, if necessary
             if (splashScreen != null) {

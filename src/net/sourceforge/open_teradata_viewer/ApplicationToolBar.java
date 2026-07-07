@@ -29,9 +29,11 @@ import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.border.TitledBorder;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.GroupAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -100,5 +102,18 @@ public class ApplicationToolBar extends JToolBar {
         toggleButton.setVerticalTextPosition(JButton.BOTTOM);
         toggleButton.setFocusable(false);
         return toggleButton;
+    }
+    
+    /**
+     * Refreshes the language for the application toolbar component.
+     * The application toolbar component doesn't have many localizable
+     * strings, but this method is provided for consistency with other GUI
+     * components.
+     */
+    public void refreshLanguage() {
+        // The application toolbar component doesn't have many UI strings to
+    	// localize.
+        // This method is here for consistency and future extensions
+        repaint();
     }
 }

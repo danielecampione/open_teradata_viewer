@@ -44,13 +44,16 @@ public class TableSorter implements MouseListener, Comparator<List> {
     public int compare(List l1, List l2) {
         Object o1 = (l1).get(col);
         Object o2 = (l2).get(col);
-        int i = o1 == null && o2 == null ? 0 : o1 == null ? -1 : o2 == null
-                ? 1
-                : o1 instanceof Number ? Double.compare(
-                        ((Number) o1).doubleValue(),
-                        ((Number) o2).doubleValue()) : o1.toString().compareTo(
-                        o2.toString());
-        return i * (mouseButton == MouseEvent.BUTTON1 ? 1 : -1);
+        
+        Comparator<Object> comparator = Comparator.nullsFirst((obj1, obj2) -> {
+            if (obj1 instanceof Number && obj2 instanceof Number) {
+                return Double.compare(((Number) obj1).doubleValue(), ((Number) obj2).doubleValue());
+            }
+            return obj1.toString().compareTo(obj2.toString());
+        });
+        
+        int result = comparator.compare(o1, o2);
+        return result * (mouseButton == MouseEvent.BUTTON1 ? 1 : -1);
     }
 
     @Override
@@ -61,11 +64,7 @@ public class TableSorter implements MouseListener, Comparator<List> {
         List<List> list = ((DefaultTableModel) tableHeader.getTable()
                 .getModel()).getDataVector();
         Collections.sort(list, this);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                ApplicationFrame.getInstance().repaint();
-            }
-        });
+        SwingUtilities.invokeLater(() -> ApplicationFrame.getInstance().repaint());
 
     }
 

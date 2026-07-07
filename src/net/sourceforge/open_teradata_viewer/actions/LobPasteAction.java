@@ -25,6 +25,7 @@ import javax.swing.JTable;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
@@ -38,7 +39,7 @@ public class LobPasteAction extends CustomAction {
     private static final long serialVersionUID = 3197672902100995655L;
 
     protected LobPasteAction() {
-        super("Paste Lob", "paste.png", null, null);
+        super(LanguageManager.getInstance().getString("action.lob.paste"), "paste.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
@@ -46,6 +47,11 @@ public class LobPasteAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         setEnabled(isLobSelected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.lob.paste"));
+        });
     }
 
     @Override
@@ -57,31 +63,33 @@ public class LobPasteAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         if (!isLobSelected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("The field is NOT a Lob.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println(
+                    "The field is NOT a Lob.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            return;
+        }
+        byte[][] savedLobs = Context.getInstance().getSavedLobs();
+        if (savedLobs == null || savedLobs.length == 0) {
+            ApplicationFrame.getInstance().getConsole().println(
+                    "No Lob has been copied yet.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         JTable table = ResultSetTable.getInstance();
         if (table.getSelectedRowCount() == 1) {
-            ResultSetTable.getInstance().setTableValue(
-                    Context.getInstance().getSavedLobs()[0]);
+            ResultSetTable.getInstance().setTableValue(savedLobs[0]);
             ResultSetTable.getInstance().editingStopped(null);
         } else {
             WaitingDialog waitingDialog = new WaitingDialog(null);
             try {
                 int[] selectedRows = table.getSelectedRows();
-                waitingDialog.setText(String
-                        .format("0/%d", selectedRows.length));
+                waitingDialog.setText(String.format("0/%d", selectedRows.length));
                 for (int i = 0; i < selectedRows.length
                         && waitingDialog.isVisible(); i++) {
                     int selectedRow = selectedRows[i];
                     table.getSelectionModel().setSelectionInterval(selectedRow,
                             selectedRow);
-                    ResultSetTable.getInstance().setTableValue(
-                            Context.getInstance().getSavedLobs()[i]);
+                    ResultSetTable.getInstance().setTableValue(savedLobs[i]);
                     ResultSetTable.getInstance().editingStopped(null);
                     waitingDialog.setText(String.format("%d/%d", i + 1,
                             selectedRows.length));

@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -94,30 +95,33 @@ public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod
             } catch (InterruptedException ie) {
                 ExceptionDialog.ignoreException(ie);
             }
-            waitingDialog.setText("Executing statement..");
+            waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
             try {
                 resultSet = statement.executeQuery();
-            } finally {
                 waitingDialog.hide();
-            }
-            final String COLUMN_SEPARATOR = ", ";
-            String text = "SELECT ";
-            while (resultSet.next()) {
-                String columnName = resultSet.getString(1);
-                if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
-                    columnName = "";
+                final String COLUMN_SEPARATOR = ", ";
+                String text = "SELECT ";
+                while (resultSet.next()) {
+                    String columnName = resultSet.getString(1);
+                    if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
+                        columnName = "";
+                    }
+                    text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;
                 }
-                text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;
+                if (text.equals("SELECT ")) {
+                    text += "* ";
+                } else if (text.endsWith(COLUMN_SEPARATOR)) {
+                    text = text.substring(0, text.length() - COLUMN_SEPARATOR.length());
+                }
+                text += " FROM " + relationName;
+                this.sqlQuery = text;
+            } finally {
+                waitingDialog.hide();  // It’s idempotent - calling it twice doesn’t cause any problems
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                statement.close();
             }
-            if (text.equals("SELECT ")) {
-                text += "* ";
-            } else if (text.endsWith(COLUMN_SEPARATOR)) {
-                text = text.substring(0, text.length() - COLUMN_SEPARATOR.length());
-            }
-            text += " FROM " + relationName;
-            this.sqlQuery = text;
-            statement.close();
-            resultSet.close();
         } else {
             this.sqlQuery = sqlQuery;
         }

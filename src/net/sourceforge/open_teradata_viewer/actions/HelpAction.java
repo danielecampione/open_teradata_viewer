@@ -20,6 +20,8 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -31,31 +33,32 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.help.HelpFiles;
 import net.sourceforge.open_teradata_viewer.help.HelpViewerWindow;
-import net.sourceforge.open_teradata_viewer.util.StreamUtil;
-import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.SwingUtil;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
-import net.sourceforge.open_teradata_viewer.util.array.StringList;
 
 /**
+ * Action that opens the Help viewer and manages resource extraction.
  * 
  * @author D. Campione
- * 
  */
 public class HelpAction extends CustomAction {
 
     private static final long serialVersionUID = 1572333979959917847L;
 
     public HelpAction() {
-        super("Help", "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1, KeyEvent.VK_UNDEFINED),
-                "Shows the user manual.");
+        super(LanguageManager.getInstance().getString("menu.help.help"), "help.png", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
+        		LanguageManager.getInstance().getString("menu.help.help.short_description"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.help.help"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("menu.help.help.short_description"));
+        });
     }
 
+    @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "help" process can be performed altough other processes are
-        // running. No ThreadAction object must be instantiated because the
-        // focus must still remains on the guide frame
         try {
             performThreaded(e);
         } catch (Throwable t) {
@@ -63,52 +66,82 @@ public class HelpAction extends CustomAction {
         }
     }
 
-    @Override
-    protected void performThreaded(ActionEvent e) throws Exception {
-        if (ApplicationFrame.getInstance().getHelpFrame() != null
-                && SwingUtil.isVisible(ApplicationFrame.getInstance().getHelpFrame())) {
+    protected void performThreaded(final ActionEvent e) {
+        // 1. Singleton check: avoid multiple windows
+        HelpViewerWindow helpFrame = ApplicationFrame.getInstance().getHelpFrame();
+        if (helpFrame != null && helpFrame.isVisible()) {
+            helpFrame.toFront();
             return;
         }
-        Utilities.writeLocallyJARInternalFile("license.txt");
-        Utilities.writeLocallyJARInternalFile("changes.txt");
 
-        // Guide files
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "manual.html");
-
-        StringList sl = new StringList();
-        sl.setText(StreamUtil.stream2String(getClass().getResourceAsStream("/res/help_files.list")));
-        for (int i = 0; i < sl.size(); i++) {
-            if (StringUtil.isEmpty((String) sl.get(i))) {
-                continue;
-            }
-            try {
-                Utilities.writeLocallyJARInternalFile(
-                        HelpFiles.helpFolder + File.separator + "images" + File.separator + (String) sl.get(i));
-            } catch (Throwable ex) {
-                ApplicationFrame.getInstance().getConsole().println("Missing resource: " + (String) sl.get(i),
-                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                return;
-            }
-        }
-
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style.css");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "license.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "changes.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "FAQ.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style_groovy_macros.css");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "groovy_macros.html");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "style_js_macros.css");
-        Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + "js_macros.html");
+        // 2. Comprehensive Resource extraction (HTML, CSS and all Images)
+        extractHelpResourcesIfNeeded();
 
         try {
-            ApplicationFrame.getInstance().setHelpFrame(new HelpViewerWindow());
-            ApplicationFrame.getInstance().getHelpFrame().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            ApplicationFrame.getInstance().getHelpFrame().setVisible(true);
+            // 3. UI Initialization
+            helpFrame = new HelpViewerWindow();
+            ApplicationFrame.getInstance().setHelpFrame(helpFrame);
+
+            // 4. Cleanup on close
+            helpFrame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    ApplicationFrame.getInstance().setHelpFrame(null);
+                }
+            });
+
+            helpFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            helpFrame.setVisible(true);
+
         } catch (IOException ioe) {
             String errorMsg = "Unable to start the Help module.";
             ApplicationFrame.getInstance().getConsole().println(errorMsg,
                     ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-            UISupport.getDialogs().showErrorMessage("Unable to start the Help module.\n" + ioe.getMessage() + "\n");
+            UISupport.getDialogs().showErrorMessage(errorMsg + "\n" + ioe.getMessage());
+        }
+    }
+    
+    /**
+     * Extracts internal JAR resources to the local temp folder only if they are missing.
+     * Includes all images required for the manual and FAQ.
+     */
+    private void extractHelpResourcesIfNeeded() {
+        String tempDir = Utilities.normalizePath(System.getProperty("java.io.tmpdir"));
+        String helpFolderPath = tempDir + HelpFiles.helpFolder + File.separator;
+        
+        // The complete list of files to be extracted
+        String[] resources = {
+            // Document files
+            "manual.html", "style.css", "license.html", "changes.html",
+            "FAQ.html", "style_groovy_macros.css", "groovy_macros.html",
+            "style_js_macros.css", "js_macros.html",
+            
+            // Image files
+            "images/add.png", "images/back.png", "images/commit.png", 
+            "images/connect.png", "images/connection.jpg", "images/connection_manager.jpg",
+            "images/copy.png", "images/delete.png", "images/disconnect.png", 
+            "images/edit.png", "images/export.png", "images/favorites.png", 
+            "images/fetchlimit.png", "images/fileopen.png", "images/filesave.png", 
+            "images/format.png", "images/import.png", "images/logo.png", 
+            "images/next.png", "images/paste.png", "images/pdf.png", 
+            "images/rollback.png", "images/run.png", "images/schema.png", 
+            "images/script.png", "images/source.png", "images/spreadsheet.png", 
+            "images/text.png", "images/textarea_clipboard_history.png", 
+            "images/textarea_contextual_menu.png", "images/textarea_matched_bracket_popup.png"
+        };
+
+        for (String fileName : resources) {
+            File targetFile = new File(helpFolderPath, fileName);
+            
+            // We only write if the file is not already there
+            if (!targetFile.exists()) {
+                try {
+                    // This method handles the creation of the "images" subfolder automatically
+                    Utilities.writeLocallyJARInternalFile(HelpFiles.helpFolder + File.separator + fileName);
+                } catch (Exception ex) {
+                    ExceptionDialog.ignoreException(ex);
+                }
+            }
         }
     }
 }

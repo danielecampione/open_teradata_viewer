@@ -29,6 +29,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -42,12 +43,15 @@ public class ExplainRequestAction extends CustomAction {
     private static final long serialVersionUID = -8555161081550563065L;
 
     protected ExplainRequestAction() {
-        super("Explain request..", null, null, "<html>The request may be a "
-                + "multi-statement request or any single-statement<BR>"
-                + "request except a DDL statement, or an explicit "
-                + "transaction.</html>");
+        super(LanguageManager.getInstance().getString("menu.query.explain"), null, null, LanguageManager.getInstance().getString("menu.query.explain.short_description"));
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.explain"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("menu.query.explain.short_description"));
+        });
     }
 
     @Override
@@ -66,11 +70,8 @@ public class ExplainRequestAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("NOT connected.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -78,16 +79,13 @@ public class ExplainRequestAction extends CustomAction {
         boolean firstIteration = true;
         while (request == null) {
             if (firstIteration) {
-                request = ApplicationFrame.getInstance().getTextComponent()
-                        .getSelectedText();
+                request = ApplicationFrame.getInstance().getTextComponent().getSelectedText();
                 firstIteration = false;
             }
             if (request == null) {
-                request = ApplicationFrame.getInstance().getTextComponent()
-                        .getText();
+                request = ApplicationFrame.getInstance().getTextComponent().getText();
                 if (request.trim().length() == 0) {
-                    request = Dialog
-                            .showInputDialog("Insert the request to analyze: ");
+                    request = Dialog.showInputDialog("Insert the request to analyze: ");
                     if (request == null) {
                         return;
                     }
@@ -97,10 +95,8 @@ public class ExplainRequestAction extends CustomAction {
 
         String sqlQuery = "EXPLAIN " + request + ";";
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData()
-                .getConnection();
-        final PreparedStatement statement = connection
-                .prepareStatement(sqlQuery);
+        Connection connection = Context.getInstance().getConnectionData().getConnection();
+        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -111,30 +107,29 @@ public class ExplainRequestAction extends CustomAction {
                 }
             }
         };
-        WaitingDialog waitingDialog = null;
+        WaitingDialog waitingDialog;
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
             ExceptionDialog.ignoreException(ie);
+            return;
         }
-        waitingDialog.setText("Executing statement..");
+        waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
         try {
             resultSet = statement.executeQuery();
+            ApplicationFrame.getInstance().getConsole().println(
+                    Utilities.LINE_SEPARATOR + "\nExplanation\n" + Utilities.LINE_SEPARATOR);
+            while (resultSet.next()) {
+                Object obj = resultSet.getString(1);
+                String executionPlan = obj.toString().trim();
+                ApplicationFrame.getInstance().getConsole().println(executionPlan);
+            }
         } finally {
             waitingDialog.hide();
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            statement.close();
         }
-        ApplicationFrame
-                .getInstance()
-                .getConsole()
-                .println(
-                        Utilities.LINE_SEPARATOR + "\nExplanation\n"
-                                + Utilities.LINE_SEPARATOR);
-        while (resultSet.next()) {
-            Object obj = resultSet.getString(1);
-            String executionPlan = obj.toString().trim();
-            ApplicationFrame.getInstance().getConsole().println(executionPlan);
-        }
-        statement.close();
-        resultSet.close();
     }
 }

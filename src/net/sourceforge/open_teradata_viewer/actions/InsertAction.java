@@ -24,6 +24,8 @@ import java.util.List;
 
 import javax.swing.JTextArea;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -35,7 +37,12 @@ public class InsertAction extends EditAction {
     private static final long serialVersionUID = 184069738259317850L;
 
     protected InsertAction() {
-        super("Insert", "add.png");
+        super(LanguageManager.getInstance().getString("menu.query.insert"), "add.png");
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.insert"));
+        });
     }
 
     @Override

@@ -85,6 +85,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 

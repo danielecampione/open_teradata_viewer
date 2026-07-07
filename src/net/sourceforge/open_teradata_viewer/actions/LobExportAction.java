@@ -21,13 +21,16 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JList;
+import javax.swing.SwingUtilities;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -40,6 +43,7 @@ import net.sourceforge.open_teradata_viewer.ExportPreviewer;
 import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -52,7 +56,7 @@ public class LobExportAction extends CustomAction {
     private static final long serialVersionUID = 9078385500232914197L;
 
     protected LobExportAction() {
-        super("Export Lob..", "export.png", null, null);
+        super(LanguageManager.getInstance().getString("action.lob.export"), "export.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
@@ -60,6 +64,11 @@ public class LobExportAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         setEnabled(isLobSelected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.lob.export"));
+        });
     }
 
     @Override
@@ -89,11 +98,31 @@ public class LobExportAction extends CustomAction {
                         columnNames.add(table.getColumnName(i));
                     }
                 }
-                final JList list = new JList(columnNames.toArray());
-                list.addMouseListener(this);
-                list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                final AtomicReference<JList> listRef = new AtomicReference<>();
+                final AtomicReference<JScrollPane> scrollPaneRef = new AtomicReference<>();
+                
+                try {
+                    SwingUtilities.invokeAndWait(new Runnable() {
+                        @Override
+                        public void run() {
+                            JList list = new JList(columnNames.toArray());
+                            list.addMouseListener(LobExportAction.this);
+                            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                            JScrollPane scrollPane = new JScrollPane(list);
+                            
+                            listRef.set(list);
+                            scrollPaneRef.set(scrollPane);
+                        }
+                    });
+                } catch (InterruptedException | InvocationTargetException ex) {
+                    throw new Exception("Error creating UI components", ex);
+                }
+                
+                final JList list = listRef.get();
+                final JScrollPane scrollPane = scrollPaneRef.get();
+                
                 if (Dialog.OK_OPTION == Dialog.show("Column for file name",
-                        new JScrollPane(list), Dialog.PLAIN_MESSAGE,
+                        scrollPane, Dialog.PLAIN_MESSAGE,
                         Dialog.OK_CANCEL_OPTION)) {
                     int selectedIndex = list.getSelectedIndex();
                     if (selectedIndex != -1) {

@@ -80,11 +80,30 @@ public class SwingFileDialogs implements IXFileDialogs {
             chooser.setSelectedFile(null);
         }
 
-        if (chooser.showSaveDialog(getParent()) != JFileChooser.APPROVE_OPTION) {
+        // Ensure showSaveDialog is called on EDT
+        final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
+        
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int result = chooser.showSaveDialog(getParent());
+                    resultRef.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef.set(chooser.getSelectedFile());
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        
+        if (resultRef.get() != JFileChooser.APPROVE_OPTION) {
             return null;
         }
 
-        return chooser.getSelectedFile();
+        return selectedFileRef.get();
     }
 
     public File open(Object action, String title, String extension,
@@ -131,11 +150,30 @@ public class SwingFileDialogs implements IXFileDialogs {
         chooser.setDialogTitle(title);
         chooser.setShowingCreateDirectory(true);
         chooser.setPreferredSize(new Dimension(400, 400));
-        if (chooser.showSaveDialog(getParent()) != JFileChooser.APPROVE_OPTION) {
+        // Ensure showSaveDialog is called on EDT
+        final java.util.concurrent.atomic.AtomicInteger resultRef2 = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef2 = new java.util.concurrent.atomic.AtomicReference<>();
+        
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int result = chooser.showSaveDialog(getParent());
+                    resultRef2.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef2.set(chooser.getSelectedFile());
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        
+        if (resultRef2.get() != JFileChooser.APPROVE_OPTION) {
             return null;
         }
 
-        return chooser.getSelectedFile();
+        return selectedFileRef2.get();
 
         // JFileChooser chooser = getChooser( action );
         // chooser.setDialogTitle( title );
@@ -174,11 +212,30 @@ public class SwingFileDialogs implements IXFileDialogs {
         chooser.setDialogTitle(title);
         chooser.setShowingCreateDirectory(true);
         chooser.setAcceptAllFileFilterUsed(true);
-        if (chooser.showSaveDialog(getParent()) != JFileChooser.APPROVE_OPTION) {
+        // Ensure showSaveDialog is called on EDT
+        final java.util.concurrent.atomic.AtomicInteger resultRef3 = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef3 = new java.util.concurrent.atomic.AtomicReference<>();
+        
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int result = chooser.showSaveDialog(getParent());
+                    resultRef3.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef3.set(chooser.getSelectedFile());
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        
+        if (resultRef3.get() != JFileChooser.APPROVE_OPTION) {
             return null;
         }
 
-        return chooser.getSelectedFile();
+        return selectedFileRef3.get();
 
         // JFileChooser chooser = getChooser( action );
         // chooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );

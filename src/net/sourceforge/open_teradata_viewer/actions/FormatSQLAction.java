@@ -26,6 +26,7 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 import org.hibernate.jdbc.util.FormatStyle;
 import org.hibernate.jdbc.util.IFormatter;
@@ -42,12 +43,17 @@ public class FormatSQLAction extends CustomAction {
 
     protected FormatSQLAction() {
         super(
-                "Format SQL code",
+        		LanguageManager.getInstance().getString("menu.edit.format_sql_code"),
                 "format.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.SHIFT_DOWN_MASK
                         + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
                 null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.format_sql_code"));
+        });
     }
 
     @Override

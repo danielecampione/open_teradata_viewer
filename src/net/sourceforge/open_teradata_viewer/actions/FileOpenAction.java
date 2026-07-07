@@ -26,6 +26,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.FileIO;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,10 +37,15 @@ import net.sourceforge.open_teradata_viewer.FileIO;
 public class FileOpenAction extends CustomAction implements SyntaxConstants {
 
     private static final long serialVersionUID = -2948843917732757209L;
-
+    
     protected FileOpenAction() {
-        super("Open File", "fileopen.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.file.open"), "fileopen.png", null, null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.file.open"));
+        });
     }
 
     @Override

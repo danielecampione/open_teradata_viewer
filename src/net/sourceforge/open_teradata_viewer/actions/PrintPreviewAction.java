@@ -20,8 +20,12 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.SwingUtilities;
+
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.print.PrintPreviewDialog;
 
 /**
@@ -30,26 +34,43 @@ import net.sourceforge.open_teradata_viewer.print.PrintPreviewDialog;
  * @author D. Campione
  * 
  */
-class PrintPreviewAction extends CustomAction {
+public class PrintPreviewAction extends CustomAction {
 
     private static final long serialVersionUID = -8657243264174233798L;
 
     /** Ctor. */
     protected PrintPreviewAction() {
-        super("Print Preview");
+        super(LanguageManager.getInstance().getString("menu.file.print_preview"));
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.file.print_preview"));
+        });
     }
 
-    /* (non-Javadoc)
-     * @see net.sourceforge.open_teradata_viewer.actions.CustomAction#performThreaded(java.awt.event.ActionEvent)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.sourceforge.open_teradata_viewer.actions.CustomAction#performThreaded(
+     * java.awt.event.ActionEvent)
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        PrintPreviewDialog printPreviewDialog = new PrintPreviewDialog(
-                ApplicationFrame.getInstance(), ApplicationFrame.getInstance()
-                        .getTextComponent());
-        printPreviewDialog
-                .setLocationRelativeTo(ApplicationFrame.getInstance());
-        UISupport.showDialog(printPreviewDialog);
+        SwingUtilities.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PrintPreviewDialog printPreviewDialog = new PrintPreviewDialog(
+                            ApplicationFrame.getInstance(),
+                            ApplicationFrame.getInstance().getTextComponent());
+                    printPreviewDialog.setLocationRelativeTo(ApplicationFrame.getInstance());
+                    UISupport.showDialog(printPreviewDialog);
+                } catch (Exception ex) {
+                    ExceptionDialog.showException(ex);
+                }
+            }
+        });
     }
 }

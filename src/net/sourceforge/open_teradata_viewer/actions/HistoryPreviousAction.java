@@ -25,6 +25,7 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.History;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -37,8 +38,13 @@ public class HistoryPreviousAction extends CustomAction {
     private static final long serialVersionUID = 4077289402901037792L;
 
     protected HistoryPreviousAction() {
-        super("History - Previous", "back.png", KeyStroke.getKeyStroke(
+        super(LanguageManager.getInstance().getString("menu.edit.history_previous"), "back.png", KeyStroke.getKeyStroke(
                 KeyEvent.VK_LEFT, KeyEvent.ALT_DOWN_MASK), null);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.history_previous"));
+        });
     }
 
     @Override

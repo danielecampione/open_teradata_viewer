@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles whether the completion window uses "fancy" rendering.
@@ -35,8 +36,13 @@ public class FancyCellRenderingAction extends CustomAction {
     private static final long serialVersionUID = 4170710988719590178L;
 
     public FancyCellRenderingAction() {
-        super("Fancy Cell Rendering");
+        super(LanguageManager.getInstance().getString("menu.view.fancy_cell_rendering"));
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.view.fancy_cell_rendering"));
+        });
     }
 
     @Override

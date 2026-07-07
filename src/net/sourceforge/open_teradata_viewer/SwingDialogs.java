@@ -39,6 +39,8 @@ import javax.swing.event.AncestorListener;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -60,7 +62,7 @@ public class SwingDialogs implements IXDialogs {
         // Build a right-aligned bar for: OK
         ButtonBarBuilder builder = new ButtonBarBuilder();
         builder.addGlue();
-        builder.addButton(new JButton(new OkAction("OK")));
+        builder.addButton(new JButton(new OkAction(LanguageManager.getInstance().getString("button.ok"))));
         JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);
@@ -105,13 +107,14 @@ public class SwingDialogs implements IXDialogs {
 
     @Override
     public void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(parent, message, "Error",
+        JOptionPane.showMessageDialog(parent, message, 
+                LanguageManager.getInstance().getString("dialog.error.title"),
                 JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
     public void showInfoMessage(String message) {
-        showInfoMessage(message, "Information");
+        showInfoMessage(message, LanguageManager.getInstance().getString("dialog.information.title"));
     }
 
     @Override
@@ -140,7 +143,10 @@ public class SwingDialogs implements IXDialogs {
 
     @Override
     public int yesYesToAllOrNo(String question, String title) {
-        String[] buttons = { "Yes", "Yes to all", "No" };
+        LanguageManager langManager = LanguageManager.getInstance();
+        String[] buttons = { langManager.getString("button.yes"), 
+                           langManager.getString("button.yes_to_all"), 
+                           langManager.getString("button.no") };
         return JOptionPane.showOptionDialog(parent, question, title, 0,
                 JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[0]);
     }
@@ -188,10 +194,11 @@ public class SwingDialogs implements IXDialogs {
             String content, Dimension size) {
         // Build a right-aligned bar for: OK and Cancel
         ButtonBarBuilder builder = new ButtonBarBuilder();
+        LanguageManager langManager = LanguageManager.getInstance();
         builder.addGlue();
-        builder.addButton(new JButton(new OkAction("OK")));
+        builder.addButton(new JButton(new OkAction(langManager.getString("button.ok"))));
         builder.addRelatedGap();
-        builder.addButton(new JButton(new CancelAction("Cancel")));
+        builder.addButton(new JButton(new CancelAction(langManager.getString("button.cancel"))));
         JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);
@@ -204,12 +211,13 @@ public class SwingDialogs implements IXDialogs {
             String description, String content, Dimension size) {
         // Build a right-aligned bar for: Yes, No and Cancel
         ButtonBarBuilder builder = new ButtonBarBuilder();
+        LanguageManager langManager = LanguageManager.getInstance();
         builder.addGlue();
-        builder.addButton(new JButton(new OkAction("Yes")));
+        builder.addButton(new JButton(new OkAction(langManager.getString("button.yes"))));
         builder.addRelatedGap();
-        builder.addButton(new JButton(new NoAction("No")));
+        builder.addButton(new JButton(new NoAction(langManager.getString("button.no"))));
         builder.addRelatedGap();
-        builder.addButton(new JButton(new CancelAction("Cancel")));
+        builder.addButton(new JButton(new CancelAction(langManager.getString("button.cancel"))));
         JPanel buttonBar = builder.getPanel();
 
         showExtendedInfo(title, description, content, buttonBar, size);

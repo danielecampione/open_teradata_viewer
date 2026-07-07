@@ -27,6 +27,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -40,12 +42,18 @@ public class InvertSelectionCaseAction extends CustomAction {
     private Action invertSelectionCase;
 
     protected InvertSelectionCaseAction() {
-        super("Invert case", null,
+        super(LanguageManager.getInstance().getString("action.invert_case"), null,
                 KeyStroke.getKeyStroke(KeyEvent.VK_I,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Inverts the case of all letters in the current selection.");
+                LanguageManager.getInstance().getString("action.invert_case.short_description"));
         invertSelectionCase = new RTextAreaEditorKit.InvertSelectionCaseAction();
         setEnabled(true);
+                
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.invert_case"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.invert_case.short_description"));
+        });
     }
 
     @Override

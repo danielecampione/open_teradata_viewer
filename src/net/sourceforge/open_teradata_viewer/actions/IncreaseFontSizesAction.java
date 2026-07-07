@@ -27,6 +27,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -40,12 +42,18 @@ public class IncreaseFontSizesAction extends CustomAction {
     private Action increaseFontSize;
 
     protected IncreaseFontSizesAction() {
-        super("Increase font sizes", "fontsizeup.png", KeyStroke.getKeyStroke(
+        super(LanguageManager.getInstance().getString("menu.edit.increase_font_sizes"), "fontsizeup.png", KeyStroke.getKeyStroke(
                 KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit()
                         .getMenuShortcutKeyMask()),
-                "Increases the size of all text area fonts.");
+        		LanguageManager.getInstance().getString("menu.edit.increase_font_sizes.short_description"));
         increaseFontSize = new RSyntaxTextAreaEditorKit.IncreaseFontSizeAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.increase_font_sizes"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("menu.edit.increase_font_sizes.short_description"));
+        });
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.fife.rsta.ui.search.ReplaceDialog;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -39,8 +40,13 @@ public class ShowFindDialogAction extends CustomAction {
     private static final long serialVersionUID = 4122174099874841385L;
 
     public ShowFindDialogAction() {
-        super("Find..", "find.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.search.find"), "find.png", null, null);
         setEnabled(true);
+        
+    	// Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.search.find"));
+        });
     }
 
     @Override

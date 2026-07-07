@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.Config;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -34,8 +35,13 @@ public class UpdateAction extends CustomAction {
     private static final long serialVersionUID = -7782859550440488409L;
 
     protected UpdateAction() {
-        super("Download latest version", null, null, null);
+        super(LanguageManager.getInstance().getString("action.download_latest_version"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.download_latest_version"));
+        });
     }
 
     @Override

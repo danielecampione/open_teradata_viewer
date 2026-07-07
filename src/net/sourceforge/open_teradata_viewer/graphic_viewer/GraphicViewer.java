@@ -59,6 +59,7 @@ import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerLayeredDigraphAutoLayout;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerNetwork;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -77,7 +78,7 @@ public class GraphicViewer extends JFrame
     private static GraphicViewer GRAPHIC_VIEWER;
     private int myDocCount;
     UndoMgr myUndoMgr;
-    static final String graphicViewerSVGXML = "Graphic Viewer SVG with XML extensions (*.xhtml)";
+    static final String graphicViewerSVGXML = LanguageManager.getInstance().getString("graphic_viewer.svg_xml");
     private String myDescription = "";
     public AppAction FileNewAction;
     public AppAction FileOpenAction;
@@ -310,21 +311,11 @@ public class GraphicViewer extends JFrame
                             }
                         }
                     } else {
-                        FileOutputStream fileoutputstream = null;
-                        try {
-                            fileoutputstream = new FileOutputStream(
-                                    "GraphicViewer.serialized");
+                        try (FileOutputStream fileoutputstream = new FileOutputStream(
+                                "GraphicViewer.serialized")) {
                             storeObjects(fileoutputstream);
                         } catch (Exception e) {
                             ExceptionDialog.hideException(e);
-                        } finally {
-                            try {
-                                if (fileoutputstream != null) {
-                                    fileoutputstream.close();
-                                }
-                            } catch (Exception e) {
-                                ExceptionDialog.ignoreException(e);
-                            }
                         }
                     }
                 }
@@ -1262,7 +1253,7 @@ public class GraphicViewer extends JFrame
                             ll.setFromLabel(null);
                             ll.setToLabel(null);
                             if (mid != null && mid instanceof GraphicViewerText) {
-                                ((GraphicViewerText) mid).setText("loop");
+                                ((GraphicViewerText) mid).setText(LanguageManager.getInstance().getString("graphic_viewer.loop"));
                             }
                         }
                     }
@@ -1430,25 +1421,25 @@ public class GraphicViewer extends JFrame
                     (GraphicViewerText) graphicviewerobject);
             UISupport.showDialog(textpropsdialog);
         } else if (graphicviewerobject instanceof GraphicViewerPort) {
-            s = "Port Properties";
+            s = LanguageManager.getInstance().getString("dialog.port_properties");
             PortPropsDialog portpropsdialog = new PortPropsDialog(
                     myView.getFrame(), s, true,
                     (GraphicViewerPort) graphicviewerobject);
             UISupport.showDialog(portpropsdialog);
         } else if (graphicviewerobject instanceof GraphicViewerDrawable) {
-            s = "Drawable Properties";
+            s = LanguageManager.getInstance().getString("dialog.drawable_properties");
             DrawablePropsDialog drawablepropsdialog = new DrawablePropsDialog(
                     myView.getFrame(), s, true,
                     (GraphicViewerDrawable) graphicviewerobject);
             UISupport.showDialog(drawablepropsdialog);
         } else if (graphicviewerobject instanceof GraphicViewerImage) {
-            s = "Image Properties";
+            s = LanguageManager.getInstance().getString("dialog.image_properties");
             ImagePropsDialog imagepropsdialog = new ImagePropsDialog(
                     myView.getFrame(), s, true,
                     (GraphicViewerImage) graphicviewerobject);
             UISupport.showDialog(imagepropsdialog);
         } else if (graphicviewerobject instanceof GraphicViewerObject) {
-            s = "Object Properties";
+            s = LanguageManager.getInstance().getString("dialog.object_properties");
             ObjectPropsDialog objectpropsdialog = new ObjectPropsDialog(
                     myView.getFrame(), s, true, graphicviewerobject);
             UISupport.showDialog(objectpropsdialog);
@@ -2892,7 +2883,7 @@ public class GraphicViewer extends JFrame
                 graphicviewerbasicnode.getPort(),
                 graphicviewerbasicnode1.getPort());
         GraphicViewerLinkLabel graphicviewerlinklabel1 = new GraphicViewerLinkLabel();
-        graphicviewerlinklabel1.setText("middle");
+        graphicviewerlinklabel1.setText(LanguageManager.getInstance().getString("graphic_viewer.middle"));
         graphicviewerlabeledlink1.setMidLabel(graphicviewerlinklabel1);
         graphicviewerlabeledlink1.setArrowHeads(false, true);
         testsubgraph.addObjectAtTail(graphicviewerlabeledlink1);
@@ -3464,7 +3455,7 @@ public class GraphicViewer extends JFrame
         //==============================================================
         // Set up menu bar
         //==============================================================
-        filemenu.setText("File");
+        filemenu.setText(LanguageManager.getInstance().getString("graphic_viewer.file"));
         filemenu.add(FileNewAction);
         filemenu.add(FileOpenAction);
         filemenu.addSeparator();
@@ -3475,7 +3466,7 @@ public class GraphicViewer extends JFrame
         filemenu.add(FileSaveAsAction);
         mainMenuBar.add(filemenu);
 
-        editmenu.setText("Edit");
+        editmenu.setText(LanguageManager.getInstance().getString("graphic_viewer.edit"));
         editmenu.add(CutAction).setAccelerator(KeyStroke.getKeyStroke(88, 2));
         editmenu.add(CopyAction).setAccelerator(KeyStroke.getKeyStroke(67, 2));
         editmenu.add(PasteAction).setAccelerator(KeyStroke.getKeyStroke(86, 2));
@@ -3540,7 +3531,7 @@ public class GraphicViewer extends JFrame
                 KeyStroke.getKeyStroke(79, 2));
         mainMenuBar.add(editmenu);
 
-        insertmenu.setText("Insert");
+        insertmenu.setText(LanguageManager.getInstance().getString("graphic_viewer.insert"));
         insertmenu.add(InsertStuffAction);
         insertmenu.add(InsertStrokeAction);
         insertmenu.add(InsertPolygonAction);
@@ -3575,7 +3566,7 @@ public class GraphicViewer extends JFrame
         insertmenu.add(AddRightPortAction);
         mainMenuBar.add(insertmenu);
 
-        layoutmenu.setText("Layout");
+        layoutmenu.setText(LanguageManager.getInstance().getString("graphic_viewer.layout"));
         layoutmenu.add(LeftAction);
         layoutmenu.add(HorizontalAction);
         layoutmenu.add(RightAction);
@@ -3672,5 +3663,41 @@ public class GraphicViewer extends JFrame
         obj.paint(g2, view);
         g2.dispose();
         return img;
+    }
+    
+    /**
+     * Refresh the language of all GUI components
+     */
+    public void refreshLanguage() {
+        // Update window title
+        String title = myDoc.getName() + " - " + LanguageManager.getInstance().getString("app.name") + " ( " + this + " )";
+        setTitle(title);
+        
+        // Update menu texts
+        if (filemenu != null) {
+            filemenu.setText(LanguageManager.getInstance().getString("menu.file"));
+        }
+        if (editmenu != null) {
+            editmenu.setText(LanguageManager.getInstance().getString("menu.edit"));
+        }
+        if (insertmenu != null) {
+            insertmenu.setText(LanguageManager.getInstance().getString("menu.insert"));
+        }
+        if (layoutmenu != null) {
+            layoutmenu.setText(LanguageManager.getInstance().getString("menu.layout"));
+        }
+        if (helpmenu != null) {
+            helpmenu.setText(LanguageManager.getInstance().getString("menu.help"));
+        }
+        
+        // Update border title
+        if (myView != null && myView.getBorder() instanceof TitledBorder) {
+            TitledBorder border = (TitledBorder) myView.getBorder();
+            border.setTitle(LanguageManager.getInstance().getString("graphic.zoom") + ": " + (int) (myView.getScale() * 100D) + '%');
+        }
+        
+        // Refresh the entire frame
+        revalidate();
+        repaint();
     }
 }

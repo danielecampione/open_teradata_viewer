@@ -3,7 +3,10 @@
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+        resizeAfterRadio.setText(langManager.getString("grid.afterwards"));
+        resizeJumpRadio.setBounds(new Rectangle(354, 60, 86, 24));
+        resizeJumpRadio.setText(langManager.getString("grid.jump"));
+        resizeJumpRadio.setBounds(new Rectangle(354, 60, 86, 24)); under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -40,6 +43,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 
@@ -48,6 +53,8 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
  *
  */
 public class GridOptionsDialog extends JDialog {
+
+    private final LanguageManager langManager = LanguageManager.getInstance();
 
     private static final long serialVersionUID = 3486810311289326513L;
 
@@ -137,83 +144,84 @@ public class GridOptionsDialog extends JDialog {
                 paperColorButton_actionPerformed(e);
             }
         });
-        moveNoSnapRadio.setText("No snap");
+        moveNoSnapRadio.setText(langManager.getString("grid.no_snap"));
         moveNoSnapRadio.setBounds(new Rectangle(255, 36, 86, 24));
-        moveJumpRadio.setText("Jump");
+        moveJumpRadio.setText(langManager.getString("grid.jump"));
         moveJumpRadio.setBounds(new Rectangle(255, 60, 86, 24));
-        moveAfterRadio.setText("Afterwards");
+        moveAfterRadio.setText(langManager.getString("grid.afterwards"));
         moveAfterRadio.setBounds(new Rectangle(255, 84, 86, 24));
         jLabel2.setBounds(new Rectangle(243, 12, 98, 24));
         jLabel2.setBounds(new Rectangle(339, 13, 98, 24));
-        jLabel2.setText("Snap On Move:");
-        resizeAfterRadio.setText("Afterwards");
+        jLabel2.setText(langManager.getString("grid.snap_on_move"));
+        resizeAfterRadio.setText(langManager.getString("grid.afterwards"));
         resizeAfterRadio.setBounds(new Rectangle(354, 84, 86, 24));
-        resizeJumpRadio.setText("Jump");
+        LanguageManager langManager = LanguageManager.getInstance();
+        resizeJumpRadio.setText(langManager.getString("grid.jump"));
         resizeJumpRadio.setBounds(new Rectangle(354, 60, 86, 24));
-        resizeNoSnapRadio.setText("No snap");
+        resizeNoSnapRadio.setText(langManager.getString("grid.no_snap"));
         resizeNoSnapRadio.setBounds(new Rectangle(354, 36, 86, 24));
-        jLabel3.setText("Snap on Resize:");
+        jLabel3.setText(langManager.getString("grid.snap_on_resize"));
         jLabel3.setBounds(new Rectangle(340, 12, 98, 24));
-        hideDisabledScrollBars.setText("Hide Disabled Scrollbars");
+        hideDisabledScrollBars.setText(langManager.getString("grid.hide_disabled_scrollbars"));
         hideDisabledScrollBars.setBounds(new Rectangle(275, 155, 166, 20));
-        dragEnabled.setText("Drag Enabled");
+        dragEnabled.setText(langManager.getString("grid.drag_enabled"));
         dragEnabled.setBounds(new Rectangle(160, 140, 104, 20));
-        dragsSelectionImage.setText("Drags Selection Image");
+        dragsSelectionImage.setText(langManager.getString("grid.drags_selection_image"));
         dragsSelectionImage.setBounds(new Rectangle(160, 185, 155, 20));
-        dropEnabled.setText("Drop Enabled");
+        dropEnabled.setText(langManager.getString("grid.drop_enabled"));
         dropEnabled.setBounds(new Rectangle(160, 155, 100, 20));
-        dragsRealtime.setText("Drags Realtime");
+        dragsRealtime.setText(langManager.getString("grid.drags_realtime"));
         dragsRealtime.setBounds(new Rectangle(160, 170, 110, 20));
-        includeNegativeCoords.setText("Include Negative Coords");
+        includeNegativeCoords.setText(langManager.getString("grid.include_negative_coords"));
         includeNegativeCoords.setBounds(new Rectangle(275, 140, 157, 20));
-        mouseEnabled.setText("Mouse Enabled");
+        mouseEnabled.setText(langManager.getString("grid.mouse_enabled"));
         mouseEnabled.setBounds(new Rectangle(25, 155, 111, 20));
-        keyEnabled.setText("Key Enabled");
+        keyEnabled.setText(langManager.getString("grid.key_enabled"));
         keyEnabled.setBounds(new Rectangle(25, 140, 98, 20));
         this.setResizable(false);
         getContentPane().add(panel1);
 
-        OKButton.setText("OK");
+        OKButton.setText(langManager.getString("button.ok"));
         OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(185, 228, 79, 22));
-        CancelButton.setText("Cancel");
+        CancelButton.setText(langManager.getString("button.cancel"));
         CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(293, 228, 79, 22));
-        label4.setText("Width:");
+        label4.setText(langManager.getString("label.width"));
         label4.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label4);
         label4.setBounds(new Rectangle(30, 36, 48, 24));
         panel1.add(widthField);
         widthField.setBounds(new Rectangle(90, 36, 36, 24));
-        label1.setText("Height:");
+        label1.setText(langManager.getString("label.height"));
         label1.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label1);
         label1.setBounds(new Rectangle(30, 60, 48, 24));
         panel1.add(heightField);
         heightField.setBounds(new Rectangle(90, 60, 36, 24));
-        gridInvisibleRadio.setText("Invisible");
+        gridInvisibleRadio.setText(langManager.getString("grid.invisible"));
         panel1.add(gridInvisibleRadio);
         gridStyleGroup.add(gridInvisibleRadio);
         gridInvisibleRadio.setBounds(new Rectangle(161, 36, 86, 24));
-        gridDotsRadio.setText("Dots");
+        gridDotsRadio.setText(langManager.getString("grid.dots"));
         gridStyleGroup.add(gridDotsRadio);
         panel1.add(gridDotsRadio);
         gridDotsRadio.setBounds(new Rectangle(161, 60, 86, 24));
-        gridCrossesRadio.setText("Crosses");
+        gridCrossesRadio.setText(langManager.getString("grid.crosses"));
         panel1.add(gridCrossesRadio);
         gridStyleGroup.add(gridCrossesRadio);
         gridCrossesRadio.setBounds(new Rectangle(161, 84, 86, 24));
-        gridLinesRadio.setText("Lines");
+        gridLinesRadio.setText(langManager.getString("grid.lines"));
         panel1.add(gridLinesRadio);
         gridStyleGroup.add(gridLinesRadio);
         gridLinesRadio.setBounds(new Rectangle(161, 108, 86, 24));
-        label2.setText("Grid Style:");
+        label2.setText(langManager.getString("grid.style"));
         panel1.add(label2);
         label2.setBounds(new Rectangle(149, 12, 98, 24));
-        label3.setText("Grid Size:");
+        label3.setText(langManager.getString("grid.size"));
         panel1.add(label3);
         label3.setBounds(new Rectangle(29, 12, 96, 24));
-        paperColorButton.setText("Paper Color...");
+        paperColorButton.setText(langManager.getString("grid.paper_color"));
         moveSnapGroup.add(moveNoSnapRadio);
         panel1.add(moveNoSnapRadio, null);
         moveSnapGroup.add(moveJumpRadio);
@@ -232,15 +240,15 @@ public class GridOptionsDialog extends JDialog {
         paperColorButton.setBounds(new Rectangle(453, 146, 116, 24));
         jLabel2.setBounds(new Rectangle(243, 12, 98, 24));
         jLabel2.setBounds(new Rectangle(243, 12, 98, 24));
-        label5.setText("Default Text Properties:");
+        label5.setText(langManager.getString("grid.default_text_properties"));
         panel1.add(label5);
         label5.setBounds(new Rectangle(445, 12, 130, 24));
-        label6.setText("Default Font Name:");
+        label6.setText(langManager.getString("grid.default_font_name"));
         panel1.add(label6);
         label6.setBounds(new Rectangle(445, 34, 130, 24));
         panel1.add(fontName);
         fontName.setBounds(new Rectangle(445, 58, 130, 24));
-        label7.setText("Default Font Size:");
+        label7.setText(langManager.getString("grid.default_font_size"));
         panel1.add(label7);
         label7.setBounds(new Rectangle(445, 82, 130, 24));
         panel1.add(fontSize);

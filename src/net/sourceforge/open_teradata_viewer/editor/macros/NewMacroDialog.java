@@ -53,6 +53,7 @@ import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.SelectableLabel;
 import net.sourceforge.open_teradata_viewer.util.OTVUtilities;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -98,9 +99,7 @@ public class NewMacroDialog extends EscapableDialog {
 
         Box topPanel = Box.createVerticalBox();
         cp.add(topPanel, BorderLayout.NORTH);
-        String descText = "<html>A macro is a script that can be assigned a shortcut, \r\n"
-                + "and used like any other action in {0}. Support for different scripting \r\n"
-                + "languages may require additional libraries.</html>";
+        String descText = LanguageManager.getInstance().getString("macro.caption");
         descText = MessageFormat.format(descText, Main.APPLICATION_NAME);
         SelectableLabel desc = new SelectableLabel(descText);
         topPanel.add(desc);
@@ -109,21 +108,21 @@ public class NewMacroDialog extends EscapableDialog {
         // Panel for defining the macro
         SpringLayout sl = new SpringLayout();
         JPanel formPanel = new JPanel(sl);
-        JLabel nameLabel = UIUtil.newLabel("Name:");
+        JLabel nameLabel = UIUtil.newLabel(LanguageManager.getInstance().getString("macro.name"));
         nameField = new JTextField(40);
         nameField.getDocument().addDocumentListener(l);
         nameLabel.setLabelFor(nameField);
         nameDIP = new DecorativeIconPanel();
         JPanel namePanel = OTVUtilities.createAssistancePanel(nameField, nameDIP);
-        JLabel descLabel = UIUtil.newLabel("Description:");
+        JLabel descLabel = UIUtil.newLabel(LanguageManager.getInstance().getString("macro.description"));
         descField = new JTextField(40);
         descLabel.setLabelFor(descField);
         JPanel descPanel = OTVUtilities.createAssistancePanel(descField, null);
-        JLabel shortcutLabel = UIUtil.newLabel("Shortcut:");
+        JLabel shortcutLabel = UIUtil.newLabel(LanguageManager.getInstance().getString("macro.shortcut"));
         shortcutField = new KeyStrokeField();
         shortcutLabel.setLabelFor(shortcutField);
         JPanel shortcutPanel = OTVUtilities.createAssistancePanel(shortcutField, null);
-        JLabel typeLabel = UIUtil.newLabel("Type:");
+        JLabel typeLabel = UIUtil.newLabel(LanguageManager.getInstance().getString("macro.type"));
         String[] items = { "Rhino (JavaScript)", "Groovy" };
         typeCombo = new JComboBox(items);
         typeCombo.addActionListener(l);
@@ -155,16 +154,16 @@ public class NewMacroDialog extends EscapableDialog {
         topPanel.add(Box.createVerticalGlue());
 
         // Panel for the buttons
-        okButton = UIUtil.newButton("OK", "O");
+        okButton = UIUtil.newButton(LanguageManager.getInstance().getString("button.ok"), "O");
         okButton.setEnabled(false);
-        cancelButton = UIUtil.newButton("Cancel", "C");
+        cancelButton = UIUtil.newButton(LanguageManager.getInstance().getString("button.cancel"), "C");
         okButton.addActionListener(l);
         cancelButton.addActionListener(l);
         Container buttonPanel = UIUtil.createButtonFooter(okButton, cancelButton);
         cp.add(buttonPanel, BorderLayout.SOUTH);
 
         setContentPane(cp);
-        setTitle("New Macro");
+        setTitle(LanguageManager.getInstance().getString("dialog.new_macro"));
         getRootPane().setDefaultButton(okButton);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setModal(true);

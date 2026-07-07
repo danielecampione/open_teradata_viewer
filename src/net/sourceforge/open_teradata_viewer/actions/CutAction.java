@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -37,9 +38,14 @@ public class CutAction extends CustomAction {
     private static final long serialVersionUID = -4230682183565962640L;
 
     protected CutAction() {
-        super("Cut", "cut.png", KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit
+        super(LanguageManager.getInstance().getString("action.cut"), "cut.png", KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit
                 .getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.cut"));
+        });
     }
 
     @Override

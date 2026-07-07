@@ -108,19 +108,7 @@ public class GraphicViewerTextEdit extends GraphicViewerControl {
 
     public void paint(Graphics2D graphics2d, GraphicViewerView graphicviewerview) {
         JComponent jcomponent = getComponent(graphicviewerview);
-        if (jcomponent != null) {
-            JTextComponent jtextcomponent = getTextComponent(graphicviewerview);
-            if (jtextcomponent != null) {
-                Font font = getTextObject().getFont();
-                if (Math.abs(graphicviewerview.getScale() - 1.0D) >= 0.01D) {
-                    String s = font.getFontName();
-                    int i = font.getSize();
-                    int j = font.getStyle();
-                    font = new Font(s, j,
-                            (int) ((double) i * graphicviewerview.getScale()));
-                }
-                jtextcomponent.setFont(font);
-            }
+        if (jcomponent != null) {            
             Rectangle rectangle = graphicviewerview.getTempRectangle();
             Rectangle rectangle1 = getBoundingRect();
             rectangle.x = rectangle1.x - 4;

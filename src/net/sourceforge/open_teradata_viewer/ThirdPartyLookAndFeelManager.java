@@ -223,10 +223,12 @@ public class ThirdPartyLookAndFeelManager {
         Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
-            InputStream inputStream = new FileInputStream(file);
-            InputSource is = new InputSource(new BufferedReader(new InputStreamReader(inputStream)));
-            is.setEncoding("UTF-8");
-            doc = db.parse(is);
+            try (InputStream inputStream = new FileInputStream(file);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                InputSource is = new InputSource(reader);
+                is.setEncoding("UTF-8");
+                doc = db.parse(is);
+            }
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception e) {

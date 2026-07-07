@@ -78,8 +78,11 @@ public abstract class CustomAction extends AbstractAction implements MouseListen
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2 && e.getSource() instanceof JList) {
             Container container = (Container) e.getSource();
-            while (!(container instanceof JOptionPane)) {
+            while (container != null && !(container instanceof JOptionPane)) {
                 container = container.getParent();
+            }
+            if (container == null) {
+                return;
             }
             JOptionPane optionPane = (JOptionPane) container;
             Object value = optionPane.getInitialValue();
@@ -87,10 +90,12 @@ public abstract class CustomAction extends AbstractAction implements MouseListen
                 value = JOptionPane.OK_OPTION;
             }
             optionPane.setValue(value);
-            while (!(container instanceof JDialog)) {
+            while (container != null && !(container instanceof JDialog)) {
                 container = container.getParent();
             }
-            container.setVisible(false);
+            if (container != null) {
+                container.setVisible(false);
+            }
         }
     }
 

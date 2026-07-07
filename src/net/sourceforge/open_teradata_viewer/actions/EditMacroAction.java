@@ -31,8 +31,10 @@ import javax.swing.ListSelectionModel;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
 import net.sourceforge.open_teradata_viewer.editor.macros.MacroManager;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -45,28 +47,45 @@ public class EditMacroAction extends CustomAction {
     private static final long serialVersionUID = -5849819778035858039L;
 
     protected EditMacroAction() {
-        super("Edit macros...");
+        super(LanguageManager.getInstance().getString("menu.macros.edit"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.macros.edit"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         Iterator<Macro> macros = MacroManager.get().getMacroIterator();
-        Vector<Macro> vectorMacro = new Vector<Macro>(1, 1);
+        final Vector<Macro> vectorMacro = new Vector<Macro>(1, 1);
         while (macros.hasNext()) {
             vectorMacro.add(macros.next());
         }
 
-        final JList<?> list = new JList(vectorMacro);
-        list.addMouseListener(this);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        Object value = Dialog.show("Macros", new JScrollPane(list), Dialog.PLAIN_MESSAGE,
-                new Object[] { "Edit the script path..." }, "Edit");
-        if ("Edit the script path...".equals(value)) {
-            if (!list.isSelectionEmpty()) {
-                Macro macro = vectorMacro.get(list.getSelectedIndex());
-                setTheScriptPath(macro);
-            }
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    final JList<?> list = new JList(vectorMacro);
+                    list.addMouseListener(EditMacroAction.this);
+                    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                    LanguageManager langManager = LanguageManager.getInstance();
+                    Object value = Dialog.show(langManager.getString("dialog.macros"),
+                            new JScrollPane(list), Dialog.PLAIN_MESSAGE,
+                            new Object[]{"button.edit_script_path"},
+                            "button.edit_script_path");
+                    if (langManager.getString("button.edit_script_path").equals(value)) {
+                        if (!list.isSelectionEmpty()) {
+                            Macro macro = vectorMacro.get(list.getSelectedIndex());
+                            setTheScriptPath(macro);
+                        }
+                    }
+                }
+            });
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            ExceptionDialog.hideException(ite);
         }
     }
 
@@ -78,27 +97,27 @@ public class EditMacroAction extends CustomAction {
         String currentFile = macro.getFile();
         File file = new File(currentFile);
         if (file.isFile()) { // Should always be true
-            String scriptFullPath = JOptionPane.showInputDialog("Enter the absolute path of the macro script file:",
-                    currentFile);
+            LanguageManager langManager = LanguageManager.getInstance();
+            String scriptFullPath = JOptionPane.showInputDialog(
+                    langManager.getString("message.enter_script_path"), currentFile);
             if (scriptFullPath == null || scriptFullPath.trim().length() == 0) {
                 return;
             }
             file = new File(scriptFullPath);
             if (file.isFile()) {
                 macro.setFile(scriptFullPath);
-
-                text = "The path of the script of the macro {0} has been modified.";
+                text = langManager.getString("message.macro_path_modified");
                 text = MessageFormat.format(text, macro.getName());
             } else {
                 return;
             }
         } else { // Macro script was deleted outside of Open Teradata Viewer
-            text = "Error: macro script file does not exist:\n{0}";
+            text = LanguageManager.getInstance().getString("message.macro_script_not_exist");
             text = MessageFormat.format(text, file.getAbsolutePath());
             messageType = JOptionPane.ERROR_MESSAGE;
         }
 
-        String title = "Information";
+        String title = LanguageManager.getInstance().getString("dialog.information");
         JOptionPane.showMessageDialog(ApplicationFrame.getInstance(), text, title, messageType);
     }
 }

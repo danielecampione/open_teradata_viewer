@@ -30,6 +30,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ShowProcedureValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -44,20 +45,22 @@ public class ShowProcedureAction extends ShowObjectAction {
     private static final long serialVersionUID = -603744266487784355L;
 
     protected ShowProcedureAction() {
-        super("Show procedure");
+    	super(LanguageManager.getInstance().getString("action.show.procedure"));
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.show.procedure"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("NOT connected.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -66,13 +69,11 @@ public class ShowProcedureAction extends ShowObjectAction {
         boolean firstIteration = true;
         while (procedureName == null) {
             if (firstIteration) {
-                procedureName = ApplicationFrame.getInstance()
-                        .getTextComponent().getSelectedText();
+                procedureName = ApplicationFrame.getInstance().getTextComponent().getSelectedText();
                 firstIteration = false;
             }
             if (procedureName == null) {
-                procedureName = Dialog
-                        .showInputDialog("Insert the procedure name: ");
+                procedureName = Dialog.showInputDialog("Insert the procedure name: ");
                 if (procedureName == null) {
                     return;
                 }
@@ -85,25 +86,20 @@ public class ShowProcedureAction extends ShowObjectAction {
         procedureName = procedureName.trim().toUpperCase();
         int lastTokenIndex = procedureName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
-            databaseName = procedureName
-                    .substring(
-                            procedureName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
-                                    : procedureName.lastIndexOf(".",
-                                            lastTokenIndex - 1), lastTokenIndex);
-            procedureName = procedureName.substring(lastTokenIndex + 1,
-                    procedureName.length());
+            databaseName = procedureName.substring(
+                    procedureName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
+                            : procedureName.lastIndexOf(".", lastTokenIndex - 1),
+                    lastTokenIndex);
+            procedureName = procedureName.substring(lastTokenIndex + 1, procedureName.length());
         }
         String sqlQuery = getSQLQueryToShowObject(
                 new ShowProcedureValidationStrategy(),
-                ((databaseName != null && databaseName.trim().length() > 0) ? databaseName
-                        + "."
-                        : "")
+                ((databaseName != null && databaseName.trim().length() > 0)
+                        ? databaseName + "." : "")
                         + procedureName);
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData()
-                .getConnection();
-        final PreparedStatement statement = connection
-                .prepareStatement(sqlQuery);
+        Connection connection = Context.getInstance().getConnectionData().getConnection();
+        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -114,31 +110,32 @@ public class ShowProcedureAction extends ShowObjectAction {
                 }
             }
         };
-        WaitingDialog waitingDialog = null;
+        WaitingDialog waitingDialog;
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
             ExceptionDialog.ignoreException(ie);
+            return;
         }
-        waitingDialog.setText("Executing statement..");
+        waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
         try {
             resultSet = statement.executeQuery();
+            StringBuilder procedureBody = new StringBuilder();
+            while (resultSet.next()) {
+                Object obj = resultSet.getString(1);
+                if (obj == null) {
+                    throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000", 1048);
+                } else if (obj instanceof String) {
+                    procedureBody.append(obj.toString());
+                }
+            }
+            ApplicationFrame.getInstance().setText(StringUtil.conformize(procedureBody.toString()));
         } finally {
             waitingDialog.hide();
-        }
-        String procedureBody = "";
-        while (resultSet.next()) {
-            Object obj = resultSet.getString(1);
-            if (obj == null) {
-                throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
-                        1048);
-            } else if (obj instanceof String) {
-                procedureBody += obj.toString();
+            if (resultSet != null) {
+                resultSet.close();
             }
+            statement.close();
         }
-        ApplicationFrame.getInstance().setText(
-                StringUtil.conformize(procedureBody));
-        statement.close();
-        resultSet.close();
     }
 }

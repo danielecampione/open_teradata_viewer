@@ -24,6 +24,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,8 +37,13 @@ public class ViewLineHighlightAction extends CustomAction {
     private static final long serialVersionUID = -4480895088251600434L;
 
     public ViewLineHighlightAction() {
-        super("Current line highlight");
+        super(LanguageManager.getInstance().getString("action.current_line_highlight"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.current_line_highlight"));
+        });
     }
 
     @Override

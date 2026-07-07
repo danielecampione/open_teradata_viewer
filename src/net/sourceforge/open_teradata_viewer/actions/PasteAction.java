@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -37,9 +38,14 @@ public class PasteAction extends CustomAction {
     private static final long serialVersionUID = 1283253040048584249L;
 
     protected PasteAction() {
-        super("Paste", "paste.png", KeyStroke.getKeyStroke(KeyEvent.VK_V,
+        super(LanguageManager.getInstance().getString("action.paste"), "paste.png", KeyStroke.getKeyStroke(KeyEvent.VK_V,
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.paste"));
+        });
     }
 
     @Override

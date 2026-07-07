@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles whether the description window is visible.
@@ -34,8 +35,13 @@ public class ShowDescriptionWindowAction extends CustomAction {
     private static final long serialVersionUID = 2674349284230159288L;
 
     public ShowDescriptionWindowAction() {
-        super("Show Description Window");
+        super(LanguageManager.getInstance().getString("menu.view.show_description_window"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.view.show_description_window"));
+        });
     }
 
     @Override

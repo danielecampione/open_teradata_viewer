@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles the matched bracket popup window.
@@ -34,8 +35,13 @@ public class MatchedBracketPopupAction extends CustomAction {
 	private static final long serialVersionUID = 1054202978350180816L;
 
 	public MatchedBracketPopupAction() {
-        super("Matched Bracket Popup");
+        super(LanguageManager.getInstance().getString("menu.view.matched_bracket_popup"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.view.matched_bracket_popup"));
+        });
     }
 
     @Override

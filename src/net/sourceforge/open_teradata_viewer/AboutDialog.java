@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -59,7 +60,9 @@ import org.fife.rsta.ac.java.buildpath.JarLibraryInfo;
 import org.fife.rsta.ac.java.buildpath.LibraryInfo;
 import org.fife.rsta.ac.perl.PerlLanguageSupport;
 
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * The "About" dialog for the application.
@@ -71,165 +74,254 @@ public class AboutDialog extends JDialog implements MouseListener {
 
     private static final long serialVersionUID = 5497242522081970155L;
 
-    private final Border empty5Border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+    private final Border empty5Border = BorderFactory.createEmptyBorder(
+            SwingUtil.scale(5), SwingUtil.scale(5), SwingUtil.scale(5), SwingUtil.scale(5));
 
     public AboutDialog(ApplicationFrame parent) {
         super(parent);
+        initializeDialog();
+    }
+    
+    /** Initializes the dialog components and layout. */
+    private void initializeDialog() {
+        LanguageManager langManager = LanguageManager.getInstance();
+        
+        setTitle(langManager.getString("dialog.about") + " " + Main.APPLICATION_NAME);
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setModal(true);
+        
+        JPanel contentPanel = createContentPanel(langManager);
+        setContentPane(contentPanel);
+        
+        pack();
+        
+        setMinimumSize(new Dimension(Math.max(getWidth() + 50, 500), 
+                                             Math.max(getHeight() + 30, 400)));
+    }
+    
+    /** Creates the main content panel for the dialog. */
+    private JPanel createContentPanel(LanguageManager langManager) {
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        
+        Box mainBox = Box.createVerticalBox();
+        
+        // Add header section
+        mainBox.add(createHeaderSection(langManager));
+        mainBox.add(Box.createVerticalStrut(5));
+        
+        // Add system information section
+        mainBox.add(createSystemInfoSection(langManager));
+        
+        // Add database information section if connected
+        JPanel dbInfoPanel = createDatabaseInfoSection();
+        if (dbInfoPanel != null) {
+            mainBox.add(dbInfoPanel);
+        }
+        
+        mainBox.add(Box.createVerticalGlue());
+        
+        contentPanel.add(mainBox, BorderLayout.NORTH);
+        contentPanel.add(createButtonPanel(langManager), BorderLayout.SOUTH);
+        
+        return contentPanel;
+    }
+    
+    /** Creates the header section with application name and description. */
+    private JPanel createHeaderSection(LanguageManager langManager) {
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setOpaque(true);
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(new TopBorder());
 
-        JPanel cp = new JPanel(new BorderLayout());
+        // Application name label
+        JLabel nameLabel = new JLabel(Main.APPLICATION_NAME);
+        nameLabel.setOpaque(true);
+        nameLabel.setBackground(Color.WHITE);
+        Font labelFont = nameLabel.getFont();
+        nameLabel.setFont(labelFont.deriveFont(Font.BOLD, 20));
+        addLeftAligned(nameLabel, headerPanel);
+        headerPanel.add(Box.createVerticalStrut(5));
 
-        Box box = Box.createVerticalBox();
-
-        // Don't use a Box, as some JVM's won't have the resulting component
-        // honor its opaque property
-        JPanel box2 = new JPanel();
-        box2.setLayout(new BoxLayout(box2, BoxLayout.Y_AXIS));
-        box2.setOpaque(true);
-        box2.setBackground(Color.white);
-        box2.setBorder(new TopBorder());
-
-        JLabel label = new JLabel(Main.APPLICATION_NAME);
-        label.setOpaque(true);
-        label.setBackground(Color.white);
-        Font labelFont = label.getFont();
-        label.setFont(labelFont.deriveFont(Font.BOLD, 20));
-        addLeftAligned(label, box2);
-        box2.add(Box.createVerticalStrut(5));
-
+        // Description text area
+        JTextArea descriptionArea = createDescriptionArea(langManager, labelFont);
+        headerPanel.add(descriptionArea);
+        
+        return headerPanel;
+    }
+    
+    /** Creates the description text area. */
+    private JTextArea createDescriptionArea(LanguageManager langManager, Font baseFont) {
         JTextArea textArea = new JTextArea(6, 60);
-        // Windows LAF picks a bad font for text areas, for some reason
-        textArea.setFont(labelFont);
+        textArea.setFont(baseFont);
+        
         try {
-            textArea.setText("Version " + Config.getVersion() + "\n\n"
-                    + "A database administration tool, suitable as front-end for your Teradata "
-                    + "relational database. Used to easily query, update and administer your "
-                    + "database, create reports and synchronize data.\n\n"
-                    + "Note that some features for some languages may not work unless your system "
-                    + "is set up properly.\nFor example, Java code completion requries a JRE on "
-                    + "your PATH and Perl completion requires the Perl executable to be on your " + "PATH.");
+            textArea.setText(String.format(langManager.getString("about.description"), 
+                    Config.getVersion()));
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }
+        
         textArea.setEditable(false);
-        textArea.setBackground(Color.white);
+        textArea.setBackground(Color.WHITE);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setBorder(null);
-        box2.add(textArea);
-
-        box.add(box2);
-        box.add(Box.createVerticalStrut(5));
-
-        SpringLayout sl = new SpringLayout();
-        JPanel temp = new JPanel(sl);
-        JLabel copyrightLabel = new JLabel(
-                "<html><font style=\"color:gray\">Copyright &copy 2019 D. Campione</font></html>");
-        JLabel licenseLabel = new JLabel("GNU General Public License");
-        licenseLabel.setForeground(Color.BLUE);
-        licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        licenseLabel.addMouseListener(this);
-        JLabel homePageLabel = new JLabel(Config.HOME_PAGE);
-        homePageLabel.setForeground(Color.BLUE);
-        homePageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        homePageLabel.addMouseListener(this);
-        JLabel javaVMLabel = new JLabel("Java VM: ");
+        
+        return textArea;
+    }
+    
+    /** Creates the system information section. */
+    private JPanel createSystemInfoSection(LanguageManager langManager) {
+        SpringLayout springLayout = new SpringLayout();
+        JPanel systemPanel = new JPanel(springLayout);
+        
+        // Create labels and fields
+        JLabel copyrightLabel = new JLabel(String.format(
+                "<html><font style=\"color:gray\">%s</font></html>", 
+                langManager.getString("about.copyright")));
+        
+        JLabel licenseLabel = createClickableLabel(langManager.getString("about.license"));
+        licenseLabel.setName("license");
+        JLabel homePageLabel = createClickableLabel(Config.HOME_PAGE);
+        
+        JLabel javaVMLabel = new JLabel(langManager.getString("about.java_vm"));
         JTextField javaVMField = createTextField(System.getProperty("java.version"));
-        JLabel perlLabel = new JLabel("Perl install location:");
-        File loc = PerlLanguageSupport.getDefaultPerlInstallLocation();
-        String text = loc == null ? null : loc.getAbsolutePath();
-        JTextField perlField = createTextField(text);
-        JLabel javaLabel = new JLabel("Java home:");
-        String jre = null;
+        
+        JLabel perlLabel = new JLabel(langManager.getString("about.perl_location"));
+        File perlLocation = PerlLanguageSupport.getDefaultPerlInstallLocation();
+        String perlPath = perlLocation == null ? null : perlLocation.getAbsolutePath();
+        JTextField perlField = createTextField(perlPath);
+        
+        JLabel javaLabel = new JLabel(langManager.getString("about.java_home"));
+        JTextField javaField = createTextField(getJavaHomePath());
+
+        // Add components based on orientation
+        addSystemInfoComponents(systemPanel, copyrightLabel, licenseLabel, homePageLabel,
+                javaVMLabel, javaVMField, perlLabel, perlField, javaLabel, javaField);
+        
+        makeSpringCompactGrid(systemPanel, 6, 2, 5, 5, 15, 5);
+        
+        return systemPanel;
+    }
+    
+    /** Creates a clickable label with hand cursor. */
+    private JLabel createClickableLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(Color.BLUE);
+        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        label.addMouseListener(this);
+        return label;
+    }
+    
+    /** Gets the Java home path from library info. */
+    private String getJavaHomePath() {
         LibraryInfo info = LibraryInfo.getMainJreJarInfo();
-        if (info != null) { // Should always be true
+        if (info != null) {
             File jarFile = ((JarLibraryInfo) info).getJarFile();
-            jre = jarFile.getParentFile().getParentFile().getAbsolutePath();
+            return jarFile.getParentFile().getParentFile().getAbsolutePath();
         }
-        JTextField javaField = createTextField(jre);
-
+        return null;
+    }
+    
+    /** Adds system information components to the panel based on orientation. */
+    private void addSystemInfoComponents(JPanel panel, JLabel copyrightLabel, JLabel licenseLabel,
+            JLabel homePageLabel, JLabel javaVMLabel, JTextField javaVMField, JLabel perlLabel,
+            JTextField perlField, JLabel javaLabel, JTextField javaField) {
+        
         if (getComponentOrientation().isLeftToRight()) {
-            temp.add(copyrightLabel);
-            temp.add(new JLabel());
-            temp.add(licenseLabel);
-            temp.add(new JLabel());
-            temp.add(homePageLabel);
-            temp.add(new JLabel());
-            temp.add(javaVMLabel);
-            temp.add(javaVMField);
-            temp.add(perlLabel);
-            temp.add(perlField);
-            temp.add(javaLabel);
-            temp.add(javaField);
+            panel.add(copyrightLabel);
+            panel.add(new JLabel());
+            panel.add(licenseLabel);
+            panel.add(new JLabel());
+            panel.add(homePageLabel);
+            panel.add(new JLabel());
+            panel.add(javaVMLabel);
+            panel.add(javaVMField);
+            panel.add(perlLabel);
+            panel.add(perlField);
+            panel.add(javaLabel);
+            panel.add(javaField);
         } else {
-            temp.add(new JLabel());
-            temp.add(copyrightLabel);
-            temp.add(new JLabel());
-            temp.add(licenseLabel);
-            temp.add(new JLabel());
-            temp.add(homePageLabel);
-            temp.add(javaVMField);
-            temp.add(javaVMLabel);
-            temp.add(perlField);
-            temp.add(perlLabel);
-            temp.add(javaField);
-            temp.add(javaLabel);
+            panel.add(new JLabel());
+            panel.add(copyrightLabel);
+            panel.add(new JLabel());
+            panel.add(licenseLabel);
+            panel.add(new JLabel());
+            panel.add(homePageLabel);
+            panel.add(javaVMField);
+            panel.add(javaVMLabel);
+            panel.add(perlField);
+            panel.add(perlLabel);
+            panel.add(javaField);
+            panel.add(javaLabel);
         }
-        makeSpringCompactGrid(temp, 6, 2, 5, 5, 15, 5);
-        box.add(temp);
-
-        temp = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(2, 2, 2, 2);
-        c.gridwidth = 2;
-        c.anchor = GridBagConstraints.SOUTHWEST;
+    }
+    
+    /** Creates the database information section if connected. */
+    private JPanel createDatabaseInfoSection() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        if (isConnected) {
-            try {
-                DatabaseMetaData metaData = Context.getInstance().getConnectionData().getConnection().getMetaData();
-                c.gridy++;
-                temp.add(new JLabel("Database: "), c);
-                temp.add(createTextField(metaData.getDatabaseProductName()), c);
-                c.gridy++;
-                temp.add(new JLabel(""), c);
-                String databaseProductVersion = metaData.getDatabaseProductVersion().replaceAll("\n", "<br>");
-                temp.add(new JLabel(String.format("<html>%s</html>", databaseProductVersion)), c);
-                c.gridy++;
-                temp.add(new JLabel("Driver: "), c);
-                temp.add(createTextField(metaData.getDriverName()), c);
-                c.gridy++;
-                temp.add(new JLabel(""), c);
-                temp.add(createTextField(metaData.getDriverVersion()), c);
-            } catch (Throwable t) {
-                ExceptionDialog.hideException(t);
-            }
-            box.add(temp);
+        if (!isConnected) {
+            return null;
         }
-
-        box.add(Box.createVerticalGlue());
-
-        cp.add(box, BorderLayout.NORTH);
-
-        JButton okButton = new JButton("OK");
-        okButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-                dispose();
-            }
-
+        
+        JPanel dbPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(2, 2, 2, 2);
+        constraints.gridwidth = 2;
+        constraints.anchor = GridBagConstraints.SOUTHWEST;
+        
+        try {
+            DatabaseMetaData metaData = Context.getInstance().getConnectionData()
+                    .getConnection().getMetaData();
+            
+            addDatabaseInfo(dbPanel, constraints, metaData);
+        } catch (Throwable t) {
+            ExceptionDialog.hideException(t);
+        }
+        
+        return dbPanel;
+    }
+    
+    /** Adds database information to the panel. */
+    private void addDatabaseInfo(JPanel panel, GridBagConstraints constraints, 
+            DatabaseMetaData metaData) throws Exception {
+        
+        LanguageManager langManager = LanguageManager.getInstance();
+        
+        constraints.gridy++;
+        panel.add(new JLabel(langManager.getString("label.database") + ": "), constraints);
+        panel.add(createTextField(metaData.getDatabaseProductName()), constraints);
+        
+        constraints.gridy++;
+        panel.add(new JLabel(""), constraints);
+        String databaseVersion = metaData.getDatabaseProductVersion().replaceAll("\n", "<br>");
+        panel.add(new JLabel(String.format("<html>%s</html>", databaseVersion)), constraints);
+        
+        constraints.gridy++;
+        panel.add(new JLabel(langManager.getString("label.driver") + ": "), constraints);
+        panel.add(createTextField(metaData.getDriverName()), constraints);
+        
+        constraints.gridy++;
+        panel.add(new JLabel(""), constraints);
+        panel.add(createTextField(metaData.getDriverVersion()), constraints);
+    }
+    
+    /** Creates the button panel with OK button. */
+    private JPanel createButtonPanel(LanguageManager langManager) {
+        JButton okButton = new JButton(langManager.getString("button.ok"));
+        okButton.addActionListener(e -> {
+            setVisible(false);
+            dispose();
         });
-        temp = new JPanel(new BorderLayout());
-        temp.setBorder(empty5Border);
-        temp.add(okButton, BorderLayout.LINE_END);
-        cp.add(temp, BorderLayout.SOUTH);
-
+        
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setBorder(empty5Border);
+        buttonPanel.add(okButton, BorderLayout.LINE_END);
+        
         getRootPane().setDefaultButton(okButton);
-        setTitle("About " + Main.APPLICATION_NAME);
-        setContentPane(cp);
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setModal(true);
-        pack();
+        
+        return buttonPanel;
     }
 
     private JPanel addLeftAligned(Component toAdd, Container addTo) {
@@ -366,26 +458,40 @@ public class AboutDialog extends JDialog implements MouseListener {
         if (me.getSource() instanceof JLabel) {
             JLabel label = (JLabel) me.getSource();
             try {
-                if (label.getText().startsWith("GNU")) {
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    InputStream in = Config.class.getResourceAsStream("/license.txt");
-                    byte[] bytes = new byte[1024];
-                    int length = in.read(bytes);
-                    while (length != -1) {
-                        out.write(bytes, 0, length);
-                        length = in.read(bytes);
-                    }
-                    in.close();
-                    JTextArea textArea = new JTextArea(new String(out.toByteArray()));
-                    textArea.setEditable(false);
-                    JScrollPane scrollPane = new JScrollPane(textArea);
-                    Dialog.show("License", scrollPane, Dialog.PLAIN_MESSAGE, Dialog.DEFAULT_OPTION);
+                if ("license".equals(label.getName())) {
+                    showLicenseDialog();
                 } else {
                     Utilities.openURLWithDefaultBrowser(label.getText());
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 ExceptionDialog.showException(e);
             }
+        }
+    }
+    
+    /** Shows the license dialog with proper resource management. */
+    private void showLicenseDialog() throws IOException {
+        try (InputStream in = Config.class.getResourceAsStream("/license.txt");
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            
+            if (in == null) {
+                throw new IOException("License file not found");
+            }
+            
+            byte[] buffer = new byte[8192]; // Increased buffer size for better performance
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+            
+            JTextArea textArea = new JTextArea(new String(out.toByteArray(), "UTF-8"));
+            textArea.setEditable(false);
+            
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new java.awt.Dimension(600, 400));
+            
+            Dialog.show(LanguageManager.getInstance().getString("dialog.license"), 
+                       scrollPane, Dialog.PLAIN_MESSAGE, Dialog.DEFAULT_OPTION);
         }
     }
 

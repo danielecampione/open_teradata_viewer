@@ -25,6 +25,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,9 +37,14 @@ public class WordWrapAction extends CustomAction {
 
     private static final long serialVersionUID = 2264574455974763739L;
 
-    public WordWrapAction() {
-        super("Word wrap");
+    public WordWrapAction() {       
+        super(LanguageManager.getInstance().getString("action.word_wrap"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.word_wrap"));
+        });
     }
 
     @Override

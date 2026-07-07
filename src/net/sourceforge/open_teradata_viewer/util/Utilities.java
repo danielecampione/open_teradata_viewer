@@ -35,6 +35,9 @@ import java.io.ObjectStreamClass;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.AccessControlException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +48,7 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.swing.JComboBox;
 import javax.swing.ListCellRenderer;
@@ -112,6 +116,8 @@ public class Utilities {
 
     private static final boolean useSubstanceRenderers;
 
+    private static final java.util.Set<Character> TERADATA_LEGAL_CHAR_SET = new java.util.HashSet<>();
+
     static {
         try {
             teradataReservedWords.setText(
@@ -125,13 +131,16 @@ public class Utilities {
             ExceptionDialog.hideException(ioe);
         }
 
-        // Space padding is most common, start with 64 chars
+        for (String s : teradataLegalChars) {
+            TERADATA_LEGAL_CHAR_SET.add(s.charAt(0));
+        }
+
         PADDING[32] = " ";
 
         boolean use = true;
         try {
             use = !Boolean.getBoolean(PROPERTY_DONT_USE_SUBSTANCE_RENDERERS);
-        } catch (AccessControlException ace) { // We're in an applet
+        } catch (AccessControlException ace) {
             use = true;
         }
         useSubstanceRenderers = use;
@@ -362,28 +371,24 @@ public class Utilities {
     public static Object cloneObject(Object toClone, final ClassLoader classLoader) {
         if (null == toClone) {
             return null;
-        } else {
-            try {
-                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+        }
+        try {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            try (ObjectOutputStream oOut = new ObjectOutputStream(bOut)) {
                 oOut.writeObject(toClone);
-                oOut.close();
-                ByteArrayInputStream bIn = new ByteArrayInputStream(bOut.toByteArray());
-                bOut.close();
-                ObjectInputStream oIn = new ObjectInputStream(bIn) {
-                    @Override
-                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                        return Class.forName(desc.getName(), false, classLoader);
-                    }
-                };
-                bIn.close();
-                Object copy = oIn.readObject();
-                oIn.close();
-
-                return copy;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+            try (ObjectInputStream oIn = new ObjectInputStream(
+                    new ByteArrayInputStream(bOut.toByteArray())) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc)
+                        throws IOException, ClassNotFoundException {
+                    return Class.forName(desc.getName(), false, classLoader);
+                }
+            }) {
+                return oIn.readObject();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -448,26 +453,17 @@ public class Utilities {
 
     public static boolean canBeATeradataObjectName(String text) {
         if (!isEmpty(text) && text.trim().length() > 0) {
-            text = text.trim();
-            // A Teradata object name must be from 1 to 30 characters long
+            text = text.trim().toUpperCase();
             int lastTokenIndex = text.lastIndexOf(".");
-            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1, text.length()).length() > 30) {
+            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
+                    text.length()).length() > 30) {
                 ApplicationFrame.getInstance().getConsole().println(
                         "A Teradata object name must be from 1 to 30 characters long.",
                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             }
-            int numRetries;
             for (int i = 0; i < text.length(); i++) {
-                numRetries = 0;
-                for (int j = 0; j < teradataLegalChars.length; j++) {
-                    if (text.toUpperCase().charAt(i) != teradataLegalChars[j].charAt(0)) {
-                        numRetries++;
-                    } else {
-                        break;
-                    }
-                }
-                if (numRetries == teradataLegalChars.length) {
+                if (!TERADATA_LEGAL_CHAR_SET.contains(text.charAt(i))) {
                     ApplicationFrame.getInstance().getConsole().println(
                             "You're trying to perform a SQL command using an illegal character.",
                             ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
@@ -483,10 +479,10 @@ public class Utilities {
                     return false;
                 }
             }
-            // A Teradata object name cannot be a number
             try {
                 Double.parseDouble(text);
-                ApplicationFrame.getInstance().getConsole().println("A Teradata object name cannot be a number.",
+                ApplicationFrame.getInstance().getConsole().println(
+                        "A Teradata object name cannot be a number.",
                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             } catch (NumberFormatException nfe) {
@@ -759,9 +755,15 @@ public class Utilities {
                     // Otherwise it is assumed it is a Unix or Linux
                     String browser = null;
                     for (String b : browsers) {
-                        if ((browser == null) && (Runtime.getRuntime().exec(new String[] { "which", b })
-                                .getInputStream().read() != -1)) {
-                            Runtime.getRuntime().exec(new String[] { browser = b, url });
+                        if (browser == null) {
+                            try (InputStream is = Runtime.getRuntime().exec(new String[] { "which", b }).getInputStream()) {
+                                if (is.read() != -1) {
+                                    browser = b;
+                                    Runtime.getRuntime().exec(new String[] { browser, url });
+                                }
+                            } catch (IOException ioe) {
+                                // Browser not found, continue to next
+                            }
                         }
                     }
                     if (browser == null) {
@@ -775,61 +777,28 @@ public class Utilities {
     }
 
     public static void writeLocallyJARInternalFile(String relativeFileName) {
-        if (relativeFileName.contains(File.separator)) {
-            String suppRelativeFileName = File.separator + relativeFileName;
-            StringTokenizer relativePath = new StringTokenizer(suppRelativeFileName, File.separator);
-            File folder = new File(
-                    normalizePath(System.getProperty("java.io.tmpdir")) + relativePath.nextElement().toString());
-            if (!folder.exists()) {
-                folder.mkdir();
-                folder.deleteOnExit();
-            }
-            for (int i = 0; i < relativePath.countTokens() - 1; i++) {
-                folder = new File(folder.getAbsolutePath() + File.separator + relativePath.nextElement().toString());
-                if (!folder.exists()) {
-                    folder.mkdir();
-                    folder.deleteOnExit();
+        try {
+            Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"));
+            Path targetPath = tmpDir.resolve(relativeFileName);
+            
+            // Create parent directories if needed
+            Files.createDirectories(targetPath.getParent());
+            
+            // Copy resource to target file using try-with-resources
+            try (InputStream in = Utilities.class.getResourceAsStream("/" + relativeFileName.replaceAll("\\\\", "/"))) {
+                if (in != null) {
+                    Files.copy(in, targetPath);
+                    targetPath.toFile().deleteOnExit();
                 }
             }
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        InputStream in = Utilities.class.getResourceAsStream("/" + relativeFileName.replaceAll("\\\\", "/"));
-        byte[] bytes = new byte[1024];
-        int length;
-        try {
-            length = in.read(bytes);
-            while (length != -1) {
-                out.write(bytes, 0, length);
-                length = in.read(bytes);
-            }
-            in.close();
         } catch (IOException e) {
             UISupport.getDialogs().showErrorMessage(e.getMessage());
-        }
-
-        File localLicenseFile = new File(normalizePath(System.getProperty("java.io.tmpdir")) + relativeFileName);
-        localLicenseFile.deleteOnExit();
-        FileOutputStream fileOutputStream;
-        try {
-            fileOutputStream = new FileOutputStream(localLicenseFile);
-            fileOutputStream.write(out.toByteArray());
-        } catch (FileNotFoundException fnfe) {
-            UISupport.getDialogs().showErrorMessage(fnfe.getMessage());
-        } catch (IOException ioe) {
-            UISupport.getDialogs().showErrorMessage(ioe.getMessage());
         }
     }
 
     public static File[] listFiles(File directory) {
-        // This filter only returns directories
-        FileFilter fileFilter = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return !file.isDirectory();
-            }
-        };
-        File[] files = directory.listFiles(fileFilter);
-        return files;
+        // This filter only returns files (not directories) using lambda expression
+        return directory.listFiles(file -> !file.isDirectory());
     }
 
     public static int getOccurancesCount(String str, String findStr) {

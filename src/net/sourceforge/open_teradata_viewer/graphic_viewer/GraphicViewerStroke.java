@@ -177,10 +177,12 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                     if (point7 != null && point9 != null) {
                         calculateFilledArrowhead(point7.x, point7.y, point9.x,
                                 point9.y, 1, ai, ai1);
+                        StringBuilder sb4 = new StringBuilder(s4);
                         for (int l1 = 0; l1 < ai.length; l1++) {
-                            s4 = s4 + " " + Integer.toString(ai[l1]) + " "
-                                    + Integer.toString(ai1[l1]);
+                            sb4.append(" ").append(ai[l1]).append(" ")
+                                    .append(ai1[l1]);
                         }
+                        s4 = sb4.toString();
 
                         domelement4.setAttribute("points", s4);
                     }
@@ -193,10 +195,12 @@ public class GraphicViewerStroke extends GraphicViewerDrawable {
                     if (point8 != null && point10 != null) {
                         calculateFilledArrowhead(point8.x, point8.y, point10.x,
                                 point10.y, 0, ai, ai1);
+                        StringBuilder sb5 = new StringBuilder(s5);
                         for (int i2 = 0; i2 < ai.length; i2++) {
-                            s5 = s5 + " " + Integer.toString(ai[i2]) + " "
-                                    + Integer.toString(ai1[i2]);
+                            sb5.append(" ").append(ai[i2]).append(" ")
+                                    .append(ai1[i2]);
                         }
+                        s5 = sb5.toString();
 
                         domelement5.setAttribute("points", s5);
                     }

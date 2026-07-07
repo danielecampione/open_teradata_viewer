@@ -35,6 +35,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 
@@ -103,15 +105,16 @@ public class ObjectPropsDialog extends JDialog {
         this.setResizable(false);
         getContentPane().add(panel1);
 
-        OKButton.setText("OK");
+        LanguageManager langManager = LanguageManager.getInstance();
+        OKButton.setText(langManager.getString("button.ok"));
         panel1.add(OKButton);
         OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(60, 204, 79, 22));
-        CancelButton.setText("Cancel");
+        CancelButton.setText(langManager.getString("button.cancel"));
         panel1.add(CancelButton);
         CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(168, 204, 79, 22));
-        label1.setText("Height:");
+        label1.setText(langManager.getString("label.height") + ":");
         label1.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label1);
         label1.setBounds(new Rectangle(132, 60, 48, 24));
@@ -129,19 +132,19 @@ public class ObjectPropsDialog extends JDialog {
         label3.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label3);
         label3.setBounds(new Rectangle(24, 60, 48, 24));
-        visibleBox.setText("Visible");
+        visibleBox.setText(langManager.getString("checkbox.visible"));
         panel1.add(visibleBox);
         visibleBox.setBounds(new Rectangle(24, 96, 96, 24));
-        selectableBox.setText("Selectable");
+        selectableBox.setText(langManager.getString("checkbox.selectable"));
         panel1.add(selectableBox);
         selectableBox.setBounds(new Rectangle(24, 120, 96, 24));
-        resizableBox.setText("Resizable");
+        resizableBox.setText(langManager.getString("checkbox.resizable"));
         panel1.add(resizableBox);
         resizableBox.setBounds(new Rectangle(24, 144, 96, 24));
-        draggableBox.setText("Draggable");
+        draggableBox.setText(langManager.getString("checkbox.draggable"));
         panel1.add(draggableBox);
         draggableBox.setBounds(new Rectangle(24, 168, 96, 24));
-        label4.setText("Width:");
+        label4.setText(langManager.getString("label.width") + ":");
         label4.setHorizontalAlignment(JLabel.RIGHT);
         panel1.add(label4);
         label4.setBounds(new Rectangle(132, 36, 48, 24));

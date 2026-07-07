@@ -44,9 +44,11 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
- * 
+ * Dialog for configuring drawable properties
  * 
  * @author D. Campione
  *
@@ -54,6 +56,8 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 public class DrawablePropsDialog extends JDialog {
 
     private static final long serialVersionUID = 2951514599149081635L;
+    
+    private final LanguageManager langManager = LanguageManager.getInstance();
 
     JPanel panel1 = new JPanel();
     JButton OKButton = new JButton();
@@ -157,13 +161,13 @@ public class DrawablePropsDialog extends JDialog {
             }
         });
 
-        OKButton.setText("OK");
+        OKButton.setText(langManager.getString("button.ok"));
         OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(106, 293, 79, 22));
-        CancelButton.setText("Cancel");
+        CancelButton.setText(langManager.getString("button.cancel"));
         CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(214, 293, 79, 22));
-        label1.setText("Height:");
+        label1.setText(langManager.getString("label.height"));
         label1.setHorizontalAlignment(JLabel.RIGHT);
         label1.setBounds(new Rectangle(132, 60, 48, 24));
         this.setModal(false);
@@ -205,82 +209,82 @@ public class DrawablePropsDialog extends JDialog {
         panel1.add(penWidth, null);
         heightField.setBounds(new Rectangle(192, 60, 36, 24));
         xField.setBounds(new Rectangle(84, 36, 36, 24));
-        label2.setText("x:");
+        label2.setText(langManager.getString("label.x"));
         label2.setHorizontalAlignment(JLabel.RIGHT);
-        label2.setBounds(new Rectangle(24, 36, 48, 24));
+        label2.setBounds(new Rectangle(24, 24, 48, 24));
         yField.setBounds(new Rectangle(84, 60, 36, 24));
-        label3.setText("y:");
+        label3.setText(langManager.getString("label.y"));
         label3.setHorizontalAlignment(JLabel.RIGHT);
         label3.setBounds(new Rectangle(24, 60, 48, 24));
-        visibleBox.setText("Visible");
+        visibleBox.setText(langManager.getString("checkbox.visible"));
         visibleBox.setBounds(new Rectangle(24, 96, 72, 24));
-        selectableBox.setText("Selectable");
+        selectableBox.setText(langManager.getString("checkbox.selectable"));
         selectableBox.setBounds(new Rectangle(24, 120, 84, 24));
-        resizableBox.setText("Resizable");
+        resizableBox.setText(langManager.getString("checkbox.resizable"));
         resizableBox.setBounds(new Rectangle(24, 144, 84, 24));
-        draggableBox.setText("Draggable");
+        draggableBox.setText(langManager.getString("checkbox.draggable"));
         draggableBox.setBounds(new Rectangle(24, 168, 84, 24));
-        label4.setText("Width:");
+        label4.setText(langManager.getString("label.width"));
         label4.setHorizontalAlignment(JLabel.RIGHT);
         label4.setBounds(new Rectangle(132, 36, 48, 24));
         widthField.setBounds(new Rectangle(192, 36, 36, 24));
-        brushColorButton.setText("Fill Color...");
+        brushColorButton.setText(langManager.getString("button.fill_color"));
         brushColorButton.setBackground(java.awt.Color.lightGray);
         brushColorButton.setBounds(new Rectangle(283, 258, 108, 24));
-        solidBrushBox.setText("Solid Brush");
+        solidBrushBox.setText(langManager.getString("checkbox.solid_brush"));
         solidBrushBox.setBackground(java.awt.Color.lightGray);
         solidBrushBox.setBounds(new Rectangle(288, 126, 108, 24));
-        penColorButton.setText("Pen Color...");
+        penColorButton.setText(langManager.getString("button.pen_color"));
         penColorButton.setBackground(java.awt.Color.lightGray);
         penColorButton.setBounds(new Rectangle(127, 258, 108, 24));
-        classNameLabel.setText("class name");
+        classNameLabel.setText(langManager.getString("label.class_name"));
         classNameLabel.setBounds(new Rectangle(26, 4, 364, 24));
-        solidPenButton.setText("Solid Line Pen");
+        solidPenButton.setText(langManager.getString("radio.solid_line_pen"));
         solidPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(solidPenButton);
         solidPenButton.setBounds(new Rectangle(120, 147, 120, 12));
-        dashedPenButton.setText("Dashed Line Pen");
+        dashedPenButton.setText(langManager.getString("radio.dashed_line_pen"));
         dashedPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashedPenButton);
         dashedPenButton.setBounds(new Rectangle(120, 163, 120, 12));
-        dottedPenButton.setText("Dotted Line Pen");
+        dottedPenButton.setText(langManager.getString("radio.dotted_line_pen"));
         dottedPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dottedPenButton);
         dottedPenButton.setBounds(new Rectangle(120, 178, 120, 12));
-        dashdotPenButton.setText("Dash Dot Pen");
+        dashdotPenButton.setText(langManager.getString("radio.dash_dot_pen"));
         dashdotPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashdotPenButton);
         dashdotPenButton.setBounds(new Rectangle(120, 193, 120, 12));
-        dashdotdotPenButton.setText("Dash Dot Dot Pen");
+        dashdotdotPenButton.setText(langManager.getString("radio.dash_dot_dot_pen"));
         dashdotdotPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(dashdotdotPenButton);
         dashdotdotPenButton.setBounds(new Rectangle(120, 209, 120, 12));
-        customPenButton.setText("Custom Pen");
+        customPenButton.setText(langManager.getString("radio.custom_pen"));
         customPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(customPenButton);
         customPenButton.setBounds(new Rectangle(120, 224, 120, 12));
-        noPenButton.setText("No Pen");
+        noPenButton.setText(langManager.getString("radio.no_pen"));
         noPenButton.setBackground(java.awt.Color.lightGray);
         penGroup.add(noPenButton);
         noPenButton.setBounds(new Rectangle(120, 132, 120, 12));
         JPanel1.setLayout(null);
         JPanel1.setBackground(java.awt.Color.lightGray);
         JPanel1.setBounds(new Rectangle(108, 96, 156, 156));
-        label5.setText("Pen Properties");
+        label5.setText(langManager.getString("label.pen_properties"));
         label5.setFont(new Font("Dialog", Font.ITALIC, 12));
         label5.setBounds(new Rectangle(35, 3, 95, 23));
-        label6.setText("Pen Width:");
+        label6.setText(langManager.getString("label.pen_width"));
         label6.setBounds(new Rectangle(25, 217, 67, 27));
         penWidth.setText("1");
         penWidth.setBounds(new Rectangle(28, 240, 48, 24));
         JPanel2.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         this.getContentPane().add(panel1, BorderLayout.SOUTH);
         JPanel2.setBounds(new Rectangle(276, 96, 132, 156));
-        label8.setText("Brush Properties");
+        label8.setText(langManager.getString("label.brush_properties"));
         label8.setFont(new Font("Dialog", Font.ITALIC, 12));
         if (myObject instanceof GraphicViewer3DNoteRect) {
-            label9.setText("Shadow width:");
-            label10.setText("Flap width:");
+            label9.setText(langManager.getString("label.shadow_width"));
+            label10.setText(langManager.getString("label.flap_width"));
             panel1.add(label9);
             panel1.add(label10);
             label9.setBounds(new Rectangle(234, 36, 80, 24));
@@ -291,7 +295,7 @@ public class DrawablePropsDialog extends JDialog {
             flapWidth.setBounds(new Rectangle(326, 60, 40, 24));
         }
         if (myObject instanceof GraphicViewer3DRect) {
-            raised.setText("Raised?");
+            raised.setText(langManager.getString("checkbox.raised"));
             panel1.add(raised);
             raised.setBounds(new Rectangle(24, 192, 84, 24));
         }

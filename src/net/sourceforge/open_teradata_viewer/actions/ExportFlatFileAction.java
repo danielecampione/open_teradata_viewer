@@ -29,6 +29,7 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExportPreviewer;
 import net.sourceforge.open_teradata_viewer.Grid;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
 /**
@@ -42,11 +43,16 @@ public class ExportFlatFileAction extends CustomAction {
     private static final long serialVersionUID = -6585713338059939897L;
 
     protected ExportFlatFileAction() {
-        super("Export flat file", "text.png", null, null);
+        super(LanguageManager.getInstance().getString("action.export.flat_file"), "text.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.export.flat_file"));
+        });
     }
 
     @Override
@@ -63,13 +69,16 @@ public class ExportFlatFileAction extends CustomAction {
         boolean selection = false;
         if (table.getSelectedRowCount() > 0
                 && table.getSelectedRowCount() != table.getRowCount()) {
-            Object option = Dialog.show("Flat File", "Export",
-                    Dialog.QUESTION_MESSAGE, new Object[]{"Everything",
-                            "Selection"}, "Everything");
-            if (option == null || "-1".equals(option.toString())) {
-                return;
-            }
-            selection = "Selection".equals(option);
+        	LanguageManager langManager = LanguageManager.getInstance();
+        	Object option = Dialog.show(langManager.getString("dialog.flat_file"),
+        			langManager.getString("action.export"),
+        	        Dialog.QUESTION_MESSAGE,
+        	        new Object[]{"option.everything", "option.selection"},
+        	        "option.everything");
+        	if (option == null || "-1".equals(option.toString())) {
+        	    return;
+        	}
+        	selection = langManager.getString("option.selection").equals(option);
         }
         Grid grid = new Grid();
         for (int i = 0; i < table.getColumnCount(); i++) {
@@ -103,7 +112,7 @@ public class ExportFlatFileAction extends CustomAction {
         }
         grid.addSeparator();
         grid.set(0, grid.getHeight(),
-                String.format("Total: %d", (grid.getHeight() - 3)));
+                String.format(LanguageManager.getInstance().getString("label.total_format"), (grid.getHeight() - 3)));
         String text = grid.toString(rightAlignedColumns);
         ExportPreviewer.preview(text, null);
     }

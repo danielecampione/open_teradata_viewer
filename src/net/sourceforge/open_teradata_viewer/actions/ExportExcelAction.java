@@ -29,6 +29,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.FileIO;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -38,7 +39,6 @@ import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
@@ -53,80 +53,83 @@ public class ExportExcelAction extends CustomAction {
     private static final long serialVersionUID = 7078532874679238724L;
 
     protected ExportExcelAction() {
-        super("Export Excel", "spreadsheet.png", null, null);
+        super(LanguageManager.getInstance().getString("action.export.excel"), "spreadsheet.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.export.excel"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("No result to write.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("No result to write.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
         if (table.getSelectedRowCount() > 0
                 && table.getSelectedRowCount() != table.getRowCount()) {
-            Object option = Dialog.show("Excel", "Export",
-                    Dialog.QUESTION_MESSAGE, new Object[]{"Everything",
-                            "Selection"}, "Everything");
-            if (option == null || "-1".equals(option.toString())) {
-                return;
-            }
-            selection = "Selection".equals(option);
+        	LanguageManager langManager = LanguageManager.getInstance();
+        	Object option = Dialog.show(langManager.getString("dialog.excel"),
+        			langManager.getString("action.export"),
+        	        Dialog.QUESTION_MESSAGE,
+        	        new Object[]{"option.everything", "option.selection"},
+        	        "option.everything");
+        	if (option == null || "-1".equals(option.toString())) {
+        	    return;
+        	}
+        	selection = langManager.getString("option.selection").equals(option);
         }
 
         List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet();
-        HSSFRow row = sheet.createRow(0);
-        HSSFCellStyle style = workbook.createCellStyle();
-        style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        HSSFFont font = workbook.createFont();
-        font.setColor(IndexedColors.WHITE.getIndex());
-        font.setBold(true);
-        style.setFont(font);
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            HSSFCell cell = row.createCell(i);
-            cell.setCellValue(new HSSFRichTextString(table.getColumnName(i)));
-            cell.setCellStyle(style);
-            sheet.setColumnWidth(i, (table.getColumnModel().getColumn(i)
-                    .getPreferredWidth() * 45));
-        }
-        int count = 1;
-        for (int i = 0; i < list.size(); i++) {
-            if (!selection || table.isRowSelected(i)) {
-                List<?> data = (List<?>) list.get(i);
-                row = sheet.createRow(count++);
-                for (int j = 0; j < data.size(); j++) {
-                    Object o = data.get(j);
-                    HSSFCell cell = row.createCell(j);
-                    if (o instanceof Number) {
-                        cell.setCellValue(((Number) o).doubleValue());
-                    } else if (o != null) {
-                        if (ResultSetTable.isLob(j)) {
-                            cell.setCellValue(new HSSFRichTextString(Context
-                                    .getInstance().getColumnTypeNames()[j]));
-                        } else {
-                            cell.setCellValue(new HSSFRichTextString(o
-                                    .toString()));
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (HSSFWorkbook workbook = new HSSFWorkbook()) {
+            HSSFSheet sheet = workbook.createSheet();
+            HSSFRow row = sheet.createRow(0);
+            HSSFCellStyle style = workbook.createCellStyle();
+            style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            HSSFFont font = workbook.createFont();
+            font.setColor(IndexedColors.WHITE.getIndex());
+            font.setBold(true);
+            style.setFont(font);
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                HSSFCell cell = row.createCell(i);
+                cell.setCellValue(new HSSFRichTextString(table.getColumnName(i)));
+                cell.setCellStyle(style);
+                sheet.setColumnWidth(i, (table.getColumnModel().getColumn(i).getPreferredWidth() * 45));
+            }
+            int count = 1;
+            for (int i = 0; i < list.size(); i++) {
+                if (!selection || table.isRowSelected(i)) {
+                    List<?> data = (List<?>) list.get(i);
+                    row = sheet.createRow(count++);
+                    for (int j = 0; j < data.size(); j++) {
+                        Object o = data.get(j);
+                        HSSFCell cell = row.createCell(j);
+                        if (o instanceof Number) {
+                            cell.setCellValue(((Number) o).doubleValue());
+                        } else if (o != null) {
+                            if (ResultSetTable.isLob(j)) {
+                                cell.setCellValue(new HSSFRichTextString(
+                                        Context.getInstance().getColumnTypeNames()[j]));
+                            } else {
+                                cell.setCellValue(new HSSFRichTextString(o.toString()));
+                            }
                         }
                     }
                 }
             }
+            sheet.createFreezePane(0, 1);
+            workbook.write(byteArrayOutputStream);
         }
-        sheet.createFreezePane(0, 1);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        workbook.write(byteArrayOutputStream);
-        FileIO.saveAndOpenFile("export.xls",
-                byteArrayOutputStream.toByteArray());
+        FileIO.saveAndOpenFile("export.xls", byteArrayOutputStream.toByteArray());
     }
 }

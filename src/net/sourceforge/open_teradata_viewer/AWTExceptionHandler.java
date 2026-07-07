@@ -39,14 +39,16 @@ public class AWTExceptionHandler {
     private FileHandler fileHandler;
 
     public AWTExceptionHandler() {
-        if (logger != null) {
+        if (logger == null) {
             logger = Logger.getLogger("net.sourceforge.open_teradata_viewer");
             try {
                 fileHandler = new FileHandler(
                         "%h/uncaughtOpenTeradataViewerAwtExceptions.log", true);
                 logger.addHandler(fileHandler);
             } catch (IOException ioe) {
-                ExceptionDialog.hideException(ioe);
+                // Log to console if file handler creation fails
+                System.err.println("Failed to create log file handler: " + ioe.getMessage());
+                // Continue without file logging - logger will still work with console handler
             }
         }
     }

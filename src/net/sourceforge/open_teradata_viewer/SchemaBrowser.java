@@ -29,6 +29,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -85,18 +86,14 @@ public class SchemaBrowser extends JTree {
                     addChildren();
                 }
             } catch (Throwable t) {
-                ApplicationFrame
-                        .getInstance()
-                        .getConsole()
-                        .println(t.getMessage(),
-                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                ApplicationFrame.getInstance().getConsole().println(
+                        t.getMessage(), ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 String relationName = toString().toUpperCase();
                 String sqlQuery = "HELP TABLE " + relationName;
                 ResultSet resultSet = null;
                 Connection connection = connectionData.getConnection();
                 try {
-                    final PreparedStatement statement = connection
-                            .prepareStatement(sqlQuery);
+                    final PreparedStatement statement = connection.prepareStatement(sqlQuery);
                     Runnable onCancel = new Runnable() {
                         @Override
                         public void run() {
@@ -107,30 +104,31 @@ public class SchemaBrowser extends JTree {
                             }
                         }
                     };
-
-                    WaitingDialog waitingDialog = null;
+                    WaitingDialog waitingDialog;
                     try {
                         waitingDialog = new WaitingDialog(onCancel);
                     } catch (InterruptedException ie) {
                         ExceptionDialog.ignoreException(ie);
+                        statement.close();
+                        return;
                     }
-                    waitingDialog.setText("Executing statement..");
+                    waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
                     try {
                         resultSet = statement.executeQuery();
+                        while (resultSet.next()) {
+                            String columnName = resultSet.getString(1).trim();
+                            if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
+                                columnName = "";
+                            }
+                            add(columnName, false);
+                        }
                     } finally {
                         waitingDialog.hide();
-                    }
-
-                    while (resultSet.next()) {
-                        String columnName = resultSet.getString(1).trim();
-                        if (Utilities.isEmpty(columnName)
-                                || columnName.trim().length() == 0) {
-                            columnName = "";
+                        if (resultSet != null) {
+                            resultSet.close();
                         }
-                        add(columnName, false);
+                        statement.close();
                     }
-                    statement.close();
-                    resultSet.close();
                 } catch (SQLException sqle) {
                     ExceptionDialog.ignoreException(sqle);
                 }
@@ -259,11 +257,11 @@ public class SchemaBrowser extends JTree {
             }
         }
 
-        private void addQuery(String query, boolean children)
-                throws SQLException {
-            ResultSet resultSet = connectionData.getConnection()
-                    .createStatement().executeQuery(query);
-            addQuery(resultSet, children, 1);
+        private void addQuery(String query, boolean children) throws SQLException {
+            try (java.sql.Statement stmt = connectionData.getConnection().createStatement();
+                 ResultSet resultSet = stmt.executeQuery(query)) {
+                addQuery(resultSet, children, 1);
+            }
         }
 
         private void addQuery(ResultSet resultSet, boolean children,

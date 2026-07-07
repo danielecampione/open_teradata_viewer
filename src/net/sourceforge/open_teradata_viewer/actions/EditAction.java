@@ -22,11 +22,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.Action;
+import javax.swing.SwingUtilities;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,6 +40,7 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -49,10 +53,15 @@ public class EditAction extends CustomAction {
     private static final long serialVersionUID = -6208272234164147803L;
 
     protected EditAction() {
-        super("Edit..", "edit.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.query.edit"), "edit.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.edit"));
+        });
     }
 
     protected EditAction(String name, String icon) {
@@ -62,31 +71,74 @@ public class EditAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ResultSet resultSet = Context.getInstance().getResultSet();
-        JPanel panel = new JPanel(new GridBagLayout());
-        JTextArea[] textAreas = new JTextArea[resultSet.getMetaData().getColumnCount()];
-        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0, 0, GridBagConstraints.NORTHWEST,
-                GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0);
-        List selectedRow = ResultSetTable.getInstance().getSelectedRowData();
-        for (int column = 0; column < resultSet.getMetaData().getColumnCount(); column++) {
-            String columnName = resultSet.getMetaData().getColumnName(column + 1);
-            panel.add(new JLabel(columnName), constraints);
-            if (column + 1 == resultSet.getMetaData().getColumnCount()) {
-                constraints.weightx = 100;
-                constraints.weighty = 100;
-            }
-            textAreas[column] = new JTextArea();
-            panel.add(textAreas[column], constraints);
-            fillTextArea(textAreas[column], selectedRow, column);
-            if (ResultSetTable.isLob(column)) {
-                textAreas[column].setEnabled(false);
-            }
-            if (resultSet.getConcurrency() == ResultSet.CONCUR_READ_ONLY) {
-                textAreas[column].setEditable(false);
-            }
-            textAreas[column].setBorder(BorderFactory.createLoweredBevelBorder());
-            constraints.gridy++;
+        if (resultSet == null) {
+            return;
         }
-        JScrollPane scrollPane = new JScrollPane(panel);
+        final int columnCount;
+        try {
+            resultSet.first();
+            columnCount = resultSet.getMetaData().getColumnCount();
+        } catch (Exception ex) {
+            ExceptionDialog.notifyException(new Exception(
+                    "Unable to retrieve ResultSet metadata. The result set may no longer be valid.", ex));
+            return;
+        }
+        final List selectedRow = ResultSetTable.getInstance().getSelectedRowData();
+
+        final AtomicReference<JPanel> panelRef = new AtomicReference<>();
+        final AtomicReference<JTextArea[]> textAreasRef = new AtomicReference<>();
+        final AtomicReference<JScrollPane> scrollPaneRef = new AtomicReference<>();
+
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JPanel panel = new JPanel(new GridBagLayout());
+                        JTextArea[] textAreas = new JTextArea[columnCount];
+                        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0, 0, GridBagConstraints.NORTHWEST,
+                                GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0);
+
+                        for (int column = 0; column < columnCount; column++) {
+                            try {
+                                String columnName = resultSet.getMetaData().getColumnName(column + 1);
+                                panel.add(new JLabel(columnName), constraints);
+                                if (column + 1 == columnCount) {
+                                    constraints.weightx = 100;
+                                    constraints.weighty = 100;
+                                }
+                                textAreas[column] = new JTextArea();
+                                panel.add(textAreas[column], constraints);
+                                fillTextArea(textAreas[column], selectedRow, column);
+                                if (ResultSetTable.isLob(column)) {
+                                    textAreas[column].setEnabled(false);
+                                }
+                                if (resultSet.getConcurrency() == ResultSet.CONCUR_READ_ONLY) {
+                                    textAreas[column].setEditable(false);
+                                }
+                                textAreas[column].setBorder(BorderFactory.createLoweredBevelBorder());
+                                constraints.gridy++;
+                            } catch (SQLException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                        JScrollPane scrollPane = new JScrollPane(panel);
+
+                        panelRef.set(panel);
+                        textAreasRef.set(textAreas);
+                        scrollPaneRef.set(scrollPane);
+                    } catch (RuntimeException ex) {
+                        throw ex;
+                    }
+                }
+            });
+        } catch (InterruptedException | InvocationTargetException ex) {
+            throw new Exception("Error creating UI components", ex);
+        }
+
+        final JPanel panel = panelRef.get();
+        final JTextArea[] textAreas = textAreasRef.get();
+        final JScrollPane scrollPane = scrollPaneRef.get();
         while (true) {
             try {
                 if (Dialog.OK_OPTION == Dialog.show((String) getValue(Action.NAME), scrollPane, Dialog.PLAIN_MESSAGE,

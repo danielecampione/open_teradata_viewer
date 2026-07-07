@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.Drivers;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -33,9 +34,15 @@ public class DriversAction extends CustomAction {
     private static final long serialVersionUID = -6863385781138040547L;
 
     public DriversAction() {
-        super("Drivers", null, null, null);
+        super(LanguageManager.getInstance().getString("action.drivers"));
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.drivers"));
+        });
     }
+    
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         Drivers.editDrivers();

@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -34,38 +35,76 @@ import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
  *
  */
 public class ExportPreviewer {
+	
     private ExportPreviewer() {
     }
 
-    public static void preview(String text, byte[] bytes) throws Exception {
-        JTextArea textArea = new JTextArea(text);
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        boolean isXml = text.startsWith("<?xml");
-        Object[] options = isXml
-                ? new Object[] { "Save to file", "Save to file and open", "Copy to clipboard", "Pretty print XML",
-                        "Cancel" }
-                : new Object[] { "Save to file", "Save to file and open", "Copy to clipboard", "Cancel" };
-        Object value = Dialog.show("Preview", scrollPane, Dialog.PLAIN_MESSAGE, options, "Save to file");
-        if ("Save to file".equals(value)) {
+    public static void preview(final String text, final byte[] bytes) throws Exception {
+        final java.util.concurrent.atomic.AtomicReference<String> chosenValue =
+                new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicBoolean isXmlRef =
+                new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JTextArea textArea = new JTextArea(text);
+                        textArea.setEditable(false);
+                        JScrollPane scrollPane = new JScrollPane(textArea);
+                        boolean isXml = text.startsWith("<?xml");
+                        isXmlRef.set(isXml);
+                        Object[] options = isXml
+                                ? new Object[]{
+                                    "button.save_to_file",
+                                    "button.save_to_file_and_open",
+                                    "button.copy_to_clipboard",
+                                    "button.pretty_print_xml",
+                                    "button.cancel"}
+                                : new Object[]{
+                                    "button.save_to_file",
+                                    "button.save_to_file_and_open",
+                                    "button.copy_to_clipboard",
+                                    "button.cancel"};
+                        LanguageManager langManager = LanguageManager.getInstance();
+                        Object value = Dialog.show(langManager.getString("dialog.preview"),
+                                scrollPane, Dialog.PLAIN_MESSAGE, options, "button.save_to_file");
+                        chosenValue.set(value != null ? value.toString() : null);
+                    } catch (Exception ex) {
+                        ExceptionDialog.showException(ex);
+                    }
+                }
+            });
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new Exception("Error in ExportPreviewer.preview", ite);
+        }
+
+        // File operations happen here, outside the EDT
+        LanguageManager langManager = LanguageManager.getInstance();
+        String value = chosenValue.get();
+        boolean isXml = isXmlRef.get();
+
+        if (langManager.getString("button.save_to_file").equals(value)) {
             String fileName = isXml ? "export.xml" : "export.txt";
             FileIO.saveFile(fileName, bytes != null ? bytes : text.getBytes());
-        } else if ("Save to file and open".equals(value)) {
+        } else if (langManager.getString("button.save_to_file_and_open").equals(value)) {
             String fileName = isXml ? "export.xml" : "export.txt";
             File file = FileIO.saveFile(fileName, bytes != null ? bytes : text.getBytes());
             if (file != null) {
                 FileIO.openFile(file, true);
             }
-        } else if ("Copy to clipboard".equals(value)) {
+        } else if (langManager.getString("button.copy_to_clipboard").equals(value)) {
             try {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+                Toolkit.getDefaultToolkit().getSystemClipboard()
+                        .setContents(new StringSelection(text), null);
             } catch (Throwable t2) {
                 ExceptionDialog.hideException(t2);
             }
-        } else if ("Pretty print XML".equals(value)) {
+        } else if (langManager.getString("button.pretty_print_xml").equals(value)) {
             XMLBeautifier xmlBeautifier = new XMLBeautifier(XMLBeautifier.DEFAULT_TAB_SIZE);
-            text = xmlBeautifier.indentXML(text);
-            preview(text, bytes);
+            String formatted = xmlBeautifier.indentXML(text);
+            preview(formatted, bytes);
         }
     }
 }

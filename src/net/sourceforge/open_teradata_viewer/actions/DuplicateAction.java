@@ -22,6 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -33,7 +35,12 @@ public class DuplicateAction extends EditAction {
     private static final long serialVersionUID = 6661786810339076715L;
 
     protected DuplicateAction() {
-        super("Duplicate", "copy.png");
+        super(LanguageManager.getInstance().getString("menu.query.duplicate"), "copy.png");
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.duplicate"));
+        });
     }
 
     @Override

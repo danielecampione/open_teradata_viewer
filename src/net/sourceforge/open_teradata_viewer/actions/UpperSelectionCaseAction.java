@@ -27,6 +27,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -40,12 +42,18 @@ public class UpperSelectionCaseAction extends CustomAction {
     private Action upperSelectionCase;
 
     protected UpperSelectionCaseAction() {
-        super("To upper case", null,
+        super(LanguageManager.getInstance().getString("action.to_upper_case"), null,
                 KeyStroke.getKeyStroke(KeyEvent.VK_U,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Converts all letters in the current selection to upper case.");
+                LanguageManager.getInstance().getString("action.to_upper_case.short_description"));
         upperSelectionCase = new RTextAreaEditorKit.UpperSelectionCaseAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.to_upper_case"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.to_upper_case.short_description"));
+        });
     }
 
     @Override

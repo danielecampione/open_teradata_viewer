@@ -31,6 +31,7 @@ import org.fife.rsta.ui.search.ReplaceDialog;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -43,9 +44,14 @@ public class GoToLineAction extends CustomAction {
     private static final long serialVersionUID = 7902153669933142665L;
 
     protected GoToLineAction() {
-        super("Go To..", null, KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit
+        super(LanguageManager.getInstance().getString("action.goto_line"), null, KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit
                 .getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.goto_line"));
+        });
     }
 
     @Override

@@ -123,12 +123,10 @@ public class StringUtil {
         if (strs == null || str == null) {
             return -1;
         }
-        for (int i = 0; i < strs.length; i++) {
-            if (str.equals(strs[i])) {
-                return i;
-            }
-        }
-        return -1;
+        return java.util.stream.IntStream.range(0, strs.length)
+                .filter(i -> str.equals(strs[i]))
+                .findFirst()
+                .orElse(-1);
     }
 
     public static boolean equalAnyOfString(String str, String[] strs,
@@ -369,9 +367,8 @@ public class StringUtil {
                 || value.equalsIgnoreCase("t") || value.equalsIgnoreCase("y")
                 || value.equalsIgnoreCase("+")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static boolean isInteger(String value) {
@@ -451,17 +448,11 @@ public class StringUtil {
     }
 
     public static String[] unionList(String[] l1, String[] l2) {
-        HashSet<String> list = new HashSet<String>();
-
-        for (String t : l1) {
-            list.add(t.trim());
-        }
-
-        for (String t : l2) {
-            list.add(t.trim());
-        }
-
-        return list.toArray(new String[list.size()]);
+        return java.util.stream.Stream.concat(
+                java.util.Arrays.stream(l1).map(String::trim),
+                java.util.Arrays.stream(l2).map(String::trim)
+        ).collect(java.util.stream.Collectors.toSet())
+         .toArray(new String[0]);
     }
 
     public static String[] tokenizeList(String[] list, String delims) {
@@ -761,16 +752,16 @@ public class StringUtil {
     public static String conformize(String s) {
         StringBuilder sbuf = new StringBuilder();
         int l = s.length();
-        int ch = -1;
-        int b;
         for (int i = 0; i < l; i++) {
-            /* Get next byte b from URL segment s */
-            switch (ch = s.charAt(i)) {
-            case ((char) 13):
-                ch = '\n';
-            default:
-                b = ch;
-                sbuf.append((char) b);
+            char ch = s.charAt(i);
+            if (ch == '\r') {
+                sbuf.append('\n');
+                // Skip the following \n if this is a \r\n sequence
+                if (i + 1 < l && s.charAt(i + 1) == '\n') {
+                    i++;
+                }
+            } else {
+                sbuf.append(ch);
             }
         }
         return sbuf.toString();

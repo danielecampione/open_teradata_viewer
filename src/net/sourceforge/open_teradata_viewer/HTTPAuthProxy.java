@@ -43,6 +43,8 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -63,9 +65,10 @@ public class HTTPAuthProxy extends Authenticator {
             String proxyRememberConfigurationKey = "proxy_remember_configuration";
 
             authenticationNecessary = true;
+            LanguageManager langManager = LanguageManager.getInstance();
             final JCheckBox isAuthenticationRequired = new JCheckBox(
-                    "Authentication required"), proxyRememberConfigurationField = new JCheckBox(
-                    "Don't ask again");
+                    langManager.getString("proxy.authentication_required")), proxyRememberConfigurationField = new JCheckBox(
+                    langManager.getString("proxy.dont_ask_again"));
 
             isAuthenticationRequired.setSelected(authenticationNecessary);
             proxyRememberConfigurationField
@@ -111,11 +114,11 @@ public class HTTPAuthProxy extends Authenticator {
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH);
             addComponent(panel, new JSeparator(), 0, 1, 2, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JLabel("proxy user"), 0, 2, 1, 1,
+            addComponent(panel, new JLabel(langManager.getString("proxy.username")), 0, 2, 1, 1,
                     GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(panel, proxyUserField, 1, 2, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JLabel("proxy password"), 0, 3, 1, 1,
+            addComponent(panel, new JLabel(langManager.getString("proxy.password")), 0, 3, 1, 1,
                     GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(panel, proxyPasswordField, 1, 3, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH);
@@ -124,13 +127,13 @@ public class HTTPAuthProxy extends Authenticator {
             addComponent(panel, proxyRememberConfigurationField, 0, 5, 2, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH);
 
-            JButton button = new JButton("OK");
+            JButton button = new JButton(langManager.getString("button.ok"));
             Object[] options = new Object[] { button };
             final JOptionPane optionPane = new JOptionPane(panel,
                     JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
                     null, options, options[0]);
             optionPane.setOptionType(JOptionPane.OK_OPTION);
-            final JDialog dialog = optionPane.createDialog("Server proxy");
+            final JDialog dialog = optionPane.createDialog(langManager.getString("proxy.server"));
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             button.addActionListener(new ActionListener() {
                 @Override
@@ -161,7 +164,7 @@ public class HTTPAuthProxy extends Authenticator {
         } else {
             proxyUser = Config.getSetting(proxyUserKey);
             proxyPassword = Config.decrypt(Config.getSetting(proxyPasswordKey));
-            authenticationNecessary = (proxyUser.length() > 0);
+            authenticationNecessary = (proxyUser != null && proxyUser.length() > 0);
         }
     }
 

@@ -32,6 +32,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -44,22 +45,23 @@ public class RunScriptAction extends CustomAction {
     private static final long serialVersionUID = -2332087371109375191L;
 
     protected RunScriptAction() {
-        super("Run Script", "script.png", null, null);
+        super(LanguageManager.getInstance().getString("action.run_script"), "script.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.run_script"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent ae) throws Exception {
-        String text = ApplicationFrame.getInstance().getTextComponent()
-                .getText();
+        String text = ApplicationFrame.getInstance().getTextComponent().getText();
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("NOT connected.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         if (text.trim().length() == 0) {
@@ -67,12 +69,8 @@ public class RunScriptAction extends CustomAction {
         }
         History.getInstance().add(text);
         Actions.getInstance().validateTextActions();
-        // Search and capture all text that is followed by a semicolon, zero or
-        // more whitespace characters [ \t\n\x0B\f\r], end of the line and again
-        // zero or more whitespace characters the regular expression is ran in
-        // dotall mode and multiline mode
-        Pattern pattern = Pattern.compile("(.*?);\\s*?$\\s*", Pattern.DOTALL
-                + Pattern.MULTILINE);
+        Pattern pattern = Pattern.compile("(.*?);\\s*?$\\s*",
+                Pattern.DOTALL + Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(text);
         int total = 0;
         while (matcher.find()) {
@@ -82,12 +80,9 @@ public class RunScriptAction extends CustomAction {
 
         final Vector<Vector> dataVector = new Vector<Vector>();
         int count = 0;
-        final Statement statement = Context
-                .getInstance()
-                .getConnectionData()
+        final Statement statement = Context.getInstance().getConnectionData()
                 .getConnection()
-                .createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                        ResultSet.CONCUR_READ_ONLY);
+                .createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -118,6 +113,7 @@ public class RunScriptAction extends CustomAction {
             throw e;
         } finally {
             waitingDialog.hide();
+            statement.close();
             Context.getInstance().setResultSet(null);
             final Vector<String> columnIdentifiers = new Vector<String>(1);
             columnIdentifiers.add("Rows updated");

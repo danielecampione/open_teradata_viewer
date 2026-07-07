@@ -28,6 +28,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -41,11 +42,17 @@ public class UncommentAction extends CustomAction {
     private static final long serialVersionUID = -7121742231003418327L;
 
     public UncommentAction() {
-        super("Uncomment SQL code", "uncomment.png",
+        super(LanguageManager.getInstance().getString("action.uncomment_sql_code"), "uncomment.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_7,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Uncomments the selectd text.");
+                LanguageManager.getInstance().getString("action.uncomment_sql_code.short_description"));
         setEnabled(true);
+                
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.uncomment_sql_code"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.uncomment_sql_code.short_description"));
+        });
     }
 
     @Override

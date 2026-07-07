@@ -131,13 +131,7 @@ public class GraphicViewerButton extends GraphicViewerControl {
         JComponent jcomponent = getComponent(graphicviewerview);
         if (jcomponent instanceof JButton) {
             JButton jbutton = (JButton) jcomponent;
-            if (Math.abs(graphicviewerview.getScale() - 1.0D) >= 0.01D) {
-                Font font = jbutton.getFont();
-                Font font1 = new Font(font.getFontName(), font.getStyle(),
-                        (int) ((double) myFontSize * graphicviewerview
-                                .getScale()));
-                jcomponent.setFont(font1);
-            }
+            
             Rectangle rectangle = graphicviewerview.getTempRectangle();
             Rectangle rectangle1 = getBoundingRect();
             rectangle.x = rectangle1.x;
@@ -147,7 +141,6 @@ public class GraphicViewerButton extends GraphicViewerControl {
             graphicviewerview.convertDocToView(rectangle);
             jcomponent.setBounds(rectangle);
             jbutton.setText(getLabel());
-            jcomponent.repaint();
         }
     }
 

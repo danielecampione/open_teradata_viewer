@@ -82,16 +82,18 @@ public class GraphicViewerPort extends GraphicViewerDrawable implements
             GraphicViewerObject paramGraphicViewerObject) {
         super(paramRectangle);
         init(1);
-        if (paramGraphicViewerObject.getLayer() != null) {
-            paramGraphicViewerObject.getLayer().removeObject(
-                    paramGraphicViewerObject.getTopLevelObject());
-        } else if (paramGraphicViewerObject.getView() != null) {
-            paramGraphicViewerObject.getView().removeObject(
-                    paramGraphicViewerObject.getTopLevelObject());
+        if (paramGraphicViewerObject != null) {
+            if (paramGraphicViewerObject.getLayer() != null) {
+                paramGraphicViewerObject.getLayer().removeObject(
+                        paramGraphicViewerObject.getTopLevelObject());
+            } else if (paramGraphicViewerObject.getView() != null) {
+                paramGraphicViewerObject.getView().removeObject(
+                        paramGraphicViewerObject.getTopLevelObject());
+            }
+            paramGraphicViewerObject.setSelectable(false);
+            paramGraphicViewerObject.setDraggable(false);
+            paramGraphicViewerObject.setResizable(false);
         }
-        paramGraphicViewerObject.setSelectable(false);
-        paramGraphicViewerObject.setDraggable(false);
-        paramGraphicViewerObject.setResizable(false);
         myObject = paramGraphicViewerObject;
     }
 

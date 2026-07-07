@@ -36,7 +36,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all text from an input stream. The stream will be closed when
+     * Reads all text from the given input stream. The stream is closed when
      * this method returns.
      *
      * @param in The input stream to read from. Will be closed on return.
@@ -45,14 +45,11 @@ public final class IOUtil {
      */
     public static String readFully(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
-        BufferedReader r = new BufferedReader(new InputStreamReader(in));
-        String line = null;
-        try {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(in))) {
+            String line;
             while ((line = r.readLine()) != null) {
                 sb.append(line).append('\n');
             }
-        } finally {
-            r.close();
         }
         return sb.toString();
     }

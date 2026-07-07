@@ -56,8 +56,12 @@ public class GraphicViewerUndoManager extends UndoManager
             super.undo();
             myUndoing = false;
         } catch (Exception e) {
-            ExceptionDialog.hideException(e);
             myUndoing = false;
+            // Log the error and notify user of undo failure
+            System.err.println("Undo operation failed: " + e.getMessage());
+            ExceptionDialog.notifyException(e);
+            // Re-throw as CannotUndoException to maintain API contract
+            throw new CannotUndoException();
         }
     }
 
@@ -68,8 +72,12 @@ public class GraphicViewerUndoManager extends UndoManager
             super.redo();
             myRedoing = false;
         } catch (Exception e) {
-            ExceptionDialog.hideException(e);
             myRedoing = false;
+            // Log the error and notify user of redo failure
+            System.err.println("Redo operation failed: " + e.getMessage());
+            ExceptionDialog.notifyException(e);
+            // Re-throw as CannotRedoException to maintain API contract
+            throw new CannotRedoException();
         }
     }
 

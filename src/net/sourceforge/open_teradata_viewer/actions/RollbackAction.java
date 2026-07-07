@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.event.ActionEvent;
 
 import net.sourceforge.open_teradata_viewer.Context;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -33,7 +34,12 @@ public class RollbackAction extends CustomAction {
     private static final long serialVersionUID = 5040518890561368254L;
 
     protected RollbackAction() {
-        super("Rollback", "rollback.png", null, null);
+        super(LanguageManager.getInstance().getString("action.rollback"), "rollback.png", null, null);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.rollback"));
+        });
     }
 
     @Override

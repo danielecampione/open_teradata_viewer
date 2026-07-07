@@ -30,6 +30,7 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ShowViewValidationStrategy;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -44,20 +45,22 @@ public class ShowViewAction extends ShowObjectAction {
     private static final long serialVersionUID = -8555161081550563065L;
 
     protected ShowViewAction() {
-        super("Show view");
+    	super(LanguageManager.getInstance().getString("action.show.view"));
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.show.view"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("NOT connected.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("NOT connected.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
 
@@ -66,8 +69,7 @@ public class ShowViewAction extends ShowObjectAction {
         boolean firstIteration = true;
         while (viewName == null) {
             if (firstIteration) {
-                viewName = ApplicationFrame.getInstance().getTextComponent()
-                        .getSelectedText();
+                viewName = ApplicationFrame.getInstance().getTextComponent().getSelectedText();
                 firstIteration = false;
             }
             if (viewName == null) {
@@ -88,20 +90,16 @@ public class ShowViewAction extends ShowObjectAction {
                     viewName.lastIndexOf(".", lastTokenIndex - 1) == -1 ? 0
                             : viewName.lastIndexOf(".", lastTokenIndex - 1),
                     lastTokenIndex);
-            viewName = viewName
-                    .substring(lastTokenIndex + 1, viewName.length());
+            viewName = viewName.substring(lastTokenIndex + 1, viewName.length());
         }
         String sqlQuery = getSQLQueryToShowObject(
                 new ShowViewValidationStrategy(),
-                ((databaseName != null && databaseName.trim().length() > 0) ? databaseName
-                        + "."
-                        : "")
+                ((databaseName != null && databaseName.trim().length() > 0)
+                        ? databaseName + "." : "")
                         + viewName);
         ResultSet resultSet = null;
-        Connection connection = Context.getInstance().getConnectionData()
-                .getConnection();
-        final PreparedStatement statement = connection
-                .prepareStatement(sqlQuery);
+        Connection connection = Context.getInstance().getConnectionData().getConnection();
+        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
@@ -112,30 +110,32 @@ public class ShowViewAction extends ShowObjectAction {
                 }
             }
         };
-        WaitingDialog waitingDialog = null;
+        WaitingDialog waitingDialog;
         try {
             waitingDialog = new WaitingDialog(onCancel);
         } catch (InterruptedException ie) {
             ExceptionDialog.ignoreException(ie);
+            return;
         }
-        waitingDialog.setText("Executing statement..");
+        waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
         try {
             resultSet = statement.executeQuery();
+            StringBuilder viewBody = new StringBuilder();
+            while (resultSet.next()) {
+                Object obj = resultSet.getString(1);
+                if (obj == null) {
+                    throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000", 1048);
+                } else if (obj instanceof String) {
+                    viewBody.append(obj.toString());
+                }
+            }
+            ApplicationFrame.getInstance().setText(StringUtil.conformize(viewBody.toString()));
         } finally {
             waitingDialog.hide();
-        }
-        String viewBody = "";
-        while (resultSet.next()) {
-            Object obj = resultSet.getString(1);
-            if (obj == null) {
-                throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000",
-                        1048);
-            } else if (obj instanceof String) {
-                viewBody += obj.toString();
+            if (resultSet != null) {
+                resultSet.close();
             }
+            statement.close();
         }
-        ApplicationFrame.getInstance().setText(StringUtil.conformize(viewBody));
-        statement.close();
-        resultSet.close();
     }
 }

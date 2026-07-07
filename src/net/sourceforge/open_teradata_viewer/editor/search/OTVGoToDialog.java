@@ -49,6 +49,7 @@ import org.fife.rsta.ui.ResizableFrameContentPane;
 
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * A "Go To" dialog allowing you to go to a specific line number in an instance
@@ -122,15 +123,15 @@ public class OTVGoToDialog extends EscapableDialog {
         AbstractDocument doc = (AbstractDocument) lineNumberField.getDocument();
         doc.addDocumentListener(l);
         doc.setDocumentFilter(new NumberDocumentFilter());
-        JLabel label = UIUtil.newLabel("Line number", lineNumberField);
+        JLabel label = UIUtil.newLabel(LanguageManager.getInstance().getString("label.line_number"), lineNumberField);
         enterLineNumberPane.add(label);
         enterLineNumberPane.add(Box.createHorizontalStrut(15));
         enterLineNumberPane.add(lineNumberField);
 
         // Make a panel containing the OK and Cancel buttons
-        okButton = UIUtil.newButton("OK");
+        okButton = UIUtil.newButton(LanguageManager.getInstance().getString("button.ok"));
         okButton.addActionListener(l);
-        cancelButton = UIUtil.newButton("Cancel");
+        cancelButton = UIUtil.newButton(LanguageManager.getInstance().getString("button.cancel"));
         cancelButton.addActionListener(l);
         Container bottomPanel = createButtonPanel(okButton, cancelButton);
 
@@ -139,7 +140,7 @@ public class OTVGoToDialog extends EscapableDialog {
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
         JRootPane rootPane = getRootPane();
         rootPane.setDefaultButton(okButton);
-        setTitle("Go To");
+        setTitle(LanguageManager.getInstance().getString("dialog.go_to"));
         setModal(true);
         applyComponentOrientation(orientation);
         pack();
@@ -199,7 +200,7 @@ public class OTVGoToDialog extends EscapableDialog {
      * override.
      */
     protected void displayInvalidLineNumberMessage() {
-        UISupport.getDialogs().showErrorMessage("Manimum line number allowed is " + maxLineNumberAllowed + ".");
+        UISupport.getDialogs().showErrorMessage(LanguageManager.getInstance().getString("error.invalid_line_number") + " " + maxLineNumberAllowed + ".");
     }
 
     /**

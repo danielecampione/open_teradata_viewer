@@ -26,6 +26,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -34,12 +36,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.editor.md5_sum_tools.MD5SumCalculator;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -50,12 +54,17 @@ import net.sourceforge.open_teradata_viewer.editor.md5_sum_tools.MD5SumCalculato
 public class CalculateMD5ChecksumAction extends CustomAction {
 
     private static final long serialVersionUID = 4640612452891344926L;
-
+    
     private final Insets insets = new Insets(0, 0, 0, 0);
 
     public CalculateMD5ChecksumAction() {
-        super("Calculate the MD5 Checksum", null, null, "Calculate the MD5 Checksum of the selected file.");
+        super(LanguageManager.getInstance().getString("menu.file.calculate_md5"), null, null, LanguageManager.getInstance().getString("menu.file.calculate_md5.short_description"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.file.calculate_md5.short_description"));
+        });
     }
 
     /* (non-Javadoc)
@@ -67,43 +76,58 @@ public class CalculateMD5ChecksumAction extends CustomAction {
         File file = FileIO.chooseFile();
         if (file != null && file.exists()) {
             MD5SumCalculator md5SumCalculator = new MD5SumCalculator();
-            JPanel panel = new JPanel(new GridBagLayout());
-            JLabel label = new JLabel("MD5 sum: ");
-            final JTextField textField = new JTextField(md5SumCalculator.calculateMD5Checksum(file));
-            JLabel label2 = new JLabel("Compare: ");
-            final JTextField textField2 = new JTextField();
-            JButton compareButton = new JButton("Compare");
-            textField.setEditable(false);
-            JButton button = new JButton("OK");
-            addComponent(panel, label, 0, 0, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, textField, 0, 1, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, label2, 0, 2, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, textField2, 0, 3, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, compareButton, 0, 4, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-            addComponent(panel, new JSeparator(), 0, 5, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, button, 0, 6, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+            final String md5Sum = md5SumCalculator.calculateMD5Checksum(file);
 
-            Object[] options = new Object[] { button };
-            final JOptionPane optionPane = new JOptionPane(panel, JOptionPane.INFORMATION_MESSAGE,
-                    JOptionPane.OK_CANCEL_OPTION, null, options, options[0]);
-            optionPane.setOptionType(JOptionPane.OK_OPTION);
-            final JDialog dialog = optionPane.createDialog("MD5 Sum");
-            dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    optionPane.setValue(JOptionPane.OK_OPTION);
-                    dialog.dispose();
-                }
-            });
-            compareButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(app, "MD5 Check Sums are "
-                            + ((textField.getText().equals(textField2.getText())) ? "the same." : "different."));
-                }
-            });
-            UISupport.showDialog(dialog);
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        JPanel panel = new JPanel(new GridBagLayout());
+                        JLabel label = new JLabel("MD5 sum: ");
+                        JTextField textField = new JTextField(md5Sum);
+                        JLabel label2 = new JLabel("Compare: ");
+                        JTextField textField2 = new JTextField();
+                        JButton compareButton = new JButton("Compare");
+                        textField.setEditable(false);
+                        JButton button = new JButton("OK");
+
+                        addComponent(panel, label, 0, 0, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, textField, 0, 1, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, label2, 0, 2, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, textField2, 0, 3, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, compareButton, 0, 4, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+                        addComponent(panel, new JSeparator(), 0, 5, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, button, 0, 6, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+
+                        Object[] options = new Object[]{button};
+                        JOptionPane optionPane = new JOptionPane(panel, JOptionPane.INFORMATION_MESSAGE,
+                                JOptionPane.OK_CANCEL_OPTION, null, options, options[0]);
+                        optionPane.setOptionType(JOptionPane.OK_OPTION);
+                        JDialog dialog = optionPane.createDialog("MD5 Sum");
+                        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+                        button.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                optionPane.setValue(JOptionPane.OK_OPTION);
+                                dialog.dispose();
+                            }
+                        });
+                        compareButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                JOptionPane.showMessageDialog(app, "MD5 Check Sums are "
+                                        + ((textField.getText().equals(textField2.getText()))
+                                        ? "the same." : "different."));
+                            }
+                        });
+
+                        UISupport.showDialog(dialog);
+                    }
+                });
+            } catch (InterruptedException | InvocationTargetException ex) {
+                throw new Exception("Error creating UI components", ex);
+            }
         }
     }
 

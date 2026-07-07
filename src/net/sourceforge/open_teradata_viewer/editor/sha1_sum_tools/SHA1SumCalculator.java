@@ -36,14 +36,13 @@ public class SHA1SumCalculator {
 
     public String calculateSHA1ChecksumOfAFile(File file) throws Exception {
         MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-        FileInputStream fis = new FileInputStream(file);
-
-        byte[] data = new byte[1024];
-        int read = 0;
-        while ((read = fis.read(data)) != -1) {
-            sha1.update(data, 0, read);
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] data = new byte[1024];
+            int read = 0;
+            while ((read = fis.read(data)) != -1) {
+                sha1.update(data, 0, read);
+            }
         }
-        ;
         byte[] hashBytes = sha1.digest();
 
         StringBuffer sb = new StringBuffer();

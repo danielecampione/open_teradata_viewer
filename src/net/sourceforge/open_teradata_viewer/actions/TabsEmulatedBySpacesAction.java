@@ -24,6 +24,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -35,9 +36,14 @@ public class TabsEmulatedBySpacesAction extends CustomAction {
 
     private static final long serialVersionUID = -7180689551210436531L;
 
-    public TabsEmulatedBySpacesAction() {
-        super("Tabs emulated by spaces");
+    public TabsEmulatedBySpacesAction() {       
+    	super(LanguageManager.getInstance().getString("action.tabs_emulated_by_spaces"));
         setEnabled(true);
+                
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.tabs_emulated_by_spaces"));
+        });
     }
 
     @Override

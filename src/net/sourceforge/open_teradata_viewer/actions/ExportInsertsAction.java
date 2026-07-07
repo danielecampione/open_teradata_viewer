@@ -29,6 +29,7 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExportPreviewer;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  *
@@ -41,44 +42,52 @@ public class ExportInsertsAction extends CustomAction {
     private static final long serialVersionUID = 1267349870154368273L;
 
     protected ExportInsertsAction() {
-        super("Export INSERT statements", "source.png", null, null);
+    	super(LanguageManager.getInstance().getString("action.export.insert_statements"), "source.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.export.insert_statements"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("No result to write.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("No result to write.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
         if (table.getSelectedRowCount() > 0
                 && table.getSelectedRowCount() != table.getRowCount()) {
-            Object option = Dialog.show("Insert Statements", "Export",
-                    Dialog.QUESTION_MESSAGE, new Object[] { "Everything",
-                            "Selection" }, "Everything");
-            if (option == null || "-1".equals(option.toString())) {
-                return;
-            }
-            selection = "Selection".equals(option);
+        	LanguageManager langManager = LanguageManager.getInstance();
+        	Object option = Dialog.show(langManager.getString("dialog.inserts"),
+        			langManager.getString("action.export"),
+        	        Dialog.QUESTION_MESSAGE,
+        	        new Object[]{"option.everything", "option.selection"},
+        	        "option.everything");
+        	if (option == null || "-1".equals(option.toString())) {
+        	    return;
+        	}
+        	selection = langManager.getString("option.selection").equals(option);
         }
         String tableName = "?";
-        Scanner scanner = new Scanner(Context.getInstance().getQuery());
-        while (scanner.hasNext()) {
-            if ("from".equals(scanner.next().toLowerCase())) {
-                if (scanner.hasNext()) {
-                    tableName = scanner.next();
+        String query = Context.getInstance().getQuery();
+        if (query != null) {
+            Scanner scanner = new Scanner(query);
+            while (scanner.hasNext()) {
+                if ("from".equals(scanner.next().toLowerCase())) {
+                    if (scanner.hasNext()) {
+                        tableName = scanner.next();
+                    }
+                    break;
                 }
-                break;
             }
+            scanner.close();
         }
-        scanner.close();
         StringBuilder prefix = new StringBuilder();
         prefix.append("insert into ");
         prefix.append(tableName);
@@ -88,17 +97,14 @@ public class ExportInsertsAction extends CustomAction {
         boolean[] isLob = new boolean[columnCount];
         boolean[] parseDate = new boolean[columnCount];
         for (int column = 0; column < columnCount; column++) {
-            prefix.append(Context
-                    .getInstance()
-                    .getConnectionData()
+            prefix.append(Context.getInstance().getConnectionData()
                     .checkMixedCaseQuotedIdentifier(table.getColumnName(column)));
             if (column + 1 < columnCount) {
                 prefix.append(",");
             }
-            parseDate[column] = Context.getInstance().getConnectionData()
-                    .isOracle()
-                    && (Context.getInstance().getColumnTypes()[column] == Types.DATE || Context
-                            .getInstance().getColumnTypes()[column] == Types.TIMESTAMP);
+            parseDate[column] = Context.getInstance().getConnectionData().isOracle()
+                    && (Context.getInstance().getColumnTypes()[column] == Types.DATE
+                            || Context.getInstance().getColumnTypes()[column] == Types.TIMESTAMP);
             isLob[column] = ResultSetTable.isLob(column);
         }
         prefix.append(") values (");

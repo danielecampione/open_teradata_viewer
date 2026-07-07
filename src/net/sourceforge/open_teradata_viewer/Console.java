@@ -36,6 +36,7 @@ import org.joda.time.DateTime;
 
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -61,9 +62,16 @@ public class Console extends JTextPane {
 
         fileIndex = getGreatestFileIndex();
         DateTime dateTime = new DateTime(new java.util.Date());
-        logFile = new File(Utilities.normalizePath(System.getProperty("user.home")) + "open_teradata_viewer_"
-                + String.format("%04d", dateTime.getYear()) + "-" + String.format("%02d", dateTime.getMonthOfYear())
-                + "-" + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
+        StringBuilder logFileName = new StringBuilder();
+        logFileName.append(Utilities.normalizePath(System.getProperty("user.home")))
+                .append("open_teradata_viewer_")
+                .append(String.format("%04d", dateTime.getYear()))
+                .append("-")
+                .append(String.format("%02d", dateTime.getMonthOfYear()))
+                .append("-")
+                .append(String.format("%02d", dateTime.getDayOfMonth()))
+                .append(".log");
+        logFile = new File(logFileName.toString());
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
@@ -80,7 +88,7 @@ public class Console extends JTextPane {
     }
 
     public void print(String text, Color foregroundColor) {
-        if (!((getDocument().getLength() + text.length()) <= maxCharacters)) {
+        if ((getDocument().getLength() + text.length()) > maxCharacters) {
             setText("");
         }
 
@@ -105,10 +113,16 @@ public class Console extends JTextPane {
                 }
                 logFile.renameTo(new File(logFile.getAbsolutePath() + "-" + fileIndex++));
                 DateTime dateTime = new DateTime(new java.util.Date());
-                logFile = new File(Utilities.normalizePath(System.getProperty("user.home")) + "open_teradata_viewer_"
-                        + String.format("%04d", dateTime.getYear()) + "-"
-                        + String.format("%02d", dateTime.getMonthOfYear()) + "-"
-                        + String.format("%02d", dateTime.getDayOfMonth()) + ".log");
+                StringBuilder newLogFileName = new StringBuilder();
+                newLogFileName.append(Utilities.normalizePath(System.getProperty("user.home")))
+                        .append("open_teradata_viewer_")
+                        .append(String.format("%04d", dateTime.getYear()))
+                        .append("-")
+                        .append(String.format("%02d", dateTime.getMonthOfYear()))
+                        .append("-")
+                        .append(String.format("%02d", dateTime.getDayOfMonth()))
+                        .append(".log");
+                logFile = new File(newLogFileName.toString());
                 try {
                     logFile.createNewFile();
                 } catch (IOException ioe) {
@@ -161,18 +175,28 @@ public class Console extends JTextPane {
 
     private int getGreatestFileIndex() {
         DateTime dateTime = new DateTime(new java.util.Date());
-        String fileName = "open_teradata_viewer_" + String.format("%04d", dateTime.getYear()) + "-"
-                + String.format("%02d", dateTime.getMonthOfYear()) + "-"
-                + String.format("%02d", dateTime.getDayOfMonth()) + ".log-";
+        StringBuilder fileNameBuilder = new StringBuilder();
+        fileNameBuilder.append("open_teradata_viewer_")
+                .append(String.format("%04d", dateTime.getYear()))
+                .append("-")
+                .append(String.format("%02d", dateTime.getMonthOfYear()))
+                .append("-")
+                .append(String.format("%02d", dateTime.getDayOfMonth()))
+                .append(".log-");
+        String fileName = fileNameBuilder.toString();
         File userHome = new File(Utilities.normalizePath(System.getProperty("user.home")));
         File[] listedFiles = Utilities.listFiles(userHome);
         Vector<Integer> listedFilesIndexVector = new Vector<Integer>(1, 1);
         for (int i = 0; i < listedFiles.length; i++) {
             if (!listedFiles[i].isDirectory()) {
                 if (listedFiles[i].getName().startsWith(fileName)
-                        && listedFiles[i].getName().length() > (fileName).length()) {
-                    listedFilesIndexVector.add(new Integer(listedFiles[i].getName().substring((fileName).length(),
-                            listedFiles[i].getName().length())));
+                        && listedFiles[i].getName().length() > fileName.length()) {
+                    try {
+                        listedFilesIndexVector.add(Integer.valueOf(
+                                listedFiles[i].getName().substring(fileName.length())));
+                    } catch (NumberFormatException nfe) {
+                        // Suffix is not a valid integer: skip this file
+                    }
                 }
             }
         }
@@ -187,5 +211,16 @@ public class Console extends JTextPane {
         }
         Arrays.sort(listedFilesIndex);
         return ++listedFilesIndex[listedFilesIndex.length - 1];
+    }
+    
+    /**
+     * Refreshes the language for console components.
+     * The console doesn't have many localizable strings, but this method
+     * is provided for consistency with other GUI components.
+     */
+    public void refreshLanguage() {
+        // Console doesn't have many UI strings to localize
+        // This method is here for consistency and future extensions
+        repaint();
     }
 }

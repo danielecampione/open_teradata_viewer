@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -29,10 +31,15 @@ public class ExportGroupAction extends GroupAction {
     private static final long serialVersionUID = 5638058942897380741L;
 
     protected ExportGroupAction() {
-        super("Export");
+        super(LanguageManager.getInstance().getString("menu.query.export"));
         addAction(Actions.EXPORT_EXCEL);
         addAction(Actions.EXPORT_PDF);
         addAction(Actions.EXPORT_FLAT_FILE);
         addAction(Actions.EXPORT_INSERTS);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.export"));
+        });
     }
 }

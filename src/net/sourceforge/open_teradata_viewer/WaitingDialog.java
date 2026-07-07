@@ -27,6 +27,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
@@ -36,40 +37,57 @@ import net.sourceforge.open_teradata_viewer.util.SwingUtil;
  * 
  */
 public class WaitingDialog extends TimerTask {
-    private JLabel message1 = new JLabel();
-    private JLabel message2 = new JLabel();
+
+    private JLabel message1;
+    private JLabel message2;
     private JDialog dialog;
     private long startTime = System.currentTimeMillis();
+    private Timer timer;
 
     public WaitingDialog(final Runnable onCancel) throws InterruptedException {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.add(message1);
-        panel.add(message2);
-        final Dialog pane = new Dialog(panel, Dialog.PLAIN_MESSAGE,
-                Dialog.DEFAULT_OPTION, new Object[]{"Cancel"}, "Cancel");
-        dialog = pane.createDialog(ApplicationFrame.getInstance(), null);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UISupport.showDialog(dialog);
-                } catch (ConcurrentModificationException cme) {
-                    ExceptionDialog.ignoreException(cme);
+        final LanguageManager langManager = LanguageManager.getInstance();
+        final String cancelText = langManager.getString("button.cancel");
+
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    message1 = new JLabel();
+                    message2 = new JLabel();
+                    JPanel panel = new JPanel(new GridLayout(2, 1));
+                    panel.add(message1);
+                    panel.add(message2);
+                    final Dialog pane = new Dialog(panel, Dialog.PLAIN_MESSAGE,
+                            Dialog.DEFAULT_OPTION, new Object[]{cancelText}, cancelText);
+                    dialog = pane.createDialog(ApplicationFrame.getInstance(), null);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                UISupport.showDialog(dialog);
+                            } catch (ConcurrentModificationException cme) {
+                                ExceptionDialog.ignoreException(cme);
+                            }
+                            if ((onCancel != null) && cancelText.equals(pane.getValue())) {
+                                onCancel.run();
+                            }
+                        }
+                    }).start();
                 }
-                if ((onCancel != null) && "Cancel".equals(pane.getValue())) {
-                    onCancel.run();
-                }
-            }
-        }).start();
-        // wait
+            });
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            ExceptionDialog.ignoreException(ite);
+        }
+
         boolean visible = false;
         while (!visible) {
-            // x64 systems hang without this Thread.sleep(20)
             Thread.sleep(20);
             visible = SwingUtil.isVisible(dialog);
         }
-        new Timer().schedule(this, 3000, 1000);
+        timer = new Timer();
+        timer.schedule(this, 3000, 1000);
     }
+
     public void setText(String text) {
         message1.setText(text);
     }
@@ -81,22 +99,29 @@ public class WaitingDialog extends TimerTask {
     public void hide() {
         dialog.dispose();
         cancel();
+        timer.cancel();
     }
 
     public String getExecutionTime() {
+        LanguageManager langManager = LanguageManager.getInstance();
         long executionTime = (System.currentTimeMillis() - startTime) / 1000;
         long hours = executionTime / 60 / 60;
         long minutes = executionTime / 60 % 60;
         long seconds = executionTime % 60;
         StringBuilder text = new StringBuilder();
         if (hours > 0) {
-            text.append(hours).append(hours == 1 ? " hour " : " hours ");
+            text.append(hours).append(hours == 1 ?
+                langManager.getString("time.hour_singular") :
+                langManager.getString("time.hour_plural")).append(" ");
         }
         if (minutes > 0) {
-            text.append(minutes)
-                    .append(minutes == 1 ? " minute " : " minutes ");
+            text.append(minutes).append(minutes == 1 ?
+                langManager.getString("time.minute_singular") :
+                langManager.getString("time.minute_plural")).append(" ");
         }
-        text.append(seconds).append(seconds == 1 ? " second" : " seconds");
+        text.append(seconds).append(seconds == 1 ?
+            langManager.getString("time.second_singular") :
+            langManager.getString("time.second_plural"));
         return text.toString();
     }
 

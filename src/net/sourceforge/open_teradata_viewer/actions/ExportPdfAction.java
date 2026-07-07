@@ -30,6 +30,7 @@ import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -65,34 +66,39 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
     private static final BaseFont BASE_FONT = FONT.getCalculatedBaseFont(false);
 
     protected ExportPdfAction() {
-        super("Export PDF", "pdf.png", null, null);
+        super(LanguageManager.getInstance().getString("action.export.pdf"), "pdf.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
         setEnabled(hasResultSet);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.export.pdf"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         JTable table = ResultSetTable.getInstance();
         if (table.getRowCount() == 0) {
-            ApplicationFrame
-                    .getInstance()
-                    .getConsole()
-                    .println("No result to write.",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            ApplicationFrame.getInstance().getConsole().println("No result to write.",
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
             return;
         }
         boolean selection = false;
         if (table.getSelectedRowCount() > 0
                 && table.getSelectedRowCount() != table.getRowCount()) {
-            Object option = Dialog.show("PDF", "Export",
-                    Dialog.QUESTION_MESSAGE, new Object[]{"Everything",
-                            "Selection"}, "Everything");
+        	LanguageManager langManager = LanguageManager.getInstance();
+        	Object option = Dialog.show(langManager.getString("dialog.pdf"),
+        			langManager.getString("action.export"),
+        	        Dialog.QUESTION_MESSAGE,
+        	        new Object[]{"option.everything", "option.selection"},
+        	        "option.everything");
             if (option == null || "-1".equals(option.toString())) {
                 return;
             }
-            selection = "Selection".equals(option);
+            selection = langManager.getString("option.selection").equals(option);
         }
 
         List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
@@ -102,22 +108,18 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
         pdfPTable.getDefaultCell().setPaddingBottom(4);
         int[] widths = new int[columnCount];
 
-        // Row Header
         pdfPTable.getDefaultCell().setBorderWidth(2);
         for (int i = 0; i < columnCount; i++) {
             String columnName = table.getColumnName(i);
             pdfPTable.addCell(new Phrase(columnName, ROW_HEADER_FONT));
-            widths[i] = Math.min(
-                    50000,
-                    Math.max(widths[i],
-                            ROW_HEADER_BASE_FONT.getWidth(columnName + " ")));
+            widths[i] = Math.min(50000,
+                    Math.max(widths[i], ROW_HEADER_BASE_FONT.getWidth(columnName + " ")));
         }
         pdfPTable.getDefaultCell().setBorderWidth(1);
         if (!list.isEmpty()) {
             pdfPTable.setHeaderRows(1);
         }
 
-        // Body
         for (int i = 0; i < list.size(); i++) {
             if (!selection || table.isRowSelected(i)) {
                 List<?> record = (List<?>) list.get(i);
@@ -136,38 +138,34 @@ public class ExportPdfAction extends CustomAction implements PdfPageEvent {
                         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                     }
                     pdfPTable.addCell(cell);
-                    widths[j] = Math.min(
-                            50000,
-                            Math.max(widths[j],
-                                    BASE_FONT.getWidth(o.toString())));
+                    widths[j] = Math.min(50000,
+                            Math.max(widths[j], BASE_FONT.getWidth(o.toString())));
                 }
             }
         }
 
-        // Size
         pdfPTable.setWidths(widths);
         int totalWidth = 0;
         for (int width : widths) {
             totalWidth += width;
         }
         Rectangle pageSize = PageSize.A4.rotate();
-        pageSize.setRight(pageSize.getRight()
-                * Math.max(1f, totalWidth / 53000f));
+        pageSize.setRight(pageSize.getRight() * Math.max(1f, totalWidth / 53000f));
         pageSize.setTop(pageSize.getTop() * Math.max(1f, totalWidth / 53000f));
 
-        // Document
         Document document = new Document(pageSize);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PdfWriter writer = PdfWriter.getInstance(document,
-                byteArrayOutputStream);
+        PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
         document.open();
-        pdfTemplate = writer.getDirectContent().createTemplate(100, 100);
-        pdfTemplate.setBoundingBox(new Rectangle(-20, -20, 100, 100));
-        writer.setPageEvent(this);
-        document.add(pdfPTable);
-        document.close();
-        FileIO.saveAndOpenFile("export.pdf",
-                byteArrayOutputStream.toByteArray());
+        try {
+            pdfTemplate = writer.getDirectContent().createTemplate(100, 100);
+            pdfTemplate.setBoundingBox(new Rectangle(-20, -20, 100, 100));
+            writer.setPageEvent(this);
+            document.add(pdfPTable);
+        } finally {
+            document.close();
+        }
+        FileIO.saveAndOpenFile("export.pdf", byteArrayOutputStream.toByteArray());
     }
 
     /** Print page numbers on right bottom corner. */

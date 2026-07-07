@@ -26,6 +26,7 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -38,10 +39,15 @@ public class FullScreenAction extends CustomAction {
     private static final long serialVersionUID = 1052503682296759923L;
 
     public FullScreenAction() {
-        super("Full Screen", null,
+        super(LanguageManager.getInstance().getString("menu.view.full_screen"), null,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F11, KeyEvent.VK_UNDEFINED),
                 null);
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.view.full_screen"));
+        });
     }
 
     @Override

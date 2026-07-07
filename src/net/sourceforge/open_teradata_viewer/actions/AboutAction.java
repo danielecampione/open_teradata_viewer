@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.AboutDialog;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Displays an "About" dialog.
@@ -35,19 +36,37 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 public class AboutAction extends CustomAction implements MouseListener {
 
     private static final long serialVersionUID = -4235652606704763545L;
-
+    
     protected AboutAction() {
-        super("About..");
+    	super(LanguageManager.getInstance().getString("action.about"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.about"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        AboutDialog ad = new AboutDialog(
-                (ApplicationFrame) SwingUtilities
-                        .getWindowAncestor(applicationFrame));
-        ad.setLocationRelativeTo(applicationFrame);
-        ad.setVisible(true);
+        final ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    AboutDialog ad = new AboutDialog(
+                            (ApplicationFrame) SwingUtilities
+                                    .getWindowAncestor(applicationFrame));
+                    ad.setLocationRelativeTo(applicationFrame);
+                    ad.setVisible(true);
+                }
+            });
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
+        } catch (java.lang.reflect.InvocationTargetException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

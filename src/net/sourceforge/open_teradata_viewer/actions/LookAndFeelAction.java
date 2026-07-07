@@ -19,11 +19,6 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
-import java.util.StringTokenizer;
-
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
@@ -48,8 +43,6 @@ public class LookAndFeelAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "l&f" process can be performed only if other processes are NOT
-        // running. No ThreadAction object must be instantiated
         try {
             performThreaded(e);
         } catch (Throwable t) {
@@ -64,38 +57,5 @@ public class LookAndFeelAction extends CustomAction {
             return;
         }
         ApplicationFrame.getInstance().setLookAndFeel(laf);
-    }
-
-    private void selectPrecedingLookAndFeelMenuItem() {
-        StringTokenizer stringTokenizer = new StringTokenizer(
-                UIManager.getLookAndFeel().getClass().toString()
-                        .substring("class ".length()),
-                ".");
-        String strSelectedLookAndFeel = "";
-        while (stringTokenizer.hasMoreElements()) {
-            strSelectedLookAndFeel = (String) stringTokenizer.nextElement();
-        }
-
-        // Searching for the look & feel menu
-        JMenuBar menuBar = ApplicationFrame.getInstance().getJMenuBar();
-        int lookAndFeelMenuPosition = -1;
-        for (int i = 0; i < menuBar.getMenuCount(); i++) {
-            JMenu currentMenu = menuBar.getMenu(i);
-            if (currentMenu.getActionCommand()
-                    .equals(ApplicationFrame.LAF_MENU_LABEL)) {
-                lookAndFeelMenuPosition = i;
-                break;
-            }
-        }
-
-        JMenu lookAndFeelMenu = menuBar.getMenu(lookAndFeelMenuPosition);
-        for (int i = 0; i < lookAndFeelMenu.getItemCount(); i++) {
-            JRadioButtonMenuItem menuItem = (JRadioButtonMenuItem) lookAndFeelMenu
-                    .getItem(i);
-            if (strSelectedLookAndFeel.equals(menuItem.getActionCommand())) {
-                menuItem.setSelected(true);
-                break;
-            }
-        }
     }
 }

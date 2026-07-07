@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 
 /**
@@ -39,7 +40,7 @@ public class LobCopyAction extends CustomAction {
     private static final long serialVersionUID = -7053146801060935508L;
 
     protected LobCopyAction() {
-        super("Copy Lob", "copy.png", null, null);
+        super(LanguageManager.getInstance().getString("action.lob.copy"), "copy.png", null, null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         boolean hasResultSet = isConnected
                 && Context.getInstance().getResultSet() != null;
@@ -47,6 +48,11 @@ public class LobCopyAction extends CustomAction {
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
                         .getSelectedColumn());
         setEnabled(isLobSelected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.lob.copy"));
+        });
     }
 
     @Override

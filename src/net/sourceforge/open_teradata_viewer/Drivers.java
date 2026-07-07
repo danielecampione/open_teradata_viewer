@@ -42,6 +42,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 
 import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -132,68 +133,94 @@ public class Drivers {
     }
 
     public static int editDrivers() throws Exception {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new Insets(2, 2, 2, 2);
-        c.gridy++;
-        c.gridwidth = 3;
-        panel.add(new JLabel(
-                String.format("The JDBC driver jar files are located in \"%s\".", new File(".").getCanonicalPath())),
-                c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        panel.add(new JSeparator(), c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        panel.add(new JLabel("Currently loaded drivers:"), c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridwidth = 1;
-        Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
-        while (loadedDrivers.hasMoreElements()) {
-            Driver loadedDriver = loadedDrivers.nextElement();
-            c.gridy++;
-            c.gridx = 0;
-            panel.add(new JLabel(loadedDriver.getClass().getName()), c);
-            c.gridx++;
-            panel.add(
-                    new JLabel(String.format("v%d.%d", loadedDriver.getMajorVersion(), loadedDriver.getMinorVersion())),
-                    c);
-            c.gridx++;
-            try {
-                URI uri = loadedDriver.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-                String path = new File(uri).getName();
-                panel.add(new JLabel(path), c);
-            } catch (Exception e) {
-                panel.add(new JLabel(), c);
-            }
+        // Ensure all UI components are created on EDT
+        final java.util.concurrent.atomic.AtomicReference<JPanel> panelRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<JTextArea> driverfieldRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicInteger responseRef = new java.util.concurrent.atomic.AtomicInteger();
+        
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JPanel panel = new JPanel(new GridBagLayout());
+                        GridBagConstraints c = new GridBagConstraints();
+                        c.anchor = GridBagConstraints.WEST;
+                        c.fill = GridBagConstraints.BOTH;
+                        c.insets = new Insets(2, 2, 2, 2);
+                        c.gridy++;
+                        c.gridwidth = 3;
+                        LanguageManager langManager = LanguageManager.getInstance();
+                        
+                        panel.add(new JLabel(
+                                langManager.getString("drivers.location", new File(".").getCanonicalPath())),
+                                c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        panel.add(new JSeparator(), c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        panel.add(new JLabel(langManager.getString("drivers.loaded")), c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridwidth = 1;
+                        Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
+                        while (loadedDrivers.hasMoreElements()) {
+                            Driver loadedDriver = loadedDrivers.nextElement();
+                            c.gridy++;
+                            c.gridx = 0;
+                            panel.add(new JLabel(loadedDriver.getClass().getName()), c);
+                            c.gridx++;
+                            panel.add(
+                                    new JLabel(String.format("v%d.%d", loadedDriver.getMajorVersion(), loadedDriver.getMinorVersion())),
+                                    c);
+                            c.gridx++;
+                            try {
+                                URI uri = loadedDriver.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
+                                String path = new File(uri).getName();
+                                panel.add(new JLabel(path), c);
+                            } catch (Exception e) {
+                                panel.add(new JLabel(), c);
+                            }
+                        }
+                        c.gridwidth = 3;
+                        c.gridx = 0;
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        panel.add(new JSeparator(), c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        panel.add(new JLabel(langManager.getString("drivers.add_manual")), c);
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+                        c.gridy++;
+                        String drivers = Config.getDrivers();
+                        JTextArea driverfield = new JTextArea(drivers, 4, 0);
+                        panel.add(new JScrollPane(driverfield), c);
+                        
+                        panelRef.set(panel);
+                        driverfieldRef.set(driverfield);
+                        
+                        int response = Dialog.show(langManager.getString("dialog.drivers"), panel, Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
+                        responseRef.set(response);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
-        c.gridwidth = 3;
-        c.gridx = 0;
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        panel.add(new JSeparator(), c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        panel.add(new JLabel("Add any driver that couldn't automatically be loaded to the list below,"
-                + " separated by a comma or a new line."), c);
-        c.gridy++;
-        panel.add(new JLabel(" "), c);
-        c.gridy++;
-        String drivers = Config.getDrivers();
-        JTextArea driverfield = new JTextArea(drivers, 4, 0);
-        panel.add(new JScrollPane(driverfield), c);
-        int response = Dialog.show("Drivers", panel, Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
+        
+        int response = responseRef.get();
         if (Dialog.OK_OPTION == response) {
-            Config.saveDrivers(driverfield.getText());
+            Config.saveDrivers(driverfieldRef.get().getText());
             try {
                 initialized = false;
                 initialize();

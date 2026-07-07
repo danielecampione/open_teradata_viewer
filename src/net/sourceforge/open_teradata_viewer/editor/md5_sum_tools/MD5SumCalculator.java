@@ -37,9 +37,10 @@ public class MD5SumCalculator {
     }
 
     public String calculateMD5Checksum(File file) throws IOException {
-        FileInputStream fis = new FileInputStream(file);
-        byte[] md5 = DigestUtils.md5(fis);
-        String hexString = new String(Hex.encodeHex(md5));
-        return hexString;
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] md5 = DigestUtils.md5(fis);
+            String hexString = new String(Hex.encodeHex(md5));
+            return hexString;
+        }
     }
 }

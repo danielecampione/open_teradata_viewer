@@ -24,6 +24,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.spell.SpellingParser;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -38,8 +39,13 @@ public class ToggleSpellCheckingAction extends CustomAction {
     private boolean isSpellCheckEnabled;
 
     public ToggleSpellCheckingAction() {
-        super("Toggle Spell Checking");
+        super(LanguageManager.getInstance().getString("menu.edit.toggle_spell_checking"));
         isSpellCheckEnabled = true;
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.toggle_spell_checking"));
+        });
     }
 
     @Override

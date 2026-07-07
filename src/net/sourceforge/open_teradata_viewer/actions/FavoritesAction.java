@@ -34,6 +34,7 @@ import javax.xml.transform.TransformerException;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Config;
 import net.sourceforge.open_teradata_viewer.Dialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 import org.xml.sax.SAXException;
 
@@ -48,9 +49,14 @@ public class FavoritesAction extends CustomAction {
     private static final long serialVersionUID = -7717126935429649941L;
 
     protected FavoritesAction() {
-        super("Favorites", "favorites.png", KeyStroke.getKeyStroke(
+        super(LanguageManager.getInstance().getString("menu.file.favorites"), "favorites.png", KeyStroke.getKeyStroke(
                 KeyEvent.VK_F, KeyEvent.ALT_DOWN_MASK), null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.file.favorites"));
+        });
     }
 
     @Override
@@ -59,46 +65,78 @@ public class FavoritesAction extends CustomAction {
     }
 
     public void favorites() throws ParserConfigurationException, IOException,
-            TransformerException, SAXException {
-        Map<String, String> favorites = Config.getFavorites();
-        final JList<?> list = new JList<Object>(favorites.keySet().toArray());
-        list.addMouseListener(this);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        Object value = Dialog.show("Favorites", new JScrollPane(list),
-                Dialog.PLAIN_MESSAGE, new Object[]{"OK", "Cancel", "Add",
-                        "Delete"}, "OK");
-        if ("OK".equals(value)) {
-            if (!list.isSelectionEmpty()) {
-                String name = (String) list.getSelectedValue();
-                String s = favorites.get(name);
-                ApplicationFrame.getInstance().setText(s);
-            }
-        } else if ("Delete".equals(value)) {
-            if (!list.isSelectionEmpty()) {
-                if (Dialog.YES_OPTION == Dialog.show("Delete favorite",
-                        "Are you sure?", Dialog.WARNING_MESSAGE,
-                        Dialog.YES_NO_OPTION)) {
-                    String name = (String) list.getSelectedValue();
-                    favorites.remove(name);
-                    Config.saveFavorites(favorites);
-                }
-            }
-            favorites();
-        } else if ("Add".equals(value)) {
-            JComboBox<?> comboBox = new JComboBox<Object>(favorites.keySet()
-                    .toArray());
-            comboBox.setEditable(true);
-            comboBox.setSelectedIndex(-1);
-            if (Dialog.OK_OPTION == Dialog.show("Name", comboBox,
-                    Dialog.QUESTION_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
-                String name = (String) comboBox.getSelectedItem();
-                if (name != null && !"".equals(name.trim())) {
-                    favorites.put(name, ApplicationFrame.getInstance()
-                            .getText());
-                    Config.saveFavorites(favorites);
-                }
-            }
-            favorites();
-        }
-    }
+    TransformerException, SAXException {
+		Map<String, String> favorites = Config.getFavorites();
+		
+		final java.util.concurrent.atomic.AtomicReference<JList<?>> listRef = new java.util.concurrent.atomic.AtomicReference<>();
+		final java.util.concurrent.atomic.AtomicReference<JScrollPane> scrollPaneRef = new java.util.concurrent.atomic.AtomicReference<>();
+		
+		try {
+		    javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+		        @Override
+		        public void run() {
+		            final JList<?> tempList = new JList<Object>(favorites.keySet().toArray());
+		            tempList.addMouseListener(FavoritesAction.this);
+		            tempList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		            JScrollPane tempScrollPane = new JScrollPane(tempList);
+		            listRef.set(tempList);
+		            scrollPaneRef.set(tempScrollPane);
+		        }
+		    });
+		} catch (Exception ex) {
+		    throw new RuntimeException(ex);
+		}
+		
+		final JList<?> list = listRef.get();
+		final JScrollPane scrollPane = scrollPaneRef.get();
+		
+		LanguageManager langManager = LanguageManager.getInstance();
+		Object value = Dialog.show(langManager.getString("dialog.favorites.title"), scrollPane,
+		        Dialog.PLAIN_MESSAGE, new Object[]{"button.ok", "button.cancel", "button.add",
+		                "button.delete"}, "button.ok");
+		if (langManager.getString("button.ok").equals(value)) {
+		    if (!list.isSelectionEmpty()) {
+		        String name = (String) list.getSelectedValue();
+		        String s = favorites.get(name);
+		        ApplicationFrame.getInstance().setText(s);
+		    }
+		} else if (langManager.getString("button.delete").equals(value)) {
+		    if (!list.isSelectionEmpty()) {
+		        if (Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.delete_favorite.title"),
+		                langManager.getString("message.are_you_sure"), Dialog.WARNING_MESSAGE,
+		                Dialog.YES_NO_OPTION)) {
+		            String name = (String) list.getSelectedValue();
+		            favorites.remove(name);
+		            Config.saveFavorites(favorites);
+		        }
+		    }
+		    favorites();
+		} else if (langManager.getString("button.add").equals(value)) {
+		    final java.util.concurrent.atomic.AtomicReference<JComboBox<?>> comboBoxRef =
+		            new java.util.concurrent.atomic.AtomicReference<>();
+		    try {
+		        javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+		            @Override
+		            public void run() {
+		                JComboBox<Object> cb = new JComboBox<Object>(favorites.keySet().toArray());
+		                cb.setEditable(true);
+		                cb.setSelectedIndex(-1);
+		                comboBoxRef.set(cb);
+		            }
+		        });
+		    } catch (Exception ex) {
+		        throw new RuntimeException(ex);
+		    }
+		    JComboBox<?> comboBox = comboBoxRef.get();
+		    if (Dialog.OK_OPTION == Dialog.show(langManager.getString("dialog.name"), comboBox,
+		            Dialog.QUESTION_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
+		        String name = (String) comboBox.getSelectedItem();
+		        if (name != null && !"".equals(name.trim())) {
+		            favorites.put(name, ApplicationFrame.getInstance().getText());
+		            Config.saveFavorites(favorites);
+		        }
+		    }
+		    favorites();
+		}
+	}
 }

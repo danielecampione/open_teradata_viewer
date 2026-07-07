@@ -24,6 +24,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,8 +37,13 @@ public class FadeCurrentLineHighlightAction extends CustomAction {
     private static final long serialVersionUID = -3918879928096853886L;
 
     public FadeCurrentLineHighlightAction() {
-        super("Fade current line highlight");
+        super(LanguageManager.getInstance().getString("action.fade_current_line_highlight"));
         setEnabled(true);
+        
+    	// Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.fade_current_line_highlight"));
+        });
     }
 
     @Override

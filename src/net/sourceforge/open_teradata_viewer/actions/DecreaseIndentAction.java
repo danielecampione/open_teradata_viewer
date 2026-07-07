@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -26,6 +27,8 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
+
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -40,11 +43,17 @@ public class DecreaseIndentAction extends CustomAction {
     private Action decreaseIndent;
 
     protected DecreaseIndentAction() {
-        super("Decrease indentation", "format_decreaseindent.png", KeyStroke
+        super(LanguageManager.getInstance().getString("menu.edit.decrease_indentation"), "format_decreaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK),
-                "Decreases the indentation amount for all selected lines.");
+                LanguageManager.getInstance().getString("menu.edit.decrease_indentation.short_description"));
         decreaseIndent = new RSyntaxTextAreaEditorKit.DecreaseIndentAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.decrease_indentation"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("menu.edit.decrease_indentation.short_description"));
+        });
     }
 
     @Override

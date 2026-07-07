@@ -32,6 +32,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ApplicationMenuBar;
@@ -85,16 +86,25 @@ public class RunMacroAction extends CustomAction {
     }
 
     private void handleSubmit(Macro macro) {
-        // Verify that the file exists before trying to run it
         File file = new File(macro.getFile());
         if (!file.isFile()) {
             String text = "The script associated with this macro no longer exists:\n\n{0}\n\nDo you want to remove this macro?";
             text = MessageFormat.format(text, file.getAbsolutePath());
             String title = "An error occured";
             ApplicationFrame app = ApplicationFrame.getInstance();
-            int rc = JOptionPane.showConfirmDialog(app, text, title, JOptionPane.YES_NO_OPTION,
-                    JOptionPane.ERROR_MESSAGE);
-            if (rc == JOptionPane.YES_OPTION) {
+            final String finalText = text;
+            final String finalTitle = title;
+            final int[] rc = {JOptionPane.NO_OPTION};
+            try {
+                javax.swing.SwingUtilities.invokeAndWait(() -> {
+                    rc[0] = JOptionPane.showConfirmDialog(app, finalText, finalTitle,
+                            JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                });
+            } catch (Exception ex) {
+                ExceptionDialog.hideException(ex);
+                return;
+            }
+            if (rc[0] == JOptionPane.YES_OPTION) {
                 MacroManager.get().removeMacro(macro);
                 ApplicationMenuBar menuBar = app.getApplicationMenuBar();
                 menuBar.refreshMacrosMenu();
@@ -102,15 +112,10 @@ public class RunMacroAction extends CustomAction {
             return;
         }
 
-        try {
-            BufferedReader r = new BufferedReader(new FileReader(file));
-            try {
-                handleSubmit(file.getName(), r);
-            } finally {
-                r.close();
-            }
-        } catch (Throwable t /* IOException ioe */ ) {
-            ExceptionDialog.showException(t /* ioe */ );
+        try (BufferedReader r = new BufferedReader(new FileReader(file))) {
+            handleSubmit(file.getName(), r);
+        } catch (Throwable t) {
+            ExceptionDialog.showException(t);
         }
     }
 
@@ -142,7 +147,21 @@ public class RunMacroAction extends CustomAction {
         bindings.put("app", app);
         bindings.put("textArea", app.getTextComponent());
 
-        engine.eval(r);
+        // Script execution MUST happen on the EDT: the macro may create
+        // Swing components (e.g. JPopupMenu) and Substance enforces EDT-only
+        // component creation.
+        final ScriptEngine finalEngine = engine;
+        final Throwable[] evalError = {null};
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                finalEngine.eval(r);
+            } catch (Throwable t) {
+                evalError[0] = t;
+            }
+        });
+        if (evalError[0] != null) {
+            throw evalError[0];
+        }
     }
 
     /**
@@ -156,8 +175,15 @@ public class RunMacroAction extends CustomAction {
             String message = "In order to run Groovy macros, place a copy of the embeddable\nGroovy jar in this location:\n\n{0}\n\nRestarting "
                     + Main.APPLICATION_NAME + " will also be required.";
             message = MessageFormat.format(message, ApplicationFrame.getInstance().getUserDirectory());
-            String title = "An error occured";
-            JOptionPane.showMessageDialog(ApplicationFrame.getInstance(), message, title, JOptionPane.ERROR_MESSAGE);
+            final String finalMessage = message;
+            try {
+                javax.swing.SwingUtilities.invokeAndWait(() -> {
+                    JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
+                            finalMessage, "An error occured", JOptionPane.ERROR_MESSAGE);
+                });
+            } catch (Exception ex) {
+                ExceptionDialog.hideException(ex);
+            }
             return null;
         }
 
@@ -213,7 +239,13 @@ public class RunMacroAction extends CustomAction {
      */
     private void showLoadingEngineError(String engine) {
         String message = "Script engine not found: " + engine;
-        String title = "An error occured";
-        JOptionPane.showMessageDialog(ApplicationFrame.getInstance(), message, title, JOptionPane.ERROR_MESSAGE);
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
+                        message, "An error occured", JOptionPane.ERROR_MESSAGE);
+            });
+        } catch (Exception ex) {
+            ExceptionDialog.hideException(ex);
+        }
     }
 }

@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -35,7 +36,12 @@ public class DeleteAction extends CustomAction {
     private static final long serialVersionUID = 2562827293387124219L;
 
     protected DeleteAction() {
-        super("Delete", "delete.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.query.delete"), "delete.png", null, null);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.delete"));
+        });
     }
 
     @Override

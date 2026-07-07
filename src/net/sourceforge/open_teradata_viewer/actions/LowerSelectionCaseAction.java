@@ -27,6 +27,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -40,12 +42,18 @@ public class LowerSelectionCaseAction extends CustomAction {
     private Action lowerSelectionCase;
 
     protected LowerSelectionCaseAction() {
-        super("To lower case", null,
+        super(LanguageManager.getInstance().getString("action.to_lower_case"), null,
                 KeyStroke.getKeyStroke(KeyEvent.VK_L,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Converts all letters in the current selection to lower case.");
+                LanguageManager.getInstance().getString("action.to_lower_case.short_description"));
         lowerSelectionCase = new RTextAreaEditorKit.LowerSelectionCaseAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.to_lower_case"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.to_lower_case.short_description"));
+        });
     }
 
     @Override

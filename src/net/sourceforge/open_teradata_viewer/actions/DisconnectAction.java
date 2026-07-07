@@ -32,6 +32,7 @@ import net.sourceforge.open_teradata_viewer.Config;
 import net.sourceforge.open_teradata_viewer.ConnectionData;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -44,7 +45,12 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
     private static final long serialVersionUID = 7202373336183800439L;
 
     protected DisconnectAction() {
-        super("Disconnect", "disconnect.png", null, null);
+        super(LanguageManager.getInstance().getString("action.disconnect"), "disconnect.png", null, null);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.disconnect"));
+        });
     }
 
     @Override

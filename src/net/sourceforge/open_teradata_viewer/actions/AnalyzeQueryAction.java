@@ -35,6 +35,7 @@ import net.sourceforge.open_teradata_viewer.graphic_viewer.AnimatedLink;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  *
@@ -45,16 +46,20 @@ import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument
 public class AnalyzeQueryAction extends CustomAction {
 
     private static final long serialVersionUID = 4156741775582762590L;
-
+    
     public AnalyzeQueryAction() {
         super(
-                "Analyze query..",
+                LanguageManager.getInstance().getString("action.analyze_query"),
                 null,
                 null,
-                "<html><body>Show table list of the SQL query in a graphic viewer.<br />"
-                        + "SqlParser parses an SQL statement and translate it into a hierarchy of Java classes.<br />"
-                        + "The generated hierarchy can be navigated by using the Visitor Pattern.</body></html>");
+                LanguageManager.getInstance().getString("action.analyze_query.short_description"));
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.analyze_query"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.analyze_query.short_description"));
+        });
     }
 
     @Override

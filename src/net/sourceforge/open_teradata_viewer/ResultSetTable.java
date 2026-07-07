@@ -68,6 +68,10 @@ public final class ResultSetTable extends JTable {
         getTableHeader().addMouseListener(new TableSorter());
         getTableHeader().setFont(
                 getTableHeader().getFont().deriveFont(Font.BOLD));
+        
+        // Fix HiDPI: scale the row height
+        setRowHeight(net.sourceforge.open_teradata_viewer.util.SwingUtil.scale(18));
+        
         addMouseListener(Actions.LOB_EXPORT);
         getSelectionModel().addListSelectionListener(Actions.getInstance());
         getColumnModel().addColumnModelListener(Actions.getInstance());
@@ -86,12 +90,18 @@ public final class ResultSetTable extends JTable {
     public Object getTableValue() {
         int row = getSelectedRow();
         int column = getSelectedColumn();
+        if (row == -1 || column == -1) {
+            return null;
+        }
         return getValueAt(row, column);
     }
 
     public void setTableValue(Object o) {
         int row = getSelectedRow();
         int column = getSelectedColumn();
+        if (row == -1 || column == -1) {
+            return;
+        }
         setValueAt(o, row, column);
     }
 

@@ -30,6 +30,7 @@ import net.sourceforge.open_teradata_viewer.CustomSelectFromStatement;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.GenericSelectFromStatement;
 import net.sourceforge.open_teradata_viewer.SelectFromStatementTemplateMethod;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -43,22 +44,29 @@ public class SelectFromAction extends CustomAction {
     private static final long serialVersionUID = 5489248195539100092L;
 
     protected SelectFromAction() {
-        super("SELECT * FROM ..", null, KeyStroke.getKeyStroke(KeyEvent.VK_S,
+        super(LanguageManager.getInstance().getString("action.select_all"), null, KeyStroke.getKeyStroke(KeyEvent.VK_S,
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         setEnabled(true);
+
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.select_all"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
-        SelectFromStatementTemplateMethod selectFromStatement = isConnected ? new CustomSelectFromStatement(
-                promptRelationName()) : new GenericSelectFromStatement();
+        SelectFromStatementTemplateMethod selectFromStatement = isConnected
+                ? new CustomSelectFromStatement(promptRelationName())
+                : new GenericSelectFromStatement();
         ApplicationFrame.getInstance().getTextComponent()
                 .setText(selectFromStatement.returnSQLQuery());
         Actions.FORMAT_SQL.actionPerformed(new ActionEvent(this, 0, null));
     }
 
-    private String promptRelationName() {
+    private String promptRelationName() throws InterruptedException,
+            java.lang.reflect.InvocationTargetException {
         String relationName = null;
         boolean firstIteration = true;
         while (relationName == null) {
@@ -68,10 +76,18 @@ public class SelectFromAction extends CustomAction {
                 firstIteration = false;
             }
             if (relationName == null) {
-                relationName = Dialog
-                        .showInputDialog("Insert the table name: ");
+                // Dialog interaction must happen on the Event Dispatch Thread
+                // to avoid Substance state-tracking violations
+                final String[] result = new String[1];
+                javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        result[0] = Dialog.showInputDialog("Insert the table name: ");
+                    }
+                });
+                relationName = result[0];
                 if (relationName == null) {
-                    return relationName;
+                    return null;
                 }
             }
             if (!Utilities.canBeATeradataObjectName(relationName)) {

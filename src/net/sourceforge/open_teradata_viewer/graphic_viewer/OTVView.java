@@ -48,6 +48,7 @@ import javax.swing.JScrollBar;
 import javax.swing.border.TitledBorder;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 

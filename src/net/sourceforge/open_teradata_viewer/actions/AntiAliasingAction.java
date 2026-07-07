@@ -25,6 +25,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -37,24 +38,20 @@ public class AntiAliasingAction extends CustomAction {
     private static final long serialVersionUID = 2213398379400202894L;
 
     public AntiAliasingAction() {
-        super("Anti-Aliasing");
+    	super(LanguageManager.getInstance().getString("action.anti_aliasing"));
         setEnabled(true);
+                
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.anti_aliasing"));
+        });
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // The "anti-aliasing" process can be performed altough other processes
-        // are running
-        new ThreadedAction() {
-            @Override
-            protected void execute() {
-                try {
-                    performThreaded(e);
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
-                }
-            }
-        };
+        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
+                .getTextComponent();
+        textArea.setAntiAliasingEnabled(!textArea.getAntiAliasingEnabled());
     }
 
     /* (non-Javadoc)
@@ -62,8 +59,5 @@ public class AntiAliasingAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setAntiAliasingEnabled(!textArea.getAntiAliasingEnabled());
     }
 }

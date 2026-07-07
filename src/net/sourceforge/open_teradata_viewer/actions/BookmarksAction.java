@@ -24,6 +24,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,8 +37,13 @@ public class BookmarksAction extends CustomAction {
     private static final long serialVersionUID = -294438529445918621L;
 
     public BookmarksAction() {
-        super("Bookmarks");
+        super(LanguageManager.getInstance().getString("action.bookmarks"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.bookmarks"));
+        });
     }
 
     @Override

@@ -121,6 +121,10 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction FULL_SCREEN = new FullScreenAction();
     public static final CustomAction NEW_MACRO = new NewMacroAction();
     public static final CustomAction EDIT_MACRO = new EditMacroAction();
+    public static final CustomAction TOGGLE_CURRENT_FOLD = new ToggleCurrentFoldAction();
+    public static final CustomAction COLLAPSE_ALL_FOLDS = new CollapseAllFoldsAction();
+    public static final CustomAction EXPAND_ALL_FOLDS = new ExpandAllFoldsAction();
+    public static final CustomAction COLLAPSE_ALL_COMMENT_FOLDS = new CollapseAllCommentFoldsAction();
 
     private static final Actions ACTIONS = new Actions();
 

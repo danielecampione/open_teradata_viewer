@@ -239,34 +239,36 @@ public class GraphicViewerPen
             s = "stroke:none;";
         } else {
             int i = getWidth();
-            s = "stroke-width:" + Integer.toString(i) + ";";
+            StringBuilder sb = new StringBuilder();
+            sb.append("stroke-width:").append(i).append(";");
             if (getStyle() == 1) {
-                s = s + "stroke-dasharray:" + Integer.toString(i * 3) + ","
-                        + Integer.toString(i) + ";";
+                sb.append("stroke-dasharray:").append(i * 3).append(",")
+                        .append(i).append(";");
             } else if (getStyle() == 2) {
-                s = s + "stroke-dasharray:" + Integer.toString(i) + ","
-                        + Integer.toString(i) + ";";
+                sb.append("stroke-dasharray:").append(i).append(",")
+                        .append(i).append(";");
             } else if (getStyle() == 3) {
-                s = s + "stroke-dasharray:" + Integer.toString(i * 3) + ","
-                        + Integer.toString(i) + "," + Integer.toString(i) + ","
-                        + Integer.toString(i) + ";";
+                sb.append("stroke-dasharray:").append(i * 3).append(",")
+                        .append(i).append(",").append(i).append(",")
+                        .append(i).append(";");
             } else if (getStyle() == 4) {
-                s = s + "stroke-dasharray:" + Integer.toString(i * 3) + ","
-                        + Integer.toString(i) + "," + Integer.toString(i) + ","
-                        + Integer.toString(i) + "," + Integer.toString(i) + ","
-                        + Integer.toString(i) + ";";
+                sb.append("stroke-dasharray:").append(i * 3).append(",")
+                        .append(i).append(",").append(i).append(",")
+                        .append(i).append(",").append(i).append(",")
+                        .append(i).append(";");
             }
             Color color = getColor();
             if (color == Color.black) {
-                s = s + "stroke:black;";
+                sb.append("stroke:black;");
             } else {
                 int j = color.getRed();
                 int k = color.getGreen();
                 int l = color.getBlue();
-                s = s + "stroke:rgb(" + Integer.toString(j) + ","
-                        + Integer.toString(k) + "," + Integer.toString(l)
-                        + ");";
+                sb.append("stroke:rgb(").append(j).append(",")
+                        .append(k).append(",").append(l)
+                        .append(");");
             }
+            s = sb.toString();
         }
         String s1 = domelement.getAttribute("style");
         s1 = s1 + s;

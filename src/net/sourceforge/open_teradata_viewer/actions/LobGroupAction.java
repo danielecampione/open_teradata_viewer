@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -29,10 +31,15 @@ public class LobGroupAction extends GroupAction {
     private static final long serialVersionUID = -4276049980996794776L;
 
     protected LobGroupAction() {
-        super("Lob");
+        super(LanguageManager.getInstance().getString("menu.query.lob"));
         addAction(Actions.LOB_EXPORT);
         addAction(Actions.LOB_IMPORT);
         addAction(Actions.LOB_COPY);
         addAction(Actions.LOB_PASTE);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.query.lob"));
+        });
     }
 }

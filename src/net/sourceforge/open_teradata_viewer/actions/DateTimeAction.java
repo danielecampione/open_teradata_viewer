@@ -24,6 +24,8 @@ import javax.swing.Action;
 
 import org.fife.ui.rtextarea.RTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -37,10 +39,16 @@ public class DateTimeAction extends CustomAction {
     private Action dateTime;
     
     protected DateTimeAction() {
-        super("Date/Time", "clock.png", null,
-                "Puts date/time stamp at current location.");
+        super(LanguageManager.getInstance().getString("action.date_time"), "clock.png", null,
+        		LanguageManager.getInstance().getString("action.date_time.short_description"));
         dateTime = new RTextAreaEditorKit.TimeDateAction(); 
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.date_time"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.date_time.short_description"));
+        });
     }
 
     @Override

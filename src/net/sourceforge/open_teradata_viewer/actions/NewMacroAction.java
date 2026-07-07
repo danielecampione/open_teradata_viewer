@@ -32,6 +32,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
 import net.sourceforge.open_teradata_viewer.editor.macros.NewMacroDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.IOUtil;
 
 /**
@@ -45,28 +46,42 @@ public class NewMacroAction extends CustomAction {
     private static final long serialVersionUID = 1785032375160581778L;
 
     public NewMacroAction() {
-        super("New macro...", null, null, null);
+        super(LanguageManager.getInstance().getString("menu.macros.new"), null, null, null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.macros.new"));
+        });
     }
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        ApplicationFrame owner = ApplicationFrame.getInstance();
-        NewMacroDialog nmd = new NewMacroDialog(owner);
-        nmd.setVisible(true);
+        final ApplicationFrame owner = ApplicationFrame.getInstance();
+        final Macro[] result = new Macro[1];
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    NewMacroDialog nmd = new NewMacroDialog(owner);
+                    nmd.setVisible(true);
+                    result[0] = nmd.getMacro();
+                }
+            });
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            ExceptionDialog.hideException(ite);
+            return;
+        }
 
-        Macro macro = nmd.getMacro();
-        if (macro != null) {
+        Macro macro = result[0];
+        if (macro != null && macro.getFile() != null) {
             File file = new File(macro.getFile());
             if (!file.isFile()) { // Should always be true
                 createInitialContentByExtension(file);
             }
-
-            if (file != null) {
-                ApplicationFrame app = ApplicationFrame.getInstance();
-                FileLocation loc = FileLocation.create(file);
-                app.openFile(loc);
-            }
+            ApplicationFrame app = ApplicationFrame.getInstance();
+            FileLocation loc = FileLocation.create(file);
+            app.openFile(loc);
         }
     }
 
@@ -77,13 +92,11 @@ public class NewMacroAction extends CustomAction {
      * @param file The file's extension.
      */
     private void createInitialContentByExtension(File file) {
-        try {
-            PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        try (PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {
             String fileName = file.getName();
             String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
             String content = getInitialContentImpl(ext);
             w.println(content);
-            w.close();
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }

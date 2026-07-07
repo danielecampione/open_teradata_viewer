@@ -24,6 +24,7 @@ import java.io.File;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.FileIO;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -36,8 +37,13 @@ public class FileSaveAction extends CustomAction {
     private static final long serialVersionUID = -9193848167596376935L;
 
     protected FileSaveAction() {
-        super("Save File", "filesave.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.file.save"), "filesave.png", null, null);
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.file.save"));
+        });
     }
 
     @Override

@@ -28,6 +28,7 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.SchemaBrowser;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -40,8 +41,13 @@ public class SchemaBrowserAction extends CustomAction implements KeyListener {
     private static final long serialVersionUID = -2426894619024711099L;
 
     protected SchemaBrowserAction() {
-        super("Schema Browser", "schema.png", KeyStroke.getKeyStroke(
+        super(LanguageManager.getInstance().getString("action.schema_browser"), "schema.png", KeyStroke.getKeyStroke(
                 KeyEvent.VK_ENTER, KeyEvent.ALT_DOWN_MASK), null);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.schema_browser"));
+        });
     }
 
     @Override

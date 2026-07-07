@@ -41,6 +41,7 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  *
@@ -53,10 +54,15 @@ public class RunAction extends CustomAction {
     private static final long serialVersionUID = -502870390309110470L;
 
     protected RunAction() {
-        super("Run", "run.png",
+        super(LanguageManager.getInstance().getString("action.run"), "run.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         setEnabled(isConnected);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.run"));
+        });
     }
 
     @Override
@@ -91,33 +97,25 @@ public class RunAction extends CustomAction {
 
         final Statement[] statements = new Statement[] { statement };
         final boolean[] executed = { false };
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (!executed[0]) {
-                        // Don't cancel when we're already going through the
-                        // result set.
-                        // There's a problem with the Oracle driver
-                        // Over some VPN's, the cancel closes the connection
-                        statements[0].cancel();
-                    }
-                } catch (Throwable t) {
-                    ExceptionDialog.hideException(t);
+        Runnable onCancel = () -> {
+            try {
+                if (!executed[0]) {
+                    statements[0].cancel();
                 }
+            } catch (Throwable t) {
+                ExceptionDialog.hideException(t);
             }
         };
         WaitingDialog waitingDialog = new WaitingDialog(onCancel);
-        waitingDialog.setText("Executing statement");
+        waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
         try {
             boolean hasResultSet;
             try {
                 hasResultSet = statement.execute();
             } catch (SQLException sqle) {
                 if (statement.getResultSetConcurrency() != ResultSet.CONCUR_READ_ONLY) {
-                    // Try read-only and without modifications
+                    statement.close();
                     statement = Context.getInstance().getConnectionData().getConnection().prepareStatement(originalSql);
-                    // Bind variables
                     handleBindVariables(statement, bindVariables);
                     statements[0] = statement;
                     hasResultSet = statement.execute();
@@ -142,11 +140,6 @@ public class RunAction extends CustomAction {
                     for (int i = 0; i < columnCount; i++) {
                         try {
                             Object object = resultSet.getObject(i + 1);
-                            // System.out.println((i + 1) + " "
-                            //     + resultSet.getMetaData().getColumnName(i+1) + " - "
-                            //     + resultSet.getMetaData().getColumnType(i+1) + " - "
-                            //     + resultSet.getMetaData().getColumnTypeName(i+1) + " - "
-                            //     + resultSet.getMetaData().getColumnClassName(i+1) + " - \"" + object + "\"");
                             row.add(object);
                         } catch (Exception e) {
                             row.add("###");
@@ -167,7 +160,7 @@ public class RunAction extends CustomAction {
                     Vector<Object> row = new Vector<Object>(1);
                     row.add(Integer.toString(updateCount));
                     dataVector.add(row);
-                    columnIdentifiers.add("Rows updated");
+                    columnIdentifiers.add(LanguageManager.getInstance().getString("label.rows_updated"));
                     columnTypes = new int[] { Types.INTEGER };
                     columnTypeNames = new String[1];
                 } else if (statement instanceof CallableStatement) {
@@ -178,15 +171,14 @@ public class RunAction extends CustomAction {
                             row.add(o);
                             dataVector.add(row);
                         } catch (SQLException sqle) {
-                            // Not an output parameter
                             ExceptionDialog.ignoreException(sqle);
                         }
                     }
-                    columnIdentifiers.add("Statement executed");
+                    columnIdentifiers.add(LanguageManager.getInstance().getString("label.statement_executed"));
                     columnTypes = new int[] { Types.VARCHAR };
                     columnTypeNames = new String[1];
                 } else {
-                    columnIdentifiers.add("Statement executed");
+                    columnIdentifiers.add(LanguageManager.getInstance().getString("label.statement_executed"));
                     columnTypes = new int[] { Types.INTEGER };
                     columnTypeNames = new String[1];
                 }
@@ -248,7 +240,7 @@ public class RunAction extends CustomAction {
             ParameterMetaData metaData = statement.getParameterMetaData();
             String[] bindVariables = new String[metaData.getParameterCount()];
             for (int i = 0; i < metaData.getParameterCount(); i++) {
-                bindVariables[i] = JOptionPane.showInputDialog(String.format("Bind variable %d", i + 1));
+                bindVariables[i] = JOptionPane.showInputDialog(String.format(LanguageManager.getInstance().getString("message.bind_variable"), i + 1));
             }
             handleBindVariables(statement, bindVariables);
             return bindVariables;

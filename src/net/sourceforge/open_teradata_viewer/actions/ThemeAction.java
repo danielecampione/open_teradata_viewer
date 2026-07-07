@@ -18,6 +18,7 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 
 /**
  * 
@@ -62,10 +64,19 @@ public class ThemeAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
+        
+        // Let's save the font: let's capture the current font which is already scaled for Hi-DPI
+        Font currentScaledFont = textArea.getFont();
+        
         InputStream in = getClass().getResourceAsStream(xml);
         try {
             Theme theme = Theme.load(in);
+            // We apply the new theme which unfortunately resets the font sizes
             theme.apply(textArea);
+            
+            // We restore the font size: we force the scaled font on all tokens of the new theme
+            OTVSyntaxTextArea.setFont(textArea, currentScaledFont);
+            
             ApplicationFrame.getInstance().getApplicationMenuBar()
                     .refreshEditOptions();
         } catch (IOException ioe) {

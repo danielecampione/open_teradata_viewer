@@ -25,14 +25,20 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 public class IndentXMLAction extends CustomAction {
 
     private static final long serialVersionUID = -7312181464359474079L;
 
     protected IndentXMLAction() {
-        super("Pretty print (XML only - with line breaks)", null, null, null);
+        super(LanguageManager.getInstance().getString("action.pretty_print"));
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.pretty_print"));
+        });
     }
 
     @Override
@@ -50,18 +56,20 @@ public class IndentXMLAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         setEnabled(false);
-        OTVSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
-        XMLBeautifier xmlBeautifier = new XMLBeautifier(textArea.getTabSize());
-        String unformattedXML = textArea.getText();
-        String formattedXML = unformattedXML;
-        unformattedXML = xmlBeautifier.validateXML(unformattedXML);
         try {
-            formattedXML = xmlBeautifier.indentXML(unformattedXML);
-        } catch (Throwable t) {
-            ExceptionDialog.notifyException(t);
+            OTVSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
+            XMLBeautifier xmlBeautifier = new XMLBeautifier(textArea.getTabSize());
+            String unformattedXML = textArea.getText();
+            String formattedXML = unformattedXML;
+            unformattedXML = xmlBeautifier.validateXML(unformattedXML);
+            try {
+                formattedXML = xmlBeautifier.indentXML(unformattedXML);
+            } catch (Throwable t) {
+                ExceptionDialog.notifyException(t);
+            }
+            textArea.setText(formattedXML);
+        } finally {
+            setEnabled(true);
         }
-
-        textArea.setText(formattedXML);
-        setEnabled(true);
     }
 }

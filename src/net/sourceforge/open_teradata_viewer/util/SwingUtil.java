@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.util;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Image;
@@ -32,6 +33,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
@@ -48,6 +50,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -61,6 +64,10 @@ import net.sourceforge.open_teradata_viewer.actions.CustomAction;
  */
 public class SwingUtil {
 
+	// --- HiDPI LOGIC ---
+    // We calculate the factor only once at startup
+    public static final float DPI_SCALE = java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 96f;
+	
     public static String setButtonText(AbstractButton button, String text) {
         if (text == null || text.equals("")) {
             return null;
@@ -431,11 +438,10 @@ public class SwingUtil {
     public static Frame getRootFrame() {
         Frame[] frames = javax.swing.JFrame.getFrames();
         if (frames != null && frames.length > 0) {
-            for (Frame frame : frames) {
-                if (frame.isVisible()) {
-                    return frame;
-                }
-            }
+            return java.util.Arrays.stream(frames)
+                    .filter(Frame::isVisible)
+                    .findFirst()
+                    .orElse(null);
         }
         return null;
     }
@@ -452,7 +458,7 @@ public class SwingUtil {
             java.awt.Color color2) {
         return new java.awt.Color((color1.getRed() + color2.getRed()) / 2,
                 (color1.getGreen() + color2.getGreen()) / 2,
-                (color1.getGreen() + color2.getGreen()) / 2);
+                (color1.getBlue() + color2.getBlue()) / 2);
     }
 
     public static String shortcutText(int code, int modifiers) {
@@ -615,5 +621,47 @@ public class SwingUtil {
             }
         };
         worker.execute();
+    }
+
+    // Method to scale the font size
+    public static int scaledFont(int size) {
+        return Math.round(size * DPI_SCALE);
+    }
+
+    // Method for scaling pixels (sizes, margins, etc.)
+    public static int scale(int value) {
+        return Math.round(value * DPI_SCALE);
+    }
+    
+    private static float getDpiScaleFactor() {
+        int dpi = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+        return dpi / 96.0f; // 96 DPI is the basic standard
+    }
+
+    public static void scaleAllFonts() {
+        float scaleFactor = getDpiScaleFactor();
+        if (scaleFactor == 1.0f) {
+            return; // No scaling necessary on standard monitors
+        }
+        
+        java.util.Set<Object> keySet = javax.swing.UIManager.getLookAndFeelDefaults().keySet();
+        Object[] keys = keySet.toArray(new Object[keySet.size()]);
+        for (Object key : keys) {
+            if (key != null && key.toString().toLowerCase().contains("font")) {
+                java.awt.Font font = javax.swing.UIManager.getDefaults().getFont(key);
+                if (font != null) {
+                    // Scales the font proportionally and then subtracts 4 units (pixels/points)
+                    float scaledSize = (font.getSize() * scaleFactor) - 4.0f;
+                    
+                    // Safeguard: prevents some fonts from becoming unreadable
+                    if (scaledSize < 15.0f) {
+                        scaledSize = 15.0f;
+                    }
+                    
+                    font = font.deriveFont(scaledSize);
+                    javax.swing.UIManager.put(key, font);
+                }
+            }
+        }
     }
 }

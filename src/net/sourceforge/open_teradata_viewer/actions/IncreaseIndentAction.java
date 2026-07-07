@@ -26,6 +26,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -39,11 +41,17 @@ public class IncreaseIndentAction extends CustomAction {
     private Action increaseIndent;
 
     protected IncreaseIndentAction() {
-        super("Increase indentation", "format_increaseindent.png", KeyStroke
+        super(LanguageManager.getInstance().getString("menu.edit.increase_indentation"), "format_increaseindent.png", KeyStroke
                 .getKeyStroke(KeyEvent.VK_TAB, 0),
-                "Increases the indentation amount for all selected lines.");
+                LanguageManager.getInstance().getString("menu.edit.increase_indentation.short_description"));
         increaseIndent = new RSyntaxTextAreaEditorKit.InsertTabAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.edit.increase_indentation"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("menu.edit.increase_indentation.short_description"));
+        });
     }
 
     @Override

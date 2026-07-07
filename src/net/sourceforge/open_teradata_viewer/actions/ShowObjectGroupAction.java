@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -30,10 +32,15 @@ public class ShowObjectGroupAction extends GroupAction {
 
     /** Ctor. */
     protected ShowObjectGroupAction() {
-        super("Show");
+        super(LanguageManager.getInstance().getString("menu.show"));
         addAction(Actions.SHOW_TABLE);
         addAction(Actions.SHOW_VIEW);
         addAction(Actions.SHOW_PROCEDURE);
         addAction(Actions.SHOW_MACRO);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("menu.show"));
+        });
     }
 }

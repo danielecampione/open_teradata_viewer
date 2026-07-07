@@ -31,8 +31,10 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
 
+import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.editor.search.OTVSyntaxSearchEngine;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 
@@ -162,15 +164,23 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
 
     /** Changes the styles used in the editor programmatically. */
     private void changeStyleProgrammatically() {
-        // Set the font for all token types
-        setFont(this, new Font("Courier New", Font.PLAIN, 16));
+        // We use SwingUtil to scale the size defined in UISupport
+        int scaledSize = net.sourceforge.open_teradata_viewer.util.SwingUtil.scale(UISupport.DEFAULT_EDITOR_FONT_SIZE);
+        
+        // We create the scaled font only once to reuse it
+        java.awt.Font editorFont = new java.awt.Font("Courier New", java.awt.Font.PLAIN, scaledSize);
 
-        // Change a few things here and there
-        SyntaxScheme scheme = getSyntaxScheme();
-        scheme.getStyle(Token.RESERVED_WORD).background = Color.yellow;
-        scheme.getStyle(Token.DATA_TYPE).foreground = Color.blue;
-        scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).underline = true;
-        scheme.getStyle(Token.COMMENT_EOL).font = new Font("Courier New", Font.PLAIN, 16);
+        // Set the font for all token types
+        setFont(this, editorFont);
+
+        // Change the specific styles
+        org.fife.ui.rsyntaxtextarea.SyntaxScheme scheme = getSyntaxScheme();
+        scheme.getStyle(org.fife.ui.rsyntaxtextarea.Token.RESERVED_WORD).background = java.awt.Color.yellow;
+        scheme.getStyle(org.fife.ui.rsyntaxtextarea.Token.DATA_TYPE).foreground = java.awt.Color.blue;
+        scheme.getStyle(org.fife.ui.rsyntaxtextarea.Token.LITERAL_STRING_DOUBLE_QUOTE).underline = true;
+        
+        // We apply the same scaled font to the comments as well
+        scheme.getStyle(org.fife.ui.rsyntaxtextarea.Token.COMMENT_EOL).font = editorFont;
 
         revalidate();
     }

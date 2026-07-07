@@ -32,15 +32,16 @@ public abstract class ThreadedAction implements Runnable {
 
     @Override
     public final void run() {
-        final Component focusOwner = KeyboardFocusManager
-                .getCurrentKeyboardFocusManager().getFocusOwner();
+        final Component[] focusOwnerHolder = {null};
         final Component glassPane = ApplicationFrame.getInstance().getRootPane()
                 .getGlassPane();
         try {
-            if (!glassPane.isVisible()) {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    focusOwnerHolder[0] = KeyboardFocusManager
+                            .getCurrentKeyboardFocusManager().getFocusOwner();
+                    if (!glassPane.isVisible()) {
                         if (glassPane.getMouseListeners().length == 0) {
                             glassPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
                             glassPane.addMouseListener(new MouseAdapter() {
@@ -49,26 +50,26 @@ public abstract class ThreadedAction implements Runnable {
                         glassPane.setVisible(true);
                         glassPane.requestFocus();
                     }
-                });
-            }
+                }
+            });
             execute();
         } catch (Throwable t) {
             ExceptionDialog.showException(t);
         } finally {
-            if (glassPane.isVisible()) {
-                try {
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (glassPane.isVisible()) {
                             glassPane.setVisible(false);
-                            if (focusOwner != null) {
-                                focusOwner.requestFocus();
+                            if (focusOwnerHolder[0] != null) {
+                                focusOwnerHolder[0].requestFocus();
                             }
                         }
-                    });
-                } catch (Throwable t) {
-                    ExceptionDialog.hideException(t);
-                }
+                    }
+                });
+            } catch (Throwable t) {
+                ExceptionDialog.hideException(t);
             }
         }
     }

@@ -75,6 +75,7 @@ import net.sourceforge.open_teradata_viewer.ScrollPane;
 import net.sourceforge.open_teradata_viewer.StatusBar;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * A dialog showing the user what their print job will look like.
@@ -143,21 +144,25 @@ public class PrintPreviewDialog extends EscapableDialog implements ActionListene
         setContentPane(contentPane);
         contentPane.add(topPanel, BorderLayout.NORTH);
         contentPane.add(new StatusBar(""), BorderLayout.SOUTH);
-        printButton = new JButton("Print");
+        LanguageManager langManager = LanguageManager.getInstance();
+        
+        printButton = new JButton(langManager.getString("button.print"));
         printButton.setActionCommand("Print");
         printButton.addActionListener(this);
         toolBarPanel.add(printButton);
-        prevPageButton = new JButton("Previous Page");
+        
+        prevPageButton = new JButton(langManager.getString("button.previous_page"));
         prevPageButton.setEnabled(false);
         prevPageButton.setActionCommand("PrevPage");
         prevPageButton.addActionListener(this);
         toolBarPanel.add(prevPageButton);
-        nextPageButton = new JButton("Next Page");
+        
+        nextPageButton = new JButton(langManager.getString("button.next_page"));
         nextPageButton.setActionCommand("NextPage");
         nextPageButton.addActionListener(this);
         toolBarPanel.add(nextPageButton);
 
-        closeButton = new JButton("Close");
+        closeButton = new JButton(langManager.getString("button.close"));
         closeButton.setActionCommand("Close");
         closeButton.addActionListener(this);
         toolBarPanel.add(closeButton);
@@ -198,7 +203,7 @@ public class PrintPreviewDialog extends EscapableDialog implements ActionListene
 
         // Get ready to go
         updateButtons();
-        setTitle("Print Preview");
+        setTitle(langManager.getString("menu.file.print_preview"));
         applyComponentOrientation(orientation);
         pack();
     }

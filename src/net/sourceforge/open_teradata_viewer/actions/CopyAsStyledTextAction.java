@@ -27,6 +27,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
 /**
  * 
  * 
@@ -40,12 +42,18 @@ public class CopyAsStyledTextAction extends CustomAction {
     private Action copyAsStyledText;
 
     protected CopyAsStyledTextAction() {
-        super("Copy as Styled Text", "copy.png",
+        super(LanguageManager.getInstance().getString("action.copy_styled"), "copy.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_C,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Copies the current selection to the clipboard as styled text.");
+                LanguageManager.getInstance().getString("action.copy_styled.short_description"));
         copyAsStyledText = new RSyntaxTextAreaEditorKit.CopyAsStyledTextAction();
         setEnabled(true);
+        
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.copy_styled"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.copy_styled.short_description"));
+        });
     }
 
     @Override

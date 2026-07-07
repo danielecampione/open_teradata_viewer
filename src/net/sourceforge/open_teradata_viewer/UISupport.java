@@ -83,14 +83,17 @@ public class UISupport {
     private static Boolean isHeadless;
 
     public static final String DEFAULT_EDITOR_FONT = "Courier plain";
-    public static final int DEFAULT_EDITOR_FONT_SIZE = 11;
+    public static final int DEFAULT_EDITOR_FONT_SIZE = 13;
 
     static {
         frame = ApplicationFrame.getInstance();
         setDialogs(new SwingDialogs(frame));
 
         if (!isHeadless()) {
-            TOOLBAR_BUTTON_DIMENSION = new Dimension(22, 21);
+            int scaledWidth = SwingUtil.scale(22);
+            int scaledHeight = SwingUtil.scale(21);
+            
+            TOOLBAR_BUTTON_DIMENSION = new Dimension(scaledWidth, scaledHeight);
         }
     }
 

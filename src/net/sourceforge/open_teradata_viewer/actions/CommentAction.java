@@ -28,6 +28,7 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -41,10 +42,16 @@ public class CommentAction extends CustomAction {
     private static final long serialVersionUID = -2802751406188460908L;
 
     public CommentAction() {
-        super("Comment SQL code", "comment.png",
+        super(LanguageManager.getInstance().getString("action.comment_sql_code"), "comment.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_7, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                "Comments the selected text.");
+                LanguageManager.getInstance().getString("action.comment_sql_code.short_description"));
         setEnabled(true);
+                
+        // Add language change listener to update the action name when language changes
+        LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
+            putValue(NAME, newBundle.getString("action.comment_sql_code"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.comment_sql_code.short_description"));
+        });
     }
 
     @Override

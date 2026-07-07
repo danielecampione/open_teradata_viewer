@@ -43,6 +43,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 
 /**
  * 
@@ -169,158 +171,158 @@ public class TextPropsDialog extends JDialog {
         this.setResizable(false);
         getContentPane().add(panel1);
 
-        setTitle("Text Properties");
+        setTitle(LanguageManager.getInstance().getString("dialog.text_properties"));
 
-        OKButton.setText("OK");
+        OKButton.setText(LanguageManager.getInstance().getString("button.ok"));
         panel1.add(OKButton);
         OKButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         OKButton.setBounds(new Rectangle(168, 272, 79, 22));
 
-        CancelButton.setText("Cancel");
+        CancelButton.setText(LanguageManager.getInstance().getString("button.cancel"));
         panel1.add(CancelButton);
         CancelButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         CancelButton.setBounds(new Rectangle(276, 272, 79, 22));
 
-        classNameLabel.setText("class name");
+        classNameLabel.setText(LanguageManager.getInstance().getString("text.dialog.class.name"));
         classNameLabel.setBounds(new Rectangle(8, 4, 389, 24));
         panel1.add(classNameLabel);
 
-        label1.setText("Height:");
+        label1.setText(LanguageManager.getInstance().getString("label.height"));
         label1.setHorizontalAlignment(JLabel.RIGHT);
         label1.setBounds(new Rectangle(67, 36, 43, 24));
         heightField.setEditable(false);
         heightField.setBounds(new Rectangle(114, 37, 36, 24));
 
-        jLabel1.setText("Width:");
+        jLabel1.setText(LanguageManager.getInstance().getString("label.width"));
         jLabel1.setHorizontalAlignment(JLabel.RIGHT);
         jLabel1.setBounds(new Rectangle(68, 70, 41, 17));
         widthField.setEditable(false);
         widthField.setBounds(new Rectangle(113, 66, 40, 23));
 
-        label2.setText("x:");
+        label2.setText(LanguageManager.getInstance().getString("label.x"));
         label2.setHorizontalAlignment(JLabel.RIGHT);
         label2.setBounds(new Rectangle(1, 35, 19, 24));
         xField.setBounds(new Rectangle(25, 36, 36, 24));
 
-        label3.setText("y:");
+        label3.setText(LanguageManager.getInstance().getString("text.dialog.y"));
         label3.setHorizontalAlignment(JLabel.RIGHT);
         label3.setBounds(new Rectangle(1, 67, 19, 24));
         yField.setBounds(new Rectangle(27, 67, 36, 24));
 
-        label6.setText("Font Size:");
+        label6.setText(LanguageManager.getInstance().getString("text.dialog.font.size"));
         label6.setHorizontalAlignment(JLabel.RIGHT);
         label6.setBounds(new Rectangle(12, 108, 64, 24));
         panel1.add(label6);
         fontSizeField.setBounds(new Rectangle(84, 108, 36, 24));
         panel1.add(fontSizeField);
 
-        label4.setText("Text:");
+        label4.setText(LanguageManager.getInstance().getString("text.dialog.text"));
         label4.setHorizontalAlignment(JLabel.RIGHT);
         label4.setBounds(new Rectangle(161, 36, 40, 24));
         textField.setBounds(new Rectangle(209, 36, 324, 24));
         textAreaScroll.setBounds(new Rectangle(209, 36, 209, 67));
 
-        label5.setText("Face:");
+        label5.setText(LanguageManager.getInstance().getString("text.dialog.face"));
         label5.setHorizontalAlignment(JLabel.RIGHT);
         label5.setBounds(new Rectangle(136, 108, 36, 24));
         panel1.add(label5);
         faceNameField.setBounds(new Rectangle(180, 108, 324, 24));
         panel1.add(faceNameField);
 
-        visibleBox.setText("Visible");
+        visibleBox.setText(LanguageManager.getInstance().getString("text.dialog.visible"));
         visibleBox.setBounds(new Rectangle(24, 144, 104, 24));
         panel1.add(visibleBox);
 
-        selectableBox.setText("Selectable");
+        selectableBox.setText(LanguageManager.getInstance().getString("text.dialog.selectable"));
         selectableBox.setBounds(new Rectangle(24, 168, 104, 24));
         panel1.add(selectableBox);
 
-        resizableBox.setText("Resizable");
+        resizableBox.setText(LanguageManager.getInstance().getString("text.dialog.resizable"));
         resizableBox.setBounds(new Rectangle(24, 192, 104, 24));
         panel1.add(resizableBox);
 
-        draggableBox.setText("Draggable");
+        draggableBox.setText(LanguageManager.getInstance().getString("text.dialog.draggable"));
         draggableBox.setBounds(new Rectangle(24, 216, 104, 24));
         panel1.add(draggableBox);
 
-        twoDScale.setText("2D Scale");
+        twoDScale.setText(LanguageManager.getInstance().getString("text.dialog.2d.scale"));
         twoDScale.setBounds(new Rectangle(24, 240, 104, 24));
         panel1.add(twoDScale);
 
-        autoResize.setText("AutoResize");
+        autoResize.setText(LanguageManager.getInstance().getString("text.dialog.auto.resize"));
         autoResize.setBounds(new Rectangle(132, 144, 94, 24));
         panel1.add(autoResize);
 
-        multilineBox.setText("Multiline");
+        multilineBox.setText(LanguageManager.getInstance().getString("text.dialog.multiline"));
         multilineBox.setBounds(new Rectangle(132, 168, 94, 24));
         panel1.add(multilineBox);
 
-        clipping.setText("Clipping");
+        clipping.setText(LanguageManager.getInstance().getString("text.dialog.clipping"));
         clipping.setBounds(new Rectangle(132, 192, 94, 24));
         panel1.add(clipping);
 
-        wrapping.setText("Wrapping");
+        wrapping.setText(LanguageManager.getInstance().getString("text.dialog.wrapping"));
         wrapping.setBounds(new Rectangle(132, 216, 94, 24));
         panel1.add(wrapping);
 
-        editableBox.setText("Editable");
+        editableBox.setText(LanguageManager.getInstance().getString("text.dialog.editable"));
         editableBox.setBounds(new Rectangle(132, 240, 94, 24));
         panel1.add(editableBox);
 
-        editSingle.setText("Edit on Single Click");
+        editSingle.setText(LanguageManager.getInstance().getString("text.dialog.edit.single.click"));
         panel1.add(editSingle);
         editSingle.setBounds(new Rectangle(228, 240, 140, 24));
 
-        boldBox.setText("Bold");
+        boldBox.setText(LanguageManager.getInstance().getString("text.dialog.bold"));
         boldBox.setBounds(new Rectangle(228, 144, 94, 24));
         panel1.add(boldBox);
 
-        italicBox.setText("Italic");
+        italicBox.setText(LanguageManager.getInstance().getString("text.dialog.italic"));
         italicBox.setBounds(new Rectangle(228, 168, 94, 24));
         panel1.add(italicBox);
 
-        underlineBox.setText("Underline");
+        underlineBox.setText(LanguageManager.getInstance().getString("text.dialog.underline"));
         underlineBox.setBounds(new Rectangle(228, 192, 94, 24));
         panel1.add(underlineBox);
 
-        strikeBox.setText("Strike");
+        strikeBox.setText(LanguageManager.getInstance().getString("text.dialog.strike"));
         strikeBox.setBounds(new Rectangle(228, 216, 94, 24));
         panel1.add(strikeBox);
 
-        alignLeftRadio.setText("Align Left");
+        alignLeftRadio.setText(LanguageManager.getInstance().getString("text.dialog.align.left"));
         alignGroup.add(alignLeftRadio);
         alignLeftRadio.setBounds(new Rectangle(324, 144, 94, 24));
         panel1.add(alignLeftRadio);
 
-        alignCenterRadio.setText("Center");
+        alignCenterRadio.setText(LanguageManager.getInstance().getString("text.dialog.center"));
         alignGroup.add(alignCenterRadio);
         alignCenterRadio.setBounds(new Rectangle(324, 168, 94, 24));
         panel1.add(alignCenterRadio);
 
-        alignRightRadio.setText("Align Right");
+        alignRightRadio.setText(LanguageManager.getInstance().getString("text.dialog.align.right"));
         alignGroup.add(alignRightRadio);
         alignRightRadio.setBounds(new Rectangle(324, 192, 94, 24));
         panel1.add(alignRightRadio);
 
-        textColorButton.setText("Text Color...");
+        textColorButton.setText(LanguageManager.getInstance().getString("text.dialog.text.color"));
         textColorButton.setBackground(java.awt.Color.lightGray);
         textColorButton.setBounds(new Rectangle(420, 136, 117, 24));
         panel1.add(textColorButton);
 
-        backgroundColorButton.setText("Background...");
+        backgroundColorButton.setText(LanguageManager.getInstance().getString("text.dialog.background"));
         backgroundColorButton.setBackground(java.awt.Color.lightGray);
         backgroundColorButton.setBounds(new Rectangle(420, 166, 117, 24));
         panel1.add(backgroundColorButton);
 
-        transparentBox.setText("Transparent");
+        transparentBox.setText(LanguageManager.getInstance().getString("text.dialog.transparent"));
         transparentBox.setBounds(new Rectangle(420, 192, 96, 24));
         panel1.add(transparentBox);
 
-        selectBack.setText("Select Background");
+        selectBack.setText(LanguageManager.getInstance().getString("text.dialog.select.background"));
         panel1.add(selectBack);
         selectBack.setBounds(new Rectangle(420, 216, 130, 24));
 
-        label7.setText("Wrap Width:");
+        label7.setText(LanguageManager.getInstance().getString("text.dialog.wrap.width"));
         label7.setHorizontalAlignment(JLabel.RIGHT);
         label7.setBounds(new Rectangle(408, 240, 83, 24));
 
@@ -490,8 +492,9 @@ public class TextPropsDialog extends JDialog {
             UpdateControl();
             this.dispose(); // Free system resources
         } catch (Exception e) {
-            System.err.println(e.toString());
-            ExceptionDialog.hideException(e);
+            System.err.println("Error updating control properties: " + e.getMessage());
+            // Show error to user instead of hiding it
+            ExceptionDialog.showException(e);
         }
     }
 

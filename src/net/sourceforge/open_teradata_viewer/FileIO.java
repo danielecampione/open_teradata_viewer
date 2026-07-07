@@ -24,11 +24,12 @@ import java.awt.Font;
 import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.util.Optional;
 
 import javax.swing.JFileChooser;
 import javax.swing.TransferHandler;
@@ -37,6 +38,7 @@ import javax.swing.TransferHandler.TransferSupport;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -61,8 +63,9 @@ public class FileIO {
 
     public static void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
         File file = saveFile(fileName, bytes);
-        if (file != null && Dialog.YES_OPTION == Dialog.show("Open file",
-                "Open the file with the associated application?", Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+        LanguageManager langManager = LanguageManager.getInstance();
+        if (file != null && Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.open_file"),
+        		langManager.getString("dialog.open_file.associated_application"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
             FileIO.openFile(file, true);
         }
     }
@@ -75,12 +78,39 @@ public class FileIO {
         } catch (IndexOutOfBoundsException ioobe) {
             // Do nothing.
         }
-        if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(ApplicationFrame.getInstance())) {
-            Config.saveLastUsedDir(fileChooser.getCurrentDirectory().getCanonicalPath());
-            File selectedFile = fileChooser.getSelectedFile();
+
+        // Ensure JFileChooser.showSaveDialog is called on EDT
+        final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
+
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
+                    resultRef.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef.set(fileChooser.getSelectedFile());
+                        try {
+                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
+        if (JFileChooser.APPROVE_OPTION == resultRef.get()) {
+        	LanguageManager langManager = LanguageManager.getInstance();
+            Config.saveLastUsedDir(currentDirRef.get());
+            File selectedFile = selectedFileRef.get();
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
-            if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show("File exists",
-                    "Overwrite existing file?", Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+            if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.file_exists"),
+            		langManager.getString("dialog.file_exists.overwrite_existing_file"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
                 if (chosenFilePath.toLowerCase().endsWith(".htm") || chosenFilePath.toLowerCase().endsWith(".html")) {
                     // Write output to the current filename
                     writeFileAsWebPage(chosenFilePath);
@@ -94,9 +124,9 @@ public class FileIO {
     }
 
     public static void writeFile(File file, byte[] bytes) throws Exception {
-        FileOutputStream out = new FileOutputStream(file);
-        out.write(bytes);
-        out.close();
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(bytes);
+        }
     }
 
     public static void openFile(File file, boolean openExternally) throws Exception {
@@ -122,33 +152,71 @@ public class FileIO {
 
     public static File chooseFile() throws Exception {
         JFileChooser fileChooser = getFileChooser();
-        if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(ApplicationFrame.getInstance())) {
-            Config.saveLastUsedDir(fileChooser.getCurrentDirectory().getCanonicalPath());
-            return fileChooser.getSelectedFile();
+
+        // Ensure JFileChooser.showOpenDialog is called on EDT
+        final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
+
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
+                    resultRef.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef.set(fileChooser.getSelectedFile());
+                        try {
+                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
+        if (JFileChooser.APPROVE_OPTION == resultRef.get()) {
+            Config.saveLastUsedDir(currentDirRef.get());
+            return selectedFileRef.get();
         }
         return null;
     }
 
     public static byte[] readFile(File file) throws Exception {
-        FileInputStream in = new FileInputStream(file);
-        byte[] b = new byte[in.available()];
-        in.read(b);
-        in.close();
-        return b;
+        return Files.readAllBytes(file.toPath());
     }
 
     protected static JFileChooser getFileChooser() throws Exception {
-        if (fileChooser == null) {
-            fileChooser = new JFileChooser();
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.addChoosableFileFilter(acceptAllFileFilter);
-            fileChooser.setFileFilter(acceptAllFileFilter);
+        // Ensure JFileChooser creation happens on EDT
+        final java.util.concurrent.atomic.AtomicReference<JFileChooser> chooserRef = new java.util.concurrent.atomic.AtomicReference<>();
+
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    if (fileChooser == null) {
+                        fileChooser = new JFileChooser();
+                        fileChooser.setAcceptAllFileFilterUsed(false);
+                        fileChooser.addChoosableFileFilter(acceptAllFileFilter);
+                        fileChooser.setFileFilter(acceptAllFileFilter);
+                    }
+                    try {
+                        Optional.ofNullable(Config.getLastUsedDir()).map(File::new)
+                                .ifPresent(fileChooser::setCurrentDirectory);
+                    } catch (Exception e) {
+                        ExceptionDialog.hideException(e);
+                    }
+                    chooserRef.set(fileChooser);
+                }
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
-        String dir = Config.getLastUsedDir();
-        if (dir != null) {
-            fileChooser.setCurrentDirectory(new File(dir));
-        }
-        return fileChooser;
+
+        return chooserRef.get();
     }
 
     private static void writeFileAsWebPage(String path) throws IOException {
@@ -156,59 +224,58 @@ public class FileIO {
         StringBuilder temp = new StringBuilder();
         StringBuilder sb = new StringBuilder();
 
-        PrintWriter out = new PrintWriter(
-                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8")));
-        out.println(
-                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
-        out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
-        out.println("<head>");
-        out.println("<!-- Generated by " + Main.APPLICATION_NAME + " -->");
-        out.println("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
-        out.println("<title>" + path + "</title>");
+        try (PrintWriter out = new PrintWriter(
+                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8")))) {
+            out.println(
+                    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+            out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+            out.println("<head>");
+            out.println("<!-- Generated by " + Main.APPLICATION_NAME + " -->");
+            out.println("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
+            out.println("<title>" + path + "</title>");
 
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
-        int lineCount = textArea.getLineCount();
-        for (int i = 0; i < lineCount; i++) {
-            Token token = textArea.getTokenListForLine(i);
-            while (token != null && token.isPaintable()) {
-                if (styles[token.getType()] == null) {
-                    temp.setLength(0);
-                    temp.append(".s").append(token.getType()).append(" {\n");
-                    Font font = textArea.getFontForTokenType(token.getType());
-                    if (font.isBold()) {
-                        temp.append("font-weight: bold;\n");
+            RSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
+            int lineCount = textArea.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                Token token = textArea.getTokenListForLine(i);
+                while (token != null && token.isPaintable()) {
+                    if (styles[token.getType()] == null) {
+                        temp.setLength(0);
+                        temp.append(".s").append(token.getType()).append(" {\n");
+                        Font font = textArea.getFontForTokenType(token.getType());
+                        if (font.isBold()) {
+                            temp.append("font-weight: bold;\n");
+                        }
+                        if (font.isItalic()) {
+                            temp.append("font-style: italic;\n");
+                        }
+                        Color c = textArea.getForegroundForToken(token);
+                        temp.append("color: ").append(UIUtil.getHTMLFormatForColor(c)).append(";\n");
+                        temp.append("}");
+                        styles[token.getType()] = temp.toString();
                     }
-                    if (font.isItalic()) {
-                        temp.append("font-style: italic;\n");
-                    }
-                    Color c = textArea.getForegroundForToken(token);
-                    temp.append("color: ").append(UIUtil.getHTMLFormatForColor(c)).append(";\n");
-                    temp.append("}");
-                    styles[token.getType()] = temp.toString();
+                    sb.append("<span class=\"s" + token.getType() + "\">");
+                    sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n", true));
+                    sb.append("</span>");
+                    token = token.getNextToken();
                 }
-                sb.append("<span class=\"s" + token.getType() + "\">");
-                sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n", true));
-                sb.append("</span>");
-                token = token.getNextToken();
+                sb.append('\n');
             }
-            sb.append('\n');
-        }
 
-        // Print CSS styles
-        out.println("<style type=\"text/css\">");
-        for (int i = 0; i < styles.length; i++) {
-            if (styles[i] != null) {
-                out.println(styles[i]);
+            // Print CSS styles
+            out.println("<style type=\"text/css\">");
+            for (int i = 0; i < styles.length; i++) {
+                if (styles[i] != null) {
+                    out.println(styles[i]);
+                }
             }
+            out.println("</style>");
+
+            // Print the body
+            out.println("</head>");
+            out.println("<body>\n<pre>");
+            out.println(sb.toString());
+            out.println("</pre>\n</body>\n</html>");
         }
-        out.println("</style>");
-
-        // Print the body
-        out.println("</head>");
-        out.println("<body>\n<pre>");
-        out.println(sb.toString());
-        out.println("</pre>\n</body>\n</html>");
-
-        out.close();
     }
 }

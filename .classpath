@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="lib/rhino/js-14.jar"/>
 	<classpathentry kind="lib" path="lib/rhino/js-14.src.zip"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.11.jar"/>
-	<classpathentry kind="lib" path="lib/itextpdf-5.5.13.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-looks-2.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-2.10.1.jar"/>
@@ -18,5 +17,6 @@
 	<classpathentry kind="lib" path="lib/rsyntaxtextarea-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/poi-4.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsqlparser-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/itextpdf-5.5.13.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -32,6 +32,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
@@ -51,6 +52,14 @@ public class Main {
     }
 
     public static void main(final String[] args) {
+        // Start of the anti-blur trick for hi-dpi
+        // Declare the app as DPI-aware to avoid the OS's blurry scaling
+        System.setProperty("sun.java2d.dpiaware", "true");
+        // Force text antialiasing to have sharp and defined fonts
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
+        // End of the anti-blur makeup
+    	
         // Check if the used JDK is supported
         if (!Utilities.isJDK18OrAbove()) {
             System.err.println("The installed JDK version is NOT supported.\n" + "The program will be terminated.");
@@ -73,10 +82,10 @@ public class Main {
         // Catch any uncaught Throwables on the EDT and log them
         AWTExceptionHandler.register();
 
-        // Swing stuff should always be done on the EDT..
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
+        // Initialize language manager before any UI components
+        net.sourceforge.open_teradata_viewer.i18n.LanguageManager.getInstance();
+
+        SwingUtilities.invokeLater(() -> {
                 String lafName = UIManager.getSystemLookAndFeelClassName();
 
                 try {
@@ -123,7 +132,8 @@ public class Main {
                 } catch (Throwable t) {
                     ExceptionDialog.hideException(t);
                 }
-                UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                UIManager.put("TextPane.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
+                UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
 
                 // Allow Substance to paint window titles, etc.. We don't allow
                 // Metal (for example) to do this, because setting these
@@ -146,14 +156,14 @@ public class Main {
                     }
                 }
 
-                setDefaultFontSize(14);
+                SwingUtil.scaleAllFonts();
 
                 Toolkit.getDefaultToolkit().setDynamicLayout(true);
                 ApplicationFrame applicationFrame = new ApplicationFrame();
                 applicationFrame.initLookAndFeelManager(lafManager);
                 applicationFrame.drawIt();
             }
-        });
+        );
     }
 
     /**
@@ -204,21 +214,6 @@ public class Main {
             UIManager.setLookAndFeel(laf);
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
             UIUtil.installOsSpecificLafTweaks();
-        }
-    }
-
-    public static void setDefaultFontSize(int size) {
-        Set<Object> keySet = UIManager.getLookAndFeelDefaults().keySet();
-        Object[] keys = keySet.toArray(new Object[keySet.size()]);
-
-        for (Object key : keys) {
-            if (key != null && key.toString().toLowerCase().contains("font")) {
-                Font font = UIManager.getDefaults().getFont(key);
-                if (font != null) {
-                    font = font.deriveFont((float) size);
-                    UIManager.put(key, font);
-                }
-            }
         }
     }
 }

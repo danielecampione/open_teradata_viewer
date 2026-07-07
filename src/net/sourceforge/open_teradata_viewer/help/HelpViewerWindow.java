@@ -57,6 +57,7 @@ import net.sourceforge.open_teradata_viewer.util.IFileWrapper;
 import net.sourceforge.open_teradata_viewer.util.IFileWrapperFactory;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -448,5 +449,24 @@ public class HelpViewerWindow extends JFrame {
             }
         }
 
+    }
+    
+    /**
+     * Refreshes the language for help viewer components.
+     */
+    public void refreshLanguage() {
+        LanguageManager langManager = LanguageManager.getInstance();
+        
+        // Update window title
+        setTitle(langManager.getString("help.window.title"));
+        
+        // Refresh the HTML panel
+        if (_detailPnl != null) {
+            _detailPnl.refreshPage();
+        }
+        
+        // Refresh the entire window
+        revalidate();
+        repaint();
     }
 }

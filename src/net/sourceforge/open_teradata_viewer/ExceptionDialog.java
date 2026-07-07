@@ -3,7 +3,9 @@
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under             if (msg.length() > 0) {
+            Dialog.show(LanguageManager.getInstance().getString("dialog.tip.title"), 
+                    msg, Dialog.INFORMATION_MESSAGE, Dialog.DEFAULT_OPTION); terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -28,7 +30,10 @@ import java.sql.SQLException;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.Logger;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -42,20 +47,35 @@ public final class ExceptionDialog {
     private ExceptionDialog() {
     }
 
-    public static void showException(Throwable t) {
+    public static void showException(final Throwable t) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            showExceptionOnEDT(t);
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(() -> showExceptionOnEDT(t));
+            } catch (Exception e) {
+                hideException(e);
+            }
+        }
+    }
+    
+    private static void showExceptionOnEDT(Throwable t) {
         ApplicationFrame applicationFrame;
         String text = "";
         try {
             applicationFrame = ApplicationFrame.getInstance();
             text = applicationFrame.getText();
         } catch (Throwable e) {
+            Logger.getInstance().error("Failed to get application frame text", e);
             ExceptionDialog.hideException(e);
         }
         notifyException(t);
-        if ("Details".equals(Dialog.show(t.getClass().getName(),
-                t.getMessage() != null ? t.getMessage() : "Error",
-                Dialog.ERROR_MESSAGE, new Object[] { "Close", "Details" },
-                "Close"))) {
+        LanguageManager langManager = LanguageManager.getInstance();
+        if (langManager.getString("button.details").equals(Dialog.show(t.getClass().getName(),
+                t.getMessage() != null ? t.getMessage() : langManager.getString("message.error"),
+                Dialog.ERROR_MESSAGE,
+                new Object[] { "button.close", "button.details" },
+                "button.close"))) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             t.printStackTrace(new PrintStream(out));
             JTextArea textArea = new JTextArea(new String(out.toByteArray()));
@@ -64,6 +84,7 @@ public final class ExceptionDialog {
             try {
                 textArea.append(Config.getVersion());
             } catch (IOException ioe) {
+                Logger.getInstance().error("Failed to get application version", ioe);
                 hideException(ioe);
             }
             textArea.append("\n");
@@ -78,8 +99,7 @@ public final class ExceptionDialog {
             textArea.append(System.getProperty("java.runtime.name"));
             textArea.append(" ");
             textArea.append(System.getProperty("java.runtime.version"));
-            ConnectionData connectionData = Context.getInstance()
-                    .getConnectionData();
+            ConnectionData connectionData = Context.getInstance().getConnectionData();
             if (connectionData != null) {
                 textArea.append("\n");
                 textArea.append(connectionData.getUrl());
@@ -90,9 +110,10 @@ public final class ExceptionDialog {
             textArea.append(text);
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
-            if ("Copy to clipboard".equals(Dialog.show(t.getClass().getName(),
-                    scrollPane, Dialog.ERROR_MESSAGE, new Object[] { "Close",
-                            "Copy to clipboard" }, "Close"))) {
+            if (langManager.getString("button.copy_to_clipboard").equals(Dialog.show(t.getClass().getName(),
+                    scrollPane, Dialog.ERROR_MESSAGE,
+                    new Object[] { "button.close", "button.copy_to_clipboard" },
+                    "button.close"))) {
                 try {
                     Toolkit.getDefaultToolkit()
                             .getSystemClipboard()
@@ -100,6 +121,7 @@ public final class ExceptionDialog {
                                     new StringSelection(textArea.getText()
                                             .replace('\r', ' ')), null);
                 } catch (Throwable t2) {
+                    Logger.getInstance().error("Failed to copy exception details to clipboard", t2);
                     ExceptionDialog.hideException(t2);
                 }
             }
@@ -154,6 +176,7 @@ public final class ExceptionDialog {
 
     public static void notifyException(Throwable t) {
         String msg = t.getMessage();
+        Logger.getInstance().warn("Exception notification", t);
         ApplicationFrame
                 .getInstance()
                 .getConsole()
@@ -162,7 +185,7 @@ public final class ExceptionDialog {
     }
 
     public static void hideException(Throwable t) {
-        t.printStackTrace();
+        Logger.getInstance().debug("Hidden exception occurred", t);
     }
 
     public static void ignoreException(Throwable t) {

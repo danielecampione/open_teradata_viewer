@@ -45,6 +45,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.MatteBorder;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * 
@@ -85,7 +86,7 @@ public class GraphicViewerPrintPreview extends JDialog {
         getContentPane().setLayout(new BorderLayout());
         m_target = paramPrintable;
         JToolBar localJToolBar = new JToolBar();
-        JButton localJButton = new JButton("Print");
+        JButton localJButton = new JButton(LanguageManager.getInstance().getString("button.print"));
         Object localObject = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
@@ -125,7 +126,7 @@ public class GraphicViewerPrintPreview extends JDialog {
         localJButton.setAlignmentY(0.5F);
         localJButton.setMargin(new Insets(4, 6, 4, 6));
         localJToolBar.add(localJButton);
-        localJButton = new JButton("Close");
+        localJButton = new JButton(LanguageManager.getInstance().getString("button.close"));
         localObject = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {

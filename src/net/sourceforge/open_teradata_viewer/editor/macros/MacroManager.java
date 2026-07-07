@@ -155,11 +155,12 @@ public class MacroManager {
 
         File file = new File(dir, MACRO_DEFINITION_FILE_NAME);
         if (file.isFile()) {
-            XMLDecoder d = new XMLDecoder(new BufferedInputStream(new FileInputStream(file)));
-            @SuppressWarnings("unchecked")
-            List<Macro> macroList = (List<Macro>) d.readObject();
-            for (Macro macro : macroList) {
-                addMacro(macro);
+            try (XMLDecoder d = new XMLDecoder(new BufferedInputStream(new FileInputStream(file)))) {
+                @SuppressWarnings("unchecked")
+                List<Macro> macroList = (List<Macro>) d.readObject();
+                for (Macro macro : macroList) {
+                    addMacro(macro);
+                }
             }
         }
 
@@ -203,7 +204,7 @@ public class MacroManager {
     public void saveMacros(File dir) throws IOException {
         // First, clear out old macros
         if (dir.isDirectory()) { // Should always already exist
-            File[] oldFiles = dir.listFiles(new OldMacroFilenameFilter());
+            File[] oldFiles = dir.listFiles(file -> file.getName().endsWith(OLD_MACRO_FILE_EXTENSION));
             for (int i = 0; i < oldFiles.length; i++) {
                 oldFiles[i].delete();
             }
@@ -230,18 +231,5 @@ public class MacroManager {
         }
     }
 
-    /**
-     * Filter that locates old macro definition files.
-     * 
-     * @author D. Campione
-     * 
-     */
-    private static class OldMacroFilenameFilter implements FileFilter {
 
-        @Override
-        public boolean accept(File file) {
-            return file.getName().endsWith(OLD_MACRO_FILE_EXTENSION);
-        }
-
-    }
 }

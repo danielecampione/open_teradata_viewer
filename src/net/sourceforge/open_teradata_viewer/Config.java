@@ -36,7 +36,13 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
+
+import net.sourceforge.open_teradata_viewer.security.CredentialManager;
+import net.sourceforge.open_teradata_viewer.util.Logger;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -64,9 +70,12 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
 public final class Config {
 
     private static String version;
+    private static final String PrivateKey = "$GeHeiM^"; // Legacy key for migration only
+    private static final Logger logger = Logger.getInstance();
+    private static final CredentialManager credentialManager = CredentialManager.getInstance();
 
-    public static final String HOME_PAGE = "http://openteradata.sourceforge.net/";
-    public static final String SOURCEFORGE_MIRROR = "http://sourceforge.net/projects/openteradata/";
+    public static final String HOME_PAGE = "https://openteradata.sourceforge.net/";
+    public static final String SOURCEFORGE_MIRROR = "https://sourceforge.net/projects/openteradata/";
 
     private Config() {
     }
@@ -93,8 +102,10 @@ public final class Config {
 
     public static String getVersion() throws IOException {
         if (version == null) {
-            version = new BufferedReader(new InputStreamReader(Config.class.getResourceAsStream("/changes.txt")))
-                    .readLine();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(Config.class.getResourceAsStream("/changes.txt")))) {
+                version = reader.readLine();
+            }
         }
         return version;
     }
@@ -107,7 +118,8 @@ public final class Config {
         NodeList list = config.getElementsByTagName("settings");
         if (list.getLength() > 0) {
             Element settings = (Element) list.item(0);
-            return settings.getAttribute(name);
+            String value = settings.getAttribute(name);
+            return value;
         }
         return null;
     }
@@ -126,15 +138,19 @@ public final class Config {
     }
 
     public static Vector<ConnectionData> getDatabases(Element config) throws Exception {
-        Vector<ConnectionData> connectionDatas = new Vector<ConnectionData>();
         NodeList nodeList = config.getElementsByTagName("database");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element element = (Element) nodeList.item(i);
-            connectionDatas.add(new ConnectionData(element.getAttribute("name"), element.getAttribute("connection"),
-                    element.getAttribute("user"), Config.decrypt(element.getAttribute("password")),
-                    element.getAttribute("defaultOwner")));
-        }
-        return connectionDatas;
+        return java.util.stream.IntStream.range(0, nodeList.getLength())
+                .mapToObj(i -> (Element) nodeList.item(i))
+                .map(element -> {
+                    try {
+                        return new ConnectionData(element.getAttribute("name"), element.getAttribute("connection"),
+                                element.getAttribute("user"), Config.decrypt(element.getAttribute("password")),
+                                element.getAttribute("defaultOwner"));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(java.util.stream.Collectors.toCollection(Vector::new));
     }
 
     public static void saveDatabases(List<ConnectionData> connectionDatas) throws Exception {
@@ -144,15 +160,19 @@ public final class Config {
         for (int i = nodeList.getLength() - 1; i > -1; i--) {
             config.removeChild(nodeList.item(i));
         }
-        for (ConnectionData connectionData : connectionDatas) {
-            Element element = config.getOwnerDocument().createElement("database");
-            element.setAttribute("name", connectionData.getName());
-            element.setAttribute("user", connectionData.getUser());
-            element.setAttribute("password", Config.encrypt(connectionData.getPassword()));
-            element.setAttribute("connection", connectionData.getUrl());
-            element.setAttribute("defaultOwner", connectionData.getDefaultOwner());
-            config.appendChild(element);
-        }
+        connectionDatas.stream().forEach(connectionData -> {
+            try {
+                Element element = config.getOwnerDocument().createElement("database");
+                element.setAttribute("name", connectionData.getName());
+                element.setAttribute("user", connectionData.getUser());
+                element.setAttribute("password", Config.encrypt(connectionData.getPassword()));
+                element.setAttribute("connection", connectionData.getUrl());
+                element.setAttribute("defaultOwner", connectionData.getDefaultOwner());
+                config.appendChild(element);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         Config.saveConfig(config);
     }
 
@@ -192,7 +212,8 @@ public final class Config {
         NodeList list = config.getElementsByTagName("settings");
         if (list.getLength() > 0) {
             Element settings = (Element) list.item(0);
-            if (value.equals(settings.getAttribute(name))) {
+            String currentValue = settings.getAttribute(name);
+            if (currentValue.equals(value)) {
                 return;
             }
             settings.setAttribute(name, value);
@@ -208,14 +229,14 @@ public final class Config {
         Element config;
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         try {
-            InputStream inputStream = new FileInputStream(
-                    new File(Utilities.normalizePath(System.getProperty("user.home")), "open_teradata_viewer.xml"));
-            config = documentBuilder.parse(inputStream).getDocumentElement();
-            inputStream.close();
+            try (InputStream inputStream = new FileInputStream(
+                    new File(Utilities.normalizePath(System.getProperty("user.home")), "open_teradata_viewer.xml"))) {
+                config = documentBuilder.parse(inputStream).getDocumentElement();
+            }
         } catch (Exception e) {
-            InputStream inputStream = new ByteArrayInputStream("<config/>".getBytes());
-            config = documentBuilder.parse(inputStream).getDocumentElement();
-            inputStream.close();
+            try (InputStream inputStream = new ByteArrayInputStream("<config/>".getBytes())) {
+                config = documentBuilder.parse(inputStream).getDocumentElement();
+            }
         }
         return config;
     }
@@ -240,19 +261,33 @@ public final class Config {
         if (encrypted == null || "".equals(encrypted)) {
             return encrypted;
         }
-        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, KEY);
-        return new String(cipher.doFinal(Base64.decode(encrypted)));
-
+        try {
+            // First try new AES decryption
+            return credentialManager.decrypt(encrypted);
+        } catch (Exception e) {
+            logger.debug("AES decryption failed, attempting legacy DES migration", e);
+            try {
+                // Try legacy DES decryption and migrate
+                String migrated = credentialManager.migrateFromLegacyEncryption(encrypted);
+                logger.info("Successfully migrated legacy encrypted password to AES");
+                return credentialManager.decrypt(migrated);
+            } catch (Exception legacyException) {
+                logger.error("Failed to decrypt string with both AES and legacy DES", legacyException);
+                throw new GeneralSecurityException("Decryption failed", legacyException);
+            }
+        }
     }
 
     protected static String encrypt(String decrypted) throws GeneralSecurityException {
         if (decrypted == null || "".equals(decrypted)) {
             return decrypted;
         }
-        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, KEY);
-        return Base64.encodeBytes(cipher.doFinal(decrypted.getBytes()));
+        try {
+            return credentialManager.encrypt(decrypted);
+        } catch (Exception e) {
+            logger.error("Failed to encrypt string", e);
+            throw new GeneralSecurityException("Encryption failed", e);
+        }
     }
 
     public static void saveLastUsedDir(String dir) throws Exception {
