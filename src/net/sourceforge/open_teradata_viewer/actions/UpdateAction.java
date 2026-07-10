@@ -46,7 +46,7 @@ public class UpdateAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        Utilities.openURLWithDefaultBrowser(Config.SOURCEFORGE_MIRROR
-                + "files/latest");
+        Utilities.openURLWithDefaultBrowser(Config.GITHUB_REPO_URL
+                + "releases/latest");
     }
 }

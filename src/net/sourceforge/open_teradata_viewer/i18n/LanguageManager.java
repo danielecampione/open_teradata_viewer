@@ -47,9 +47,10 @@ public class LanguageManager {
     // Supported languages
     public static final Language ENGLISH = new Language("en", "English", "English");
     public static final Language ITALIAN = new Language("it", "Italiano", "Italian");
+    public static final Language GERMAN = new Language("de", "Deutsch", "German");
     
     private static final Language[] SUPPORTED_LANGUAGES = {
-        ENGLISH, ITALIAN
+        ENGLISH, ITALIAN, GERMAN
     };
 
     private LanguageManager() {

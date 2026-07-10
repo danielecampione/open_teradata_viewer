@@ -128,7 +128,7 @@ public class FavoritesAction extends CustomAction {
 		        throw new RuntimeException(ex);
 		    }
 		    JComboBox<?> comboBox = comboBoxRef.get();
-		    if (Dialog.OK_OPTION == Dialog.show(langManager.getString("dialog.name"), comboBox,
+		    if (Dialog.OK_OPTION == Dialog.show(langManager.getString("dialog.favorites.add.title"), comboBox,
 		            Dialog.QUESTION_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
 		        String name = (String) comboBox.getSelectedItem();
 		        if (name != null && !"".equals(name.trim())) {

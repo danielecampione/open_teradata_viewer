@@ -35,10 +35,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 
 import net.sourceforge.open_teradata_viewer.security.CredentialManager;
@@ -57,8 +53,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.itextpdf.text.pdf.codec.Base64;
-
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -76,6 +70,12 @@ public final class Config {
 
     public static final String HOME_PAGE = "https://openteradata.sourceforge.net/";
     public static final String SOURCEFORGE_MIRROR = "https://sourceforge.net/projects/openteradata/";
+
+    /** Home page of the project's official GitHub repository. */
+    public static final String GITHUB_REPO_URL = "https://github.com/danielecampione/open_teradata_viewer/";
+
+    /** GitHub REST API endpoint returning the most recent published release. */
+    public static final String GITHUB_LATEST_RELEASE_API_URL = "https://api.github.com/repos/danielecampione/open_teradata_viewer/releases/latest";
 
     private Config() {
     }

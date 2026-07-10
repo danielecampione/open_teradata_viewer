@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.io.File;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * 
@@ -59,7 +60,37 @@ public final class Context {
         return resultSet;
     }
 
+    /**
+     * Replaces the currently held {@link ResultSet}, if any, with a new one
+     * (or with <code>null</code>).
+     * <p>
+     * Before the reference is actually replaced, the {@link Statement} that
+     * produced the <em>previous</em> {@link ResultSet} (if different from
+     * the new one) is closed - which, per the JDBC specification, also
+     * closes the {@link ResultSet} itself and releases the corresponding
+     * server-side cursor. Without this, every successive query execution
+     * (e.g. through <code>RunAction</code>) silently abandoned the previous
+     * query's <code>Statement</code>/<code>ResultSet</code>, leaking JDBC
+     * resources for the whole duration of the session.
+     * <p>
+     * The <em>current</em> {@link ResultSet} is never touched here, so
+     * in-place grid editing/deletion (e.g. <code>DeleteAction</code>), which
+     * relies on it staying open, is unaffected.
+     *
+     * @param resultSet the new {@link ResultSet} to hold, or
+     *        <code>null</code>.
+     */
     public void setResultSet(ResultSet resultSet) {
+        if (this.resultSet != null && this.resultSet != resultSet) {
+            try {
+                Statement previousStatement = this.resultSet.getStatement();
+                if (previousStatement != null) {
+                    previousStatement.close();
+                }
+            } catch (Throwable t) {
+                ExceptionDialog.hideException(t);
+            }
+        }
         this.resultSet = resultSet;
     }
 

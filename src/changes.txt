@@ -1,3 +1,13 @@
+0.31a (11/07/2026)
+    - Added German language support to the UI internationalization.
+    - Refactored update-check mechanism: replaced the unreliable SourceForge
+      changes.txt scraping with the GitHub Releases REST API (Strategy pattern)
+      parsed via the org.json library, and fixed proxy handling that silently
+      ignored manually configured host/port (Factory-built java.net.Proxy replaces
+      broken proxyHost/proxyPort system properties).
+    - Fixed resource leak in Context#setResultSet(): the Statement/ResultSet of
+      the superseded query is now closed instead of being silently discarded.
+
 0.3c (07/07/2026)
     - Added internationalization support in the UI: dynamic language selection
       (English and Italian) to improve global accessibility and user experience.
@@ -22,10 +32,10 @@
         BufferedReader.
     - Improved Utilities.java:
       - Fixed a redundant repeated toUpperCase() call in Utilities.java:
-        canBeATeradataObjectName() now converts the text to uppercase once before
-        the loops instead of calling toUpperCase() on every inner iteration, and
-        caches the current character in a local variable to avoid repeated
-        charAt() calls.
+        canBeATeradataObjectName() now converts the text to uppercase once
+        before the loops instead of calling toUpperCase() on every inner
+        iteration, and caches the current character in a local variable to avoid
+        repeated charAt() calls.
       - cloneObject() now uses try-with-resources for ObjectOutputStream and
         ObjectInputStream, ensuring streams are always closed even if an
         exception occurs during serialization or deserialization.
@@ -41,15 +51,16 @@
         branch, returning false directly after the positive condition check.
     - Modernized and hardened the update check mechanism in UpdateChecker.java:
       - Replaced the simplified URL.openStream() with a robust HttpURLConnection
-        implementation to allow for better control over the HTTP request lifecycle.
+        implementation to allow for better control over the HTTP request
+        lifecycle.
       - Fixed a 403 Forbidden error during update checks: added a standard
         "User-Agent" header to the request to prevent SourceForge from blocking
         the connection as a bot/automated script.
       - Improved network reliability: implemented explicit connection and read
-        timeouts (10 seconds) to prevent the application from hanging indefinitely
-        in case of repository or network latency.
-      - Added HTTP response code validation: the client now explicitly checks for
-        HTTP_OK (200) before attempting to read the version file.
+        timeouts (10 seconds) to prevent the application from hanging
+        indefinitely in case of repository or network latency.
+      - Added HTTP response code validation: the client now explicitly checks
+        for HTTP_OK (200) before attempting to read the version file.
       - Secure update communication: updated Config.java to use HTTPS for
         HOME_PAGE, ensuring all version queries are performed over an encrypted
         channel.
@@ -60,9 +71,9 @@
       ExceptionDialog.hideException with appropriate logging and user
       notifications to avoid silently suppressing errors.
     - Full Hi-DPI support: implemented a comprehensive scaling system for
-      high-resolution displays (4K/Retina). This includes automatic font resizing
-      via UIManager, dynamic UI geometry scaling (dividers, row heights and
-      paddings) and OS-level DPI-awareness to eliminate the "blur" effect on
+      high-resolution displays (4K/Retina). This includes automatic font
+      resizing via UIManager, dynamic UI geometry scaling (dividers, row heights
+      and paddings) and OS-level DPI-awareness to eliminate the "blur" effect on
       Windows and macOS.
     - Applied try-with-resources across code handling streams and other closable
       resources to ensure automatic cleanup.
@@ -74,15 +85,15 @@
     - Fixed Event Dispatch Thread (EDT) violations: ensured all Swing component
       creation and UI updates are executed on the EDT to prevent
       UiThreadingViolationException.
-    - Fixed a resource leak in RunScriptAction.java: performThreaded() now closes
-      the Statement in the finally block, preventing database cursor accumulation
-      on every script execution.
+    - Fixed a resource leak in RunScriptAction.java: performThreaded() now
+      closes the Statement in the finally block, preventing database cursor
+      accumulation on every script execution.
     - Fixed a logical bug in AWTExceptionHandler.java: corrected a faulty
-      constructor condition (logger initialization was blocked by an incorrect if
-      (logger != null) check).
+      constructor condition (logger initialization was blocked by an incorrect
+      if (logger != null) check).
     - Fixed a potential NullPointerException in ApplicationFrame.java:
-      loadMacros() now performs a null check on the array returned by File.list()
-      before iterating over the macro directory entries.
+      loadMacros() now performs a null check on the array returned by
+      File.list() before iterating over the macro directory entries.
     - Fixed a redundant and misleading String.format() call in
       ApplicationFrame.java: getFileIsTooLarge() now invokes
       MessageFormat.format() directly, removing the superfluous String.format()
@@ -107,8 +118,8 @@
       Integer.valueOf().
     - Fixed a misleading statement ordering in ApplicationFrame.java:
       destroyObjectChooser() now calls splitPane.setRightComponent(null) before
-      nulling the rightComponent field, making the intent explicit and preventing
-      accidental regressions if the two lines are ever reordered.
+      nulling the rightComponent field, making the intent explicit and
+      preventing accidental regressions if the two lines are ever reordered.
     - Fixed a potential NullPointerException in Config.java: saveSetting() now
       calls equals() on the non-null currentValue rather than on the potentially
       null value parameter.
@@ -118,9 +129,9 @@
     - Fixed a potential NullPointerException in HTTPAuthProxy.java: the
       constructor now null-checks the value returned by Config.getSetting()
       before calling length() on the proxy user setting.
-    - Fixed a potential NullPointerException in CustomAction.java: mouseClicked()
-      now guards against a null parent reference while traversing the component
-      hierarchy in search of a JOptionPane and a JDialog ancestor.
+    - Fixed a potential NullPointerException in CustomAction.java:
+      mouseClicked() now guards against a null parent reference while traversing
+      the component hierarchy in search of a JOptionPane and a JDialog ancestor.
     - Fixed a NullPointerException in ExplainRequestAction.java:
       performThreaded() now returns early if WaitingDialog construction fails
       with InterruptedException, preventing subsequent null dereference. Also
@@ -131,24 +142,24 @@
       non-null and non-empty before attempting to paste, printing a warning
       message if no Lob has been copied yet.
     - Reduced redundant LanguageManager listener registrations in
-      AnalyzeQueryAction.java: merged two separate language change listeners into
-      one, updating both NAME and SHORT_DESCRIPTION in a single callback.
-    - Fixed a NullPointerException in ShowMacroAction.java: performThreaded() now
-      returns early if WaitingDialog construction fails with
+      AnalyzeQueryAction.java: merged two separate language change listeners
+      into one, updating both NAME and SHORT_DESCRIPTION in a single callback.
+    - Fixed a NullPointerException in ShowMacroAction.java: performThreaded()
+      now returns early if WaitingDialog construction fails with
       InterruptedException, consistent with the fix applied to
       ExplainRequestAction.java. Also replaced string concatenation in loop with
       StringBuilder for improved performance on large macro bodies.
     - Fixed NullPointerExceptions and string concatenation in loop in
       ShowTableAction.java and ShowViewAction.java: both performThreaded()
       methods now return early if WaitingDialog construction fails with
-      InterruptedException, and use StringBuilder instead of string concatenation
-      when assembling the object body, consistent with the fix applied to
-      ShowMacroAction.java.
+      InterruptedException, and use StringBuilder instead of string
+      concatenation when assembling the object body, consistent with the fix
+      applied to ShowMacroAction.java.
     - Fixed a NullPointerException and string concatenation in loop in
       ShowProcedureAction.java: performThreaded() now returns early if
       WaitingDialog construction fails with InterruptedException, and uses
-      StringBuilder instead of string concatenation when assembling the procedure
-      body, consistent with the fix applied to ShowMacroAction.java,
+      StringBuilder instead of string concatenation when assembling the
+      procedure body, consistent with the fix applied to ShowMacroAction.java,
       ShowTableAction.java, and ShowViewAction.java.
     - Fixed a potential NullPointerException in ExportInsertsAction.java:
       performThreaded() now guards against Context.getQuery() returning null
@@ -163,23 +174,24 @@
       now logs the warning and continues, so the help viewer opens even if some
       images are unavailable.
     - Fixed a resource leak in ExportExcelAction.java: performThreaded() now
-      wraps HSSFWorkbook in a try-with-resources block, ensuring the workbook and
-      its internal resources are properly closed after the Excel file is written.
-    - Fixed a resource leak in ExportPdfAction.java: performThreaded() now closes
-      the iText Document in a finally block, ensuring it is always closed even if
-      an exception occurs while adding content to the PDF.
+      wraps HSSFWorkbook in a try-with-resources block, ensuring the workbook
+      and its internal resources are properly closed after the Excel file is
+      written.
+    - Fixed a resource leak in ExportPdfAction.java: performThreaded() now
+      closes the iText Document in a finally block, ensuring it is always closed
+      even if an exception occurs while adding content to the PDF.
     - Fixed a permanent action disablement bug in IndentXMLAction.java:
-      performThreaded() now re-enables the action in a finally block, ensuring it
-      is always re-enabled even if an unexpected exception occurs during XML
+      performThreaded() now re-enables the action in a finally block, ensuring
+      it is always re-enabled even if an unexpected exception occurs during XML
       formatting.
     - Removed dead code in LookAndFeelAction.java: deleted the private method
       selectPrecedingLookAndFeelMenuItem(), which was never called and also
       contained a latent ArrayIndexOutOfBoundsException when the Look and Feel
       menu could not be found in the menu bar.
-    - Fixed a bug in SwingUtil.java: computeColor() was using the Green component
-      twice instead of Green and Blue, causing the returned color to always have
-      a zero Blue component; corrected the third argument to average the Blue
-      channels of the two input colors.
+    - Fixed a bug in SwingUtil.java: computeColor() was using the Green
+      component twice instead of Green and Blue, causing the returned color to
+      always have a zero Blue component; corrected the third argument to average
+      the Blue channels of the two input colors.
     - Fixed dead code in Logger.java: processLogQueue() was checking for
       Level.ERROR inside a branch that already excluded ERROR entries, making
       that condition always false; removed the redundant Level.ERROR check from

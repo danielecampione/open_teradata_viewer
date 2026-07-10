@@ -19,17 +19,16 @@
 package net.sourceforge.open_teradata_viewer;
 
 import java.awt.Color;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Authenticator;
-import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.Proxy;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.Box;
@@ -39,13 +38,27 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.update.GitHubReleaseVersionProvider;
+import net.sourceforge.open_teradata_viewer.update.IUpdateVersionProvider;
+import net.sourceforge.open_teradata_viewer.update.ProxyResolver;
 
 /**
- * 
- * 
+ * Checks, on a background thread, whether a newer version of the application
+ * has been published, and - if so - shows the "update available" menu
+ * (built and colored exactly as before; only the way the remote version is
+ * retrieved has changed).
+ * <p>
+ * The remote version is now retrieved from the "latest release" of the
+ * project's official GitHub repository (see
+ * {@link net.sourceforge.open_teradata_viewer.update.GitHubReleaseVersionProvider})
+ * instead of a plain-text file previously hosted on SourceForge, which had
+ * become an unreliable source (intermittent <code>403</code> responses,
+ * broken proxy handling, etc.).
+ *
  * @author D. Campione
  * 
  */
@@ -67,10 +80,10 @@ public class UpdateChecker implements Runnable {
             LanguageManager langManager = LanguageManager.getInstance();
             
             // Show dialog on EDT
-            final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
+            final AtomicInteger resultRef = new AtomicInteger();
             
             try {
-                javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                SwingUtilities.invokeAndWait(new Runnable() {
                     @Override
                     public void run() {
                         int result = JOptionPane.showConfirmDialog(
@@ -93,8 +106,15 @@ public class UpdateChecker implements Runnable {
                 return;
             }
 
+            // "result" gets reassigned further down for the proxy
+            // sub-dialog's own outcome, so the original Yes/No/Cancel
+            // choice is captured here once and for all
+            final boolean useManualProxy = (result == JOptionPane.YES_OPTION);
+
             System.setProperty("java.net.useSystemProxies", new Boolean(
                     result == JOptionPane.NO_OPTION).toString());
+
+            String proxyHost = "", proxyPort = "";
 
             if (result == JOptionPane.YES_OPTION) {
                 String proxyHostKey = "proxy_host", proxyPortKey = "proxy_port";
@@ -102,7 +122,6 @@ public class UpdateChecker implements Runnable {
 
                 final JTextField proxyHostField = new JTextField();
                 final JTextField proxyPortField = new JTextField();
-                String proxyHost = "", proxyPort = "";
 
                 String rawSetting = Config.getSetting(proxyRememberConfigurationKey);
                 boolean proxyRememberConfiguration = rawSetting != null
@@ -119,7 +138,7 @@ public class UpdateChecker implements Runnable {
                     final AtomicReference<JDialog> dialogRef = new AtomicReference<>();
                     
                     try {
-                        javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+                        SwingUtilities.invokeAndWait(new Runnable() {
                             @Override
                             public void run() {
                                 JOptionPane proxyPane = new JOptionPane(new Object[] {
@@ -162,9 +181,6 @@ public class UpdateChecker implements Runnable {
                     }
                 }
 
-                System.setProperty("proxyHost", proxyHost);
-                System.setProperty("proxyPort", proxyPort);
-
                 HTTPAuthProxy httpAuthProxy = new HTTPAuthProxy(
                         proxyRememberConfiguration);
                 if (httpAuthProxy.isAuthenticationNecessary()) {
@@ -172,27 +188,22 @@ public class UpdateChecker implements Runnable {
                 }
             }
 
+            IUpdateVersionProvider updateVersionProvider = new GitHubReleaseVersionProvider();
+
             DateFormat format = new SimpleDateFormat("(dd/MM/yyyy)");
             String localVersion = Config.getVersion();
             String latestVersion = null;
             try {
-                // Using HttpURLConnection to set a User-Agent and avoid SourceForge blocking default Java requests
-                URL url = new URL(Config.HOME_PAGE + "changes.txt");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                
-                // Identify as a browser to prevent 403 Forbidden errors
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                connection.setConnectTimeout(10000);
-                connection.setReadTimeout(10000);
+                Proxy proxy = useManualProxy
+                        ? ProxyResolver.resolveManualProxy(proxyHost, proxyPort)
+                        : ProxyResolver.resolveSystemProxy(new URL(
+                                Config.GITHUB_LATEST_RELEASE_API_URL));
 
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                        latestVersion = reader.readLine();
-                    }
-                }
+                latestVersion = updateVersionProvider
+                        .getLatestVersionLabel(proxy);
             } catch (ProtocolException pe) { // The exception is caught if the Server has redirected too many times
                 ExceptionDialog.ignoreException(pe);
-            } catch (IOException ioe) { // The authentication is required if the HTTP status is 407
+            } catch (IOException ioe) { // Network, proxy or GitHub API error
                 ApplicationFrame
                         .getInstance()
                         .getConsole()
@@ -201,7 +212,7 @@ public class UpdateChecker implements Runnable {
             } finally {
                 if (latestVersion == null) {
                     String rawMessage = langManager.getString("update.unable_determine_version");
-                    String formattedMessage = MessageFormat.format(rawMessage, Config.SOURCEFORGE_MIRROR);
+                    String formattedMessage = MessageFormat.format(rawMessage, Config.GITHUB_REPO_URL);
                     ApplicationFrame
                             .getInstance()
                             .getConsole()
