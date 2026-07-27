@@ -1,10 +1,30 @@
+0.31b (28/07/2026)
+    - Added ActionScript syntax highlighting.
+    - Added BBCode syntax highlighting.
+    - Added Delphi syntax highlighting.
+    - Added DTD syntax highlighting.
+    - Added Fortran syntax highlighting.
+    - Added Go syntax highlighting.
+    - Added .htaccess syntax highlighting.
+    - Added JSON with Comments (JSHintrc-style) syntax highlighting.
+    - Added LaTeX syntax highlighting.
+    - Added Makefile syntax highlighting.
+    - Added Properties syntax highlighting.
+    - Added SAS syntax highlighting.
+    - Added Tcl syntax highlighting.
+    - Upgraded rsyntaxtextarea library 3.0.3 -> 3.0.4
+    - Upgraded autocomplete library 3.0.0 -> 3.0.4
+    - Upgraded languagesupport library 3.0.0 -> 3.0.2
+    - Upgraded rstaui library 3.0.0 -> 3.0.4
+    - Upgraded spellchecker library 3.0.0 -> 3.0.4
+
 0.31a (11/07/2026)
     - Added German language support to the UI internationalization.
     - Refactored update-check mechanism: replaced the unreliable SourceForge
       changes.txt scraping with the GitHub Releases REST API (Strategy pattern)
       parsed via the org.json library, and fixed proxy handling that silently
-      ignored manually configured host/port (Factory-built java.net.Proxy replaces
-      broken proxyHost/proxyPort system properties).
+      ignored manually configured host/port (Factory-built java.net.Proxy
+      replaces broken proxyHost/proxyPort system properties).
     - Fixed resource leak in Context#setResultSet(): the Statement/ResultSet of
       the superseded query is now closed instead of being silently discarded.
 
