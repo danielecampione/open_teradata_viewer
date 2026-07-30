@@ -291,6 +291,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         ButtonGroup bg = new ButtonGroup();
         addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu2);
         addSyntaxItem("ActionScript", SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT, bg, subMenu2);
+        addSyntaxItem("Assembler (6502)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_6502, bg, subMenu2);
         addSyntaxItem("Assembler (x86)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86, bg, subMenu2);
         addSyntaxItem("BBCode", SyntaxConstants.SYNTAX_STYLE_BBCODE, bg, subMenu2);
         addSyntaxItem("C", SyntaxConstants.SYNTAX_STYLE_C, bg, subMenu2);

@@ -1,3 +1,12 @@
+0.32a (31/07/2026)
+    - Added Assembler (6502) syntax highlighting.
+    - Upgraded rsyntaxtextarea library 3.0.4 -> 3.0.6
+    - Upgraded autocomplete library 3.0.4 -> 3.0.5
+    - Upgraded rstaui library 3.0.4 -> 3.0.6
+    - Enhanced NSIS-based Windows installer: added a pre-installation cleanup
+      step that deletes artifacts from prior installations without affecting
+      user configuration files, guaranteeing a clean and safe upgrade path.
+
 0.31c (30/07/2026)
     - Fixed row-identity resolution in ResultSetTable#getOriginalSelectedRow():
       switched from content-based equality to reference identity, preventing
