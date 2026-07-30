@@ -26,8 +26,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -122,7 +120,12 @@ public class CalculateSHA1ChecksumOfATextAction extends CustomAction {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             JOptionPane.showMessageDialog(app, "SHA1 Check Sums are "
-                                    + ((textField.getText().equals(textField2.getText()))
+                                    // Hex checksums are case-insensitive by
+                                    // definition: this tool always displays
+                                    // its own result in lowercase, but a
+                                    // checksum pasted from elsewhere for
+                                    // comparison may well be uppercase
+                                    + ((textField.getText().equalsIgnoreCase(textField2.getText()))
                                     ? "the same." : "different."));
                         }
                     });

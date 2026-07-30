@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -87,21 +88,33 @@ public class Console extends JTextPane {
         }
     }
 
-    public void print(String text, Color foregroundColor) {
-        if ((getDocument().getLength() + text.length()) > maxCharacters) {
-            setText("");
-        }
+    public void print(final String text, final Color foregroundColor) {
+        // Console#print() is called from performThreaded() in virtually
+        // every action, which - via ThreadedAction - always runs on a
+        // background thread, never the EDT. Every text-component call
+        // below is a Swing mutation and must not happen off the EDT, so
+        // it is dispatched through invokeLater(); the log-file writing
+        // further down does not touch any Swing component and is
+        // intentionally left to run on the calling thread
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if ((getDocument().getLength() + text.length()) > maxCharacters) {
+                    setText("");
+                }
 
-        // StyleContext
-        StyleContext sc = StyleContext.getDefaultStyleContext();
+                // StyleContext
+                StyleContext sc = StyleContext.getDefaultStyleContext();
 
-        int len = getDocument().getLength(); // same value as getText().length();
-        setCaretPosition(len); // place caret at the end (with no selection)
-        if (!curSubstance) {
-            AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
-            setCharacterAttributes(aset, false);
-        }
-        replaceSelection(text); // there is no selection, so inserts at caret
+                int len = getDocument().getLength(); // same value as getText().length();
+                setCaretPosition(len); // place caret at the end (with no selection)
+                if (!curSubstance) {
+                    AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
+                    setCharacterAttributes(aset, false);
+                }
+                replaceSelection(text); // there is no selection, so inserts at caret
+            }
+        });
 
         if (logFile.exists()) {
             if (logFile.length() > 10000000) { // 10000000 equals to 10

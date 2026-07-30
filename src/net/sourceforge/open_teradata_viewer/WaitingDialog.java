@@ -127,6 +127,16 @@ public class WaitingDialog extends TimerTask {
 
     @Override
     public void run() {
-        message2.setText(getExecutionTime());
+        // TimerTask#run() executes on the Timer's own background thread,
+        // not on the EDT: mutating a Swing component (JLabel#setText())
+        // directly from here is a classic Swing thread-safety violation.
+        // Every single query that runs longer than 3 seconds hits this,
+        // since that is exactly when this callback starts firing
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                message2.setText(getExecutionTime());
+            }
+        });
     }
 }

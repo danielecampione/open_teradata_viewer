@@ -123,7 +123,21 @@ public final class ResultSetTable extends JTable {
     public int getOriginalSelectedRow(int selectedRow) {
         Vector row = (Vector) ((DefaultTableModel) getModel()).getDataVector()
                 .get(selectedRow);
-        return originalOrder.indexOf(row);
+        // Identity comparison is required here, not content equality:
+        // TableSorter re-orders dataVector in place but never clones or
+        // mutates the row Vector instances, so the same row object simply
+        // moves to a different position. Using List#indexOf() (which
+        // relies on Vector#equals(), i.e. content comparison) would return
+        // the position of the first row with equal values in every
+        // displayed column, silently pointing at the wrong record whenever
+        // the result set contains two or more rows that look identical -
+        // causing Edit/Delete to be applied to the wrong database row
+        for (int i = 0; i < originalOrder.size(); i++) {
+            if (originalOrder.get(i) == row) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public void removeRow(int row) {

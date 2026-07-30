@@ -80,7 +80,14 @@ public class Grid {
 
     public int[] calculateWidths() {
         int cols = 0;
-        int[] widths = new int[1024];
+        for (List<Object> row : rows) {
+            cols = Math.max(cols, row.size());
+        }
+        // Column widths, plus one extra trailing slot holding the grand
+        // total width. Previously a hardcoded int[1024], which threw
+        // ArrayIndexOutOfBoundsException for any result set with 1024 or
+        // more columns instead of sizing itself to the actual data
+        int[] widths = new int[cols + 1];
         for (List<Object> row : rows) {
             for (int j = 0; j < row.size(); j++) {
                 widths[j] = Math.max(widths[j],
@@ -88,7 +95,6 @@ public class Grid {
                                 ? 0
                                 : row.get(j).toString().length());
             }
-            cols = Math.max(cols, row.size());
         }
         // put total width in last index
         for (int i = 0; i < widths.length - 1; i++) {

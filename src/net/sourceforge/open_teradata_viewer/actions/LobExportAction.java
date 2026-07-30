@@ -206,7 +206,13 @@ public class LobExportAction extends CustomAction {
     }
 
     private boolean startsWith(byte[] bytes, int... b) {
-        for (int i = 0; i < b.length && i < bytes.length; i++) {
+        // A LOB shorter than the signature can never match it: bail out
+        // immediately instead of letting the loop bound below silently
+        // stop early and return true on a partial, unverified match
+        if (bytes.length < b.length) {
+            return false;
+        }
+        for (int i = 0; i < b.length; i++) {
             if ((bytes[i] & 0xFF) != b[i]) {
                 return false;
             }

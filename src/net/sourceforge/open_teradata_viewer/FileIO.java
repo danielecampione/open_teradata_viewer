@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
@@ -144,7 +145,14 @@ public class FileIO {
             Context.getInstance().setOpenedFile(file);
             RSyntaxTextArea textArea = applicationFrame.getTextComponent();
             TransferHandler transferHandler = textArea.getTransferHandler();
-            StringSelection stringSelection = new StringSelection(new String(FileIO.readFile(file)));
+            // An explicit charset is required here: relying on the
+            // platform default (as new String(byte[]) does) makes the
+            // decoded text depend on the OS/locale the JVM happens to run
+            // under, silently corrupting any non-ASCII character (e.g.
+            // accented Italian letters) whenever the file was written on a
+            // different machine or with a different editor
+            StringSelection stringSelection = new StringSelection(
+                    new String(FileIO.readFile(file), StandardCharsets.UTF_8));
             transferHandler.importData(new TransferSupport(textArea, stringSelection));
             textArea.setCaretPosition(0);
         }

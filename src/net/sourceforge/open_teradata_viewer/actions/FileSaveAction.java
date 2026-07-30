@@ -20,6 +20,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
@@ -49,7 +50,13 @@ public class FileSaveAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         File openedFile = Context.getInstance().getOpenedFile();
+        // An explicit charset is required here too, to stay symmetric with
+        // FileIO#openFile(File): String#getBytes() with no argument uses
+        // the platform default charset, which would silently mismatch a
+        // file later reopened on a different OS/locale (or written back
+        // with any character outside plain ASCII)
         FileIO.saveFile(openedFile == null ? "" : openedFile.toString(),
-                ApplicationFrame.getInstance().getText().getBytes());
+                ApplicationFrame.getInstance().getText()
+                        .getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -32,15 +32,15 @@ import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * 
@@ -90,19 +90,24 @@ public class ExportExcelAction extends CustomAction {
 
         List<?> list = ((DefaultTableModel) table.getModel()).getDataVector();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try (HSSFWorkbook workbook = new HSSFWorkbook()) {
-            HSSFSheet sheet = workbook.createSheet();
-            HSSFRow row = sheet.createRow(0);
-            HSSFCellStyle style = workbook.createCellStyle();
+        // XSSFWorkbook (.xlsx, OOXML) is used instead of HSSFWorkbook (.xls,
+        // BIFF8): the legacy .xls format has a hard limit of 65,536 rows per
+        // sheet (HSSFSheet#createRow() throws IllegalArgumentException
+        // beyond that), which a Teradata-oriented export tool can hit very
+        // easily. XSSF supports up to 1,048,576 rows
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet();
+            XSSFRow row = sheet.createRow(0);
+            XSSFCellStyle style = workbook.createCellStyle();
             style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
             style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            HSSFFont font = workbook.createFont();
+            XSSFFont font = workbook.createFont();
             font.setColor(IndexedColors.WHITE.getIndex());
             font.setBold(true);
             style.setFont(font);
             for (int i = 0; i < table.getColumnCount(); i++) {
-                HSSFCell cell = row.createCell(i);
-                cell.setCellValue(new HSSFRichTextString(table.getColumnName(i)));
+                XSSFCell cell = row.createCell(i);
+                cell.setCellValue(new XSSFRichTextString(table.getColumnName(i)));
                 cell.setCellStyle(style);
                 sheet.setColumnWidth(i, (table.getColumnModel().getColumn(i).getPreferredWidth() * 45));
             }
@@ -113,15 +118,15 @@ public class ExportExcelAction extends CustomAction {
                     row = sheet.createRow(count++);
                     for (int j = 0; j < data.size(); j++) {
                         Object o = data.get(j);
-                        HSSFCell cell = row.createCell(j);
+                        XSSFCell cell = row.createCell(j);
                         if (o instanceof Number) {
                             cell.setCellValue(((Number) o).doubleValue());
                         } else if (o != null) {
                             if (ResultSetTable.isLob(j)) {
-                                cell.setCellValue(new HSSFRichTextString(
+                                cell.setCellValue(new XSSFRichTextString(
                                         Context.getInstance().getColumnTypeNames()[j]));
                             } else {
-                                cell.setCellValue(new HSSFRichTextString(o.toString()));
+                                cell.setCellValue(new XSSFRichTextString(o.toString()));
                             }
                         }
                     }
@@ -130,6 +135,6 @@ public class ExportExcelAction extends CustomAction {
             sheet.createFreezePane(0, 1);
             workbook.write(byteArrayOutputStream);
         }
-        FileIO.saveAndOpenFile("export.xls", byteArrayOutputStream.toByteArray());
+        FileIO.saveAndOpenFile("export.xlsx", byteArrayOutputStream.toByteArray());
     }
 }

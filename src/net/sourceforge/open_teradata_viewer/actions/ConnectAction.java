@@ -312,7 +312,7 @@ public class ConnectAction extends CustomAction {
                     panel.add(user, c);
                     c.gridy++;
                     panel.add(new JLabel(langManager.getString("label.password")), c);
-                    JTextField password = new JPasswordField(connectionData.getPassword());
+                    JPasswordField password = new JPasswordField(connectionData.getPassword());
                     panel.add(password, c);
                     Object i = Dialog.show(langManager.getString("dialog.connect.title"), panel, Dialog.PLAIN_MESSAGE,
                             new Object[]{"button.ok", "button.cancel"},
@@ -320,7 +320,12 @@ public class ConnectAction extends CustomAction {
                     connectionData.setName(name.getText());
                     connectionData.setUrl(url.getText());
                     connectionData.setUser(user.getText().trim());
-                    connectionData.setPassword(password.getText());
+                    // getPassword() (char[]) is used instead of getText()
+                    // (String): a String lingers in JVM memory until GC,
+                    // while a char[] can be wiped right after use - the
+                    // standard, documented way to handle a JPasswordField's
+                    // value.
+                    connectionData.setPassword(new String(password.getPassword()));
                     if (langManager.getString("button.ok").equals(i) && connectionData.getName().trim().isEmpty()) {
                         try {
                             Dialog.show(langManager.getString("dialog.empty_name.title"),

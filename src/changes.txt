@@ -1,3 +1,44 @@
+0.31c (30/07/2026)
+    - Fixed row-identity resolution in ResultSetTable#getOriginalSelectedRow():
+      switched from content-based equality to reference identity, preventing
+      Edit/Delete/Duplicate from silently targeting the wrong database row when
+      the grid is sorted and duplicate-looking rows are present.
+    - Migrated Excel export from HSSF (.xls) to XSSF (.xlsx): the legacy BIFF8
+      format caps out at 65,536 rows per sheet and threw
+      IllegalArgumentException on larger result sets; .xlsx supports over one
+      million rows.
+    - Fixed LobExportAction#startsWith(): a LOB shorter than the file-signature
+      being checked no longer produces a false-positive match, which could
+      mislabel very small or empty exported LOBs with the wrong file extension.
+    - Fixed multi-statement script splitting in RunScriptAction: semicolons
+      inside single-quoted string literals were incorrectly treated as statement
+      terminators, silently truncating and misaligning statements whose data
+      contained a trailing semicolon.
+    - Fixed platform-dependent character encoding when opening and saving SQL
+      files: reads and writes now explicitly use UTF-8 instead of the JVM's
+      default charset, preventing corruption of non-ASCII characters across
+      different OSes/locales.
+    - Fixed checksum comparison in the MD5/SHA1 "Compare" dialogs: switched from
+      case-sensitive to case-insensitive matching, since hex-encoded checksums
+      are case-insensitive by definition and this tool always displays its own
+      result in lowercase.
+    - Hardened database connection password handling in ConnectAction: switched
+      from JPasswordField#getText() (String) to getPassword() (char[]),
+      consistent with how HTTPAuthProxy and SwingDialogs already handle it
+      elsewhere in the project.
+    - Fixed a Swing thread-safety violation in WaitingDialog#run(): the
+      elapsed-time label was updated directly from the Timer's background thread
+      instead of the EDT, now wrapped in SwingUtilities.invokeLater().
+    - Removed the hardcoded 1024-column limit in Grid#calculateWidths(): the
+      width array is now sized dynamically from the actual row data, preventing
+      ArrayIndexOutOfBoundsException on wide result sets when exporting to a
+      flat file.
+    - Fixed a Swing thread-safety violation in Console#print(): text-component
+      updates were mutated directly from background threads (every action's
+      console output), now dispatched through SwingUtilities.invokeLater();
+      log-file writing is left on the calling thread.
+    - Upgraded poi library 4.1.0 -> 5.5.1
+
 0.31b (28/07/2026)
     - Added ActionScript syntax highlighting.
     - Added BBCode syntax highlighting.

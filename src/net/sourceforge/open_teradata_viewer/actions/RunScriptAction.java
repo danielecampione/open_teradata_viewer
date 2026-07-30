@@ -22,9 +22,9 @@ import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
@@ -69,14 +69,9 @@ public class RunScriptAction extends CustomAction {
         }
         History.getInstance().add(text);
         Actions.getInstance().validateTextActions();
-        Pattern pattern = Pattern.compile("(.*?);\\s*?$\\s*",
-                Pattern.DOTALL + Pattern.MULTILINE);
-        Matcher matcher = pattern.matcher(text);
-        int total = 0;
-        while (matcher.find()) {
-            total++;
-        }
-        matcher.reset();
+
+        List<int[]> statementBounds = splitStatements(text);
+        int total = statementBounds.size();
 
         final Vector<Vector> dataVector = new Vector<Vector>();
         int count = 0;
@@ -95,20 +90,27 @@ public class RunScriptAction extends CustomAction {
         };
         WaitingDialog waitingDialog = new WaitingDialog(onCancel);
         waitingDialog.setText(String.format("0/%d", total));
+        int[] currentBounds = null;
         try {
-            while (waitingDialog.isVisible() && matcher.find()) {
-                String sql = text.substring(matcher.start(1), matcher.end(1));
+            for (int[] bounds : statementBounds) {
+                if (!waitingDialog.isVisible()) {
+                    break;
+                }
+                currentBounds = bounds;
+                String sql = text.substring(bounds[0], bounds[1]);
                 Vector<String> row = new Vector<String>(1);
                 int i = statement.executeUpdate(sql);
                 row.add(Integer.toString(i));
                 dataVector.add(row);
-                waitingDialog.setText(String.format("%d/%d", count++, total));
+                waitingDialog.setText(String.format("%d/%d", ++count, total));
             }
         } catch (Exception e) {
-            ApplicationFrame.getInstance().getTextComponent()
-                    .setSelectionStart(matcher.start(1));
-            ApplicationFrame.getInstance().getTextComponent()
-                    .setSelectionEnd(matcher.end(1));
+            if (currentBounds != null) {
+                ApplicationFrame.getInstance().getTextComponent()
+                        .setSelectionStart(currentBounds[0]);
+                ApplicationFrame.getInstance().getTextComponent()
+                        .setSelectionEnd(currentBounds[1]);
+            }
             ApplicationFrame.getInstance().focusTextArea();
             throw e;
         } finally {
@@ -123,5 +125,48 @@ public class RunScriptAction extends CustomAction {
                     columnIdentifiers, waitingDialog.getExecutionTime());
             Actions.getInstance().validateActions();
         }
+    }
+
+    /**
+     * Splits a multi-statement SQL script into the [start, end) character
+     * offsets of each individual statement it contains, the terminating
+     * semicolon excluded.
+     * <p>
+     * A semicolon is treated as a statement terminator only when it is the
+     * last non-whitespace character on its line - same convention as
+     * before - except that a semicolon located inside a single-quoted
+     * string literal is never treated as a terminator. The previous
+     * regular-expression-based split had no notion of string literals at
+     * all, so a value such as <code>'Operation completed;'</code> sitting
+     * at the end of a line would silently cut the statement in the wrong
+     * place. The standard SQL <code>''</code> escape for a literal quote
+     * inside a string is handled correctly as an emergent property of the
+     * simple in/out-of-string toggle below.
+     *
+     * @param text the full script text.
+     * @return the ordered list of [start, end) offsets, one per statement.
+     */
+    private static List<int[]> splitStatements(String text) {
+        List<int[]> statements = new ArrayList<int[]>();
+        int length = text.length();
+        int start = 0;
+        boolean inString = false;
+        for (int i = 0; i < length; i++) {
+            char c = text.charAt(i);
+            if (c == '\'') {
+                inString = !inString;
+            } else if (c == ';' && !inString) {
+                int j = i + 1;
+                while (j < length && (text.charAt(j) == ' '
+                        || text.charAt(j) == '\t' || text.charAt(j) == '\r')) {
+                    j++;
+                }
+                if (j == length || text.charAt(j) == '\n') {
+                    statements.add(new int[] { start, i });
+                    start = j < length ? j + 1 : j;
+                }
+            }
+        }
+        return statements;
     }
 }
