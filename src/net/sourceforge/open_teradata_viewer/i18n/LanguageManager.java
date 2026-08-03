@@ -49,9 +49,10 @@ public class LanguageManager {
     public static final Language ITALIAN = new Language("it", "Italiano", "Italian");
     public static final Language GERMAN = new Language("de", "Deutsch", "German");
     public static final Language DUTCH = new Language("nl", "Nederlands", "Dutch");
+    public static final Language UKRAINIAN = new Language("uk", "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430", "Ukrainian");
     
     private static final Language[] SUPPORTED_LANGUAGES = {
-        ENGLISH, ITALIAN, GERMAN, DUTCH
+        ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN
     };
 
     private LanguageManager() {
