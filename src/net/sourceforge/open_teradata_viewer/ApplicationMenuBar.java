@@ -242,6 +242,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu, true);
         addThemeItem("Default (Alternative Version)", "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme, subMenu);
+        addThemeItem("Druid", "/res/themes/druid.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Eclipse", "/res/themes/eclipse.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("IDEA", "/res/themes/idea.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Monokai", "/res/themes/monokai.xml", buttonGroupEditorTheme, subMenu);

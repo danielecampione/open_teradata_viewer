@@ -158,7 +158,7 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
      *
      * @return The default modifier key.
      */
-    protected static final int getDefaultModifier() {
+    public static final int getDefaultModifier() {
         return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     }
 
