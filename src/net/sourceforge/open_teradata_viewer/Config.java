@@ -143,9 +143,21 @@ public final class Config {
                 .mapToObj(i -> (Element) nodeList.item(i))
                 .map(element -> {
                     try {
-                        return new ConnectionData(element.getAttribute("name"), element.getAttribute("connection"),
-                                element.getAttribute("user"), Config.decrypt(element.getAttribute("password")),
+                        ConnectionData connectionData = new ConnectionData(element.getAttribute("name"),
+                                element.getAttribute("connection"), element.getAttribute("user"),
+                                Config.decrypt(element.getAttribute("password")),
                                 element.getAttribute("defaultOwner"));
+                        String databaseTypeAttribute = element.getAttribute("databaseType");
+                        ConnectionData.DatabaseType databaseType;
+                        if (databaseTypeAttribute != null && databaseTypeAttribute.trim().length() > 0) {
+                            databaseType = ConnectionData.DatabaseType.valueOf(databaseTypeAttribute);
+                        } else {
+                            // Connection saved before the databaseType attribute existed:
+                            // fall back to guessing it from the JDBC URL
+                            databaseType = ConnectionData.inferDatabaseTypeFromUrl(connectionData.getUrl());
+                        }
+                        connectionData.setDatabaseType(databaseType);
+                        return connectionData;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -168,6 +180,7 @@ public final class Config {
                 element.setAttribute("password", Config.encrypt(connectionData.getPassword()));
                 element.setAttribute("connection", connectionData.getUrl());
                 element.setAttribute("defaultOwner", connectionData.getDefaultOwner());
+                element.setAttribute("databaseType", connectionData.getDatabaseType().name());
                 config.appendChild(element);
             } catch (Exception e) {
                 throw new RuntimeException(e);

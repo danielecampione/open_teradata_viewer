@@ -323,6 +323,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu2);
         addSyntaxItem("Lua", SyntaxConstants.SYNTAX_STYLE_LUA, bg, subMenu2);
         addSyntaxItem("Makefile", SyntaxConstants.SYNTAX_STYLE_MAKEFILE, bg, subMenu2);
+        addSyntaxItem("Markdown", SyntaxConstants.SYNTAX_STYLE_MARKDOWN, bg, subMenu2);
         addSyntaxItem("MXML", SyntaxConstants.SYNTAX_STYLE_MXML, bg, subMenu2);
         addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu2);
         addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu2);

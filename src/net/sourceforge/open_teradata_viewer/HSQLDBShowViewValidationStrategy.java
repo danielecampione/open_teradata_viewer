@@ -19,19 +19,20 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * 
- * 
+ * HSQLDB equivalent of Teradata's "SHOW VIEW", via the standard
+ * <code>INFORMATION_SCHEMA.VIEWS.VIEW_DEFINITION</code> column.
+ *
  * @author D. Campione
  *
  */
-public class ShowProcedureValidationStrategy
+public class HSQLDBShowViewValidationStrategy
         implements
             IShowObjectValidationStrategy {
 
-    public ShowProcedureValidationStrategy() {
+    public HSQLDBShowViewValidationStrategy() {
     }
 
-    public String getSQLQueryToShowObject(String procedureName) {
-        return "SHOW PROCEDURE " + procedureName;
+    public String getSQLQueryToShowObject(String viewName) {
+        return HSQLDBInformationSchemaQueryBuilder.buildViewDefinitionQuery(viewName);
     }
 }

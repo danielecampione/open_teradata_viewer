@@ -19,19 +19,26 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * 
- * 
+ * Oracle equivalent of Teradata's "SHOW PROCEDURE", implemented via
+ * <code>DBMS_METADATA.GET_DDL</code>.<p/>
+ *
+ * Note: this only resolves standalone procedures. A procedure that lives
+ * inside a package is not found this way (Oracle has no direct concept of a
+ * "procedure" name in isolation from its package in that case) - Teradata
+ * has no packages, so this mirrors what "SHOW PROCEDURE" already covers
+ * there.
+ *
  * @author D. Campione
  *
  */
-public class ShowMacroValidationStrategy
+public class OracleShowProcedureValidationStrategy
         implements
             IShowObjectValidationStrategy {
 
-    public ShowMacroValidationStrategy() {
+    public OracleShowProcedureValidationStrategy() {
     }
 
-    public String getSQLQueryToShowObject(String macroName) {
-        return "SHOW MACRO " + macroName;
+    public String getSQLQueryToShowObject(String procedureName) {
+        return OracleDdlQueryBuilder.buildGetDdlQuery("PROCEDURE", procedureName);
     }
 }

@@ -19,27 +19,21 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * The interface defines the validation strategy used to initialize the SQL
- * query invoked to obtain the DDL.
- * 
+ * Teradata's native "SHOW MACRO" DDL-echo statement. Macros are a
+ * Teradata-specific object type with no equivalent in the other database
+ * types currently supported.
+ *
  * @author D. Campione
  *
  */
-public interface IShowObjectValidationStrategy {
+public class TeradataShowMacroValidationStrategy
+        implements
+            IShowObjectValidationStrategy {
 
-    String getSQLQueryToShowObject(String objectName);
-
-    /**
-     * Which 1-based column of the query's result set holds the DDL text.
-     * Teradata's "SHOW ...", Oracle's DBMS_METADATA.GET_DDL and DB2's
-     * catalog TEXT columns all return it as the only column, hence the
-     * default. MySQL's "SHOW CREATE ..." statements return it alongside
-     * several other descriptive columns (sql_mode, character set, etc.),
-     * at a different position depending on the object type, so
-     * {@link MySqlShowProcedureValidationStrategy} overrides this.
-     */
-    default int getResultColumnIndex() {
-        return 1;
+    public TeradataShowMacroValidationStrategy() {
     }
 
+    public String getSQLQueryToShowObject(String macroName) {
+        return "SHOW MACRO " + macroName;
+    }
 }

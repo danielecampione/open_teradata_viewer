@@ -30,11 +30,12 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
 /**
  * One of the partecipants belonging to the template method that has been
  * adopted to implement the initialization of the "select from" statement; the
- * class represents one of the ConcreteClasses of the specified design
- * pattern.<p/>
+ * class represents one of the ConcreteClasses of the specified design pattern.
+ * <p/>
  * 
  * A ConcreteClass consists of a class that implements the primitive operations
- * for executing the steps related to the algorithm.<p/>
+ * for executing the steps related to the algorithm.
+ * <p/>
  * 
  * The class <code>CustomSelectFromStatement</code> implements the code of the
  * custom SQL query having the fields listed in the select statement. This class
@@ -60,22 +61,21 @@ public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod
 
         ApplicationFrame app = ApplicationFrame.getInstance();
         DatabaseType databaseType = app.getDatabaseType();
-        ColumnsNameDiscovererHandlerFactoryMethod handler;
-        IColumnsNameDiscovererElement columnsNameDiscoverer;
-
-        if (databaseType == DatabaseType.TERADATA) {
-            handler = new TeradataColumnsNameDiscovererHandler();
-            columnsNameDiscoverer = (TeradataColumnsNameDiscoverer) handler.createElement(relationName);
-        } else if (databaseType == DatabaseType.ORACLE) {
-            handler = new ORACLEColumnsNameDiscovererHandler();
-            columnsNameDiscoverer = (ORACLEColumnsNameDiscoverer) handler.createElement(relationName);
-        } else {
-            handler = new GenericColumnsNameDiscovererHandler();
-            columnsNameDiscoverer = (GenericColumnsNameDiscoverer) handler.createElement(relationName);
-        }
+        ColumnsNameDiscovererHandlerFactoryMethod handler = ColumnsNameDiscovererHandlerFactoryMethod
+                .forDatabaseType(databaseType);
+        IColumnsNameDiscovererElement columnsNameDiscoverer = handler.createElement(relationName);
         String sqlQuery = columnsNameDiscoverer.getSQLQuery();
 
-        if (databaseType != DatabaseType.UNKNOWN) {
+        // Only Teradata and Oracle currently have a real column-name-discovery
+        // query behind them (one that queries the system catalog and returns
+        // column names as data). Every other database type gets
+        // GenericColumnsNameDiscoverer's plain "SELECT * FROM relationName",
+        // which must be used as-is: running it here and reading its result rows
+        // as if they were column names would silently turn actual table data
+        // into a bogus, broken query
+        boolean canDiscoverColumnNames = databaseType == DatabaseType.TERADATA || databaseType == DatabaseType.ORACLE;
+
+        if (canDiscoverColumnNames) {
             ResultSet resultSet = null;
             Connection connection = Context.getInstance().getConnectionData().getConnection();
             final PreparedStatement statement = connection.prepareStatement(sqlQuery);
@@ -116,7 +116,7 @@ public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod
                 text += " FROM " + relationName;
                 this.sqlQuery = text;
             } finally {
-                waitingDialog.hide();  // It’s idempotent - calling it twice doesn’t cause any problems
+                waitingDialog.hide(); // It’s idempotent - calling it twice doesn’t cause any problems
                 if (resultSet != null) {
                     resultSet.close();
                 }

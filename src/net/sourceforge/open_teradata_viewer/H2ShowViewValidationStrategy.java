@@ -19,27 +19,25 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * The interface defines the validation strategy used to initialize the SQL
- * query invoked to obtain the DDL.
- * 
+ * H2 equivalent of Teradata's "SHOW VIEW". Perhaps surprisingly, this is
+ * the exact same statement as {@link H2ShowTableValidationStrategy}: in
+ * H2's own SQL grammar, the <code>TABLE</code> clause of
+ * <code>SCRIPT</code> accepts a view name just as well as a table name
+ * (confirmed from H2's parser source: both resolve through the same
+ * <code>readTableOrView()</code> method), and correctly produces a
+ * "CREATE VIEW ..." statement instead of "CREATE TABLE ...".
+ *
  * @author D. Campione
  *
  */
-public interface IShowObjectValidationStrategy {
+public class H2ShowViewValidationStrategy
+        implements
+            IShowObjectValidationStrategy {
 
-    String getSQLQueryToShowObject(String objectName);
-
-    /**
-     * Which 1-based column of the query's result set holds the DDL text.
-     * Teradata's "SHOW ...", Oracle's DBMS_METADATA.GET_DDL and DB2's
-     * catalog TEXT columns all return it as the only column, hence the
-     * default. MySQL's "SHOW CREATE ..." statements return it alongside
-     * several other descriptive columns (sql_mode, character set, etc.),
-     * at a different position depending on the object type, so
-     * {@link MySqlShowProcedureValidationStrategy} overrides this.
-     */
-    default int getResultColumnIndex() {
-        return 1;
+    public H2ShowViewValidationStrategy() {
     }
 
+    public String getSQLQueryToShowObject(String viewName) {
+        return "SCRIPT NODATA NOPASSWORDS NOSETTINGS NOVERSION TABLE " + viewName;
+    }
 }

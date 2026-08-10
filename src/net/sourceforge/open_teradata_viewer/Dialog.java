@@ -234,6 +234,53 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
                 initialValue);
     }
 
+    /**
+     * Thread-safe replacement for the inherited
+     * {@link JOptionPane#showInputDialog(Object)}. Swing components must
+     * always be created on the Event Dispatch Thread - calling the
+     * inherited version directly from a background thread (as every
+     * Show*Action used to, from inside performThreaded()) happened to work
+     * most of the time by accident, but throws a
+     * UiThreadingViolationException under the Substance Look and Feel,
+     * which enforces the rule strictly.<p/>
+     *
+     * Declaring this method here, with the same name and signature as the
+     * inherited one, means every existing call to
+     * <code>Dialog.showInputDialog(...)</code> now resolves to this safe
+     * version instead - no other class needs to change.
+     */
+    public static String showInputDialog(Object message) {
+        // If we're already on EDT, execute directly
+        if (SwingUtilities.isEventDispatchThread()) {
+            return JOptionPane.showInputDialog(message);
+        }
+
+        // Otherwise, execute on EDT and wait for result
+        final AtomicReference<String> result = new AtomicReference<String>();
+        final AtomicReference<Exception> exception = new AtomicReference<Exception>();
+
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        result.set(JOptionPane.showInputDialog(message));
+                    } catch (Exception e) {
+                        exception.set(e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            exception.set(e);
+        }
+
+        if (exception.get() != null) {
+            throw new RuntimeException(exception.get());
+        }
+
+        return result.get();
+    }
+
     private static void determineSize(JScrollPane scrollPane) {
         // If we're already on EDT, execute directly
         if (SwingUtilities.isEventDispatchThread()) {

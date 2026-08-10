@@ -20,13 +20,15 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.List;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.ExplainStrategyFactory;
+import net.sourceforge.open_teradata_viewer.IExplainStrategy;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -93,18 +95,20 @@ public class ExplainRequestAction extends CustomAction {
             }
         }
 
-        String sqlQuery = "EXPLAIN " + request + ";";
-        ResultSet resultSet = null;
+        DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
+        final IExplainStrategy explainStrategy = ExplainStrategyFactory.getStrategy(databaseType);
+        if (explainStrategy == null) {
+            ApplicationFrame.getInstance().getConsole().println(
+                    LanguageManager.getInstance().getString("message.action_not_supported_for_database"),
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            return;
+        }
+
         Connection connection = Context.getInstance().getConnectionData().getConnection();
-        final PreparedStatement statement = connection.prepareStatement(sqlQuery);
         Runnable onCancel = new Runnable() {
             @Override
             public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
-                }
+                explainStrategy.cancel();
             }
         };
         WaitingDialog waitingDialog;
@@ -116,20 +120,14 @@ public class ExplainRequestAction extends CustomAction {
         }
         waitingDialog.setText(LanguageManager.getInstance().getString("message.executing_statement"));
         try {
-            resultSet = statement.executeQuery();
+            List<String> executionPlan = explainStrategy.explain(connection, request);
             ApplicationFrame.getInstance().getConsole().println(
                     Utilities.LINE_SEPARATOR + "\nExplanation\n" + Utilities.LINE_SEPARATOR);
-            while (resultSet.next()) {
-                Object obj = resultSet.getString(1);
-                String executionPlan = obj.toString().trim();
-                ApplicationFrame.getInstance().getConsole().println(executionPlan);
+            for (String line : executionPlan) {
+                ApplicationFrame.getInstance().getConsole().println(line);
             }
         } finally {
             waitingDialog.hide();
-            if (resultSet != null) {
-                resultSet.close();
-            }
-            statement.close();
         }
     }
 }

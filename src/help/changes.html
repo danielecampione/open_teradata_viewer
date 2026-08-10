@@ -6,6 +6,93 @@
     </HEAD>
     <BODY bgcolor="#FFFFFF">
 <PRE>
+0.33b (10/08/2026)
+    - Added Markdown syntax highlighting.
+    - Added Danish language support to the UI internationalization.
+    - Fixed RunAction sending a trailing SQL*Plus "/" block terminator literally
+      to the JDBC driver, causing a spurious error after a successful CREATE
+      PROCEDURE/FUNCTION/etc..
+    - Fixed RunScriptAction's statement splitter breaking PL/SQL blocks (CREATE
+      PROCEDURE/FUNCTION/PACKAGE/TRIGGER/TYPE, DECLARE/BEGIN) into invalid
+      fragments at semicolons that are actually inside the block, not statement
+      separators.
+    - ConnectionData now stores the database type explicitly (set from the
+      connection wizard) instead of guessing it later from the JDBC URL, which
+      only recognized Teradata and Oracle out of the 9 supported types.
+    - Refactored Show Table/View/Procedure/Macro and Explain request into
+      per-database strategies (Teradata, Oracle) picked via
+      ShowObjectValidationStrategyFactory/ExplainStrategyFactory; unsupported
+      combinations now report a clear message instead of running the wrong SQL
+      dialect.
+    - Added Oracle support for Show Table/View/Procedure (DBMS_METADATA.GET_DDL)
+      and Explain request (EXPLAIN PLAN FOR + DBMS_XPLAN.DISPLAY).
+    - Fixed a latent bug in CustomSelectFromStatement that would have misread
+      table data as column names for database types other than Teradata/Oracle
+      once database-type detection was corrected.
+    - "Other" database option in the new-connection wizard now prompts for a
+      JDBC URL instead of silently doing nothing.
+    - Deleted ShowTableValidationStrategy.java, ShowViewValidationStrategy.java,
+      ShowProcedureValidationStrategy.java, ShowMacroValidationStrategy.java
+      (replaced by per-database Show*ValidationStrategy.java).
+    - Added DB2 support for Show View and Show Procedure (SYSCAT.VIEWS.TEXT /
+      SYSCAT.ROUTINES.TEXT); Show Table and Explain request remain unsupported
+      for DB2 (no SQL-callable equivalent exists — db2look/db2exfmt are
+      command-line-only tools).
+    - Added MySQL support for Show Table/View (SHOW CREATE TABLE/VIEW),
+      Show Procedure (SHOW CREATE PROCEDURE) and Explain request
+      (EXPLAIN FORMAT=TREE, requires MySQL 8.0.16+).
+    - IShowObjectValidationStrategy gained a default getResultColumnIndex()
+      method (defaulting to 1) to support dialects like MySQL where the DDL
+      isn't always in the first result column, without touching any existing
+      strategy class.
+    - Added SQLite support for Show Table/View (reading the original CREATE
+      TABLE/VIEW text verbatim from sqlite_master) and Explain request (EXPLAIN
+      QUERY PLAN); Show Procedure remains unsupported for SQLite, which has no
+      server-side stored procedures.
+    - Added HSQLDB support for Show View/Procedure
+      (INFORMATION_SCHEMA.VIEWS/ROUTINES) and Explain request
+      (EXPLAIN PLAN FOR); Show Table remains unsupported (no confirmed
+      single-query DDL mechanism found).
+    - Added H2 support for Show Table/View (SCRIPT NODATA ... TABLE, confirmed
+      from H2's parser source - the same statement covers both) and Explain
+      request (EXPLAIN); Show Procedure remains unsupported (H2 has no native
+      SQL stored procedures, only Java-backed CREATE ALIAS functions).
+    - Added Derby support for Show View (SYS.SYSVIEWS.VIEWDEFINITION); Show
+      Table and Show Procedure remain unsupported (no reliable DDL
+      reconstruction / procedures are always Java-backed); Explain request is
+      deliberately not implemented for Derby, since its only readable mechanism
+      (RUNTIMESTATISTICS) requires actually executing the statement, unlike
+      every other database here.
+    - Added SQL Server support for Show View/Procedure
+      (OBJECT_DEFINITION/OBJECT_ID) and Explain request (SET
+      SHOWPLAN_TEXT ON/OFF, carefully scoped with guaranteed cleanup since it is
+      session-sticky); Show Table remains unsupported (no plain-T-SQL equivalent
+      exists).
+    - Fixed 12 literal (unescaped) accented characters in
+      messages_it.properties.
+    - Fixed a Substance L&F UIThreadingViolationException: the 4 Show*Action
+      classes called JOptionPane.showInputDialog (inherited via Dialog, no EDT
+      protection) from a background thread; added a proper
+      Dialog.showInputDialog(Object) using the same invokeAndWait pattern as the
+      rest of the class, which every existing call site now resolves to
+      automatically.
+    - ShowTable/View/Procedure/MacroAction now check whether the current
+      database type is supported before prompting for the object name, instead
+      of after — the outcome never depended on the name typed, so asking first
+      was wasted effort whenever the command wasn't supported.
+    - Utilities.canBeATeradataObjectName renamed to canBeAValidObjectName and
+      made database-aware: the maximum identifier length now depends on the
+      connected database type (Teradata 30 unchanged,
+      Oracle/DB2/HSQLDB/Derby/SQL Server 128, MySQL 64, SQLite/H2 unlimited)
+      instead of always being 30; the Teradata reserved-word check now only runs
+      for an actual Teradata connection, since no verified reserved-word list
+      exists here for the other 8 database types.
+    - Upgraded rsyntaxtextarea library 3.1.1 -> 3.1.2 
+    - Upgraded autocomplete library 3.1.1 -> 3.1.2
+    - Upgraded languagesupport library 3.1.1 -> 3.1.2
+    - Upgraded rstaui library 3.1.1 -> 3.1.2
+    - Upgraded spellchecker library 3.1.1 -> 3.1.2
+
 0.33a (04/08/2026)
     - Added the "Druid" editor theme (new in RSyntaxTextArea 3.1.1) to the "Look
       & Feel" - "Editor Theme" menu.

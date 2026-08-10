@@ -19,27 +19,25 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * The interface defines the validation strategy used to initialize the SQL
- * query invoked to obtain the DDL.
- * 
+ * DB2 equivalent of Teradata's "SHOW PROCEDURE": reads the procedure's
+ * defining SQL text straight from <code>SYSCAT.ROUTINES</code>.<p/>
+ *
+ * Note: this only works for native SQL PL procedures. It returns nothing
+ * for external (Java/C) procedures - DB2 does not store their source in
+ * the catalog at all - and returns an encoded, unreadable string for
+ * procedures that were deliberately created with an obfuscated body.
+ *
  * @author D. Campione
  *
  */
-public interface IShowObjectValidationStrategy {
+public class DB2ShowProcedureValidationStrategy
+        implements
+            IShowObjectValidationStrategy {
 
-    String getSQLQueryToShowObject(String objectName);
-
-    /**
-     * Which 1-based column of the query's result set holds the DDL text.
-     * Teradata's "SHOW ...", Oracle's DBMS_METADATA.GET_DDL and DB2's
-     * catalog TEXT columns all return it as the only column, hence the
-     * default. MySQL's "SHOW CREATE ..." statements return it alongside
-     * several other descriptive columns (sql_mode, character set, etc.),
-     * at a different position depending on the object type, so
-     * {@link MySqlShowProcedureValidationStrategy} overrides this.
-     */
-    default int getResultColumnIndex() {
-        return 1;
+    public DB2ShowProcedureValidationStrategy() {
     }
 
+    public String getSQLQueryToShowObject(String procedureName) {
+        return Db2CatalogQueryBuilder.buildProcedureTextQuery(procedureName);
+    }
 }

@@ -112,14 +112,16 @@ public class ConnectAction extends CustomAction {
                         }
                         app.getConsole().println(langManager.getString("message.connected"));
 
-                        String url = connectionData.getUrl().trim().toLowerCase();
-                        if (url.startsWith("jdbc:teradata:")) { // Teradata
-                            app.setDatabaseType(DatabaseType.TERADATA);
-                        } else if (url.startsWith("jdbc:oracle:")) { // ORACLE
-                            app.setDatabaseType(DatabaseType.ORACLE);
-                        } else {
-                            app.setDatabaseType(DatabaseType.UNKNOWN);
+                        // The database type is the one recorded on the connection itself
+                        // (set when it was created/edited - see newConnectionWizard()).
+                        // Connections saved before this field existed already had it
+                        // backfilled from their JDBC URL when loaded (see Config.getDatabases());
+                        // the URL-based guess here is only a last-resort safety net.
+                        DatabaseType databaseType = connectionData.getDatabaseType();
+                        if (databaseType == null) {
+                            databaseType = ConnectionData.inferDatabaseTypeFromUrl(connectionData.getUrl());
                         }
+                        app.setDatabaseType(databaseType);
 
                         SQLWarning warnings = connectionData.getConnection().getWarnings();
                         while (warnings != null) {
@@ -208,48 +210,66 @@ public class ConnectAction extends CustomAction {
                             connectionData.setUrl(String.format(
                                     "jdbc:teradata://%s/database=%s,TMODE=ANSI,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
                                     serverName, databaseName));
+                            connectionData.setDatabaseType(DatabaseType.TERADATA);
                         } else if (langManager.getString("database.oracle").equals(db)) {
                             String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
                             String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
                             connectionData.setName(databaseName);
                             connectionData.setUrl(String.format("jdbc:oracle:thin:@%s:1521:%s", serverName, databaseName));
+                            connectionData.setDatabaseType(DatabaseType.ORACLE);
                         } else if (langManager.getString("database.db2").equals(db)) {
                             String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
                             String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
                             String portNumber = checkString(JOptionPane.showInputDialog(langManager.getString("message.port_number"), "50000"));
                             connectionData.setName(databaseName);
                             connectionData.setUrl(String.format("jdbc:db2://%s:%s/%s", serverName, portNumber, databaseName));
+                            connectionData.setDatabaseType(DatabaseType.DB2);
                         } else if (langManager.getString("database.mysql").equals(db)) {
                             String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
                             String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
                             connectionData.setName(databaseName);
                             connectionData.setUrl(String.format("jdbc:mysql://%s/%s", serverName, databaseName));
+                            connectionData.setDatabaseType(DatabaseType.MYSQL);
                         } else if (langManager.getString("database.sqlite").equals(db)) {
                             String fileName = checkString(
                                     JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/sqlite.db").getCanonicalPath()));
                             connectionData.setName(new File(fileName).getName());
                             connectionData.setUrl(String.format("jdbc:sqlite:%s", fileName));
+                            connectionData.setDatabaseType(DatabaseType.SQLITE);
                         } else if (langManager.getString("database.hsqldb").equals(db)) {
                             String fileName = checkString(
                                     JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/hsqldb").getCanonicalPath()));
                             connectionData.setName(new File(fileName).getName());
                             connectionData.setUrl(String.format("jdbc:hsqldb:%s", fileName));
                             connectionData.setUser("sa");
+                            connectionData.setDatabaseType(DatabaseType.HSQLDB);
                         } else if (langManager.getString("database.h2").equals(db)) {
                             String fileName = checkString(
                                     JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/h2db").getCanonicalPath()));
                             connectionData.setName(new File(fileName).getName());
                             connectionData.setUrl(String.format("jdbc:h2:%s", fileName));
+                            connectionData.setDatabaseType(DatabaseType.H2);
                         } else if (langManager.getString("database.derby").equals(db)) {
                             String fileName = checkString(
                                     JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/derbydb").getCanonicalPath()));
                             connectionData.setName(new File(fileName).getName());
                             connectionData.setUrl(String.format("jdbc:derby:%s", fileName));
+                            connectionData.setDatabaseType(DatabaseType.APACHE_DERBY);
                         } else if (langManager.getString("database.sqlserver").equals(db)) {
                             String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
                             String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
                             connectionData.setName(databaseName);
                             connectionData.setUrl(String.format("jdbc:jtds:sqlserver://%s:1433/%s", serverName, databaseName));
+                            connectionData.setDatabaseType(DatabaseType.SQL_SERVER);
+                        } else if (langManager.getString("database.other").equals(db)) {
+                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                            String url = checkString(JOptionPane.showInputDialog("JDBC URL:"));
+                            connectionData.setName(databaseName);
+                            connectionData.setUrl(url);
+                            // The exact dialect is unknown: the "SHOW TABLE/VIEW/PROCEDURE/MACRO"
+                            // and "explain request" commands will report themselves as
+                            // unsupported rather than firing SQL for the wrong dialect.
+                            connectionData.setDatabaseType(DatabaseType.UNKNOWN);
                         }
                     } catch (IOException e) {
                         ioExceptionHolder[0] = e;
@@ -319,6 +339,11 @@ public class ConnectAction extends CustomAction {
                             "button.ok");
                     connectionData.setName(name.getText());
                     connectionData.setUrl(url.getText());
+                    // This dialog only exposes a raw URL field (no database-type
+                    // selector like newConnectionWizard() does), so re-derive the
+                    // type from the URL to avoid it going stale if the URL was
+                    // changed to point to a different kind of database.
+                    connectionData.setDatabaseType(ConnectionData.inferDatabaseTypeFromUrl(connectionData.getUrl()));
                     connectionData.setUser(user.getText().trim());
                     // getPassword() (char[]) is used instead of getText()
                     // (String): a String lingers in JVM memory until GC,

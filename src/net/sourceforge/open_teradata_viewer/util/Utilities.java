@@ -56,6 +56,7 @@ import javax.swing.ListCellRenderer;
 import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.util.array.StringList;
@@ -451,14 +452,33 @@ public class Utilities {
         System.gc();
     }
 
-    public static boolean canBeATeradataObjectName(String text) {
+    /**
+     * Checks whether the given text could be a valid, existing object name
+     * for the currently connected database - used as a client-side sanity
+     * check before accepting user-typed input (Show Table/View/Procedure/
+     * Macro, "Select from ...") rather than as a security boundary.<p/>
+     *
+     * The maximum identifier length depends on the connected database type
+     * (Teradata's 30-character limit does not apply everywhere - see
+     * {@link #getMaxIdentifierLength(DatabaseType)}). The Teradata
+     * reserved-word check only ever runs for an actual Teradata
+     * connection: there is no verified reserved-word list here for the
+     * other 8 database types this application supports, and applying
+     * Teradata's list to, say, an Oracle connection would risk rejecting
+     * a perfectly valid Oracle name over a word that only Teradata
+     * reserves - a worse outcome than simply not checking for those
+     * database types.
+     */
+    public static boolean canBeAValidObjectName(String text) {
         if (!isEmpty(text) && text.trim().length() > 0) {
             text = text.trim().toUpperCase();
             int lastTokenIndex = text.lastIndexOf(".");
-            if (text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
-                    text.length()).length() > 30) {
+            DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
+            int maxLength = getMaxIdentifierLength(databaseType);
+            if (maxLength > 0 && text.substring(lastTokenIndex == -1 ? 0 : lastTokenIndex + 1,
+                    text.length()).length() > maxLength) {
                 ApplicationFrame.getInstance().getConsole().println(
-                        "A Teradata object name must be from 1 to 30 characters long.",
+                        "An object name must be from 1 to " + maxLength + " characters long.",
                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             }
@@ -470,19 +490,21 @@ public class Utilities {
                     return false;
                 }
             }
-            for (int i = 0; i < teradataReservedWords.size(); i++) {
-                if (text.equalsIgnoreCase(teradataReservedWords.get(i))) {
-                    ApplicationFrame.getInstance().getConsole().println(
-                            "You're trying to perform a SQL command using a Teradata reserved word: \""
-                                    + teradataReservedWords.get(i) + "\".",
-                            ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                    return false;
+            if (databaseType == DatabaseType.TERADATA) {
+                for (int i = 0; i < teradataReservedWords.size(); i++) {
+                    if (text.equalsIgnoreCase(teradataReservedWords.get(i))) {
+                        ApplicationFrame.getInstance().getConsole().println(
+                                "You're trying to perform a SQL command using a Teradata reserved word: \""
+                                        + teradataReservedWords.get(i) + "\".",
+                                ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                        return false;
+                    }
                 }
             }
             try {
                 Double.parseDouble(text);
                 ApplicationFrame.getInstance().getConsole().println(
-                        "A Teradata object name cannot be a number.",
+                        "An object name cannot be a number.",
                         ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                 return false;
             } catch (NumberFormatException nfe) {
@@ -490,6 +512,39 @@ public class Utilities {
             }
         }
         return false;
+    }
+
+    /**
+     * Maximum unquoted identifier length per database type, taken from
+     * each vendor's own documentation:<br/>
+     * Teradata 30 (unchanged - this application's original, long-standing
+     * value) &#8226; Oracle 128 (12.2+) &#8226; DB2 LUW 128 (unqualified
+     * table/view/procedure name) &#8226; MySQL 64 &#8226; HSQLDB 128
+     * &#8226; Apache Derby 128 &#8226; SQL Server 128 &#8226; SQLite and
+     * H2 do not enforce a specific limit, so their length is not checked
+     * here (a returned value of 0 means "no limit").
+     */
+    private static int getMaxIdentifierLength(DatabaseType databaseType) {
+        if (databaseType == null) {
+            return 30;
+        }
+        switch (databaseType) {
+        case TERADATA:
+            return 30;
+        case ORACLE:
+        case DB2:
+        case HSQLDB:
+        case APACHE_DERBY:
+        case SQL_SERVER:
+            return 128;
+        case MYSQL:
+            return 64;
+        case SQLITE:
+        case H2:
+            return 0;
+        default:
+            return 30;
+        }
     }
 
     /**

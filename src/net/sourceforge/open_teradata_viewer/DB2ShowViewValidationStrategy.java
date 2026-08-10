@@ -19,19 +19,20 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * 
- * 
+ * DB2 equivalent of Teradata's "SHOW VIEW": reads the view's defining SQL
+ * text straight from <code>SYSCAT.VIEWS</code>.
+ *
  * @author D. Campione
  *
  */
-public class ShowViewValidationStrategy
+public class DB2ShowViewValidationStrategy
         implements
             IShowObjectValidationStrategy {
 
-    public ShowViewValidationStrategy() {
+    public DB2ShowViewValidationStrategy() {
     }
 
     public String getSQLQueryToShowObject(String viewName) {
-        return "SHOW VIEW " + viewName;
+        return Db2CatalogQueryBuilder.buildViewTextQuery(viewName);
     }
 }

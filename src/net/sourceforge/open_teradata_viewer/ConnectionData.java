@@ -49,6 +49,16 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
 
     private String defaultOwner;
 
+    /**
+     * The kind of database this connection points to. This is the single
+     * source of truth used throughout the application (Schema browser
+     * actions, "Explain request", column name discovery, etc.) to decide
+     * which SQL dialect/syntax to use. It is set explicitly when the
+     * connection is created (see {@link net.sourceforge.open_teradata_viewer.actions.ConnectAction#newConnectionWizard()})
+     * rather than being guessed later from the JDBC URL.
+     */
+    private DatabaseType databaseType = DatabaseType.UNKNOWN;
+
     private String identifierQuoteString;
 
     public ConnectionData() {
@@ -116,6 +126,48 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
 
     public void setDefaultOwner(String newDefaultOwner) {
         this.defaultOwner = newDefaultOwner;
+    }
+
+    public DatabaseType getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(DatabaseType newDatabaseType) {
+        this.databaseType = newDatabaseType == null ? DatabaseType.UNKNOWN : newDatabaseType;
+    }
+
+    /**
+     * Best-effort fallback used only for connections saved before
+     * {@link #databaseType} existed (older <code>config.xml</code> files
+     * without the attribute). Newly created connections no longer rely on
+     * this: their type is set explicitly from the database chosen in
+     * {@link net.sourceforge.open_teradata_viewer.actions.ConnectAction#newConnectionWizard()}.
+     */
+    public static DatabaseType inferDatabaseTypeFromUrl(String url) {
+        if (url == null) {
+            return DatabaseType.UNKNOWN;
+        }
+        String lowerUrl = url.trim().toLowerCase();
+        if (lowerUrl.startsWith("jdbc:teradata:")) {
+            return DatabaseType.TERADATA;
+        } else if (lowerUrl.startsWith("jdbc:oracle:")) {
+            return DatabaseType.ORACLE;
+        } else if (lowerUrl.startsWith("jdbc:db2:")) {
+            return DatabaseType.DB2;
+        } else if (lowerUrl.startsWith("jdbc:mysql:")) {
+            return DatabaseType.MYSQL;
+        } else if (lowerUrl.startsWith("jdbc:sqlite:")) {
+            return DatabaseType.SQLITE;
+        } else if (lowerUrl.startsWith("jdbc:hsqldb:")) {
+            return DatabaseType.HSQLDB;
+        } else if (lowerUrl.startsWith("jdbc:h2:")) {
+            return DatabaseType.H2;
+        } else if (lowerUrl.startsWith("jdbc:derby:")) {
+            return DatabaseType.APACHE_DERBY;
+        } else if (lowerUrl.startsWith("jdbc:jtds:sqlserver:") || lowerUrl.startsWith("jdbc:sqlserver:")) {
+            return DatabaseType.SQL_SERVER;
+        }
+        return DatabaseType.UNKNOWN;
     }
 
     public void connect() throws Exception {

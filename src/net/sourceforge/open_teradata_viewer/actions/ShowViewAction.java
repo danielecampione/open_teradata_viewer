@@ -25,10 +25,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.ShowViewValidationStrategy;
+import net.sourceforge.open_teradata_viewer.IShowObjectValidationStrategy;
+import net.sourceforge.open_teradata_viewer.ShowObjectType;
+import net.sourceforge.open_teradata_viewer.ShowObjectValidationStrategyFactory;
 import net.sourceforge.open_teradata_viewer.WaitingDialog;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
@@ -64,6 +67,20 @@ public class ShowViewAction extends ShowObjectAction {
             return;
         }
 
+        // Checked here, before asking for the view name below, because
+        // the answer never depends on that name - it would be wasted
+        // effort to make the user type one only to be told afterwards
+        // that this isn't supported for the connected database type.
+        DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
+        IShowObjectValidationStrategy showObjectValidationStrategy = ShowObjectValidationStrategyFactory
+                .getStrategy(ShowObjectType.VIEW, databaseType);
+        if (showObjectValidationStrategy == null) {
+            ApplicationFrame.getInstance().getConsole().println(
+                    LanguageManager.getInstance().getString("message.action_not_supported_for_database"),
+                    ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+            return;
+        }
+
         String viewName = null;
         String databaseName = null;
         boolean firstIteration = true;
@@ -73,12 +90,12 @@ public class ShowViewAction extends ShowObjectAction {
                 firstIteration = false;
             }
             if (viewName == null) {
-                viewName = Dialog.showInputDialog("Insert the view name: ");
+                viewName = Dialog.showInputDialog(LanguageManager.getInstance().getString("message.insert_view_name"));
                 if (viewName == null) {
                     return;
                 }
             }
-            if (!Utilities.canBeATeradataObjectName(viewName)) {
+            if (!Utilities.canBeAValidObjectName(viewName)) {
                 viewName = null;
             }
         }
@@ -93,7 +110,7 @@ public class ShowViewAction extends ShowObjectAction {
             viewName = viewName.substring(lastTokenIndex + 1, viewName.length());
         }
         String sqlQuery = getSQLQueryToShowObject(
-                new ShowViewValidationStrategy(),
+                showObjectValidationStrategy,
                 ((databaseName != null && databaseName.trim().length() > 0)
                         ? databaseName + "." : "")
                         + viewName);
@@ -122,7 +139,7 @@ public class ShowViewAction extends ShowObjectAction {
             resultSet = statement.executeQuery();
             StringBuilder viewBody = new StringBuilder();
             while (resultSet.next()) {
-                Object obj = resultSet.getString(1);
+                Object obj = resultSet.getString(showObjectValidationStrategy.getResultColumnIndex());
                 if (obj == null) {
                     throw new SQLException("ER_BAD_NULL_ERROR", "SQLState 23000", 1048);
                 } else if (obj instanceof String) {

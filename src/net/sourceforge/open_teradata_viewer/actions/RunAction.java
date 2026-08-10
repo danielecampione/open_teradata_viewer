@@ -77,6 +77,7 @@ public class RunAction extends CustomAction {
         if (sql.trim().length() == 0) {
             return;
         }
+        sql = stripTrailingSlashTerminator(sql);
         if (sql.trim().endsWith(";")) {
             String sqlWithoutSemicolon = sql.trim().substring(0, sql.trim().length() - 1);
             if (!sqlWithoutSemicolon.trim().toLowerCase().endsWith("end")) {
@@ -253,5 +254,27 @@ public class RunAction extends CustomAction {
         for (int i = 0; i < bindVariables.length; i++) {
             statement.setObject(i + 1, bindVariables[i]);
         }
+    }
+
+    /**
+     * Strips a trailing "/" placed alone on its own line, if present.<p/>
+     *
+     * A PL/SQL block (CREATE PROCEDURE/FUNCTION/PACKAGE/TRIGGER/TYPE, or a
+     * bare BEGIN/DECLARE block) is conventionally terminated this way in
+     * SQL*Plus/SQLcl-style scripts - it is a client-side directive
+     * ("execute this block now"), not part of the SQL text itself. Sending
+     * it to the JDBC driver as literal trailing content makes the database
+     * report a syntax error even though the CREATE/REPLACE right before it
+     * already succeeded, which looks like the whole statement failed when
+     * it didn't.
+     */
+    private static String stripTrailingSlashTerminator(String sql) {
+        sql = sql.trim();
+        int lastNewline = Math.max(sql.lastIndexOf('\n'), sql.lastIndexOf('\r'));
+        String lastLine = lastNewline == -1 ? sql : sql.substring(lastNewline + 1);
+        if (lastLine.trim().equals("/")) {
+            sql = (lastNewline == -1 ? "" : sql.substring(0, lastNewline)).trim();
+        }
+        return sql;
     }
 }

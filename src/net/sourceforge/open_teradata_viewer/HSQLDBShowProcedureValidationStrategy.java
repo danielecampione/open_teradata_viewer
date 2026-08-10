@@ -19,27 +19,22 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * The interface defines the validation strategy used to initialize the SQL
- * query invoked to obtain the DDL.
- * 
+ * HSQLDB equivalent of Teradata's "SHOW PROCEDURE", via the standard
+ * <code>INFORMATION_SCHEMA.ROUTINES.ROUTINE_DEFINITION</code> column.
+ * Only covers routines written in SQL (the common case); a routine backed
+ * by an external Java method has no SQL body to show.
+ *
  * @author D. Campione
  *
  */
-public interface IShowObjectValidationStrategy {
+public class HSQLDBShowProcedureValidationStrategy
+        implements
+            IShowObjectValidationStrategy {
 
-    String getSQLQueryToShowObject(String objectName);
-
-    /**
-     * Which 1-based column of the query's result set holds the DDL text.
-     * Teradata's "SHOW ...", Oracle's DBMS_METADATA.GET_DDL and DB2's
-     * catalog TEXT columns all return it as the only column, hence the
-     * default. MySQL's "SHOW CREATE ..." statements return it alongside
-     * several other descriptive columns (sql_mode, character set, etc.),
-     * at a different position depending on the object type, so
-     * {@link MySqlShowProcedureValidationStrategy} overrides this.
-     */
-    default int getResultColumnIndex() {
-        return 1;
+    public HSQLDBShowProcedureValidationStrategy() {
     }
 
+    public String getSQLQueryToShowObject(String procedureName) {
+        return HSQLDBInformationSchemaQueryBuilder.buildRoutineDefinitionQuery(procedureName);
+    }
 }

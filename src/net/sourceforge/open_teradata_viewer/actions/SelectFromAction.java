@@ -90,7 +90,7 @@ public class SelectFromAction extends CustomAction {
                     return null;
                 }
             }
-            if (!Utilities.canBeATeradataObjectName(relationName)) {
+            if (!Utilities.canBeAValidObjectName(relationName)) {
                 relationName = null;
             }
         }

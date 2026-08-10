@@ -118,7 +118,7 @@ public class RunScriptAction extends CustomAction {
             statement.close();
             Context.getInstance().setResultSet(null);
             final Vector<String> columnIdentifiers = new Vector<String>(1);
-            columnIdentifiers.add("Rows updated");
+            columnIdentifiers.add(LanguageManager.getInstance().getString("label.rows_updated"));
             Context.getInstance().setColumnTypes(new int[]{Types.INTEGER});
             Context.getInstance().setColumnTypeNames(new String[1]);
             ResultSetTable.getInstance().setDataVector(dataVector,
@@ -128,20 +128,34 @@ public class RunScriptAction extends CustomAction {
     }
 
     /**
+     * A PL/SQL block (CREATE PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY/
+     * TRIGGER/TYPE/TYPE BODY, or a bare DECLARE/BEGIN block) is
+     * conventionally terminated by a "/" on its own line in SQL*Plus/
+     * SQLcl-style scripts, rather than by a semicolon - a block routinely
+     * contains several semicolons of its own (e.g. inside BEGIN ... END;),
+     * none of which are statement separators.
+     */
+    private static final java.util.regex.Pattern PLSQL_BLOCK_START = java.util.regex.Pattern.compile(
+            "\\A\\s*(CREATE\\s+(OR\\s+REPLACE\\s+)?(PACKAGE\\s+BODY|PACKAGE|PROCEDURE|FUNCTION|TRIGGER|TYPE\\s+BODY|TYPE)\\b"
+                    + "|DECLARE\\b|BEGIN\\b)",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
      * Splits a multi-statement SQL script into the [start, end) character
      * offsets of each individual statement it contains, the terminating
-     * semicolon excluded.
+     * semicolon (or, for a PL/SQL block, the terminating "/" line)
+     * excluded.
      * <p>
      * A semicolon is treated as a statement terminator only when it is the
-     * last non-whitespace character on its line - same convention as
-     * before - except that a semicolon located inside a single-quoted
-     * string literal is never treated as a terminator. The previous
-     * regular-expression-based split had no notion of string literals at
-     * all, so a value such as <code>'Operation completed;'</code> sitting
-     * at the end of a line would silently cut the statement in the wrong
-     * place. The standard SQL <code>''</code> escape for a literal quote
-     * inside a string is handled correctly as an emergent property of the
-     * simple in/out-of-string toggle below.
+     * last non-whitespace character on its line, and one located inside a
+     * single-quoted string literal is never treated as a terminator (the
+     * standard SQL <code>''</code> escape for a literal quote inside a
+     * string is handled correctly as an emergent property of the simple
+     * in/out-of-string toggle below). A statement that starts with a
+     * PL/SQL block opener is the one exception to the semicolon rule: it
+     * is instead read in full up to its terminating "/" line, so that the
+     * semicolons inside it are preserved rather than splitting it into
+     * broken fragments.
      *
      * @param text the full script text.
      * @return the ordered list of [start, end) offsets, one per statement.
@@ -150,8 +164,52 @@ public class RunScriptAction extends CustomAction {
         List<int[]> statements = new ArrayList<int[]>();
         int length = text.length();
         int start = 0;
+        while (start < length) {
+            while (start < length && Character.isWhitespace(text.charAt(start))) {
+                start++;
+            }
+            if (start >= length) {
+                break;
+            }
+            if (PLSQL_BLOCK_START.matcher(text).region(start, length).lookingAt()) {
+                int end = findStandaloneSlashLine(text, start, length);
+                if (end != -1) {
+                    statements.add(new int[] { start, end });
+                    int nextLine = text.indexOf('\n', end);
+                    start = nextLine == -1 ? length : nextLine + 1;
+                    continue;
+                }
+                // No terminating "/" found for this block (script doesn't
+                // use the convention, or it's simply missing) - fall back
+                // to the ordinary semicolon rule below, same as any other
+                // statement.
+            }
+            int end = findSemicolonTerminator(text, start, length);
+            if (end == -1) {
+                break;
+            }
+            statements.add(new int[] { start, end });
+            start = advancePastSemicolonLine(text, end, length);
+        }
+        return statements;
+    }
+
+    private static int findStandaloneSlashLine(String text, int from, int length) {
+        int pos = from;
+        while (pos < length) {
+            int lineEnd = text.indexOf('\n', pos);
+            int lineEndExclusive = lineEnd == -1 ? length : lineEnd;
+            if (text.substring(pos, lineEndExclusive).trim().equals("/")) {
+                return pos;
+            }
+            pos = lineEnd == -1 ? length : lineEnd + 1;
+        }
+        return -1;
+    }
+
+    private static int findSemicolonTerminator(String text, int from, int length) {
         boolean inString = false;
-        for (int i = 0; i < length; i++) {
+        for (int i = from; i < length; i++) {
             char c = text.charAt(i);
             if (c == '\'') {
                 inString = !inString;
@@ -162,11 +220,18 @@ public class RunScriptAction extends CustomAction {
                     j++;
                 }
                 if (j == length || text.charAt(j) == '\n') {
-                    statements.add(new int[] { start, i });
-                    start = j < length ? j + 1 : j;
+                    return i;
                 }
             }
         }
-        return statements;
+        return -1;
+    }
+
+    private static int advancePastSemicolonLine(String text, int semicolonPos, int length) {
+        int j = semicolonPos + 1;
+        while (j < length && (text.charAt(j) == ' ' || text.charAt(j) == '\t' || text.charAt(j) == '\r')) {
+            j++;
+        }
+        return j < length ? j + 1 : j;
     }
 }

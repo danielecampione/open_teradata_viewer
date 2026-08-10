@@ -18,6 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
+
 /**
  * One of the partecipants belonging to the factory method that has been adopted
  * to implement the initialization of the columns name discoverer statement; the
@@ -53,5 +55,23 @@ public abstract class ColumnsNameDiscovererHandlerFactoryMethod {
 
     public String returnElement(IColumnsNameDiscovererElement element) {
         return element.getSQLQuery();
+    }
+
+    /**
+     * Picks the concrete handler appropriate to the given database type,
+     * so callers don't have to branch on {@link DatabaseType} themselves
+     * (previously done inline in {@link CustomSelectFromStatement}).
+     * Databases with no dedicated column-name-discovery logic fall back to
+     * {@link GenericColumnsNameDiscovererHandler}, which is always safe:
+     * it simply leaves "SELECT *" as-is instead of expanding it to an
+     * explicit column list.
+     */
+    public static ColumnsNameDiscovererHandlerFactoryMethod forDatabaseType(DatabaseType databaseType) {
+        if (databaseType == DatabaseType.TERADATA) {
+            return new TeradataColumnsNameDiscovererHandler();
+        } else if (databaseType == DatabaseType.ORACLE) {
+            return new ORACLEColumnsNameDiscovererHandler();
+        }
+        return new GenericColumnsNameDiscovererHandler();
     }
 }

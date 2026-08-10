@@ -19,19 +19,20 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * 
- * 
+ * Oracle equivalent of Teradata's "SHOW TABLE", implemented via
+ * <code>DBMS_METADATA.GET_DDL</code>.
+ *
  * @author D. Campione
  *
  */
-public class ShowTableValidationStrategy
+public class OracleShowTableValidationStrategy
         implements
             IShowObjectValidationStrategy {
 
-    public ShowTableValidationStrategy() {
+    public OracleShowTableValidationStrategy() {
     }
 
     public String getSQLQueryToShowObject(String tableName) {
-        return "SHOW TABLE " + tableName;
+        return OracleDdlQueryBuilder.buildGetDdlQuery("TABLE", tableName);
     }
 }

@@ -19,27 +19,29 @@
 package net.sourceforge.open_teradata_viewer;
 
 /**
- * The interface defines the validation strategy used to initialize the SQL
- * query invoked to obtain the DDL.
- * 
+ * MySQL equivalent of Teradata's "SHOW TABLE": <code>SHOW CREATE TABLE</code>.
+ * Unlike Teradata/Oracle/DB2, the result has two columns
+ * (<code>Table</code>, <code>Create Table</code>) - the DDL is in the
+ * second one, hence the {@link #getResultColumnIndex()} override. MySQL
+ * accepts a schema-qualified <code>db.table</code> name directly, so no
+ * splitting is needed here (unlike the Oracle/DB2 equivalents).
+ *
  * @author D. Campione
  *
  */
-public interface IShowObjectValidationStrategy {
+public class MySqlShowTableValidationStrategy
+        implements
+            IShowObjectValidationStrategy {
 
-    String getSQLQueryToShowObject(String objectName);
-
-    /**
-     * Which 1-based column of the query's result set holds the DDL text.
-     * Teradata's "SHOW ...", Oracle's DBMS_METADATA.GET_DDL and DB2's
-     * catalog TEXT columns all return it as the only column, hence the
-     * default. MySQL's "SHOW CREATE ..." statements return it alongside
-     * several other descriptive columns (sql_mode, character set, etc.),
-     * at a different position depending on the object type, so
-     * {@link MySqlShowProcedureValidationStrategy} overrides this.
-     */
-    default int getResultColumnIndex() {
-        return 1;
+    public MySqlShowTableValidationStrategy() {
     }
 
+    public String getSQLQueryToShowObject(String tableName) {
+        return "SHOW CREATE TABLE " + tableName;
+    }
+
+    @Override
+    public int getResultColumnIndex() {
+        return 2;
+    }
 }
