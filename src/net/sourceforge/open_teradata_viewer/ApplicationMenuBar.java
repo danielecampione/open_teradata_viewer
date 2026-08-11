@@ -318,6 +318,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addSyntaxItem("JSON", SyntaxConstants.SYNTAX_STYLE_JSON, bg, subMenu2);
         addSyntaxItem("JSON with Comments", SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS, bg, subMenu2);
         addSyntaxItem("JSP", SyntaxConstants.SYNTAX_STYLE_JSP, bg, subMenu2);
+        addSyntaxItem("Kotlin", SyntaxConstants.SYNTAX_STYLE_KOTLIN, bg, subMenu2);
         addSyntaxItem("LaTeX", SyntaxConstants.SYNTAX_STYLE_LATEX, bg, subMenu2);
         addSyntaxItem("Less", SyntaxConstants.SYNTAX_STYLE_LESS, bg, subMenu2);
         addSyntaxItem("Lisp", SyntaxConstants.SYNTAX_STYLE_LISP, bg, subMenu2);
