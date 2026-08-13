@@ -44,9 +44,10 @@ public class WaitingDialog extends TimerTask {
     private long startTime = System.currentTimeMillis();
     private Timer timer;
 
+    private static final String BUTTON_CANCEL_KEY = "button.cancel";
+
     public WaitingDialog(final Runnable onCancel) throws InterruptedException {
         final LanguageManager langManager = LanguageManager.getInstance();
-        final String cancelText = langManager.getString("button.cancel");
 
         try {
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
@@ -58,7 +59,7 @@ public class WaitingDialog extends TimerTask {
                     panel.add(message1);
                     panel.add(message2);
                     final Dialog pane = new Dialog(panel, Dialog.PLAIN_MESSAGE,
-                            Dialog.DEFAULT_OPTION, new Object[]{cancelText}, cancelText);
+                            Dialog.DEFAULT_OPTION, new Object[]{BUTTON_CANCEL_KEY}, BUTTON_CANCEL_KEY);
                     dialog = pane.createDialog(ApplicationFrame.getInstance(), null);
                     new Thread(new Runnable() {
                         @Override
@@ -68,7 +69,7 @@ public class WaitingDialog extends TimerTask {
                             } catch (ConcurrentModificationException cme) {
                                 ExceptionDialog.ignoreException(cme);
                             }
-                            if ((onCancel != null) && cancelText.equals(pane.getValue())) {
+                            if ((onCancel != null) && langManager.getString(BUTTON_CANCEL_KEY).equals(pane.getValue())) {
                                 onCancel.run();
                             }
                         }

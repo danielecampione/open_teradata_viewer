@@ -46,6 +46,7 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction CUT = new CutAction();
     public static final CustomAction COPY = new CopyAction();
     public static final CustomAction COPY_AS_STYLED_TEXT = new CopyAsStyledTextAction();
+    public static final CustomAction CUT_AS_STYLED_TEXT = new CutAsStyledTextAction();
     public static final CustomAction PASTE = new PasteAction();
     public static final CustomAction VIEW_LINE_HIGHLIGHT = new ViewLineHighlightAction();
     public static final CustomAction FADE_CURRENT_LINE_HIGHLIGHT = new FadeCurrentLineHighlightAction();

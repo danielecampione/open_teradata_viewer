@@ -1,3 +1,57 @@
+0.34a (13/08/2026)
+    - Added Spanish (es) language support to the UI internationalization.
+    - Refactored the reserved-word lookup in Utilities.java from a single
+      Teradata-only branch to a DatabaseType->StringList map, so the remaining 8
+      database types only need a resource file and a map entry, not new
+      branching logic.
+    - Added a verified reserved-word check for Oracle (110 words) to
+      canBeAValidObjectName, sourced from Oracle's official SQL Language
+      Reference.
+    - Added a verified reserved-word check for DB2 (400 words) to
+      canBeAValidObjectName, sourced from IBM's official Db2 LUW documentation.
+    - Added a verified reserved-word check for MySQL (260 words, only keywords
+      marked "(R)" for reserved) to canBeAValidObjectName, sourced from the
+      MySQL 8.4 Reference Manual.
+    - Added a verified reserved-word check for HSQLDB (339 words, HyperSQL 2.0
+      reserved keyword set) to canBeAValidObjectName.
+    - Added a verified reserved-word check for H2 (87 words, official
+      advanced.html keyword table, unconditionally-reserved "+" entries only) to
+      canBeAValidObjectName.
+    - Added a verified reserved-word check for Apache Derby (212 words, Derby
+      Reference Manual) to canBeAValidObjectName.
+    - Added a verified reserved-word check for SQL Server (185 words,
+      Microsoft's own enforced Transact-SQL/Azure Synapse keyword table,
+      excluding the non-enforced ODBC/ISO and "Future Keywords" lists) to
+      canBeAValidObjectName.
+    - canBeAValidObjectName now performs a verified reserved-word check for 8 of
+      the 9 supported database types; SQLite remains intentionally unchecked,
+      per its own documentation not distinguishing always-reserved words from
+      ones usable as unquoted identifiers.
+    - Removed a dead no-op loop left over from the original Teradata word-list
+      loading code.
+    - Fixed double-click on a saved database connection not triggering the
+      connect action, by translating the raw localization key before it reaches
+      JOptionPane's initialValue.
+    - Fixed Dialog's initialValue/options translation properly: centralized key
+      translation in the constructor (translateOptions/translateKey), applied
+      unconditionally, and fixed WaitingDialog to pass the "button.cancel"
+      localization key instead of pre-translated text - removing the need for
+      any heuristic.
+    - Removed the now-redundant manual options-translation loop from
+      Dialog.showOnEDT.
+    - Fixed About dialog OK button overlapping the Java Home path when no
+      database is connected.
+    - Added a "Cut as styled text" action and menu entry
+      (RSyntaxTextAreaEditorKit.CopyCutAsStyledTextAction's new cut variant,
+      RSTA 3.1.4), placed right below "Copy as styled text" in the Edit menu.
+    - Added the action.cut_styled / action.cut_styled.short_description i18n
+      keys to all 7 language files.
+    - Upgraded rsyntaxtextarea library 3.1.3 -> 3.1.4
+    - Upgraded autocomplete library 3.1.3 -> 3.1.4
+    - Upgraded languagesupport library 3.1.3 -> 3.1.4
+    - Upgraded rstaui library 3.1.3 -> 3.1.4
+    - Upgraded spellchecker library 3.1.3 -> 3.1.4
+
 0.33c (11/08/2026)
     - Added Kotlin syntax highlighting.
     - Upgraded rsyntaxtextarea library 3.1.2 -> 3.1.3

@@ -44,12 +44,13 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 import javax.swing.JComboBox;
 import javax.swing.ListCellRenderer;
 
@@ -79,6 +80,36 @@ public class Utilities {
 
     /** An object name cannot be a Teradata reserved word. */
     public static StringList teradataReservedWords = new StringList();
+
+    /** An object name cannot be an Oracle reserved word. */
+    public static StringList oracleReservedWords = new StringList();
+
+    /** An object name cannot be a DB2 reserved word. */
+    public static StringList db2ReservedWords = new StringList();
+
+    /** An object name cannot be a MySQL reserved word. */
+    public static StringList mysqlReservedWords = new StringList();
+
+    /** An object name cannot be an HSQLDB reserved word. */
+    public static StringList hsqldbReservedWords = new StringList();
+
+    /** An object name cannot be an H2 reserved word. */
+    public static StringList h2ReservedWords = new StringList();
+
+    /** An object name cannot be an Apache Derby reserved word. */
+    public static StringList derbyReservedWords = new StringList();
+
+    /** An object name cannot be a SQL Server reserved word. */
+    public static StringList sqlServerReservedWords = new StringList();
+
+    /**
+     * Maps each database type to its verified reserved-word list, looked up
+     * by {@link #canBeAValidObjectName(String)}. A database type that is not
+     * a key here simply skips the reserved-word check - see that method's
+     * Javadoc for why an unverified list is worse than no check at all.
+     */
+    private static final Map<DatabaseType, StringList> RESERVED_WORDS_BY_DATABASE_TYPE = new EnumMap<>(
+            DatabaseType.class);
 
     /** Used to indicate a &quot;Start Of Line&quot; comment in SQL. */
     public final static String START_OF_LINE_COMMENT = "--";
@@ -117,20 +148,26 @@ public class Utilities {
 
     private static final boolean useSubstanceRenderers;
 
-    private static final java.util.Set<Character> TERADATA_LEGAL_CHAR_SET = new java.util.HashSet<>();
+    private static final Set<Character> TERADATA_LEGAL_CHAR_SET = new HashSet<>();
 
     static {
-        try {
-            teradataReservedWords.setText(
-                    StreamUtil.stream2String(Utilities.class.getResourceAsStream("/res/teradata_reserved_words.list")));
-            for (int i = 0; i < teradataReservedWords.size(); i++) {
-                if (StringUtil.isEmpty(teradataReservedWords.get(i))) {
-                    continue;
-                }
-            }
-        } catch (IOException ioe) {
-            ExceptionDialog.hideException(ioe);
-        }
+        loadReservedWords(teradataReservedWords, "/res/teradata_reserved_words.list");
+        loadReservedWords(oracleReservedWords, "/res/oracle_reserved_words.list");
+        loadReservedWords(db2ReservedWords, "/res/db2_reserved_words.list");
+        loadReservedWords(mysqlReservedWords, "/res/mysql_reserved_words.list");
+        loadReservedWords(hsqldbReservedWords, "/res/hsqldb_reserved_words.list");
+        loadReservedWords(h2ReservedWords, "/res/h2_reserved_words.list");
+        loadReservedWords(derbyReservedWords, "/res/derby_reserved_words.list");
+        loadReservedWords(sqlServerReservedWords, "/res/sqlserver_reserved_words.list");
+
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.TERADATA, teradataReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.ORACLE, oracleReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.DB2, db2ReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.MYSQL, mysqlReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.HSQLDB, hsqldbReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.H2, h2ReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.APACHE_DERBY, derbyReservedWords);
+        RESERVED_WORDS_BY_DATABASE_TYPE.put(DatabaseType.SQL_SERVER, sqlServerReservedWords);
 
         for (String s : teradataLegalChars) {
             TERADATA_LEGAL_CHAR_SET.add(s.charAt(0));
@@ -145,6 +182,26 @@ public class Utilities {
             use = true;
         }
         useSubstanceRenderers = use;
+    }
+
+    /**
+     * Loads a newline-separated reserved-word list bundled as a classpath
+     * resource into {@code target}. Any failure is reported through the
+     * existing exception dialog and otherwise ignored, leaving
+     * {@code target} empty - consistent with this class' original
+     * Teradata-only loading behavior, now shared across all verified
+     * per-database-type lists.
+     *
+     * @param target The (already constructed) list to populate.
+     * @param resourcePath The classpath location of the <code>.list</code>
+     *        resource, e.g. <code>"/res/oracle_reserved_words.list"</code>.
+     */
+    private static void loadReservedWords(StringList target, String resourcePath) {
+        try {
+            target.setText(StreamUtil.stream2String(Utilities.class.getResourceAsStream(resourcePath)));
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
     }
 
     /** Ctor. <TT>private</TT> as all methods are static. */
@@ -460,14 +517,19 @@ public class Utilities {
      *
      * The maximum identifier length depends on the connected database type
      * (Teradata's 30-character limit does not apply everywhere - see
-     * {@link #getMaxIdentifierLength(DatabaseType)}). The Teradata
-     * reserved-word check only ever runs for an actual Teradata
-     * connection: there is no verified reserved-word list here for the
-     * other 8 database types this application supports, and applying
-     * Teradata's list to, say, an Oracle connection would risk rejecting
-     * a perfectly valid Oracle name over a word that only Teradata
-     * reserves - a worse outcome than simply not checking for those
-     * database types.
+     * {@link #getMaxIdentifierLength(DatabaseType)}). The reserved-word
+     * check only runs for a database type present in
+     * {@link #RESERVED_WORDS_BY_DATABASE_TYPE}: applying, say, Teradata's
+     * list to an Oracle connection would risk rejecting a perfectly valid
+     * Oracle name over a word that only Teradata reserves - a worse outcome
+     * than simply not checking for a database type without its own
+     * verified list. This is why SQLite is deliberately absent from that
+     * map even though every other supported database type is present:
+     * unlike the others, SQLite's own keyword list does not distinguish
+     * words that are always reserved from ones that remain usable as
+     * unquoted identifiers in most contexts, so treating the whole list as
+     * reserved would risk exactly the false rejects this check exists to
+     * avoid.
      */
     public static boolean canBeAValidObjectName(String text) {
         if (!isEmpty(text) && text.trim().length() > 0) {
@@ -490,12 +552,14 @@ public class Utilities {
                     return false;
                 }
             }
-            if (databaseType == DatabaseType.TERADATA) {
-                for (int i = 0; i < teradataReservedWords.size(); i++) {
-                    if (text.equalsIgnoreCase(teradataReservedWords.get(i))) {
+            StringList reservedWords = RESERVED_WORDS_BY_DATABASE_TYPE.get(databaseType);
+            if (reservedWords != null) {
+                for (int i = 0; i < reservedWords.size(); i++) {
+                    if (text.equalsIgnoreCase(reservedWords.get(i))) {
                         ApplicationFrame.getInstance().getConsole().println(
-                                "You're trying to perform a SQL command using a Teradata reserved word: \""
-                                        + teradataReservedWords.get(i) + "\".",
+                                "You're trying to perform a SQL command using a "
+                                        + getDatabaseTypeDisplayName(databaseType) + " reserved word: \""
+                                        + reservedWords.get(i) + "\".",
                                 ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
                         return false;
                     }
@@ -512,6 +576,48 @@ public class Utilities {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the display name used to identify {@code databaseType} in the
+     * console warnings printed by {@link #canBeAValidObjectName(String)},
+     * matching the labels already used for this same purpose in the "New
+     * Connection" wizard (see the <code>database.*</code> keys in
+     * <code>messages.properties</code>). This message is not itself
+     * localized - like the other console warnings in this method - so the
+     * name is hardcoded here rather than looked up through
+     * {@code LanguageManager}.
+     *
+     * @param databaseType The database type to get a display name for.
+     * @return The display name, or <code>"database"</code> as a generic
+     *         fallback for {@link DatabaseType#UNKNOWN} or <code>null</code>.
+     */
+    private static String getDatabaseTypeDisplayName(DatabaseType databaseType) {
+        if (databaseType == null) {
+            return "database";
+        }
+        switch (databaseType) {
+        case TERADATA:
+            return "Teradata";
+        case ORACLE:
+            return "Oracle";
+        case DB2:
+            return "DB2";
+        case MYSQL:
+            return "MySQL";
+        case SQLITE:
+            return "SQLite";
+        case HSQLDB:
+            return "HSQLDB";
+        case H2:
+            return "H2";
+        case APACHE_DERBY:
+            return "Derby";
+        case SQL_SERVER:
+            return "SQL Server";
+        default:
+            return "database";
+        }
     }
 
     /**

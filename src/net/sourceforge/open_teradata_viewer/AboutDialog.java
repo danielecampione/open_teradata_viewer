@@ -96,7 +96,7 @@ public class AboutDialog extends JDialog implements MouseListener {
         pack();
         
         setMinimumSize(new Dimension(Math.max(getWidth() + 50, 500), 
-                                             Math.max(getHeight() + 30, 400)));
+                                             Math.max(getHeight() + 30, 480)));
     }
     
     /** Creates the main content panel for the dialog. */

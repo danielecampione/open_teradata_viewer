@@ -35,30 +35,33 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
  * @author D. Campione
  * 
  */
-public class CopyAsStyledTextAction extends CustomAction {
+public class CutAsStyledTextAction extends CustomAction {
 
-    private static final long serialVersionUID = -804158889626235212L;
+    private static final long serialVersionUID = -804158889626235213L;
 
-    private Action copyAsStyledText;
+    private Action cutAsStyledText;
 
-    protected CopyAsStyledTextAction() {
-        super(LanguageManager.getInstance().getString("action.copy_styled"), "copy.png",
-                KeyStroke.getKeyStroke(KeyEvent.VK_C,
+    protected CutAsStyledTextAction() {
+        super(LanguageManager.getInstance().getString("action.cut_styled"), "cut.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_X,
                         KeyEvent.SHIFT_DOWN_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
-                LanguageManager.getInstance().getString("action.copy_styled.short_description"));
-        copyAsStyledText = new RSyntaxTextAreaEditorKit.CopyCutAsStyledTextAction(false);
+                LanguageManager.getInstance().getString("action.cut_styled.short_description"));
+        // true selects RSTA's new cut variant (copies as styled text, then
+        // removes the selection), as opposed to CopyAsStyledTextAction's
+        // false, which only copies
+        cutAsStyledText = new RSyntaxTextAreaEditorKit.CopyCutAsStyledTextAction(true);
         setEnabled(true);
         
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
-            putValue(NAME, newBundle.getString("action.copy_styled"));
-            putValue(SHORT_DESCRIPTION, newBundle.getString("action.copy_styled.short_description"));
+            putValue(NAME, newBundle.getString("action.cut_styled"));
+            putValue(SHORT_DESCRIPTION, newBundle.getString("action.cut_styled.short_description"));
         });
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        copyAsStyledText.actionPerformed(e);
+        cutAsStyledText.actionPerformed(e);
     }
 
     @Override

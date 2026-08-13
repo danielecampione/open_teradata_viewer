@@ -48,13 +48,65 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
     
     public Dialog(Object message, int messageType, int optionType,
             Object[] options, Object initialValue) {
-        super(message, messageType, optionType, null, options, initialValue);
+        // Both options[] and initialValue are expected to be localization
+        // keys (e.g. "button.connect"), like everywhere else in this
+        // codebase - not already-translated text. Translating them here,
+        // uniformly and unconditionally, is what makes the double-click
+        // shortcut in CustomAction.mouseClicked() work: it closes the
+        // dialog by copying getInitialValue() into the pane's value, which
+        // callers such as ConnectAction#performThreaded() then compare
+        // against langManager.getString(key) - so the pane's initialValue
+        // has to be the translated form of the same key, exactly like the
+        // (translated) options it is compared against.
+        super(message, messageType, optionType, null, translateOptions(options), translateKey(initialValue));
         this.message = message;
         this.options = options;
         this.initialValue = initialValue;
         
         // Register for language changes
         LanguageManager.getInstance().addLanguageChangeListener(this);
+    }
+
+    /**
+     * Translates every <code>String</code> entry of {@code options} through
+     * the current language bundle (see {@link #translateKey(Object)}),
+     * leaving the original array untouched.
+     *
+     * @param options The raw options array passed to the constructor - by
+     *        convention, localization keys - or <code>null</code>.
+     * @return A new, translated array, or <code>null</code> if
+     *         <code>options</code> was <code>null</code>.
+     */
+    private static Object[] translateOptions(Object[] options) {
+        if (options == null) {
+            return null;
+        }
+        Object[] translated = new Object[options.length];
+        for (int i = 0; i < options.length; i++) {
+            translated[i] = translateKey(options[i]);
+        }
+        return translated;
+    }
+
+    /**
+     * Translates {@code value} through the current language bundle when it
+     * is a <code>String</code> - by convention, every <code>String</code>
+     * passed as an option or as {@code initialValue} is a localization key
+     * such as <code>"button.connect"</code>, never already-translated text
+     * (see {@link WaitingDialog} for the fix that made this hold - it used
+     * to pass the translated Cancel label directly).
+     *
+     * @param value The raw value: a localization key, a non-<code>String</code>
+     *        option constant (e.g. an <code>Integer</code>), or
+     *        <code>null</code>.
+     * @return The translated string, or <code>value</code> itself when it
+     *         is not a <code>String</code>.
+     */
+    private static Object translateKey(Object value) {
+        if (value instanceof String) {
+            return LanguageManager.getInstance().getString((String) value);
+        }
+        return value;
     }
     
     @Override
@@ -193,27 +245,8 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
     
     private static Object showOnEDT(String title, Object message, int messageType,
             Object[] options, Object initialValue) {
-        // Translate options before creating dialog if they are localization keys
-        Object[] translatedOptions = null;
-        if (options != null) {
-            translatedOptions = new Object[options.length];
-            LanguageManager langManager = LanguageManager.getInstance();
-            for (int i = 0; i < options.length; i++) {
-                if (options[i] instanceof String) {
-                    String key = (String) options[i];
-                    try {
-                        translatedOptions[i] = langManager.getString(key);
-                    } catch (Exception e) {
-                        translatedOptions[i] = options[i]; // Keep original if not a key
-                    }
-                } else {
-                    translatedOptions[i] = options[i];
-                }
-            }
-        }
-        
         Dialog dialog = new Dialog(message, messageType, DEFAULT_OPTION,
-                translatedOptions, initialValue);
+                options, initialValue);
         activeDialogs.add(dialog);
         try {
             UISupport.showDialog(dialog.createDialog(

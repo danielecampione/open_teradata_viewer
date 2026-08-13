@@ -122,6 +122,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(Actions.CUT);
         menu.add(Actions.COPY);
         menu.add(Actions.COPY_AS_STYLED_TEXT);
+        menu.add(Actions.CUT_AS_STYLED_TEXT);
         menu.add(Actions.PASTE);
         menu.addSeparator();
         menu.add(RTextArea.getAction(RTextArea.DELETE_ACTION));
