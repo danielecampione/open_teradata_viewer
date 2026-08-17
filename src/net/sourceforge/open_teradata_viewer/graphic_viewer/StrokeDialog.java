@@ -164,36 +164,21 @@ public class StrokeDialog extends JDialog {
             panel1.setMinimumSize(new Dimension(580, 329));
             panel1.setPreferredSize(new Dimension(580, 329));
         }
-        OKButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                OKButton_actionPerformed(e);
-            }
+        OKButton.addActionListener(e -> {
+            OKButton_actionPerformed(e);
         });
-        CancelButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                CancelButton_actionPerformed(e);
-            }
+        CancelButton.addActionListener(e -> {
+            CancelButton_actionPerformed(e);
         });
-        penColorButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                penColorButton_actionPerformed(e);
-            }
+        penColorButton.addActionListener(e -> {
+            penColorButton_actionPerformed(e);
         });
-        brushColorButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                brushColorButton_actionPerformed(e);
-            }
+        brushColorButton.addActionListener(e -> {
+            brushColorButton_actionPerformed(e);
         });
         highlightColorButton
-                .addActionListener(new java.awt.event.ActionListener() {
-
-                    public void actionPerformed(ActionEvent e) {
-                        highlightColorButton_actionPerformed(e);
-                    }
+                .addActionListener(e -> {
+                    highlightColorButton_actionPerformed(e);
                 });
         OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 

@@ -72,17 +72,14 @@ public class FavoritesAction extends CustomAction {
 		final java.util.concurrent.atomic.AtomicReference<JScrollPane> scrollPaneRef = new java.util.concurrent.atomic.AtomicReference<>();
 		
 		try {
-		    javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-		        @Override
-		        public void run() {
+		    javax.swing.SwingUtilities.invokeAndWait(() -> {
 		            final JList<?> tempList = new JList<Object>(favorites.keySet().toArray());
 		            tempList.addMouseListener(FavoritesAction.this);
 		            tempList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		            JScrollPane tempScrollPane = new JScrollPane(tempList);
 		            listRef.set(tempList);
 		            scrollPaneRef.set(tempScrollPane);
-		        }
-		    });
+		        });
 		} catch (Exception ex) {
 		    throw new RuntimeException(ex);
 		}
@@ -115,15 +112,12 @@ public class FavoritesAction extends CustomAction {
 		    final java.util.concurrent.atomic.AtomicReference<JComboBox<?>> comboBoxRef =
 		            new java.util.concurrent.atomic.AtomicReference<>();
 		    try {
-		        javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-		            @Override
-		            public void run() {
-		                JComboBox<Object> cb = new JComboBox<Object>(favorites.keySet().toArray());
+		        javax.swing.SwingUtilities.invokeAndWait(() -> {
+		                JComboBox<Object> cb = new JComboBox<>(favorites.keySet().toArray());
 		                cb.setEditable(true);
 		                cb.setSelectedIndex(-1);
 		                comboBoxRef.set(cb);
-		            }
-		        });
+		            });
 		    } catch (Exception ex) {
 		        throw new RuntimeException(ex);
 		    }

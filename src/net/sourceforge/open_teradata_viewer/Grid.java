@@ -34,7 +34,7 @@ public class Grid {
     private String columnSeparator = "  ";
 
     public Grid() {
-        this(new ArrayList<List<Object>>());
+        this(new ArrayList<>());
     }
 
     public Grid(List<List<Object>> newRows) {
@@ -43,7 +43,7 @@ public class Grid {
 
     public Grid set(int x, int y, String text) {
         while (rows.size() < y + 1) {
-            rows.add(new ArrayList<Object>());
+            rows.add(new ArrayList<>());
         }
         List<Object> row = rows.get(y);
         while (row.size() < x + 1) {

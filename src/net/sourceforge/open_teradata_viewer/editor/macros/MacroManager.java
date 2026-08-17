@@ -60,7 +60,7 @@ public class MacroManager {
 
     /** Private constructor to prevent instantiation. */
     private MacroManager() {
-        macros = new TreeSet<Macro>();
+        macros = new TreeSet<>();
         support = new PropertyChangeSupport(this);
     }
 
@@ -100,7 +100,7 @@ public class MacroManager {
      *         empty, but will never be <code>null</code>.
      */
     public SortedSet<Macro> clearMacros() {
-        TreeSet<Macro> copy = new TreeSet<Macro>(macros);
+        TreeSet<Macro> copy = new TreeSet<>(macros);
         macros.clear();
         support.firePropertyChange(PROPERTY_MACROS, null, null);
         return copy;
@@ -216,7 +216,7 @@ public class MacroManager {
         Thread.currentThread().setContextClassLoader(Macro.class.getClassLoader());
         try {
             // Put our macros into a list
-            List<Macro> macroList = new ArrayList<Macro>(macros);
+            List<Macro> macroList = new ArrayList<>(macros);
 
             // Save our list of macros as XML
             File file = new File(dir, MACRO_DEFINITION_FILE_NAME);

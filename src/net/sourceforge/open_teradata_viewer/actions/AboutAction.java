@@ -52,15 +52,12 @@ public class AboutAction extends CustomAction implements MouseListener {
         final ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
         
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    AboutDialog ad = new AboutDialog(
-                            (ApplicationFrame) SwingUtilities
-                                    .getWindowAncestor(applicationFrame));
-                    ad.setLocationRelativeTo(applicationFrame);
-                    ad.setVisible(true);
-                }
+            SwingUtilities.invokeAndWait(() -> {
+                AboutDialog ad = new AboutDialog(
+                        (ApplicationFrame) SwingUtilities
+                                .getWindowAncestor(applicationFrame));
+                ad.setLocationRelativeTo(applicationFrame);
+                ad.setVisible(true);
             });
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();

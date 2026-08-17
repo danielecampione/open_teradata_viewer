@@ -192,7 +192,7 @@ public final class Config {
     public static Map<String, String> getFavorites() throws ParserConfigurationException, IOException, SAXException {
         Element config = getConfig();
         NodeList favorites = config.getElementsByTagName("favorite");
-        Map<String, String> map = new TreeMap<String, String>();
+        Map<String, String> map = new TreeMap<>();
         for (int i = 0; i < favorites.getLength(); i++) {
             Element favorite = (Element) favorites.item(i);
             map.put(favorite.getAttribute("name"), favorite.getAttribute("query"));

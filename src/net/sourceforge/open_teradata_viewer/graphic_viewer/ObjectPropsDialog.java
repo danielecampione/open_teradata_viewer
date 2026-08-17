@@ -90,17 +90,11 @@ public class ObjectPropsDialog extends JDialog {
         panel1.setLayout(null);
         panel1.setMinimumSize(new Dimension(294, 241));
         panel1.setPreferredSize(new Dimension(294, 241));
-        OKButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                OKButton_actionPerformed(e);
-            }
+        OKButton.addActionListener(e -> {
+            OKButton_actionPerformed(e);
         });
-        CancelButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                CancelButton_actionPerformed(e);
-            }
+        CancelButton.addActionListener(e -> {
+            CancelButton_actionPerformed(e);
         });
         this.setResizable(false);
         getContentPane().add(panel1);

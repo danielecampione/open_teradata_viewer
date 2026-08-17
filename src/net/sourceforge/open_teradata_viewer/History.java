@@ -32,7 +32,7 @@ public final class History {
     private static final History HISTORY = new History();
 
     private int offset = -1;
-    private List<String> history = new ArrayList<String>();
+    private List<String> history = new ArrayList<>();
 
     private History() {
     }

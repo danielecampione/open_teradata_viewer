@@ -62,12 +62,9 @@ public class FullScreenAction extends CustomAction {
         fullScreenMode = !fullScreenMode;
         ApplicationFrame.getInstance().setFullScreenMode(fullScreenMode);
         ApplicationFrame.getInstance().repaint();
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                for (WindowListener w : wl) {
-                    ApplicationFrame.getInstance().addWindowListener(w);
-                }
+        java.awt.EventQueue.invokeLater(() -> {
+            for (WindowListener w : wl) {
+                ApplicationFrame.getInstance().addWindowListener(w);
             }
         });
     }

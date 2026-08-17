@@ -59,28 +59,25 @@ public class EditMacroAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         Iterator<Macro> macros = MacroManager.get().getMacroIterator();
-        final Vector<Macro> vectorMacro = new Vector<Macro>(1, 1);
+        final Vector<Macro> vectorMacro = new Vector<>(1, 1);
         while (macros.hasNext()) {
             vectorMacro.add(macros.next());
         }
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    final JList<?> list = new JList(vectorMacro);
-                    list.addMouseListener(EditMacroAction.this);
-                    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                    LanguageManager langManager = LanguageManager.getInstance();
-                    Object value = Dialog.show(langManager.getString("dialog.macros"),
-                            new JScrollPane(list), Dialog.PLAIN_MESSAGE,
-                            new Object[]{"button.edit_script_path"},
-                            "button.edit_script_path");
-                    if (langManager.getString("button.edit_script_path").equals(value)) {
-                        if (!list.isSelectionEmpty()) {
-                            Macro macro = vectorMacro.get(list.getSelectedIndex());
-                            setTheScriptPath(macro);
-                        }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                final JList<?> list = new JList(vectorMacro);
+                list.addMouseListener(EditMacroAction.this);
+                list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                LanguageManager langManager = LanguageManager.getInstance();
+                Object value = Dialog.show(langManager.getString("dialog.macros"),
+                        new JScrollPane(list), Dialog.PLAIN_MESSAGE,
+                        new Object[]{"button.edit_script_path"},
+                        "button.edit_script_path");
+                if (langManager.getString("button.edit_script_path").equals(value)) {
+                    if (!list.isSelectionEmpty()) {
+                        Macro macro = vectorMacro.get(list.getSelectedIndex());
+                        setTheScriptPath(macro);
                     }
                 }
             });

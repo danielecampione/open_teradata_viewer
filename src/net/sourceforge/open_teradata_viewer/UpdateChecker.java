@@ -83,17 +83,14 @@ public class UpdateChecker implements Runnable {
             final AtomicInteger resultRef = new AtomicInteger();
             
             try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        int result = JOptionPane.showConfirmDialog(
-                                ApplicationFrame.getInstance(),
-                                langManager.getString("update.configure_proxy"),
-                                langManager.getString("update.checker_title"), 
-                                JOptionPane.YES_NO_CANCEL_OPTION,
-                                JOptionPane.QUESTION_MESSAGE);
-                        resultRef.set(result);
-                    }
+                SwingUtilities.invokeAndWait(() -> {
+                    int result = JOptionPane.showConfirmDialog(
+                            ApplicationFrame.getInstance(),
+                            langManager.getString("update.configure_proxy"),
+                            langManager.getString("update.checker_title"), 
+                            JOptionPane.YES_NO_CANCEL_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+                    resultRef.set(result);
                 });
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -138,19 +135,16 @@ public class UpdateChecker implements Runnable {
                     final AtomicReference<JDialog> dialogRef = new AtomicReference<>();
                     
                     try {
-                        SwingUtilities.invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                JOptionPane proxyPane = new JOptionPane(new Object[] {
-                                        new JLabel(langManager.getString("update.host")), proxyHostField,
-                                        new JLabel(langManager.getString("update.port")), proxyPortField },
-                                        JOptionPane.QUESTION_MESSAGE,
-                                        JOptionPane.OK_CANCEL_OPTION);
-                                JDialog dialog = proxyPane.createDialog(langManager.getString("update.server_proxy_title"));
-                                
-                                proxyPaneRef.set(proxyPane);
-                                dialogRef.set(dialog);
-                            }
+                        SwingUtilities.invokeAndWait(() -> {
+                            JOptionPane proxyPane = new JOptionPane(new Object[] {
+                                    new JLabel(langManager.getString("update.host")), proxyHostField,
+                                    new JLabel(langManager.getString("update.port")), proxyPortField },
+                                    JOptionPane.QUESTION_MESSAGE,
+                                    JOptionPane.OK_CANCEL_OPTION);
+                            JDialog dialog = proxyPane.createDialog(langManager.getString("update.server_proxy_title"));
+                            
+                            proxyPaneRef.set(proxyPane);
+                            dialogRef.set(dialog);
                         });
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);

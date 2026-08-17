@@ -55,7 +55,7 @@ public class PluginFactory {
 
     private URLClassLoader classLoader = null;
 
-    private Vector<Integer> idNotAvailable = new Vector<Integer>();
+    private Vector<Integer> idNotAvailable = new Vector<>();
 
     public PluginFactory(String pluginsPath) {
         this.loadPlugins(pluginsPath);
@@ -98,7 +98,7 @@ public class PluginFactory {
      */
     public Vector<EntryDescriptor> getEntryDescriptorsByName(String name) {
         Iterator<EntryDescriptor> pluginsIterator = plugins.values().iterator();
-        Vector<EntryDescriptor> pluginsByName = new Vector<EntryDescriptor>();
+        Vector<EntryDescriptor> pluginsByName = new Vector<>();
         while (pluginsIterator.hasNext()) {
             EntryDescriptor pd = (EntryDescriptor) pluginsIterator.next();
             if (pd.getName().equals(name)) {
@@ -117,7 +117,7 @@ public class PluginFactory {
             String[] jar = (new File(pluginsPath)).list(new PluginFileFilter());
             if (jar.length == 0)
                 return;
-            plugins = new Hashtable<Integer, EntryDescriptor>();
+            plugins = new Hashtable<>();
 
             URL[] url = new URL[jar.length];
             for (int i = 0; i < jar.length; i++) {

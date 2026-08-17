@@ -25,8 +25,10 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.History;
@@ -70,22 +72,20 @@ public class RunScriptAction extends CustomAction {
         History.getInstance().add(text);
         Actions.getInstance().validateTextActions();
 
-        List<int[]> statementBounds = splitStatements(text);
+        DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
+        List<int[]> statementBounds = splitStatements(text, databaseType);
         int total = statementBounds.size();
 
-        final Vector<Vector> dataVector = new Vector<Vector>();
+        final Vector<Vector> dataVector = new Vector<>();
         int count = 0;
         final Statement statement = Context.getInstance().getConnectionData()
                 .getConnection()
                 .createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.hideException(t);
-                }
+        Runnable onCancel = () -> {
+            try {
+                statement.cancel();
+            } catch (Throwable t) {
+                ExceptionDialog.hideException(t);
             }
         };
         WaitingDialog waitingDialog = new WaitingDialog(onCancel);
@@ -98,7 +98,7 @@ public class RunScriptAction extends CustomAction {
                 }
                 currentBounds = bounds;
                 String sql = text.substring(bounds[0], bounds[1]);
-                Vector<String> row = new Vector<String>(1);
+                Vector<String> row = new Vector<>(1);
                 int i = statement.executeUpdate(sql);
                 row.add(Integer.toString(i));
                 dataVector.add(row);
@@ -117,7 +117,7 @@ public class RunScriptAction extends CustomAction {
             waitingDialog.hide();
             statement.close();
             Context.getInstance().setResultSet(null);
-            final Vector<String> columnIdentifiers = new Vector<String>(1);
+            final Vector<String> columnIdentifiers = new Vector<>(1);
             columnIdentifiers.add(LanguageManager.getInstance().getString("label.rows_updated"));
             Context.getInstance().setColumnTypes(new int[]{Types.INTEGER});
             Context.getInstance().setColumnTypeNames(new String[1]);
@@ -135,10 +135,22 @@ public class RunScriptAction extends CustomAction {
      * contains several semicolons of its own (e.g. inside BEGIN ... END;),
      * none of which are statement separators.
      */
-    private static final java.util.regex.Pattern PLSQL_BLOCK_START = java.util.regex.Pattern.compile(
+    private static final Pattern PLSQL_BLOCK_START = Pattern.compile(
             "\\A\\s*(CREATE\\s+(OR\\s+REPLACE\\s+)?(PACKAGE\\s+BODY|PACKAGE|PROCEDURE|FUNCTION|TRIGGER|TYPE\\s+BODY|TYPE)\\b"
                     + "|DECLARE\\b|BEGIN\\b)",
-            java.util.regex.Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE);
+
+    /**
+     * MySQL's equivalent block-starter recognition. MySQL has no "CREATE OR
+     * REPLACE" for routines/triggers/events (only for VIEW, which isn't a
+     * block statement) and no PL/SQL packages, but it does allow an
+     * optional <code>DEFINER = user</code> clause between CREATE and the
+     * object type (routinely present in scripts exported by mysqldump/
+     * phpMyAdmin), which {@link #PLSQL_BLOCK_START} doesn't account for.
+     */
+    private static final Pattern MYSQL_BLOCK_START = Pattern.compile(
+            "\\A\\s*CREATE\\s+(DEFINER\\s*=\\s*\\S+\\s+)?(PROCEDURE|FUNCTION|TRIGGER|EVENT)\\b",
+            Pattern.CASE_INSENSITIVE);
 
     /**
      * Splits a multi-statement SQL script into the [start, end) character
@@ -156,12 +168,22 @@ public class RunScriptAction extends CustomAction {
      * is instead read in full up to its terminating "/" line, so that the
      * semicolons inside it are preserved rather than splitting it into
      * broken fragments.
+     * <p>
+     * MySQL has no "/" terminator convention at all, so on a MySQL
+     * connection a CREATE PROCEDURE/FUNCTION/TRIGGER/EVENT is instead read
+     * up to the semicolon that closes its own top-level BEGIN...END
+     * nesting - see {@link #findMySqlRoutineEnd(String, int, int)}.
      *
      * @param text the full script text.
+     * @param databaseType the type of the database the script will run
+     *        against; only used to select the MySQL-specific block
+     *        handling above, everything else behaves identically for
+     *        every database type.
      * @return the ordered list of [start, end) offsets, one per statement.
      */
-    private static List<int[]> splitStatements(String text) {
-        List<int[]> statements = new ArrayList<int[]>();
+    private static List<int[]> splitStatements(String text, DatabaseType databaseType) {
+        boolean isMySql = databaseType == DatabaseType.MYSQL;
+        List<int[]> statements = new ArrayList<>();
         int length = text.length();
         int start = 0;
         while (start < length) {
@@ -171,7 +193,16 @@ public class RunScriptAction extends CustomAction {
             if (start >= length) {
                 break;
             }
-            if (PLSQL_BLOCK_START.matcher(text).region(start, length).lookingAt()) {
+            if (isMySql) {
+                if (MYSQL_BLOCK_START.matcher(text).region(start, length).lookingAt()) {
+                    int end = findMySqlRoutineEnd(text, start, length);
+                    if (end != -1) {
+                        statements.add(new int[] { start, end });
+                        start = advancePastSemicolonLine(text, end, length);
+                        continue;
+                    }
+                }
+            } else if (PLSQL_BLOCK_START.matcher(text).region(start, length).lookingAt()) {
                 int end = findStandaloneSlashLine(text, start, length);
                 if (end != -1) {
                     statements.add(new int[] { start, end });
@@ -205,6 +236,88 @@ public class RunScriptAction extends CustomAction {
             pos = lineEnd == -1 ? length : lineEnd + 1;
         }
         return -1;
+    }
+
+    /**
+     * Finds the semicolon that terminates a MySQL CREATE PROCEDURE/
+     * FUNCTION/TRIGGER/EVENT statement, honoring its own BEGIN...END
+     * nesting instead of the SQL*Plus "/" convention (which MySQL doesn't
+     * have): a semicolon only counts as the terminator when it is reached
+     * at "depth zero", i.e. outside of any BEGIN block opened since
+     * {@code from}. This also transparently handles a body-less routine
+     * (e.g. <code>CREATE FUNCTION f() RETURNS INT RETURN 1;</code>, legal
+     * in MySQL), since depth simply never leaves zero in that case.
+     * <p>
+     * A bare <code>END</code> is treated as closing a <code>BEGIN</code>;
+     * the compound forms <code>END IF/WHILE/LOOP/REPEAT/CASE</code> close
+     * their own construct instead and are correctly not counted here.
+     * Like {@link #findSemicolonTerminator(String, int, int)}, only
+     * single-quoted string literals are tracked - a semicolon inside a
+     * double-quoted string, or inside a <code>--</code>/<code>/* *&#47;</code>
+     * comment, or a bare (non-"CASE") <code>END</code> that closes an
+     * inline <code>CASE ... END</code> expression rather than a
+     * <code>BEGIN</code> block, are known limitations shared with (or, for
+     * the CASE expression case, specific to) this simple scan.
+     */
+    private static int findMySqlRoutineEnd(String text, int from, int length) {
+        boolean inString = false;
+        int depth = 0;
+        int i = from;
+        while (i < length) {
+            char c = text.charAt(i);
+            if (c == '\'') {
+                inString = !inString;
+                i++;
+                continue;
+            }
+            if (!inString && matchesWord(text, i, length, "BEGIN")) {
+                depth++;
+                i += 5;
+                continue;
+            }
+            if (!inString && matchesWord(text, i, length, "END")) {
+                int after = i + 3;
+                int wsEnd = after;
+                while (wsEnd < length && Character.isWhitespace(text.charAt(wsEnd))) {
+                    wsEnd++;
+                }
+                boolean closesOtherConstruct = matchesWord(text, wsEnd, length, "IF")
+                        || matchesWord(text, wsEnd, length, "WHILE")
+                        || matchesWord(text, wsEnd, length, "LOOP")
+                        || matchesWord(text, wsEnd, length, "REPEAT")
+                        || matchesWord(text, wsEnd, length, "CASE");
+                if (!closesOtherConstruct && depth > 0) {
+                    depth--;
+                }
+                i = after;
+                continue;
+            }
+            if (c == ';' && !inString && depth == 0) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+    /**
+     * Whether the case-insensitive keyword {@code word} occurs at position
+     * {@code pos} in {@code text} as a standalone token, i.e. not as part
+     * of a longer identifier (so that, for example, "APPEND" or
+     * "ENDPOINT" don't get mistaken for the keywords "APPEND"/"END").
+     */
+    private static boolean matchesWord(String text, int pos, int length, String word) {
+        int wl = word.length();
+        if (pos < 0 || pos + wl > length || !text.regionMatches(true, pos, word, 0, wl)) {
+            return false;
+        }
+        if (pos > 0 && Character.isLetterOrDigit(text.charAt(pos - 1))) {
+            return false;
+        }
+        if (pos + wl < length && Character.isLetterOrDigit(text.charAt(pos + wl))) {
+            return false;
+        }
+        return true;
     }
 
     private static int findSemicolonTerminator(String text, int from, int length) {

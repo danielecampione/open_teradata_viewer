@@ -105,11 +105,8 @@ public class ExplainRequestAction extends CustomAction {
         }
 
         Connection connection = Context.getInstance().getConnectionData().getConnection();
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                explainStrategy.cancel();
-            }
+        Runnable onCancel = () -> {
+            explainStrategy.cancel();
         };
         WaitingDialog waitingDialog;
         try {

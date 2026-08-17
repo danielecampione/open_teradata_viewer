@@ -460,7 +460,7 @@ public class StringUtil {
             return null;
         }
 
-        HashSet<String> tl = new HashSet<String>(100);
+        HashSet<String> tl = new HashSet<>(100);
         for (String l : list) {
             StringTokenizer st = new StringTokenizer(l, delims);
             while (st.hasMoreTokens()) {
@@ -473,7 +473,7 @@ public class StringUtil {
 
     public static String[] tokenizeList(String list, String delims) {
         StringTokenizer st = new StringTokenizer(list, delims);
-        HashSet<String> tl = new HashSet<String>(100);
+        HashSet<String> tl = new HashSet<>(100);
         while (st.hasMoreTokens()) {
             tl.add(st.nextToken().trim());
         }
@@ -489,7 +489,7 @@ public class StringUtil {
         }
         BreakIterator boundary = BreakIterator.getLineInstance();
         boundary.setText(text);
-        ArrayList<String> strings = new ArrayList<String>();
+        ArrayList<String> strings = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         int start = boundary.first();
         for (int end = boundary
@@ -599,7 +599,7 @@ public class StringUtil {
             return new String[0];
         }
 
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
         String elem = null;
         int i = 0, j = 0;
         while (j != -1 && j < len) {

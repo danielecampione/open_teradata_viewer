@@ -583,7 +583,7 @@ public class SwingUtil {
 
     public static <V> V invokeAndWait(Callable<V> callable) {
         try {
-            FutureTask<V> task = new FutureTask<V>(callable);
+            FutureTask<V> task = new FutureTask<>(callable);
             if (!java.awt.EventQueue.isDispatchThread()) {
                 java.awt.EventQueue.invokeAndWait(task);
             } else {
@@ -598,7 +598,7 @@ public class SwingUtil {
 
     public static void invokeLater(Callable<Object> callable) {
         try {
-            FutureTask<Object> task = new FutureTask<Object>(callable);
+            FutureTask<Object> task = new FutureTask<>(callable);
             if (!java.awt.EventQueue.isDispatchThread()) {
                 java.awt.EventQueue.invokeLater(task);
             } else {

@@ -46,34 +46,31 @@ public class ExportPreviewer {
                 new java.util.concurrent.atomic.AtomicBoolean(false);
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        JTextArea textArea = new JTextArea(text);
-                        textArea.setEditable(false);
-                        JScrollPane scrollPane = new JScrollPane(textArea);
-                        boolean isXml = text.startsWith("<?xml");
-                        isXmlRef.set(isXml);
-                        Object[] options = isXml
-                                ? new Object[]{
-                                    "button.save_to_file",
-                                    "button.save_to_file_and_open",
-                                    "button.copy_to_clipboard",
-                                    "button.pretty_print_xml",
-                                    "button.cancel"}
-                                : new Object[]{
-                                    "button.save_to_file",
-                                    "button.save_to_file_and_open",
-                                    "button.copy_to_clipboard",
-                                    "button.cancel"};
-                        LanguageManager langManager = LanguageManager.getInstance();
-                        Object value = Dialog.show(langManager.getString("dialog.preview"),
-                                scrollPane, Dialog.PLAIN_MESSAGE, options, "button.save_to_file");
-                        chosenValue.set(value != null ? value.toString() : null);
-                    } catch (Exception ex) {
-                        ExceptionDialog.showException(ex);
-                    }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                try {
+                    JTextArea textArea = new JTextArea(text);
+                    textArea.setEditable(false);
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    boolean isXml = text.startsWith("<?xml");
+                    isXmlRef.set(isXml);
+                    Object[] options = isXml
+                            ? new Object[]{
+                                "button.save_to_file",
+                                "button.save_to_file_and_open",
+                                "button.copy_to_clipboard",
+                                "button.pretty_print_xml",
+                                "button.cancel"}
+                            : new Object[]{
+                                "button.save_to_file",
+                                "button.save_to_file_and_open",
+                                "button.copy_to_clipboard",
+                                "button.cancel"};
+                    LanguageManager langManager = LanguageManager.getInstance();
+                    Object value = Dialog.show(langManager.getString("dialog.preview"),
+                            scrollPane, Dialog.PLAIN_MESSAGE, options, "button.save_to_file");
+                    chosenValue.set(value != null ? value.toString() : null);
+                } catch (Exception ex) {
+                    ExceptionDialog.showException(ex);
                 }
             });
         } catch (java.lang.reflect.InvocationTargetException ite) {

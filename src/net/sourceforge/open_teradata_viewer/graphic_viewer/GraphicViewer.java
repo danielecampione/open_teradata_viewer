@@ -1953,7 +1953,7 @@ public class GraphicViewer extends JFrame
         // special subgraph children as stand-alone objects
         if (graphicviewerarea instanceof GraphicViewerSubGraph) {
             GraphicViewerSubGraph graphicviewersubgraph = (GraphicViewerSubGraph) graphicviewerarea;
-            ArrayList<GraphicViewerObject> arraylist1 = new ArrayList<GraphicViewerObject>();
+            ArrayList<GraphicViewerObject> arraylist1 = new ArrayList<>();
             GraphicViewerListPosition graphicviewerlistposition = graphicviewersubgraph
                     .getFirstObjectPos();
             do {
@@ -3421,7 +3421,7 @@ public class GraphicViewer extends JFrame
         stuffAction(); // Make a bunch of stuff in the palette, into myDoc
 
         // Remove all links between nodes from palette
-        ArrayList<GraphicViewerObject> arraylist = new ArrayList<GraphicViewerObject>();
+        ArrayList<GraphicViewerObject> arraylist = new ArrayList<>();
         GraphicViewerListPosition graphicviewerlistposition = graphicviewerdocument1
                 .getFirstObjectPos();
         do {

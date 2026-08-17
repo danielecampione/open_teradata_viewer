@@ -50,31 +50,25 @@ public class WaitingDialog extends TimerTask {
         final LanguageManager langManager = LanguageManager.getInstance();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    message1 = new JLabel();
-                    message2 = new JLabel();
-                    JPanel panel = new JPanel(new GridLayout(2, 1));
-                    panel.add(message1);
-                    panel.add(message2);
-                    final Dialog pane = new Dialog(panel, Dialog.PLAIN_MESSAGE,
-                            Dialog.DEFAULT_OPTION, new Object[]{BUTTON_CANCEL_KEY}, BUTTON_CANCEL_KEY);
-                    dialog = pane.createDialog(ApplicationFrame.getInstance(), null);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                UISupport.showDialog(dialog);
-                            } catch (ConcurrentModificationException cme) {
-                                ExceptionDialog.ignoreException(cme);
-                            }
-                            if ((onCancel != null) && langManager.getString(BUTTON_CANCEL_KEY).equals(pane.getValue())) {
-                                onCancel.run();
-                            }
-                        }
-                    }).start();
-                }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                message1 = new JLabel();
+                message2 = new JLabel();
+                JPanel panel = new JPanel(new GridLayout(2, 1));
+                panel.add(message1);
+                panel.add(message2);
+                final Dialog pane = new Dialog(panel, Dialog.PLAIN_MESSAGE,
+                        Dialog.DEFAULT_OPTION, new Object[]{BUTTON_CANCEL_KEY}, BUTTON_CANCEL_KEY);
+                dialog = pane.createDialog(ApplicationFrame.getInstance(), null);
+                new Thread(() -> {
+                    try {
+                        UISupport.showDialog(dialog);
+                    } catch (ConcurrentModificationException cme) {
+                        ExceptionDialog.ignoreException(cme);
+                    }
+                    if ((onCancel != null) && langManager.getString(BUTTON_CANCEL_KEY).equals(pane.getValue())) {
+                        onCancel.run();
+                    }
+                }).start();
             });
         } catch (java.lang.reflect.InvocationTargetException ite) {
             ExceptionDialog.ignoreException(ite);
@@ -133,11 +127,8 @@ public class WaitingDialog extends TimerTask {
         // directly from here is a classic Swing thread-safety violation.
         // Every single query that runs longer than 3 seconds hits this,
         // since that is exactly when this callback starts firing
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                message2.setText(getExecutionTime());
-            }
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            message2.setText(getExecutionTime());
         });
     }
 }

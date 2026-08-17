@@ -117,14 +117,11 @@ public class ShowMacroAction extends ShowObjectAction {
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData().getConnection();
         final PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
-                }
+        Runnable onCancel = () -> {
+            try {
+                statement.cancel();
+            } catch (Throwable t) {
+                ExceptionDialog.ignoreException(t);
             }
         };
         WaitingDialog waitingDialog;

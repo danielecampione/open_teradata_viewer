@@ -63,7 +63,7 @@ public class HtmlViewerPanel extends JPanel {
     private URL _currentURL;
 
     /** History of links. */
-    private final List<URL> _history = new LinkedList<URL>();
+    private final List<URL> _history = new LinkedList<>();
 
     /** Current index into <TT>_history</TT>. */
     private int _historyIndex = -1;
@@ -281,18 +281,16 @@ public class HtmlViewerPanel extends JPanel {
     }
 
     private HyperlinkListener createHyperLinkListener() {
-        return new HyperlinkListener() {
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (e instanceof HTMLFrameHyperlinkEvent) {
-                        ((HTMLDocument) _contentsTxt.getDocument())
-                                .processHTMLFrameHyperlinkEvent((HTMLFrameHyperlinkEvent) e);
-                    } else {
-                        try {
-                            gotoURL(e.getURL());
-                        } catch (IOException ioe) {
-                            ExceptionDialog.ignoreException(ioe);
-                        }
+        return e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if (e instanceof HTMLFrameHyperlinkEvent) {
+                    ((HTMLDocument) _contentsTxt.getDocument())
+                            .processHTMLFrameHyperlinkEvent((HTMLFrameHyperlinkEvent) e);
+                } else {
+                    try {
+                        gotoURL(e.getURL());
+                    } catch (IOException ioe) {
+                        ExceptionDialog.ignoreException(ioe);
                     }
                 }
             }

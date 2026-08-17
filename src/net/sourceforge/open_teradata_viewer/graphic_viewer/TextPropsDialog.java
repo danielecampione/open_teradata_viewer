@@ -129,30 +129,18 @@ public class TextPropsDialog extends JDialog {
 
     void jbInit() throws Exception {
         panel1.setLayout(null);
-        OKButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                OKButton_actionPerformed(e);
-            }
+        OKButton.addActionListener(e -> {
+            OKButton_actionPerformed(e);
         });
-        CancelButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                CancelButton_actionPerformed(e);
-            }
+        CancelButton.addActionListener(e -> {
+            CancelButton_actionPerformed(e);
         });
-        textColorButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                textColorButton_actionPerformed(e);
-            }
+        textColorButton.addActionListener(e -> {
+            textColorButton_actionPerformed(e);
         });
         backgroundColorButton
-                .addActionListener(new java.awt.event.ActionListener() {
-
-                    public void actionPerformed(ActionEvent e) {
-                        backgroundColorButton_actionPerformed(e);
-                    }
+                .addActionListener(e -> {
+                    backgroundColorButton_actionPerformed(e);
                 });
         OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 

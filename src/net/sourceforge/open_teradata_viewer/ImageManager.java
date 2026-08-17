@@ -33,7 +33,7 @@ import javax.swing.ImageIcon;
  */
 public final class ImageManager {
 
-    private static HashMap<String, ImageIcon> imageList = new HashMap<String, ImageIcon>();
+    private static HashMap<String, ImageIcon> imageList = new HashMap<>();
 
     public final static ImageIcon getImage(String resName) {
         return getImage(resName, Toolkit.getDefaultToolkit().getClass());

@@ -90,46 +90,43 @@ public class EditAction extends CustomAction {
         final AtomicReference<JScrollPane> scrollPaneRef = new AtomicReference<>();
 
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        JPanel panel = new JPanel(new GridBagLayout());
-                        JTextArea[] textAreas = new JTextArea[columnCount];
-                        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0, 0, GridBagConstraints.NORTHWEST,
-                                GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0);
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    JPanel panel = new JPanel(new GridBagLayout());
+                    JTextArea[] textAreas = new JTextArea[columnCount];
+                    GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 0, 0, GridBagConstraints.NORTHWEST,
+                            GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0);
 
-                        for (int column = 0; column < columnCount; column++) {
-                            try {
-                                String columnName = resultSet.getMetaData().getColumnName(column + 1);
-                                panel.add(new JLabel(columnName), constraints);
-                                if (column + 1 == columnCount) {
-                                    constraints.weightx = 100;
-                                    constraints.weighty = 100;
-                                }
-                                textAreas[column] = new JTextArea();
-                                panel.add(textAreas[column], constraints);
-                                fillTextArea(textAreas[column], selectedRow, column);
-                                if (ResultSetTable.isLob(column)) {
-                                    textAreas[column].setEnabled(false);
-                                }
-                                if (resultSet.getConcurrency() == ResultSet.CONCUR_READ_ONLY) {
-                                    textAreas[column].setEditable(false);
-                                }
-                                textAreas[column].setBorder(BorderFactory.createLoweredBevelBorder());
-                                constraints.gridy++;
-                            } catch (SQLException ex) {
-                                throw new RuntimeException(ex);
+                    for (int column = 0; column < columnCount; column++) {
+                        try {
+                            String columnName = resultSet.getMetaData().getColumnName(column + 1);
+                            panel.add(new JLabel(columnName), constraints);
+                            if (column + 1 == columnCount) {
+                                constraints.weightx = 100;
+                                constraints.weighty = 100;
                             }
+                            textAreas[column] = new JTextArea();
+                            panel.add(textAreas[column], constraints);
+                            fillTextArea(textAreas[column], selectedRow, column);
+                            if (ResultSetTable.isLob(column)) {
+                                textAreas[column].setEnabled(false);
+                            }
+                            if (resultSet.getConcurrency() == ResultSet.CONCUR_READ_ONLY) {
+                                textAreas[column].setEditable(false);
+                            }
+                            textAreas[column].setBorder(BorderFactory.createLoweredBevelBorder());
+                            constraints.gridy++;
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
                         }
-                        JScrollPane scrollPane = new JScrollPane(panel);
-
-                        panelRef.set(panel);
-                        textAreasRef.set(textAreas);
-                        scrollPaneRef.set(scrollPane);
-                    } catch (RuntimeException ex) {
-                        throw ex;
                     }
+                    JScrollPane scrollPane = new JScrollPane(panel);
+
+                    panelRef.set(panel);
+                    textAreasRef.set(textAreas);
+                    scrollPaneRef.set(scrollPane);
+                } catch (RuntimeException ex) {
+                    throw ex;
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {

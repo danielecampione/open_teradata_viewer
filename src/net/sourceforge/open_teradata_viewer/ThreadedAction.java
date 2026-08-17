@@ -36,20 +36,17 @@ public abstract class ThreadedAction implements Runnable {
         final Component glassPane = ApplicationFrame.getInstance().getRootPane()
                 .getGlassPane();
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    focusOwnerHolder[0] = KeyboardFocusManager
-                            .getCurrentKeyboardFocusManager().getFocusOwner();
-                    if (!glassPane.isVisible()) {
-                        if (glassPane.getMouseListeners().length == 0) {
-                            glassPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                            glassPane.addMouseListener(new MouseAdapter() {
-                            });
-                        }
-                        glassPane.setVisible(true);
-                        glassPane.requestFocus();
+            SwingUtilities.invokeAndWait(() -> {
+                focusOwnerHolder[0] = KeyboardFocusManager
+                        .getCurrentKeyboardFocusManager().getFocusOwner();
+                if (!glassPane.isVisible()) {
+                    if (glassPane.getMouseListeners().length == 0) {
+                        glassPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                        glassPane.addMouseListener(new MouseAdapter() {
+                        });
                     }
+                    glassPane.setVisible(true);
+                    glassPane.requestFocus();
                 }
             });
             execute();
@@ -57,14 +54,11 @@ public abstract class ThreadedAction implements Runnable {
             ExceptionDialog.showException(t);
         } finally {
             try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (glassPane.isVisible()) {
-                            glassPane.setVisible(false);
-                            if (focusOwnerHolder[0] != null) {
-                                focusOwnerHolder[0].requestFocus();
-                            }
+                SwingUtilities.invokeAndWait(() -> {
+                    if (glassPane.isVisible()) {
+                        glassPane.setVisible(false);
+                        if (focusOwnerHolder[0] != null) {
+                            focusOwnerHolder[0].requestFocus();
                         }
                     }
                 });

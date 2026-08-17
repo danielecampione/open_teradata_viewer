@@ -21,7 +21,6 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
-import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,8 +32,6 @@ import java.nio.file.Files;
 import java.util.Optional;
 
 import javax.swing.JFileChooser;
-import javax.swing.TransferHandler;
-import javax.swing.TransferHandler.TransferSupport;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -86,18 +83,15 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
-                    resultRef.set(result);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        selectedFileRef.set(fileChooser.getSelectedFile());
-                        try {
-                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
-                        } catch (Exception ex) {
-                            throw new RuntimeException(ex);
-                        }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
+                resultRef.set(result);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFileRef.set(fileChooser.getSelectedFile());
+                    try {
+                        currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
             });
@@ -139,23 +133,39 @@ public class FileIO {
     }
 
     public static void openFile(File file) throws Exception {
-        if (file != null) {
+        if (file == null) {
+            return;
+        }
+        // The content read here must be handed over to the EDT before it
+        // touches the text area's Document: this method runs on the
+        // background thread started by ThreadedAction (see performThreaded()
+        // callers), and Swing text components/Documents are not thread-safe.
+        // The previous implementation mutated the text area directly from
+        // this background thread (and, for the initial clear, queued an
+        // *asynchronous* SwingUtilities.invokeLater() via
+        // ApplicationFrame.setText() that raced against it) - depending on
+        // scheduling, the EDT could clear the text area right after this
+        // thread had just loaded the real content into it, leaving the
+        // editor empty, or the two threads could corrupt the Document by
+        // touching it at the same time; once corrupted, the same shared
+        // RSyntaxTextArea/Document instance stayed broken for the rest of
+        // that run, which is why every subsequent open (including of a file
+        // that had opened fine moments before) kept failing too
+        // An explicit charset is required here: relying on the platform
+        // default (as new String(byte[]) does) makes the decoded text
+        // depend on the OS/locale the JVM happens to run under, silently
+        // corrupting any non-ASCII character (e.g. accented Italian
+        // letters) whenever the file was written on a different machine or
+        // with a different editor
+        final String content = new String(FileIO.readFile(file), StandardCharsets.UTF_8);
+        javax.swing.SwingUtilities.invokeAndWait(() -> {
             ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-            applicationFrame.setText("");
             Context.getInstance().setOpenedFile(file);
             RSyntaxTextArea textArea = applicationFrame.getTextComponent();
-            TransferHandler transferHandler = textArea.getTransferHandler();
-            // An explicit charset is required here: relying on the
-            // platform default (as new String(byte[]) does) makes the
-            // decoded text depend on the OS/locale the JVM happens to run
-            // under, silently corrupting any non-ASCII character (e.g.
-            // accented Italian letters) whenever the file was written on a
-            // different machine or with a different editor
-            StringSelection stringSelection = new StringSelection(
-                    new String(FileIO.readFile(file), StandardCharsets.UTF_8));
-            transferHandler.importData(new TransferSupport(textArea, stringSelection));
+            textArea.setText(content);
             textArea.setCaretPosition(0);
-        }
+            applicationFrame.refreshSourceTree();
+        });
     }
 
     public static File chooseFile() throws Exception {
@@ -167,18 +177,15 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
-                    resultRef.set(result);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        selectedFileRef.set(fileChooser.getSelectedFile());
-                        try {
-                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
-                        } catch (Exception ex) {
-                            throw new RuntimeException(ex);
-                        }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
+                resultRef.set(result);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFileRef.set(fileChooser.getSelectedFile());
+                    try {
+                        currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
             });
@@ -202,23 +209,20 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicReference<JFileChooser> chooserRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    if (fileChooser == null) {
-                        fileChooser = new JFileChooser();
-                        fileChooser.setAcceptAllFileFilterUsed(false);
-                        fileChooser.addChoosableFileFilter(acceptAllFileFilter);
-                        fileChooser.setFileFilter(acceptAllFileFilter);
-                    }
-                    try {
-                        Optional.ofNullable(Config.getLastUsedDir()).map(File::new)
-                                .ifPresent(fileChooser::setCurrentDirectory);
-                    } catch (Exception e) {
-                        ExceptionDialog.hideException(e);
-                    }
-                    chooserRef.set(fileChooser);
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                if (fileChooser == null) {
+                    fileChooser = new JFileChooser();
+                    fileChooser.setAcceptAllFileFilterUsed(false);
+                    fileChooser.addChoosableFileFilter(acceptAllFileFilter);
+                    fileChooser.setFileFilter(acceptAllFileFilter);
                 }
+                try {
+                    Optional.ofNullable(Config.getLastUsedDir()).map(File::new)
+                            .ifPresent(fileChooser::setCurrentDirectory);
+                } catch (Exception e) {
+                    ExceptionDialog.hideException(e);
+                }
+                chooserRef.set(fileChooser);
             });
         } catch (Exception ex) {
             throw new RuntimeException(ex);

@@ -33,9 +33,9 @@ public class MultiTextNode extends GraphicViewerNode {
     private static final long serialVersionUID = -2845126676363781592L;
 
     public MultiTextNode() {
-        myVector = new ArrayList<Object>();
-        myLeftPorts = new ArrayList<Object>();
-        myRightPorts = new ArrayList<Object>();
+        myVector = new ArrayList<>();
+        myLeftPorts = new ArrayList<>();
+        myRightPorts = new ArrayList<>();
         myTopPort = null;
         myBottomPort = null;
         myBack = null;

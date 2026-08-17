@@ -42,7 +42,7 @@ public class TeradataExplainStrategy implements IExplainStrategy {
     @Override
     public List<String> explain(Connection connection, String sqlToExplain) throws SQLException {
         String sqlQuery = "EXPLAIN " + sqlToExplain + ";";
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
         currentStatement = statement;
         try {

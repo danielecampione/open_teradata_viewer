@@ -97,7 +97,7 @@ public class AnalyzeQueryAction extends CustomAction {
                             .getDocument();
 
                     int i = 1;
-                    Vector<GraphicViewerBasicNode> nodes = new Vector<GraphicViewerBasicNode>(
+                    Vector<GraphicViewerBasicNode> nodes = new Vector<>(
                             1, 1);
                     for (Iterator<?> iter = tableList.iterator(); iter
                             .hasNext(); i++) {

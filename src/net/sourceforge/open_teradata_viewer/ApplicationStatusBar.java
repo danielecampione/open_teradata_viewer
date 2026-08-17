@@ -73,18 +73,16 @@ public class ApplicationStatusBar extends ApplicationStatusBarPanel {
 
     private void updateMemoryStatus() {
         if (memoryStatus) {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    final Runtime rt = Runtime.getRuntime();
-                    final long totalMemory = rt.totalMemory();
-                    final long freeMemory = rt.freeMemory();
-                    final long usedMemory = totalMemory - freeMemory;
-                    StringBuilder buf = new StringBuilder();
-                    buf.append(StringUtil.formatSize(usedMemory, 1))
-                            .append("/")
-                            .append(StringUtil.formatSize(totalMemory, 1) + " ");
-                    memoryPanel.setText(buf.toString());
-                }
+            java.awt.EventQueue.invokeLater(() -> {
+                final Runtime rt = Runtime.getRuntime();
+                final long totalMemory = rt.totalMemory();
+                final long freeMemory = rt.freeMemory();
+                final long usedMemory = totalMemory - freeMemory;
+                StringBuilder buf = new StringBuilder();
+                buf.append(StringUtil.formatSize(usedMemory, 1))
+                        .append("/")
+                        .append(StringUtil.formatSize(totalMemory, 1) + " ");
+                memoryPanel.setText(buf.toString());
             });
         }
     }
@@ -148,14 +146,12 @@ public class ApplicationStatusBar extends ApplicationStatusBarPanel {
         timer.schedule(new TimerTask() {
             public void run() {
                 if (timeStatus) {
-                    java.awt.EventQueue.invokeLater(new Runnable() {
-                        public void run() {
-                            timePanel.setText(String.format((dateTimeFormat
-                                    ? "%1$tY-%1$tm-%1$td "
-                                    : "") + "%1$tH:%1$tM:%1$tS",
-                                    new Object[]{new Date().getTime()})
-                                    + " ");
-                        }
+                    java.awt.EventQueue.invokeLater(() -> {
+                        timePanel.setText(String.format((dateTimeFormat
+                                ? "%1$tY-%1$tm-%1$td "
+                                : "") + "%1$tH:%1$tM:%1$tS",
+                                new Object[]{new Date().getTime()})
+                                + " ");
                     });
                 }
             }
@@ -170,12 +166,10 @@ public class ApplicationStatusBar extends ApplicationStatusBarPanel {
         timer.schedule(new TimerTask() {
             public void run() {
                 if (runTimeStatus) {
-                    java.awt.EventQueue.invokeLater(new Runnable() {
-                        public void run() {
-                            runTimePanel.setText(StringUtil.formatTime(System
-                                    .nanoTime() - startApp)
-                                    + " ");
-                        }
+                    java.awt.EventQueue.invokeLater(() -> {
+                        runTimePanel.setText(StringUtil.formatTime(System
+                                .nanoTime() - startApp)
+                                + " ");
                     });
                 }
             }

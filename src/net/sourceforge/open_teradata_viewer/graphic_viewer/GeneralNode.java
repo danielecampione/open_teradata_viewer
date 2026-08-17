@@ -38,8 +38,8 @@ public class GeneralNode extends GraphicViewerNode {
         myTopLabel = null;
         myBottomLabel = null;
         myIcon = null;
-        myLeftPorts = new ArrayList<Object>();
-        myRightPorts = new ArrayList<Object>();
+        myLeftPorts = new ArrayList<>();
+        myRightPorts = new ArrayList<>();
     }
 
     public void initialize(Point point, Dimension dimension,

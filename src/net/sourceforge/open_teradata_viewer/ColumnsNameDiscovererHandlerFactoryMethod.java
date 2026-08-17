@@ -71,6 +71,8 @@ public abstract class ColumnsNameDiscovererHandlerFactoryMethod {
             return new TeradataColumnsNameDiscovererHandler();
         } else if (databaseType == DatabaseType.ORACLE) {
             return new ORACLEColumnsNameDiscovererHandler();
+        } else if (databaseType == DatabaseType.MYSQL) {
+            return new MySqlColumnsNameDiscovererHandler();
         }
         return new GenericColumnsNameDiscovererHandler();
     }

@@ -69,7 +69,7 @@ import com.jgoodies.looks.Options;
 
 public class UISupport {
 
-    private static List<ClassLoader> secondaryResourceLoaders = new ArrayList<ClassLoader>();
+    private static List<ClassLoader> secondaryResourceLoaders = new ArrayList<>();
 
     private static Component frame;
     public static Dimension TOOLBAR_BUTTON_DIMENSION;

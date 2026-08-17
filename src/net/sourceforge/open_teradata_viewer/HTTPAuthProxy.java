@@ -85,28 +85,19 @@ public class HTTPAuthProxy extends Authenticator {
                     .setEnabled(isAuthenticationRequired.isSelected());
 
             proxyUserField
-                    .addPropertyChangeListener(new PropertyChangeListener() {
-                        @Override
-                        public void propertyChange(PropertyChangeEvent arg0) {
-                            authenticationNecessary = isAuthenticationRequired
-                                    .isSelected();
-                        }
+                    .addPropertyChangeListener(arg0 -> {
+                        authenticationNecessary = isAuthenticationRequired
+                                .isSelected();
                     });
             proxyPasswordField
-                    .addPropertyChangeListener(new PropertyChangeListener() {
-                        @Override
-                        public void propertyChange(PropertyChangeEvent e) {
-                            authenticationNecessary = isAuthenticationRequired
-                                    .isSelected();
-                        }
+                    .addPropertyChangeListener(e -> {
+                        authenticationNecessary = isAuthenticationRequired
+                                .isSelected();
                     });
-            isAuthenticationRequired.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    proxyUserField.setEnabled(!proxyUserField.isEnabled());
-                    proxyPasswordField.setEnabled(!proxyPasswordField
-                            .isEnabled());
-                }
+            isAuthenticationRequired.addChangeListener(e -> {
+                proxyUserField.setEnabled(!proxyUserField.isEnabled());
+                proxyPasswordField.setEnabled(!proxyPasswordField
+                        .isEnabled());
             });
 
             JPanel panel = new JPanel(new GridBagLayout());
@@ -135,12 +126,9 @@ public class HTTPAuthProxy extends Authenticator {
             optionPane.setOptionType(JOptionPane.OK_OPTION);
             final JDialog dialog = optionPane.createDialog(langManager.getString("proxy.server"));
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    optionPane.setValue(JOptionPane.OK_OPTION);
-                    dialog.dispose();
-                }
+            button.addActionListener(e -> {
+                optionPane.setValue(JOptionPane.OK_OPTION);
+                dialog.dispose();
             });
             UISupport.showDialog(dialog);
 

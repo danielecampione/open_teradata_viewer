@@ -253,12 +253,9 @@ public class OTVGoToDialog extends EscapableDialog {
         if (visible) {
             lineNumber = -1;
             okButton.setEnabled(lineNumberField.getDocument().getLength() > 0);
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    lineNumberField.requestFocusInWindow();
-                    lineNumberField.selectAll();
-                }
+            SwingUtilities.invokeLater(() -> {
+                lineNumberField.requestFocusInWindow();
+                lineNumberField.selectAll();
             });
         }
         super.setVisible(visible);

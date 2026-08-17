@@ -94,14 +94,11 @@ public class SchemaBrowser extends JTree {
                 Connection connection = connectionData.getConnection();
                 try {
                     final PreparedStatement statement = connection.prepareStatement(sqlQuery);
-                    Runnable onCancel = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                statement.cancel();
-                            } catch (Throwable t) {
-                                ExceptionDialog.ignoreException(t);
-                            }
+                    Runnable onCancel = () -> {
+                        try {
+                            statement.cancel();
+                        } catch (Throwable t2) {
+                            ExceptionDialog.ignoreException(t2);
                         }
                     };
                     WaitingDialog waitingDialog;

@@ -114,17 +114,11 @@ public class GridOptionsDialog extends JDialog {
         panel1.setLayout(null);
         panel1.setMinimumSize(new Dimension(586, 265));
         panel1.setPreferredSize(new Dimension(586, 265));
-        OKButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                OKButton_actionPerformed(e);
-            }
+        OKButton.addActionListener(e -> {
+            OKButton_actionPerformed(e);
         });
-        CancelButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                CancelButton_actionPerformed(e);
-            }
+        CancelButton.addActionListener(e -> {
+            CancelButton_actionPerformed(e);
         });
         OKButton.addKeyListener(new java.awt.event.KeyAdapter() {
 
@@ -138,11 +132,8 @@ public class GridOptionsDialog extends JDialog {
                 CancelButton_keyPressed(e);
             }
         });
-        paperColorButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                paperColorButton_actionPerformed(e);
-            }
+        paperColorButton.addActionListener(e -> {
+            paperColorButton_actionPerformed(e);
         });
         moveNoSnapRadio.setText(langManager.getString("grid.no_snap"));
         moveNoSnapRadio.setBounds(new Rectangle(255, 36, 86, 24));

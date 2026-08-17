@@ -1,3 +1,77 @@
+0.34b (17/08/2026)
+    - Modernized Java 1.6-style code to Java 1.7 style: replaced explicit
+      generic type arguments with the diamond operator in 69
+      field/local-variable declarations across 36 classes (ApplicationFrame,
+      ApplicationMenuBar, Config, Console, Dialog, Drivers, Grid,
+      H2ExplainStrategy, HSQLDBExplainStrategy, History, ImageManager,
+      MySqlExplainStrategy, OracleExplainStrategy, SQLiteExplainStrategy,
+      SQLServerExplainStrategy, SwingFileDialogs, TeradataExplainStrategy,
+      UISupport, AnalyzeQueryAction, EditMacroAction, FavoritesAction,
+      RunAction, RunScriptAction, MacroManager, GeneralNode, GraphicViewer,
+      ListArea, MultiTextNode, HelpViewerWindow, HtmlViewerPanel, PluginFactory,
+      StreamUtil, StringUtil, SwingUtil, UtilException, Variant); no behavioral
+      change.
+    - Fixed ShowTableAction/ShowViewAction/ShowProcedureAction forcing the
+      schema/object name to upper case unconditionally, which broke object
+      lookup on case-sensitive MySQL installations (typically Linux) when the
+      real name wasn't already upper case; now skipped for MySQL connections
+      only, other database types unaffected.
+    - Fixed RunScriptAction's statement splitter treating every semicolon at
+      end-of-line as a statement terminator, which broke MySQL scripts
+      containing a CREATE PROCEDURE/FUNCTION/TRIGGER/EVENT with a BEGIN...END
+      body (each internal semicolon was mistaken for the end of the script);
+      MySQL routines are now read up to the semicolon that closes their own
+      top-level BEGIN...END nesting instead, other database types unaffected.
+    - Added a real MySQL column-name-discovery query
+      (information_schema.columns) so "SELECT * FROM table" now expands to an
+      explicit column list on MySQL connections too, as it already did for
+      Teradata/Oracle; supports both unqualified and schema-qualified relation
+      names, falling back to the connection's current database when no schema is
+      given.
+    - Fixed SelectFromAction forcing the relation name to upper case
+      unconditionally before the column-discovery lookup, which broke it on
+      case-sensitive MySQL installations (typically Linux) when the real
+      table/schema name wasn't already upper case; now skipped for MySQL
+      connections only, other database types unaffected.
+    - Modernized Java 1.6/1.7-style code to Java 1.8 style: converted 87
+      anonymous inner classes implementing a single-abstract-method interface
+      (Runnable, ActionListener, ChangeListener, PropertyChangeListener,
+      FilenameFilter, AdjustmentListener, HyperlinkListener) into lambda
+      expressions across 44 classes, with no other change needed in any of them;
+      no behavioral change.
+    - Modernized Java 1.6/1.7-style code to Java 1.8 style: converted an
+      anonymous Runnable and 2 anonymous ActionListener instances into lambda
+      expressions in each of CalculateMD5ChecksumAction,
+      CalculateSHA1ChecksumOfAFileAction and CalculateSHA1ChecksumOfATextAction,
+      additionally renaming the ActionListener parameter from "e" to "ae" in all
+      three since it would otherwise shadow the enclosing method's own "e"
+      (legal for an anonymous class, not for a lambda); no other behavioral
+      change.
+    - Modernized Java 1.6/1.7-style code to Java 1.8 style: converted an
+      anonymous Runnable into a lambda expression in SchemaBrowser's onCancel
+      handler, additionally renaming its catch-block variable from "t" to "t2"
+      since it would otherwise shadow the enclosing catch block's own "t"; no
+      other behavioral change.
+    - Modernized Java 1.6/1.7-style code to Java 1.8 style: converted 3
+      anonymous ActionListener instances into lambda expressions in
+      GraphicViewerPrintPreview, additionally changing a local variable's
+      declared type from Object to ActionListener since a lambda needs a
+      functional-interface target type (redundant casts removed accordingly); no
+      other behavioral change.
+    - Fixed FileIO.openFile() performing the text-area update (clear, load,
+      caret reposition) on the background thread started for every user action
+      instead of the EDT, racing against an earlier asynchronous
+      SwingUtilities.invokeLater() clear; depending on scheduling this left the
+      editor empty or corrupted the shared RSyntaxTextArea's Document for the
+      rest of the session. The whole update now runs inside a single
+      SwingUtilities.invokeAndWait() call; replaced the
+      TransferHandler.importData()-based "simulated paste" with a direct
+      textArea.setText() call, and added a refreshSourceTree() call after
+      loading so the source outline tree reflects the newly opened file instead
+      of staying stuck on the pre-clear empty state.
+    - Upgraded rsyntaxtextarea library 3.1.4 -> 3.1.5
+    - Upgraded autocomplete library 3.1.4 -> 3.1.5
+
 0.34a (13/08/2026)
     - Added Spanish (es) language support to the UI internationalization.
     - Refactored the reserved-word lookup in Utilities.java from a single

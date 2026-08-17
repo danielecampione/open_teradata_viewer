@@ -87,102 +87,93 @@ public class GraphicViewerPrintPreview extends JDialog {
         m_target = paramPrintable;
         JToolBar localJToolBar = new JToolBar();
         JButton localJButton = new JButton(LanguageManager.getInstance().getString("button.print"));
-        Object localObject = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
-                Thread local1 = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            PrinterJob localPrinterJob = PrinterJob
-                                    .getPrinterJob();
-                            Book localBook = new Book();
-                            localBook
-                                    .append(GraphicViewerPrintPreview.this.m_target,
-                                            GraphicViewerPrintPreview.this.m_pageFormat,
-                                            GraphicViewerPrintPreview.this.m_pageCount);
-                            localPrinterJob.setPageable(localBook);
-                            if (!localPrinterJob.printDialog()) {
-                                return;
-                            }
-                            GraphicViewerPrintPreview.this.setCursor(Cursor
-                                    .getPredefinedCursor(3));
-                            localPrinterJob.print();
-                            GraphicViewerPrintPreview.this.setCursor(Cursor
-                                    .getPredefinedCursor(0));
-                            GraphicViewerPrintPreview.this.dispose();
-                        } catch (PrinterException localPrinterException) {
-                            ExceptionDialog
-                                    .hideException(localPrinterException);
-                            System.err.println("Printing error: "
-                                    + localPrinterException.toString());
+        ActionListener localObject = paramAnonymousActionEvent -> {
+            Thread local1 = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        PrinterJob localPrinterJob = PrinterJob
+                                .getPrinterJob();
+                        Book localBook = new Book();
+                        localBook
+                                .append(GraphicViewerPrintPreview.this.m_target,
+                                        GraphicViewerPrintPreview.this.m_pageFormat,
+                                        GraphicViewerPrintPreview.this.m_pageCount);
+                        localPrinterJob.setPageable(localBook);
+                        if (!localPrinterJob.printDialog()) {
+                            return;
                         }
+                        GraphicViewerPrintPreview.this.setCursor(Cursor
+                                .getPredefinedCursor(3));
+                        localPrinterJob.print();
+                        GraphicViewerPrintPreview.this.setCursor(Cursor
+                                .getPredefinedCursor(0));
+                        GraphicViewerPrintPreview.this.dispose();
+                    } catch (PrinterException localPrinterException) {
+                        ExceptionDialog
+                                .hideException(localPrinterException);
+                        System.err.println("Printing error: "
+                                + localPrinterException.toString());
                     }
-                };
-                local1.start();
-            }
+                }
+            };
+            local1.start();
         };
-        localJButton.addActionListener((ActionListener) localObject);
+        localJButton.addActionListener(localObject);
         localJButton.setAlignmentY(0.5F);
         localJButton.setMargin(new Insets(4, 6, 4, 6));
         localJToolBar.add(localJButton);
         localJButton = new JButton(LanguageManager.getInstance().getString("button.close"));
-        localObject = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
-                try {
-                    GraphicViewerPrintPreview.this.dispose();
-                } catch (Exception localException) {
-                }
+        localObject = paramAnonymousActionEvent -> {
+            try {
+                GraphicViewerPrintPreview.this.dispose();
+            } catch (Exception localException) {
             }
         };
-        localJButton.addActionListener((ActionListener) localObject);
+        localJButton.addActionListener(localObject);
         localJButton.setAlignmentY(0.5F);
         localJButton.setMargin(new Insets(4, 6, 4, 6));
         localJToolBar.add(localJButton);
         String[] arrayOfString = { "10 %", "25 %", "50 %", "100 %" };
         m_cbScale = new JComboBox(arrayOfString);
         m_cbScale.setSelectedIndex(1);
-        localObject = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
-                Thread local1 = new Thread() {
-                    @Override
-                    public void run() {
-                        String str = GraphicViewerPrintPreview.this.m_cbScale
-                                .getSelectedItem().toString();
-                        if (str.endsWith("%")) {
-                            str = str.substring(0, str.length() - 1);
-                        }
-                        str = str.trim();
-                        int i = 0;
-                        try {
-                            i = Integer.parseInt(str);
-                        } catch (NumberFormatException localNumberFormatException) {
-                            return;
-                        }
-                        int j = GraphicViewerPrintPreview.this.m_wPage * i
-                                / 100;
-                        int k = GraphicViewerPrintPreview.this.m_hPage * i
-                                / 100;
-                        Component[] arrayOfComponent = GraphicViewerPrintPreview.this.m_preview
-                                .getComponents();
-                        for (int m = 0; m < arrayOfComponent.length; m++) {
-                            if ((arrayOfComponent[m] instanceof GraphicViewerPrintPreview.PagePreview)) {
-                                GraphicViewerPrintPreview.PagePreview localPagePreview = (GraphicViewerPrintPreview.PagePreview) arrayOfComponent[m];
-                                localPagePreview
-                                        .setScaledSize(j, k, i / 100.0D);
-                            }
-                        }
-                        GraphicViewerPrintPreview.this.m_preview.doLayout();
-                        GraphicViewerPrintPreview.this.m_preview.getParent()
-                                .getParent().validate();
+        localObject = paramAnonymousActionEvent -> {
+            Thread local1 = new Thread() {
+                @Override
+                public void run() {
+                    String str = GraphicViewerPrintPreview.this.m_cbScale
+                            .getSelectedItem().toString();
+                    if (str.endsWith("%")) {
+                        str = str.substring(0, str.length() - 1);
                     }
-                };
-                local1.start();
-            }
+                    str = str.trim();
+                    int i = 0;
+                    try {
+                        i = Integer.parseInt(str);
+                    } catch (NumberFormatException localNumberFormatException) {
+                        return;
+                    }
+                    int j = GraphicViewerPrintPreview.this.m_wPage * i
+                            / 100;
+                    int k = GraphicViewerPrintPreview.this.m_hPage * i
+                            / 100;
+                    Component[] arrayOfComponent = GraphicViewerPrintPreview.this.m_preview
+                            .getComponents();
+                    for (int m = 0; m < arrayOfComponent.length; m++) {
+                        if ((arrayOfComponent[m] instanceof GraphicViewerPrintPreview.PagePreview)) {
+                            GraphicViewerPrintPreview.PagePreview localPagePreview = (GraphicViewerPrintPreview.PagePreview) arrayOfComponent[m];
+                            localPagePreview
+                                    .setScaledSize(j, k, i / 100.0D);
+                        }
+                    }
+                    GraphicViewerPrintPreview.this.m_preview.doLayout();
+                    GraphicViewerPrintPreview.this.m_preview.getParent()
+                            .getParent().validate();
+                }
+            };
+            local1.start();
         };
-        m_cbScale.addActionListener((ActionListener) localObject);
+        m_cbScale.addActionListener(localObject);
         m_cbScale.setMaximumSize(m_cbScale.getPreferredSize());
         m_cbScale.setEditable(true);
         localJToolBar.addSeparator();

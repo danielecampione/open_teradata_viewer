@@ -60,13 +60,10 @@ public class NewMacroAction extends CustomAction {
         final ApplicationFrame owner = ApplicationFrame.getInstance();
         final Macro[] result = new Macro[1];
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    NewMacroDialog nmd = new NewMacroDialog(owner);
-                    nmd.setVisible(true);
-                    result[0] = nmd.getMacro();
-                }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                NewMacroDialog nmd = new NewMacroDialog(owner);
+                nmd.setVisible(true);
+                result[0] = nmd.getMacro();
             });
         } catch (java.lang.reflect.InvocationTargetException ite) {
             ExceptionDialog.hideException(ite);

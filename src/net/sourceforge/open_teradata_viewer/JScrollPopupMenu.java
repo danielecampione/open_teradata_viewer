@@ -72,12 +72,9 @@ public class JScrollPopupMenu extends JPopupMenu {
     protected JScrollBar getScrollBar() {
         if (popupScrollBar == null) {
             popupScrollBar = new JScrollBar(JScrollBar.VERTICAL);
-            popupScrollBar.addAdjustmentListener(new AdjustmentListener() {
-                @Override
-                public void adjustmentValueChanged(AdjustmentEvent e) {
-                    doLayout();
-                    repaint();
-                }
+            popupScrollBar.addAdjustmentListener(e -> {
+                doLayout();
+                repaint();
             });
 
             popupScrollBar.setVisible(false);

@@ -58,18 +58,15 @@ public class PrintPreviewAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        SwingUtilities.invokeAndWait(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    PrintPreviewDialog printPreviewDialog = new PrintPreviewDialog(
-                            ApplicationFrame.getInstance(),
-                            ApplicationFrame.getInstance().getTextComponent());
-                    printPreviewDialog.setLocationRelativeTo(ApplicationFrame.getInstance());
-                    UISupport.showDialog(printPreviewDialog);
-                } catch (Exception ex) {
-                    ExceptionDialog.showException(ex);
-                }
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                PrintPreviewDialog printPreviewDialog = new PrintPreviewDialog(
+                        ApplicationFrame.getInstance(),
+                        ApplicationFrame.getInstance().getTextComponent());
+                printPreviewDialog.setLocationRelativeTo(ApplicationFrame.getInstance());
+                UISupport.showDialog(printPreviewDialog);
+            } catch (Exception ex) {
+                ExceptionDialog.showException(ex);
             }
         });
     }

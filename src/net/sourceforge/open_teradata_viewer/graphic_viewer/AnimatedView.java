@@ -34,21 +34,19 @@ public class AnimatedView extends OTVView {
     private static final long serialVersionUID = -2006218480848329886L;
 
     public AnimatedView() {
-        new Timer(50, new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                GraphicViewerDocument doc = getDocument();
-                doc.setSkipsUndoManager(true);
-                GraphicViewerListPosition pos = doc.getFirstObjectPos();
-                while (pos != null) {
-                    GraphicViewerObject obj = doc.getObjectAtPos(pos);
-                    pos = doc.getNextObjectPosAtTop(pos);
-                    if (obj instanceof AnimatedLink) {
-                        AnimatedLink link = (AnimatedLink) obj;
-                        link.step();
-                    }
+        new Timer(50, evt -> {
+            GraphicViewerDocument doc = getDocument();
+            doc.setSkipsUndoManager(true);
+            GraphicViewerListPosition pos = doc.getFirstObjectPos();
+            while (pos != null) {
+                GraphicViewerObject obj = doc.getObjectAtPos(pos);
+                pos = doc.getNextObjectPosAtTop(pos);
+                if (obj instanceof AnimatedLink) {
+                    AnimatedLink link = (AnimatedLink) obj;
+                    link.step();
                 }
-                doc.setSkipsUndoManager(false);
             }
+            doc.setSkipsUndoManager(false);
         }).start();
     }
 

@@ -50,31 +50,29 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
     // invokeLater to schedule the code for execution on the event dispatch
     // thread.
     protected void displaySelectionInfo(final int dot, final int mark) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                if (dot == mark) { // No selection
-                    try {
-                        Rectangle caretCoords = ApplicationFrame.getInstance()
-                                .getTextComponent().modelToView(dot);
-                        // Convert it to view coordinates
-                        setText(dot + ", [" + caretCoords.x + ", "
-                                + caretCoords.y + "]\n");
-                    } catch (BadLocationException ble) {
-                        setText(dot + "\n");
-                    }
+        SwingUtilities.invokeLater(() -> {
+            if (dot == mark) { // No selection
+                try {
+                    Rectangle caretCoords = ApplicationFrame.getInstance()
+                            .getTextComponent().modelToView(dot);
+                    // Convert it to view coordinates
+                    setText(dot + ", [" + caretCoords.x + ", "
+                            + caretCoords.y + "]\n");
+                } catch (BadLocationException ble) {
+                    setText(dot + "\n");
+                }
+            } else {
+                int selectedCharacters;
+                if (dot < mark) {
+                    selectedCharacters = mark - dot;
+                    setText("selection from: " + dot + " to " + mark + " ("
+                            + selectedCharacters
+                            + " selected characters)\n");
                 } else {
-                    int selectedCharacters;
-                    if (dot < mark) {
-                        selectedCharacters = mark - dot;
-                        setText("selection from: " + dot + " to " + mark + " ("
-                                + selectedCharacters
-                                + " selected characters)\n");
-                    } else {
-                        selectedCharacters = dot - mark;
-                        setText("selection from: " + mark + " to " + dot + " ("
-                                + selectedCharacters
-                                + " selected characters)\n");
-                    }
+                    selectedCharacters = dot - mark;
+                    setText("selection from: " + mark + " to " + dot + " ("
+                            + selectedCharacters
+                            + " selected characters)\n");
                 }
             }
         });

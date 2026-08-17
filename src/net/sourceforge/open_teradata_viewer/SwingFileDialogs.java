@@ -34,7 +34,7 @@ import com.l2fprod.common.swing.JDirectoryChooser;
  */
 public class SwingFileDialogs implements IXFileDialogs {
     private static Component parent;
-    private static Map<Object, JFileChooser> choosers = new HashMap<Object, JFileChooser>();
+    private static Map<Object, JFileChooser> choosers = new HashMap<>();
 
     public SwingFileDialogs(Component parent) {
         SwingFileDialogs.parent = parent;
@@ -85,14 +85,11 @@ public class SwingFileDialogs implements IXFileDialogs {
         final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
         
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    int result = chooser.showSaveDialog(getParent());
-                    resultRef.set(result);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        selectedFileRef.set(chooser.getSelectedFile());
-                    }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                int result = chooser.showSaveDialog(getParent());
+                resultRef.set(result);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFileRef.set(chooser.getSelectedFile());
                 }
             });
         } catch (Exception ex) {
@@ -155,14 +152,11 @@ public class SwingFileDialogs implements IXFileDialogs {
         final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef2 = new java.util.concurrent.atomic.AtomicReference<>();
         
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    int result = chooser.showSaveDialog(getParent());
-                    resultRef2.set(result);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        selectedFileRef2.set(chooser.getSelectedFile());
-                    }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                int result = chooser.showSaveDialog(getParent());
+                resultRef2.set(result);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFileRef2.set(chooser.getSelectedFile());
                 }
             });
         } catch (Exception ex) {
@@ -217,14 +211,11 @@ public class SwingFileDialogs implements IXFileDialogs {
         final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef3 = new java.util.concurrent.atomic.AtomicReference<>();
         
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    int result = chooser.showSaveDialog(getParent());
-                    resultRef3.set(result);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        selectedFileRef3.set(chooser.getSelectedFile());
-                    }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                int result = chooser.showSaveDialog(getParent());
+                resultRef3.set(result);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFileRef3.set(chooser.getSelectedFile());
                 }
             });
         } catch (Exception ex) {

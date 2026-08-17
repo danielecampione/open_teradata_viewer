@@ -87,8 +87,8 @@ public class RunAction extends CustomAction {
         String originalSql = sql;
         History.getInstance().add(sql);
         Actions.getInstance().validateTextActions();
-        Vector<String> columnIdentifiers = new Vector<String>();
-        Vector<Vector> dataVector = new Vector<Vector>();
+        Vector<String> columnIdentifiers = new Vector<>();
+        Vector<Vector> dataVector = new Vector<>();
         int[] columnTypes;
         String[] columnTypeNames;
         PreparedStatement statement = createStatement(Context.getInstance().getConnectionData().getConnection(), sql);
@@ -137,7 +137,7 @@ public class RunAction extends CustomAction {
                     columnTypeNames[i] = resultSet.getMetaData().getColumnTypeName(i + 1);
                 }
                 while (waitingDialog.isVisible() && resultSet.next()) {
-                    Vector<Object> row = new Vector<Object>(columnCount + 1);
+                    Vector<Object> row = new Vector<>(columnCount + 1);
                     for (int i = 0; i < columnCount; i++) {
                         try {
                             Object object = resultSet.getObject(i + 1);
@@ -158,7 +158,7 @@ public class RunAction extends CustomAction {
                 Context.getInstance().setResultSet(null);
                 int updateCount = statement.getUpdateCount();
                 if (updateCount != -1) {
-                    Vector<Object> row = new Vector<Object>(1);
+                    Vector<Object> row = new Vector<>(1);
                     row.add(Integer.toString(updateCount));
                     dataVector.add(row);
                     columnIdentifiers.add(LanguageManager.getInstance().getString("label.rows_updated"));
@@ -168,7 +168,7 @@ public class RunAction extends CustomAction {
                     for (int i = 0; i < bindVariables.length; i++) {
                         try {
                             Object o = ((CallableStatement) statement).getObject(i + 1);
-                            Vector<Object> row = new Vector<Object>(1);
+                            Vector<Object> row = new Vector<>(1);
                             row.add(o);
                             dataVector.add(row);
                         } catch (SQLException sqle) {

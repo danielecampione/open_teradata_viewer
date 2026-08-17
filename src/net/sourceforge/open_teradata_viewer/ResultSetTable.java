@@ -148,27 +148,24 @@ public final class ResultSetTable extends JTable {
 
     public void setDataVector(final Vector dataVector,
             final Vector columnIdentifiers, final String executionTime) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                originalOrder = new ArrayList(dataVector);
-                ((DefaultTableModel) getModel()).setDataVector(dataVector,
-                        columnIdentifiers);
-                validate();
-                String rows = String.format("%d %s", dataVector.size(),
-                        dataVector.size() != 1 ? "rows" : "row");
-                JComponent scrollPane = (JComponent) getParent().getParent();
-                if (dataVector.isEmpty()) {
-                    scrollPane.setToolTipText(String.format("%s - %s", rows,
-                            executionTime));
-                    setToolTipText(null);
-                } else {
-                    setToolTipText(String
-                            .format("%s - %s", rows, executionTime));
-                    scrollPane.setToolTipText(null);
-                }
-                resizeColumns();
+        SwingUtilities.invokeLater(() -> {
+            originalOrder = new ArrayList(dataVector);
+            ((DefaultTableModel) getModel()).setDataVector(dataVector,
+                    columnIdentifiers);
+            validate();
+            String rows = String.format("%d %s", dataVector.size(),
+                    dataVector.size() != 1 ? "rows" : "row");
+            JComponent scrollPane = (JComponent) getParent().getParent();
+            if (dataVector.isEmpty()) {
+                scrollPane.setToolTipText(String.format("%s - %s", rows,
+                        executionTime));
+                setToolTipText(null);
+            } else {
+                setToolTipText(String
+                        .format("%s - %s", rows, executionTime));
+                scrollPane.setToolTipText(null);
             }
+            resizeColumns();
         });
     }
 

@@ -56,8 +56,8 @@ import net.sourceforge.open_teradata_viewer.util.StringUtil;
  */
 public final class Variant implements Cloneable, Comparable<Object> {
 
-    private static HashMap<Long, Class<? extends IVariantConnectable>> registeredClasses = new HashMap<Long, Class<? extends IVariantConnectable>>();
-    private static HashMap<Class<? extends IVariantConnectable>, Long> registeredIds = new HashMap<Class<? extends IVariantConnectable>, Long>();
+    private static HashMap<Long, Class<? extends IVariantConnectable>> registeredClasses = new HashMap<>();
+    private static HashMap<Class<? extends IVariantConnectable>, Long> registeredIds = new HashMap<>();
 
     private static SimpleDateFormat dateFormat = null;
     private static SimpleDateFormat timeFormat = null;
@@ -1627,7 +1627,7 @@ public final class Variant implements Cloneable, Comparable<Object> {
             setObject(getObject());
             break;
         case VariantType.varList: {
-            ArrayList<Variant> list = new ArrayList<Variant>();
+            ArrayList<Variant> list = new ArrayList<>();
             list.add(getVariant());
             setList(list);
             break;

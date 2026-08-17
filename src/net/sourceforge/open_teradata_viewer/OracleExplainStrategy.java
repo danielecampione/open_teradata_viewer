@@ -51,7 +51,7 @@ public class OracleExplainStrategy implements IExplainStrategy {
             queryToExplain = queryToExplain.substring(0, queryToExplain.length() - 1);
         }
 
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         Statement statement = connection.createStatement();
         currentStatement = statement;
         try {

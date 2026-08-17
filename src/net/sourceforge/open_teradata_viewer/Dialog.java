@@ -159,18 +159,15 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
         }
         
         // Otherwise, execute on EDT and wait for result
-        final AtomicReference<Integer> result = new AtomicReference<Integer>();
-        final AtomicReference<Exception> exception = new AtomicReference<Exception>();
+        final AtomicReference<Integer> result = new AtomicReference<>();
+        final AtomicReference<Exception> exception = new AtomicReference<>();
         
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        result.set(showOnEDT(title, message, messageType, optionType));
-                    } catch (Exception e) {
-                        exception.set(e);
-                    }
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    result.set(showOnEDT(title, message, messageType, optionType));
+                } catch (Exception e) {
+                    exception.set(e);
                 }
             });
         } catch (Exception e) {
@@ -218,18 +215,15 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
         }
         
         // Otherwise, execute on EDT and wait for result
-        final AtomicReference<Object> result = new AtomicReference<Object>();
-        final AtomicReference<Exception> exception = new AtomicReference<Exception>();
+        final AtomicReference<Object> result = new AtomicReference<>();
+        final AtomicReference<Exception> exception = new AtomicReference<>();
         
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        result.set(showOnEDT(title, message, messageType, options, initialValue));
-                    } catch (Exception e) {
-                        exception.set(e);
-                    }
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    result.set(showOnEDT(title, message, messageType, options, initialValue));
+                } catch (Exception e) {
+                    exception.set(e);
                 }
             });
         } catch (Exception e) {
@@ -289,18 +283,15 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
         }
 
         // Otherwise, execute on EDT and wait for result
-        final AtomicReference<String> result = new AtomicReference<String>();
-        final AtomicReference<Exception> exception = new AtomicReference<Exception>();
+        final AtomicReference<String> result = new AtomicReference<>();
+        final AtomicReference<Exception> exception = new AtomicReference<>();
 
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        result.set(JOptionPane.showInputDialog(message));
-                    } catch (Exception e) {
-                        exception.set(e);
-                    }
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    result.set(JOptionPane.showInputDialog(message));
+                } catch (Exception e) {
+                    exception.set(e);
                 }
             });
         } catch (Exception e) {
@@ -321,11 +312,8 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
         } else {
             // Otherwise, execute on EDT and wait for completion
             try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        determineSizeOnEDT(scrollPane);
-                    }
+                SwingUtilities.invokeAndWait(() -> {
+                    determineSizeOnEDT(scrollPane);
                 });
             } catch (Exception e) {
                 throw new RuntimeException(e);

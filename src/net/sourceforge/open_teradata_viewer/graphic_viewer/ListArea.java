@@ -35,10 +35,10 @@ public class ListArea extends GraphicViewerArea {
     private static final long serialVersionUID = -6277318536848734193L;
 
     public ListArea() {
-        myVector = new ArrayList<Object>();
-        myIcons = new ArrayList<Object>();
-        myLeftPorts = new ArrayList<Object>();
-        myRightPorts = new ArrayList<Object>();
+        myVector = new ArrayList<>();
+        myIcons = new ArrayList<>();
+        myLeftPorts = new ArrayList<>();
+        myRightPorts = new ArrayList<>();
         myRect = null;
         myBar = null;
         myVertical = true;

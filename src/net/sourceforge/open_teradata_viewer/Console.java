@@ -96,24 +96,21 @@ public class Console extends JTextPane {
         // it is dispatched through invokeLater(); the log-file writing
         // further down does not touch any Swing component and is
         // intentionally left to run on the calling thread
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if ((getDocument().getLength() + text.length()) > maxCharacters) {
-                    setText("");
-                }
-
-                // StyleContext
-                StyleContext sc = StyleContext.getDefaultStyleContext();
-
-                int len = getDocument().getLength(); // same value as getText().length();
-                setCaretPosition(len); // place caret at the end (with no selection)
-                if (!curSubstance) {
-                    AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
-                    setCharacterAttributes(aset, false);
-                }
-                replaceSelection(text); // there is no selection, so inserts at caret
+        SwingUtilities.invokeLater(() -> {
+            if ((getDocument().getLength() + text.length()) > maxCharacters) {
+                setText("");
             }
+
+            // StyleContext
+            StyleContext sc = StyleContext.getDefaultStyleContext();
+
+            int len = getDocument().getLength(); // same value as getText().length();
+            setCaretPosition(len); // place caret at the end (with no selection)
+            if (!curSubstance) {
+                AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
+                setCharacterAttributes(aset, false);
+            }
+            replaceSelection(text); // there is no selection, so inserts at caret
         });
 
         if (logFile.exists()) {
@@ -199,7 +196,7 @@ public class Console extends JTextPane {
         String fileName = fileNameBuilder.toString();
         File userHome = new File(Utilities.normalizePath(System.getProperty("user.home")));
         File[] listedFiles = Utilities.listFiles(userHome);
-        Vector<Integer> listedFilesIndexVector = new Vector<Integer>(1, 1);
+        Vector<Integer> listedFilesIndexVector = new Vector<>(1, 1);
         for (int i = 0; i < listedFiles.length; i++) {
             if (!listedFiles[i].isDirectory()) {
                 if (listedFiles[i].getName().startsWith(fileName)

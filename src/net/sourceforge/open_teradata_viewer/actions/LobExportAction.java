@@ -102,17 +102,14 @@ public class LobExportAction extends CustomAction {
                 final AtomicReference<JScrollPane> scrollPaneRef = new AtomicReference<>();
                 
                 try {
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
-                            JList list = new JList(columnNames.toArray());
-                            list.addMouseListener(LobExportAction.this);
-                            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                            JScrollPane scrollPane = new JScrollPane(list);
-                            
-                            listRef.set(list);
-                            scrollPaneRef.set(scrollPane);
-                        }
+                    SwingUtilities.invokeAndWait(() -> {
+                        JList list = new JList(columnNames.toArray());
+                        list.addMouseListener(LobExportAction.this);
+                        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                        JScrollPane scrollPane = new JScrollPane(list);
+                        
+                        listRef.set(list);
+                        scrollPaneRef.set(scrollPane);
                     });
                 } catch (InterruptedException | InvocationTargetException ex) {
                     throw new Exception("Error creating UI components", ex);

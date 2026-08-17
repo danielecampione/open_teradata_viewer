@@ -122,11 +122,9 @@ public class ApplicationStatusBarPanel extends JPanel {
     }
 
     public void refresh() {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                revalidate();
-                repaint();
-            }
+        EventQueue.invokeLater(() -> {
+            revalidate();
+            repaint();
         });
     }
 }

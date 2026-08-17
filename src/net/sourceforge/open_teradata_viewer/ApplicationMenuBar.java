@@ -253,7 +253,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
         StringList completePathOfLafClasses = new StringList(true, lafInfo.length);
         ButtonGroup buttonGroupLookAndFeel = new ButtonGroup();
-        Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<JRadioButtonMenuItem>(lafInfo.length, 1);
+        Vector<JRadioButtonMenuItem> _mnuAvailableLookAndFeel = new Vector<>(lafInfo.length, 1);
         for (int i = 0; i < lafInfo.length; i++) {
             String name = lafInfo[i].getName();
             _mnuAvailableLookAndFeel.add(new JRadioButtonMenuItem(name));
@@ -420,7 +420,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
     }
 
     private void setMnemonics(MenuElement menuElement) {
-        Set<Character> used = new HashSet<Character>();
+        Set<Character> used = new HashSet<>();
         MenuElement[] subElements = menuElement.getSubElements();
         for (MenuElement subElement : subElements) {
             AbstractButton item = (AbstractButton) subElement;

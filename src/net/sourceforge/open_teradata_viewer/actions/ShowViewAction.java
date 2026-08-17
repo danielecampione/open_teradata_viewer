@@ -100,7 +100,15 @@ public class ShowViewAction extends ShowObjectAction {
             }
         }
 
-        viewName = viewName.trim().toUpperCase();
+        viewName = viewName.trim();
+        if (databaseType != DatabaseType.MYSQL) {
+            // MySQL on Linux (and most other Unix-likes) treats unquoted
+            // table/schema identifiers as case-sensitive, unlike
+            // Teradata/Oracle/DB2, where they fold to upper case by
+            // default - forcing upper case here would make MySQL unable
+            // to find an object whose real name isn't already upper case.
+            viewName = viewName.toUpperCase();
+        }
         int lastTokenIndex = viewName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
             databaseName = viewName.substring(
@@ -117,14 +125,11 @@ public class ShowViewAction extends ShowObjectAction {
         ResultSet resultSet = null;
         Connection connection = Context.getInstance().getConnectionData().getConnection();
         final PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        Runnable onCancel = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    statement.cancel();
-                } catch (Throwable t) {
-                    ExceptionDialog.ignoreException(t);
-                }
+        Runnable onCancel = () -> {
+            try {
+                statement.cancel();
+            } catch (Throwable t) {
+                ExceptionDialog.ignoreException(t);
             }
         };
         WaitingDialog waitingDialog;

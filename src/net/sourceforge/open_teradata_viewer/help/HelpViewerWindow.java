@@ -79,7 +79,7 @@ public class HelpViewerWindow extends JFrame {
     private URL _homeURL;
 
     /** Collection of the nodes in the tree keyed by the URL.toString(). */
-    private final Map<String, DefaultMutableTreeNode> _nodes = new HashMap<String, DefaultMutableTreeNode>();
+    private final Map<String, DefaultMutableTreeNode> _nodes = new HashMap<>();
 
     /**
      * Factory for creating FileWrappers which insulate the application from
@@ -175,14 +175,11 @@ public class HelpViewerWindow extends JFrame {
         setSize(new Dimension(windowWidth, windowHeight));
         setLocationRelativeTo(null);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                _detailPnl.setHomeURL(_homeURL);
-                _tree.expandRow(0);
-                _tree.expandRow(2);
-                _tree.setRootVisible(false);
-            }
+        SwingUtilities.invokeLater(() -> {
+            _detailPnl.setHomeURL(_homeURL);
+            _tree.expandRow(0);
+            _tree.expandRow(2);
+            _tree.setRootVisible(false);
         });
 
         _detailPnl.addListener(new IHtmlViewerPanelListener() {
@@ -374,8 +371,8 @@ public class HelpViewerWindow extends JFrame {
 
         private static final long serialVersionUID = -6574834940741510025L;
 
-        private final List<String> _docTitles = new ArrayList<String>();
-        private final List<URL> _docURLs = new ArrayList<URL>();
+        private final List<String> _docTitles = new ArrayList<>();
+        private final List<URL> _docURLs = new ArrayList<>();
         private final IFileWrapper _contentsFile;
 
         FolderNode(String title) throws IOException {

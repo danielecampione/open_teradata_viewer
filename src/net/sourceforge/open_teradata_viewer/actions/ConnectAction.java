@@ -71,17 +71,14 @@ public class ConnectAction extends CustomAction {
         final java.util.concurrent.atomic.AtomicReference<JScrollPane> scrollPaneRef = new java.util.concurrent.atomic.AtomicReference<>();
         
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    JList<?> tempList = new JList<Object>(connectionDatas);
-                    tempList.addMouseListener(ConnectAction.this);
-                    tempList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                    JScrollPane tempScrollPane = new JScrollPane(tempList);
-                    
-                    listRef.set(tempList);
-                    scrollPaneRef.set(tempScrollPane);
-                }
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                JList<?> tempList = new JList<Object>(connectionDatas);
+                tempList.addMouseListener(ConnectAction.this);
+                tempList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                JScrollPane tempScrollPane = new JScrollPane(tempList);
+                
+                listRef.set(tempList);
+                scrollPaneRef.set(tempScrollPane);
             });
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -193,87 +190,84 @@ public class ConnectAction extends CustomAction {
             // Synchronously dispatch dialog creation and user inputs to the Event
         	// Dispatch Thread (EDT) to satisfy look-and-feel thread-safety
         	// requirements
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Object db = Dialog.show(langManager.getString("dialog.new_connection.title"), langManager.getString("dialog.choose_database"), Dialog.PLAIN_MESSAGE, 
-                                new Object[] { "database.teradata", "database.oracle", 
-                                              "database.db2", "database.mysql",
-                                              "database.sqlite", "database.hsqldb",
-                                              "database.h2", "database.derby",
-                                              "database.sqlserver", "database.other" }, null);
-                        if (langManager.getString("database.teradata").equals(db)) {
-                            String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(String.format(
-                                    "jdbc:teradata://%s/database=%s,TMODE=ANSI,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
-                                    serverName, databaseName));
-                            connectionData.setDatabaseType(DatabaseType.TERADATA);
-                        } else if (langManager.getString("database.oracle").equals(db)) {
-                            String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(String.format("jdbc:oracle:thin:@%s:1521:%s", serverName, databaseName));
-                            connectionData.setDatabaseType(DatabaseType.ORACLE);
-                        } else if (langManager.getString("database.db2").equals(db)) {
-                            String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            String portNumber = checkString(JOptionPane.showInputDialog(langManager.getString("message.port_number"), "50000"));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(String.format("jdbc:db2://%s:%s/%s", serverName, portNumber, databaseName));
-                            connectionData.setDatabaseType(DatabaseType.DB2);
-                        } else if (langManager.getString("database.mysql").equals(db)) {
-                            String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(String.format("jdbc:mysql://%s/%s", serverName, databaseName));
-                            connectionData.setDatabaseType(DatabaseType.MYSQL);
-                        } else if (langManager.getString("database.sqlite").equals(db)) {
-                            String fileName = checkString(
-                                    JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/sqlite.db").getCanonicalPath()));
-                            connectionData.setName(new File(fileName).getName());
-                            connectionData.setUrl(String.format("jdbc:sqlite:%s", fileName));
-                            connectionData.setDatabaseType(DatabaseType.SQLITE);
-                        } else if (langManager.getString("database.hsqldb").equals(db)) {
-                            String fileName = checkString(
-                                    JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/hsqldb").getCanonicalPath()));
-                            connectionData.setName(new File(fileName).getName());
-                            connectionData.setUrl(String.format("jdbc:hsqldb:%s", fileName));
-                            connectionData.setUser("sa");
-                            connectionData.setDatabaseType(DatabaseType.HSQLDB);
-                        } else if (langManager.getString("database.h2").equals(db)) {
-                            String fileName = checkString(
-                                    JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/h2db").getCanonicalPath()));
-                            connectionData.setName(new File(fileName).getName());
-                            connectionData.setUrl(String.format("jdbc:h2:%s", fileName));
-                            connectionData.setDatabaseType(DatabaseType.H2);
-                        } else if (langManager.getString("database.derby").equals(db)) {
-                            String fileName = checkString(
-                                    JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/derbydb").getCanonicalPath()));
-                            connectionData.setName(new File(fileName).getName());
-                            connectionData.setUrl(String.format("jdbc:derby:%s", fileName));
-                            connectionData.setDatabaseType(DatabaseType.APACHE_DERBY);
-                        } else if (langManager.getString("database.sqlserver").equals(db)) {
-                            String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(String.format("jdbc:jtds:sqlserver://%s:1433/%s", serverName, databaseName));
-                            connectionData.setDatabaseType(DatabaseType.SQL_SERVER);
-                        } else if (langManager.getString("database.other").equals(db)) {
-                            String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
-                            String url = checkString(JOptionPane.showInputDialog("JDBC URL:"));
-                            connectionData.setName(databaseName);
-                            connectionData.setUrl(url);
-                            // The exact dialect is unknown: the "SHOW TABLE/VIEW/PROCEDURE/MACRO"
-                            // and "explain request" commands will report themselves as
-                            // unsupported rather than firing SQL for the wrong dialect.
-                            connectionData.setDatabaseType(DatabaseType.UNKNOWN);
-                        }
-                    } catch (IOException e) {
-                        ioExceptionHolder[0] = e;
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                try {
+                    Object db = Dialog.show(langManager.getString("dialog.new_connection.title"), langManager.getString("dialog.choose_database"), Dialog.PLAIN_MESSAGE, 
+                            new Object[] { "database.teradata", "database.oracle", 
+                                          "database.db2", "database.mysql",
+                                          "database.sqlite", "database.hsqldb",
+                                          "database.h2", "database.derby",
+                                          "database.sqlserver", "database.other" }, null);
+                    if (langManager.getString("database.teradata").equals(db)) {
+                        String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(String.format(
+                                "jdbc:teradata://%s/database=%s,TMODE=ANSI,DBS_PORT=1025,CHARSET=UTF8,LOGMECH=LDAP,LOGDATA=<user>@@<password>",
+                                serverName, databaseName));
+                        connectionData.setDatabaseType(DatabaseType.TERADATA);
+                    } else if (langManager.getString("database.oracle").equals(db)) {
+                        String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(String.format("jdbc:oracle:thin:@%s:1521:%s", serverName, databaseName));
+                        connectionData.setDatabaseType(DatabaseType.ORACLE);
+                    } else if (langManager.getString("database.db2").equals(db)) {
+                        String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        String portNumber = checkString(JOptionPane.showInputDialog(langManager.getString("message.port_number"), "50000"));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(String.format("jdbc:db2://%s:%s/%s", serverName, portNumber, databaseName));
+                        connectionData.setDatabaseType(DatabaseType.DB2);
+                    } else if (langManager.getString("database.mysql").equals(db)) {
+                        String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(String.format("jdbc:mysql://%s/%s", serverName, databaseName));
+                        connectionData.setDatabaseType(DatabaseType.MYSQL);
+                    } else if (langManager.getString("database.sqlite").equals(db)) {
+                        String fileName = checkString(
+                                JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/sqlite.db").getCanonicalPath()));
+                        connectionData.setName(new File(fileName).getName());
+                        connectionData.setUrl(String.format("jdbc:sqlite:%s", fileName));
+                        connectionData.setDatabaseType(DatabaseType.SQLITE);
+                    } else if (langManager.getString("database.hsqldb").equals(db)) {
+                        String fileName = checkString(
+                                JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/hsqldb").getCanonicalPath()));
+                        connectionData.setName(new File(fileName).getName());
+                        connectionData.setUrl(String.format("jdbc:hsqldb:%s", fileName));
+                        connectionData.setUser("sa");
+                        connectionData.setDatabaseType(DatabaseType.HSQLDB);
+                    } else if (langManager.getString("database.h2").equals(db)) {
+                        String fileName = checkString(
+                                JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/h2db").getCanonicalPath()));
+                        connectionData.setName(new File(fileName).getName());
+                        connectionData.setUrl(String.format("jdbc:h2:%s", fileName));
+                        connectionData.setDatabaseType(DatabaseType.H2);
+                    } else if (langManager.getString("database.derby").equals(db)) {
+                        String fileName = checkString(
+                                JOptionPane.showInputDialog(langManager.getString("message.file_name"), new File("/derbydb").getCanonicalPath()));
+                        connectionData.setName(new File(fileName).getName());
+                        connectionData.setUrl(String.format("jdbc:derby:%s", fileName));
+                        connectionData.setDatabaseType(DatabaseType.APACHE_DERBY);
+                    } else if (langManager.getString("database.sqlserver").equals(db)) {
+                        String serverName = checkString(JOptionPane.showInputDialog(langManager.getString("message.server_name")));
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(String.format("jdbc:jtds:sqlserver://%s:1433/%s", serverName, databaseName));
+                        connectionData.setDatabaseType(DatabaseType.SQL_SERVER);
+                    } else if (langManager.getString("database.other").equals(db)) {
+                        String databaseName = checkString(JOptionPane.showInputDialog(langManager.getString("message.database_name")));
+                        String url = checkString(JOptionPane.showInputDialog("JDBC URL:"));
+                        connectionData.setName(databaseName);
+                        connectionData.setUrl(url);
+                        // The exact dialect is unknown: the "SHOW TABLE/VIEW/PROCEDURE/MACRO"
+                        // and "explain request" commands will report themselves as
+                        // unsupported rather than firing SQL for the wrong dialect.
+                        connectionData.setDatabaseType(DatabaseType.UNKNOWN);
                     }
+                } catch (IOException e) {
+                    ioExceptionHolder[0] = e;
                 }
             });
         } catch (java.lang.reflect.InvocationTargetException e) {
@@ -310,76 +304,73 @@ public class ConnectAction extends CustomAction {
         final java.util.concurrent.atomic.AtomicBoolean result = new java.util.concurrent.atomic.AtomicBoolean(false);
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    JPanel panel = new JPanel(new GridBagLayout());
-                    GridBagConstraints c = new GridBagConstraints();
-                    c.anchor = GridBagConstraints.WEST;
-                    c.fill = GridBagConstraints.BOTH;
-                    c.insets = new Insets(2, 2, 2, 2);
-                    c.gridy++;
-                    panel.add(new JLabel(langManager.getString("label.name")), c);
-                    JTextField name = new JTextField(connectionData.getName(), 50);
-                    panel.add(name, c);
-                    c.gridy++;
-                    panel.add(new JLabel(langManager.getString("label.url")), c);
-                    final JTextField url = new JTextField(connectionData.getUrl());
-                    panel.add(url, c);
-                    c.gridy++;
-                    panel.add(new JLabel(langManager.getString("label.username")), c);
-                    JTextField user = new JTextField(connectionData.getUser());
-                    panel.add(user, c);
-                    c.gridy++;
-                    panel.add(new JLabel(langManager.getString("label.password")), c);
-                    JPasswordField password = new JPasswordField(connectionData.getPassword());
-                    panel.add(password, c);
-                    Object i = Dialog.show(langManager.getString("dialog.connect.title"), panel, Dialog.PLAIN_MESSAGE,
-                            new Object[]{"button.ok", "button.cancel"},
-                            "button.ok");
-                    connectionData.setName(name.getText());
-                    connectionData.setUrl(url.getText());
-                    // This dialog only exposes a raw URL field (no database-type
-                    // selector like newConnectionWizard() does), so re-derive the
-                    // type from the URL to avoid it going stale if the URL was
-                    // changed to point to a different kind of database.
-                    connectionData.setDatabaseType(ConnectionData.inferDatabaseTypeFromUrl(connectionData.getUrl()));
-                    connectionData.setUser(user.getText().trim());
-                    // getPassword() (char[]) is used instead of getText()
-                    // (String): a String lingers in JVM memory until GC,
-                    // while a char[] can be wiped right after use - the
-                    // standard, documented way to handle a JPasswordField's
-                    // value.
-                    connectionData.setPassword(new String(password.getPassword()));
-                    if (langManager.getString("button.ok").equals(i) && connectionData.getName().trim().isEmpty()) {
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                JPanel panel = new JPanel(new GridBagLayout());
+                GridBagConstraints c = new GridBagConstraints();
+                c.anchor = GridBagConstraints.WEST;
+                c.fill = GridBagConstraints.BOTH;
+                c.insets = new Insets(2, 2, 2, 2);
+                c.gridy++;
+                panel.add(new JLabel(langManager.getString("label.name")), c);
+                JTextField name = new JTextField(connectionData.getName(), 50);
+                panel.add(name, c);
+                c.gridy++;
+                panel.add(new JLabel(langManager.getString("label.url")), c);
+                final JTextField url = new JTextField(connectionData.getUrl());
+                panel.add(url, c);
+                c.gridy++;
+                panel.add(new JLabel(langManager.getString("label.username")), c);
+                JTextField user = new JTextField(connectionData.getUser());
+                panel.add(user, c);
+                c.gridy++;
+                panel.add(new JLabel(langManager.getString("label.password")), c);
+                JPasswordField password = new JPasswordField(connectionData.getPassword());
+                panel.add(password, c);
+                Object i = Dialog.show(langManager.getString("dialog.connect.title"), panel, Dialog.PLAIN_MESSAGE,
+                        new Object[]{"button.ok", "button.cancel"},
+                        "button.ok");
+                connectionData.setName(name.getText());
+                connectionData.setUrl(url.getText());
+                // This dialog only exposes a raw URL field (no database-type
+                // selector like newConnectionWizard() does), so re-derive the
+                // type from the URL to avoid it going stale if the URL was
+                // changed to point to a different kind of database.
+                connectionData.setDatabaseType(ConnectionData.inferDatabaseTypeFromUrl(connectionData.getUrl()));
+                connectionData.setUser(user.getText().trim());
+                // getPassword() (char[]) is used instead of getText()
+                // (String): a String lingers in JVM memory until GC,
+                // while a char[] can be wiped right after use - the
+                // standard, documented way to handle a JPasswordField's
+                // value.
+                connectionData.setPassword(new String(password.getPassword()));
+                if (langManager.getString("button.ok").equals(i) && connectionData.getName().trim().isEmpty()) {
+                    try {
+                        Dialog.show(langManager.getString("dialog.empty_name.title"),
+                                langManager.getString("dialog.empty_name.message"), Dialog.ERROR_MESSAGE,
+                                new Object[]{"dialog.empty_name.button"}, null);
+                        boolean okay;
                         try {
-                            Dialog.show(langManager.getString("dialog.empty_name.title"),
-                                    langManager.getString("dialog.empty_name.message"), Dialog.ERROR_MESSAGE,
-                                    new Object[]{"dialog.empty_name.button"}, null);
-                            boolean okay;
-                            try {
-                                okay = editConnection(connectionData, true);
-                            } catch (Exception ex) {
-                                okay = false;
-                            }
-                            if (!nested) {
-                                if (okay) {
-                                    Dialog.show(null, langManager.getString("dialog.name_added.message"),
-                                            Dialog.INFORMATION_MESSAGE,
-                                            new Object[]{"dialog.name_added.button"}, null);
-                                } else {
-                                    Dialog.show(null, langManager.getString("dialog.no_name.message"),
-                                            Dialog.QUESTION_MESSAGE,
-                                            new Object[]{"dialog.no_name.button"}, null);
-                                }
-                            }
-                            result.set(okay);
+                            okay = editConnection(connectionData, true);
                         } catch (Exception ex) {
-                            result.set(false);
+                            okay = false;
                         }
-                    } else {
-                        result.set(langManager.getString("button.ok").equals(i));
+                        if (!nested) {
+                            if (okay) {
+                                Dialog.show(null, langManager.getString("dialog.name_added.message"),
+                                        Dialog.INFORMATION_MESSAGE,
+                                        new Object[]{"dialog.name_added.button"}, null);
+                            } else {
+                                Dialog.show(null, langManager.getString("dialog.no_name.message"),
+                                        Dialog.QUESTION_MESSAGE,
+                                        new Object[]{"dialog.no_name.button"}, null);
+                            }
+                        }
+                        result.set(okay);
+                    } catch (Exception ex) {
+                        result.set(false);
                     }
+                } else {
+                    result.set(langManager.getString("button.ok").equals(i));
                 }
             });
         } catch (java.lang.reflect.InvocationTargetException ite) {

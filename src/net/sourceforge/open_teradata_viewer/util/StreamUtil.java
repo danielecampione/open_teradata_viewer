@@ -42,7 +42,7 @@ public class StreamUtil {
             return null;
         }
 
-        ArrayList<byte[]> buflist = new ArrayList<byte[]>();
+        ArrayList<byte[]> buflist = new ArrayList<>();
         byte[] buffer = new byte[8096];
         byte[] result = null;
         int readed, pos;

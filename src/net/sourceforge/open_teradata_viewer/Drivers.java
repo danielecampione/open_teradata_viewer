@@ -70,26 +70,23 @@ public class Drivers {
     }
 
     static URL[] retrieveAllJars(String path) throws MalformedURLException {
-        File[] files = new File(Utilities.normalizePath(path)).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String fileName) {
-                Vector<String> filesToIgnore = new Vector<String>(1, 1);
-                String currentFileInClassPath = null;
-                StringTokenizer classesPaths = new StringTokenizer(
-                        Utilities.normalizePath(System.getProperty("java.class.path")), ";");
-                while (classesPaths.hasMoreTokens()) {
-                    StringTokenizer pathTokenizer = new StringTokenizer(classesPaths.nextToken(), "\\");
-                    while (pathTokenizer.hasMoreTokens()) {
-                        currentFileInClassPath = pathTokenizer.nextToken();
-                    }
-                    if (fileName.equalsIgnoreCase(currentFileInClassPath)) {
-                        filesToIgnore.add(currentFileInClassPath);
-                    }
+        File[] files = new File(Utilities.normalizePath(path)).listFiles((dir, fileName) -> {
+            Vector<String> filesToIgnore = new Vector<>(1, 1);
+            String currentFileInClassPath = null;
+            StringTokenizer classesPaths = new StringTokenizer(
+                    Utilities.normalizePath(System.getProperty("java.class.path")), ";");
+            while (classesPaths.hasMoreTokens()) {
+                StringTokenizer pathTokenizer = new StringTokenizer(classesPaths.nextToken(), "\\");
+                while (pathTokenizer.hasMoreTokens()) {
+                    currentFileInClassPath = pathTokenizer.nextToken();
                 }
-
-                return !filesToIgnore.contains(fileName) && fileName.toLowerCase().endsWith(".jar")
-                        || fileName.toLowerCase().endsWith(".zip");
+                if (fileName.equalsIgnoreCase(currentFileInClassPath)) {
+                    filesToIgnore.add(currentFileInClassPath);
+                }
             }
+
+            return !filesToIgnore.contains(fileName) && fileName.toLowerCase().endsWith(".jar")
+                    || fileName.toLowerCase().endsWith(".zip");
         });
 
         URL[] urls = new URL[files.length];
@@ -139,79 +136,76 @@ public class Drivers {
         final java.util.concurrent.atomic.AtomicInteger responseRef = new java.util.concurrent.atomic.AtomicInteger();
         
         try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        JPanel panel = new JPanel(new GridBagLayout());
-                        GridBagConstraints c = new GridBagConstraints();
-                        c.anchor = GridBagConstraints.WEST;
-                        c.fill = GridBagConstraints.BOTH;
-                        c.insets = new Insets(2, 2, 2, 2);
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                try {
+                    JPanel panel = new JPanel(new GridBagLayout());
+                    GridBagConstraints c = new GridBagConstraints();
+                    c.anchor = GridBagConstraints.WEST;
+                    c.fill = GridBagConstraints.BOTH;
+                    c.insets = new Insets(2, 2, 2, 2);
+                    c.gridy++;
+                    c.gridwidth = 3;
+                    LanguageManager langManager = LanguageManager.getInstance();
+                    
+                    panel.add(new JLabel(
+                            langManager.getString("drivers.location", new File(".").getCanonicalPath())),
+                            c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    panel.add(new JSeparator(), c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    panel.add(new JLabel(langManager.getString("drivers.loaded")), c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridwidth = 1;
+                    Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
+                    while (loadedDrivers.hasMoreElements()) {
+                        Driver loadedDriver = loadedDrivers.nextElement();
                         c.gridy++;
-                        c.gridwidth = 3;
-                        LanguageManager langManager = LanguageManager.getInstance();
-                        
-                        panel.add(new JLabel(
-                                langManager.getString("drivers.location", new File(".").getCanonicalPath())),
-                                c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        panel.add(new JSeparator(), c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        panel.add(new JLabel(langManager.getString("drivers.loaded")), c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridwidth = 1;
-                        Enumeration<Driver> loadedDrivers = DriverManager.getDrivers();
-                        while (loadedDrivers.hasMoreElements()) {
-                            Driver loadedDriver = loadedDrivers.nextElement();
-                            c.gridy++;
-                            c.gridx = 0;
-                            panel.add(new JLabel(loadedDriver.getClass().getName()), c);
-                            c.gridx++;
-                            panel.add(
-                                    new JLabel(String.format("v%d.%d", loadedDriver.getMajorVersion(), loadedDriver.getMinorVersion())),
-                                    c);
-                            c.gridx++;
-                            try {
-                                URI uri = loadedDriver.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-                                String path = new File(uri).getName();
-                                panel.add(new JLabel(path), c);
-                            } catch (Exception e) {
-                                panel.add(new JLabel(), c);
-                            }
-                        }
-                        c.gridwidth = 3;
                         c.gridx = 0;
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        panel.add(new JSeparator(), c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        panel.add(new JLabel(langManager.getString("drivers.add_manual")), c);
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
-                        c.gridy++;
-                        String drivers = Config.getDrivers();
-                        JTextArea driverfield = new JTextArea(drivers, 4, 0);
-                        panel.add(new JScrollPane(driverfield), c);
-                        
-                        panelRef.set(panel);
-                        driverfieldRef.set(driverfield);
-                        
-                        int response = Dialog.show(langManager.getString("dialog.drivers"), panel, Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
-                        responseRef.set(response);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        panel.add(new JLabel(loadedDriver.getClass().getName()), c);
+                        c.gridx++;
+                        panel.add(
+                                new JLabel(String.format("v%d.%d", loadedDriver.getMajorVersion(), loadedDriver.getMinorVersion())),
+                                c);
+                        c.gridx++;
+                        try {
+                            URI uri = loadedDriver.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
+                            String path = new File(uri).getName();
+                            panel.add(new JLabel(path), c);
+                        } catch (Exception e) {
+                            panel.add(new JLabel(), c);
+                        }
                     }
+                    c.gridwidth = 3;
+                    c.gridx = 0;
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    panel.add(new JSeparator(), c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    panel.add(new JLabel(langManager.getString("drivers.add_manual")), c);
+                    c.gridy++;
+                    panel.add(new JLabel(" "), c);
+                    c.gridy++;
+                    String drivers = Config.getDrivers();
+                    JTextArea driverfield = new JTextArea(drivers, 4, 0);
+                    panel.add(new JScrollPane(driverfield), c);
+                    
+                    panelRef.set(panel);
+                    driverfieldRef.set(driverfield);
+                    
+                    int response = Dialog.show(langManager.getString("dialog.drivers"), panel, Dialog.PLAIN_MESSAGE, Dialog.OK_CANCEL_OPTION);
+                    responseRef.set(response);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
             });
         } catch (Exception ex) {

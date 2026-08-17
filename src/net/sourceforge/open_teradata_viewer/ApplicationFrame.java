@@ -303,13 +303,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         textScrollPane.setIconRowHeaderEnabled(true);
 
         LayerUI<JComponent> layerUI = new WallpaperLayerUI();
-        JLayer<JComponent> jlayer = new JLayer<JComponent>(treeSP, layerUI);
+        JLayer<JComponent> jlayer = new JLayer<>(treeSP, layerUI);
         final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jlayer, textScrollPane);
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                sp.setDividerLocation(0.25);
-            }
+        SwingUtilities.invokeLater(() -> {
+            sp.setDividerLocation(0.25);
         });
         sp.setContinuousLayout(true);
         Gutter gutter = textScrollPane.getGutter();
@@ -526,36 +523,30 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     public void initializeObjectChooser(final ConnectionData connectionData) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // SchemaBrowser extends JTree: all Swing component creation
-                    // must happen on the Event Dispatch Thread
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final SchemaBrowser schemaBrowser = new SchemaBrowser(connectionData);
-                                if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
-                                    SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
-                                    schemaBrowser.addKeyListener(schemaBrowserAction);
-                                    schemaBrowser.addMouseListener(schemaBrowserAction);
-                                }
-                                rightComponent = new JScrollPane(schemaBrowser);
-                                schemaBrowser.expand(new String[] { connectionData.getName(), "username", "TABLES" });
-                                Actions.SCHEMA_BROWSER.setEnabled(true);
-                            } catch (IllegalStateException ise) {
-                                // Ignore: connection has been closed
-                                ExceptionDialog.ignoreException(ise);
-                            }
+        new Thread(() -> {
+            try {
+                // SchemaBrowser extends JTree: all Swing component creation
+                // must happen on the Event Dispatch Thread
+                SwingUtilities.invokeAndWait(() -> {
+                    try {
+                        final SchemaBrowser schemaBrowser = new SchemaBrowser(connectionData);
+                        if (Actions.SCHEMA_BROWSER instanceof SchemaBrowserAction) {
+                            SchemaBrowserAction schemaBrowserAction = (SchemaBrowserAction) Actions.SCHEMA_BROWSER;
+                            schemaBrowser.addKeyListener(schemaBrowserAction);
+                            schemaBrowser.addMouseListener(schemaBrowserAction);
                         }
-                    });
-                } catch (InterruptedException ie) {
-                    ExceptionDialog.ignoreException(ie);
-                } catch (java.lang.reflect.InvocationTargetException ite) {
-                    ExceptionDialog.ignoreException(ite);
-                }
+                        rightComponent = new JScrollPane(schemaBrowser);
+                        schemaBrowser.expand(new String[] { connectionData.getName(), "username", "TABLES" });
+                        Actions.SCHEMA_BROWSER.setEnabled(true);
+                    } catch (IllegalStateException ise) {
+                        // Ignore: connection has been closed
+                        ExceptionDialog.ignoreException(ise);
+                    }
+                });
+            } catch (InterruptedException ie) {
+                ExceptionDialog.ignoreException(ie);
+            } catch (java.lang.reflect.InvocationTargetException ite) {
+                ExceptionDialog.ignoreException(ite);
             }
         }).start();
     }
@@ -784,12 +775,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                     } catch (SecurityException se) { // Applets
                         System.err.println("Can't open user dictionary: " + se.getMessage());
                     }
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            textArea.addParser(spellingParser);
-                            Actions.TOGGLE_SPELLING_PARSER.setEnabled(true);
-                        }
+                    SwingUtilities.invokeLater(() -> {
+                        textArea.addParser(spellingParser);
+                        Actions.TOGGLE_SPELLING_PARSER.setEnabled(true);
                     });
                 }
             }
@@ -928,11 +916,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 // don't set it, exceptions will be thrown
                 UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
                 UIUtil.installOsSpecificLafTweaks();
-                Runnable updateUIRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        updateLookAndFeel(lnf);
-                    }
+                Runnable updateUIRunnable = () -> {
+                    updateLookAndFeel(lnf);
                 };
 
                 // Ensure we update Look and Feels on event dispatch thread
@@ -982,12 +967,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     /** Sets the content in the text area. */
     public void setText(final String t) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                textArea.setText(t);
-                refreshSourceTree();
-            }
+        SwingUtilities.invokeLater(() -> {
+            textArea.setText(t);
+            refreshSourceTree();
         });
     }
 

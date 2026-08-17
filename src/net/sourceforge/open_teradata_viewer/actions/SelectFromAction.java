@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
+import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.CustomSelectFromStatement;
 import net.sourceforge.open_teradata_viewer.Dialog;
@@ -79,11 +80,8 @@ public class SelectFromAction extends CustomAction {
                 // Dialog interaction must happen on the Event Dispatch Thread
                 // to avoid Substance state-tracking violations
                 final String[] result = new String[1];
-                javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        result[0] = Dialog.showInputDialog("Insert the table name: ");
-                    }
+                javax.swing.SwingUtilities.invokeAndWait(() -> {
+                    result[0] = Dialog.showInputDialog("Insert the table name: ");
                 });
                 relationName = result[0];
                 if (relationName == null) {
@@ -94,7 +92,15 @@ public class SelectFromAction extends CustomAction {
                 relationName = null;
             }
         }
-        relationName = relationName.toUpperCase();
+        DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
+        if (databaseType != DatabaseType.MYSQL) {
+            // MySQL on Linux (and most other Unix-likes) treats unquoted
+            // table/schema identifiers as case-sensitive, unlike
+            // Teradata/Oracle/DB2, where they fold to upper case by
+            // default - forcing upper case here would make MySQL unable
+            // to find an object whose real name isn't already upper case.
+            relationName = relationName.toUpperCase();
+        }
         return relationName;
     }
 }

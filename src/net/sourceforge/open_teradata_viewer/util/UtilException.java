@@ -34,7 +34,7 @@ public class UtilException extends Exception {
     private static HashMap<Class<? extends UtilException>, ErrorMessages> messagesList;
 
     static {
-        messagesList = new HashMap<Class<? extends UtilException>, ErrorMessages>();
+        messagesList = new HashMap<>();
         registerErrorMessages(UtilException.class, new ErrorMessages());
     }
 
