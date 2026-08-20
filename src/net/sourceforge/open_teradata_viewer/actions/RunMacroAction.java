@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.text.MessageFormat;
 
 import javax.script.Bindings;
@@ -82,7 +83,41 @@ public class RunMacroAction extends CustomAction {
     }
 
     private File getGroovyJar() {
-        return new File("groovy-all-3.0.0-alpha-1.jar");
+        return new File(getApplicationInstallDirectory(), "groovy-all-3.0.0-alpha-1.jar");
+    }
+
+    /**
+     * Returns the directory OTV is actually running from (i.e. the
+     * directory containing the application's jar file, or the output/
+     * "bin" directory when running unpacked from within an IDE). This is
+     * where OTV expects optional dependency jars, such as the embeddable
+     * Groovy jar, to be placed.
+     * <p>
+     * This is deliberately <b>not</b> based on the JVM's current working
+     * directory ("user.dir"): on Linux desktop environments (e.g. Debian
+     * 13 "trixie"), GUI application launchers commonly start the JVM with
+     * the current working directory set to the user's home directory
+     * rather than to the application's installation directory. Relying on
+     * "user.dir" therefore previously caused the Groovy jar lookup to fail
+     * even when the jar was correctly placed alongside the application.
+     *
+     * @return The application's installation directory, or the JVM's
+     *         current working directory as a fallback if the former
+     *         cannot be determined.
+     */
+    private File getApplicationInstallDirectory() {
+        try {
+            URI codeSourceUri = RunMacroAction.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            // When running from a jar, this location is the jar file
+            // itself, so its parent is the installation directory. When
+            // running unpacked (e.g. from within an IDE), this location is
+            // already the output directory, whose parent is the project's
+            // root directory - which is also where dependency jars are
+            // expected to be placed during development
+            return new File(codeSourceUri).getParentFile();
+        } catch (Exception e) {
+            return new File(System.getProperty("user.dir"));
+        }
     }
 
     private void handleSubmit(Macro macro) {
@@ -174,7 +209,7 @@ public class RunMacroAction extends CustomAction {
         if (groovyJar == null || !groovyJar.isFile()) {
             String message = "In order to run Groovy macros, place a copy of the embeddable\nGroovy jar in this location:\n\n{0}\n\nRestarting "
                     + Main.APPLICATION_NAME + " will also be required.";
-            message = MessageFormat.format(message, ApplicationFrame.getInstance().getUserDirectory());
+            message = MessageFormat.format(message, getApplicationInstallDirectory().getAbsolutePath());
             final String finalMessage = message;
             try {
                 javax.swing.SwingUtilities.invokeAndWait(() -> {

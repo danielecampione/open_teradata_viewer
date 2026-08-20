@@ -30,6 +30,6 @@
 	<classpathentry kind="lib" path="lib/rsta/spellchecker-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/rstaui-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/autocomplete-3.1.5.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/rsyntaxtextarea-3.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/rsyntaxtextarea-3.1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

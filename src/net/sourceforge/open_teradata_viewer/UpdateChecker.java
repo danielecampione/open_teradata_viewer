@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.Box;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -78,29 +79,86 @@ public class UpdateChecker implements Runnable {
     public void run() {
         try {
             LanguageManager langManager = LanguageManager.getInstance();
-            
-            // Show dialog on EDT
-            final AtomicInteger resultRef = new AtomicInteger();
-            
-            try {
-                SwingUtilities.invokeAndWait(() -> {
-                    int result = JOptionPane.showConfirmDialog(
-                            ApplicationFrame.getInstance(),
-                            langManager.getString("update.configure_proxy"),
-                            langManager.getString("update.checker_title"), 
-                            JOptionPane.YES_NO_CANCEL_OPTION,
-                            JOptionPane.QUESTION_MESSAGE);
-                    resultRef.set(result);
-                });
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+
+            // Whether the initial Yes/No/Cancel prompt below should be
+            // remembered so it is not shown again on every startup, and -
+            // if so - which of the two answers to reuse. This is
+            // deliberately kept independent of "proxy_remember_configuration"
+            // further down, which only ever covers the manual proxy's
+            // host/port and credentials sub-dialogs (reachable exclusively
+            // after a YES answer here) and is left completely untouched by
+            // this feature, to avoid ever skipping those sub-dialogs with
+            // empty/unset values on a first run
+            String proxyChoiceRememberedKey = "proxy_choice_remembered";
+            String proxyUseManualProxyKey = "proxy_use_manual_proxy";
+
+            String choiceRememberedRawSetting = Config
+                    .getSetting(proxyChoiceRememberedKey);
+            boolean choiceRemembered = choiceRememberedRawSetting != null
+                    && choiceRememberedRawSetting.trim().equalsIgnoreCase(
+                            "true");
+
+            int result;
+            boolean rememberChoiceNow = false;
+
+            if (choiceRemembered) {
+                String useManualRawSetting = Config
+                        .getSetting(proxyUseManualProxyKey);
+                boolean rememberedUseManual = useManualRawSetting != null
+                        && useManualRawSetting.trim().equalsIgnoreCase(
+                                "true");
+                result = rememberedUseManual ? JOptionPane.YES_OPTION
+                        : JOptionPane.NO_OPTION;
+            } else {
+                // Show dialog on EDT
+                final AtomicInteger resultRef = new AtomicInteger();
+                final AtomicReference<Boolean> rememberChoiceRef = new AtomicReference<>(
+                        Boolean.FALSE);
+
+                try {
+                    SwingUtilities.invokeAndWait(() -> {
+                        // The checkbox must be created here, on the EDT,
+                        // not before entering this block: constructing a
+                        // Swing component off the EDT is a threading
+                        // violation that some look and feels (e.g.
+                        // Substance) actively detect and report
+                        JCheckBox rememberChoiceCheckBox = new JCheckBox(
+                                langManager.getString("proxy.dont_ask_again"));
+                        Object[] message = new Object[] {
+                                langManager
+                                        .getString("update.configure_proxy"),
+                                rememberChoiceCheckBox };
+                        int dialogResult = JOptionPane.showConfirmDialog(
+                                ApplicationFrame.getInstance(),
+                                message,
+                                langManager.getString("update.checker_title"),
+                                JOptionPane.YES_NO_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE);
+                        resultRef.set(dialogResult);
+                        rememberChoiceRef.set(rememberChoiceCheckBox
+                                .isSelected());
+                    });
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                result = resultRef.get();
+                rememberChoiceNow = rememberChoiceRef.get();
             }
-            
-            int result = resultRef.get();
-                    
+
             if (result == JOptionPane.CLOSED_OPTION
                     || result == JOptionPane.CANCEL_OPTION) {
                 return;
+            }
+
+            // A YES/NO answer is only persisted when the user explicitly
+            // checked the "don't ask again" box; CLOSED/CANCEL is never
+            // remembered (it means "decide later", not "never")
+            if (!choiceRemembered && rememberChoiceNow) {
+                Config.saveSetting(proxyChoiceRememberedKey,
+                        Boolean.TRUE.toString());
+                Config.saveSetting(proxyUseManualProxyKey, Boolean
+                        .toString(result == JOptionPane.YES_OPTION));
             }
 
             // "result" gets reassigned further down for the proxy
@@ -117,9 +175,6 @@ public class UpdateChecker implements Runnable {
                 String proxyHostKey = "proxy_host", proxyPortKey = "proxy_port";
                 String proxyRememberConfigurationKey = "proxy_remember_configuration";
 
-                final JTextField proxyHostField = new JTextField();
-                final JTextField proxyPortField = new JTextField();
-
                 String rawSetting = Config.getSetting(proxyRememberConfigurationKey);
                 boolean proxyRememberConfiguration = rawSetting != null
                         && rawSetting.trim().equalsIgnoreCase("true");
@@ -127,43 +182,51 @@ public class UpdateChecker implements Runnable {
                 proxyPort = Config.getSetting(proxyPortKey);
 
                 if (!proxyRememberConfiguration) {
-                    proxyHostField.setText(proxyHost);
-                    proxyPortField.setText(proxyPort);
+                    // All Swing component creation and the modal dialog
+                    // display/disposal must happen on the EDT - this used
+                    // to run on the caller's background thread, a
+                    // threading violation that some look and feels (e.g.
+                    // Substance) actively detect and report
+                    final String[] hostHolder = new String[] { proxyHost };
+                    final String[] portHolder = new String[] { proxyPort };
+                    final int[] resultHolder = new int[] { JOptionPane.CANCEL_OPTION };
 
-                    // Create proxy dialog on EDT
-                    final AtomicReference<JOptionPane> proxyPaneRef = new AtomicReference<>();
-                    final AtomicReference<JDialog> dialogRef = new AtomicReference<>();
-                    
                     try {
                         SwingUtilities.invokeAndWait(() -> {
+                            final JTextField proxyHostField = new JTextField();
+                            final JTextField proxyPortField = new JTextField();
+                            proxyHostField.setText(hostHolder[0]);
+                            proxyPortField.setText(portHolder[0]);
+
                             JOptionPane proxyPane = new JOptionPane(new Object[] {
                                     new JLabel(langManager.getString("update.host")), proxyHostField,
                                     new JLabel(langManager.getString("update.port")), proxyPortField },
                                     JOptionPane.QUESTION_MESSAGE,
                                     JOptionPane.OK_CANCEL_OPTION);
                             JDialog dialog = proxyPane.createDialog(langManager.getString("update.server_proxy_title"));
-                            
-                            proxyPaneRef.set(proxyPane);
-                            dialogRef.set(dialog);
+
+                            UISupport.showDialog(dialog);
+
+                            Integer objResult = (Integer) proxyPane.getValue();
+                            int dialogResult = JOptionPane.CANCEL_OPTION;
+                            if (objResult != null) {
+                                dialogResult = objResult;
+                            }
+                            dialog.dispose();
+
+                            resultHolder[0] = dialogResult;
+                            hostHolder[0] = proxyHostField.getText().trim();
+                            portHolder[0] = proxyPortField.getText().trim();
                         });
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
-                    
-                    JOptionPane proxyPane = proxyPaneRef.get();
-                    JDialog dialog = dialogRef.get();
-                    UISupport.showDialog(dialog);
 
-                    Integer objResult = (Integer) proxyPane.getValue();
-                    result = JOptionPane.CANCEL_OPTION;
-                    if (objResult != null) {
-                        result = objResult;
-                    }
-                    dialog.dispose();
+                    result = resultHolder[0];
 
                     if (result == JOptionPane.OK_OPTION) {
-                        proxyHost = proxyHostField.getText().trim();
-                        proxyPort = proxyPortField.getText().trim();
+                        proxyHost = hostHolder[0];
+                        proxyPort = portHolder[0];
 
                         Config.saveSetting(proxyHostKey, proxyHost);
                         Config.saveSetting(proxyPortKey, proxyPort);
@@ -176,7 +239,7 @@ public class UpdateChecker implements Runnable {
                 }
 
                 HTTPAuthProxy httpAuthProxy = new HTTPAuthProxy(
-                        proxyRememberConfiguration);
+                        proxyRememberConfiguration, rememberChoiceNow);
                 if (httpAuthProxy.isAuthenticationNecessary()) {
                     Authenticator.setDefault(httpAuthProxy);
                 }

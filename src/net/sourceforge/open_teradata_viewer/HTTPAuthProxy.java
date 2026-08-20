@@ -39,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -58,7 +59,8 @@ public class HTTPAuthProxy extends Authenticator {
     private String proxyPassword;
     private final Insets insets = new Insets(0, 0, 0, 0);
 
-    public HTTPAuthProxy(boolean proxyRememberConfiguration) throws Throwable {
+    public HTTPAuthProxy(boolean proxyRememberConfiguration,
+            boolean preselectRememberChoice) throws Throwable {
         String proxyUserKey = "proxy_user", proxyPasswordKey = "proxy_password";
 
         if (!proxyRememberConfiguration) {
@@ -66,88 +68,110 @@ public class HTTPAuthProxy extends Authenticator {
 
             authenticationNecessary = true;
             LanguageManager langManager = LanguageManager.getInstance();
-            final JCheckBox isAuthenticationRequired = new JCheckBox(
-                    langManager.getString("proxy.authentication_required")), proxyRememberConfigurationField = new JCheckBox(
-                    langManager.getString("proxy.dont_ask_again"));
 
-            isAuthenticationRequired.setSelected(authenticationNecessary);
-            proxyRememberConfigurationField
-                    .setSelected(proxyRememberConfiguration);
+            // All Swing component creation, the modal dialog display, and
+            // the settings persistence below must happen on the EDT - this
+            // whole block used to run on the caller's background thread, a
+            // threading violation that some look and feels (e.g.
+            // Substance) actively detect and report
+            final Throwable[] errorHolder = new Throwable[1];
 
-            final JTextField proxyUserField = new JTextField();
-            proxyUserField.setText(Config.getSetting(proxyUserKey));
-            proxyUserField.setEnabled(isAuthenticationRequired.isSelected());
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    try {
+                        final JCheckBox isAuthenticationRequired = new JCheckBox(
+                                langManager.getString("proxy.authentication_required")), proxyRememberConfigurationField = new JCheckBox(
+                                langManager.getString("proxy.dont_ask_again"));
 
-            final JPasswordField proxyPasswordField = new JPasswordField();
-            proxyPasswordField.setText(Config.decrypt(Config
-                    .getSetting(proxyPasswordKey)));
-            proxyPasswordField
-                    .setEnabled(isAuthenticationRequired.isSelected());
+                        isAuthenticationRequired.setSelected(authenticationNecessary);
+                        proxyRememberConfigurationField
+                                .setSelected(preselectRememberChoice);
 
-            proxyUserField
-                    .addPropertyChangeListener(arg0 -> {
-                        authenticationNecessary = isAuthenticationRequired
-                                .isSelected();
-                    });
-            proxyPasswordField
-                    .addPropertyChangeListener(e -> {
-                        authenticationNecessary = isAuthenticationRequired
-                                .isSelected();
-                    });
-            isAuthenticationRequired.addChangeListener(e -> {
-                proxyUserField.setEnabled(!proxyUserField.isEnabled());
-                proxyPasswordField.setEnabled(!proxyPasswordField
-                        .isEnabled());
-            });
+                        final JTextField proxyUserField = new JTextField();
+                        proxyUserField.setText(Config.getSetting(proxyUserKey));
+                        proxyUserField.setEnabled(isAuthenticationRequired.isSelected());
 
-            JPanel panel = new JPanel(new GridBagLayout());
-            addComponent(panel, isAuthenticationRequired, 0, 0, 2, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JSeparator(), 0, 1, 2, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JLabel(langManager.getString("proxy.username")), 0, 2, 1, 1,
-                    GridBagConstraints.WEST, GridBagConstraints.BOTH);
-            addComponent(panel, proxyUserField, 1, 2, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JLabel(langManager.getString("proxy.password")), 0, 3, 1, 1,
-                    GridBagConstraints.WEST, GridBagConstraints.BOTH);
-            addComponent(panel, proxyPasswordField, 1, 3, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, new JSeparator(), 0, 4, 2, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
-            addComponent(panel, proxyRememberConfigurationField, 0, 5, 2, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        final JPasswordField proxyPasswordField = new JPasswordField();
+                        proxyPasswordField.setText(Config.decrypt(Config
+                                .getSetting(proxyPasswordKey)));
+                        proxyPasswordField
+                                .setEnabled(isAuthenticationRequired.isSelected());
 
-            JButton button = new JButton(langManager.getString("button.ok"));
-            Object[] options = new Object[] { button };
-            final JOptionPane optionPane = new JOptionPane(panel,
-                    JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
-                    null, options, options[0]);
-            optionPane.setOptionType(JOptionPane.OK_OPTION);
-            final JDialog dialog = optionPane.createDialog(langManager.getString("proxy.server"));
-            dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-            button.addActionListener(e -> {
-                optionPane.setValue(JOptionPane.OK_OPTION);
-                dialog.dispose();
-            });
-            UISupport.showDialog(dialog);
+                        proxyUserField
+                                .addPropertyChangeListener(arg0 -> {
+                                    authenticationNecessary = isAuthenticationRequired
+                                            .isSelected();
+                                });
+                        proxyPasswordField
+                                .addPropertyChangeListener(e -> {
+                                    authenticationNecessary = isAuthenticationRequired
+                                            .isSelected();
+                                });
+                        isAuthenticationRequired.addChangeListener(e -> {
+                            proxyUserField.setEnabled(!proxyUserField.isEnabled());
+                            proxyPasswordField.setEnabled(!proxyPasswordField
+                                    .isEnabled());
+                        });
 
-            Integer objResult = (Integer) optionPane.getValue();
-            int result = JOptionPane.CANCEL_OPTION;
-            if (objResult != null) {
-                result = objResult;
+                        JPanel panel = new JPanel(new GridBagLayout());
+                        addComponent(panel, isAuthenticationRequired, 0, 0, 2, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, new JSeparator(), 0, 1, 2, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, new JLabel(langManager.getString("proxy.username")), 0, 2, 1, 1,
+                                GridBagConstraints.WEST, GridBagConstraints.BOTH);
+                        addComponent(panel, proxyUserField, 1, 2, 1, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, new JLabel(langManager.getString("proxy.password")), 0, 3, 1, 1,
+                                GridBagConstraints.WEST, GridBagConstraints.BOTH);
+                        addComponent(panel, proxyPasswordField, 1, 3, 1, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, new JSeparator(), 0, 4, 2, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+                        addComponent(panel, proxyRememberConfigurationField, 0, 5, 2, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH);
+
+                        JButton button = new JButton(langManager.getString("button.ok"));
+                        Object[] options = new Object[] { button };
+                        final JOptionPane optionPane = new JOptionPane(panel,
+                                JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
+                                null, options, options[0]);
+                        optionPane.setOptionType(JOptionPane.OK_OPTION);
+                        final JDialog dialog = optionPane.createDialog(langManager.getString("proxy.server"));
+                        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                        button.addActionListener(e -> {
+                            optionPane.setValue(JOptionPane.OK_OPTION);
+                            dialog.dispose();
+                        });
+                        UISupport.showDialog(dialog);
+
+                        Integer objResult = (Integer) optionPane.getValue();
+                        int result = JOptionPane.CANCEL_OPTION;
+                        if (objResult != null) {
+                            result = objResult;
+                        }
+
+                        if (result == JOptionPane.OK_OPTION) {
+                            proxyUser = proxyUserField.getText();
+                            proxyPassword = new String(proxyPasswordField.getPassword());
+                            boolean rememberSelected = proxyRememberConfigurationField
+                                    .isSelected();
+                            Config.saveSetting(proxyUserKey, proxyUser);
+                            Config.saveSetting(proxyPasswordKey,
+                                    Config.encrypt(proxyPassword));
+                            Config.saveSetting(proxyRememberConfigurationKey, new Boolean(
+                                    rememberSelected).toString());
+                        }
+                    } catch (Throwable t) {
+                        errorHolder[0] = t;
+                    }
+                });
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
 
-            if (result == JOptionPane.OK_OPTION) {
-                proxyUser = proxyUserField.getText();
-                proxyPassword = new String(proxyPasswordField.getPassword());
-                proxyRememberConfiguration = proxyRememberConfigurationField
-                        .isSelected();
-                Config.saveSetting(proxyUserKey, proxyUser);
-                Config.saveSetting(proxyPasswordKey,
-                        Config.encrypt(proxyPassword));
-                Config.saveSetting(proxyRememberConfigurationKey, new Boolean(
-                        proxyRememberConfiguration).toString());
+            if (errorHolder[0] != null) {
+                throw errorHolder[0];
             }
         } else {
             proxyUser = Config.getSetting(proxyUserKey);

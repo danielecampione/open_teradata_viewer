@@ -1,3 +1,33 @@
+0.34c (20/08/2026)
+    - Added Norwegian (Bokmål) language support to the UI internationalization.
+      Used the Norwegian locale code "no" instead of the ISO-639-1-correct "nb":
+      Oracle JDBC maps the JVM default locale to its own NLS language/territory
+      settings at connect time, and "nb" is not recognized by older bundled
+      drivers (e.g. Oracle XE), causing connection failures under the Norwegian
+      UI language. For this reason, even though the ISO-639-1-correct locale for
+      Norwegian Bokmål is "nb", it could not be used without triggering the
+      above issue.
+    - Added Swedish language support to the UI internationalization.
+    - Added a "remember my choice" option to the startup proxy prompt: a new
+      checkbox lets the user opt out of being asked on every launch, whether
+      they choose to use a manual proxy or not; when opting to use one, the
+      existing credentials dialog now starts with its own "don't ask again"
+      checkbox pre-selected so the whole setup is captured in a single pass.
+    - Fixed Groovy macro engine looking for its jar
+      (groovy-all-3.0.0-alpha-1.jar) relative to the JVM's current working
+      directory instead of OTV's own installation directory, causing macro
+      execution to fail under some Linux desktop launchers (e.g. Debian 13
+      "trixie"); the associated error message now points to the correct location
+      too.
+    - Fixed a pre-existing Swing threading violation in the proxy credentials
+      dialog: component creation, the modal dialog display, and settings
+      persistence now all run on the Event Dispatch Thread instead of the
+      caller's background thread.
+    - Fixed a second Swing threading violation in the startup proxy prompt
+      (host/port dialog) - component creation and dialog show/dispose now run
+      entirely on the EDT.
+    - Upgraded rsyntaxtextarea library 3.1.5 -> 3.1.6
+
 0.34b (17/08/2026)
     - Modernized Java 1.6-style code to Java 1.7 style: replaced explicit
       generic type arguments with the diamond operator in 69

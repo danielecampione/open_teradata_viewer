@@ -52,9 +52,11 @@ public class LanguageManager {
     public static final Language UKRAINIAN = new Language("uk", "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430", "Ukrainian");
     public static final Language DANISH = new Language("da", "Dansk", "Danish");
     public static final Language SPANISH = new Language("es", "Espa\u00f1ol", "Spanish");
+    public static final Language NORWEGIAN = new Language("no", "Norsk", "Norwegian");
+    public static final Language SWEDISH = new Language("sv", "Svenska", "Swedish");
     
     private static final Language[] SUPPORTED_LANGUAGES = {
-        ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH
+        ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH, NORWEGIAN, SWEDISH
     };
 
     private LanguageManager() {

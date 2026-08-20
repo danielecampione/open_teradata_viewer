@@ -110,12 +110,13 @@ public class AboutDialog extends JDialog implements MouseListener {
         mainBox.add(Box.createVerticalStrut(5));
         
         // Add system information section
-        mainBox.add(createSystemInfoSection(langManager));
+        int[] labelColumnWidth = new int[1];
+        mainBox.add(createSystemInfoSection(langManager, labelColumnWidth));
         
         // Add database information section if connected
-        JPanel dbInfoPanel = createDatabaseInfoSection();
+        JPanel dbInfoPanel = createDatabaseInfoSection(labelColumnWidth[0]);
         if (dbInfoPanel != null) {
-            mainBox.add(dbInfoPanel);
+            addLeftAligned(dbInfoPanel, mainBox);
         }
         
         mainBox.add(Box.createVerticalGlue());
@@ -172,7 +173,7 @@ public class AboutDialog extends JDialog implements MouseListener {
     }
     
     /** Creates the system information section. */
-    private JPanel createSystemInfoSection(LanguageManager langManager) {
+    private JPanel createSystemInfoSection(LanguageManager langManager, int[] labelColumnWidthOut) {
         SpringLayout springLayout = new SpringLayout();
         JPanel systemPanel = new JPanel(springLayout);
         
@@ -201,6 +202,13 @@ public class AboutDialog extends JDialog implements MouseListener {
                 javaVMLabel, javaVMField, perlLabel, perlField, javaLabel, javaField);
         
         makeSpringCompactGrid(systemPanel, 6, 2, 5, 5, 15, 5);
+        
+        // "javaVMLabel" sits in the label column (column 0), which
+        // makeSpringCompactGrid has just sized to fit the widest component
+        // sharing that column (here, the home page URL) - reading its
+        // resolved width back lets other sections (e.g. the database info
+        // panel) line their own value column up with this one
+        labelColumnWidthOut[0] = springLayout.getConstraints(javaVMLabel).getWidth().getValue();
         
         return systemPanel;
     }
@@ -259,7 +267,7 @@ public class AboutDialog extends JDialog implements MouseListener {
     }
     
     /** Creates the database information section if connected. */
-    private JPanel createDatabaseInfoSection() {
+    private JPanel createDatabaseInfoSection(int labelColumnWidth) {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
             return null;
@@ -268,14 +276,13 @@ public class AboutDialog extends JDialog implements MouseListener {
         JPanel dbPanel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(2, 2, 2, 2);
-        constraints.gridwidth = 2;
-        constraints.anchor = GridBagConstraints.SOUTHWEST;
+        constraints.anchor = GridBagConstraints.WEST;
         
         try {
             DatabaseMetaData metaData = Context.getInstance().getConnectionData()
                     .getConnection().getMetaData();
             
-            addDatabaseInfo(dbPanel, constraints, metaData);
+            addDatabaseInfo(dbPanel, constraints, metaData, labelColumnWidth);
         } catch (Throwable t) {
             ExceptionDialog.hideException(t);
         }
@@ -285,26 +292,52 @@ public class AboutDialog extends JDialog implements MouseListener {
     
     /** Adds database information to the panel. */
     private void addDatabaseInfo(JPanel panel, GridBagConstraints constraints, 
-            DatabaseMetaData metaData) throws Exception {
+            DatabaseMetaData metaData, int labelColumnWidth) throws Exception {
         
         LanguageManager langManager = LanguageManager.getInstance();
         
+        JLabel databaseLabel = new JLabel(langManager.getString("label.database") + ": ");
+        padToWidth(databaseLabel, labelColumnWidth);
+        constraints.gridx = 0;
         constraints.gridy++;
-        panel.add(new JLabel(langManager.getString("label.database") + ": "), constraints);
+        panel.add(databaseLabel, constraints);
+        constraints.gridx = 1;
         panel.add(createTextField(metaData.getDatabaseProductName()), constraints);
         
+        constraints.gridx = 0;
         constraints.gridy++;
         panel.add(new JLabel(""), constraints);
+        constraints.gridx = 1;
         String databaseVersion = metaData.getDatabaseProductVersion().replaceAll("\n", "<br>");
         panel.add(new JLabel(String.format("<html>%s</html>", databaseVersion)), constraints);
         
+        JLabel driverLabel = new JLabel(langManager.getString("label.driver") + ": ");
+        padToWidth(driverLabel, labelColumnWidth);
+        constraints.gridx = 0;
         constraints.gridy++;
-        panel.add(new JLabel(langManager.getString("label.driver") + ": "), constraints);
+        panel.add(driverLabel, constraints);
+        constraints.gridx = 1;
         panel.add(createTextField(metaData.getDriverName()), constraints);
         
+        constraints.gridx = 0;
         constraints.gridy++;
         panel.add(new JLabel(""), constraints);
+        constraints.gridx = 1;
         panel.add(createTextField(metaData.getDriverVersion()), constraints);
+    }
+    
+    /**
+     * Widens a label's preferred size to at least the given width, without
+     * ever shrinking it below its own natural width. Used to line up the
+     * database info panel's value column with the system info section's
+     * value column above it, even though the two panels use different
+     * layout managers and are otherwise sized independently.
+     */
+    private void padToWidth(JLabel label, int width) {
+        Dimension natural = label.getPreferredSize();
+        if (width > natural.width) {
+            label.setPreferredSize(new Dimension(width, natural.height));
+        }
     }
     
     /** Creates the button panel with OK button. */
