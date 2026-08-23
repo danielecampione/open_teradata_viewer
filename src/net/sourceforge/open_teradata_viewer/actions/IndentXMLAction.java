@@ -19,6 +19,12 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import org.xml.sax.SAXException;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -64,8 +70,14 @@ public class IndentXMLAction extends CustomAction {
             unformattedXML = xmlBeautifier.validateXML(unformattedXML);
             try {
                 formattedXML = xmlBeautifier.indentXML(unformattedXML);
-            } catch (Throwable t) {
-                ExceptionDialog.notifyException(t);
+            } catch (SAXException | IOException | ParserConfigurationException
+                    | TransformerException ex) {
+                // The content isn't well-formed XML (or is empty): this is an
+                // expected outcome of trying to pretty-print text that isn't
+                // valid XML yet, not an application error, so it's logged
+                // quietly and the editor is left untouched instead of
+                // showing it to the user.
+                ExceptionDialog.hideException(ex);
             }
             textArea.setText(formattedXML);
         } finally {

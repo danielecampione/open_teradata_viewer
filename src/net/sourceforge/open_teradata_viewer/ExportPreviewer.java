@@ -21,9 +21,14 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import org.xml.sax.SAXException;
 
 import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -100,7 +105,16 @@ public class ExportPreviewer {
             }
         } else if (langManager.getString("button.pretty_print_xml").equals(value)) {
             XMLBeautifier xmlBeautifier = new XMLBeautifier(XMLBeautifier.DEFAULT_TAB_SIZE);
-            String formatted = xmlBeautifier.indentXML(text);
+            String formatted = text;
+            try {
+                formatted = xmlBeautifier.indentXML(text);
+            } catch (SAXException | IOException | ParserConfigurationException
+                    | TransformerException ex) {
+                // The content isn't well-formed XML (or is empty): re-open the
+                // preview with the original, untouched content instead of
+                // letting the error surface to the user.
+                ExceptionDialog.hideException(ex);
+            }
             preview(formatted, bytes);
         }
     }

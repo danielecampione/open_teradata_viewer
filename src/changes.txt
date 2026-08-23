@@ -1,3 +1,22 @@
+0.35a (24/08/2026)
+    - Added Finnish language support to the UI internationalization.
+    - Fixed a bug where indenting invalid or empty XML content surfaced an error
+      to the user instead of leaving the content untouched.
+    - Removed duplicate keys from all messages*.properties files (kept the value
+      already in effect at runtime for each) and reorganized the affected
+      entries back into their proper sections for readability (kept the value
+      already in effect at runtime for each).
+    - Removed 304 unused i18n keys (never referenced in source) from all
+      messages*.properties files.
+    - Added 8 previously-missing i18n keys used by ConnectAction's "empty
+      connection name" flow, for all supported languages.
+    - Completed the stranded i18n change in ExceptionDialog so the "Tip" dialog
+      title is now translatable via dialog.tip.title.
+    - Upgraded rsyntaxtextarea library 3.1.6 -> 3.2.0
+    - Upgraded autocomplete library 3.1.5 -> 3.2.0
+    - Upgraded rstaui library 3.1.4 -> 3.2.0
+    - Upgraded spellchecker library 3.1.4 -> 3.2.0
+
 0.34c (20/08/2026)
     - Added Norwegian (Bokmål) language support to the UI internationalization.
       Used the Norwegian locale code "no" instead of the ISO-639-1-correct "nb":

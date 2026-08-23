@@ -3,9 +3,7 @@
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
- * it under             if (msg.length() > 0) {
-            Dialog.show(LanguageManager.getInstance().getString("dialog.tip.title"), 
-                    msg, Dialog.INFORMATION_MESSAGE, Dialog.DEFAULT_OPTION); terms of the GNU General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -169,8 +167,8 @@ public final class ExceptionDialog {
                     + " has a memory limit of 512 MB.\n");
         }
         if (msg.length() > 0) {
-            Dialog.show("Tip", msg, Dialog.INFORMATION_MESSAGE,
-                    Dialog.DEFAULT_OPTION);
+            Dialog.show(LanguageManager.getInstance().getString("dialog.tip.title"),
+                    msg, Dialog.INFORMATION_MESSAGE, Dialog.DEFAULT_OPTION);
         }
     }
 

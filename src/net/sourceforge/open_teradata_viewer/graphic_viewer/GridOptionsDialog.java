@@ -3,10 +3,7 @@
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
-        resizeAfterRadio.setText(langManager.getString("grid.afterwards"));
-        resizeJumpRadio.setBounds(new Rectangle(354, 60, 86, 24));
-        resizeJumpRadio.setText(langManager.getString("grid.jump"));
-        resizeJumpRadio.setBounds(new Rectangle(354, 60, 86, 24)); under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
