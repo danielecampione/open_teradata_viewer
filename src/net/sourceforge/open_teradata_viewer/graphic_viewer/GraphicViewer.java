@@ -376,7 +376,7 @@ public class GraphicViewer extends JFrame
     }
 
     void initActions() {
-        FileNewAction = new AppAction("New", this) {
+        FileNewAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.new"), this) {
 
             private static final long serialVersionUID = 1414804103634873529L;
 
@@ -388,7 +388,7 @@ public class GraphicViewer extends JFrame
                 return true; // doesn't depend on a view
             }
         };
-        FileOpenAction = new AppAction("Open...", this) {
+        FileOpenAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.open"), this) {
             private static final long serialVersionUID = 1414804103634873529L;
 
             public void actionPerformed(ActionEvent e) {
@@ -400,14 +400,14 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        FileSaveAsAction = new AppAction("Save As...", this) {
+        FileSaveAsAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.save_as"), this) {
             private static final long serialVersionUID = -8992470956687528154L;
 
             public void actionPerformed(ActionEvent e) {
                 saveAsProcess();
             }
         };
-        InsertStuffAction = new AppAction("Lots of stuff", this) {
+        InsertStuffAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.stuff"), this) {
 
             private static final long serialVersionUID = 7824327533127229483L;
 
@@ -416,7 +416,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertRectangleAction = new AppAction("Rectangle", this) {
+        InsertRectangleAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.rectangle"), this) {
 
             private static final long serialVersionUID = -7734244329928963779L;
 
@@ -425,7 +425,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertRoundedRectangleAction = new AppAction("Rounded Rectangle", this) {
+        InsertRoundedRectangleAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.rounded_rectangle"), this) {
 
             private static final long serialVersionUID = -5750114374594012980L;
 
@@ -434,7 +434,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertEllipseAction = new AppAction("Ellipse", this) {
+        InsertEllipseAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.ellipse"), this) {
 
             private static final long serialVersionUID = 2350403706812354245L;
 
@@ -443,7 +443,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertMultiPortNodeAction = new AppAction("MultiPort Node", this) {
+        InsertMultiPortNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.multiport_node"), this) {
 
             private static final long serialVersionUID = 5138435614630320870L;
 
@@ -452,7 +452,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertSimpleNodeAction = new AppAction("Simple Node", this) {
+        InsertSimpleNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.simple_node"), this) {
 
             private static final long serialVersionUID = 7737685033924499665L;
 
@@ -461,7 +461,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertIconicNodeAction = new AppAction("Iconic Node", this) {
+        InsertIconicNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.iconic_node"), this) {
 
             private static final long serialVersionUID = 294111230286315144L;
 
@@ -480,7 +480,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertBasicNodeAction = new AppAction("Basic Node", this) {
+        InsertBasicNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.basic_node"), this) {
 
             private static final long serialVersionUID = -399074925553917646L;
 
@@ -509,7 +509,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertRectBasicNodeAction = new AppAction("Rectangular Basic Node",
+        InsertRectBasicNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.rect_basic_node"),
                 this) {
 
             private static final long serialVersionUID = 8209521760670971679L;
@@ -529,7 +529,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertMultiSpotNodeAction = new AppAction("MultiSpot Node", this) {
+        InsertMultiSpotNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.multispot_node"), this) {
 
             private static final long serialVersionUID = -8271066125492537578L;
 
@@ -538,7 +538,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertGeneralNodeAction = new AppAction("General Node", this) {
+        InsertGeneralNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.general_node"), this) {
 
             private static final long serialVersionUID = 8549766769239283317L;
 
@@ -547,7 +547,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        AddLeftPortAction = new AppAction("Add Left Port", this) {
+        AddLeftPortAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.add_left_port"), this) {
 
             private static final long serialVersionUID = -3870235105758306841L;
 
@@ -556,7 +556,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        AddRightPortAction = new AppAction("Add Right Port", this) {
+        AddRightPortAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.add_right_port"), this) {
 
             private static final long serialVersionUID = 950608518073769584L;
 
@@ -565,7 +565,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertTextNodeAction = new AppAction("Text Node", this) {
+        InsertTextNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.text_node"), this) {
 
             private static final long serialVersionUID = 6784464396775214436L;
 
@@ -574,7 +574,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertFixedSizeTextNodeAction = new AppAction("Fixed Size Text Node",
+        InsertFixedSizeTextNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.fixed_size_text_node"),
                 this) {
 
             private static final long serialVersionUID = 7645476463263072508L;
@@ -584,7 +584,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertRoundTextNodeAction = new AppAction("Rounded Text Node", this) {
+        InsertRoundTextNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.rounded_text_node"), this) {
 
             private static final long serialVersionUID = 2864794450759408050L;
 
@@ -593,7 +593,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertMultiTextNodeAction = new AppAction("MultiText Node", this) {
+        InsertMultiTextNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.multitext_node"), this) {
 
             private static final long serialVersionUID = 8552018778759542590L;
 
@@ -602,7 +602,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertListAreaAction = new AppAction("List Area", this) {
+        InsertListAreaAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.list_area"), this) {
 
             private static final long serialVersionUID = -9063319089227319635L;
 
@@ -611,7 +611,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertRecordNodeAction = new AppAction("Record Nodes", this) {
+        InsertRecordNodeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.record_nodes"), this) {
 
             private static final long serialVersionUID = 4697530519715949009L;
 
@@ -620,7 +620,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertStrokeAction = new AppAction("Stroke", this) {
+        InsertStrokeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.stroke"), this) {
 
             private static final long serialVersionUID = -7097043041168044421L;
 
@@ -629,7 +629,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertPolygonAction = new AppAction("Polygon", this) {
+        InsertPolygonAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.polygon"), this) {
 
             private static final long serialVersionUID = 7217907977680263758L;
 
@@ -638,7 +638,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertDiamondAction = new AppAction("Diamond", this) {
+        InsertDiamondAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.diamond"), this) {
 
             private static final long serialVersionUID = 8529623323726339626L;
 
@@ -647,7 +647,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertTextAction = new AppAction("Text", this) {
+        InsertTextAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.text"), this) {
 
             private static final long serialVersionUID = -7992724108770079232L;
 
@@ -656,7 +656,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        Insert3DRectAction = new AppAction("3D Rectangle", this) {
+        Insert3DRectAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.3d_rectangle"), this) {
 
             private static final long serialVersionUID = -883620064977884699L;
 
@@ -665,7 +665,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertCommentAction = new AppAction("Comment", this) {
+        InsertCommentAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.comment"), this) {
 
             private static final long serialVersionUID = -122196234878236573L;
 
@@ -674,7 +674,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        Insert10000Action = new AppAction("10000 Objects", this) {
+        Insert10000Action = new AppAction(LanguageManager.getInstance().getString("graphic.action.10000_objects"), this) {
 
             private static final long serialVersionUID = -1210129709740108709L;
 
@@ -683,7 +683,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertDrawingStrokeAction = new AppAction("Draw Stroke", this) {
+        InsertDrawingStrokeAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.draw_stroke"), this) {
 
             private static final long serialVersionUID = -1797867180828907051L;
 
@@ -692,7 +692,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InsertGraphOfGraphsAction = new AppAction("Graph of Graphs", this) {
+        InsertGraphOfGraphsAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.graph_of_graphs"), this) {
 
             private static final long serialVersionUID = -39748531827914446L;
 
@@ -701,7 +701,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        CutAction = new AppAction("Cut", this) {
+        CutAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.cut"), this) {
 
             private static final long serialVersionUID = 8320792511130210987L;
 
@@ -714,7 +714,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        CopyAction = new AppAction("Copy", this) {
+        CopyAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.copy"), this) {
 
             private static final long serialVersionUID = -1391954706276049234L;
 
@@ -727,7 +727,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        PasteAction = new AppAction("Paste", this) {
+        PasteAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.paste"), this) {
 
             private static final long serialVersionUID = 7726438029238472529L;
 
@@ -736,7 +736,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        SelectAllAction = new AppAction("Select All", this) {
+        SelectAllAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.select_all"), this) {
 
             private static final long serialVersionUID = -94753359164386311L;
 
@@ -745,7 +745,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        MoveToFrontAction = new AppAction("Move to Front", this) {
+        MoveToFrontAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.move_to_front"), this) {
 
             private static final long serialVersionUID = 867310512731307069L;
 
@@ -758,7 +758,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        MoveToBackAction = new AppAction("Move to Back", this) {
+        MoveToBackAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.move_to_back"), this) {
 
             private static final long serialVersionUID = -5222661550993554992L;
 
@@ -771,7 +771,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        ChangeLayersAction = new AppAction("Change Layers", this) {
+        ChangeLayersAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.change_layers"), this) {
 
             private static final long serialVersionUID = -4760944129508589979L;
 
@@ -780,7 +780,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        GroupAction = new AppAction("Group", this) {
+        GroupAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.group"), this) {
 
             private static final long serialVersionUID = 4200991881326798174L;
 
@@ -794,7 +794,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        SubgraphAction = new AppAction("Make SubGraph", this) {
+        SubgraphAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.make_subgraph"), this) {
 
             private static final long serialVersionUID = -4010986694049376449L;
 
@@ -808,7 +808,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        UngroupAction = new AppAction("Ungroup", this) {
+        UngroupAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.ungroup"), this) {
 
             private static final long serialVersionUID = -9101271013112289670L;
 
@@ -823,7 +823,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        InspectAction = new AppAction("Inspect", this) {
+        InspectAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.inspect"), this) {
 
             private static final long serialVersionUID = 4628419768518358843L;
 
@@ -832,7 +832,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        PropertiesAction = new AppAction("Properties", this) {
+        PropertiesAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.properties"), this) {
 
             private static final long serialVersionUID = 5060694950361021930L;
 
@@ -845,7 +845,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        ZoomInAction = new AppAction("Zoom In", this) {
+        ZoomInAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.zoom_in"), this) {
 
             private static final long serialVersionUID = -5529252815471243299L;
 
@@ -858,7 +858,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        ZoomOutAction = new AppAction("Zoom Out", this) {
+        ZoomOutAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.zoom_out"), this) {
 
             private static final long serialVersionUID = 4100420909989446212L;
 
@@ -872,7 +872,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        ZoomNormalAction = new AppAction("Zoom Normal Size", this) {
+        ZoomNormalAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.zoom_normal"), this) {
 
             private static final long serialVersionUID = 8701123078885648918L;
 
@@ -881,7 +881,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        ZoomToFitAction = new AppAction("Zoom To Fit", this) {
+        ZoomToFitAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.zoom_to_fit"), this) {
 
             private static final long serialVersionUID = 3137572118754680732L;
 
@@ -890,7 +890,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        PrintPreviewAction = new AppAction("Print Preview", this) {
+        PrintPreviewAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.print_preview"), this) {
 
             private static final long serialVersionUID = 2896981114073240329L;
 
@@ -909,7 +909,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        PrintAction = new AppAction("Print", this) {
+        PrintAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.print"), this) {
 
             private static final long serialVersionUID = 4415255746348666691L;
 
@@ -928,7 +928,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        GridAction = new AppAction("Grid", this) {
+        GridAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.grid"), this) {
 
             private static final long serialVersionUID = -5503002814477578749L;
 
@@ -937,7 +937,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        OverviewAction = new AppAction("Overview", this) {
+        OverviewAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.overview"), this) {
 
             private static final long serialVersionUID = 6722294542396754343L;
 
@@ -946,7 +946,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        LeftAction = new AppAction("Align Left Sides", this) {
+        LeftAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_left"), this) {
 
             private static final long serialVersionUID = 3212592007640043891L;
 
@@ -960,7 +960,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        HorizontalAction = new AppAction("Align Horizontal Centers", this) {
+        HorizontalAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_horizontal_centers"), this) {
 
             private static final long serialVersionUID = -1369902587875184042L;
 
@@ -974,7 +974,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        RightAction = new AppAction("Align Right Sides", this) {
+        RightAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_right"), this) {
 
             private static final long serialVersionUID = 382509548069206211L;
 
@@ -988,7 +988,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        TopAction = new AppAction("Align Tops", this) {
+        TopAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_top"), this) {
 
             private static final long serialVersionUID = 7728435179793277793L;
 
@@ -1002,7 +1002,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        BottomAction = new AppAction("Align Bottoms", this) {
+        BottomAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_bottom"), this) {
 
             private static final long serialVersionUID = 5567282088716420732L;
 
@@ -1016,7 +1016,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        VerticalAction = new AppAction("Align Vertical Centers", this) {
+        VerticalAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.align_vertical_centers"), this) {
 
             private static final long serialVersionUID = -7623195699157226758L;
 
@@ -1030,7 +1030,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        SameWidthAction = new AppAction("Make Same Size Widths", this) {
+        SameWidthAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.same_width"), this) {
 
             private static final long serialVersionUID = -3456044941221751098L;
 
@@ -1044,7 +1044,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        SameHeightAction = new AppAction("Make Same Size Heights", this) {
+        SameHeightAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.same_height"), this) {
 
             private static final long serialVersionUID = -3813018331047630619L;
 
@@ -1058,7 +1058,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        SameBothAction = new AppAction("Make Same Size Both", this) {
+        SameBothAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.same_both"), this) {
 
             private static final long serialVersionUID = -5412308482846372221L;
 
@@ -1072,7 +1072,7 @@ public class GraphicViewer extends JFrame
             }
 
         };
-        LayeredDigraphAutoLayoutAction = new AppAction("AutoLayout", this) {
+        LayeredDigraphAutoLayoutAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.auto_layout"), this) {
 
             private static final long serialVersionUID = 8400897852369657505L;
 
@@ -1082,7 +1082,7 @@ public class GraphicViewer extends JFrame
 
         };
         UndoMenuItem = null;
-        UndoAction = new AppAction("Undo", this) {
+        UndoAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.undo"), this) {
 
             private static final long serialVersionUID = 6203990439611925515L;
 
@@ -1109,7 +1109,7 @@ public class GraphicViewer extends JFrame
 
         };
         RedoMenuItem = null;
-        RedoAction = new AppAction("Redo", this) {
+        RedoAction = new AppAction(LanguageManager.getInstance().getString("graphic.action.redo"), this) {
 
             private static final long serialVersionUID = -2944349594857618168L;
 
@@ -3688,6 +3688,50 @@ public class GraphicViewer extends JFrame
         }
         if (helpmenu != null) {
             helpmenu.setText(LanguageManager.getInstance().getString("menu.help"));
+        }
+        
+        // Update toolbar/menu action names (New, Open, Cut, Copy, Zoom, Align, etc.)
+        AppAction[] actionsToRefresh = {
+            FileNewAction, FileOpenAction, FileSaveAsAction, InsertStuffAction,
+            InsertRectangleAction, InsertRoundedRectangleAction, InsertEllipseAction, InsertMultiPortNodeAction,
+            InsertSimpleNodeAction, InsertIconicNodeAction, InsertBasicNodeAction, InsertRectBasicNodeAction,
+            InsertMultiSpotNodeAction, InsertGeneralNodeAction, AddLeftPortAction, AddRightPortAction,
+            InsertTextNodeAction, InsertFixedSizeTextNodeAction, InsertRoundTextNodeAction, InsertMultiTextNodeAction,
+            InsertListAreaAction, InsertRecordNodeAction, InsertStrokeAction, InsertPolygonAction,
+            InsertDiamondAction, InsertTextAction, Insert3DRectAction, InsertCommentAction,
+            Insert10000Action, InsertDrawingStrokeAction, InsertGraphOfGraphsAction, CutAction,
+            CopyAction, PasteAction, SelectAllAction, MoveToFrontAction,
+            MoveToBackAction, ChangeLayersAction, GroupAction, SubgraphAction,
+            UngroupAction, InspectAction, PropertiesAction, ZoomInAction,
+            ZoomOutAction, ZoomNormalAction, ZoomToFitAction, PrintPreviewAction,
+            PrintAction, GridAction, OverviewAction, LeftAction,
+            HorizontalAction, RightAction, TopAction, BottomAction,
+            VerticalAction, SameWidthAction, SameHeightAction, SameBothAction,
+            LayeredDigraphAutoLayoutAction, UndoAction, RedoAction
+        };
+        String[] actionKeysToRefresh = {
+            "graphic.action.new", "graphic.action.open", "graphic.action.save_as", "graphic.action.stuff",
+            "graphic.action.rectangle", "graphic.action.rounded_rectangle", "graphic.action.ellipse", "graphic.action.multiport_node",
+            "graphic.action.simple_node", "graphic.action.iconic_node", "graphic.action.basic_node", "graphic.action.rect_basic_node",
+            "graphic.action.multispot_node", "graphic.action.general_node", "graphic.action.add_left_port", "graphic.action.add_right_port",
+            "graphic.action.text_node", "graphic.action.fixed_size_text_node", "graphic.action.rounded_text_node", "graphic.action.multitext_node",
+            "graphic.action.list_area", "graphic.action.record_nodes", "graphic.action.stroke", "graphic.action.polygon",
+            "graphic.action.diamond", "graphic.action.text", "graphic.action.3d_rectangle", "graphic.action.comment",
+            "graphic.action.10000_objects", "graphic.action.draw_stroke", "graphic.action.graph_of_graphs", "graphic.action.cut",
+            "graphic.action.copy", "graphic.action.paste", "graphic.action.select_all", "graphic.action.move_to_front",
+            "graphic.action.move_to_back", "graphic.action.change_layers", "graphic.action.group", "graphic.action.make_subgraph",
+            "graphic.action.ungroup", "graphic.action.inspect", "graphic.action.properties", "graphic.action.zoom_in",
+            "graphic.action.zoom_out", "graphic.action.zoom_normal", "graphic.action.zoom_to_fit", "graphic.action.print_preview",
+            "graphic.action.print", "graphic.action.grid", "graphic.action.overview", "graphic.action.align_left",
+            "graphic.action.align_horizontal_centers", "graphic.action.align_right", "graphic.action.align_top", "graphic.action.align_bottom",
+            "graphic.action.align_vertical_centers", "graphic.action.same_width", "graphic.action.same_height", "graphic.action.same_both",
+            "graphic.action.auto_layout", "graphic.action.undo", "graphic.action.redo"
+        };
+        for (int i = 0; i < actionsToRefresh.length; i++) {
+            if (actionsToRefresh[i] != null) {
+                actionsToRefresh[i].putValue(javax.swing.Action.NAME,
+                        LanguageManager.getInstance().getString(actionKeysToRefresh[i]));
+            }
         }
         
         // Update border title

@@ -65,9 +65,18 @@ import net.sourceforge.open_teradata_viewer.util.array.StringList;
  * @author D. Campione
  *
  */
-public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListener, LanguageManager.LanguageChangeListener {
+public class ApplicationMenuBar extends JMenuBar
+        implements PropertyChangeListener, LanguageManager.LanguageChangeListener {
 
     private static final long serialVersionUID = -3435078396857591267L;
+
+    /**
+     * Client property key used to tag each <code>JMenu</code> with the i18n
+     * resource key it was built from, so its text can be refreshed on a language
+     * change by looking the key up directly instead of trying to recognize the menu
+     * from its currently displayed (and possibly already translated) text.
+     */
+    private static final String I18N_KEY_PROPERTY = "otvI18nKey";
 
     protected JCheckBoxMenuItem cbViewLineHighlight = new JCheckBoxMenuItem(Actions.VIEW_LINE_HIGHLIGHT);
     protected JCheckBoxMenuItem cbFadeCurrentLineHighlight = new JCheckBoxMenuItem(Actions.FADE_CURRENT_LINE_HIGHLIGHT);
@@ -93,11 +102,11 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
 
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
         CollapsibleSectionPanel csp = applicationFrame.getCollapsibleSectionPanel();
-        
+
         // Register for language change notifications
         LanguageManager.getInstance().addLanguageChangeListener(this);
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.connection"));
+        menu = createMenu("menu.connection");
         add(menu);
         menu.add(Actions.CONNECT);
         menu.add(Actions.DISCONNECT);
@@ -105,7 +114,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(Actions.COMMIT);
         menu.add(Actions.ROLLBACK);
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.file"));
+        menu = createMenu("menu.file");
         add(menu);
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
@@ -117,7 +126,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.addSeparator();
         menu.add(Actions.FAVORITES);
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.edit"));
+        menu = createMenu("menu.edit");
         add(menu);
         menu.add(Actions.CUT);
         menu.add(Actions.COPY);
@@ -130,7 +139,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.addSeparator();
         menu.add(Actions.DATE_TIME);
         menu.addSeparator();
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.folding"));
+        subMenu = createMenu("menu.folding");
         menu.add(subMenu);
         subMenu.add(Actions.TOGGLE_CURRENT_FOLD);
         subMenu.add(Actions.COLLAPSE_ALL_COMMENT_FOLDS);
@@ -138,11 +147,11 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         subMenu.add(Actions.EXPAND_ALL_FOLDS);
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.xml_tools"));
+        subMenu = createMenu("menu.xml_tools");
         menu.add(subMenu);
         subMenu.add(Actions.INDENT_XML);
         menu.addSeparator();
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.view"));
+        subMenu = createMenu("menu.view");
         menu.add(subMenu);
         subMenu.add(cbViewLineHighlight);
         subMenu.add(cbFadeCurrentLineHighlight);
@@ -157,7 +166,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         subMenu.add(cbPaintMatchedBracketPair);
         subMenu.add(cbTabsEmulatedBySpaces);
         menu.addSeparator();
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.text"));
+        subMenu = createMenu("menu.text");
         menu.add(subMenu);
         subMenu.add(Actions.COMMENT);
         subMenu.add(Actions.UNCOMMENT);
@@ -165,7 +174,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         subMenu.add(Actions.INVERT_SELECTION_CASE);
         subMenu.add(Actions.UPPER_SELECTION_CASE);
         subMenu.add(Actions.LOWER_SELECTION_CASE);
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.indent"));
+        subMenu = createMenu("menu.indent");
         menu.add(subMenu);
         subMenu.add(Actions.INCREASE_INDENT);
         subMenu.add(Actions.DECREASE_INDENT);
@@ -181,7 +190,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
 
         refreshEditOptions();
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.search"));
+        menu = createMenu("menu.search");
         add(menu);
         menu.add(Actions.SHOW_FIND_DIALOG);
         menu.add(Actions.SHOW_REPLACE_DIALOG);
@@ -198,7 +207,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.addSeparator();
         menu.add(Actions.GO_TO_LINE);
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.schema_browser"));
+        menu = createMenu("menu.schema_browser");
         add(menu);
         menu.add(Actions.SCHEMA_BROWSER);
         menu.add(Actions.FETCH_LIMIT);
@@ -211,19 +220,19 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(Actions.EDIT);
         menu.add(Actions.DUPLICATE);
         menu.addSeparator();
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.lob"));
+        subMenu = createMenu("menu.lob");
         menu.add(subMenu);
         subMenu.add(Actions.LOB_EXPORT);
         subMenu.add(Actions.LOB_IMPORT);
         subMenu.add(Actions.LOB_COPY);
         subMenu.add(Actions.LOB_PASTE);
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.export"));
+        subMenu = createMenu("menu.export");
         menu.add(subMenu);
         subMenu.add(Actions.EXPORT_EXCEL);
         subMenu.add(Actions.EXPORT_PDF);
         subMenu.add(Actions.EXPORT_FLAT_FILE);
         subMenu.add(Actions.EXPORT_INSERTS);
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.show"));
+        subMenu = createMenu("menu.show");
         menu.add(subMenu);
         subMenu.add(Actions.SHOW_TABLE);
         subMenu.add(Actions.SHOW_VIEW);
@@ -236,10 +245,10 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(Actions.RUN);
         menu.add(Actions.RUN_SCRIPT);
 
-        JScrollMenu menu2 = new JScrollMenu(ApplicationFrame.LAF_MENU_LABEL);
+        JScrollMenu menu2 = createScrollMenu("menu.lookandfeel");
         add(menu2);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
-        subMenu = new JMenu(LanguageManager.getInstance().getString("menu.editor_theme"));
+        subMenu = createMenu("menu.editor_theme");
         addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu, true);
         addThemeItem("Default (Alternative Version)", "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme, subMenu);
@@ -287,9 +296,9 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
             }
         }
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.view_main"));
+        menu = createMenu("menu.view_main");
         add(menu);
-        JScrollMenu subMenu2 = new JScrollMenu(LanguageManager.getInstance().getString("menu.view.highlighting"));
+        JScrollMenu subMenu2 = createScrollMenu("menu.view.highlighting");
         ButtonGroup bg = new ButtonGroup();
         addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu2);
         addSyntaxItem("ActionScript", SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT, bg, subMenu2);
@@ -331,6 +340,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu2);
         addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu2);
         addSyntaxItem("Properties", SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE, bg, subMenu2);
+        addSyntaxItem("Proto", SyntaxConstants.SYNTAX_STYLE_PROTO, bg, subMenu2);
         addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu2);
         addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu2);
         addSyntaxItem("SAS", SyntaxConstants.SYNTAX_STYLE_SAS, bg, subMenu2);
@@ -364,7 +374,7 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
         menu.add(fullScreenMenuItem);
 
         // Language menu
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.language"));
+        menu = createMenu("menu.language");
         add(menu);
         LanguageManager langManager = LanguageManager.getInstance();
         ButtonGroup languageGroup = new ButtonGroup();
@@ -375,15 +385,13 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
             langItem.addActionListener(e -> {
                 // Show confirmation dialog for language change
                 String title = langManager.getString("dialog.language_change");
-                String message = langManager.getString("message.language_change_restart");
-                
-                JOptionPane.showMessageDialog(applicationFrame, message, title, JOptionPane.INFORMATION_MESSAGE);
-                int result = 0;
-                
+                String message = langManager.getString("message.language_change");
+
+                int result = JOptionPane.showConfirmDialog(applicationFrame, message, title,
+                        JOptionPane.INFORMATION_MESSAGE);
+
                 if (result == 0) { // User clicked Yes
                     langManager.setLanguage(language.getCode());
-                    // Close the application
-                    applicationFrame.handleWindowClose();
                 } else {
                     // User clicked No, revert the selection
                     langItem.setSelected(false);
@@ -401,13 +409,13 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
             menu.add(langItem);
         }
 
-        menu = new JMenu(LanguageManager.getInstance().getString("menu.help"));
+        menu = createMenu("menu.help");
         add(menu);
         menu.add(Actions.HELP);
         menu.addSeparator();
         menu.add(Actions.ABOUT);
 
-        macrosMenu = new JScrollMenu(LanguageManager.getInstance().getString("menu.macros"));
+        macrosMenu = createScrollMenu("menu.macros");
         add(macrosMenu);
         macrosMenu.add(Actions.NEW_MACRO);
         macrosMenu.add(Actions.EDIT_MACRO);
@@ -484,8 +492,8 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
     }
 
     /**
-     * Refreshes the elements in the Macros menu to be in sync with the macros
-     * the user has defined.
+     * Refreshes the elements in the Macros menu to be in sync with the macros the
+     * user has defined.
      */
     public void refreshMacrosMenu() {
         JScrollPopupMenu menu = (JScrollPopupMenu) macrosMenu.getSubElements()[0];
@@ -529,27 +537,48 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
     }
 
     /**
+     * Creates a top-level or nested <code>JMenu</code> whose text comes from the
+     * given i18n resource key, and tags it with that key (see
+     * {@link #I18N_KEY_PROPERTY}) so it can be refreshed later on a language
+     * change.
+     */
+    private JMenu createMenu(String i18nKey) {
+        JMenu newMenu = new JMenu(LanguageManager.getInstance().getString(i18nKey));
+        newMenu.putClientProperty(I18N_KEY_PROPERTY, i18nKey);
+        return newMenu;
+    }
+
+    /**
+     * Same as {@link #createMenu(String)}, but for a {@link JScrollMenu}.
+     */
+    private JScrollMenu createScrollMenu(String i18nKey) {
+        JScrollMenu newMenu = new JScrollMenu(LanguageManager.getInstance().getString(i18nKey));
+        newMenu.putClientProperty(I18N_KEY_PROPERTY, i18nKey);
+        return newMenu;
+    }
+
+    /**
      * Called when the language changes. Automatically refreshes all GUI components.
      */
     @Override
     public void onLanguageChanged(java.util.Locale newLocale, java.util.ResourceBundle newBundle) {
         refreshAllComponents();
     }
-    
+
     /**
      * Refreshes all GUI components to reflect the current language.
      */
     public void refreshAllComponents() {
         LanguageManager langManager = LanguageManager.getInstance();
-        
+
         // Update menu texts
         updateMenuTexts(langManager);
-        
+
         // Repaint the menu bar
         revalidate();
         repaint();
     }
-    
+
     /**
      * Updates all menu texts with localized strings.
      */
@@ -562,47 +591,25 @@ public class ApplicationMenuBar extends JMenuBar implements PropertyChangeListen
             }
         }
     }
-    
+
     /**
      * Recursively updates menu and menu item texts.
+     *
+     * The text is looked up through the i18n key stored on each menu via
+     * {@link #I18N_KEY_PROPERTY} (set by {@link #createMenu(String)} /
+     * {@link #createScrollMenu(String)} at construction time), rather than by
+     * trying to recognize the menu from its currently displayed text: that text is
+     * only in English before the very first language switch, so matching against
+     * hardcoded English literals silently stops working on every switch after the
+     * first one (and never covered submenus to begin with, since only the 10
+     * top-level menus had a matching case).
      */
     private void updateMenuText(JMenu menu, LanguageManager langManager) {
-        String menuText = menu.getText();
-        
-        // Update main menu texts
-        switch (menuText) {
-            case "Connection":
-                menu.setText(langManager.getString("menu.connection"));
-                break;
-            case "File":
-                menu.setText(langManager.getString("menu.file"));
-                break;
-            case "Edit":
-                menu.setText(langManager.getString("menu.edit"));
-                break;
-            case "Search":
-                menu.setText(langManager.getString("menu.search"));
-                break;
-            case "Schema Browser":
-                menu.setText(langManager.getString("menu.schema_browser"));
-                break;
-            case "Look & Feel":
-                menu.setText(langManager.getString("menu.lookandfeel"));
-                break;
-            case "View":
-                menu.setText(langManager.getString("menu.view"));
-                break;
-            case "Language":
-                menu.setText(langManager.getString("menu.language"));
-                break;
-            case "Macros":
-                menu.setText(langManager.getString("menu.macros"));
-                break;
-            case "?":
-                menu.setText(langManager.getString("menu.help"));
-                break;
+        Object i18nKey = menu.getClientProperty(I18N_KEY_PROPERTY);
+        if (i18nKey instanceof String) {
+            menu.setText(langManager.getString((String) i18nKey));
         }
-        
+
         // Update menu items recursively
         for (int i = 0; i < menu.getItemCount(); i++) {
             JMenuItem item = menu.getItem(i);

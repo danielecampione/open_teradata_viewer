@@ -6,6 +6,38 @@
     </HEAD>
     <BODY bgcolor="#FFFFFF">
 <PRE>
+0.35b (28/08/2026)
+    - Added Protocol Buffers (.proto) syntax highlighting.
+    - Added translations for the 63 Graphic Viewer toolbar/menu actions (New,
+      Open, Cut, Zoom, Align, etc.), previously hardcoded in English regardless
+      of the selected language; their names now also refresh on a language
+      switch.
+    - Added the Connect, Disconnect, Format SQL, Insert, Delete, Edit and
+      Duplicate buttons that were already implemented but missing from the
+      toolbar.
+    - Updated the 8 built-in editor themes to set the fold indicator's "armed"
+      (hover) color, matching the corresponding rsyntaxtextarea 3.3.0 theme
+      update.
+    - Updated 5 of the 8 built-in editor themes to set the current line's
+      line-number color, matching the corresponding rsyntaxtextarea 3.2.0 theme
+      update.
+    - Improved menu bar language refresh: language changes now apply instantly 
+      without requiring an application restart.
+    - Fixed menu bar language refresh: menus were matched against hardcoded
+      English text, so they silently stopped updating after the first language
+      switch and submenus were never refreshed at all; menus are now tagged with
+      their i18n key at creation time and refreshed directly from it.
+    - Fixed HiDPI font/size scaling being applied on top of the JRE's own
+      per-monitor scaling on modern displays, doubling the effective scale
+      factor.
+    - Upgraded rsyntaxtextarea library 3.2.0 -> 3.3.0
+    - Upgraded autocomplete library 3.2.0 -> 3.3.0
+    - Upgraded languagesupport library 3.1.4 -> 3.3.0
+    - Upgraded rstaui library 3.2.0 -> 3.3.0
+    - Upgraded spellchecker library 3.2.0 -> 3.3.0
+    - Upgraded Mozilla Rhino library 1.7.7.1 -> 1.7.15.1 (with attached sources)
+      and removed unreferenced legacy Rhino JAR.
+
 0.35a (24/08/2026)
     - Added Finnish language support to the UI internationalization.
     - Fixed a bug where indenting invalid or empty XML content surfaced an error

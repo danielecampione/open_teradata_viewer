@@ -21,7 +21,6 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.File;
-import java.util.Set;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -55,11 +54,16 @@ public class Main {
         // Start of the anti-blur trick for hi-dpi
         // Declare the app as DPI-aware to avoid the OS's blurry scaling
         System.setProperty("sun.java2d.dpiaware", "true");
+        // Let the JRE's own graphics pipeline apply per-monitor HiDPI
+        // scaling where supported, instead of leaving everything at 1x and
+        // relying only on our own manual font/size scaling
+        // (SwingUtil.DPI_SCALE) to compensate
+        System.setProperty("sun.java2d.uiScale.enabled", "true");
         // Force text antialiasing to have sharp and defined fonts
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
         // End of the anti-blur makeup
-    	
+
         // Check if the used JDK is supported
         if (!Utilities.isJDK18OrAbove()) {
             System.err.println("The installed JDK version is NOT supported.\n" + "The program will be terminated.");
@@ -86,91 +90,90 @@ public class Main {
         net.sourceforge.open_teradata_viewer.i18n.LanguageManager.getInstance();
 
         SwingUtilities.invokeLater(() -> {
-                String lafName = UIManager.getSystemLookAndFeelClassName();
+            String lafName = UIManager.getSystemLookAndFeelClassName();
 
+            try {
+                String startupLookAndFeelProperty = "startup_lookandfeel_class";
+                String strStartupLookAndFeelClassName = Config.getSetting(startupLookAndFeelProperty);
+                if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
+                    Config.saveSetting(startupLookAndFeelProperty, lafName);
+                } else {
+                    lafName = strStartupLookAndFeelClassName;
+                }
+            } catch (Exception e) {
+                ExceptionDialog.hideException(e);
+            }
+
+            String rootDir = Utilities.getRootDir();
+            ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(rootDir + File.separator);
+
+            try {
+                installACompatibleLaf(lafManager, lafName);
+            } catch (ClassNotFoundException cnfe) {
+                ExceptionDialog.hideException(cnfe);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+            } catch (UnsupportedLookAndFeelException ulafe) {
+                ExceptionDialog.hideException(ulafe);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+            } catch (IllegalAccessException iae) {
+                ExceptionDialog.hideException(iae);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+            } catch (InstantiationException ie) {
+                ExceptionDialog.hideException(ie);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+            } catch (IllegalStateException ise) {
+                ExceptionDialog.hideException(ise);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+            } catch (NoClassDefFoundError ncdfe) { // For example, the JGoodies Looks library is unavailable
+                ExceptionDialog.hideException(ncdfe);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
+                String message = "The Look And Feel can't be installed.\n" + "Please restart the application.";
+                String title = "Look And Feel";
+                UISupport.getDialogs().showInfoMessage(message, title);
+                System.exit(-3);
+            } catch (RuntimeException re) {
+                throw re;
+            } catch (Throwable t) {
+                ExceptionDialog.hideException(t);
+            }
+            UIManager.put("TextPane.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
+            UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
+
+            // Allow Substance to paint window titles, etc.. We don't allow
+            // Metal (for example) to do this, because setting these
+            // properties to "true", then toggling to a LAF that doesn't
+            // support this property, such as Windows, causes the
+            // OS-supplied frame to not appear (as of JVM 6u20)
+            lafName = UIManager.getLookAndFeel().getClass().getCanonicalName();
+            if (SubstanceUtil.isASubstanceLookAndFeel(lafName)) {
+                JFrame.setDefaultLookAndFeelDecorated(true);
+                JDialog.setDefaultLookAndFeelDecorated(true);
+            }
+
+            // The default speed of Substance animations is too slow
+            // (200ms), looks bad moving through JMenuItems quickly
+            if (SubstanceUtil.isSubstanceInstalled()) {
                 try {
-                    String startupLookAndFeelProperty = "startup_lookandfeel_class";
-                    String strStartupLookAndFeelClassName = Config.getSetting(startupLookAndFeelProperty);
-                    if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
-                        Config.saveSetting(startupLookAndFeelProperty, lafName);
-                    } else {
-                        lafName = strStartupLookAndFeelClassName;
-                    }
+                    SubstanceUtil.setAnimationSpeed(100);
                 } catch (Exception e) {
                     ExceptionDialog.hideException(e);
                 }
-
-                String rootDir = Utilities.getRootDir();
-                ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(rootDir + File.separator);
-
-                try {
-                    installACompatibleLaf(lafManager, lafName);
-                } catch (ClassNotFoundException cnfe) {
-                    ExceptionDialog.hideException(cnfe);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                } catch (UnsupportedLookAndFeelException ulafe) {
-                    ExceptionDialog.hideException(ulafe);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                } catch (IllegalAccessException iae) {
-                    ExceptionDialog.hideException(iae);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                } catch (InstantiationException ie) {
-                    ExceptionDialog.hideException(ie);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                } catch (IllegalStateException ise) {
-                    ExceptionDialog.hideException(ise);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                } catch (NoClassDefFoundError ncdfe) { // For example, the JGoodies Looks library is unavailable
-                    ExceptionDialog.hideException(ncdfe);
-                    ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                    String message = "The Look And Feel can't be installed.\n" + "Please restart the application.";
-                    String title = "Look And Feel";
-                    UISupport.getDialogs().showInfoMessage(message, title);
-                    System.exit(-3);
-                } catch (RuntimeException re) {
-                    throw re;
-                } catch (Throwable t) {
-                    ExceptionDialog.hideException(t);
-                }
-                UIManager.put("TextPane.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
-                UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
-
-                // Allow Substance to paint window titles, etc.. We don't allow
-                // Metal (for example) to do this, because setting these
-                // properties to "true", then toggling to a LAF that doesn't
-                // support this property, such as Windows, causes the
-                // OS-supplied frame to not appear (as of JVM 6u20)
-                lafName = UIManager.getLookAndFeel().getClass().getCanonicalName();
-                if (SubstanceUtil.isASubstanceLookAndFeel(lafName)) {
-                    JFrame.setDefaultLookAndFeelDecorated(true);
-                    JDialog.setDefaultLookAndFeelDecorated(true);
-                }
-
-                // The default speed of Substance animations is too slow
-                // (200ms), looks bad moving through JMenuItems quickly
-                if (SubstanceUtil.isSubstanceInstalled()) {
-                    try {
-                        SubstanceUtil.setAnimationSpeed(100);
-                    } catch (Exception e) {
-                        ExceptionDialog.hideException(e);
-                    }
-                }
-
-                SwingUtil.scaleAllFonts();
-
-                Toolkit.getDefaultToolkit().setDynamicLayout(true);
-                ApplicationFrame applicationFrame = new ApplicationFrame();
-                applicationFrame.initLookAndFeelManager(lafManager);
-                applicationFrame.drawIt();
             }
-        );
+
+            SwingUtil.scaleAllFonts();
+
+            Toolkit.getDefaultToolkit().setDynamicLayout(true);
+            ApplicationFrame applicationFrame = new ApplicationFrame();
+            applicationFrame.initLookAndFeelManager(lafManager);
+            applicationFrame.drawIt();
+        });
     }
 
     /**
-     * The method checks if the minimum Java version required for the selected
-     * LAF is still compatible (the installed JVM can be changed or the minimum
-     * Java version specified for the current LAF can be downgraded from the
-     * last startup) and, if not, it temporary installs the default LAF.
+     * The method checks if the minimum Java version required for the selected LAF
+     * is still compatible (the installed JVM can be changed or the minimum Java
+     * version specified for the current LAF can be downgraded from the last
+     * startup) and, if not, it temporary installs the default LAF.
      */
     private static void installACompatibleLaf(ThirdPartyLookAndFeelManager lafManager, String lafName)
             throws Throwable {

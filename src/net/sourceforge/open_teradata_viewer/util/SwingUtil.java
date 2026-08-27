@@ -23,6 +23,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.MediaTracker;
@@ -30,6 +33,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.geom.AffineTransform;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -66,7 +70,10 @@ public class SwingUtil {
 
 	// --- HiDPI LOGIC ---
     // We calculate the factor only once at startup
-    public static final float DPI_SCALE = java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 96f;
+    // Delegates to getDpiScaleFactor(), which additionally protects against
+    // scaling twice on a JRE that already applies HiDPI scaling itself; see
+    // that method's Javadoc.
+    public static final float DPI_SCALE = getDpiScaleFactor();
 	
     public static String setButtonText(AbstractButton button, String text) {
         if (text == null || text.equals("")) {
@@ -633,8 +640,41 @@ public class SwingUtil {
         return Math.round(value * DPI_SCALE);
     }
     
+    /**
+     * Computes the HiDPI scale factor to apply on top of the Look And
+     * Feel's own metrics, protecting against scaling twice.
+     *
+     * <p>{@link Toolkit#getScreenResolution()} always reports the OS's
+     * logical DPI (e.g. 144 for a 150% Windows scaling setting), regardless
+     * of whether the JRE/graphics pipeline is already applying that same
+     * scaling to everything it draws. On a modern, per-monitor-DPI-aware
+     * JRE (enabled here via the {@code sun.java2d.dpiaware}/
+     * {@code sun.java2d.uiScale.enabled} system properties set in
+     * {@link net.sourceforge.open_teradata_viewer.Main}) the desktop
+     * scaling is already baked into the default {@link GraphicsConfiguration}
+     * transform, so applying this factor again on top of it - as the
+     * previous, unconditional {@code dpi / 96.0f} computation did - results
+     * in oversized, doubly-scaled fonts and components on HiDPI displays.
+     * This mirrors the check every other JRE/OS combination still needs it
+     * for.</p>
+     */
     private static float getDpiScaleFactor() {
-        int dpi = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+        if (GraphicsEnvironment.isHeadless()) {
+            return 1.0f;
+        }
+
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        GraphicsConfiguration configuration = device.getDefaultConfiguration();
+        AffineTransform transform = configuration.getDefaultTransform();
+        double graphicsScale = Math.max(transform.getScaleX(), transform.getScaleY());
+
+        // The JRE's own graphics pipeline is already scaling everything it
+        // draws: applying our own factor on top would scale it twice.
+        if (graphicsScale > 1.01) {
+            return 1.0f;
+        }
+
+        int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
         return dpi / 96.0f; // 96 DPI is the basic standard
     }
 
@@ -644,11 +684,11 @@ public class SwingUtil {
             return; // No scaling necessary on standard monitors
         }
         
-        java.util.Set<Object> keySet = javax.swing.UIManager.getLookAndFeelDefaults().keySet();
+        Set<Object> keySet = UIManager.getLookAndFeelDefaults().keySet();
         Object[] keys = keySet.toArray(new Object[keySet.size()]);
         for (Object key : keys) {
             if (key != null && key.toString().toLowerCase().contains("font")) {
-                java.awt.Font font = javax.swing.UIManager.getDefaults().getFont(key);
+                Font font = UIManager.getDefaults().getFont(key);
                 if (font != null) {
                     // Scales the font proportionally and then subtracts 4 units (pixels/points)
                     float scaledSize = (font.getSize() * scaleFactor) - 4.0f;

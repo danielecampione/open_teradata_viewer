@@ -47,27 +47,39 @@ public class ApplicationToolBar extends JToolBar {
 
     public ApplicationToolBar(JToggleButton schemaBrowserToggleButton) {
         setFloatable(false);
-        add(Actions.RUN);
-        add(Actions.RUN_SCRIPT);
+
+        add(Actions.CONNECT);
+        add(Actions.DISCONNECT);
         add(Actions.COMMIT);
         add(Actions.ROLLBACK);
+        addSeparator();
+        add(Actions.FILE_OPEN);
+        add(Actions.FILE_SAVE);
+        add(Actions.FAVORITES);
+        add(Actions.HISTORY_PREVIOUS);
+        add(Actions.HISTORY_NEXT);
+        addSeparator();
+        add(Actions.FORMAT_SQL);
+        addSeparator();
+        add(Actions.RUN);
+        add(Actions.RUN_SCRIPT);
+        addSeparator();
+        add(Actions.INSERT);
+        add(Actions.DELETE);
+        add(Actions.EDIT);
+        add(Actions.DUPLICATE);
         addSeparator();
         add(Actions.CUT);
         add(Actions.COPY);
         add(Actions.PASTE);
         addSeparator();
-        add(Actions.FILE_OPEN);
-        add(Actions.FILE_SAVE);
-        add(Actions.FAVORITES);
-        addSeparator();
-        add(Actions.HISTORY_PREVIOUS);
-        add(Actions.HISTORY_NEXT);
-        addSeparator();
+        
         add(Actions.LOB_GROUP);
         addSeparator();
         add(Actions.EXPORT_GROUP);
         addSeparator();
         add(Actions.SHOW_OBJECT_GROUP);
+
         add(Box.createHorizontalGlue());
         schemaBrowserToggleButton.setAction(Actions.SCHEMA_BROWSER);
         schemaBrowserToggleButton.setText(null);
