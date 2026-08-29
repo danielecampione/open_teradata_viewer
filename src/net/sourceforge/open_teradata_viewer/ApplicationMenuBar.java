@@ -319,6 +319,7 @@ public class ApplicationMenuBar extends JMenuBar
         addSyntaxItem("Fortran", SyntaxConstants.SYNTAX_STYLE_FORTRAN, bg, subMenu2);
         addSyntaxItem("Go", SyntaxConstants.SYNTAX_STYLE_GO, bg, subMenu2);
         addSyntaxItem("Groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY, bg, subMenu2);
+        addSyntaxItem("Handlebars", SyntaxConstants.SYNTAX_STYLE_HANDLEBARS, bg, subMenu2);
         addSyntaxItem("Hosts", SyntaxConstants.SYNTAX_STYLE_HOSTS, bg, subMenu2);
         addSyntaxItem(".htaccess", SyntaxConstants.SYNTAX_STYLE_HTACCESS, bg, subMenu2);
         addSyntaxItem("HTML", SyntaxConstants.SYNTAX_STYLE_HTML, bg, subMenu2);
@@ -383,6 +384,13 @@ public class ApplicationMenuBar extends JMenuBar
             JRadioButtonMenuItem langItem = new JRadioButtonMenuItem(language.getNativeName());
             langItem.setSelected(language.getCode().equals(langManager.getCurrentLanguageCode()));
             langItem.addActionListener(e -> {
+                // Clicking the already-active language is a no-op: keep it selected and
+                // skip the confirmation dialog entirely, since there is nothing to confirm
+                // or to switch
+                if (language.getCode().equals(langManager.getCurrentLanguageCode())) {
+                    return;
+                }
+
                 // Show confirmation dialog for language change
                 String title = langManager.getString("dialog.language_change");
                 String message = langManager.getString("message.language_change");
@@ -390,7 +398,7 @@ public class ApplicationMenuBar extends JMenuBar
                 int result = JOptionPane.showConfirmDialog(applicationFrame, message, title,
                         JOptionPane.INFORMATION_MESSAGE);
 
-                if (result == 0) { // User clicked Yes
+                if (result == JOptionPane.YES_OPTION) {
                     langManager.setLanguage(language.getCode());
                 } else {
                     // User clicked No, revert the selection

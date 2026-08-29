@@ -325,10 +325,20 @@ public class BasicFormatterImpl implements IFormatter {
             parensSinceSelect--;
             if (parensSinceSelect < 0) {
                 indent--;
-                parensSinceSelect = ((Integer) parenCounts.removeLast())
-                        .intValue();
-                afterByOrSetOrFromOrSelect = ((Boolean) afterByOrFromOrSelects
-                        .removeLast()).booleanValue();
+                if (!parenCounts.isEmpty()) {
+                    parensSinceSelect = ((Integer) parenCounts.removeLast())
+                            .intValue();
+                    afterByOrSetOrFromOrSelect = ((Boolean) afterByOrFromOrSelects
+                            .removeLast()).booleanValue();
+                } else {
+                    // Closing parenthesis with no outer SELECT context to
+                    // restore - e.g. malformed/partial SQL, or a stray/unbalanced
+                    // ")" occurring before any SELECT was seen. There is nothing
+                    // to pop, so simply stop tracking a negative nesting count
+                    // instead of letting LinkedList#removeLast() throw a
+                    // NoSuchElementException on the empty stack
+                    parensSinceSelect = 0;
+                }
             }
             if (inFunction > 0) {
                 inFunction--;

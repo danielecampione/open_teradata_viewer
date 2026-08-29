@@ -1,3 +1,19 @@
+0.35c (29/08/2026)
+    - Added Handlebars syntax highlighting.
+    - Fixed language menu showing a redundant confirmation dialog when
+      re-selecting the already active language.
+    - Fixed Graphic Viewer actions retaining their pre-switch language the first
+      time the window is shown after a language change.
+    - Fixed NoSuchElementException in the SQL formatter when a closing
+      parenthesis has no matching outer SELECT context to restore (e.g.
+      malformed or partial SQL/DDL text).
+    - Upgraded rsyntaxtextarea library 3.3.0 -> 3.3.2 (3.3.1 skipped: introduces
+      a severe regression corrupting editor content on newline insertion, fixed
+      upstream in 3.3.2)
+    - Upgraded autocomplete library 3.3.0 -> 3.3.1
+    - Upgraded rstaui library 3.3.0 -> 3.3.1
+    - Upgraded spellchecker library 3.3.0 -> 3.3.1
+
 0.35b (28/08/2026)
     - Added Protocol Buffers (.proto) syntax highlighting.
     - Added translations for the 63 Graphic Viewer toolbar/menu actions (New,

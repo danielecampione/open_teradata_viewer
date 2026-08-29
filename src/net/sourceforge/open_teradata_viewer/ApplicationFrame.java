@@ -1285,8 +1285,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             helpFrame.refreshLanguage();
         }
         
-        // Update graphic viewer if visible
-        if (graphicViewer != null && graphicViewer.isVisible()) {
+        // Update graphic viewer. It is pre-instantiated during application startup
+        // (see the splash screen initialization sequence) and may still be hidden -
+        // not yet opened by the user - when the language changes, so its language
+        // must be refreshed unconditionally rather than only while visible, or it
+        // will keep showing stale, pre-switch action names the first time it is
+        // actually opened
+        if (graphicViewer != null) {
             graphicViewer.refreshLanguage();
         }
         
