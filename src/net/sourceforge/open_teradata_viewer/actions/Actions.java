@@ -43,6 +43,8 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction DISCONNECT = new DisconnectAction();
     public static final CustomAction COMMIT = new CommitAction();
     public static final CustomAction ROLLBACK = new RollbackAction();
+    public static final CustomAction UNDO = new UndoAction();
+    public static final CustomAction REDO = new RedoAction();
     public static final CustomAction CUT = new CutAction();
     public static final CustomAction COPY = new CopyAction();
     public static final CustomAction COPY_AS_STYLED_TEXT = new CopyAsStyledTextAction();

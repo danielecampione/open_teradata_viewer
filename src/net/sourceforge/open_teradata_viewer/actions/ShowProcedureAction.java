@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
@@ -108,7 +109,9 @@ public class ShowProcedureAction extends ShowObjectAction {
             // Teradata/Oracle/DB2, where they fold to upper case by
             // default - forcing upper case here would make MySQL unable
             // to find an object whose real name isn't already upper case.
-            procedureName = procedureName.toUpperCase();
+            // Locale-independent: this value is sent straight to the
+            // database, so it must not depend on the active UI language.
+            procedureName = procedureName.toUpperCase(Locale.ENGLISH);
         }
         int lastTokenIndex = procedureName.lastIndexOf(".");
         if (lastTokenIndex != -1) {

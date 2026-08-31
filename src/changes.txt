@@ -1,3 +1,29 @@
+0.36a (31/08/2026)
+    - Added Undo/Redo toolbar buttons.
+    - Added Turkish language support to the UI internationalization.
+    - Fixed Turkish-locale case conversion corrupting database object names and
+      SQL keyword matching (Utilities, RunAction, ShowTableAction,
+      SelectFromAction, ShowViewAction, ShowProcedureAction, ShowMacroAction,
+      CustomSelectFromStatement, SchemaBrowser, Drivers, ConnectionData,
+      BasicFormatterImpl).
+    - Fixed find/replace search bar toggle menu items not being retranslated on
+      language change (they are backed by CollapsibleSectionPanel actions from
+      RSTAUI rather than OTV's own self-refreshing Action classes, so their
+      label was only ever set once, at menu bar construction time).
+    - Fixed find/replace search bar and dialog internal labels (Match Case,
+      Regex, Whole word, Find/Replace buttons, etc.) never picking up a language
+      change, because RSTAUI caches them in static final ResourceBundle fields
+      resolved once at class-load time; the fix reflectively reloads those
+      bundles and rebuilds the four affected components on every language change
+      (ApplicationFrame, ApplicationMenuBar).
+    - Fixed the main SQL editor's right-click context menu (Undo, Redo, Cut,
+      Copy, Paste, Delete, Select All, and the Folding submenu) never picking up
+      a language change, because RTextArea/RSyntaxTextArea cache these actions
+      in static fields shared by every text area in the application, created
+      once at first use (ApplicationFrame).
+    - Upgraded autocomplete library 3.3.1 -> 3.3.2
+    - Upgraded rstaui library 3.3.1 -> 3.3.2
+
 0.35c (29/08/2026)
     - Added Handlebars syntax highlighting.
     - Fixed language menu showing a redundant confirmation dialog when

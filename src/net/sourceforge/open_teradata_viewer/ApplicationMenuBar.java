@@ -96,12 +96,34 @@ public class ApplicationMenuBar extends JMenuBar
     private JCheckBoxMenuItem cbMatchedBracketPopupItem = new JCheckBoxMenuItem(Actions.MATCHED_BRACKET_POPUP);
     private JScrollMenu macrosMenu;
 
+    /**
+     * These two toggle actions are created by RSTAUI's
+     * {@link CollapsibleSectionPanel#addBottomComponent(KeyStroke, java.awt.Component)},
+     * not by one of OTV's own {@code Action} subclasses, so they don't
+     * self-register with {@link LanguageManager} the way every other menu
+     * action does. Their display name has to be re-applied explicitly on
+     * every language change (see {@link #refreshAllComponents()}), otherwise
+     * they stay stuck in whichever language was active when this menu bar
+     * was built.
+     * <p>
+     * Worse, {@link ApplicationFrame} has to entirely discard and rebuild
+     * the underlying find/replace toolbars on every language change (see
+     * {@code ApplicationFrame#refreshSearchComponentsLanguage()}), which
+     * means these actions - each tied to one specific toolbar instance -
+     * go stale too. {@link #rebuildSearchBarBottomComponents()} re-creates
+     * them against the new toolbars and rebinds the two menu items below
+     * to the new actions.
+     */
+    private Action showFindSearchBarAction;
+    private Action showReplaceSearchBarAction;
+    private JMenuItem showFindSearchBarMenuItem;
+    private JMenuItem showReplaceSearchBarMenuItem;
+
     public ApplicationMenuBar() {
         JMenu menu;
         JMenu subMenu;
 
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        CollapsibleSectionPanel csp = applicationFrame.getCollapsibleSectionPanel();
 
         // Register for language change notifications
         LanguageManager.getInstance().addLanguageChangeListener(this);
@@ -128,6 +150,9 @@ public class ApplicationMenuBar extends JMenuBar
 
         menu = createMenu("menu.edit");
         add(menu);
+        menu.add(Actions.UNDO);
+        menu.add(Actions.REDO);
+        menu.addSeparator();
         menu.add(Actions.CUT);
         menu.add(Actions.COPY);
         menu.add(Actions.COPY_AS_STYLED_TEXT);
@@ -195,15 +220,11 @@ public class ApplicationMenuBar extends JMenuBar
         menu.add(Actions.SHOW_FIND_DIALOG);
         menu.add(Actions.SHOW_REPLACE_DIALOG);
         menu.addSeparator();
-        int default_modifier = getToolkit().getMenuShortcutKeyMask();
-        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
-        Action a = csp.addBottomComponent(ks, applicationFrame.getFindToolBar());
-        a.putValue(Action.NAME, LanguageManager.getInstance().getString("menu.search.show_find_search_bar"));
-        menu.add(new JMenuItem(a));
-        ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, default_modifier);
-        a = csp.addBottomComponent(ks, applicationFrame.getReplaceToolBar());
-        a.putValue(Action.NAME, LanguageManager.getInstance().getString("menu.search.show_replace_search_bar"));
-        menu.add(new JMenuItem(a));
+        showFindSearchBarMenuItem = new JMenuItem();
+        menu.add(showFindSearchBarMenuItem);
+        showReplaceSearchBarMenuItem = new JMenuItem();
+        menu.add(showReplaceSearchBarMenuItem);
+        rebuildSearchBarBottomComponents();
         menu.addSeparator();
         menu.add(Actions.GO_TO_LINE);
 
@@ -574,6 +595,53 @@ public class ApplicationMenuBar extends JMenuBar
     }
 
     /**
+     * (Re)registers the find/replace search-bar toggle actions with the
+     * {@link CollapsibleSectionPanel}, and rebinds the two corresponding
+     * menu items to them.
+     * <p>
+     * Called once from the constructor to set things up initially, and
+     * again by {@code ApplicationFrame#refreshSearchComponentsLanguage()}
+     * every time the language changes, since that method has to entirely
+     * discard and rebuild the find/replace toolbars (RSTAUI caches their
+     * internal strings in a way that can't otherwise be refreshed for a
+     * new locale - see its javadoc for the full explanation). The old
+     * actions returned by {@code addBottomComponent()} stay permanently
+     * bound, via RSTAUI's own internal bookkeeping, to whichever toolbar
+     * instance was current when they were created, so simply relabeling
+     * them (as {@link #refreshAllComponents()} does) is not enough once
+     * that instance has been thrown away - they have to be recreated
+     * against the new one.
+     * <p>
+     * Re-adding the same keystroke ({@code Ctrl+F}/{@code Ctrl+R}) via
+     * {@code addBottomComponent()} again simply overwrites its previous
+     * binding in the panel's {@code InputMap}/{@code ActionMap}, so the
+     * shortcut keeps working correctly; the old, now-unreferenced
+     * {@code BottomComponentInfo} entry for the discarded toolbar is
+     * harmless, since nothing looks it up by identity again.
+     */
+    public void rebuildSearchBarBottomComponents() {
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        CollapsibleSectionPanel csp = applicationFrame.getCollapsibleSectionPanel();
+        int default_modifier = getToolkit().getMenuShortcutKeyMask();
+
+        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, default_modifier);
+        Action a = csp.addBottomComponent(ks, applicationFrame.getFindToolBar());
+        a.putValue(Action.NAME, LanguageManager.getInstance().getString("menu.search.show_find_search_bar"));
+        showFindSearchBarAction = a;
+        if (showFindSearchBarMenuItem != null) {
+            showFindSearchBarMenuItem.setAction(a);
+        }
+
+        ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, default_modifier);
+        a = csp.addBottomComponent(ks, applicationFrame.getReplaceToolBar());
+        a.putValue(Action.NAME, LanguageManager.getInstance().getString("menu.search.show_replace_search_bar"));
+        showReplaceSearchBarAction = a;
+        if (showReplaceSearchBarMenuItem != null) {
+            showReplaceSearchBarMenuItem.setAction(a);
+        }
+    }
+
+    /**
      * Refreshes all GUI components to reflect the current language.
      */
     public void refreshAllComponents() {
@@ -581,6 +649,18 @@ public class ApplicationMenuBar extends JMenuBar
 
         // Update menu texts
         updateMenuTexts(langManager);
+
+        // These two actions come from RSTAUI's CollapsibleSectionPanel, not
+        // from one of OTV's own Action subclasses, so they don't listen for
+        // language changes on their own (see the field javadoc) and must be
+        // refreshed here explicitly.
+        if (showFindSearchBarAction != null) {
+            showFindSearchBarAction.putValue(Action.NAME, langManager.getString("menu.search.show_find_search_bar"));
+        }
+        if (showReplaceSearchBarAction != null) {
+            showReplaceSearchBarAction.putValue(Action.NAME,
+                    langManager.getString("menu.search.show_replace_search_bar"));
+        }
 
         // Repaint the menu bar
         revalidate();

@@ -20,6 +20,7 @@ package org.hibernate.jdbc.util;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -124,7 +125,12 @@ public class BasicFormatterImpl implements IFormatter {
 
             while (tokens.hasMoreTokens()) {
                 token = tokens.nextToken();
-                lcToken = token.toLowerCase();
+                // Locale-independent: lcToken is matched against the
+                // keyword sets below (BEGIN_CLAUSES, DML, LOGICAL, etc.),
+                // most of which contain a letter 'i' (INSERT, INTO, JOIN,
+                // DISTINCT...) that must not be mangled by the active UI
+                // language.
+                lcToken = token.toLowerCase(Locale.ENGLISH);
 
                 if ("'".equals(token)) {
                     String t;

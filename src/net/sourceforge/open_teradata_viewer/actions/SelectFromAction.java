@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
 
 import javax.swing.KeyStroke;
 
@@ -99,7 +100,9 @@ public class SelectFromAction extends CustomAction {
             // Teradata/Oracle/DB2, where they fold to upper case by
             // default - forcing upper case here would make MySQL unable
             // to find an object whose real name isn't already upper case.
-            relationName = relationName.toUpperCase();
+            // Locale-independent: this value is sent straight to the
+            // database, so it must not depend on the active UI language.
+            relationName = relationName.toUpperCase(Locale.ENGLISH);
         }
         return relationName;
     }

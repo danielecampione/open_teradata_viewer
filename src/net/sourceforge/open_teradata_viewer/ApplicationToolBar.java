@@ -53,6 +53,13 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.COMMIT);
         add(Actions.ROLLBACK);
         addSeparator();
+        add(Actions.UNDO);
+        add(Actions.REDO);
+        addSeparator();
+        add(Actions.CUT);
+        add(Actions.COPY);
+        add(Actions.PASTE);
+        addSeparator();
         add(Actions.FILE_OPEN);
         add(Actions.FILE_SAVE);
         add(Actions.FAVORITES);
@@ -69,11 +76,7 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.EDIT);
         add(Actions.DUPLICATE);
         addSeparator();
-        add(Actions.CUT);
-        add(Actions.COPY);
-        add(Actions.PASTE);
-        addSeparator();
-        
+
         add(Actions.LOB_GROUP);
         addSeparator();
         add(Actions.EXPORT_GROUP);
@@ -124,7 +127,7 @@ public class ApplicationToolBar extends JToolBar {
      */
     public void refreshLanguage() {
         // The application toolbar component doesn't have many UI strings to
-    	// localize.
+    	    // localize.
         // This method is here for consistency and future extensions
         repaint();
     }

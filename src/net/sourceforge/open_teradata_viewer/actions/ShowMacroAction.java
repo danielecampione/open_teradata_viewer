@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
@@ -100,7 +101,9 @@ public class ShowMacroAction extends ShowObjectAction {
             }
         }
 
-        macroName = macroName.trim().toUpperCase();
+        // Locale-independent: this value is sent straight to the database,
+        // so it must not depend on the active UI language.
+        macroName = macroName.trim().toUpperCase(Locale.ENGLISH);
         int lastTokenIndex = macroName.lastIndexOf(".");
         if (lastTokenIndex != -1) {
             databaseName = macroName.substring(

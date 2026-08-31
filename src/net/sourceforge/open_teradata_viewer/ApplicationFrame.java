@@ -35,15 +35,20 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayer;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -69,6 +74,7 @@ import org.fife.rsta.ac.java.tree.JavaOutlineTree;
 import org.fife.rsta.ac.js.tree.JavaScriptOutlineTree;
 import org.fife.rsta.ac.xml.tree.XmlOutlineTree;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
+import org.fife.rsta.ui.search.AbstractSearchDialog;
 import org.fife.rsta.ui.search.FindDialog;
 import org.fife.rsta.ui.search.FindToolBar;
 import org.fife.rsta.ui.search.ReplaceDialog;
@@ -82,9 +88,12 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.FileLocation;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.spell.SpellingParser;
 import org.fife.ui.rtextarea.Gutter;
+import org.fife.ui.rtextarea.RecordableTextAction;
+import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
@@ -1254,6 +1263,287 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Forcibly replaces a {@code private}/{@code protected} {@code static
+     * final} field via reflection. Only ever used, here, on the two RSTAUI
+     * classes described in {@link #refreshSearchComponentsLanguage()}.
+     * <p>
+     * This relies on implementation details of RSTAUI 3.3.x (the exact
+     * field names below). The actual override uses {@code sun.misc.
+     * Unsafe#putObject()}, which writes directly to the field's memory
+     * location and so does not go through the {@code final} check at all -
+     * unlike the older "strip the {@code final} modifier off the {@code
+     * Field} object itself" trick, which relied on {@code java.lang.
+     * reflect.Field} exposing its own modifiers as a plain {@code int}
+     * field; that representation no longer exists as of some later JDKs
+     * (verified: it is gone by JDK 21), which would silently make that
+     * approach throw {@code NoSuchFieldException} and do nothing. The
+     * {@code Unsafe}-based approach was verified, with a real reproduction
+     * of this bug against the actual RSTAUI 3.3.2 classes, to work
+     * correctly both under a JDK 21 runtime and under target/release 8
+     * compilation, so it is expected to keep working on OTV's Java 8
+     * baseline. Should {@code sun.misc.Unsafe} itself ever be removed in
+     * some future JDK, the method falls back to the older, Java 8-only
+     * trick.
+     * <p>
+     * Either way, this should be re-verified against the actual RSTAUI
+     * sources if that library, or OTV's Java baseline, is ever upgraded.
+     * Failures are caught and logged rather than propagated, so a mismatch
+     * degrades gracefully: the find/replace components simply keep the
+     * previous language's wording until the application is restarted,
+     * exactly as they did before this fix existed - it does not crash the
+     * language switch.
+     *
+     * @param clazz     the class declaring the field
+     * @param fieldName the field's name
+     * @param newValue  the value to force into the field
+     */
+    private static void forceStaticFinalField(Class<?> clazz, String fieldName, Object newValue) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            try {
+                // Accessed entirely via reflection - not a direct
+                // "sun.misc.Unsafe" type reference - so this keeps
+                // compiling even against a bootclasspath/release that
+                // does not expose sun.misc at compile time.
+                Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+                Field theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
+                theUnsafeField.setAccessible(true);
+                Object unsafe = theUnsafeField.get(null);
+                Object base = unsafeClass.getMethod("staticFieldBase", Field.class).invoke(unsafe, field);
+                long offset = (Long) unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafe, field);
+                unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafe, base,
+                        offset, newValue);
+            } catch (ReflectiveOperationException unsafeUnavailable) {
+                // Fallback for a JVM without sun.misc.Unsafe: the classic
+                // "strip final off the Field object" trick, which only
+                // works on Java 8 (see the class javadoc above)
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                field.set(null, newValue);
+            }
+        } catch (ReflectiveOperationException e) {
+            System.err.println("[ApplicationFrame] Could not refresh RSTAUI search bundle field " + clazz.getName()
+                    + "#" + fieldName + ": " + e);
+        }
+    }
+
+    /**
+     * Rebuilds the find/replace dialogs and search toolbars for the
+     * current language.
+     * <p>
+     * RSTAUI's find/replace dialogs ({@code org.fife.rsta.ui.search.
+     * AbstractSearchDialog}, the base class of {@link FindDialog} and
+     * {@link ReplaceDialog}) and search toolbars ({@link FindToolBar}, the
+     * base class of {@link ReplaceToolBar}) each cache their own internal
+     * strings (Match Case, Whole word, Regex, Wrap, the Find/Replace
+     * buttons, etc.) in {@code static final ResourceBundle} fields that
+     * are resolved from {@code Locale.getDefault()} only once, the first
+     * time either class is loaded by the JVM. Unlike OTV's own actions,
+     * which listen for language changes and relabel themselves on every
+     * change (see {@code LanguageManager.LanguageChangeListener}), RSTAUI
+     * offers no public API to reload these bundles for a new locale -
+     * calling {@code Locale.setDefault()} again has no effect on
+     * components that were already built, nor on any new ones, since the
+     * bundle is already permanently cached at the class level for the
+     * life of the JVM.
+     * <p>
+     * The only way to make these components track OTV's own language
+     * selector is to reflectively force the cached bundles to reload (see
+     * {@link #forceStaticFinalField}) and then discard and reconstruct
+     * every affected component, so each is built fresh against the newly
+     * loaded bundle - exactly as {@link #initSearchDialogs()} does the
+     * first time around. The current search options (match case, regex,
+     * whole word, etc.) are preserved across the rebuild. The two
+     * search-bar toggle menu items are then rebound to the new toolbar
+     * instances via {@code ApplicationMenuBar.rebuildSearchBarBottomComponents()},
+     * since their old actions stay bound to the now-discarded toolbars.
+     */
+    private void refreshSearchComponentsLanguage() {
+        Locale locale = LanguageManager.getInstance().getCurrentLocale();
+        if (locale == null) {
+            return;
+        }
+
+        forceStaticFinalField(AbstractSearchDialog.class, "MSG",
+                ResourceBundle.getBundle("org.fife.rsta.ui.search.Search", locale));
+        forceStaticFinalField(FindToolBar.class, "SEARCH_MSG",
+                ResourceBundle.getBundle("org.fife.rsta.ui.search.Search", locale));
+        forceStaticFinalField(FindToolBar.class, "MSG",
+                ResourceBundle.getBundle("org.fife.rsta.ui.search.SearchToolBar", locale));
+
+        // Preserve the user's current search options across the rebuild
+        SearchContext context = null;
+        if (findDialog != null) {
+            context = findDialog.getSearchContext();
+        } else if (findToolBar != null) {
+            context = findToolBar.getSearchContext();
+        }
+
+        // Hide the search bar, if visible, before swapping the component
+        // underneath it
+        if (csp != null) {
+            csp.hideBottomComponent();
+        }
+
+        if (replaceDialog != null) {
+            if (replaceDialog.isVisible()) {
+                replaceDialog.setVisible(false);
+            }
+            replaceDialog.dispose();
+        }
+        if (findDialog != null) {
+            if (findDialog.isVisible()) {
+                findDialog.setVisible(false);
+            }
+            findDialog.dispose();
+        }
+
+        setFindDialog(new FindDialog(this, this));
+        setReplaceDialog(new ReplaceDialog(this, this));
+        setFindToolBar(new FindToolBar(this));
+        setReplaceToolBar(new ReplaceToolBar(this));
+
+        if (context == null) {
+            context = findDialog.getSearchContext();
+        }
+        findDialog.setSearchContext(context);
+        replaceDialog.setSearchContext(context);
+        findToolBar.setSearchContext(context);
+        replaceToolBar.setSearchContext(context);
+
+        if (menubar != null) {
+            menubar.rebuildSearchBarBottomComponents();
+        }
+    }
+
+    /**
+     * Refreshes the right-click context menu of every {@code RSyntaxTextArea}
+     * in the application (in practice, the main SQL editor - see
+     * {@link #textArea}) for the current language.
+     * <p>
+     * {@link RTextArea} and {@link RSyntaxTextArea} each cache the
+     * Cut/Copy/Paste/Delete/Undo/Redo/Select All actions ({@code
+     * RTextArea}) and the code-folding actions ({@code RSyntaxTextArea})
+     * shown in every text area's right-click context menu in
+     * package-private/protected {@code static} fields, created once - the
+     * first time any {@code RTextArea} subclass is constructed anywhere in
+     * the JVM (see {@code RTextArea#init()} /
+     * {@code RSyntaxTextArea#createRstaPopupMenuActions()}) - using
+     * whatever language was active at that moment. Unlike OTV's own
+     * actions, these never listen for a language change and relabel
+     * themselves; and since the fields are {@code static}, EVERY text area
+     * in the application, not just the SQL editor, shares the very same
+     * {@code Action} objects for its popup menu.
+     * <p>
+     * Rather than replace these {@code Action} objects - which would leave
+     * any already-built popup menu's {@code JMenuItem}s, each bound to the
+     * <em>old</em> {@code Action} instance via a
+     * {@code PropertyChangeListener}, stuck on the old text - this mutates
+     * their name/mnemonic/short description in place, via the actions' own
+     * public {@code setProperties()} method (no reflective {@code final}
+     * trickery needed here: these fields are plain {@code static}, not
+     * {@code static final}). Since a {@code JMenuItem} built from an
+     * {@code Action} listens for exactly this kind of change, every popup
+     * menu that already exists picks up the new text immediately, and any
+     * popup built later naturally uses the same, now-current, actions.
+     * <p>
+     * The one piece this does not cover is the "Folding" submenu's own
+     * label, which - unlike its child items - is a plain, unbound
+     * {@code JMenu}, stored in RSyntaxTextArea's private {@code
+     * foldingMenu} instance field and built directly from a resource
+     * bundle the one time {@code createPopupMenu()} runs for a given text
+     * area. This is relabeled directly, in place, via reflection, for the
+     * same reason the actions above are mutated rather than replaced.
+     * <p>
+     * An earlier version of this fix tried to force a rebuild instead, via
+     * {@code RTextArea#setPopupMenu(null)}; that does not work and must
+     * not be reintroduced - {@code getPopupMenu()} is guarded by a
+     * separate {@code popupMenuCreated} boolean that {@code
+     * setPopupMenu()} does not reset, so once a text area's popup has been
+     * shown once, resetting the {@code popupMenu} field to {@code null}
+     * this way only makes {@code getPopupMenu()} keep returning {@code
+     * null} forever after - silently breaking the context menu entirely.
+     * This was caught by actually reproducing the failure against the
+     * real RSTA 3.3.2 classes before shipping it, not by reasoning about
+     * the code alone.
+     */
+    private void refreshTextAreaPopupMenuLanguage() {
+        Locale locale = LanguageManager.getInstance().getCurrentLocale();
+        if (locale == null) {
+            return;
+        }
+
+        ResourceBundle rTextAreaBundle = ResourceBundle.getBundle("org.fife.ui.rtextarea.RTextArea", locale);
+        ResourceBundle rstaBundle = ResourceBundle.getBundle("org.fife.ui.rsyntaxtextarea.RSyntaxTextArea", locale);
+
+        refreshRecordableAction(RTextArea.class, "cutAction", rTextAreaBundle, "Action.Cut");
+        refreshRecordableAction(RTextArea.class, "copyAction", rTextAreaBundle, "Action.Copy");
+        refreshRecordableAction(RTextArea.class, "pasteAction", rTextAreaBundle, "Action.Paste");
+        refreshRecordableAction(RTextArea.class, "deleteAction", rTextAreaBundle, "Action.Delete");
+        refreshRecordableAction(RTextArea.class, "undoAction", rTextAreaBundle, "Action.Undo");
+        refreshRecordableAction(RTextArea.class, "redoAction", rTextAreaBundle, "Action.Redo");
+        refreshRecordableAction(RTextArea.class, "selectAllAction", rTextAreaBundle, "Action.SelectAll");
+
+        refreshRecordableAction(RSyntaxTextArea.class, "toggleCurrentFoldAction", rstaBundle,
+                "Action.ToggleCurrentFold");
+        refreshRecordableAction(RSyntaxTextArea.class, "collapseAllCommentFoldsAction", rstaBundle,
+                "Action.CollapseCommentFolds");
+        refreshRecordableAction(RSyntaxTextArea.class, "collapseAllFoldsAction", rstaBundle,
+                "Action.CollapseAllFolds");
+        refreshRecordableAction(RSyntaxTextArea.class, "expandAllFoldsAction", rstaBundle, "Action.ExpandAllFolds");
+
+        // The "Folding" submenu's own label is not Action-bound (see the
+        // method javadoc above), so relabel the main SQL editor's copy of
+        // it directly.
+        if (textArea != null) {
+            try {
+                Field foldingMenuField = RSyntaxTextArea.class.getDeclaredField("foldingMenu");
+                foldingMenuField.setAccessible(true);
+                Object foldingMenu = foldingMenuField.get(textArea);
+                if (foldingMenu instanceof JMenu) {
+                    ((JMenu) foldingMenu).setText(rstaBundle.getString("ContextMenu.Folding"));
+                }
+            } catch (ReflectiveOperationException e) {
+                System.err.println("[ApplicationFrame] Could not refresh the SQL editor's Folding submenu label: "
+                        + e);
+            }
+        }
+    }
+
+    /**
+     * Reflectively refreshes one of RTextArea's/RSyntaxTextArea's cached
+     * popup-menu actions in place. See
+     * {@link #refreshTextAreaPopupMenuLanguage()} for why this is
+     * necessary. Failures are caught and logged rather than propagated, so
+     * a mismatch degrades gracefully: that one context-menu entry simply
+     * keeps the previous language's wording, exactly as before this fix
+     * existed - it does not crash the language switch.
+     *
+     * @param owner     the class declaring the static field ({@link
+     *                  RTextArea} or {@link RSyntaxTextArea})
+     * @param fieldName the field's name
+     * @param bundle    the freshly loaded bundle for the current language
+     * @param keyRoot   the key root passed to {@code setProperties()}
+     *                  (e.g. {@code "Action.Cut"})
+     */
+    private static void refreshRecordableAction(Class<?> owner, String fieldName, ResourceBundle bundle,
+            String keyRoot) {
+        try {
+            Field field = owner.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Object action = field.get(null);
+            if (action instanceof RecordableTextAction) {
+                ((RecordableTextAction) action).setProperties(bundle, keyRoot);
+            }
+        } catch (ReflectiveOperationException e) {
+            System.err.println("[ApplicationFrame] Could not refresh RSTA popup menu action " + owner.getName()
+                    + "#" + fieldName + ": " + e);
+        }
+    }
+
+    /**
      * Called when the language changes. Automatically refreshes all GUI components.
      */
     @Override
@@ -1300,6 +1590,20 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             toolbar.refreshLanguage();
         }
         
+        // Rebuild the find/replace dialogs and search toolbars so their
+        // internal RSTAUI-supplied strings (Match Case, Regex, Whole word,
+        // the Find/Replace buttons, etc.) pick up the new language too -
+        // see refreshSearchComponentsLanguage() for why a simple relabel
+        // is not enough here, unlike every other component refreshed
+        // above.
+        refreshSearchComponentsLanguage();
+
+        // Refresh the main SQL editor's right-click context menu (Cut,
+        // Copy, Paste, Undo, Redo, Select All, and the Folding submenu) -
+        // see refreshTextAreaPopupMenuLanguage() for why RSTA's own
+        // caching means this needs its own explicit refresh too.
+        refreshTextAreaPopupMenuLanguage();
+
         // Update dialogs
         if (findDialog != null) {
             findDialog.setTitle(langManager.getString("dialog.find.title"));

@@ -31,6 +31,7 @@ import java.net.URLClassLoader;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -85,8 +86,10 @@ public class Drivers {
                 }
             }
 
-            return !filesToIgnore.contains(fileName) && fileName.toLowerCase().endsWith(".jar")
-                    || fileName.toLowerCase().endsWith(".zip");
+            // Locale-independent: an uppercase ".ZIP" extension must still
+            // be recognized regardless of the active UI language.
+            return !filesToIgnore.contains(fileName) && fileName.toLowerCase(Locale.ENGLISH).endsWith(".jar")
+                    || fileName.toLowerCase(Locale.ENGLISH).endsWith(".zip");
         });
 
         URL[] urls = new URL[files.length];

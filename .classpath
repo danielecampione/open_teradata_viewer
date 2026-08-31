@@ -27,9 +27,9 @@
 	<classpathentry kind="lib" path="lib/rsta/languagesupport-3.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/rhino/rhino-1.7.15.1.jar"/>
 	<classpathentry kind="lib" path="lib/rhino/rhino-1.7.15.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/autocomplete-3.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/rstaui-3.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/rsyntaxtextarea-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/spellchecker-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/autocomplete-3.3.2.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/rstaui-3.3.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

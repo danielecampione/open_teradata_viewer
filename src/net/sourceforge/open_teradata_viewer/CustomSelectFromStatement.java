@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -104,7 +105,10 @@ public class CustomSelectFromStatement extends SelectFromStatementTemplateMethod
                     if (Utilities.isEmpty(columnName) || columnName.trim().length() == 0) {
                         columnName = "";
                     }
-                    text += columnName.toUpperCase().trim() + COLUMN_SEPARATOR;
+                    // Locale-independent: this text becomes part of the SQL
+                    // sent to the database, so it must not depend on the
+                    // active UI language.
+                    text += columnName.toUpperCase(Locale.ENGLISH).trim() + COLUMN_SEPARATOR;
                 }
                 if (text.equals("SELECT ")) {
                     text += "* ";

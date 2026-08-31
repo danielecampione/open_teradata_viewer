@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -80,7 +81,7 @@ public class RunAction extends CustomAction {
         sql = stripTrailingSlashTerminator(sql);
         if (sql.trim().endsWith(";")) {
             String sqlWithoutSemicolon = sql.trim().substring(0, sql.trim().length() - 1);
-            if (!sqlWithoutSemicolon.trim().toLowerCase().endsWith("end")) {
+            if (!sqlWithoutSemicolon.trim().toLowerCase(Locale.ENGLISH).endsWith("end")) {
                 sql = sqlWithoutSemicolon;
             }
         }
@@ -195,8 +196,9 @@ public class RunAction extends CustomAction {
     }
 
     private PreparedStatement createStatement(Connection connection, String sql) throws SQLException {
-        boolean query = sql.trim().toLowerCase().startsWith("sel") || sql.trim().toLowerCase().startsWith("with");
-        boolean call = sql.trim().toLowerCase().startsWith("call");
+        boolean query = sql.trim().toLowerCase(Locale.ENGLISH).startsWith("sel")
+                || sql.trim().toLowerCase(Locale.ENGLISH).startsWith("with");
+        boolean call = sql.trim().toLowerCase(Locale.ENGLISH).startsWith("call");
         PreparedStatement statement;
         if (query) {
             if (Context.getInstance().getConnectionData().isOracle()) {

@@ -55,9 +55,10 @@ public class LanguageManager {
     public static final Language NORWEGIAN = new Language("no", "Norsk", "Norwegian");
     public static final Language SWEDISH = new Language("sv", "Svenska", "Swedish");
     public static final Language FINNISH = new Language("fi", "Suomi", "Finnish");
+    public static final Language TURKISH = new Language("tr", "T\u00fcrk\u00e7e", "Turkish");
     
     private static final Language[] SUPPORTED_LANGUAGES = {
-        ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH, NORWEGIAN, SWEDISH, FINNISH
+        ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH, NORWEGIAN, SWEDISH, FINNISH, TURKISH
     };
 
     private LanguageManager() {

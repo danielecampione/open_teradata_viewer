@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -88,7 +89,10 @@ public class SchemaBrowser extends JTree {
             } catch (Throwable t) {
                 ApplicationFrame.getInstance().getConsole().println(
                         t.getMessage(), ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
-                String relationName = toString().toUpperCase();
+                // Locale-independent: this feeds directly into a "HELP
+                // TABLE" statement, so it must not depend on the active UI
+                // language.
+                String relationName = toString().toUpperCase(Locale.ENGLISH);
                 String sqlQuery = "HELP TABLE " + relationName;
                 ResultSet resultSet = null;
                 Connection connection = connectionData.getConnection();

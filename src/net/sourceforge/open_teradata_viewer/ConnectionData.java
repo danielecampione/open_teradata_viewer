@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -147,7 +148,9 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
         if (url == null) {
             return DatabaseType.UNKNOWN;
         }
-        String lowerUrl = url.trim().toLowerCase();
+        // Locale-independent: this drives database-type detection from the
+        // JDBC URL, so it must not depend on the active UI language.
+        String lowerUrl = url.trim().toLowerCase(Locale.ENGLISH);
         if (lowerUrl.startsWith("jdbc:teradata:")) {
             return DatabaseType.TERADATA;
         } else if (lowerUrl.startsWith("jdbc:oracle:")) {
@@ -218,25 +221,25 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     }
 
     private void addProperty(Properties properties, String name, String value) {
-        if (!url.toLowerCase().contains(name.toLowerCase())) {
+        if (!url.toLowerCase(Locale.ENGLISH).contains(name.toLowerCase(Locale.ENGLISH))) {
             properties.setProperty(name, value);
         }
     }
 
     public boolean isOracle() {
-        return url.toLowerCase().trim().startsWith("jdbc:oracle");
+        return url.toLowerCase(Locale.ENGLISH).trim().startsWith("jdbc:oracle");
     }
 
     public boolean isIbm() {
-        return url.toLowerCase().trim().startsWith("jdbc:db2");
+        return url.toLowerCase(Locale.ENGLISH).trim().startsWith("jdbc:db2");
     }
 
     public boolean isDataDirect() {
-        return url.toLowerCase().trim().startsWith("jdbc:datadirect");
+        return url.toLowerCase(Locale.ENGLISH).trim().startsWith("jdbc:datadirect");
     }
 
     public boolean isHSQLDB() {
-        return url.toLowerCase().trim().startsWith("jdbc:hsqldb");
+        return url.toLowerCase(Locale.ENGLISH).trim().startsWith("jdbc:hsqldb");
     }
 
     private void setMixedCaseQuotedIdentifiers() {
@@ -254,7 +257,7 @@ public class ConnectionData implements Comparable<Object>, Cloneable {
     }
 
     public String checkMixedCaseQuotedIdentifier(String s) {
-        boolean hasLowerCase = !s.equals(s.toUpperCase());
+        boolean hasLowerCase = !s.equals(s.toUpperCase(Locale.ENGLISH));
         if (hasLowerCase) {
             s = String.format("%s%s%s", identifierQuoteString, s, identifierQuoteString);
         }

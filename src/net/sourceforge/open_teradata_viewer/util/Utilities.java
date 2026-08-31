@@ -533,7 +533,12 @@ public class Utilities {
      */
     public static boolean canBeAValidObjectName(String text) {
         if (!isEmpty(text) && text.trim().length() > 0) {
-            text = text.trim().toUpperCase();
+            // Locale-independent on purpose: under the Turkish locale,
+            // String#toUpperCase() maps 'i' to '\u0130' ('I' with dot above)
+            // instead of plain ASCII 'I', which would then fail the
+            // TERADATA_LEGAL_CHAR_SET check below for perfectly ordinary
+            // object names (e.g. "invoice", "client_id").
+            text = text.trim().toUpperCase(Locale.ENGLISH);
             int lastTokenIndex = text.lastIndexOf(".");
             DatabaseType databaseType = ApplicationFrame.getInstance().getDatabaseType();
             int maxLength = getMaxIdentifierLength(databaseType);
