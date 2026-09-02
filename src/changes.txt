@@ -1,3 +1,14 @@
+0.36b (02/09/2026)
+    - Fixed the Schema Browser toolbar toggle button showing a text label after
+      a language change instead of staying icon-only, because Swing re-applies
+      an Action's NAME to its bound button on every property change.
+    - Fixed AboutDialog: the OK button and the last database-info row could get
+      clipped when connected to a database; reworked the dialog's layout and
+      sizing so the OK button always sits fully visible below the last row,
+      regardless of look-and-feel or platform.
+    - Upgraded rsyntaxtextarea library 3.3.2 -> 3.3.3
+    - Upgraded autocomplete library 3.3.2 -> 3.3.3
+
 0.36a (31/08/2026)
     - Added Undo/Redo toolbar buttons.
     - Added Turkish language support to the UI internationalization.

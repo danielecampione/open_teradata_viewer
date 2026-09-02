@@ -1589,6 +1589,36 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         if (toolbar != null) {
             toolbar.refreshLanguage();
         }
+
+        // The Schema Browser toggle button is bound to Actions.SCHEMA_BROWSER
+        // (see ApplicationToolBar's constructor), which is deliberately
+        // shown as an icon-only button - setText(null) is applied once,
+        // there. But since the button is bound to that Action via
+        // setAction(), Swing's own AbstractButton.configurePropertiesFromAction()
+        // automatically re-applies the Action's current NAME to the button
+        // every time that property changes. Actions.SCHEMA_BROWSER relabels
+        // itself on every language change via its own, independent
+        // LanguageChangeListener (see CustomAction/SchemaBrowserAction),
+        // which silently undoes the icon-only intent - so it has to be
+        // re-applied here too, not just once at startup.
+        // 
+        // Simply calling setText(null) inline, right here, is not enough:
+        // ApplicationFrame registers itself as a LanguageChangeListener in
+        // its constructor before ApplicationToolBar (and therefore the
+        // Actions class, and SchemaBrowserAction's own listener) is even
+        // constructed - see the constructor. LanguageManager notifies
+        // listeners in registration order, so SchemaBrowserAction's
+        // listener - registered later - always fires and relabels the
+        // button *after* this method returns, undoing an inline fix here
+        // every single time. This was caught by actually reproducing the
+        // resulting behavior, not by reasoning about the code alone.
+        // Deferring via invokeLater() sidesteps the ordering entirely: it
+        // runs after every LanguageChangeListener for this event -
+        // regardless of registration order, now or after some future
+        // change elsewhere - has already had its say.
+        if (schemaBrowserToggleButton != null) {
+            SwingUtilities.invokeLater(() -> schemaBrowserToggleButton.setText(null));
+        }
         
         // Rebuild the find/replace dialogs and search toolbars so their
         // internal RSTAUI-supplied strings (Match Case, Regex, Whole word,
