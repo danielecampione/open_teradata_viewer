@@ -1,3 +1,9 @@
+0.36c (03/09/2026)
+    - Added Croatian (hr) language support to the UI internationalization.
+    - Added Lithuanian (lt) language support to the UI internationalization.
+    - Added Portuguese (pt) language support to the UI internationalization.
+    - Upgraded rsyntaxtextarea library 3.3.3 -> 3.3.4
+
 0.36b (02/09/2026)
     - Fixed the Schema Browser toolbar toggle button showing a text label after
       a language change instead of staying icon-only, because Swing re-applies
