@@ -365,6 +365,7 @@ public class ApplicationMenuBar extends JMenuBar
         addSyntaxItem("Proto", SyntaxConstants.SYNTAX_STYLE_PROTO, bg, subMenu2);
         addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu2);
         addSyntaxItem("Ruby", SyntaxConstants.SYNTAX_STYLE_RUBY, bg, subMenu2);
+        addSyntaxItem("Rust", SyntaxConstants.SYNTAX_STYLE_RUST, bg, subMenu2);
         addSyntaxItem("SAS", SyntaxConstants.SYNTAX_STYLE_SAS, bg, subMenu2);
         addSyntaxItem("Scala", SyntaxConstants.SYNTAX_STYLE_SCALA, bg, subMenu2);
         addSyntaxItem("Tcl", SyntaxConstants.SYNTAX_STYLE_TCL, bg, subMenu2);

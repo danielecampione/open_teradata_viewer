@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ApplicationMenuBar;
+import net.sourceforge.open_teradata_viewer.Drivers;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
@@ -80,10 +81,6 @@ public class RunMacroAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         handleSubmit(macro);
-    }
-
-    private File getGroovyJar() {
-        return new File(getApplicationInstallDirectory(), "groovy-all-3.0.0-alpha-1.jar");
     }
 
     /**
@@ -131,7 +128,7 @@ public class RunMacroAction extends CustomAction {
             final String finalTitle = title;
             final int[] rc = {JOptionPane.NO_OPTION};
             try {
-                javax.swing.SwingUtilities.invokeAndWait(() -> {
+                SwingUtilities.invokeAndWait(() -> {
                     rc[0] = JOptionPane.showConfirmDialog(app, finalText, finalTitle,
                             JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 });
@@ -183,7 +180,7 @@ public class RunMacroAction extends CustomAction {
         bindings.put("textArea", app.getTextComponent());
 
         // Script execution MUST happen on the EDT: the macro may create
-        // Swing components (e.g. JPopupMenu) and Substance enforces EDT-only
+        // Swing components (e.g. JPopupMenu) and Radiance enforces EDT-only
         // component creation.
         final ScriptEngine finalEngine = engine;
         final Throwable[] evalError = {null};
@@ -205,27 +202,9 @@ public class RunMacroAction extends CustomAction {
      * @return The script engine, or <code>null</code> if it cannot be created.
      */
     private ScriptEngine initGroovyEngine() {
-        File groovyJar = getGroovyJar();
-        if (groovyJar == null || !groovyJar.isFile()) {
-            String message = "In order to run Groovy macros, place a copy of the embeddable\nGroovy jar in this location:\n\n{0}\n\nRestarting "
-                    + Main.APPLICATION_NAME + " will also be required.";
-            message = MessageFormat.format(message, getApplicationInstallDirectory().getAbsolutePath());
-            final String finalMessage = message;
-            try {
-                javax.swing.SwingUtilities.invokeAndWait(() -> {
-                    JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
-                            finalMessage, "An error occured", JOptionPane.ERROR_MESSAGE);
-                });
-            } catch (Exception ex) {
-                ExceptionDialog.hideException(ex);
-            }
-            return null;
-        }
-
         if (groovyEngine == null) {
-            groovyEngine = initScriptEngineImpl("Groovy");
+            groovyEngine = initScriptEngineImpl("Groovy", this::showMissingGroovyJarsMessage);
         }
-
         return groovyEngine;
     }
 
@@ -236,19 +215,44 @@ public class RunMacroAction extends CustomAction {
      */
     private ScriptEngine initJavaScriptEngine() {
         if (jsEngine == null) {
-            jsEngine = initScriptEngineImpl("JavaScript");
+            jsEngine = initScriptEngineImpl("JavaScript", null);
         }
         return jsEngine;
     }
 
-    private ScriptEngine initScriptEngineImpl(String shortName) {
+    /**
+     * Looks up and initializes the given script engine.
+     *
+     * @param shortName the engine's JSR 223 short name (e.g. "Groovy" or
+     *                  "JavaScript")
+     * @param onNotFound invoked instead of {@link #showLoadingEngineError(
+     *                   String)} when the engine cannot be found, so a
+     *                   caller can show a more specific, actionable
+     *                   message; may be {@code null} to use the generic
+     *                   one
+     * @return The script engine, or <code>null</code> if it cannot be created.
+     */
+    private ScriptEngine initScriptEngineImpl(String shortName, Runnable onNotFound) {
         ScriptEngine engine = null;
 
         try {
-            ScriptEngineManager sem = new ScriptEngineManager(this.getClass().getClassLoader());
+            // NOTE: on Java 8, a jar dropped into the application's
+            // working directory (e.g. groovy-3.0.25.jar and
+            // groovy-jsr223-3.0.25.jar, providing the "Groovy" engine)
+            // used to be injected straight into the system class loader,
+            // so this.getClass().getClassLoader() already saw it. As of
+            // Java 9, such jars instead live in a separate class loader
+            // (see Drivers#addAllJarsToClasspath), invisible from here
+            // unless resolved through Drivers.getRuntimeClassLoader()
+            // instead - see that method's javadoc for the full story.
+            ScriptEngineManager sem = new ScriptEngineManager(Drivers.getRuntimeClassLoader());
             engine = sem.getEngineByName(shortName);
             if (engine == null) {
-                showLoadingEngineError(shortName);
+                if (onNotFound != null) {
+                    onNotFound.run();
+                } else {
+                    showLoadingEngineError(shortName);
+                }
                 return null;
             }
 
@@ -275,9 +279,37 @@ public class RunMacroAction extends CustomAction {
     private void showLoadingEngineError(String engine) {
         String message = "Script engine not found: " + engine;
         try {
-            javax.swing.SwingUtilities.invokeAndWait(() -> {
+            SwingUtilities.invokeAndWait(() -> {
                 JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
                         message, "An error occured", JOptionPane.ERROR_MESSAGE);
+            });
+        } catch (Exception ex) {
+            ExceptionDialog.hideException(ex);
+        }
+    }
+
+    /**
+     * Displays an error dialog telling the user where to place Groovy's
+     * engine jars, shown when no "Groovy" engine could be found at all.
+     * <p>
+     * Deliberately does not name a single specific jar file: Groovy no
+     * longer ships as one "groovy-all" uber-jar (that packaging was
+     * dropped after the 2.5.x line), so - unlike a hardcoded single file
+     * name check, which broke the very first time a different jar/
+     * version combination was used - this message, like the check it
+     * follows from, stays correct regardless of which Groovy jars or
+     * version the user drops in.
+     */
+    private void showMissingGroovyJarsMessage() {
+        String message = "In order to run Groovy macros, place a copy of Groovy's engine jars\n"
+                + "(e.g. groovy-<version>.jar and groovy-jsr223-<version>.jar) in this\nlocation:\n\n{0}\n\nRestarting "
+                + Main.APPLICATION_NAME + " will also be required.";
+        message = MessageFormat.format(message, getApplicationInstallDirectory().getAbsolutePath());
+        final String finalMessage = message;
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
+                        finalMessage, "An error occured", JOptionPane.ERROR_MESSAGE);
             });
         } catch (Exception ex) {
             ExceptionDialog.hideException(ex);

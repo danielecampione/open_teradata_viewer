@@ -61,7 +61,14 @@ public class TableSorter implements MouseListener, Comparator<List> {
         JTableHeader tableHeader = (JTableHeader) e.getSource();
         col = tableHeader.columnAtPoint(e.getPoint());
         mouseButton = e.getButton();
-        List<List> list = ((DefaultTableModel) tableHeader.getTable()
+        // NOTE: as of Java 9, DefaultTableModel#getDataVector() was
+        // generified to Vector<Vector> (it used to return a raw Vector
+        // on Java 8). Vector<Vector> is not assignable to List<List>
+        // (generics are invariant), so the target variable is kept as
+        // a raw List here, matching this class' existing raw-type style
+        // (see the Comparator<List> declaration and compare(List, List)
+        // above) and working unchanged on both Java 8 and Java 11+.
+        List list = ((DefaultTableModel) tableHeader.getTable()
                 .getModel()).getDataVector();
         Collections.sort(list, this);
         SwingUtilities.invokeLater(() -> ApplicationFrame.getInstance().repaint());

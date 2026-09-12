@@ -35,7 +35,7 @@ import javax.swing.text.StyleContext;
 
 import org.joda.time.DateTime;
 
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
@@ -53,11 +53,11 @@ public class Console extends JTextPane {
     File logFile;
     BufferedWriter bw;
     int fileIndex;
-    boolean curSubstance;
+    boolean curRadiance;
 
     public Console(int width, int height, int maxChars) {
         super();
-        curSubstance = SubstanceUtil.isSubstanceInstalled();
+        curRadiance = RadianceUtil.isRadianceInstalled();
         setSize(width, height);
         maxCharacters = maxChars;
 
@@ -106,7 +106,7 @@ public class Console extends JTextPane {
 
             int len = getDocument().getLength(); // same value as getText().length();
             setCaretPosition(len); // place caret at the end (with no selection)
-            if (!curSubstance) {
+            if (!curRadiance) {
                 AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, foregroundColor);
                 setCharacterAttributes(aset, false);
             }

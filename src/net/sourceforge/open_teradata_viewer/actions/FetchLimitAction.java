@@ -66,7 +66,7 @@ public class FetchLimitAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        // Substance requires all Swing components to be created and manipulated on
+        // Radiance requires all Swing components to be created and manipulated on
     	// the EDT.
         // invokeAndWait is used to block the current background thread until the
     	// user interacts with the dialog

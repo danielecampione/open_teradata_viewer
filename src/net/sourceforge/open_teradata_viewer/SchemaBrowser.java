@@ -31,7 +31,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -47,7 +47,7 @@ public class SchemaBrowser extends JTree {
     public SchemaBrowser(ConnectionData connectionData) {
         super(new ObjectNode(connectionData));
         try {
-            if (!SubstanceUtil.isSubstanceInstalled()) {
+            if (!RadianceUtil.isRadianceInstalled()) {
                 ((DefaultTreeCellRenderer) getCellRenderer()).setLeafIcon(null);
                 ((DefaultTreeCellRenderer) getCellRenderer()).setOpenIcon(null);
                 ((DefaultTreeCellRenderer) getCellRenderer())

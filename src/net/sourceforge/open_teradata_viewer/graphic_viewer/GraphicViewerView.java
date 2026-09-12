@@ -3812,7 +3812,7 @@ public class GraphicViewerView extends JComponent
             try {
                 Class class1 = graphicviewerdocument.getClass();
                 GraphicViewerDocument graphicviewerdocument1 = (GraphicViewerDocument) class1
-                        .newInstance();
+                        .getDeclaredConstructor().newInstance();
                 graphicviewerdocument1.copyLayersFrom(graphicviewerdocument);
                 GraphicViewerObject agraphicviewerobject[] = getSelection()
                         .toArray();
@@ -4087,7 +4087,7 @@ public class GraphicViewerView extends JComponent
             GraphicViewerDocument graphicviewerdocument = getDocument();
             Class class1 = graphicviewerdocument.getClass();
             GraphicViewerDocument graphicviewerdocument1 = (GraphicViewerDocument) class1
-                    .newInstance();
+                    .getDeclaredConstructor().newInstance();
             graphicviewerdocument1.copyLayersFrom(graphicviewerdocument);
             GraphicViewerObject agraphicviewerobject[] = getSelection()
                     .toArray();

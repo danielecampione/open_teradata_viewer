@@ -118,7 +118,7 @@ import net.sourceforge.open_teradata_viewer.plugin.IPluginEntry;
 import net.sourceforge.open_teradata_viewer.plugin.PluginFactory;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
@@ -209,6 +209,14 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         Drivers.setInitialized(false);
         try {
             Drivers.initialize();
+        } catch (ClassNotFoundException cnfe) {
+            // A driver class name is configured (Config/"Edit drivers")
+            // but wasn't found. Previously this was silently swallowed
+            // by the catch-all below, leaving no clue until a later,
+            // seemingly unrelated "No suitable driver" error when
+            // actually connecting - surface it in the console instead,
+            // exactly as editDrivers() already does for the same case.
+            getConsole().println(cnfe.getMessage(), WARNING_FOREGROUND_COLOR_LOG);
         } catch (Exception e) {
             ExceptionDialog.ignoreException(e);
         }
@@ -890,19 +898,17 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 // value is reset to null
                 ClassLoader cl = getLookAndFeelManager().getLAFClassLoader();
 
-                // Load the Look and Feel class. Note that we cannot simply use
-                // its name for some reason (Exceptions are thrown)
-                Class<?> c = cl.loadClass(lnfClassName);
-                final LookAndFeel lnf = (LookAndFeel) c.newInstance();
-
                 // If we're changing to a LAF that supports window decorations
                 // and our current one doesn't, or vice versa, inform the user
-                // that this change will occur on restart. Substance seems to be
+                // that this change will occur on restart. Radiance seems to be
                 // the only troublemaker here (Metal, for example, supports
-                // window decorations, but works fine without special logic)
-                boolean curSubstance = SubstanceUtil.isSubstanceInstalled();
-                boolean nextSubstance = SubstanceUtil.isASubstanceLookAndFeel(lnf);
-                if (curSubstance != nextSubstance) {
+                // window decorations, but works fine without special logic).
+                // NOTE: checked by class name alone - no need to load and
+                // instantiate the LAF just for this check, RadianceUtil
+                // supports both
+                boolean curRadiance = RadianceUtil.isRadianceInstalled();
+                boolean nextRadiance = RadianceUtil.isARadianceLookAndFeel(lnfClassName);
+                if (curRadiance != nextRadiance) {
                     String startupLookAndFeelProperty = "startup_lookandfeel_class";
                     try {
                         Config.saveSetting(startupLookAndFeelProperty, lnfClassName);
@@ -916,7 +922,32 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                     return;
                 }
 
-                UIManager.setLookAndFeel(lnf);
+                // NOTE: this used to load the LAF class and instantiate it
+                // manually (cl.loadClass(...) + Constructor#newInstance()),
+                // which - for any JDK built-in LAF living in a package
+                // java.desktop does not export, such as WindowsLookAndFeel -
+                // triggers an "illegal reflective access" warning on every
+                // switch (JDK-8136366: those packages were never exported/
+                // opened to unnamed modules), exactly like the one already
+                // fixed at startup in Main.java - see that method's comment
+                // for the full story. The old comment above this method used
+                // to say the LAF couldn't be loaded by its name here
+                // ("Exceptions are thrown") - that was true only because the
+                // context class loader was never pointed at cl first, which
+                // is what lets UIManager.setLookAndFeel(String)'s own
+                // internal class resolution (via Thread.currentThread().
+                // getContextClassLoader()) find third-party LAF jars
+                // (Radiance, Kunststoff, Liquid, ...) exactly as the manual
+                // cl.loadClass(...) call used to.
+                ClassLoader previousContextCl = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(cl);
+                try {
+                    UIManager.setLookAndFeel(lnfClassName);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(previousContextCl);
+                }
+                final LookAndFeel lnf = UIManager.getLookAndFeel();
+
                 // Re-save the class loader BEFORE calling updateLookAndFeels(),
                 // as the UIManager.setLookAndFeel() call above resets this
                 // property to null, and we need this class loader to be set as
@@ -1280,10 +1311,14 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * {@code Unsafe}-based approach was verified, with a real reproduction
      * of this bug against the actual RSTAUI 3.3.2 classes, to work
      * correctly both under a JDK 21 runtime and under target/release 8
-     * compilation, so it is expected to keep working on OTV's Java 8
-     * baseline. Should {@code sun.misc.Unsafe} itself ever be removed in
-     * some future JDK, the method falls back to the older, Java 8-only
-     * trick.
+     * compilation. Re-verified after OTV's baseline moved from Java 8 to
+     * Java 11: this mechanism is pure reflection with no compiled-in
+     * reference to {@code sun.misc.Unsafe} (see the comment on {@code
+     * unsafeClass} below), so it is unaffected by the compiled bytecode's
+     * own target/release level, and is expected to keep working on OTV's
+     * Java 11 baseline exactly as it did on Java 8. Should {@code sun.
+     * misc.Unsafe} itself ever be removed in some future JDK, the method
+     * falls back to the older, Java 8-only trick.
      * <p>
      * Either way, this should be re-verified against the actual RSTAUI
      * sources if that library, or OTV's Java baseline, is ever upgraded.

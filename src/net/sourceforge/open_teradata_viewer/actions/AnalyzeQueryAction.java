@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
@@ -36,6 +37,7 @@ import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewer;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerBasicNode;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.GraphicViewerDocument;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+import net.sourceforge.open_teradata_viewer.util.Logger;
 
 /**
  *
@@ -122,6 +124,18 @@ public class AnalyzeQueryAction extends CustomAction {
                 ApplicationFrame.getInstance().getGraphicViewer().LayeredDigraphAutoLayoutAction
                         .actionPerformed(new ActionEvent(this, 0, null));
             }
+        } catch (JSQLParserException jpe) {
+            // The user is very often still in the middle of typing the
+            // query (or it's simply invalid) when this command is used -
+            // that's an everyday, expected occurrence, not a bug worth a
+            // dialog or graphic-console noise. Log it to the
+            // non-graphical console only (same message format as
+            // ExceptionDialog.notifyException() already uses elsewhere),
+            // exactly as it already happened there before this catch was
+            // narrowed to skip the dialog and the graphic console for
+            // this one, everyday case. The graphic viewer still simply
+            // appears regardless, via the finally block below
+            Logger.getInstance().warn("Exception notification", jpe);
         } catch (Throwable t) {
             ExceptionDialog.showException(t);
         } finally {

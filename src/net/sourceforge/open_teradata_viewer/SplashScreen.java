@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -35,6 +36,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JWindow;
+import javax.swing.UIManager;
 
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
@@ -156,6 +158,16 @@ public class SplashScreen extends JWindow {
             paint = new GradientPaint(0.0f, 0.0f, foreground1, 0.0f,
                     statusBarHeight, foreground2);
             this.textColor = textColor;
+            // NOTE: a plain JPanel doesn't inherit "Label.font"/
+            // "MenuItem.font" (component-specific UIManager keys), so
+            // this stayed at whatever smaller default a JPanel falls
+            // back to, unaffected by the font calibration done in
+            // Main.java. Matching MenuItem.font's size here too, for the
+            // same reason and the same reference size used there
+            Font menuItemFont = UIManager.getFont("MenuItem.font");
+            if (menuItemFont != null) {
+                setFont(getFont().deriveFont((float) menuItemFont.getSize()));
+            }
             update(text, percentComplete);
         }
 

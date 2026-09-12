@@ -79,7 +79,7 @@ public class SelectFromAction extends CustomAction {
             }
             if (relationName == null) {
                 // Dialog interaction must happen on the Event Dispatch Thread
-                // to avoid Substance state-tracking violations
+                // to avoid Radiance state-tracking violations
                 final String[] result = new String[1];
                 javax.swing.SwingUtilities.invokeAndWait(() -> {
                     result[0] = Dialog.showInputDialog("Insert the table name: ");

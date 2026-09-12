@@ -13,7 +13,7 @@ Teradata is the database for which the drivers are included in the installation 
 ### Cross platform
 Runs on Windows, Linux, Solaris and Mac OS X.
 
-Although only tested on these operating systems, it ought to run on any configuration where Java 8 or higher is installed.
+Although only tested on these operating systems, it ought to run on any configuration where Java 11 or higher is installed.
 
 ### SQL Editing
 Syntax highlighting.

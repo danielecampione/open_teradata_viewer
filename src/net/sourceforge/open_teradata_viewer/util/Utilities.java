@@ -128,15 +128,15 @@ public class Utilities {
 
     /**
      * If a system property is defined with this name and set, ignoring case, to
-     * <code>true</code>, this library will not attempt to use Substance
-     * renderers. Otherwise, if a Substance Look and Feel is installed, we will
-     * attempt to use Substance cell renderers in all of our dropdowns.<p>
+     * <code>true</code>, this library will not attempt to use Radiance
+     * renderers. Otherwise, if a Radiance Look and Feel is installed, we will
+     * attempt to use Radiance cell renderers in all of our dropdowns.<p>
      *
-     * Note that we do not have a build dependency on Substance, so all access
-     * to Substance stuff is done via reflection. We will fall back onto default
+     * Note that we do not have a build dependency on Radiance, so all access
+     * to Radiance stuff is done via reflection. We will fall back onto default
      * renderers if something goes wrong.
      */
-    public static final String PROPERTY_DONT_USE_SUBSTANCE_RENDERERS = "net.sourceforge.open_teradata_viewer.editor.autocomplete.DontUseSubstanceRenderers";
+    public static final String PROPERTY_DONT_USE_RADIANCE_RENDERERS = "net.sourceforge.open_teradata_viewer.editor.autocomplete.DontUseRadianceRenderers";
 
     /**
      * Used for the color of hyperlinks when a LookAndFeel uses light text
@@ -146,7 +146,7 @@ public class Utilities {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]*>");
 
-    private static final boolean useSubstanceRenderers;
+    private static final boolean useRadianceRenderers;
 
     private static final Set<Character> TERADATA_LEGAL_CHAR_SET = new HashSet<>();
 
@@ -177,11 +177,11 @@ public class Utilities {
 
         boolean use = true;
         try {
-            use = !Boolean.getBoolean(PROPERTY_DONT_USE_SUBSTANCE_RENDERERS);
+            use = !Boolean.getBoolean(PROPERTY_DONT_USE_RADIANCE_RENDERERS);
         } catch (AccessControlException ace) {
             use = true;
         }
-        useSubstanceRenderers = use;
+        useRadianceRenderers = use;
     }
 
     /**
@@ -889,10 +889,8 @@ public class Utilities {
     }
 
     /** Check the installed JDK version */
-    public static boolean isJDK18OrAbove() {
-        String vmVer = System.getProperty("java.vm.version").substring(0, 3);
-
-        return (vmVer.compareTo("1.8") >= 0);
+    public static boolean isJDK11OrAbove() {
+        return Runtime.version().feature() >= 11;
     }
 
     public static void openURLWithDefaultBrowser(String url) {
@@ -1108,15 +1106,15 @@ public class Utilities {
     }
 
     /**
-     * Returns whether we should attempt to use Substance cell renderers and
-     * styles for things such as completion choices, if a Substance Look and
+     * Returns whether we should attempt to use Radiance cell renderers and
+     * styles for things such as completion choices, if a Radiance Look and
      * Feel is installed. If this is <code>false</code>, we'll use our standard
-     * rendering for completions, even when Substance is being used.
+     * rendering for completions, even when Radiance is being used.
      *
-     * @return Whether to use Substance renderers if Substance is installed.
+     * @return Whether to use Radiance renderers if Radiance is installed.
      */
-    public static boolean getUseSubstanceRenderers() {
-        return useSubstanceRenderers;
+    public static boolean getUseRadianceRenderers() {
+        return useRadianceRenderers;
     }
 
     /**

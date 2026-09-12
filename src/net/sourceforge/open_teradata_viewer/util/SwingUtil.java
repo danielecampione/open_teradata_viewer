@@ -690,9 +690,18 @@ public class SwingUtil {
             if (key != null && key.toString().toLowerCase().contains("font")) {
                 Font font = UIManager.getDefaults().getFont(key);
                 if (font != null) {
-                    // Scales the font proportionally and then subtracts 4 units (pixels/points)
-                    float scaledSize = (font.getSize() * scaleFactor) - 4.0f;
-                    
+                    // Scale the font proportionally to the detected DPI
+                    // scale factor. NOTE: this used to also subtract a
+                    // flat 4 points after scaling, which for typical
+                    // label/menu font sizes (11-13pt) ate up almost all
+                    // of the proportional increase (e.g. 12pt at a 1.5x
+                    // scale factor became 14pt instead of 18pt), while
+                    // barely denting larger fonts (such as the fixed
+                    // 16pt TextArea/TextPane font set just before this
+                    // method runs, see Main.java) - hence labels looking
+                    // far too small while text areas looked fine.
+                    float scaledSize = font.getSize() * scaleFactor;
+
                     // Safeguard: prevents some fonts from becoming unreadable
                     if (scaledSize < 15.0f) {
                         scaledSize = 15.0f;

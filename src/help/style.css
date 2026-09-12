@@ -56,6 +56,21 @@ table,td,tr,th,thead {
 pre, h4 {
   margin-top: 0;
 }
+pre {
+  /* Matches the graphic console's and AboutDialog's license text font
+     exactly (see Main.java's "TextArea.font"/"TextPane.font" setup, both
+     java.awt.Font.MONOSPACED at 13pt - which the JRE maps to "Courier
+     New" on Windows). Swing's HTMLEditorKit otherwise renders <pre>
+     blocks (used by changes.html for the changelog) with its own
+     built-in monospace font/size, unrelated to and not affected by
+     those UIManager keys. NOTE: "Monospaced" (Java's own logical font
+     alias, not a real font family name) is not something Swing's CSS
+     engine can resolve, unlike a real font name - see div.shortcut
+     above, which already uses the same "Courier new" name for the same
+     reason. */
+  font-family: "Courier new", monospace;
+  font-size: 13pt;
+}
 .s2 {
 font-style: italic;
 color: #008000;

@@ -73,7 +73,7 @@ public class HTTPAuthProxy extends Authenticator {
             // the settings persistence below must happen on the EDT - this
             // whole block used to run on the caller's background thread, a
             // threading violation that some look and feels (e.g.
-            // Substance) actively detect and report
+            // Radiance) actively detect and report
             final Throwable[] errorHolder = new Throwable[1];
 
             try {

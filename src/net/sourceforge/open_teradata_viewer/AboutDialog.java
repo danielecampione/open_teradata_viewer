@@ -29,10 +29,7 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.SystemColor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
@@ -61,12 +58,13 @@ import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 
 import org.fife.rsta.ac.java.buildpath.JarLibraryInfo;
+import org.fife.rsta.ac.java.buildpath.Jdk9LibraryInfo;
 import org.fife.rsta.ac.java.buildpath.LibraryInfo;
 import org.fife.rsta.ac.perl.PerlLanguageSupport;
 
+import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
-import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * The "About" dialog for the application.
@@ -78,14 +76,14 @@ public class AboutDialog extends JDialog implements MouseListener {
 
     private static final long serialVersionUID = 5497242522081970155L;
 
-    private final Border empty5Border = BorderFactory.createEmptyBorder(
-            SwingUtil.scale(5), SwingUtil.scale(5), SwingUtil.scale(5), SwingUtil.scale(5));
+    private final Border empty5Border = BorderFactory.createEmptyBorder(SwingUtil.scale(5), SwingUtil.scale(5),
+            SwingUtil.scale(5), SwingUtil.scale(5));
 
     /**
-     * Reference to the OK button's panel, kept around so
-     * {@link #reconcileContentHeight()} can measure its real, laid-out
-     * position after the dialog is actually shown - see that method for
-     * why this second pass exists.
+     * Reference to the OK button's panel. {@link #reconcileContentHeight()} only
+     * checks it for {@code null}, as a guard against running before
+     * {@link #createContentPanel} has finished building the dialog - see that
+     * method for why the second pass it guards exists.
      */
     private JPanel buttonPanel;
 
@@ -93,69 +91,68 @@ public class AboutDialog extends JDialog implements MouseListener {
         super(parent);
         initializeDialog();
     }
-    
+
     /** Initializes the dialog components and layout. */
     private void initializeDialog() {
         LanguageManager langManager = LanguageManager.getInstance();
-        
+
         setTitle(langManager.getString("dialog.about") + " " + Main.APPLICATION_NAME);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setModal(true);
-        
+
         JPanel contentPanel = createContentPanel(langManager);
         setContentPane(contentPanel);
-        
+
         packToFinalSize();
         scheduleContentHeightReconciliation();
     }
-    
+
     /**
-     * Sizes the dialog to fit every section that was actually added
-     * (system info, and the database info section too, when connected),
-     * OK button included, then locks that as the minimum size.
+     * Sizes the dialog to fit every section that was actually added (system info,
+     * and the database info section too, when connected), OK button included, then
+     * locks that as the minimum size.
      * <p>
-     * A single {@link #pack()} is not always enough: on some platform /
-     * font combinations, a child component can still report a stale
-     * preferred size right after the first layout pass - before the
-     * dialog has a live native peer - which then undersizes the window
-     * and clips the last row of the database info section until the
-     * user manually resizes. Explicitly validating and packing a second
-     * time forces every child to re-measure against its now-realized
-     * state, so the size read back afterwards is always the real, final
-     * one - no arbitrary extra padding needed to compensate.
+     * A single {@link #pack()} is not always enough: on some platform / font
+     * combinations, a child component can still report a stale preferred size right
+     * after the first layout pass - before the dialog has a live native peer -
+     * which then undersizes the window and clips the last row of the database info
+     * section until the user manually resizes. Explicitly validating and packing a
+     * second time forces every child to re-measure against its now-realized state,
+     * so the size read back afterwards is always the real, final one - no arbitrary
+     * extra padding needed to compensate.
      * <p>
-     * Any slack introduced by the {@code 500x480} minimum-size floor
-     * below lands after the OK button (see {@link #createContentPanel},
-     * where the button is part of the same vertical flow as the content
-     * above it), never between the content and the button.
+     * Any slack introduced by the {@code 500}-wide minimum-size floor below lands
+     * after the OK button (see {@link #createContentPanel}, where the button is
+     * part of the same vertical flow as the content above it), never between the
+     * content and the button. There is no equivalent floor on height: the packed
+     * height is used as-is, and {@link #reconcileContentHeight()} - not a guessed
+     * minimum - is what guarantees the OK button stays visible if a look-and-feel's
+     * real, laid-out height ever ends up taller than what pack() found.
      */
     private void packToFinalSize() {
         pack();
         validate();
         pack();
-        
+
         Dimension packedSize = getSize();
-        setMinimumSize(new Dimension(Math.max(packedSize.width, 500),
-                                             Math.max(packedSize.height, 480)));
+        setMinimumSize(new Dimension(Math.max(packedSize.width, 550), Math.max(packedSize.height, 445)));
     }
-    
+
     /**
-     * Registers a one-shot correction that runs right after the dialog
-     * is actually shown on screen, to guarantee the OK button - and
-     * therefore every row above it - always ends up fully visible.
+     * Registers a one-shot correction that runs right after the dialog is actually
+     * shown on screen, to guarantee the OK button - and therefore every row above
+     * it - always ends up fully visible.
      * <p>
-     * {@link #packToFinalSize()} already does the right thing with the
-     * information available <em>before</em> the dialog is shown, but on
-     * some platform / look-and-feel combinations a component's
-     * {@code getPreferredSize()} only settles to its real value after
-     * the component has actually been painted at least once - which
-     * cannot happen before {@link #setVisible(boolean)} is called, no
-     * matter how many times {@code pack()} is called beforehand. Rather
+     * {@link #packToFinalSize()} already does the right thing with the information
+     * available <em>before</em> the dialog is shown, but on some platform /
+     * look-and-feel combinations a component's {@code getPreferredSize()} only
+     * settles to its real value after the component has actually been painted at
+     * least once - which cannot happen before {@link #setVisible(boolean)} is
+     * called, no matter how many times {@code pack()} is called beforehand. Rather
      * than continuing to guess at preferred sizes, this schedules
-     * {@link #reconcileContentHeight()} to run once the dialog is
-     * showing, where it measures the OK button's real, laid-out
-     * position and grows the window if needed - so the guarantee holds
-     * regardless of which look-and-feel is active.
+     * {@link #reconcileContentHeight()} to run once the dialog is showing, where it
+     * measures the OK button's real, laid-out position and grows the window if
+     * needed - so the guarantee holds regardless of which look-and-feel is active.
      */
     private void scheduleContentHeightReconciliation() {
         addComponentListener(new ComponentAdapter() {
@@ -166,65 +163,81 @@ public class AboutDialog extends JDialog implements MouseListener {
                 // paint/layout events already queued as part of the
                 // dialog becoming visible run first, so the components
                 // we are about to measure have settled.
-                SwingUtilities.invokeLater(() -> SwingUtilities
-                        .invokeLater(AboutDialog.this::reconcileContentHeight));
+                SwingUtilities.invokeLater(() -> SwingUtilities.invokeLater(AboutDialog.this::reconcileContentHeight));
             }
         });
     }
-    
+
     /**
-     * Measures the real, laid-out bottom edge of {@link #buttonPanel}
-     * and grows the dialog if that edge does not comfortably fit within
-     * the current window - guaranteeing the OK button always sits below
-     * the last filled row, with breathing room, regardless of what any
-     * individual component's preferred size claimed before showing.
-     * This only ever grows the window, never shrinks it.
+     * Grows the dialog, and forces an explicit repaint, if its real, now-settled
+     * content does not fit within the window that {@link #packToFinalSize()}
+     * computed before the dialog was ever shown.
      * <p>
-     * Checking {@code buttonPanel} alone is enough: it is the last
-     * non-glue child in the {@code BoxLayout.Y_AXIS} box built by
-     * {@link #createContentPanel}, and a Y_AXIS box always stacks its
-     * children in sequence with no overlap, so nothing else in that box
-     * can end up lower on screen than it does.
+     * This used to hand-measure {@link #buttonPanel}'s laid-out bottom edge with
+     * {@link SwingUtilities#convertPoint} and grow the window by the shortfall.
+     * That trusted a single measurement taken right after the dialog became
+     * visible; under look-and-feels that only apply their final component padding
+     * once a component has actually been painted at least once - a Radiance
+     * default button's glow border is one example - that single measurement can be
+     * taken mid-transition and overshoot, and since this method only ever grows
+     * the window, an overshoot then stuck around for the dialog's entire lifetime
+     * instead of settling back down.
+     * <p>
+     * Calling {@link #pack()} again instead sidesteps the hand-rolled geometry
+     * entirely: it asks every component for its real, now-settled preferred size,
+     * the same computation {@link #packToFinalSize()} already trusted once, so
+     * growth tracks what the look-and-feel actually needs rather than an
+     * approximation of it - and, separately from sizing, {@link #repaint()}
+     * afterwards matters on its own: some look-and-feels (Radiance included) paint
+     * window content through an offscreen buffer sized for gradients/glow effects,
+     * and do not reliably repaint newly exposed pixels when an already-visible
+     * window is resized programmatically rather than by the user dragging an edge
+     * - without it, any area this method adds can be left blank.
      */
     private void reconcileContentHeight() {
         if (buttonPanel == null) {
             return;
         }
-        
-        validate();
-        
-        final int breathingRoom = SwingUtil.scale(15);
-        Point buttonPanelBottom = SwingUtilities.convertPoint(buttonPanel.getParent(),
-                new Point(0, buttonPanel.getY() + buttonPanel.getHeight()), getContentPane());
-        int available = getContentPane().getHeight();
-        int shortfall = (buttonPanelBottom.y + breathingRoom) - available;
-        
-        if (shortfall > 0) {
-            setSize(getWidth(), getHeight() + shortfall);
-            validate();
+
+        Dimension beforeReconciliation = getSize();
+
+        pack();
+
+        // Preserve the "only ever grows" contract: pack() alone could in
+        // principle also return something marginally smaller than the
+        // pre-reconciliation size (e.g. tiny hinting/metrics differences now
+        // that the peer is real), which would visibly shrink an
+        // already-visible dialog - never desirable after it has been shown.
+        int width = Math.max(beforeReconciliation.width, getWidth());
+        int height = Math.max(beforeReconciliation.height, getHeight());
+        if (width != getWidth() || height != getHeight()) {
+            setSize(width, height);
         }
+
+        repaint();
+        validate();
     }
-    
+
     /** Creates the main content panel for the dialog. */
     private JPanel createContentPanel(LanguageManager langManager) {
         JPanel contentPanel = new JPanel(new BorderLayout());
-        
+
         Box mainBox = Box.createVerticalBox();
-        
+
         // Add header section
         mainBox.add(createHeaderSection(langManager));
         mainBox.add(Box.createVerticalStrut(5));
-        
+
         // Add system information section
         int[] labelColumnWidth = new int[1];
         mainBox.add(createSystemInfoSection(langManager, labelColumnWidth));
-        
+
         // Add database information section if connected
         JPanel dbInfoPanel = createDatabaseInfoSection(labelColumnWidth[0]);
         if (dbInfoPanel != null) {
             addLeftAligned(dbInfoPanel, mainBox);
         }
-        
+
         // The OK button lives in the same vertical flow as the content
         // above it (as the very last element), rather than being pinned
         // to BorderLayout.SOUTH of a separate NORTH/SOUTH split. With a
@@ -250,12 +263,12 @@ public class AboutDialog extends JDialog implements MouseListener {
         buttonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, buttonPanel.getPreferredSize().height));
         mainBox.add(buttonPanel);
         mainBox.add(Box.createVerticalGlue());
-        
+
         contentPanel.add(mainBox, BorderLayout.CENTER);
-        
+
         return contentPanel;
     }
-    
+
     /** Creates the header section with application name and description. */
     private JPanel createHeaderSection(LanguageManager langManager) {
         JPanel headerPanel = new JPanel();
@@ -276,72 +289,70 @@ public class AboutDialog extends JDialog implements MouseListener {
         // Description text area
         JTextArea descriptionArea = createDescriptionArea(langManager, labelFont);
         headerPanel.add(descriptionArea);
-        
+
         return headerPanel;
     }
-    
+
     /** Creates the description text area. */
     private JTextArea createDescriptionArea(LanguageManager langManager, Font baseFont) {
         JTextArea textArea = new JTextArea(6, 60);
         textArea.setFont(baseFont);
-        
+
         try {
-            textArea.setText(String.format(langManager.getString("about.description"), 
-                    Config.getVersion()));
+            textArea.setText(String.format(langManager.getString("about.description"), Config.getVersion()));
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }
-        
+
         textArea.setEditable(false);
         textArea.setBackground(Color.WHITE);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setBorder(null);
-        
+
         return textArea;
     }
-    
+
     /** Creates the system information section. */
     private JPanel createSystemInfoSection(LanguageManager langManager, int[] labelColumnWidthOut) {
         SpringLayout springLayout = new SpringLayout();
         JPanel systemPanel = new JPanel(springLayout);
-        
+
         // Create labels and fields
-        JLabel copyrightLabel = new JLabel(String.format(
-                "<html><font style=\"color:gray\">%s</font></html>", 
+        JLabel copyrightLabel = new JLabel(String.format("<html><font style=\"color:gray\">%s</font></html>",
                 langManager.getString("about.copyright")));
-        
+
         JLabel licenseLabel = createClickableLabel(langManager.getString("about.license"));
         licenseLabel.setName("license");
         JLabel homePageLabel = createClickableLabel(Config.HOME_PAGE);
-        
+
         JLabel javaVMLabel = new JLabel(langManager.getString("about.java_vm"));
         JTextField javaVMField = createTextField(System.getProperty("java.version"));
-        
+
         JLabel perlLabel = new JLabel(langManager.getString("about.perl_location"));
         File perlLocation = PerlLanguageSupport.getDefaultPerlInstallLocation();
         String perlPath = perlLocation == null ? null : perlLocation.getAbsolutePath();
         JTextField perlField = createTextField(perlPath);
-        
+
         JLabel javaLabel = new JLabel(langManager.getString("about.java_home"));
         JTextField javaField = createTextField(getJavaHomePath());
 
         // Add components based on orientation
-        addSystemInfoComponents(systemPanel, copyrightLabel, licenseLabel, homePageLabel,
-                javaVMLabel, javaVMField, perlLabel, perlField, javaLabel, javaField);
-        
+        addSystemInfoComponents(systemPanel, copyrightLabel, licenseLabel, homePageLabel, javaVMLabel, javaVMField,
+                perlLabel, perlField, javaLabel, javaField);
+
         makeSpringCompactGrid(systemPanel, 6, 2, 5, 5, 15, 5);
-        
+
         // "javaVMLabel" sits in the label column (column 0), which
         // makeSpringCompactGrid has just sized to fit the widest component
         // sharing that column (here, the home page URL) - reading its
         // resolved width back lets other sections (e.g. the database info
         // panel) line their own value column up with this one
         labelColumnWidthOut[0] = springLayout.getConstraints(javaVMLabel).getWidth().getValue();
-        
+
         return systemPanel;
     }
-    
+
     /** Creates a clickable label with hand cursor. */
     private JLabel createClickableLabel(String text) {
         JLabel label = new JLabel(text);
@@ -350,22 +361,31 @@ public class AboutDialog extends JDialog implements MouseListener {
         label.addMouseListener(this);
         return label;
     }
-    
+
     /** Gets the Java home path from library info. */
     private String getJavaHomePath() {
         LibraryInfo info = LibraryInfo.getMainJreJarInfo();
-        if (info != null) {
+        // NOTE: on any Java 9+ JVM (i.e. always, now that OTV targets
+        // Java 11), rt.jar no longer exists and getMainJreJarInfo()
+        // returns a Jdk9LibraryInfo, never a JarLibraryInfo - the
+        // unconditional cast to JarLibraryInfo used to throw a
+        // ClassCastException here on every Java 9+ run. Both cases are
+        // now handled explicitly.
+        if (info instanceof JarLibraryInfo) {
             File jarFile = ((JarLibraryInfo) info).getJarFile();
             return jarFile.getParentFile().getParentFile().getAbsolutePath();
+        } else if (info instanceof Jdk9LibraryInfo) {
+            File jreHome = ((Jdk9LibraryInfo) info).getJreHome();
+            return jreHome != null ? jreHome.getAbsolutePath() : null;
         }
         return null;
     }
-    
+
     /** Adds system information components to the panel based on orientation. */
-    private void addSystemInfoComponents(JPanel panel, JLabel copyrightLabel, JLabel licenseLabel,
-            JLabel homePageLabel, JLabel javaVMLabel, JTextField javaVMField, JLabel perlLabel,
-            JTextField perlField, JLabel javaLabel, JTextField javaField) {
-        
+    private void addSystemInfoComponents(JPanel panel, JLabel copyrightLabel, JLabel licenseLabel, JLabel homePageLabel,
+            JLabel javaVMLabel, JTextField javaVMField, JLabel perlLabel, JTextField perlField, JLabel javaLabel,
+            JTextField javaField) {
+
         if (getComponentOrientation().isLeftToRight()) {
             panel.add(copyrightLabel);
             panel.add(new JLabel());
@@ -394,37 +414,36 @@ public class AboutDialog extends JDialog implements MouseListener {
             panel.add(javaLabel);
         }
     }
-    
+
     /** Creates the database information section if connected. */
     private JPanel createDatabaseInfoSection(int labelColumnWidth) {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         if (!isConnected) {
             return null;
         }
-        
+
         JPanel dbPanel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(2, 2, 2, 2);
         constraints.anchor = GridBagConstraints.WEST;
-        
+
         try {
-            DatabaseMetaData metaData = Context.getInstance().getConnectionData()
-                    .getConnection().getMetaData();
-            
+            DatabaseMetaData metaData = Context.getInstance().getConnectionData().getConnection().getMetaData();
+
             addDatabaseInfo(dbPanel, constraints, metaData, labelColumnWidth);
         } catch (Throwable t) {
             ExceptionDialog.hideException(t);
         }
-        
+
         return dbPanel;
     }
-    
+
     /** Adds database information to the panel. */
-    private void addDatabaseInfo(JPanel panel, GridBagConstraints constraints, 
-            DatabaseMetaData metaData, int labelColumnWidth) throws Exception {
-        
+    private void addDatabaseInfo(JPanel panel, GridBagConstraints constraints, DatabaseMetaData metaData,
+            int labelColumnWidth) throws Exception {
+
         LanguageManager langManager = LanguageManager.getInstance();
-        
+
         JLabel databaseLabel = new JLabel(langManager.getString("label.database") + ": ");
         padToWidth(databaseLabel, labelColumnWidth);
         constraints.gridx = 0;
@@ -432,9 +451,9 @@ public class AboutDialog extends JDialog implements MouseListener {
         panel.add(databaseLabel, constraints);
         constraints.gridx = 1;
         panel.add(createTextField(metaData.getDatabaseProductName()), constraints);
-        
+
         addMultilineValue(panel, constraints, metaData.getDatabaseProductVersion());
-        
+
         JLabel driverLabel = new JLabel(langManager.getString("label.driver") + ": ");
         padToWidth(driverLabel, labelColumnWidth);
         constraints.gridx = 0;
@@ -442,22 +461,21 @@ public class AboutDialog extends JDialog implements MouseListener {
         panel.add(driverLabel, constraints);
         constraints.gridx = 1;
         panel.add(createTextField(metaData.getDriverName()), constraints);
-        
+
         constraints.gridx = 0;
         constraints.gridy++;
         panel.add(new JLabel(""), constraints);
         constraints.gridx = 1;
         panel.add(createTextField(metaData.getDriverVersion()), constraints);
     }
-    
+
     /**
-     * Adds a (possibly multi-line) value under the current label
-     * column, one plain-text row per line, advancing {@code gridy} as
-     * needed. Deliberately avoids a single HTML-wrapped JLabel: Swing's
-     * HTML text view can misreport its preferred size the first time
-     * it is laid out - before the component has a live Graphics
-     * context - which on some platform/JDK/font combinations makes the
-     * enclosing dialog undersize itself. Plain JLabels do not have this
+     * Adds a (possibly multi-line) value under the current label column, one
+     * plain-text row per line, advancing {@code gridy} as needed. Deliberately
+     * avoids a single HTML-wrapped JLabel: Swing's HTML text view can misreport its
+     * preferred size the first time it is laid out - before the component has a
+     * live Graphics context - which on some platform/JDK/font combinations makes
+     * the enclosing dialog undersize itself. Plain JLabels do not have this
      * problem, so pack() always measures the real height.
      */
     private void addMultilineValue(JPanel panel, GridBagConstraints constraints, String value) {
@@ -470,13 +488,13 @@ public class AboutDialog extends JDialog implements MouseListener {
             panel.add(new JLabel(line), constraints);
         }
     }
-    
+
     /**
-     * Widens a label's preferred size to at least the given width, without
-     * ever shrinking it below its own natural width. Used to line up the
-     * database info panel's value column with the system info section's
-     * value column above it, even though the two panels use different
-     * layout managers and are otherwise sized independently.
+     * Widens a label's preferred size to at least the given width, without ever
+     * shrinking it below its own natural width. Used to line up the database info
+     * panel's value column with the system info section's value column above it,
+     * even though the two panels use different layout managers and are otherwise
+     * sized independently.
      */
     private void padToWidth(JLabel label, int width) {
         Dimension natural = label.getPreferredSize();
@@ -484,7 +502,7 @@ public class AboutDialog extends JDialog implements MouseListener {
             label.setPreferredSize(new Dimension(width, natural.height));
         }
     }
-    
+
     /** Creates the button panel with OK button. */
     private JPanel createButtonPanel(LanguageManager langManager) {
         JButton okButton = new JButton(langManager.getString("button.ok"));
@@ -492,13 +510,13 @@ public class AboutDialog extends JDialog implements MouseListener {
             setVisible(false);
             dispose();
         });
-        
+
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setBorder(empty5Border);
         buttonPanel.add(okButton, BorderLayout.LINE_END);
-        
+
         getRootPane().setDefaultButton(okButton);
-        
+
         return buttonPanel;
     }
 
@@ -523,9 +541,9 @@ public class AboutDialog extends JDialog implements MouseListener {
      * <code>SpringUtilities.java</code> in the Sun Java Tutorial.
      *
      * @param parent The container whose layout must be an instance of
-     *        <code>SpringLayout</code>.
-     * @return The spring constraints for the specified component contained
-     *         in <code>parent</code>.
+     *               <code>SpringLayout</code>.
+     * @return The spring constraints for the specified component contained in
+     *         <code>parent</code>.
      */
     private static final SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols) {
         SpringLayout layout = (SpringLayout) parent.getLayout();
@@ -537,20 +555,19 @@ public class AboutDialog extends JDialog implements MouseListener {
      * This method is ripped off from <code>SpringUtilities.java</code> found on
      * Sun's Java Tutorial pages. It takes a component whose layout is
      * <code>SpringLayout</code> and organizes the components it contains into a
-     * nice grid.
-     * Aligns the first <code>rows</code> * <code>cols</code> components of
-     * <code>parent</code> in a grid. Each component in a column is as wide as
+     * nice grid. Aligns the first <code>rows</code> * <code>cols</code> components
+     * of <code>parent</code> in a grid. Each component in a column is as wide as
      * the maximum preferred width of the components in that column; height is
-     * similarly determined for each row. The parent is made just big enough to
-     * fit them all.
+     * similarly determined for each row. The parent is made just big enough to fit
+     * them all.
      *
-     * @param parent The container whose layout is <code>SpringLayout</code>.
-     * @param rows The number of rows of components to make in the container.
-     * @param cols The number of columns of components to make.
+     * @param parent   The container whose layout is <code>SpringLayout</code>.
+     * @param rows     The number of rows of components to make in the container.
+     * @param cols     The number of columns of components to make.
      * @param initialX The x-location to start the grid at.
      * @param initialY The y-location to start the grid at.
-     * @param xPad The x-padding between cells.
-     * @param yPad The y-padding between cells.
+     * @param xPad     The x-padding between cells.
+     * @param yPad     The y-padding between cells.
      */
     public static final void makeSpringCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
             int xPad, int yPad) {
@@ -646,30 +663,30 @@ public class AboutDialog extends JDialog implements MouseListener {
             }
         }
     }
-    
+
     /** Shows the license dialog with proper resource management. */
     private void showLicenseDialog() throws IOException {
         try (InputStream in = Config.class.getResourceAsStream("/license.txt");
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
             if (in == null) {
                 throw new IOException("License file not found");
             }
-            
+
             byte[] buffer = new byte[8192]; // Increased buffer size for better performance
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
             }
-            
+
             JTextArea textArea = new JTextArea(new String(out.toByteArray(), "UTF-8"));
             textArea.setEditable(false);
-            
+
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setPreferredSize(new java.awt.Dimension(600, 400));
-            
-            Dialog.show(LanguageManager.getInstance().getString("dialog.license"), 
-                       scrollPane, Dialog.PLAIN_MESSAGE, Dialog.DEFAULT_OPTION);
+
+            Dialog.show(LanguageManager.getInstance().getString("dialog.license"), scrollPane, Dialog.PLAIN_MESSAGE,
+                    Dialog.DEFAULT_OPTION);
         }
     }
 

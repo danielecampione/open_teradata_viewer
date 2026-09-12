@@ -268,7 +268,7 @@ public class Dialog extends JOptionPane implements LanguageManager.LanguageChang
      * inherited version directly from a background thread (as every
      * Show*Action used to, from inside performThreaded()) happened to work
      * most of the time by accident, but throws a
-     * UiThreadingViolationException under the Substance Look and Feel,
+     * UiThreadingViolationException under the Radiance Look and Feel,
      * which enforces the rule strictly.<p/>
      *
      * Declaring this method here, with the same name and signature as the

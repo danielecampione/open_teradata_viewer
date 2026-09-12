@@ -142,7 +142,7 @@ public abstract class GraphicViewerObject
         }
         try {
             Class class1 = getClass();
-            graphicviewerobject = (GraphicViewerObject) class1.newInstance();
+            graphicviewerobject = (GraphicViewerObject) class1.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             ExceptionDialog.hideException(e);
         }

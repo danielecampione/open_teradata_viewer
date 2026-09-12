@@ -121,7 +121,7 @@ public class UpdateChecker implements Runnable {
                         // not before entering this block: constructing a
                         // Swing component off the EDT is a threading
                         // violation that some look and feels (e.g.
-                        // Substance) actively detect and report
+                        // Radiance) actively detect and report
                         JCheckBox rememberChoiceCheckBox = new JCheckBox(
                                 langManager.getString("proxy.dont_ask_again"));
                         Object[] message = new Object[] {
@@ -186,7 +186,7 @@ public class UpdateChecker implements Runnable {
                     // display/disposal must happen on the EDT - this used
                     // to run on the caller's background thread, a
                     // threading violation that some look and feels (e.g.
-                    // Substance) actively detect and report
+                    // Radiance) actively detect and report
                     final String[] hostHolder = new String[] { proxyHost };
                     final String[] portHolder = new String[] { proxyPort };
                     final int[] resultHolder = new int[] { JOptionPane.CANCEL_OPTION };

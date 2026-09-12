@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.11.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-looks-2.8.0.jar"/>
@@ -24,12 +27,13 @@
 	<classpathentry kind="lib" path="lib/poi/poi-ooxml-full-5.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi/SparseBitSet-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/poi/xmlbeans-5.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/languagesupport-3.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/languagesupport-3.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/rhino/rhino-1.7.15.1.jar"/>
 	<classpathentry kind="lib" path="lib/rhino/rhino-1.7.15.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/spellchecker-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/spellchecker-3.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/rstaui-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/rsta/autocomplete-3.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/rsta/rsyntaxtextarea-3.3.4.jar"/>
+	<classpathentry kind="lib" path="lib/rsta/rsyntaxtextarea-3.4.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -32,7 +32,7 @@ import javax.swing.plaf.ButtonUI;
 /**
  * Utility methods for applications looking to support WebLookAndFeel.
  * 
- * Utilities for using WebLookAndFeel. It's super nice, but like Substance, it
+ * Utilities for using WebLookAndFeel. It's super nice, but like Radiance, it
  * assumes you're building your application from the ground up with it, so we
  * have to tweak it somewhat to make it look OK with an application like Open
  * Teradata Viewer that uses "standard" Swing paradigms.<p>

@@ -24,13 +24,12 @@ import java.io.File;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.SubstanceUtil;
+import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
@@ -64,9 +63,18 @@ public class Main {
         System.setProperty("swing.aatext", "true");
         // End of the anti-blur makeup
 
+        // Nashorn (used for JavaScript macros, see RunMacroAction) prints
+        // "Warning: Nashorn engine is planned to be removed from a future
+        // JDK release" to stderr the first time it's instantiated, on any
+        // JDK 11+. This is the officially documented way to silence it
+        // (JDK 11 release notes), and only affects that one console
+        // message - Nashorn itself keeps working exactly the same
+        System.setProperty("nashorn.args", "--no-deprecation-warning");
+
         // Check if the used JDK is supported
-        if (!Utilities.isJDK18OrAbove()) {
-            System.err.println("The installed JDK version is NOT supported.\n" + "The program will be terminated.");
+        if (!Utilities.isJDK11OrAbove()) {
+            System.err.println(
+                    "Java 11 or higher is required to run this application.\n" + "The program will be terminated.");
             System.exit(-1);
         }
 
@@ -125,36 +133,79 @@ public class Main {
                 ExceptionDialog.hideException(ise);
                 ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
             } catch (NoClassDefFoundError ncdfe) { // For example, the JGoodies Looks library is unavailable
+                // NOTE: this used to show a blocking dialog and then call
+                // System.exit(), forcing the user to restart the app (and,
+                // since the broken LAF's class name was still the one
+                // saved to config at that point, restart into the very
+                // same failure again and again, until they went and
+                // edited open_teradata_viewer_lookandfeels.xml by hand).
+                // restoreSystemLookAndFeel() below already fixes the saved
+                // setting for the *next* restart - there's no reason not
+                // to just let this one carry on with whatever LAF is
+                // already active (the JVM's own built-in default, since
+                // the failed LAF never got installed), exactly like every
+                // other case caught here.
                 ExceptionDialog.hideException(ncdfe);
                 ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
-                String message = "The Look And Feel can't be installed.\n" + "Please restart the application.";
-                String title = "Look And Feel";
-                UISupport.getDialogs().showInfoMessage(message, title);
-                System.exit(-3);
             } catch (RuntimeException re) {
                 throw re;
             } catch (Throwable t) {
+                // NOTE: a LookAndFeel that is no longer compatible with the
+                // running JVM (e.g. an old Substance/Insubstantial skin on
+                // Java 9+) typically fails with some flavor of LinkageError
+                // not explicitly named above (NoSuchMethodError,
+                // ExceptionInInitializerError, etc.), which used to end up
+                // here without ever correcting the saved LAF setting -
+                // meaning every subsequent restart tried, and failed on,
+                // the very same broken LAF again. Restoring the system
+                // default here too, exactly like every other case above,
+                // makes recovery automatic instead of requiring a manual
+                // edit of open_teradata_viewer_lookandfeels.xml.
                 ExceptionDialog.hideException(t);
+                ThirdPartyLookAndFeelManager.restoreSystemLookAndFeel();
             }
-            UIManager.put("TextPane.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
-            UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 16));
+            UIManager.put("TextPane.font", new Font(Font.MONOSPACED, Font.PLAIN, 13));
+            UIManager.put("TextArea.font", new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
-            // Allow Substance to paint window titles, etc.. We don't allow
+            // Some Look & Feels define a noticeably smaller default font for
+            // labels, trees, buttons, toggle buttons, text fields, combo
+            // boxes, lists, checkboxes and radio buttons than for
+            // menu items - most visible now that Java 11 renders every one
+            // of them at its true, correctly DPI-scaled size (a DPI-unaware
+            // Java 8 runtime rendered everything uniformly undersized,
+            // which masked the difference). Bring them all up to the menu
+            // item font's size for visual consistency, without touching
+            // anything if a given LAF doesn't have this discrepancy in the
+            // first place
+            Font menuItemFont = UIManager.getFont("MenuItem.font");
+            if (menuItemFont != null) {
+                String[] keysToMatchMenuItemFont = { "Label.font", "Tree.font", "Button.font", "TextField.font",
+                        "ComboBox.font", "List.font", "ToggleButton.font", "CheckBox.font", "RadioButton.font",
+                        "Table.font", "TableHeader.font" };
+                for (String key : keysToMatchMenuItemFont) {
+                    Font font = UIManager.getFont(key);
+                    if (font != null && font.getSize() < menuItemFont.getSize()) {
+                        UIManager.put(key, font.deriveFont((float) menuItemFont.getSize()));
+                    }
+                }
+            }
+
+            // Allow Radiance to paint window titles, etc.. We don't allow
             // Metal (for example) to do this, because setting these
             // properties to "true", then toggling to a LAF that doesn't
             // support this property, such as Windows, causes the
             // OS-supplied frame to not appear (as of JVM 6u20)
             lafName = UIManager.getLookAndFeel().getClass().getCanonicalName();
-            if (SubstanceUtil.isASubstanceLookAndFeel(lafName)) {
+            if (RadianceUtil.isARadianceLookAndFeel(lafName)) {
                 JFrame.setDefaultLookAndFeelDecorated(true);
                 JDialog.setDefaultLookAndFeelDecorated(true);
             }
 
-            // The default speed of Substance animations is too slow
+            // The default speed of Radiance animations is too slow
             // (200ms), looks bad moving through JMenuItems quickly
-            if (SubstanceUtil.isSubstanceInstalled()) {
+            if (RadianceUtil.isRadianceInstalled()) {
                 try {
-                    SubstanceUtil.setAnimationSpeed(100);
+                    RadianceUtil.setAnimationSpeed(100);
                 } catch (Exception e) {
                     ExceptionDialog.hideException(e);
                 }
@@ -202,19 +253,39 @@ public class Main {
                 WebLookAndFeelUtil.installWebLookAndFeelProperties(cl);
             }
             // Must set UIManager's ClassLoader before instantiating
-            // the LAF. Substance is so high-maintenance
+            // the LAF. Radiance is so high-maintenance
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
-            Class<?> clazz = null;
+            // NOTE: this used to load the LAF class and instantiate it
+            // manually (cl.loadClass(...) + Constructor#newInstance()),
+            // which - for any JDK built-in LAF living in a package
+            // java.desktop does not export, such as WindowsLookAndFeel -
+            // triggers an "illegal reflective access" warning on every
+            // single startup (JDK-8136366: those packages were never
+            // exported/opened to unnamed modules). UIManager.
+            // setLookAndFeel(String) achieves the exact same result
+            // without that warning: its own reflective instantiation
+            // happens *inside* java.desktop itself, so accessing another
+            // java.desktop-internal class from there is ordinary
+            // intra-module access, never cross-module reflection.
+            // Temporarily pointing the context class loader at the LAF
+            // class loader makes UIManager.setLookAndFeel(String) - which
+            // resolves the class via Thread.currentThread().
+            // getContextClassLoader() - still find third-party LAF jars
+            // (Radiance, Kunststoff, Liquid, ...) exactly as before.
+            ClassLoader previousContextCl = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(cl);
             try {
-                clazz = cl.loadClass(lafName);
-            } catch (UnsupportedClassVersionError ucve) {
-                // A LookAndFeel requiring Java X or later, but we're
-                // now restarting with a Java version earlier than X
-                lafName = UIManager.getSystemLookAndFeelClassName();
-                clazz = cl.loadClass(lafName);
+                try {
+                    UIManager.setLookAndFeel(lafName);
+                } catch (UnsupportedClassVersionError ucve) {
+                    // A LookAndFeel requiring Java X or later, but we're
+                    // now restarting with a Java version earlier than X
+                    lafName = UIManager.getSystemLookAndFeelClassName();
+                    UIManager.setLookAndFeel(lafName);
+                }
+            } finally {
+                Thread.currentThread().setContextClassLoader(previousContextCl);
             }
-            LookAndFeel laf = (LookAndFeel) clazz.newInstance();
-            UIManager.setLookAndFeel(laf);
             UIManager.getLookAndFeelDefaults().put("ClassLoader", cl);
             UIUtil.installOsSpecificLafTweaks();
         }
