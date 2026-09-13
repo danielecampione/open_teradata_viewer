@@ -28,8 +28,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
+import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
@@ -181,7 +181,7 @@ public class Main {
             if (menuItemFont != null) {
                 String[] keysToMatchMenuItemFont = { "Label.font", "Tree.font", "Button.font", "TextField.font",
                         "ComboBox.font", "List.font", "ToggleButton.font", "CheckBox.font", "RadioButton.font",
-                        "Table.font", "TableHeader.font" };
+                        "Table.font", "TableHeader.font", "Spinner.font" };
                 for (String key : keysToMatchMenuItemFont) {
                     Font font = UIManager.getFont(key);
                     if (font != null && font.getSize() < menuItemFont.getSize()) {
