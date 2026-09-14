@@ -18,15 +18,16 @@
 
 package test.net.sourceforge.open_teradata_viewer.editor.xml_tools;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
 
 /**
@@ -35,7 +36,7 @@ import net.sourceforge.open_teradata_viewer.editor.xml_tools.XMLBeautifier;
  * @author D. Campione
  *
  */
-public class TestXMLBeautifier extends TestCase {
+public class TestXMLBeautifier {
 
     /**
      * The line separator {@link XMLBeautifier#indentXML(String)} itself inserts
@@ -54,7 +55,7 @@ public class TestXMLBeautifier extends TestCase {
         unformattedXML = xmlBeautifier.validateXML(unformattedXML);
         String formattedXML = xmlBeautifier.indentXML(unformattedXML);
         String expectedPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note>";
-        TestCase.assertTrue(formattedXML.startsWith(expectedPrefix));
+        assertTrue(formattedXML.startsWith(expectedPrefix));
     }
 
     @Test
@@ -66,7 +67,7 @@ public class TestXMLBeautifier extends TestCase {
                 + "</body></note>";
         String formattedXML = xmlBeautifier.indentXML(unformattedXML);
         String expectedPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note>";
-        TestCase.assertTrue(formattedXML.startsWith(expectedPrefix));
+        assertTrue(formattedXML.startsWith(expectedPrefix));
 
         // NOTE: this is indentXML() called directly on irregular,
         // un-normalized XML (no validateXML() pass first) - not a path any
@@ -84,14 +85,14 @@ public class TestXMLBeautifier extends TestCase {
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note>" + LS + "    " + LS + "    <to>Tove</to>"
                 + LS + "    <from>Jani</from>" + LS + "    <heading>Reminder</heading>" + LS + "                " + LS
                 + "    <body>Don't forget me this weekend!" + LS + "</body>" + LS + "</note>" + LS;
-        TestCase.assertTrue(formattedXML.equals(expected));
+        assertTrue(formattedXML.equals(expected));
 
         formattedXML = xmlBeautifier.validateXML(formattedXML);
         formattedXML = xmlBeautifier.indentXML(formattedXML);
         expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note>" + LS + "    <to>Tove</to>" + LS
                 + "    <from>Jani</from>" + LS + "    <heading>Reminder</heading>" + LS
                 + "    <body>Don't forget me this weekend!</body>" + LS + "</note>" + LS;
-        TestCase.assertTrue(formattedXML.equals(expected));
+        assertTrue(formattedXML.equals(expected));
     }
 
     @Test
@@ -106,6 +107,6 @@ public class TestXMLBeautifier extends TestCase {
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note>" + LS + "    <to>Tove</to>" + LS
                 + "    <from>Jani</from>" + LS + "    <heading>Reminder</heading>" + LS
                 + "    <body>Don't forget me this weekend!</body>" + LS + "</note>" + LS;
-        TestCase.assertTrue(formattedXML.equals(expected));
+        assertTrue(formattedXML.equals(expected));
     }
 }

@@ -6,9 +6,16 @@
     </HEAD>
     <BODY bgcolor="#FFFFFF">
 <PRE>
-0.37b (13/09/2026)
+0.37b (14/09/2026)
+    - Added Czech (cs) language support to the UI internationalization.
     - Extended Java 11 Look and Feel font scaling adjustment to include JSpinner
       ("Spinner.font") alongside other input components.
+    - Migrated the two existing JUnit test cases (TestXMLBeautifier,
+      TestSHA1SumCalculator) from the legacy JUnit 3/4 style (extending
+      junit.framework.TestCase) to pure JUnit 5 Jupiter
+      (org.junit.jupiter.api.Test / Assertions), no longer relying on the
+      Vintage engine; unexpected-exception branches now use fail(e) instead of
+      assertTrue(false) for a proper failure cause.
     - Upgraded rsyntaxtextarea library 3.4.0 -> 3.4.1
     - Upgraded languagesupport library 3.4.0 -> 3.4.1
     - Upgraded spellchecker library 3.4.0 -> 3.4.1 (updated underlying

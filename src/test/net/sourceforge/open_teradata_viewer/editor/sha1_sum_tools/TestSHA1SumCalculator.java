@@ -18,16 +18,19 @@
 
 package test.net.sourceforge.open_teradata_viewer.editor.sha1_sum_tools;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-import junit.framework.TestCase;
 import net.sourceforge.open_teradata_viewer.editor.sha1_sum_tools.SHA1SumCalculator;
 
 /**
@@ -36,7 +39,7 @@ import net.sourceforge.open_teradata_viewer.editor.sha1_sum_tools.SHA1SumCalcula
  * @author D. Campione
  *
  */
-public class TestSHA1SumCalculator extends TestCase {
+public class TestSHA1SumCalculator {
 
     @Test
     public void test_indentXML_someText()
@@ -47,10 +50,10 @@ public class TestSHA1SumCalculator extends TestCase {
         try {
             sha1Sum = sha1SumCalculator.calculateSHA1ChecksumOfAText(input);
         } catch (NoSuchAlgorithmException e) {
-            TestCase.assertTrue(false);
+            fail(e);
         }
         String expectedSHA1Sum = "02d92c580d4ede6c80a878bdd9f3142d8f757be8";
-        TestCase.assertTrue(expectedSHA1Sum.equals(sha1Sum));
+        assertTrue(expectedSHA1Sum.equals(sha1Sum));
     }
 
     @Test
@@ -62,9 +65,9 @@ public class TestSHA1SumCalculator extends TestCase {
         try {
             sha1Sum = sha1SumCalculator.calculateSHA1ChecksumOfAText(input);
         } catch (NoSuchAlgorithmException e) {
-            TestCase.assertTrue(false);
+            fail(e);
         }
-        TestCase.assertNull(sha1Sum);
+        assertNull(sha1Sum);
     }
 
     @Test
@@ -76,9 +79,9 @@ public class TestSHA1SumCalculator extends TestCase {
         try {
             sha1Sum = sha1SumCalculator.calculateSHA1ChecksumOfAText(input);
         } catch (NoSuchAlgorithmException e) {
-            TestCase.assertTrue(false);
+            fail(e);
         }
         String expectedSHA1Sum = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
-        TestCase.assertTrue(expectedSHA1Sum.equals(sha1Sum));
+        assertTrue(expectedSHA1Sum.equals(sha1Sum));
     }
 }
