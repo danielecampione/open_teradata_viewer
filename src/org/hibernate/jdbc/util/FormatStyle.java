@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( formatter )
+ * Open Teradata Viewer ( sql formatter )
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,19 +19,38 @@
 package org.hibernate.jdbc.util;
 
 /**
- * Represents the the understood types or styles of formatting. 
+ * Represents the understood styles of SQL formatting. This mirrors the
+ * small, well known three-way shape (basic DML, DDL, no-op) without any
+ * dependency on the real Hibernate ORM: only {@link #BASIC} is currently
+ * used by Open Teradata Viewer ({@code FormatSQLAction}), {@link #DDL} and
+ * {@link #NONE} are provided for completeness and possible future menu
+ * entries (e.g. a dedicated "Format DDL" action).
  *
- * @author Steve Ebersole
- * 
+ * @author D. Campione
+ *
  */
-public class FormatStyle {
+public final class FormatStyle {
 
-    public static final FormatStyle BASIC = new FormatStyle("basic",
-            new BasicFormatterImpl());
-    public static final FormatStyle DDL = new FormatStyle("ddl",
-            new DDLFormatterImpl());
-    public static final FormatStyle NONE = new FormatStyle("none",
-            new NoFormatImpl());
+    public static final FormatStyle BASIC = new FormatStyle("basic", new IFormatter() {
+        @Override
+        public String format(String source) {
+            return SqlFormatterSupport.formatBasic(source);
+        }
+    });
+
+    public static final FormatStyle DDL = new FormatStyle("ddl", new IFormatter() {
+        @Override
+        public String format(String source) {
+            return SqlFormatterSupport.formatDdl(source);
+        }
+    });
+
+    public static final FormatStyle NONE = new FormatStyle("none", new IFormatter() {
+        @Override
+        public String format(String source) {
+            return source == null ? "" : source;
+        }
+    });
 
     private final String name;
     private final IFormatter formatter;
@@ -50,36 +69,7 @@ public class FormatStyle {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        FormatStyle that = (FormatStyle) o;
-
-        return name.equals(that.name);
-
-    }
-
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }
-
-    /**
-     *
-     * 
-     * @author Gavin King
-     * @author Steve Ebersole
-     * 
-     */
-    private static class NoFormatImpl implements IFormatter {
-        @Override
-        public String format(String source) {
-            return source;
-        }
+    public String toString() {
+        return name;
     }
 }

@@ -1,3 +1,16 @@
+0.37c (15/09/2026)
+    - Added Slovenian (sl) language support to the UI internationalization.
+    - Added a lightweight, dependency-free SQL formatter
+      (org.hibernate.jdbc.util package: IFormatter, FormatStyle,
+      SqlFormatterSupport) so FormatSQLAction compiles standalone, without
+      requiring the Hibernate ORM as a dependency.
+    - OTVSyntaxTextArea now sources its default editor font family from
+      RSyntaxTextArea's own FontUtil (OS-aware) instead of a hardcoded "Courier
+      New", while keeping Open Teradata Viewer's own Hi-DPI scaled size.
+    - Upgraded rsyntaxtextarea library 3.4.1 -> 3.5.2 (3.5.0/3.5.1 skipped:
+      leftover debug System.out.println in SmartHighlightPainter.paintLayer(),
+      removed upstream in 3.5.2)
+
 0.37b (14/09/2026)
     - Added Czech (cs) language support to the UI internationalization.
     - Extended Java 11 Look and Feel font scaling adjustment to include JSpinner

@@ -1,5 +1,5 @@
 /*
- * Open Teradata Viewer ( formatter )
+ * Open Teradata Viewer ( sql formatter )
  * Copyright (C), D. Campione
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,13 +19,24 @@
 package org.hibernate.jdbc.util;
 
 /**
- * IFormatter contract
+ * Minimal contract for pretty-printing a SQL statement. This package is
+ * <b>not</b> a real Hibernate dependency: it is a small, self-contained,
+ * dependency-free formatter maintained directly inside Open Teradata Viewer
+ * under this package name only to stay a drop-in replacement for the type
+ * originally referenced by {@code FormatSQLAction}, without pulling in the
+ * whole Hibernate ORM just to reformat a SQL string.
  *
- * @author Steve Ebersole
- * 
+ * @author D. Campione
+ *
  */
 public interface IFormatter {
 
-    public String format(String source);
-
+    /**
+     * Formats the given SQL source.
+     *
+     * @param source The raw SQL statement (or script) to format.
+     * @return The formatted SQL, never <code>null</code> (an empty or
+     *         <code>null</code> input yields an empty string).
+     */
+    String format(String source);
 }

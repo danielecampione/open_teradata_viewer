@@ -30,6 +30,7 @@ import javax.swing.KeyStroke;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rtextarea.FontUtil;
 
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
@@ -166,9 +167,16 @@ public class OTVSyntaxTextArea extends RSyntaxTextArea {
     private void changeStyleProgrammatically() {
         // We use SwingUtil to scale the size defined in UISupport
         int scaledSize = net.sourceforge.open_teradata_viewer.util.SwingUtil.scale(UISupport.DEFAULT_EDITOR_FONT_SIZE);
-        
+
+        // Let RSyntaxTextArea itself pick the most appropriate monospaced font
+        // family for the current operating system (e.g. Cascadia Code or
+        // Consolas on Windows, Menlo/Monaco on macOS, Ubuntu Mono/DejaVu Sans
+        // Mono on Linux), instead of a hardcoded family that may not even be
+        // installed on the user's machine
+        String defaultFontFamily = FontUtil.getDefaultMonospacedFont().getFamily();
+
         // We create the scaled font only once to reuse it
-        java.awt.Font editorFont = new java.awt.Font("Courier New", java.awt.Font.PLAIN, scaledSize);
+        java.awt.Font editorFont = new java.awt.Font(defaultFontFamily, java.awt.Font.PLAIN, scaledSize);
 
         // Set the font for all token types
         setFont(this, editorFont);
