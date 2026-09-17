@@ -172,6 +172,7 @@ public class ApplicationMenuBar extends JMenuBar
         subMenu.add(Actions.EXPAND_ALL_FOLDS);
         menu.addSeparator();
         menu.add(Actions.FORMAT_SQL);
+        menu.add(Actions.FORMAT_DDL);
         subMenu = createMenu("menu.xml_tools");
         menu.add(subMenu);
         subMenu.add(Actions.INDENT_XML);

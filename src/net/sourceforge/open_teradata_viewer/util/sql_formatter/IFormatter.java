@@ -16,15 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.hibernate.jdbc.util;
+package net.sourceforge.open_teradata_viewer.util.sql_formatter;
 
 /**
- * Minimal contract for pretty-printing a SQL statement. This package is
- * <b>not</b> a real Hibernate dependency: it is a small, self-contained,
- * dependency-free formatter maintained directly inside Open Teradata Viewer
- * under this package name only to stay a drop-in replacement for the type
- * originally referenced by {@code FormatSQLAction}, without pulling in the
- * whole Hibernate ORM just to reformat a SQL string.
+ * Minimal contract for pretty-printing a SQL statement.
  *
  * @author D. Campione
  *

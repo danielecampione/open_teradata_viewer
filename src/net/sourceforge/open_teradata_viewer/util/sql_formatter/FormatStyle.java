@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.hibernate.jdbc.util;
+package net.sourceforge.open_teradata_viewer.util.sql_formatter;
 
 /**
  * Represents the understood styles of SQL formatting. This mirrors the
- * small, well known three-way shape (basic DML, DDL, no-op) without any
- * dependency on the real Hibernate ORM: only {@link #BASIC} is currently
- * used by Open Teradata Viewer ({@code FormatSQLAction}), {@link #DDL} and
- * {@link #NONE} are provided for completeness and possible future menu
- * entries (e.g. a dedicated "Format DDL" action).
+ * small, well known three-way shape (basic DML, DDL, no-op): only
+ * {@link #BASIC} is currently used by Open Teradata Viewer
+ * ({@code FormatSQLAction}), {@link #DDL} and {@link #NONE} are provided
+ * for completeness and possible future menu entries (e.g. a dedicated
+ * "Format DDL" action).
  *
  * @author D. Campione
  *

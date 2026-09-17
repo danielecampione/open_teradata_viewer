@@ -36,22 +36,22 @@ import net.sourceforge.open_teradata_viewer.util.sql_formatter.IFormatter;
  * @author D. Campione
  *
  */
-public class FormatSQLAction extends CustomAction {
+public class FormatDDLAction extends CustomAction {
 
-    private static final long serialVersionUID = 860629017867347294L;
+    private static final long serialVersionUID = 860629017867347295L;
 
-    protected FormatSQLAction() {
+    protected FormatDDLAction() {
         super(
-        		LanguageManager.getInstance().getString("menu.edit.format_sql_code"),
+                LanguageManager.getInstance().getString("menu.edit.format_ddl_code"),
                 "format.png",
-                KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.SHIFT_DOWN_MASK
-                        + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                KeyStroke.getKeyStroke(KeyEvent.VK_D, KeyEvent.SHIFT_DOWN_MASK
+                        | Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()),
                 null);
         setEnabled(true);
         
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
-            putValue(NAME, newBundle.getString("menu.edit.format_sql_code"));
+            putValue(NAME, newBundle.getString("menu.edit.format_ddl_code"));
         });
     }
 
@@ -69,7 +69,7 @@ public class FormatSQLAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        IFormatter iFormatter = FormatStyle.BASIC.getFormatter();
+        IFormatter iFormatter = FormatStyle.DDL.getFormatter();
         String original = ApplicationFrame.getInstance().getText();
         String formatted = iFormatter.format(original);
         ApplicationFrame.getInstance().setText(formatted);

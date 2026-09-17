@@ -89,6 +89,7 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction HISTORY_PREVIOUS = new HistoryPreviousAction();
     public static final CustomAction HISTORY_NEXT = new HistoryNextAction();
     public static final CustomAction FORMAT_SQL = new FormatSQLAction();
+    public static final CustomAction FORMAT_DDL = new FormatDDLAction();
     public static final CustomAction INDENT_XML = new IndentXMLAction();
     public static final CustomAction INSERT = new InsertAction();
     public static final CustomAction EDIT = new EditAction();

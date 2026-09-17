@@ -6,6 +6,20 @@
     </HEAD>
     <BODY bgcolor="#FFFFFF">
 <PRE>
+0.38a (17/09/2026)
+    - Added a "Format DDL" menu action (Ctrl+Shift+D), right below Format SQL,
+      wired to the existing DDL formatter.
+    - Added Estonian (et) language support to the UI internationalization.
+    - Renamed the org.hibernate.jdbc.util SQL formatter package to
+      net.sourceforge.open_teradata_viewer.util.sql_formatter (no actual
+      Hibernate dependency); updated FormatSQLAction imports accordingly.
+    - Improved the SQL formatter: fixed BETWEEN...AND, line-comment, and
+      nested-CASE handling; added CASE/WHEN/ELSE/END support; and gave
+      ALTER TABLE, COMMENT ON, CTEs, subqueries, and OVER(...) window specs
+      their own correct layout instead of the generic clause/paren-based
+      rules.
+    - Upgraded rsyntaxtextarea library 3.5.2 -> 3.5.3
+
 0.37c (15/09/2026)
     - Added Slovenian (sl) language support to the UI internationalization.
     - Added a lightweight, dependency-free SQL formatter
