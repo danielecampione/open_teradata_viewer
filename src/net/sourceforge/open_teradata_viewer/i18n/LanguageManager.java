@@ -63,9 +63,12 @@ public class LanguageManager {
     public static final Language CZECH = new Language("cs", "\u010ce\u0161tina", "Czech");
     public static final Language SLOVENIAN = new Language("sl", "Sloven\u0161\u010dina", "Slovenian");
     public static final Language ESTONIAN = new Language("et", "Eesti keel", "Estonian");
+    public static final Language LATVIAN = new Language("lv", "Latvie\u0161u", "Latvian");
+    public static final Language SERBIAN = new Language("sr", "Srpski", "Serbian");
 
     private static final Language[] SUPPORTED_LANGUAGES = { ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH,
-            NORWEGIAN, SWEDISH, FINNISH, TURKISH, CROATIAN, LITHUANIAN, PORTUGUESE, CZECH, SLOVENIAN, ESTONIAN };
+            NORWEGIAN, SWEDISH, FINNISH, TURKISH, CROATIAN, LITHUANIAN, PORTUGUESE, CZECH, SLOVENIAN, ESTONIAN,
+            LATVIAN, SERBIAN };
 
     private LanguageManager() {
         listeners = new ArrayList<>();

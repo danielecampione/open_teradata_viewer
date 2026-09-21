@@ -89,13 +89,44 @@ public class CommentAction extends CustomAction {
         String[] lines = textToComment.split("\n");
 
         StringBuilder commentedLines = new StringBuilder();
+        // Tracks the offset (in the ORIGINAL, un-commented text) of the start
+        // of the line currently being processed, so the caret shift can be
+        // computed against real document positions instead of against the
+        // length of the (partially built) output, which is fragile once the
+        // comment marker is no longer always inserted at column 0 below.
+        int origOffset = bounds[0];
 
         for (int i = 0; i < lines.length; i++) {
-            if (bounds[0] + commentedLines.length() <= caretPosition) {
+            String line = lines[i];
+
+            // Insert the comment marker right after the line's leading
+            // whitespace instead of always at column 0, so existing
+            // indentation is preserved. This also keeps Comment/Uncomment
+            // symmetric: Uncomment now looks for the marker after any
+            // leading whitespace too (see UncommentAction), mirroring the
+            // fix RSTA itself applied to its own ToggleCommentAction in
+            // 3.5.4 for the identical class of bug.
+            int contentStart = 0;
+            while (contentStart < line.length() && Character.isWhitespace(line.charAt(contentStart))) {
+                contentStart++;
+            }
+            boolean blankLine = contentStart == line.length();
+
+            if (origOffset + contentStart <= caretPosition) {
                 caretPosition += Utilities.START_OF_LINE_COMMENT.length();
             }
 
-            commentedLines.append(Utilities.START_OF_LINE_COMMENT).append(lines[i]);
+            if (blankLine) {
+                // Don't litter blank lines inside the selection with a bare
+                // comment marker.
+                commentedLines.append(line);
+            } else {
+                commentedLines.append(line, 0, contentStart).append(Utilities.START_OF_LINE_COMMENT)
+                        .append(line.substring(contentStart));
+            }
+
+            origOffset += line.length() + 1; // +1 for the '\n' consumed by split()
+
             if (i < lines.length - 1 || textToComment.endsWith("\n")) {
                 commentedLines.append("\n");
             }

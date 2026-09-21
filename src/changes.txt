@@ -1,3 +1,16 @@
+0.38b (21/09/2026)
+    - Added Latvian (lv) language support to the UI internationalization.
+    - Added Serbian (sr, Latin script) language support to the UI
+      internationalization.
+    - Fixed CommentAction/UncommentAction: Uncomment silently failed on lines
+      with leading whitespace before the -- marker (e.g. after applying Increase
+      Indentation to already-commented lines, or when pasting pre-indented
+      commented SQL) - the marker is now located after any leading whitespace
+      instead of assuming column 0. Comment now inserts the marker after
+      existing indentation instead of always at column 0, keeping both actions
+      symmetric, and no longer marks blank lines within the selection.
+    - Upgraded rsyntaxtextarea library 3.5.3 -> 3.5.4
+
 0.38a (17/09/2026)
     - Added a "Format DDL" menu action (Ctrl+Shift+D), right below Format SQL,
       wired to the existing DDL formatter.

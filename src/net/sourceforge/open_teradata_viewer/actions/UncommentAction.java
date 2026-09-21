@@ -90,19 +90,42 @@ public class UncommentAction extends CustomAction {
         String[] lines = textToComment.split("\n");
 
         StringBuilder uncommentedLines = new StringBuilder();
+        // See CommentAction for why this tracks original-text offsets
+        // instead of comparing against the output buffer's length.
+        int origOffset = bounds[0];
 
         for (int i = 0; i < lines.length; i++) {
-            if (bounds[0] + uncommentedLines.length() < caretPosition) {
-                if (lines[i].startsWith(Utilities.START_OF_LINE_COMMENT)) {
-                    caretPosition -= Utilities.START_OF_LINE_COMMENT.length();
-                }
+            String line = lines[i];
+
+            // BUGFIX: the previous check (line.startsWith(START_OF_LINE_COMMENT))
+            // only matched when the marker was exactly at column 0. A line that
+            // had been indented AFTER being commented (e.g. via "Increase
+            // Indentation"), or SQL pasted in already commented-and-indented,
+            // would silently fail to be uncommented, with no error and no
+            // visible sign anything was skipped. Now the marker is looked up
+            // right after any leading whitespace instead, and that whitespace
+            // is preserved on removal. Same class of bug RSTA fixed for its
+            // own ToggleCommentAction in 3.5.4.
+            int contentStart = 0;
+            while (contentStart < line.length() && Character.isWhitespace(line.charAt(contentStart))) {
+                contentStart++;
+            }
+            boolean hasMarker = line.regionMatches(contentStart, Utilities.START_OF_LINE_COMMENT, 0,
+                    Utilities.START_OF_LINE_COMMENT.length());
+
+            if (hasMarker && origOffset + contentStart < caretPosition) {
+                caretPosition -= Utilities.START_OF_LINE_COMMENT.length();
             }
 
-            if (lines[i].startsWith(Utilities.START_OF_LINE_COMMENT)) {
-                uncommentedLines.append(lines[i].substring(Utilities.START_OF_LINE_COMMENT.length()));
+            if (hasMarker) {
+                uncommentedLines.append(line, 0, contentStart)
+                        .append(line.substring(contentStart + Utilities.START_OF_LINE_COMMENT.length()));
             } else {
-                uncommentedLines.append(lines[i]);
+                // Not a commented line (e.g. a mixed selection) - leave it untouched.
+                uncommentedLines.append(line);
             }
+
+            origOffset += line.length() + 1; // +1 for the '\n' consumed by split()
 
             if (i < lines.length - 1 || textToComment.endsWith("\n")) {
                 uncommentedLines.append("\n");
