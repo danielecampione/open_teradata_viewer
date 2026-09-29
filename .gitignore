@@ -1,6 +1,17 @@
+# IDE configuration (IntelliJ IDEA / Eclipse)
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
 # Generated files
 bin
 /target/
+
+# Gradle
+.gradle/
+/build/
 
 # Compiled source #
 ###################
