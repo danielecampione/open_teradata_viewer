@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.text.MessageFormat;
 
 import javax.script.Bindings;
@@ -39,7 +38,6 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ApplicationMenuBar;
 import net.sourceforge.open_teradata_viewer.Drivers;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
 import net.sourceforge.open_teradata_viewer.editor.macros.MacroManager;
 
@@ -81,40 +79,6 @@ public class RunMacroAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         handleSubmit(macro);
-    }
-
-    /**
-     * Returns the directory OTV is actually running from (i.e. the
-     * directory containing the application's jar file, or the output/
-     * "bin" directory when running unpacked from within an IDE). This is
-     * where OTV expects optional dependency jars, such as the embeddable
-     * Groovy jar, to be placed.
-     * <p>
-     * This is deliberately <b>not</b> based on the JVM's current working
-     * directory ("user.dir"): on Linux desktop environments (e.g. Debian
-     * 13 "trixie"), GUI application launchers commonly start the JVM with
-     * the current working directory set to the user's home directory
-     * rather than to the application's installation directory. Relying on
-     * "user.dir" therefore previously caused the Groovy jar lookup to fail
-     * even when the jar was correctly placed alongside the application.
-     *
-     * @return The application's installation directory, or the JVM's
-     *         current working directory as a fallback if the former
-     *         cannot be determined.
-     */
-    private File getApplicationInstallDirectory() {
-        try {
-            URI codeSourceUri = RunMacroAction.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-            // When running from a jar, this location is the jar file
-            // itself, so its parent is the installation directory. When
-            // running unpacked (e.g. from within an IDE), this location is
-            // already the output directory, whose parent is the project's
-            // root directory - which is also where dependency jars are
-            // expected to be placed during development
-            return new File(codeSourceUri).getParentFile();
-        } catch (Exception e) {
-            return new File(System.getProperty("user.dir"));
-        }
     }
 
     private void handleSubmit(Macro macro) {
@@ -203,7 +167,7 @@ public class RunMacroAction extends CustomAction {
      */
     private ScriptEngine initGroovyEngine() {
         if (groovyEngine == null) {
-            groovyEngine = initScriptEngineImpl("Groovy", this::showMissingGroovyJarsMessage);
+            groovyEngine = initScriptEngineImpl("Groovy");
         }
         return groovyEngine;
     }
@@ -215,7 +179,7 @@ public class RunMacroAction extends CustomAction {
      */
     private ScriptEngine initJavaScriptEngine() {
         if (jsEngine == null) {
-            jsEngine = initScriptEngineImpl("JavaScript", null);
+            jsEngine = initScriptEngineImpl("JavaScript");
         }
         return jsEngine;
     }
@@ -225,34 +189,22 @@ public class RunMacroAction extends CustomAction {
      *
      * @param shortName the engine's JSR 223 short name (e.g. "Groovy" or
      *                  "JavaScript")
-     * @param onNotFound invoked instead of {@link #showLoadingEngineError(
-     *                   String)} when the engine cannot be found, so a
-     *                   caller can show a more specific, actionable
-     *                   message; may be {@code null} to use the generic
-     *                   one
      * @return The script engine, or <code>null</code> if it cannot be created.
      */
-    private ScriptEngine initScriptEngineImpl(String shortName, Runnable onNotFound) {
+    private ScriptEngine initScriptEngineImpl(String shortName) {
         ScriptEngine engine = null;
 
         try {
-            // NOTE: on Java 8, a jar dropped into the application's
-            // working directory (e.g. groovy-3.0.25.jar and
-            // groovy-jsr223-3.0.25.jar, providing the "Groovy" engine)
-            // used to be injected straight into the system class loader,
-            // so this.getClass().getClassLoader() already saw it. As of
-            // Java 9, such jars instead live in a separate class loader
-            // (see Drivers#addAllJarsToClasspath), invisible from here
-            // unless resolved through Drivers.getRuntimeClassLoader()
-            // instead - see that method's javadoc for the full story.
+            // The Groovy engine is a regular dependency of the build (see
+            // build.gradle), so it is already visible from the application's
+            // own class loader. The runtime class loader used here delegates
+            // to it first, and in addition lets a JSR 223 engine jar dropped
+            // into the application's working directory be found too - see
+            // Drivers.getRuntimeClassLoader() for the details.
             ScriptEngineManager sem = new ScriptEngineManager(Drivers.getRuntimeClassLoader());
             engine = sem.getEngineByName(shortName);
             if (engine == null) {
-                if (onNotFound != null) {
-                    onNotFound.run();
-                } else {
-                    showLoadingEngineError(shortName);
-                }
+                showLoadingEngineError(shortName);
                 return null;
             }
 
@@ -282,34 +234,6 @@ public class RunMacroAction extends CustomAction {
             SwingUtilities.invokeAndWait(() -> {
                 JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
                         message, "An error occured", JOptionPane.ERROR_MESSAGE);
-            });
-        } catch (Exception ex) {
-            ExceptionDialog.hideException(ex);
-        }
-    }
-
-    /**
-     * Displays an error dialog telling the user where to place Groovy's
-     * engine jars, shown when no "Groovy" engine could be found at all.
-     * <p>
-     * Deliberately does not name a single specific jar file: Groovy no
-     * longer ships as one "groovy-all" uber-jar (that packaging was
-     * dropped after the 2.5.x line), so - unlike a hardcoded single file
-     * name check, which broke the very first time a different jar/
-     * version combination was used - this message, like the check it
-     * follows from, stays correct regardless of which Groovy jars or
-     * version the user drops in.
-     */
-    private void showMissingGroovyJarsMessage() {
-        String message = "In order to run Groovy macros, place a copy of Groovy's engine jars\n"
-                + "(e.g. groovy-<version>.jar and groovy-jsr223-<version>.jar) in this\nlocation:\n\n{0}\n\nRestarting "
-                + Main.APPLICATION_NAME + " will also be required.";
-        message = MessageFormat.format(message, getApplicationInstallDirectory().getAbsolutePath());
-        final String finalMessage = message;
-        try {
-            SwingUtilities.invokeAndWait(() -> {
-                JOptionPane.showMessageDialog(ApplicationFrame.getInstance(),
-                        finalMessage, "An error occured", JOptionPane.ERROR_MESSAGE);
             });
         } catch (Exception ex) {
             ExceptionDialog.hideException(ex);

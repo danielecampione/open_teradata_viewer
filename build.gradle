@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'net.sourceforge.open_teradata_viewer'
-version = '0.38c'
+version = '0.39a'
 
 // Explicit toolchain: Gradle LOOKS FOR (or requests) a JDK 11+ to compile,
 // regardless of which JDK launches gradlew/the daemon. This resolves the case
@@ -120,12 +120,22 @@ dependencies {
     implementation 'com.fifesoft:languagesupport:3.4.1'
     implementation 'com.fifesoft:spellchecker:3.4.1'
     implementation 'org.mozilla:rhino-all:1.9.0'
-    // spellchecker 3.4.1's own POM requires rsyntaxtextarea 3.6.1, which
-    // otherwise wins dependency resolution over the plain line below
-    // (Gradle takes the highest version requested by anything in the
-    // graph). "strictly" is what actually pins it to 3.6.0.
+    // Groovy's JSR-223 engine, looked up by RunMacroAction through
+    // javax.script.ScriptEngineManager to run the "*.groovy" macros. Groovy
+    // 3.0.x is still published under the org.codehaus.groovy group (the
+    // org.apache.groovy group only starts with 4.0), and it stays at 3.0.25,
+    // the version OTV currently ships with: the 4.x line is a separate
+    // upgrade. The core artifact declares only optional dependencies, which
+    // Gradle does not resolve, so nothing else is pulled in transitively.
+    implementation 'org.codehaus.groovy:groovy:3.0.25'
+    implementation 'org.codehaus.groovy:groovy-jsr223:3.0.25'
+    // Every sibling library declared above (rstaui, autocomplete,
+    // languagesupport, spellchecker) is built against rsyntaxtextarea 3.6.1.
+    // "strictly" keeps the version pinned in this one place: were any of them
+    // to ask for a newer one in the future, the build fails loudly instead
+    // of Gradle silently taking the highest version found in the graph.
     implementation('com.fifesoft:rsyntaxtextarea') {
-        version { strictly '3.6.0' }
+        version { strictly '3.6.1' }
     }
 
     // The old monolithic "-all" bundle was never published to Maven
@@ -211,17 +221,14 @@ jar {
 
 // Resources OTV expects to find in ITS OWN WORKING DIRECTORY at runtime,
 // scanned from the filesystem rather than loaded off the classpath: JDBC
-// drivers and script-engine jars (a custom classloader in Drivers.java/
-// MacroManager.java looks for them there), third-party Look&Feel jars
-// (ThirdPartyLookAndFeelManager, same mechanism), the bundled macros, and
-// the spelling dictionary. They live at the project root, outside every
-// Gradle sourceSet, so neither "jar" nor "installDist" ever picks them up
-// on their own - copied here explicitly instead, next to every runnable
-// artifact this build produces.
+// drivers (a custom classloader in Drivers.java looks for them there),
+// third-party Look&Feel jars (ThirdPartyLookAndFeelManager, same mechanism),
+// the bundled macros, and the spelling dictionary. They live at the project
+// root, outside every Gradle sourceSet, so neither "jar" nor "installDist"
+// ever picks them up on their own - copied here explicitly instead, next to
+// every runnable artifact this build produces.
 def runtimeWorkingDirFiles = [
         'english_dic.zip',
-        'groovy-3.0.25.jar',
-        'groovy-jsr223-3.0.25.jar',
         'kunststoff.jar',
         'liquidlnf.jar',
         'mysql-connector-j-8.0.33.jar',
@@ -236,9 +243,12 @@ def runtimeWorkingDirFiles = [
 // as an alternative rather than a replacement: a merge like this cannot
 // preserve a META-INF/services file that two different dependency jars each
 // contribute different content for (whichever copy is encountered first
-// wins, the rest are dropped) - unlikely to matter for OTV's own dependency
-// set, but worth knowing if something that relies on Java's ServiceLoader
-// mechanism ever misbehaves only in this jar and nowhere else.
+// wins, the rest are dropped). Worth knowing for the one service OTV really
+// looks up at runtime, javax.script.ScriptEngineFactory (Groovy's engine,
+// provided by groovy-jsr223): today no other dependency contributes a file
+// of that name, so nothing is lost - but a second JSR-223 engine added as a
+// dependency (e.g. rhino-engine) would silently replace or be replaced by
+// it in this jar and nowhere else.
 tasks.register('runnableJar', Jar) {
     group = 'distribution'
     description = 'Builds a single, self-contained, double-click-runnable jar with every dependency merged in.'

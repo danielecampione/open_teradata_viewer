@@ -1,3 +1,10 @@
+0.39a (30/09/2026)
+    - Groovy (groovy and groovy-jsr223, version 3.0.25) is now resolved from
+      Maven Central by Gradle, like the other dependencies, instead of being
+      two jars kept in the project root and loaded at runtime. Groovy macros
+      no longer need any jar placed next to the application.
+    - Upgraded rsyntaxtextarea library 3.6.0 -> 3.6.1
+
 0.38c (29/09/2026)
     - Added VHDL syntax highlighting.
     - Migrated the build system from a plain Eclipse project (no build

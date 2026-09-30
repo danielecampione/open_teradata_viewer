@@ -73,10 +73,12 @@ public class Drivers {
     /**
      * Returns the class loader that should be used to resolve anything
      * that might live in a jar dropped into the application's working
-     * directory at runtime - not just JDBC drivers, but e.g. the Groovy
-     * engine jars ({@code groovy-*.jar}, {@code groovy-jsr223-*.jar})
-     * that {@code RunMacroAction} looks up via {@code
-     * javax.script.ScriptEngineManager}.
+     * directory at runtime - not just JDBC drivers, but also any additional
+     * JSR 223 script engine jar that {@code RunMacroAction} looks up via
+     * {@code javax.script.ScriptEngineManager}. (Groovy's own engine is not
+     * one of them any more: it is a regular dependency of the build, hence
+     * visible from the application's own class loader, which this one
+     * delegates to first.)
      * <p>
      * On Java 8, such a jar used to be injected directly into {@link
      * ClassLoader#getSystemClassLoader()} (see the javadoc on {@link
