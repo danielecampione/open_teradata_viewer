@@ -1,2 +1,37 @@
 Liquid;com.birosoft.liquid.LiquidLookAndFeel;1.6
-Kunststoff;com.incors.plaf.kunststoff.KunststoffLookAndFeel;1.6
+Office 2003;org.fife.plaf.Office2003.Office2003LookAndFeel;1.6;2
+Office XP;org.fife.plaf.OfficeXP.OfficeXPLookAndFeel;1.6;2
+Visual Studio 2005;org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel;1.6;2
+Radiance Business;org.pushingpixels.radiance.theming.api.skin.RadianceBusinessLookAndFeel;9;4
+Radiance Business Black Steel;org.pushingpixels.radiance.theming.api.skin.RadianceBusinessBlackSteelLookAndFeel;9;4
+Radiance Business Blue Steel;org.pushingpixels.radiance.theming.api.skin.RadianceBusinessBlueSteelLookAndFeel;9;4
+Radiance Autumn;org.pushingpixels.radiance.theming.api.skin.RadianceAutumnLookAndFeel;9;4
+Radiance Blueprint;org.pushingpixels.radiance.theming.api.skin.RadianceBlueprintLookAndFeel;9;4
+Radiance Cerulean;org.pushingpixels.radiance.theming.api.skin.RadianceCeruleanLookAndFeel;9;4
+Radiance Creme;org.pushingpixels.radiance.theming.api.skin.RadianceCremeLookAndFeel;9;4
+Radiance Creme Coffee;org.pushingpixels.radiance.theming.api.skin.RadianceCremeCoffeeLookAndFeel;9;4
+Radiance Dust;org.pushingpixels.radiance.theming.api.skin.RadianceDustLookAndFeel;9;4
+Radiance Dust Coffee;org.pushingpixels.radiance.theming.api.skin.RadianceDustCoffeeLookAndFeel;9;4
+Radiance Gemini;org.pushingpixels.radiance.theming.api.skin.RadianceGeminiLookAndFeel;9;4
+Radiance Graphite;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteLookAndFeel;9;4
+Radiance Graphite Aqua;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteAquaLookAndFeel;9;4
+Radiance Graphite Chalk;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteChalkLookAndFeel;9;4
+Radiance Graphite Electric;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteElectricLookAndFeel;9;4
+Radiance Graphite Glass;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteGlassLookAndFeel;9;4
+Radiance Graphite Gold;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteGoldLookAndFeel;9;4
+Radiance Graphite Sienna;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteSiennaLookAndFeel;9;4
+Radiance Graphite Sunset;org.pushingpixels.radiance.theming.api.skin.RadianceGraphiteSunsetLookAndFeel;9;4
+Radiance Green Magic;org.pushingpixels.radiance.theming.api.skin.RadianceGreenMagicLookAndFeel;9;4
+Radiance Magellan;org.pushingpixels.radiance.theming.api.skin.RadianceMagellanLookAndFeel;9;4
+Radiance Mariner;org.pushingpixels.radiance.theming.api.skin.RadianceMarinerLookAndFeel;9;4
+Radiance Mist Aqua;org.pushingpixels.radiance.theming.api.skin.RadianceMistAquaLookAndFeel;9;4
+Radiance Mist Silver;org.pushingpixels.radiance.theming.api.skin.RadianceMistSilverLookAndFeel;9;4
+Radiance Moderate;org.pushingpixels.radiance.theming.api.skin.RadianceModerateLookAndFeel;9;4
+Radiance Nebula;org.pushingpixels.radiance.theming.api.skin.RadianceNebulaLookAndFeel;9;4
+Radiance Nebula Amethyst;org.pushingpixels.radiance.theming.api.skin.RadianceNebulaAmethystLookAndFeel;9;4
+Radiance Nebula Brick Wall;org.pushingpixels.radiance.theming.api.skin.RadianceNebulaBrickWallLookAndFeel;9;4
+Radiance Night Shade;org.pushingpixels.radiance.theming.api.skin.RadianceNightShadeLookAndFeel;9;4
+Radiance Raven;org.pushingpixels.radiance.theming.api.skin.RadianceRavenLookAndFeel;9;4
+Radiance Sahara;org.pushingpixels.radiance.theming.api.skin.RadianceSaharaLookAndFeel;9;4
+Radiance Sentinel;org.pushingpixels.radiance.theming.api.skin.RadianceSentinelLookAndFeel;9;4
+Radiance Twilight;org.pushingpixels.radiance.theming.api.skin.RadianceTwilightLookAndFeel;9;4

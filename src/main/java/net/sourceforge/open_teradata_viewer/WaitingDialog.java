@@ -104,17 +104,19 @@ public class WaitingDialog extends TimerTask {
         long minutes = executionTime / 60 % 60;
         long seconds = executionTime % 60;
         StringBuilder text = new StringBuilder();
+        // The separator between a number and its unit is appended here: a leading space
+        // in the resource strings would be stripped by Properties.load()
         if (hours > 0) {
-            text.append(hours).append(hours == 1 ?
+            text.append(hours).append(' ').append(hours == 1 ?
                 langManager.getString("time.hour_singular") :
                 langManager.getString("time.hour_plural")).append(" ");
         }
         if (minutes > 0) {
-            text.append(minutes).append(minutes == 1 ?
+            text.append(minutes).append(' ').append(minutes == 1 ?
                 langManager.getString("time.minute_singular") :
                 langManager.getString("time.minute_plural")).append(" ");
         }
-        text.append(seconds).append(seconds == 1 ?
+        text.append(seconds).append(' ').append(seconds == 1 ?
             langManager.getString("time.second_singular") :
             langManager.getString("time.second_plural"));
         return text.toString();

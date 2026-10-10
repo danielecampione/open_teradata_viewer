@@ -65,10 +65,11 @@ public class LanguageManager {
     public static final Language ESTONIAN = new Language("et", "Eesti keel", "Estonian");
     public static final Language LATVIAN = new Language("lv", "Latvie\u0161u", "Latvian");
     public static final Language SERBIAN = new Language("sr", "Srpski", "Serbian");
+    public static final Language ICELANDIC = new Language("is", "\u00cdslenska", "Icelandic");
 
     private static final Language[] SUPPORTED_LANGUAGES = { ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH,
             NORWEGIAN, SWEDISH, FINNISH, TURKISH, CROATIAN, LITHUANIAN, PORTUGUESE, CZECH, SLOVENIAN, ESTONIAN,
-            LATVIAN, SERBIAN };
+            LATVIAN, SERBIAN, ICELANDIC };
 
     private LanguageManager() {
         listeners = new ArrayList<>();

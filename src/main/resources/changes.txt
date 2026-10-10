@@ -1,3 +1,29 @@
+0.39b (10/10/2026)
+    - Added PowerShell syntax highlighting.
+    - Added Icelandic (is) language support to the UI internationalization.
+    - Fixed the elapsed time shown by the waiting dialog, which ran the number
+      and its unit together (e.g. "5minutes" instead of "5 minutes").
+    - Added the Office 2003, Office XP and Visual Studio 2005 Look and Feels
+      (OfficeLnFs), offered on Windows only.
+    - On Windows, the Visual Studio 2005 Look and Feel is now the default one
+      when no Look and Feel has been chosen yet.
+    - The Radiance Look and Feels (33 skins) are now available out of the
+      box: their libraries are bundled with the application and their
+      entries are added automatically, so there are no jar files to copy and
+      no XML entries to write by hand.
+    - Removed the Kunststoff Look and Feel.
+    - The new Look and Feels (Office and Radiance) are added once to an
+      existing open_teradata_viewer_lookandfeels.xml, and the removed
+      Kunststoff entry is dropped from it. Entries the user has removed are
+      never restored.
+    - Fixed the default list of third-party Look and Feels being read wrongly
+      on Windows, which left a fresh installation without any of them.
+    - The editor now starts with the Visual Studio theme.
+    - Made the real-desktop splash screen test more robust: the splash screen
+      is kept on top and the screen is polled for the repaint instead of being
+      sampled only once.
+    - Upgraded rsyntaxtextarea library 3.6.1 -> 3.6.2
+
 0.39a (30/09/2026)
     - Groovy (groovy and groovy-jsr223, version 3.0.25) is now resolved from
       Maven Central by Gradle, like the other dependencies, instead of being

@@ -29,8 +29,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilder;
@@ -44,7 +48,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -52,8 +55,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import net.sourceforge.open_teradata_viewer.util.StreamUtil;
-import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
@@ -86,7 +87,7 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
  * should be a double value, such as "1.6", etc..
  *
  * @author D. Campione
- * 
+ *
  */
 public class ThirdPartyLookAndFeelManager {
 
@@ -97,6 +98,37 @@ public class ThirdPartyLookAndFeelManager {
     private static final String LOOK_AND_FEEL = "LookAndFeel";
     private static final String MIN_JAVA_VERSION = "minJavaVersion";
     private static final String NAME = "name";
+    private static final String ROOT = "ThirdPartyLookAndFeels";
+
+    /**
+     * Root attribute of the XML file holding the revision of the built-in list
+     * (default_3rd_party_lnfs.list) the file was last synchronized with. Older
+     * releases ignore it.
+     */
+    private static final String DEFAULTS_REVISION_ATTRIBUTE = "defaultsRevision";
+
+    /**
+     * The current revision of the built-in list. Raise it whenever an entry
+     * with a new "since" revision is added to default_3rd_party_lnfs.list.
+     */
+    private static final int DEFAULTS_REVISION = 4;
+
+    /**
+     * Built-in Look and Feels that are no longer shipped. Their entries are
+     * dropped once from an existing file that is older than the revision that
+     * retired them, so that the menu does not offer a Look and Feel that can
+     * no longer be loaded.
+     */
+    private static final String[] RETIRED_CLASSES = { "com.incors.plaf.kunststoff.KunststoffLookAndFeel" };
+
+    /** The Office Look and Feels are built on top of the Windows one. */
+    private static final String WINDOWS_ONLY_CLASS_PREFIX = "org.fife.plaf.";
+
+    /** The Look and Feel used by default on Windows, when it is available. */
+    private static final String WINDOWS_DEFAULT_LOOK_AND_FEEL = "org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel";
+
+    private static final boolean IS_WINDOWS = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH)
+            .startsWith("windows");
 
     /** Ctor. */
     public ThirdPartyLookAndFeelManager(String path) {
@@ -174,39 +206,18 @@ public class ThirdPartyLookAndFeelManager {
         File file = new File(Utilities.normalizePath(System.getProperty("user.home")), xmlFile);
         if (!file.isFile()) {
             try {
-                String defaultThirdPartyLookAndFeelsFileContent = StreamUtil.stream2String(
-                        ThirdPartyLookAndFeelManager.class.getResourceAsStream("/res/default_3rd_party_lnfs.list"));
-                String[] defaultThirdPartyLookAndFeels = StringUtil.split(defaultThirdPartyLookAndFeelsFileContent,
-                        System.getProperty("line.separator").charAt(0));
-
                 DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                 Document doc = docBuilder.newDocument();
-                Element rootElement = doc.createElement("ThirdPartyLookAndFeels");
+                Element rootElement = doc.createElement(ROOT);
+                rootElement.setAttribute(DEFAULTS_REVISION_ATTRIBUTE, String.valueOf(DEFAULTS_REVISION));
                 doc.appendChild(rootElement);
 
-                String[] attributeNames = { NAME, CLASS, MIN_JAVA_VERSION };
-                for (String line : defaultThirdPartyLookAndFeels) {
-                    String[] attributes = line.split(";");
-                    Element element = doc.createElement("LookAndFeel");
-                    rootElement.appendChild(element);
-                    for (int i = 0; i < attributeNames.length; i++) {
-                        String attributeName = attributeNames[i];
-                        Attr attr = doc.createAttribute(attributeName);
-                        initAttribute(doc, attr, element, attributeName, attributes[i].trim());
-                    }
+                for (String[] defaultLookAndFeel : readDefaultLookAndFeels()) {
+                    rootElement.appendChild(createLookAndFeelElement(doc, defaultLookAndFeel));
                 }
 
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(file);
-
-                // Write the content into XML file
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                transformer.transform(source, new StreamResult(new ByteArrayOutputStream())); // Test first
-                transformer.transform(source, result);
+                writeDocument(doc, file);
             } catch (ParserConfigurationException pce) {
                 ExceptionDialog.ignoreException(pce);
             } catch (TransformerConfigurationException tce) {
@@ -216,6 +227,8 @@ public class ThirdPartyLookAndFeelManager {
             } catch (IOException ioe) {
                 ExceptionDialog.ignoreException(ioe);
             }
+        } else {
+            synchronizeWithDefaults(file);
         }
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -250,7 +263,6 @@ public class ThirdPartyLookAndFeelManager {
     /**
      * Used in parsing the XML file containing the 3rd party look and feels.
      *
-     * @param node The root node of the parsed XML document.
      * @param lafInfo An array list of <code>ExtendedLookAndFeelInfo</code>s.
      * @throws IOException If an error occurs while parsing the XML.
      */
@@ -317,6 +329,11 @@ public class ThirdPartyLookAndFeelManager {
                     } catch (NumberFormatException nfe) {
                         ExceptionDialog.hideException(nfe);
                     }
+                    // The Office Look and Feels extend the Windows one: they cannot
+                    // work anywhere else, so they are not offered there
+                    if (add && !IS_WINDOWS && className.startsWith(WINDOWS_ONLY_CLASS_PREFIX)) {
+                        add = false;
+                    }
                     if (add) {
                         lafInfo.add(new ExtendedLookAndFeelInfo(name, className));
                     }
@@ -327,10 +344,167 @@ public class ThirdPartyLookAndFeelManager {
         }
     }
 
-    private void initAttribute(Document doc, Attr attr, Element element, String attributeName, String attributeValue) {
-        attr = doc.createAttribute(attributeName);
-        attr.setValue(attributeValue);
-        element.setAttributeNode(attr);
+    /**
+     * Reads the built-in list of 3rd party Look and Feels. Every non-empty line
+     * that is not a comment has the form
+     * <code>name;class;minJavaVersion[;since]</code>, where the optional
+     * <code>since</code> is the revision of the list that introduced the entry
+     * (1 when omitted).
+     *
+     * @return The entries as arrays of four strings: name, class, minimum Java
+     *         version and since revision.
+     * @throws IOException If the list cannot be read.
+     */
+    private static List<String[]> readDefaultLookAndFeels() throws IOException {
+        List<String[]> entries = new ArrayList<>();
+        try (InputStream is = ThirdPartyLookAndFeelManager.class.getResourceAsStream("/res/default_3rd_party_lnfs.list")) {
+            if (is == null) {
+                throw new IOException("Resource not found: /res/default_3rd_party_lnfs.list");
+            }
+            // readLine() copes with any line terminator, whatever the platform
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                String[] fields = line.split(";");
+                if (fields.length < 3) {
+                    continue;
+                }
+                String[] entry = { fields[0].trim(), fields[1].trim(), fields[2].trim(),
+                        fields.length > 3 ? fields[3].trim() : "1" };
+                entries.add(entry);
+            }
+        }
+        return entries;
+    }
+
+    private static Element createLookAndFeelElement(Document doc, String[] defaultLookAndFeel) {
+        Element element = doc.createElement(LOOK_AND_FEEL);
+        element.setAttribute(NAME, defaultLookAndFeel[0]);
+        element.setAttribute(CLASS, defaultLookAndFeel[1]);
+        element.setAttribute(MIN_JAVA_VERSION, defaultLookAndFeel[2]);
+        return element;
+    }
+
+    private static void writeDocument(Document doc, File file) throws TransformerException {
+        DOMSource source = new DOMSource(doc);
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.transform(source, new StreamResult(new ByteArrayOutputStream())); // Test first
+        transformer.transform(source, new StreamResult(file));
+    }
+
+    /**
+     * Brings an already existing XML file up to date with the built-in list:
+     * the Look and Feels that were introduced after the revision the file was
+     * last synchronized with are added, and the ones that have been retired
+     * since are removed. This is done once per revision, so that an entry the
+     * user removes later on is never put back.
+     *
+     * @param file The XML file of the 3rd party Look and Feels.
+     */
+    private static void synchronizeWithDefaults(File file) {
+        try {
+            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc;
+            try (InputStream inputStream = new FileInputStream(file)) {
+                doc = docBuilder.parse(inputStream);
+            }
+            Element rootElement = doc.getDocumentElement();
+
+            int revision = 1;
+            String storedRevision = rootElement.getAttribute(DEFAULTS_REVISION_ATTRIBUTE).trim();
+            if (storedRevision.length() > 0) {
+                try {
+                    revision = Integer.parseInt(storedRevision);
+                } catch (NumberFormatException nfe) {
+                    ExceptionDialog.hideException(nfe);
+                }
+            }
+            if (revision >= DEFAULTS_REVISION) {
+                return;
+            }
+
+            Set<String> presentClasses = new HashSet<>();
+            List<Element> retired = new ArrayList<>();
+            List<String> retiredClasses = Arrays.asList(RETIRED_CLASSES);
+            NodeList children = rootElement.getElementsByTagName(LOOK_AND_FEEL);
+            for (int i = 0; i < children.getLength(); i++) {
+                Element lookAndFeel = (Element) children.item(i);
+                String className = lookAndFeel.getAttribute(CLASS).trim();
+                if (retiredClasses.contains(className)) {
+                    retired.add(lookAndFeel);
+                } else {
+                    presentClasses.add(className);
+                }
+            }
+            for (Element lookAndFeel : retired) {
+                rootElement.removeChild(lookAndFeel);
+            }
+
+            for (String[] defaultLookAndFeel : readDefaultLookAndFeels()) {
+                int since = 1;
+                try {
+                    since = Integer.parseInt(defaultLookAndFeel[3]);
+                } catch (NumberFormatException nfe) {
+                    ExceptionDialog.hideException(nfe);
+                }
+                if (since > revision && !presentClasses.contains(defaultLookAndFeel[1])) {
+                    rootElement.appendChild(createLookAndFeelElement(doc, defaultLookAndFeel));
+                }
+            }
+            rootElement.setAttribute(DEFAULTS_REVISION_ATTRIBUTE, String.valueOf(DEFAULTS_REVISION));
+
+            // Drop the blank text nodes of the old formatting, the transformer
+            // indents the whole file again
+            NodeList rootChildren = rootElement.getChildNodes();
+            for (int i = rootChildren.getLength() - 1; i >= 0; i--) {
+                Node child = rootChildren.item(i);
+                if (child.getNodeType() == Node.TEXT_NODE && child.getTextContent().trim().isEmpty()) {
+                    rootElement.removeChild(child);
+                }
+            }
+            writeDocument(doc, file);
+        } catch (Exception e) {
+            ExceptionDialog.ignoreException(e);
+        }
+    }
+
+    /**
+     * Returns the Look and Feel to use when the user has never chosen one: on
+     * Windows it is the Visual Studio 2005 one, provided that it is listed and
+     * can be loaded, everywhere else (or otherwise) the given one.
+     *
+     * @param systemLookAndFeel The class name of the Look and Feel to fall back
+     *                          to, usually the system one.
+     * @return The class name of the Look and Feel to use.
+     */
+    public String getDefaultLookAndFeelClassName(String systemLookAndFeel) {
+        if (IS_WINDOWS && isListed(WINDOWS_DEFAULT_LOOK_AND_FEEL)) {
+            try {
+                Class.forName(WINDOWS_DEFAULT_LOOK_AND_FEEL, false, lafLoader);
+                return WINDOWS_DEFAULT_LOOK_AND_FEEL;
+            } catch (ClassNotFoundException | LinkageError e) {
+                ExceptionDialog.hideException(e);
+            }
+        }
+        return systemLookAndFeel;
+    }
+
+    private boolean isListed(String className) {
+        if (lnfInfo != null) {
+            for (Iterator i = lnfInfo.iterator(); i.hasNext();) {
+                if (className.equals(((ExtendedLookAndFeelInfo) i.next()).getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static void restoreSystemLookAndFeel() {

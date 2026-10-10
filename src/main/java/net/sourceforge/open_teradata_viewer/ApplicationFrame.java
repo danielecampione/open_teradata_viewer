@@ -103,6 +103,7 @@ import org.fife.ui.rtextarea.ToolTipSupplier;
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
+import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
@@ -330,6 +331,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         gutter.setBookmarkingEnabled(true);
         gutter.setBookmarkIcon(ImageManager.getImage("/icons/bookmark.png"));
         textScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        // Applied only now that the editor sits in its scroll pane, so that the
+        // theme styles the gutter as well
+        try {
+            ThemeAction.applyTheme(textArea, ThemeAction.DEFAULT_THEME_XML);
+        } catch (IOException ioe) {
+            ExceptionDialog.hideException(ioe);
+        }
         csp.add(sp);
         ErrorStrip errorStrip = new ErrorStrip(textArea);
         contentPane.add(csp, BorderLayout.CENTER);
@@ -937,7 +945,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 // is what lets UIManager.setLookAndFeel(String)'s own
                 // internal class resolution (via Thread.currentThread().
                 // getContextClassLoader()) find third-party LAF jars
-                // (Radiance, Kunststoff, Liquid, ...) exactly as the manual
+                // (Radiance, Liquid, ...) exactly as the manual
                 // cl.loadClass(...) call used to.
                 ClassLoader previousContextCl = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(cl);
@@ -1582,7 +1590,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * Called when the language changes. Automatically refreshes all GUI components.
      */
     @Override
-    public void onLanguageChanged(java.util.Locale newLocale, java.util.ResourceBundle newBundle) {
+    public void onLanguageChanged(Locale newLocale, ResourceBundle newBundle) {
         refreshLanguage();
     }
     

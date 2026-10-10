@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'net.sourceforge.open_teradata_viewer'
-version = '0.39a'
+version = '0.39b'
 
 // Explicit toolchain: Gradle LOOKS FOR (or requests) a JDK 11+ to compile,
 // regardless of which JDK launches gradlew/the daemon. This resolves the case
@@ -130,12 +130,16 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy:3.0.25'
     implementation 'org.codehaus.groovy:groovy-jsr223:3.0.25'
     // Every sibling library declared above (rstaui, autocomplete,
-    // languagesupport, spellchecker) is built against rsyntaxtextarea 3.6.1.
-    // "strictly" keeps the version pinned in this one place: were any of them
-    // to ask for a newer one in the future, the build fails loudly instead
-    // of Gradle silently taking the highest version found in the graph.
+    // languagesupport, spellchecker) declares rsyntaxtextarea 3.6.1 as its
+    // own dependency, and runs unchanged on top of 3.6.2. "strictly" on this
+    // direct declaration overrides whatever version they request, in either
+    // direction, and it does so silently: Gradle neither takes the highest
+    // version found in the graph nor fails if a newer sibling release asks
+    // for a higher one. The version OTV ships with is therefore decided in
+    // this one place, and when a sibling library is upgraded the
+    // rsyntaxtextarea version it declares must be checked by hand.
     implementation('com.fifesoft:rsyntaxtextarea') {
-        version { strictly '3.6.1' }
+        version { strictly '3.6.2' }
     }
 
     // The old monolithic "-all" bundle was never published to Maven
@@ -146,6 +150,20 @@ dependencies {
     // the only one pulled in - smaller than the local "-all" jar it
     // replaces, not just an equivalent swap.
     implementation 'com.l2fprod.common:l2fprod-common-directorychooser:6.9.1'
+
+    // Radiance Theming: the skins of the "Radiance ..." entries of the
+    // "Look & Feel" menu (see default_3rd_party_lnfs.list). OTV only refers to
+    // them by class name, hence runtime-only dependencies. The four artifacts
+    // are listed one by one on purpose, and ephemeral-chroma-java has to keep
+    // in step with the Radiance release: Radiance 9.0.0 needs 2.0.0, with an
+    // older one every skin fails with a NoSuchMethodError.
+    // The other Look and Feels offered out of the box (Liquid and the Office
+    // ones) have no Maven Central coordinates: their jars stay in the project
+    // root, see runtimeWorkingDirFiles below.
+    runtimeOnly 'org.pushing-pixels:radiance-theming:9.0.0'
+    runtimeOnly 'org.pushing-pixels:radiance-animation:9.0.0'
+    runtimeOnly 'org.pushing-pixels:radiance-common:9.0.0'
+    runtimeOnly 'org.pushing-pixels:ephemeral-chroma-java:2.0.0'
 
     // Actual JUnit 5 for the 4 existing tests (TestFormatStyleBasic,
     // TestFormatStyleDdl, TestXMLBeautifier, TestSHA1SumCalculator).
@@ -221,17 +239,20 @@ jar {
 
 // Resources OTV expects to find in ITS OWN WORKING DIRECTORY at runtime,
 // scanned from the filesystem rather than loaded off the classpath: JDBC
-// drivers (a custom classloader in Drivers.java looks for them there),
-// third-party Look&Feel jars (ThirdPartyLookAndFeelManager, same mechanism),
-// the bundled macros, and the spelling dictionary. They live at the project
-// root, outside every Gradle sourceSet, so neither "jar" nor "installDist"
-// ever picks them up on their own - copied here explicitly instead, next to
-// every runnable artifact this build produces.
+// drivers (a custom classloader in Drivers.java looks for them there), the
+// third-party Look&Feel jars that have no Maven Central coordinates (Liquid
+// and the Office ones, plus any further one the user drops there:
+// ThirdPartyLookAndFeelManager, same mechanism; Radiance comes from the
+// classpath instead, see the dependencies above), the bundled macros, and
+// the spelling dictionary. They live at the
+// project root, outside every Gradle sourceSet, so neither "jar" nor
+// "installDist" ever picks them up on their own - copied here explicitly
+// instead, next to every runnable artifact this build produces.
 def runtimeWorkingDirFiles = [
         'english_dic.zip',
-        'kunststoff.jar',
         'liquidlnf.jar',
         'mysql-connector-j-8.0.33.jar',
+        'OfficeLnFs.jar',
         'ojdbc11.jar',
         'terajdbc4.jar'
 ]

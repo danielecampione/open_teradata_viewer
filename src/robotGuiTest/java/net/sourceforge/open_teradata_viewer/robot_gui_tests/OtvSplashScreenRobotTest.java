@@ -45,12 +45,24 @@ import net.sourceforge.open_teradata_viewer.SplashScreen;
  */
 public final class OtvSplashScreenRobotTest {
 
+    /** How long the screen is polled for the repaint to show up, in milliseconds. */
+    private static final long REPAINT_TIMEOUT_MS = 3000;
+
+    /** The delay between two screen captures while polling, in milliseconds. */
+    private static final long POLL_INTERVAL_MS = 100;
+
     public static void main(String[] args) throws Exception {
         final SplashScreen[] splash = new SplashScreen[1];
 
         SwingUtilities.invokeAndWait(() -> {
             splash[0] = new SplashScreen("icons/logo.png", "Test in progress...");
+            // A window hidden behind another one can never show a repaint on
+            // the real screen, so the splash screen is kept above the others
+            if (splash[0].isAlwaysOnTopSupported()) {
+                splash[0].setAlwaysOnTop(true);
+            }
             splash[0].setVisible(true);
+            splash[0].toFront();
         });
 
         Robot robot = new Robot();
@@ -79,14 +91,25 @@ public final class OtvSplashScreenRobotTest {
 
             SwingUtilities.invokeAndWait(() -> splash[0].updateStatus("Almost finished...", 80));
             robot.waitForIdle();
-            Thread.sleep(200);
-            Toolkit.getDefaultToolkit().sync();
 
-            BufferedImage after = robot.createScreenCapture(bounds);
+            // The window system may take a while to put the repaint on the
+            // screen, so the screen is captured again and again until it
+            // differs from the "before" capture or the time is over: a single
+            // capture after a fixed delay is at the mercy of the machine load
+            BufferedImage after;
+            long deadline = System.currentTimeMillis() + REPAINT_TIMEOUT_MS;
+            do {
+                Thread.sleep(POLL_INTERVAL_MS);
+                Toolkit.getDefaultToolkit().sync();
+                after = robot.createScreenCapture(bounds);
+            } while (imagesEqual(before, after) && System.currentTimeMillis() < deadline);
 
             if (imagesEqual(before, after)) {
-                throw new AssertionError("The real screenshot before and after updateStatus() is identical: "
-                        + "the repaint did not actually occur on the screen.");
+                throw new AssertionError("The real screenshot before and after updateStatus() is identical for "
+                        + REPAINT_TIMEOUT_MS + " ms: the repaint did not actually occur on the screen "
+                        + "(splash screen showing: " + splash[0].isShowing() + ", always on top: "
+                        + splash[0].isAlwaysOnTop() + ", bounds: " + bounds + "). Make sure that no other window "
+                        + "covers it and that the desktop session is neither locked nor disconnected.");
             }
 
             System.out.println("OK - SplashScreen displayed and repainted on a real desktop (Robot).");

@@ -99,12 +99,13 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             String lafName = UIManager.getSystemLookAndFeelClassName();
+            String startupLookAndFeelProperty = "startup_lookandfeel_class";
+            boolean noSavedLookAndFeel = false;
 
             try {
-                String startupLookAndFeelProperty = "startup_lookandfeel_class";
                 String strStartupLookAndFeelClassName = Config.getSetting(startupLookAndFeelProperty);
                 if (StringUtil.isEmpty(strStartupLookAndFeelClassName)) {
-                    Config.saveSetting(startupLookAndFeelProperty, lafName);
+                    noSavedLookAndFeel = true;
                 } else {
                     lafName = strStartupLookAndFeelClassName;
                 }
@@ -114,6 +115,18 @@ public class Main {
 
             String rootDir = Utilities.getRootDir();
             ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(rootDir + File.separator);
+
+            // The user has never chosen a Look and Feel: use the default one
+            // (the Office Visual Studio 2005 one on Windows, the system one
+            // elsewhere) and remember it, exactly as the system one used to be
+            if (noSavedLookAndFeel) {
+                lafName = lafManager.getDefaultLookAndFeelClassName(lafName);
+                try {
+                    Config.saveSetting(startupLookAndFeelProperty, lafName);
+                } catch (Exception e) {
+                    ExceptionDialog.hideException(e);
+                }
+            }
 
             try {
                 installACompatibleLaf(lafManager, lafName);
@@ -271,7 +284,7 @@ public class Main {
             // class loader makes UIManager.setLookAndFeel(String) - which
             // resolves the class via Thread.currentThread().
             // getContextClassLoader() - still find third-party LAF jars
-            // (Radiance, Kunststoff, Liquid, ...) exactly as before.
+            // (Radiance, Liquid, ...) exactly as before.
             ClassLoader previousContextCl = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(cl);
             try {

@@ -40,6 +40,9 @@ public class ThemeAction extends CustomAction {
 
     private static final long serialVersionUID = -5998678412806566178L;
 
+    /** The theme the editor starts with. */
+    public static final String DEFAULT_THEME_XML = "/res/themes/vs.xml";
+
     private String xml;
 
     public ThemeAction(String name, String xml) {
@@ -64,23 +67,38 @@ public class ThemeAction extends CustomAction {
     protected void performThreaded(ActionEvent e) throws Exception {
         RSyntaxTextArea textArea = ApplicationFrame.getInstance()
                 .getTextComponent();
-        
-        // Let's save the font: let's capture the current font which is already scaled for Hi-DPI
-        Font currentScaledFont = textArea.getFont();
-        
-        InputStream in = getClass().getResourceAsStream(xml);
+
         try {
-            Theme theme = Theme.load(in);
-            // We apply the new theme which unfortunately resets the font sizes
-            theme.apply(textArea);
-            
-            // We restore the font size: we force the scaled font on all tokens of the new theme
-            OTVSyntaxTextArea.setFont(textArea, currentScaledFont);
-            
+            applyTheme(textArea, xml);
+
             ApplicationFrame.getInstance().getApplicationMenuBar()
                     .refreshEditOptions();
         } catch (IOException ioe) {
             ExceptionDialog.notifyException(ioe);
+        }
+    }
+
+    /**
+     * Applies a theme to an editor, keeping its current font size.
+     *
+     * @param textArea The editor.
+     * @param xml The classpath location of the theme file.
+     * @throws IOException If the theme cannot be read.
+     */
+    public static void applyTheme(RSyntaxTextArea textArea, String xml) throws IOException {
+        // Let's save the font: let's capture the current font which is already scaled for Hi-DPI
+        Font currentScaledFont = textArea.getFont();
+
+        try (InputStream in = ThemeAction.class.getResourceAsStream(xml)) {
+            if (in == null) {
+                throw new IOException("Theme not found: " + xml);
+            }
+            Theme theme = Theme.load(in);
+            // We apply the new theme which unfortunately resets the font sizes
+            theme.apply(textArea);
+
+            // We restore the font size: we force the scaled font on all tokens of the new theme
+            OTVSyntaxTextArea.setFont(textArea, currentScaledFont);
         }
     }
 }

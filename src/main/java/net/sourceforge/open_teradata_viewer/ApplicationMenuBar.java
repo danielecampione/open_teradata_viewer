@@ -271,7 +271,7 @@ public class ApplicationMenuBar extends JMenuBar
         add(menu2);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
         subMenu = createMenu("menu.editor_theme");
-        addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu, true);
+        addThemeItem("Default", "/res/themes/default.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Default (Alternative Version)", "/res/themes/default-alt.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Dark", "/res/themes/dark.xml", buttonGroupEditorTheme, subMenu);
         addThemeItem("Druid", "/res/themes/druid.xml", buttonGroupEditorTheme, subMenu);
@@ -362,6 +362,7 @@ public class ApplicationMenuBar extends JMenuBar
         addSyntaxItem("NSIS", SyntaxConstants.SYNTAX_STYLE_NSIS, bg, subMenu2);
         addSyntaxItem("Perl", SyntaxConstants.SYNTAX_STYLE_PERL, bg, subMenu2);
         addSyntaxItem("PHP", SyntaxConstants.SYNTAX_STYLE_PHP, bg, subMenu2);
+        addSyntaxItem("PowerShell", SyntaxConstants.SYNTAX_STYLE_POWERSHELL, bg, subMenu2);
         addSyntaxItem("Properties", SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE, bg, subMenu2);
         addSyntaxItem("Proto", SyntaxConstants.SYNTAX_STYLE_PROTO, bg, subMenu2);
         addSyntaxItem("Python", SyntaxConstants.SYNTAX_STYLE_PYTHON, bg, subMenu2);
@@ -504,7 +505,7 @@ public class ApplicationMenuBar extends JMenuBar
     }
 
     private void addThemeItem(String name, String themeXml, ButtonGroup bg, JMenu menu) {
-        addThemeItem(name, themeXml, bg, menu, false);
+        addThemeItem(name, themeXml, bg, menu, ThemeAction.DEFAULT_THEME_XML.equals(themeXml));
     }
 
     private void addSyntaxItem(String name, String style, ButtonGroup bg, JScrollMenu menu) {
