@@ -1,3 +1,11 @@
+0.39c (11/10/2026)
+    - Added Slovak (sk) language support to the UI internationalization.
+    - The Look and Feel menu now uses up to 90% of the usable screen height
+      instead of showing only 10 rows at a time.
+    - Fixed four wrongly accented words ("é" instead of "è") in the Italian
+      translation.
+    - Upgraded rsyntaxtextarea library 3.6.2 -> 3.6.3
+
 0.39b (10/10/2026)
     - Added PowerShell syntax highlighting.
     - Added Icelandic (is) language support to the UI internationalization.

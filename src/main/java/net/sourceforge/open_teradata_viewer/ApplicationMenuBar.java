@@ -268,6 +268,10 @@ public class ApplicationMenuBar extends JMenuBar
         menu.add(Actions.RUN_SCRIPT);
 
         JScrollMenu menu2 = createScrollMenu("menu.lookandfeel");
+        // The list of the Look and Feels is long: let it use most of the height
+        // of the screen (still leaving some room), instead of showing just a
+        // few rows
+        menu2.setMaximumScreenHeightRatio(0.9d);
         add(menu2);
         ButtonGroup buttonGroupEditorTheme = new ButtonGroup();
         subMenu = createMenu("menu.editor_theme");

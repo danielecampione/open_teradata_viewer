@@ -31,7 +31,7 @@ import net.sourceforge.open_teradata_viewer.Config;
 /**
  * Manages internationalization for the application. Handles language switching
  * and resource bundle management.
- * 
+ *
  * @author D. Campione
  */
 public class LanguageManager {
@@ -66,10 +66,11 @@ public class LanguageManager {
     public static final Language LATVIAN = new Language("lv", "Latvie\u0161u", "Latvian");
     public static final Language SERBIAN = new Language("sr", "Srpski", "Serbian");
     public static final Language ICELANDIC = new Language("is", "\u00cdslenska", "Icelandic");
+    public static final Language SLOVAK = new Language("sk", "Sloven\u010dina", "Slovak");
 
     private static final Language[] SUPPORTED_LANGUAGES = { ENGLISH, ITALIAN, GERMAN, DUTCH, UKRAINIAN, DANISH, SPANISH,
             NORWEGIAN, SWEDISH, FINNISH, TURKISH, CROATIAN, LITHUANIAN, PORTUGUESE, CZECH, SLOVENIAN, ESTONIAN,
-            LATVIAN, SERBIAN, ICELANDIC };
+            LATVIAN, SERBIAN, ICELANDIC, SLOVAK };
 
     private LanguageManager() {
         listeners = new ArrayList<>();
@@ -180,7 +181,7 @@ public class LanguageManager {
 
     /**
      * Sets the current language and updates the resource bundle.
-     * 
+     *
      * @param languageCode the language code (e.g., "en", "it")
      */
     public void setLanguage(String languageCode) {
@@ -231,7 +232,7 @@ public class LanguageManager {
 
     /**
      * Gets a localized string for the given key.
-     * 
+     *
      * @param key the resource key
      * @return the localized string, or the key itself if not found
      */
@@ -256,7 +257,7 @@ public class LanguageManager {
 
     /**
      * Gets a localized string with parameters.
-     * 
+     *
      * @param key    the resource key
      * @param params parameters to substitute
      * @return the formatted localized string
@@ -285,7 +286,7 @@ public class LanguageManager {
 
     /**
      * Gets the current locale.
-     * 
+     *
      * @return the current locale
      */
     public Locale getCurrentLocale() {
@@ -294,7 +295,7 @@ public class LanguageManager {
 
     /**
      * Gets the current language code.
-     * 
+     *
      * @return the current language code
      */
     public String getCurrentLanguageCode() {
@@ -303,7 +304,7 @@ public class LanguageManager {
 
     /**
      * Gets all supported languages.
-     * 
+     *
      * @return array of supported languages
      */
     public Language[] getSupportedLanguages() {
@@ -312,7 +313,7 @@ public class LanguageManager {
 
     /**
      * Gets the current language object.
-     * 
+     *
      * @return the current language
      */
     public Language getCurrentLanguage() {
@@ -327,7 +328,7 @@ public class LanguageManager {
 
     /**
      * Adds a language change listener.
-     * 
+     *
      * @param listener the listener to add
      */
     public void addLanguageChangeListener(LanguageChangeListener listener) {
@@ -339,7 +340,7 @@ public class LanguageManager {
 
     /**
      * Removes a language change listener.
-     * 
+     *
      * @param listener the listener to remove
      */
     public void removeLanguageChangeListener(LanguageChangeListener listener) {

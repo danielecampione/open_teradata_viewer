@@ -32,10 +32,10 @@ import javax.swing.plaf.MenuItemUI;
 import javax.swing.plaf.PopupMenuUI;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class JScrollMenu extends JMenu {
 
@@ -44,7 +44,7 @@ public class JScrollMenu extends JMenu {
     // Covers the one in the JMenu because the method that creates it in
     // JMenu is private
     /** The popup menu portion of the menu. */
-    private JPopupMenu popupMenu;
+    private JScrollPopupMenu popupMenu;
 
     /** Ctor. Constructs a new <code>JMenu</code> with no text. */
     public JScrollMenu() {
@@ -70,6 +70,19 @@ public class JScrollMenu extends JMenu {
     public JScrollMenu(Action a) {
         this();
         setAction(a);
+    }
+
+    /**
+     * Makes the height of the popup menu depend on the height of the screen
+     * instead of on a fixed number of rows.
+     *
+     * @param ratio The fraction of the usable screen height the popup menu may
+     *        occupy; 0 restores the fixed number of visible rows.
+     * @see JScrollPopupMenu#setMaximumScreenHeightRatio(double)
+     */
+    public void setMaximumScreenHeightRatio(double ratio) {
+        ensurePopupMenuCreated();
+        popupMenu.setMaximumScreenHeightRatio(ratio);
     }
 
     /**

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'net.sourceforge.open_teradata_viewer'
-version = '0.39b'
+version = '0.39c'
 
 // Explicit toolchain: Gradle LOOKS FOR (or requests) a JDK 11+ to compile,
 // regardless of which JDK launches gradlew/the daemon. This resolves the case
@@ -131,7 +131,7 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy-jsr223:3.0.25'
     // Every sibling library declared above (rstaui, autocomplete,
     // languagesupport, spellchecker) declares rsyntaxtextarea 3.6.1 as its
-    // own dependency, and runs unchanged on top of 3.6.2. "strictly" on this
+    // own dependency, and runs unchanged on top of 3.6.3. "strictly" on this
     // direct declaration overrides whatever version they request, in either
     // direction, and it does so silently: Gradle neither takes the highest
     // version found in the graph nor fails if a newer sibling release asks
@@ -139,7 +139,7 @@ dependencies {
     // this one place, and when a sibling library is upgraded the
     // rsyntaxtextarea version it declares must be checked by hand.
     implementation('com.fifesoft:rsyntaxtextarea') {
-        version { strictly '3.6.2' }
+        version { strictly '3.6.3' }
     }
 
     // The old monolithic "-all" bundle was never published to Maven
