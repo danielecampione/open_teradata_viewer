@@ -26,9 +26,9 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles whether parameter assistance is enabled.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ParameterAssistanceAction extends CustomAction {
 
@@ -37,7 +37,7 @@ public class ParameterAssistanceAction extends CustomAction {
     public ParameterAssistanceAction() {
         super(LanguageManager.getInstance().getString("menu.view.parameter_assistance"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.view.parameter_assistance"));
@@ -62,10 +62,13 @@ public class ParameterAssistanceAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        boolean enabled = !applicationFrame.getAutoCompletion()
-                .isParameterAssistanceEnabled();
-        applicationFrame.getAutoCompletion().setParameterAssistanceEnabled(
-                enabled);
+        final boolean enabled = !applicationFrame.getAutoCompletion().isParameterAssistanceEnabled();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> {
+            if (document.getAutoCompletion() != null) {
+                document.getAutoCompletion().setParameterAssistanceEnabled(enabled);
+            }
+        });
     }
 
     public boolean isParameterAssistanceEnabled() {

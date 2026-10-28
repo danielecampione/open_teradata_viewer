@@ -1,11 +1,56 @@
 <HTML>
-    <HEAD>
-        <TITLE>
-            Changes
-        </TITLE>
-    </HEAD>
-    <BODY bgcolor="#FFFFFF">
+<HEAD>
+    <TITLE>
+        Changes
+    </TITLE>
+</HEAD>
+<BODY bgcolor="#FFFFFF">
 <PRE>
+0.4a (28/10/2026)
+    - Added Hungarian (hu) language support to the UI internationalization.
+    - The "View as (highlighting file type)" menu now uses up to 90% of the
+      usable screen height instead of showing only 10 rows at a time.
+    - Grouped the parts that make up an editor document (text area, scroll
+      pane, source tree and auto-completion) in a dedicated class, as the
+      first step towards a multi-tab editor.
+    - Each editor document now holds its own file, query and results, and the
+      table showing them, instead of one set shared by the whole application,
+      as the second step towards a multi-tab editor.
+    - The settings of the editor (theme, font size, line wrapping, line
+      numbers, auto-completion options, spell checking, ...) are now applied
+      to all its documents instead of only the current one, as the third step
+      towards a multi-tab editor.
+    - The editor now has tabs: each one holds a document, with its own text,
+      syntax and results. A new tab is opened from the File menu or with
+      Ctrl+N, and closed with its close button, the middle mouse button, the
+      File menu or Ctrl+W (a tab with some text asks for confirmation first).
+      The results shown below the editor are the ones of the current tab, and
+      a new tab starts with the same settings as the others. The tabs cannot
+      be changed while an action, like a query, is being executed.
+    - Disconnecting from the database now releases the results of all the
+      tabs.
+    - Fixed a possible NullPointerException in the label that shows the
+      position of the caret.
+    - Files are now opened in a tab of their own, or in the empty tab that is
+      shown, and a file that is already open is not opened twice: its tab is
+      shown.
+    - The tab of a document whose text has been changed is marked with an
+      asterisk, and closing it asks whether to save the changes. Saving the
+      whole text of a tab makes it the document of that file.
+    - The occurrences marked by a search ("Mark All") now follow the tab that
+      is shown: they are removed from the tab that has been left and marked in
+      the new one.
+    - The text of a file that has just been opened cannot be undone anymore,
+      so that undoing does not empty its tab.
+    - Closing the application now asks, for each tab whose text has been
+      changed, whether to save it, and the application stays open if the user
+      gives up.
+    - The tabs have a menu with the commands to close the tab, the other tabs
+      and all the tabs. The File menu has the commands to close all the tabs
+      (Ctrl+Shift+W) and to show the next (Ctrl+PageDown) and the previous
+      (Ctrl+PageUp) tab, which work also when the focus is in the editor.
+    - The tabs can be dragged with the mouse to change their order.
+
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
     - The Look and Feel menu now uses up to 90% of the usable screen height
@@ -1655,5 +1700,5 @@
 0.01a (14/06/2011)
     - First release.
 </PRE>
-    </BODY>
+</BODY>
 </HTML>

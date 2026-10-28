@@ -56,11 +56,17 @@ public final class ResultSetTable extends JTable {
 
     private static final long serialVersionUID = -6752248958512135384L;
 
-    private static final ResultSetTable RESULT_SET_TABLE = new ResultSetTable();
+    /** The table of the document currently shown, see {@link #getInstance()}. */
+    private static volatile ResultSetTable current;
 
     private List originalOrder;
 
-    private ResultSetTable() {
+    /**
+     * Creates the table showing the results of a document. The window creates
+     * one for each document and tells which one is the current by calling
+     * {@link #setCurrent(ResultSetTable)}.
+     */
+    ResultSetTable() {
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setToolTipText(
@@ -68,10 +74,10 @@ public final class ResultSetTable extends JTable {
         getTableHeader().addMouseListener(new TableSorter());
         getTableHeader().setFont(
                 getTableHeader().getFont().deriveFont(Font.BOLD));
-        
+
         // Fix HiDPI: scale the row height
         setRowHeight(net.sourceforge.open_teradata_viewer.util.SwingUtil.scale(18));
-        
+
         addMouseListener(Actions.LOB_EXPORT);
         getSelectionModel().addListSelectionListener(Actions.getInstance());
         getColumnModel().addColumnModelListener(Actions.getInstance());
@@ -83,8 +89,21 @@ public final class ResultSetTable extends JTable {
         UIUtil.possiblyFixGridColor(this);
     }
 
+    /**
+     * @return The table showing the results of the document currently shown in
+     *         the editor.
+     */
     public static ResultSetTable getInstance() {
-        return RESULT_SET_TABLE;
+        return current;
+    }
+
+    /**
+     * Makes the given table the one returned by {@link #getInstance()}.
+     *
+     * @param table The table of the document to show.
+     */
+    static void setCurrent(ResultSetTable table) {
+        current = table;
     }
 
     public Object getTableValue() {
@@ -147,7 +166,7 @@ public final class ResultSetTable extends JTable {
     }
 
     public void setDataVector(final Vector dataVector,
-            final Vector columnIdentifiers, final String executionTime) {
+                              final Vector columnIdentifiers, final String executionTime) {
         SwingUtilities.invokeLater(() -> {
             originalOrder = new ArrayList(dataVector);
             ((DefaultTableModel) getModel()).setDataVector(dataVector,
@@ -298,7 +317,7 @@ public final class ResultSetTable extends JTable {
                 return Context.getInstance().getConnectionData() != null
                         && Context.getInstance().getResultSet() != null
                         && Context.getInstance().getResultSet()
-                                .getConcurrency() == ResultSet.CONCUR_UPDATABLE
+                        .getConcurrency() == ResultSet.CONCUR_UPDATABLE
                         && !isLob(column);
             } catch (SQLException sqle) {
                 return false;
@@ -318,8 +337,8 @@ public final class ResultSetTable extends JTable {
 
         @Override
         public Component getTableCellRendererComponent(JTable componentTable,
-                Object value, boolean isSelected, boolean hasFocus, int row,
-                int column) {
+                                                       Object value, boolean isSelected, boolean hasFocus, int row,
+                                                       int column) {
             if (value != null && isLob(column)) {
                 value = Context.getInstance().getColumnTypeNames()[column];
             }

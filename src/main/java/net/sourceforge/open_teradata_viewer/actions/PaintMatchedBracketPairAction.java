@@ -20,26 +20,25 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class PaintMatchedBracketPairAction extends CustomAction {
 
     private static final long serialVersionUID = -8275825697347916986L;
 
     public PaintMatchedBracketPairAction() {
-    	super(LanguageManager.getInstance().getString("menu.view.matched_bracket_popup"));
+        super(LanguageManager.getInstance().getString("menu.view.matched_bracket_popup"));
         setEnabled(true);
-    	
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.view.matched_bracket_popup"));
@@ -63,9 +62,9 @@ public class PaintMatchedBracketPairAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setPaintMatchedBracketPair(!textArea
-                .getPaintMatchedBracketPair());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getPaintMatchedBracketPair();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setPaintMatchedBracketPair(enabled));
     }
 }

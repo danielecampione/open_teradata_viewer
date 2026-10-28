@@ -20,17 +20,16 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class BookmarksAction extends CustomAction {
 
@@ -39,7 +38,7 @@ public class BookmarksAction extends CustomAction {
     public BookmarksAction() {
         super(LanguageManager.getInstance().getString("action.bookmarks"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.bookmarks"));
@@ -63,9 +62,9 @@ public class BookmarksAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RTextScrollPane scrollPane = ApplicationFrame.getInstance()
-                .getTextScrollPane();
-        scrollPane
-                .setIconRowHeaderEnabled(!scrollPane.isIconRowHeaderEnabled());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextScrollPane().isIconRowHeaderEnabled();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getScrollPane().setIconRowHeaderEnabled(enabled));
     }
 }

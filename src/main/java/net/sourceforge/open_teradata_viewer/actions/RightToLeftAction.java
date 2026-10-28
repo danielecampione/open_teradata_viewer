@@ -21,26 +21,25 @@ package net.sourceforge.open_teradata_viewer.actions;
 import java.awt.ComponentOrientation;
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class RightToLeftAction extends CustomAction {
 
     private static final long serialVersionUID = 5144421032473177175L;
 
     public RightToLeftAction() {
-    	super(LanguageManager.getInstance().getString("action.right_to_left_orientation"));
+        super(LanguageManager.getInstance().getString("action.right_to_left_orientation"));
         setEnabled(true);
-    	
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.right_to_left_orientation"));
@@ -64,14 +63,10 @@ public class RightToLeftAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RTextScrollPane scrollPane = ApplicationFrame.getInstance()
-                .getTextScrollPane();
-        if (scrollPane.getComponentOrientation().isLeftToRight()) {
-            scrollPane
-                    .applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        } else {
-            scrollPane
-                    .applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-        }
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final ComponentOrientation orientation = applicationFrame.getTextScrollPane().getComponentOrientation()
+                .isLeftToRight() ? ComponentOrientation.RIGHT_TO_LEFT : ComponentOrientation.LEFT_TO_RIGHT;
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getScrollPane().applyComponentOrientation(orientation));
     }
 }

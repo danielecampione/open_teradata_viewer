@@ -35,10 +35,10 @@ import net.sourceforge.open_teradata_viewer.ExceptionDialog;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class DisconnectAction extends CustomAction implements AncestorListener {
 
@@ -46,7 +46,7 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
 
     protected DisconnectAction() {
         super(LanguageManager.getInstance().getString("action.disconnect"), "disconnect.png", null, null);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.disconnect"));
@@ -69,7 +69,9 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
                 ExceptionDialog.hideException(t);
             }
             Context.getInstance().setConnectionData(null);
-            Context.getInstance().setResultSet(null);
+            // The connection is shared by all the documents of the editor: the
+            // results of every one of them are released
+            ApplicationFrame.getInstance().forEachDocument(document -> document.getState().setResultSet(null));
             ApplicationFrame.getInstance().updateTitle();
             Actions.getInstance().validateActions();
             ApplicationFrame.getInstance().getConsole()
@@ -87,7 +89,7 @@ public class DisconnectAction extends CustomAction implements AncestorListener {
                     .getObjectChooser().getSelectedOwner();
             if (selectedOwner != null
                     && !selectedOwner.equals(thisConnectionData
-                            .getDefaultOwner())) {
+                    .getDefaultOwner())) {
                 thisConnectionData.setDefaultOwner(selectedOwner);
                 Vector<ConnectionData> connectionDatas = Config.getDatabases();
                 for (ConnectionData connectionData : connectionDatas) {

@@ -20,17 +20,16 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ViewLineHighlightAction extends CustomAction {
 
@@ -39,7 +38,7 @@ public class ViewLineHighlightAction extends CustomAction {
     public ViewLineHighlightAction() {
         super(LanguageManager.getInstance().getString("action.current_line_highlight"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.current_line_highlight"));
@@ -63,8 +62,9 @@ public class ViewLineHighlightAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setHighlightCurrentLine(!textArea.getHighlightCurrentLine());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getHighlightCurrentLine();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setHighlightCurrentLine(enabled));
     }
 }

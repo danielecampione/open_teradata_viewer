@@ -25,10 +25,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
 
 /**
  * This listens for and reports caret movements.
- * 
+ *
  * @author D. Campione
  *
  */
@@ -42,7 +43,22 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
 
     /** Might not be invoked from the event dispatch thread */
     public void caretUpdate(CaretEvent e) {
+        // Only the caret of the document shown matters: the other documents
+        // may move theirs while they are not shown
+        if (e.getSource() != ApplicationFrame.getInstance().getTextComponent()) {
+            return;
+        }
         displaySelectionInfo(e.getDot(), e.getMark());
+    }
+
+    /**
+     * Shows the position of the caret of a text component, for instance when it
+     * has just become the one shown.
+     *
+     * @param textComponent The text component.
+     */
+    public void refresh(JTextComponent textComponent) {
+        displaySelectionInfo(textComponent.getCaretPosition(), textComponent.getCaret().getMark());
     }
 
     // This method can be invoked from any thread. It invokes the setText and
@@ -55,9 +71,15 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
                 try {
                     Rectangle caretCoords = ApplicationFrame.getInstance()
                             .getTextComponent().modelToView(dot);
-                    // Convert it to view coordinates
-                    setText(dot + ", [" + caretCoords.x + ", "
-                            + caretCoords.y + "]\n");
+                    if (caretCoords == null) {
+                        // The text component is not displayed, or has not been
+                        // given its size yet
+                        setText(dot + "\n");
+                    } else {
+                        // Convert it to view coordinates
+                        setText(dot + ", [" + caretCoords.x + ", "
+                                + caretCoords.y + "]\n");
+                    }
                 } catch (BadLocationException ble) {
                     setText(dot + "\n");
                 }

@@ -27,13 +27,14 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class DecreaseFontSizesAction extends CustomAction {
 
@@ -43,12 +44,12 @@ public class DecreaseFontSizesAction extends CustomAction {
 
     protected DecreaseFontSizesAction() {
         super(LanguageManager.getInstance().getString("menu.edit.decrease_font_sizes"), "fontsizedown.png", KeyStroke
-                .getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit()
-                        .getMenuShortcutKeyMask()),
+                        .getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit()
+                                .getMenuShortcutKeyMask()),
                 LanguageManager.getInstance().getString("menu.edit.decrease_font_sizes.short_description"));
         decreaseFontSize = new RSyntaxTextAreaEditorKit.DecreaseFontSizeAction();
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.edit.decrease_font_sizes"));
@@ -58,7 +59,10 @@ public class DecreaseFontSizesAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        decreaseFontSize.actionPerformed(e);
+        // The font size is shared by all the documents of the editor. The action
+        // works on the text area that is the source of the event
+        ApplicationFrame.getInstance().forEachDocument(document -> decreaseFontSize.actionPerformed(
+                new ActionEvent(document.getTextArea(), e.getID(), e.getActionCommand())));
     }
 
     @Override

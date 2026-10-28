@@ -20,7 +20,6 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
@@ -28,19 +27,19 @@ import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class WordWrapAction extends CustomAction {
 
     private static final long serialVersionUID = 2264574455974763739L;
 
-    public WordWrapAction() {       
+    public WordWrapAction() {
         super(LanguageManager.getInstance().getString("action.word_wrap"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.word_wrap"));
@@ -69,8 +68,9 @@ public class WordWrapAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setLineWrap(!textArea.getLineWrap());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getLineWrap();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setLineWrap(enabled));
     }
 }

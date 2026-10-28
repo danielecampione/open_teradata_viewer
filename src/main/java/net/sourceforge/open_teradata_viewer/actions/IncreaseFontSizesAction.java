@@ -27,13 +27,14 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 
+import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class IncreaseFontSizesAction extends CustomAction {
 
@@ -43,12 +44,12 @@ public class IncreaseFontSizesAction extends CustomAction {
 
     protected IncreaseFontSizesAction() {
         super(LanguageManager.getInstance().getString("menu.edit.increase_font_sizes"), "fontsizeup.png", KeyStroke.getKeyStroke(
-                KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit()
-                        .getMenuShortcutKeyMask()),
-        		LanguageManager.getInstance().getString("menu.edit.increase_font_sizes.short_description"));
+                        KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit()
+                                .getMenuShortcutKeyMask()),
+                LanguageManager.getInstance().getString("menu.edit.increase_font_sizes.short_description"));
         increaseFontSize = new RSyntaxTextAreaEditorKit.IncreaseFontSizeAction();
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.edit.increase_font_sizes"));
@@ -58,7 +59,10 @@ public class IncreaseFontSizesAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        increaseFontSize.actionPerformed(e);
+        // The font size is shared by all the documents of the editor. The action
+        // works on the text area that is the source of the event
+        ApplicationFrame.getInstance().forEachDocument(document -> increaseFontSize.actionPerformed(
+                new ActionEvent(document.getTextArea(), e.getID(), e.getActionCommand())));
     }
 
     @Override

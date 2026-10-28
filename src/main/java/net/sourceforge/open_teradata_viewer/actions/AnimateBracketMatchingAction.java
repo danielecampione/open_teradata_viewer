@@ -20,26 +20,24 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class AnimateBracketMatchingAction extends CustomAction {
 
     private static final long serialVersionUID = 4255392123894645009L;
 
-    public AnimateBracketMatchingAction() {       
-    	super(LanguageManager.getInstance().getString("action.animate_bracket_matching"));
+    public AnimateBracketMatchingAction() {
+        super(LanguageManager.getInstance().getString("action.animate_bracket_matching"));
         setEnabled(true);
-    	
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.animate_bracket_matching"));
@@ -48,9 +46,10 @@ public class AnimateBracketMatchingAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setAnimateBracketMatching(!textArea.getAnimateBracketMatching());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getAnimateBracketMatching();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setAnimateBracketMatching(enabled));
     }
 
     /* (non-Javadoc)

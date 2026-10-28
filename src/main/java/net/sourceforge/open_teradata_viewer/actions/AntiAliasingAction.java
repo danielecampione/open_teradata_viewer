@@ -20,27 +20,24 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.ExceptionDialog;
-import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class AntiAliasingAction extends CustomAction {
 
     private static final long serialVersionUID = 2213398379400202894L;
 
     public AntiAliasingAction() {
-    	super(LanguageManager.getInstance().getString("action.anti_aliasing"));
+        super(LanguageManager.getInstance().getString("action.anti_aliasing"));
         setEnabled(true);
-                
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.anti_aliasing"));
@@ -49,9 +46,10 @@ public class AntiAliasingAction extends CustomAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setAntiAliasingEnabled(!textArea.getAntiAliasingEnabled());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getAntiAliasingEnabled();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setAntiAliasingEnabled(enabled));
     }
 
     /* (non-Javadoc)

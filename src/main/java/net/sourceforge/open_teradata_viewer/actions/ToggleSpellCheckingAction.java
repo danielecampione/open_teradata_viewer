@@ -20,15 +20,14 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.spell.SpellingParser;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -38,10 +37,18 @@ public class ToggleSpellCheckingAction extends CustomAction {
 
     private boolean isSpellCheckEnabled;
 
+    /**
+     * @return <code>true</code> if the spell checking is on: every document of
+     *         the editor has the spell checking parser.
+     */
+    public boolean isSpellCheckEnabled() {
+        return isSpellCheckEnabled;
+    }
+
     public ToggleSpellCheckingAction() {
         super(LanguageManager.getInstance().getString("menu.edit.toggle_spell_checking"));
         isSpellCheckEnabled = true;
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.edit.toggle_spell_checking"));
@@ -51,15 +58,18 @@ public class ToggleSpellCheckingAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        RSyntaxTextArea textArea = applicationFrame.getTextComponent();
-        SpellingParser spellingParser = applicationFrame.getSpellingParser();
-
+        final SpellingParser spellingParser = applicationFrame.getSpellingParser();
         isSpellCheckEnabled = !isSpellCheckEnabled;
-
-        if (isSpellCheckEnabled) {
-            textArea.addParser(spellingParser);
-        } else {
-            textArea.removeParser(spellingParser);
-        }
+        final boolean enabled = isSpellCheckEnabled;
+        // The settings of the editor are shared by all its documents. The same
+        // parser can be used by all of them: the parsing is always run by the
+        // Swing event thread, one text area after the other
+        applicationFrame.forEachDocument(document -> {
+            if (enabled) {
+                document.getTextArea().addParser(spellingParser);
+            } else {
+                document.getTextArea().removeParser(spellingParser);
+            }
+        });
     }
 }

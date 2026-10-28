@@ -28,8 +28,8 @@ import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -40,7 +40,7 @@ public class FileSaveAction extends CustomAction {
     protected FileSaveAction() {
         super(LanguageManager.getInstance().getString("menu.file.save"), "filesave.png", null, null);
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.file.save"));
@@ -49,14 +49,22 @@ public class FileSaveAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        File openedFile = Context.getInstance().getOpenedFile();
-        // An explicit charset is required here too, to stay symmetric with
-        // FileIO#openFile(File): String#getBytes() with no argument uses
-        // the platform default charset, which would silently mismatch a
-        // file later reopened on a different OS/locale (or written back
-        // with any character outside plain ASCII)
-        FileIO.saveFile(openedFile == null ? "" : openedFile.toString(),
-                ApplicationFrame.getInstance().getText()
-                        .getBytes(StandardCharsets.UTF_8));
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        String selectedText = applicationFrame.getSelectedText();
+        if (selectedText == null) {
+            // The whole text of the document is saved, and the document is
+            // then the one of that file
+            applicationFrame.saveDocument(applicationFrame.getCurrentDocument());
+        } else {
+            // Only the selected text is saved: the file does not hold the
+            // document, which is left as it is.
+            // An explicit charset is required here too, to stay symmetric with
+            // FileIO#openFile(File): String#getBytes() with no argument uses
+            // the platform default charset, which would silently mismatch a
+            // file later reopened on a different OS/locale (or written back
+            // with any character outside plain ASCII)
+            File openedFile = Context.getInstance().getOpenedFile();
+            FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), selectedText.getBytes(StandardCharsets.UTF_8));
+        }
     }
 }

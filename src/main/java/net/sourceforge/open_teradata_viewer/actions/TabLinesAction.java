@@ -20,26 +20,25 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TabLinesAction extends CustomAction {
 
     private static final long serialVersionUID = -1961066567395140300L;
 
     public TabLinesAction() {
-    	super(LanguageManager.getInstance().getString("action.tab_lines"));
+        super(LanguageManager.getInstance().getString("action.tab_lines"));
         setEnabled(true);
-    	
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.tab_lines"));
@@ -63,8 +62,9 @@ public class TabLinesAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setPaintTabLines(!textArea.getPaintTabLines());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getPaintTabLines();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setPaintTabLines(enabled));
     }
 }

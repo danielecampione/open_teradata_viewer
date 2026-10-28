@@ -21,13 +21,27 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.MouseAdapter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 
 public abstract class ThreadedAction implements Runnable {
 
+    /** The number of actions started and not finished yet. */
+    private static final AtomicInteger RUNNING = new AtomicInteger();
+
     public ThreadedAction() {
+        RUNNING.incrementAndGet();
         new Thread(this).start();
+    }
+
+    /**
+     * @return <code>true</code> if an action is being executed. While it is, the
+     *         documents of the editor must not be changed, because the action
+     *         works on the one that was current when it started.
+     */
+    public static boolean isRunning() {
+        return RUNNING.get() > 0;
     }
 
     @Override
@@ -64,6 +78,8 @@ public abstract class ThreadedAction implements Runnable {
                 });
             } catch (Throwable t) {
                 ExceptionDialog.hideException(t);
+            } finally {
+                RUNNING.decrementAndGet();
             }
         }
     }

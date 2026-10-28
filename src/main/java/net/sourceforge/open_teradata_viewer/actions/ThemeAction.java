@@ -28,13 +28,14 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ThemeAction extends CustomAction {
 
@@ -42,6 +43,12 @@ public class ThemeAction extends CustomAction {
 
     /** The theme the editor starts with. */
     public static final String DEFAULT_THEME_XML = "/res/themes/vs.xml";
+
+    /**
+     * The theme currently applied to the documents of the editor: they all share
+     * it, and a document created later starts with it.
+     */
+    private static volatile String currentThemeXml = DEFAULT_THEME_XML;
 
     private String xml;
 
@@ -65,14 +72,16 @@ public class ThemeAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
 
         try {
-            applyTheme(textArea, xml);
+            // The theme is shared by all the documents of the editor
+            for (EditorDocument document : applicationFrame.getDocuments()) {
+                applyTheme(document.getTextArea(), xml);
+            }
+            currentThemeXml = xml;
 
-            ApplicationFrame.getInstance().getApplicationMenuBar()
-                    .refreshEditOptions();
+            applicationFrame.getApplicationMenuBar().refreshEditOptions();
         } catch (IOException ioe) {
             ExceptionDialog.notifyException(ioe);
         }
@@ -85,6 +94,14 @@ public class ThemeAction extends CustomAction {
      * @param xml The classpath location of the theme file.
      * @throws IOException If the theme cannot be read.
      */
+    /**
+     * @return The resource of the theme currently applied to the documents of
+     *         the editor.
+     */
+    public static String getCurrentThemeXml() {
+        return currentThemeXml;
+    }
+
     public static void applyTheme(RSyntaxTextArea textArea, String xml) throws IOException {
         // Let's save the font: let's capture the current font which is already scaled for Hi-DPI
         Font currentScaledFont = textArea.getFont();

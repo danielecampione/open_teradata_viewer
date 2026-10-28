@@ -20,26 +20,25 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class TabsEmulatedBySpacesAction extends CustomAction {
 
     private static final long serialVersionUID = -7180689551210436531L;
 
-    public TabsEmulatedBySpacesAction() {       
-    	super(LanguageManager.getInstance().getString("action.tabs_emulated_by_spaces"));
+    public TabsEmulatedBySpacesAction() {
+        super(LanguageManager.getInstance().getString("action.tabs_emulated_by_spaces"));
         setEnabled(true);
-                
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.tabs_emulated_by_spaces"));
@@ -63,8 +62,9 @@ public class TabsEmulatedBySpacesAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setTabsEmulated(!textArea.getTabsEmulated());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getTabsEmulated();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setTabsEmulated(enabled));
     }
 }

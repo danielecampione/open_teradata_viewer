@@ -27,22 +27,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
 
+import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -63,7 +67,7 @@ public class FileIO {
         File file = saveFile(fileName, bytes);
         LanguageManager langManager = LanguageManager.getInstance();
         if (file != null && Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.open_file"),
-        		langManager.getString("dialog.open_file.associated_application"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+                langManager.getString("dialog.open_file.associated_application"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
             FileIO.openFile(file, true);
         }
     }
@@ -83,7 +87,7 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(() -> {
+            runOnEventThread(() -> {
                 int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
                 resultRef.set(result);
                 if (result == JFileChooser.APPROVE_OPTION) {
@@ -100,12 +104,12 @@ public class FileIO {
         }
 
         if (JFileChooser.APPROVE_OPTION == resultRef.get()) {
-        	LanguageManager langManager = LanguageManager.getInstance();
+            LanguageManager langManager = LanguageManager.getInstance();
             Config.saveLastUsedDir(currentDirRef.get());
             File selectedFile = selectedFileRef.get();
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
             if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.file_exists"),
-            		langManager.getString("dialog.file_exists.overwrite_existing_file"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
+                    langManager.getString("dialog.file_exists.overwrite_existing_file"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
                 if (chosenFilePath.toLowerCase().endsWith(".htm") || chosenFilePath.toLowerCase().endsWith(".html")) {
                     // Write output to the current filename
                     writeFileAsWebPage(chosenFilePath);
@@ -158,26 +162,53 @@ public class FileIO {
         // letters) whenever the file was written on a different machine or
         // with a different editor
         final String content = new String(FileIO.readFile(file), StandardCharsets.UTF_8);
-        javax.swing.SwingUtilities.invokeAndWait(() -> {
+        SwingUtilities.invokeAndWait(() -> {
             ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-            Context.getInstance().setOpenedFile(file);
-            RSyntaxTextArea textArea = applicationFrame.getTextComponent();
+            // The file is opened in a tab of its own, or in the empty one that
+            // is shown, unless it is already open: then its tab is shown
+            EditorDocument document = applicationFrame.getDocumentForOpening(file);
+            if (document == null) {
+                return;
+            }
+            document.getState().setOpenedFile(file);
+            RSyntaxTextArea textArea = document.getTextArea();
             textArea.setText(content);
             textArea.setCaretPosition(0);
-            applicationFrame.refreshSourceTree();
+            // The text of the file is where the document starts from: it must
+            // not be possible to undo it
+            textArea.discardAllEdits();
+            document.setModified(false);
+            document.refreshSourceTree();
+            applicationFrame.refreshTabTitles();
         });
+    }
+
+    /**
+     * Runs a task on the Swing event thread and waits for it: at once if the
+     * caller already is the event thread, which cannot wait for itself.
+     *
+     * @param task The task to run.
+     * @throws InterruptedException If the thread is interrupted while waiting.
+     * @throws InvocationTargetException If the task throws an exception.
+     */
+    static void runOnEventThread(Runnable task) throws InterruptedException, InvocationTargetException {
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeAndWait(task);
+        }
     }
 
     public static File chooseFile() throws Exception {
         JFileChooser fileChooser = getFileChooser();
 
         // Ensure JFileChooser.showOpenDialog is called on EDT
-        final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
-        final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
-        final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final AtomicInteger resultRef = new AtomicInteger();
+        final AtomicReference<File> selectedFileRef = new AtomicReference<>();
+        final AtomicReference<String> currentDirRef = new AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(() -> {
+            SwingUtilities.invokeAndWait(() -> {
                 int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
                 resultRef.set(result);
                 if (result == JFileChooser.APPROVE_OPTION) {
@@ -209,7 +240,7 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicReference<JFileChooser> chooserRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            javax.swing.SwingUtilities.invokeAndWait(() -> {
+            SwingUtilities.invokeAndWait(() -> {
                 if (fileChooser == null) {
                     fileChooser = new JFileChooser();
                     fileChooser.setAcceptAllFileFilterUsed(false);

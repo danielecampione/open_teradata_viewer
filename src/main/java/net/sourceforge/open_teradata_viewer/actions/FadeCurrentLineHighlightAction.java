@@ -20,17 +20,16 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ThreadedAction;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public class FadeCurrentLineHighlightAction extends CustomAction {
 
@@ -39,8 +38,8 @@ public class FadeCurrentLineHighlightAction extends CustomAction {
     public FadeCurrentLineHighlightAction() {
         super(LanguageManager.getInstance().getString("action.fade_current_line_highlight"));
         setEnabled(true);
-        
-    	// Add language change listener to update the action name when language changes
+
+        // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.fade_current_line_highlight"));
         });
@@ -63,9 +62,9 @@ public class FadeCurrentLineHighlightAction extends CustomAction {
      */
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        RSyntaxTextArea textArea = ApplicationFrame.getInstance()
-                .getTextComponent();
-        textArea.setFadeCurrentLineHighlight(!textArea
-                .getFadeCurrentLineHighlight());
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        final boolean enabled = !applicationFrame.getTextComponent().getFadeCurrentLineHighlight();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setFadeCurrentLineHighlight(enabled));
     }
 }

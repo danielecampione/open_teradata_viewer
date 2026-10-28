@@ -27,9 +27,9 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles whether the completion window uses "fancy" rendering.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class FancyCellRenderingAction extends CustomAction {
 
@@ -63,10 +63,13 @@ public class FancyCellRenderingAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        boolean fancy = (applicationFrame.getAutoCompletion()
-                .getListCellRenderer() == null);
-        applicationFrame.getAutoCompletion().setListCellRenderer(
-                fancy ? new SQLCellRenderer() : null);
+        final boolean fancy = (applicationFrame.getAutoCompletion().getListCellRenderer() == null);
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> {
+            if (document.getAutoCompletion() != null) {
+                document.getAutoCompletion().setListCellRenderer(fancy ? new SQLCellRenderer() : null);
+            }
+        });
     }
 
     public boolean isFancyCellRenderingActivated() {

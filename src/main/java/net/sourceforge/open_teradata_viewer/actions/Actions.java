@@ -32,10 +32,10 @@ import net.sourceforge.open_teradata_viewer.History;
 import net.sourceforge.open_teradata_viewer.ResultSetTable;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public final class Actions implements ListSelectionListener, TableColumnModelListener {
 
@@ -79,6 +79,11 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
     public static final CustomAction RUN = new RunAction();
     public static final CustomAction RUN_SCRIPT = new RunScriptAction();
     public static final CustomAction SCHEMA_BROWSER = new SchemaBrowserAction();
+    public static final CustomAction FILE_NEW_TAB = new FileNewTabAction();
+    public static final CustomAction FILE_CLOSE_TAB = new FileCloseTabAction();
+    public static final CustomAction FILE_CLOSE_ALL_TABS = new FileCloseAllTabsAction();
+    public static final CustomAction FILE_NEXT_TAB = new FileNextTabAction();
+    public static final CustomAction FILE_PREVIOUS_TAB = new FilePreviousTabAction();
     public static final CustomAction FILE_OPEN = new FileOpenAction();
     public static final CustomAction FILE_SAVE = new FileSaveAction();
     public static final CustomAction CALCULATE_MD5_CHECKSUM = new CalculateMD5ChecksumAction();
@@ -172,7 +177,7 @@ public final class Actions implements ListSelectionListener, TableColumnModelLis
         HISTORY_NEXT.setEnabled(History.getInstance().hasNext());
     }
 
-    protected void validateActions() {
+    public void validateActions() {
         boolean isConnected = Context.getInstance().getConnectionData() != null;
         DISCONNECT.setEnabled(isConnected);
         COMMIT.setEnabled(isConnected);

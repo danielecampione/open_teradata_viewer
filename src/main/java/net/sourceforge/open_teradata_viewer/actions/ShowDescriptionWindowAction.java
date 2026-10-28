@@ -26,9 +26,9 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles whether the description window is visible.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class ShowDescriptionWindowAction extends CustomAction {
 
@@ -37,7 +37,7 @@ public class ShowDescriptionWindowAction extends CustomAction {
     public ShowDescriptionWindowAction() {
         super(LanguageManager.getInstance().getString("menu.view.show_description_window"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.view.show_description_window"));
@@ -62,9 +62,13 @@ public class ShowDescriptionWindowAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        boolean show = !applicationFrame.getAutoCompletion()
-                .getShowDescWindow();
-        applicationFrame.getAutoCompletion().setShowDescWindow(show);
+        final boolean show = !applicationFrame.getAutoCompletion().getShowDescWindow();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> {
+            if (document.getAutoCompletion() != null) {
+                document.getAutoCompletion().setShowDescWindow(show);
+            }
+        });
     }
 
     public boolean isVisible() {

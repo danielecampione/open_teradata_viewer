@@ -21,8 +21,10 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -97,6 +99,13 @@ public class ApplicationMenuBar extends JMenuBar
     private JScrollMenu macrosMenu;
 
     /**
+     * The items of the menu that shows the syntax style of the text, by style,
+     * and the group that holds their selection.
+     */
+    private final Map<String, JRadioButtonMenuItem> syntaxItems = new HashMap<>();
+    private ButtonGroup syntaxGroup;
+
+    /**
      * These two toggle actions are created by RSTAUI's
      * {@link CollapsibleSectionPanel#addBottomComponent(KeyStroke, java.awt.Component)},
      * not by one of OTV's own {@code Action} subclasses, so they don't
@@ -138,6 +147,13 @@ public class ApplicationMenuBar extends JMenuBar
 
         menu = createMenu("menu.file");
         add(menu);
+        menu.add(Actions.FILE_NEW_TAB);
+        menu.add(Actions.FILE_CLOSE_TAB);
+        menu.add(Actions.FILE_CLOSE_ALL_TABS);
+        menu.addSeparator();
+        menu.add(Actions.FILE_NEXT_TAB);
+        menu.add(Actions.FILE_PREVIOUS_TAB);
+        menu.addSeparator();
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
         menu.add(Actions.CALCULATE_MD5_CHECKSUM);
@@ -325,7 +341,12 @@ public class ApplicationMenuBar extends JMenuBar
         menu = createMenu("menu.view_main");
         add(menu);
         JScrollMenu subMenu2 = createScrollMenu("menu.view.highlighting");
+        // Same as the Look and Feel menu: the list of the syntax styles is
+        // long, so let it use most of the height of the screen instead of
+        // showing just a few rows
+        subMenu2.setMaximumScreenHeightRatio(0.9d);
         ButtonGroup bg = new ButtonGroup();
+        syntaxGroup = bg;
         addSyntaxItem("SQL", SyntaxConstants.SYNTAX_STYLE_SQL, bg, subMenu2);
         addSyntaxItem("ActionScript", SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT, bg, subMenu2);
         addSyntaxItem("Assembler (6502)", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_6502, bg, subMenu2);
@@ -516,6 +537,23 @@ public class ApplicationMenuBar extends JMenuBar
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ChangeSyntaxStyleAction(name, style));
         bg.add(item);
         menu.add(item);
+        syntaxItems.put(style, item);
+    }
+
+    /**
+     * Selects, in the menu that shows the syntax style of the text, the item of
+     * the given style. The style is a property of each document, so this is
+     * called when another document is shown.
+     *
+     * @param style The syntax style, one of {@link SyntaxConstants}.
+     */
+    public void selectSyntaxStyle(String style) {
+        JRadioButtonMenuItem item = style == null ? null : syntaxItems.get(style);
+        if (item != null) {
+            item.setSelected(true);
+        } else if (syntaxGroup != null) {
+            syntaxGroup.clearSelection();
+        }
     }
 
     /** {@inheritDoc} */

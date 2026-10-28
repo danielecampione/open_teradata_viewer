@@ -26,18 +26,18 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
  * Toggles the matched bracket popup window.
- * 
+ *
  * @author D. Campione
- * 
+ *
  */
 public class MatchedBracketPopupAction extends CustomAction {
 
-	private static final long serialVersionUID = 1054202978350180816L;
+    private static final long serialVersionUID = 1054202978350180816L;
 
-	public MatchedBracketPopupAction() {
+    public MatchedBracketPopupAction() {
         super(LanguageManager.getInstance().getString("menu.view.matched_bracket_popup"));
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.view.matched_bracket_popup"));
@@ -62,9 +62,9 @@ public class MatchedBracketPopupAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        boolean enabled = !applicationFrame.getTextComponent()
-                .getShowMatchedBracketPopup();
-        applicationFrame.getTextComponent().setShowMatchedBracketPopup(enabled);
+        final boolean enabled = !applicationFrame.getTextComponent().getShowMatchedBracketPopup();
+        // The settings of the editor are shared by all its documents
+        applicationFrame.forEachDocument(document -> document.getTextArea().setShowMatchedBracketPopup(enabled));
     }
 
     public boolean isMatchedBracketPopupEnabled() {

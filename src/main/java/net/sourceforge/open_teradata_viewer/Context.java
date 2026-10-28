@@ -20,11 +20,13 @@ package net.sourceforge.open_teradata_viewer;
 
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 /**
- * 
- * 
+ * Holds what is shared by the whole application, like the database
+ * connection, and gives access to the {@link DocumentState state} of the
+ * document currently shown in the editor: the accessors of the file, the query
+ * and the results below always refer to that document.
+ *
  * @author D. Campione
  *
  */
@@ -33,12 +35,7 @@ public final class Context {
     private static final Context CONTEXT = new Context();
 
     private ConnectionData connectionData;
-    private ResultSet resultSet;
-    private int[] columnTypes;
-    private String[] columnTypeNames;
-    private String query;
-    private File openedFile;
-    private byte[][] savedLobs;
+    private volatile DocumentState documentState = new DocumentState();
     private int fetchLimit = 2000;
 
     private Context() {
@@ -56,82 +53,80 @@ public final class Context {
         connectionData = newConnectionData;
     }
 
-    public ResultSet getResultSet() {
-        return resultSet;
+    /**
+     * @return The state of the document currently shown in the editor.
+     */
+    public DocumentState getDocumentState() {
+        return documentState;
     }
 
     /**
-     * Replaces the currently held {@link ResultSet}, if any, with a new one
-     * (or with <code>null</code>).
-     * <p>
-     * Before the reference is actually replaced, the {@link Statement} that
-     * produced the <em>previous</em> {@link ResultSet} (if different from
-     * the new one) is closed - which, per the JDBC specification, also
-     * closes the {@link ResultSet} itself and releases the corresponding
-     * server-side cursor. Without this, every successive query execution
-     * (e.g. through <code>RunAction</code>) silently abandoned the previous
-     * query's <code>Statement</code>/<code>ResultSet</code>, leaking JDBC
-     * resources for the whole duration of the session.
-     * <p>
-     * The <em>current</em> {@link ResultSet} is never touched here, so
-     * in-place grid editing/deletion (e.g. <code>DeleteAction</code>), which
-     * relies on it staying open, is unaffected.
+     * Makes the given state the one the accessors of this class refer to, that
+     * is the state of the document currently shown in the editor.
+     *
+     * @param documentState The state of the document to show; never
+     *        <code>null</code>.
+     */
+    public void setDocumentState(DocumentState documentState) {
+        if (documentState == null) {
+            throw new IllegalArgumentException("documentState == null");
+        }
+        this.documentState = documentState;
+    }
+
+    public ResultSet getResultSet() {
+        return documentState.getResultSet();
+    }
+
+    /**
+     * Replaces the {@link ResultSet} held for the current document, see
+     * {@link DocumentState#setResultSet(ResultSet)}.
      *
      * @param resultSet the new {@link ResultSet} to hold, or
      *        <code>null</code>.
      */
     public void setResultSet(ResultSet resultSet) {
-        if (this.resultSet != null && this.resultSet != resultSet) {
-            try {
-                Statement previousStatement = this.resultSet.getStatement();
-                if (previousStatement != null) {
-                    previousStatement.close();
-                }
-            } catch (Throwable t) {
-                ExceptionDialog.hideException(t);
-            }
-        }
-        this.resultSet = resultSet;
+        documentState.setResultSet(resultSet);
     }
 
     public int[] getColumnTypes() {
-        return columnTypes;
+        return documentState.getColumnTypes();
     }
 
     public void setColumnTypes(int[] columnTypes) {
-        this.columnTypes = columnTypes;
+        documentState.setColumnTypes(columnTypes);
     }
 
     public String[] getColumnTypeNames() {
-        return columnTypeNames;
+        return documentState.getColumnTypeNames();
     }
 
     public void setColumnTypeNames(String[] columnTypeNames) {
-        this.columnTypeNames = columnTypeNames;
+        documentState.setColumnTypeNames(columnTypeNames);
     }
 
     public String getQuery() {
-        return query;
+        return documentState.getQuery();
     }
 
     public void setQuery(String query) {
-        this.query = query;
+        documentState.setQuery(query);
     }
 
     public File getOpenedFile() {
-        return openedFile;
+        return documentState.getOpenedFile();
     }
 
     public void setOpenedFile(File openedFile) {
-        this.openedFile = openedFile;
+        documentState.setOpenedFile(openedFile);
     }
 
     public byte[][] getSavedLobs() {
-        return savedLobs;
+        return documentState.getSavedLobs();
     }
 
     public void setSavedLobs(byte[][] savedLobs) {
-        this.savedLobs = savedLobs;
+        documentState.setSavedLobs(savedLobs);
     }
 
     public int getFetchLimit() {

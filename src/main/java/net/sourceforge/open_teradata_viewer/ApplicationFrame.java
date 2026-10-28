@@ -30,6 +30,7 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -38,23 +39,33 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayer;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -66,13 +77,9 @@ import javax.swing.plaf.LayerUI;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreeNode;
 
-import org.fife.rsta.ac.AbstractSourceTree;
 import org.fife.rsta.ac.LanguageSupport;
 import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.rsta.ac.java.JavaLanguageSupport;
-import org.fife.rsta.ac.java.tree.JavaOutlineTree;
-import org.fife.rsta.ac.js.tree.JavaScriptOutlineTree;
-import org.fife.rsta.ac.xml.tree.XmlOutlineTree;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.search.AbstractSearchDialog;
 import org.fife.rsta.ui.search.FindDialog;
@@ -104,6 +111,11 @@ import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
 import net.sourceforge.open_teradata_viewer.actions.Actions;
 import net.sourceforge.open_teradata_viewer.actions.SchemaBrowserAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
+import net.sourceforge.open_teradata_viewer.actions.ToggleSpellCheckingAction;
+import net.sourceforge.open_teradata_viewer.editor.DocumentTabs;
+import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.EditorSettings;
+import net.sourceforge.open_teradata_viewer.editor.SearchMarks;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
@@ -144,8 +156,27 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /** The output console. */
     private Console console;
 
-    private OTVSyntaxTextArea textArea;
-    private AutoCompletion autoCompletion;
+    /**
+     * The document currently shown in the editor: it groups the text area, the
+     * scroll pane, the auto-completion and the source tree.
+     */
+    private EditorDocument currentDocument;
+
+    /**
+     * The tabs holding all the documents of the editor. Their settings (theme,
+     * font, wrapping of the lines, ...) are shared: a change is applied to every
+     * one of them, see {@link #forEachDocument(Consumer)}.
+     */
+    private DocumentTabs documentTabs;
+
+    /**
+     * The split pane with the editor above and the results of the current
+     * document below.
+     */
+    private JSplitPane workArea;
+
+    /** The number given to the last document created. */
+    private int documentCounter;
     private HelpViewerWindow helpFrame;
     private GraphicViewer graphicViewer;
     private ApplicationMenuBar menubar;
@@ -159,8 +190,6 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     /** The scrollpane containing the schema browser. */
     private JScrollPane rightComponent;
-
-    private RTextScrollPane textScrollPane;
 
     private boolean fullScreenMode;
     private DisplayChanger displayChanger;
@@ -178,9 +207,6 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     private SpellingParser spellingParser;
 
-    private JScrollPane treeSP;
-    private AbstractSourceTree tree;
-
     private boolean doFileSizeCheck;
     private float maxFileSize; // In MB
 
@@ -189,7 +215,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     public ApplicationFrame() {
         super(Main.APPLICATION_NAME);
         APPLICATION_FRAME = this;
-        
+
         // Register for language change notifications
         LanguageManager.getInstance().addLanguageChangeListener(this);
     }
@@ -271,11 +297,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     private JSplitPane createWorkArea() {
         JSplitPane queryArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createEditor(), createTable());
         queryArea.setOneTouchExpandable(true);
-        
+        workArea = queryArea;
+
         // Fix HiDPI: Scale size and divider position
         queryArea.setDividerSize(SwingUtil.scale(4));
         queryArea.setDividerLocation(SwingUtil.scale(200));
-        
+
         return queryArea;
     }
 
@@ -309,15 +336,50 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             ExceptionDialog.hideException(ioe);
         }
 
+        documentTabs = new DocumentTabs(new DocumentTabsHost());
+        EditorDocument document = createDocument(ThemeAction.DEFAULT_THEME_XML);
+        document.setNumber(++documentCounter);
+        documentTabs.add(document, true);
+        setCurrentDocument(document);
+        csp.add(documentTabs.getComponent());
+        contentPane.add(csp, BorderLayout.CENTER);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, contentPane, null);
+
+        globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
+
+        // Create the status area
+        JPanel statusPane = new JPanel(new GridLayout(1, 1));
+        caretListenerLabel = new CaretListenerLabel("Ready.");
+        statusPane.add(caretListenerLabel);
+        globalQueryEditorPanel.add(statusPane, BorderLayout.PAGE_END);
+
+        document.getTextArea().addCaretListener(caretListenerLabel);
+
+        addSyntaxHighlighting(document);
+
+        return globalQueryEditorPanel;
+    }
+
+    /**
+     * Creates a document of the editor: the text area, the scroll pane with its
+     * gutter, the area showing the source tree and the error strip, with the
+     * given theme applied. The document is not added to the window yet and its
+     * syntax highlighting is set up separately, see
+     * {@link #addSyntaxHighlighting(EditorDocument)}.
+     *
+     * @param themeXml The resource of the theme to apply.
+     * @return The new document.
+     */
+    private EditorDocument createDocument(String themeXml) {
         // Dummy tree keeps JViewport's "background" looking right initially
         JTree dummy = new JTree((TreeNode) null);
-        treeSP = new JScrollPane(dummy);
+        JScrollPane treeSP = new JScrollPane(dummy);
 
-        textArea = createTextArea();
+        OTVSyntaxTextArea textArea = createTextArea();
         LanguageSupportFactory.get().register(textArea);
         ToolTipManager.sharedInstance().registerComponent(textArea);
 
-        textScrollPane = new RTextScrollPane(textArea, true);
+        RTextScrollPane textScrollPane = new RTextScrollPane(textArea, true);
         textScrollPane.setIconRowHeaderEnabled(true);
 
         LayerUI<JComponent> layerUI = new WallpaperLayerUI();
@@ -334,29 +396,40 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         // Applied only now that the editor sits in its scroll pane, so that the
         // theme styles the gutter as well
         try {
-            ThemeAction.applyTheme(textArea, ThemeAction.DEFAULT_THEME_XML);
+            ThemeAction.applyTheme(textArea, themeXml);
         } catch (IOException ioe) {
             ExceptionDialog.hideException(ioe);
         }
-        csp.add(sp);
         ErrorStrip errorStrip = new ErrorStrip(textArea);
-        contentPane.add(csp, BorderLayout.CENTER);
-        contentPane.add(errorStrip, BorderLayout.LINE_END);
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, contentPane, null);
 
-        globalQueryEditorPanel.add(splitPane, BorderLayout.CENTER);
+        // Ctrl+PageDown and Ctrl+PageUp change the tab also when the text area
+        // has the focus: the scroll pane that contains it would otherwise use
+        // them to scroll horizontally, before the menu gets them
+        int shortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap actionMap = textArea.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, shortcutMask), "otvNextTab");
+        actionMap.put("otvNextTab", Actions.FILE_NEXT_TAB);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, shortcutMask), "otvPreviousTab");
+        actionMap.put("otvPreviousTab", Actions.FILE_PREVIOUS_TAB);
 
-        // Create the status area
-        JPanel statusPane = new JPanel(new GridLayout(1, 1));
-        caretListenerLabel = new CaretListenerLabel("Ready.");
-        statusPane.add(caretListenerLabel);
-        globalQueryEditorPanel.add(statusPane, BorderLayout.PAGE_END);
+        ResultSetTable resultSetTable = new ResultSetTable();
+        JScrollPane resultScrollPane = new JScrollPane(resultSetTable);
+        return new EditorDocument(textArea, textScrollPane, treeSP, sp, errorStrip, new DocumentState(),
+                resultSetTable, resultScrollPane);
+    }
 
-        textArea.addCaretListener(caretListenerLabel);
-
-        addSyntaxHighlighting();
-
-        return globalQueryEditorPanel;
+    /**
+     * Makes the given document the one shown in the editor: the shared accessors
+     * of the application ({@link #getTextComponent()}, {@link Context} and
+     * {@link ResultSetTable#getInstance()}) refer to it from now on.
+     *
+     * @param document The document to show.
+     */
+    private void setCurrentDocument(EditorDocument document) {
+        currentDocument = document;
+        Context.getInstance().setDocumentState(document.getState());
+        ResultSetTable.setCurrent(document.getResultSetTable());
     }
 
     /** Creates our Find and Replace dialogs. */
@@ -376,7 +449,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         replaceToolBar.setSearchContext(context);
     }
 
-    private void addSyntaxHighlighting() {
+    private void addSyntaxHighlighting(EditorDocument document) {
+        OTVSyntaxTextArea textArea = document.getTextArea();
+
         //      Syntax highlighting solutions tried so far:
 
         //      1 jEdit Syntax Package
@@ -438,7 +513,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
         CompletionProvider provider = createCompletionProvider();
         // Install auto-completion onto our text area
-        autoCompletion = new AutoCompletion(provider);
+        AutoCompletion autoCompletion = new AutoCompletion(provider);
+        document.setAutoCompletion(autoCompletion);
         autoCompletion.setListCellRenderer(new SQLCellRenderer());
         autoCompletion.setShowDescWindow(true);
         autoCompletion.setParameterAssistanceEnabled(true);
@@ -451,7 +527,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     private JScrollPane createTable() {
-        return new JScrollPane(ResultSetTable.getInstance());
+        return currentDocument.getResultScrollPane();
     }
 
     public void updateTitle() {
@@ -512,9 +588,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             ExceptionDialog.ignoreException(ioe);
         }
 
-        if (tree != null) {
-            tree.uninstall();
-            treeSP.remove(tree);
+        for (EditorDocument document : getDocuments()) {
+            document.disposeSourceTree();
         }
 
         dispose();
@@ -602,7 +677,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     public void replaceText(String t) {
-        textArea.replaceSelection(t);
+        getTextComponent().replaceSelection(t);
     }
 
     /**
@@ -637,7 +712,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     public void focusTextArea() {
-        textArea.requestFocusInWindow();
+        getTextComponent().requestFocusInWindow();
     }
 
     /**
@@ -734,28 +809,29 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         SearchEvent.Type type = e.getType();
         SearchContext context = e.getSearchContext();
         SearchResult result = null;
+        OTVSyntaxTextArea textArea = getTextComponent();
 
         switch (type) {
-        default: // Prevent FindBugs warning later
-        case MARK_ALL:
-            result = SearchEngine.markAll(textArea, context);
-            break;
-        case FIND:
-            result = SearchEngine.find(textArea, context);
-            if (!result.wasFound()) {
-                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
-            }
-            break;
-        case REPLACE:
-            result = SearchEngine.replace(textArea, context);
-            if (!result.wasFound()) {
-                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
-            }
-            break;
-        case REPLACE_ALL:
-            result = SearchEngine.replaceAll(textArea, context);
-            UISupport.getDialogs().showInfoMessage(result.getCount() + " occurrences replaced.");
-            break;
+            default: // Prevent FindBugs warning later
+            case MARK_ALL:
+                result = SearchEngine.markAll(textArea, context);
+                break;
+            case FIND:
+                result = SearchEngine.find(textArea, context);
+                if (!result.wasFound()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                }
+                break;
+            case REPLACE:
+                result = SearchEngine.replace(textArea, context);
+                if (!result.wasFound()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                }
+                break;
+            case REPLACE_ALL:
+                result = SearchEngine.replaceAll(textArea, context);
+                UISupport.getDialogs().showInfoMessage(result.getCount() + " occurrences replaced.");
+                break;
         }
 
         String text = null;
@@ -801,7 +877,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                         System.err.println("Can't open user dictionary: " + se.getMessage());
                     }
                     SwingUtilities.invokeLater(() -> {
-                        textArea.addParser(spellingParser);
+                        // The same parser is used by all the documents: the
+                        // parsing is always run by the Swing event thread, one
+                        // text area after the other
+                        forEachDocument(document -> document.getTextArea().addParser(spellingParser));
                         Actions.TOGGLE_SPELLING_PARSER.setEnabled(true);
                     });
                 }
@@ -837,29 +916,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * current programming language.
      */
     public void refreshSourceTree() {
-        if (tree != null) {
-            tree.uninstall();
-        }
-
-        String language = textArea.getSyntaxEditingStyle();
-        if (SyntaxConstants.SYNTAX_STYLE_JAVA.equals(language)) {
-            tree = new JavaOutlineTree();
-        } else if (SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT.equals(language)) {
-            tree = new JavaScriptOutlineTree();
-        } else if (SyntaxConstants.SYNTAX_STYLE_XML.equals(language)) {
-            tree = new XmlOutlineTree();
-        } else {
-            tree = null;
-        }
-
-        if (tree != null) {
-            tree.listenTo(textArea);
-            treeSP.setViewportView(tree);
-        } else {
-            JTree dummy = new JTree((TreeNode) null);
-            treeSP.setViewportView(dummy);
-        }
-        treeSP.revalidate();
+        currentDocument.refreshSourceTree();
     }
 
     public static ApplicationFrame getInstance() {
@@ -873,15 +930,344 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      */
     @Override
     public String getSelectedText() {
-        return textArea.getSelectedText();
+        return getTextComponent().getSelectedText();
     }
 
     public String getText() {
-        return getSelectedText() != null ? getSelectedText() : textArea.getText();
+        return getSelectedText() != null ? getSelectedText() : getTextComponent().getText();
     }
 
     public AutoCompletion getAutoCompletion() {
-        return autoCompletion;
+        return currentDocument == null ? null : currentDocument.getAutoCompletion();
+    }
+
+    /**
+     * @return The document currently shown in the editor, or <code>null</code>
+     *         if the editor has not been created yet.
+     */
+    public EditorDocument getCurrentDocument() {
+        return currentDocument;
+    }
+
+    /**
+     * @return A snapshot of all the documents of the editor, in the order of
+     *         their tabs.
+     */
+    public List<EditorDocument> getDocuments() {
+        return documentTabs == null ? Collections.<EditorDocument>emptyList() : documentTabs.getDocuments();
+    }
+
+    /**
+     * Runs the given operation on every document of the editor. The settings of
+     * the editor are shared by all its documents, so a command that changes one
+     * of them has to be applied to each document, not only to the current one.
+     *
+     * @param operation The operation to run on every document.
+     */
+    public void forEachDocument(Consumer<EditorDocument> operation) {
+        if (documentTabs != null) {
+            documentTabs.forEach(operation);
+        }
+    }
+
+    /**
+     * Opens a new empty document, in a new tab, and shows it. Must be called
+     * from the Swing event thread.
+     *
+     * @return The new document, or <code>null</code> if it could not be
+     *         opened because a long running action is using the current one.
+     */
+    public EditorDocument newDocument() {
+        if (ThreadedAction.isRunning()) {
+            Toolkit.getDefaultToolkit().beep();
+            return null;
+        }
+        EditorDocument document = createAlignedDocument();
+        documentTabs.add(document, true);
+        return document;
+    }
+
+    /**
+     * Closes the document currently shown, if the user confirms it. Must be
+     * called from the Swing event thread.
+     *
+     * @return <code>false</code> if the document has not been closed.
+     */
+    public boolean closeCurrentDocument() {
+        return documentTabs.close(documentTabs.getCurrent());
+    }
+
+    /**
+     * Closes all the documents, asking before each one that has changes. Must be
+     * called from the Swing event thread.
+     *
+     * @return <code>false</code> if some documents have not been closed.
+     */
+    public boolean closeAllDocuments() {
+        return documentTabs.closeAll();
+    }
+
+    /**
+     * Shows the document of the next tab, going round at the end. Must be called
+     * from the Swing event thread.
+     */
+    public void selectNextDocument() {
+        documentTabs.selectRelative(1);
+    }
+
+    /**
+     * Shows the document of the previous tab, going round at the start. Must be
+     * called from the Swing event thread.
+     */
+    public void selectPreviousDocument() {
+        documentTabs.selectRelative(-1);
+    }
+
+    /**
+     * Updates the title of the tab of every document, for instance after a file
+     * has been opened in one of them. Must be called from the Swing event
+     * thread.
+     */
+    public void refreshTabTitles() {
+        if (documentTabs != null) {
+            documentTabs.refreshTitles();
+        }
+    }
+
+    /**
+     * Creates a document that is like the one currently shown: it has the same
+     * theme, font, options and spell checking, and it is empty, with the SQL
+     * syntax. It is not added to the tabs yet.
+     *
+     * @return The new document.
+     */
+    private EditorDocument createAlignedDocument() {
+        EditorDocument source = currentDocument;
+        EditorDocument document = createDocument(ThemeAction.getCurrentThemeXml());
+        document.setNumber(++documentCounter);
+        addSyntaxHighlighting(document);
+        document.getTextArea().addCaretListener(caretListenerLabel);
+        if (source != null) {
+            EditorSettings.copy(source, document);
+            JMenu sourceFoldingMenu = getFoldingMenu(source.getTextArea());
+            JMenu foldingMenu = getFoldingMenu(document.getTextArea());
+            if (sourceFoldingMenu != null && foldingMenu != null) {
+                foldingMenu.setText(sourceFoldingMenu.getText());
+            }
+        }
+        // The action is enabled only once the dictionary has been loaded and the
+        // parser added to the documents that existed at that time
+        if (Actions.TOGGLE_SPELLING_PARSER.isEnabled() && spellingParser != null
+                && ((ToggleSpellCheckingAction) Actions.TOGGLE_SPELLING_PARSER).isSpellCheckEnabled()) {
+            document.getTextArea().addParser(spellingParser);
+        }
+        return document;
+    }
+
+    /**
+     * Makes the given document, already selected in the tabs, the one the
+     * window works on: what depends on the current document is updated.
+     *
+     * @param document The document now shown.
+     */
+    private void showDocument(EditorDocument document) {
+        EditorDocument previous = currentDocument;
+        setCurrentDocument(document);
+
+        // The results of the document are shown below its text
+        if (workArea != null) {
+            int dividerLocation = workArea.getDividerLocation();
+            workArea.setBottomComponent(document.getResultScrollPane());
+            workArea.setDividerLocation(dividerLocation);
+        }
+
+        if (menubar != null) {
+            menubar.refreshEditOptions();
+            menubar.selectSyntaxStyle(document.getTextArea().getSyntaxEditingStyle());
+        }
+        Actions.getInstance().validateActions();
+        // The occurrences marked by the search follow the document shown
+        SearchMarks.move(previous, document, findDialog == null ? null : findDialog.getSearchContext());
+        if (caretListenerLabel != null) {
+            caretListenerLabel.refresh(document.getTextArea());
+        }
+        SwingUtilities.invokeLater(() -> document.getTextArea().requestFocusInWindow());
+    }
+
+    /**
+     * @return The name of a document: the name of the file it was opened from or
+     *         saved in, or a name that tells apart the documents that are not
+     *         in a file.
+     */
+    private String getDocumentName(EditorDocument document) {
+        File file = document.getState().getOpenedFile();
+        if (file != null) {
+            return file.getName();
+        }
+        String untitled = LanguageManager.getInstance().getString("tab.untitled");
+        return document.getNumber() <= 1 ? untitled : untitled + " " + document.getNumber();
+    }
+
+    /**
+     * @return The title of the tab of a document: its name, marked with an
+     *         asterisk if the text has been changed.
+     */
+    private String getDocumentTitle(EditorDocument document) {
+        String name = getDocumentName(document);
+        return document.isModified() ? "*" + name : name;
+    }
+
+    /**
+     * Saves the whole text of a document in a file chosen by the user, which
+     * becomes the file of the document, unless it is written as a web page (see
+     * {@link FileIO#saveFile(String, byte[])}): it does not hold the text of
+     * the document then. Can be called from any thread.
+     *
+     * @param document The document to save, that must be the current one.
+     * @return <code>false</code> if the user gave up, and the text has not been
+     *         saved.
+     * @throws Exception If the file cannot be written.
+     */
+    public boolean saveDocument(final EditorDocument document) throws Exception {
+        File openedFile = document.getState().getOpenedFile();
+        // An explicit charset is required here, to stay symmetric with
+        // FileIO#openFile(File)
+        byte[] bytes = document.getTextArea().getText().getBytes(StandardCharsets.UTF_8);
+        final File file = FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), bytes);
+        if (file == null) {
+            return false;
+        }
+        String name = file.getName().toLowerCase();
+        if (!name.endsWith(".htm") && !name.endsWith(".html")) {
+            FileIO.runOnEventThread(() -> {
+                document.getState().setOpenedFile(file);
+                document.setModified(false);
+                refreshTabTitles();
+            });
+        }
+        return true;
+    }
+
+    /**
+     * Chooses the document a file is going to be opened in: the one it is
+     * already open in, which is shown, otherwise the current one if it is empty,
+     * otherwise a new one, shown in a new tab. Must be called from the Swing
+     * event thread. This is also done while an action is being executed, as
+     * opening a file is one.
+     *
+     * @param file The file to open.
+     * @return The document to load the file in, or <code>null</code> if the file
+     *         is already open in a document, which has just been shown.
+     */
+    public EditorDocument getDocumentForOpening(File file) {
+        EditorDocument existing = documentTabs.findDocument(file);
+        if (existing != null) {
+            documentTabs.select(existing);
+            return null;
+        }
+        EditorDocument current = documentTabs.getCurrent();
+        if (current.isPristine()) {
+            return current;
+        }
+        EditorDocument document = createAlignedDocument();
+        documentTabs.add(document, true);
+        return document;
+    }
+
+    /** What the tabs ask the window. */
+    private final class DocumentTabsHost implements DocumentTabs.Host {
+
+        @Override
+        public EditorDocument createDocument() {
+            return createAlignedDocument();
+        }
+
+        @Override
+        public void documentShown(EditorDocument document) {
+            showDocument(document);
+        }
+
+        @Override
+        public boolean confirmClose(EditorDocument document) {
+            if (!document.isModified()) {
+                return true;
+            }
+            // The question is about this document, so show it: it is also the
+            // one that is saved, if the user wants it
+            documentTabs.select(document);
+            LanguageManager languageManager = LanguageManager.getInstance();
+            int answer = Dialog.show(languageManager.getString("dialog.warning.title"),
+                    MessageFormat.format(languageManager.getString("tab.save_changes"), getDocumentName(document)),
+                    Dialog.WARNING_MESSAGE, Dialog.YES_NO_CANCEL_OPTION);
+            if (answer == Dialog.YES_OPTION) {
+                try {
+                    // The document is closed only if the text has been saved
+                    return saveDocument(document);
+                } catch (Exception e) {
+                    ExceptionDialog.showException(e);
+                    return false;
+                }
+            }
+            return answer == Dialog.NO_OPTION;
+        }
+
+        @Override
+        public void documentClosed(EditorDocument document) {
+            document.dispose();
+        }
+
+        @Override
+        public boolean isBusy() {
+            return ThreadedAction.isRunning();
+        }
+
+        @Override
+        public String getTitle(EditorDocument document) {
+            return getDocumentTitle(document);
+        }
+
+        @Override
+        public String getToolTip(EditorDocument document) {
+            File file = document.getState().getOpenedFile();
+            return file == null ? null : file.getPath();
+        }
+
+        @Override
+        public String getCloseToolTip() {
+            return LanguageManager.getInstance().getString("tab.close");
+        }
+
+        @Override
+        public JPopupMenu createTabMenu(final EditorDocument document) {
+            LanguageManager languageManager = LanguageManager.getInstance();
+            JPopupMenu menu = new JPopupMenu();
+            menu.add(new AbstractAction(languageManager.getString("menu.file.close_tab")) {
+                private static final long serialVersionUID = 6120094755283013452L;
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    documentTabs.close(document);
+                }
+            });
+            JMenuItem closeOthers = menu.add(new AbstractAction(languageManager.getString("tab.close_others")) {
+                private static final long serialVersionUID = -4417209580632148717L;
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    documentTabs.closeOthers(document);
+                }
+            });
+            closeOthers.setEnabled(getDocuments().size() > 1);
+            menu.add(new AbstractAction(languageManager.getString("menu.file.close_all_tabs")) {
+                private static final long serialVersionUID = 8874531190367452906L;
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    documentTabs.closeAll();
+                }
+            });
+            return menu;
+        }
     }
 
     /**
@@ -1016,7 +1402,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /** Sets the content in the text area. */
     public void setText(final String t) {
         SwingUtilities.invokeLater(() -> {
-            textArea.setText(t);
+            getTextComponent().setText(t);
             refreshSourceTree();
         });
     }
@@ -1032,7 +1418,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
     /** @return The SQL editor. */
     public OTVSyntaxTextArea getTextComponent() {
-        return textArea;
+        return currentDocument == null ? null : currentDocument.getTextArea();
     }
 
     /** @return The help frame. */
@@ -1065,9 +1451,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         this.toolbar = toolbar;
     }
 
-    /** @return The textScrollPane */
+    /** @return The scroll pane of the SQL editor */
     public RTextScrollPane getTextScrollPane() {
-        return textScrollPane;
+        return currentDocument == null ? null : currentDocument.getScrollPane();
     }
 
     /** @return The menubar. */
@@ -1464,7 +1850,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /**
      * Refreshes the right-click context menu of every {@code RSyntaxTextArea}
      * in the application (in practice, the main SQL editor - see
-     * {@link #textArea}) for the current language.
+     * {@link #getTextComponent()}) for the current language.
      * <p>
      * {@link RTextArea} and {@link RSyntaxTextArea} each cache the
      * Cut/Copy/Paste/Delete/Undo/Redo/Select All actions ({@code
@@ -1538,20 +1924,30 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         refreshRecordableAction(RSyntaxTextArea.class, "expandAllFoldsAction", rstaBundle, "Action.ExpandAllFolds");
 
         // The "Folding" submenu's own label is not Action-bound (see the
-        // method javadoc above), so relabel the main SQL editor's copy of
-        // it directly.
-        if (textArea != null) {
-            try {
-                Field foldingMenuField = RSyntaxTextArea.class.getDeclaredField("foldingMenu");
-                foldingMenuField.setAccessible(true);
-                Object foldingMenu = foldingMenuField.get(textArea);
-                if (foldingMenu instanceof JMenu) {
-                    ((JMenu) foldingMenu).setText(rstaBundle.getString("ContextMenu.Folding"));
-                }
-            } catch (ReflectiveOperationException e) {
-                System.err.println("[ApplicationFrame] Could not refresh the SQL editor's Folding submenu label: "
-                        + e);
+        // method javadoc above), so relabel the copy of it that every document
+        // of the editor has directly.
+        for (EditorDocument document : getDocuments()) {
+            JMenu foldingMenu = getFoldingMenu(document.getTextArea());
+            if (foldingMenu != null) {
+                foldingMenu.setText(rstaBundle.getString("ContextMenu.Folding"));
             }
+        }
+    }
+
+    /**
+     * @param textArea A text area of the editor.
+     * @return The "Folding" submenu of the context menu of the text area, or
+     *         <code>null</code> if it cannot be reached.
+     */
+    private JMenu getFoldingMenu(OTVSyntaxTextArea textArea) {
+        try {
+            Field foldingMenuField = RSyntaxTextArea.class.getDeclaredField("foldingMenu");
+            foldingMenuField.setAccessible(true);
+            Object foldingMenu = foldingMenuField.get(textArea);
+            return foldingMenu instanceof JMenu ? (JMenu) foldingMenu : null;
+        } catch (ReflectiveOperationException e) {
+            System.err.println("[ApplicationFrame] Could not reach the Folding submenu of a text area: " + e);
+            return null;
         }
     }
 
@@ -1572,7 +1968,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      *                  (e.g. {@code "Action.Cut"})
      */
     private static void refreshRecordableAction(Class<?> owner, String fieldName, ResourceBundle bundle,
-            String keyRoot) {
+                                                String keyRoot) {
         try {
             Field field = owner.getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -1593,31 +1989,31 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     public void onLanguageChanged(Locale newLocale, ResourceBundle newBundle) {
         refreshLanguage();
     }
-    
+
     /**
      * Refreshes the language for all GUI components recursively.
      */
     public void refreshLanguage() {
         LanguageManager langManager = LanguageManager.getInstance();
-        
+
         // Update window title
         setTitle(langManager.getString("app.title"));
-        
+
         // Update menu bar - THIS WAS MISSING!
         if (menubar != null) {
             menubar.refreshAllComponents();
         }
-        
+
         // Update console title if visible
         if (console != null) {
             console.refreshLanguage();
         }
-        
+
         // Update help frame if visible
         if (helpFrame != null && helpFrame.isVisible()) {
             helpFrame.refreshLanguage();
         }
-        
+
         // Update graphic viewer. It is pre-instantiated during application startup
         // (see the splash screen initialization sequence) and may still be hidden -
         // not yet opened by the user - when the language changes, so its language
@@ -1627,7 +2023,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         if (graphicViewer != null) {
             graphicViewer.refreshLanguage();
         }
-        
+
         // Update toolbar
         if (toolbar != null) {
             toolbar.refreshLanguage();
@@ -1644,7 +2040,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         // LanguageChangeListener (see CustomAction/SchemaBrowserAction),
         // which silently undoes the icon-only intent - so it has to be
         // re-applied here too, not just once at startup.
-        // 
+        //
         // Simply calling setText(null) inline, right here, is not enough:
         // ApplicationFrame registers itself as a LanguageChangeListener in
         // its constructor before ApplicationToolBar (and therefore the
@@ -1662,7 +2058,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         if (schemaBrowserToggleButton != null) {
             SwingUtilities.invokeLater(() -> schemaBrowserToggleButton.setText(null));
         }
-        
+
         // Rebuild the find/replace dialogs and search toolbars so their
         // internal RSTAUI-supplied strings (Match Case, Regex, Whole word,
         // the Find/Replace buttons, etc.) pick up the new language too -
@@ -1677,17 +2073,20 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         // caching means this needs its own explicit refresh too.
         refreshTextAreaPopupMenuLanguage();
 
+        // Update the titles of the tabs ("Untitled") and their close tool tip
+        refreshTabTitles();
+
         // Update dialogs
         if (findDialog != null) {
             findDialog.setTitle(langManager.getString("dialog.find.title"));
             SwingUtilities.updateComponentTreeUI(findDialog);
         }
-        
+
         if (replaceDialog != null) {
-            replaceDialog.setTitle(langManager.getString("dialog.replace.title")); 
+            replaceDialog.setTitle(langManager.getString("dialog.replace.title"));
             SwingUtilities.updateComponentTreeUI(replaceDialog);
         }
-        
+
         if (_OTVGoToDialog != null) {
             _OTVGoToDialog.setTitle(langManager.getString("dialog.goto.title"));
             SwingUtilities.updateComponentTreeUI(_OTVGoToDialog);
@@ -1695,17 +2094,17 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
         // Recursively update all text components in the frame
         SwingUtilities.updateComponentTreeUI(this);
-        
+
         // Force menu bar update
         if (getJMenuBar() != null) {
             SwingUtilities.updateComponentTreeUI(getJMenuBar());
         }
-        
+
         // Update owned windows
         for (Window window : getOwnedWindows()) {
             SwingUtilities.updateComponentTreeUI(window);
         }
-        
+
         // Refresh the entire frame
         revalidate();
         repaint();
@@ -1746,6 +2145,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             splashScreen.updateStatus(langManager.getString("splash.work_area"), 40);
             JPanel globalPanel = new JPanel(new BorderLayout());
             globalPanel.add(createWorkArea(), BorderLayout.CENTER);
+            // The user may give up closing the application, to save the documents
+            // that have changes: closing the window must not hide it by itself
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -1754,7 +2156,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    handleWindowClose();
+                    if (documentTabs.confirmCloseAll()) {
+                        handleWindowClose();
+                    }
                 }
             });
 
@@ -1770,11 +2174,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             splashScreen.updateStatus(langManager.getString("splash.work_panels"), 50);
             JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, globalPanel, scrollPaneConsole);
             mainSplitPane.setOneTouchExpandable(true);
-            
+
             // Fix HiDPI: scale the main divisor
             mainSplitPane.setDividerSize(SwingUtil.scale(4));
             mainSplitPane.setDividerLocation(SwingUtil.scale(510));
-            
+
             getContentPane().add(mainSplitPane, BorderLayout.CENTER);
 
             splashScreen.updateStatus(langManager.getString("splash.graphic_viewer"), 60);
@@ -1811,10 +2215,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             pack();
             double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
             double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-            
+
             // Fix HiDPI: Scale the hardcoded base size
             setSize(Math.min(SwingUtil.scale(1150), (int) (screenWidth * .8)), Math.min(SwingUtil.scale(720), (int) (screenHeight * .8)));
-            
+
             setMinimumSize(new Dimension((int) (screenWidth * .2), (int) (screenHeight * .2)));
             SwingUtil.centerWithinScreen(ApplicationFrame.this);
             splashScreen.updateStatus(langManager.getString("splash.done"), 100);
