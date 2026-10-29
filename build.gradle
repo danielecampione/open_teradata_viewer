@@ -195,7 +195,7 @@ tasks.named('run') {
 // lookup it already does on its own.
 tasks.named('startScripts') {
     doLast {
-        def javaHome = 'C:\\Program_Files\\Java\\jdk-11.0.32.1-full'
+        def javaHome = 'C:\\Program_Files\\Java\\jdk-11.0.33.0.3-full'
         windowsScript.text = "@if exist \"${javaHome}\\bin\\java.exe\" set \"JAVA_HOME=${javaHome}\"\r\n" + windowsScript.text
     }
 }
