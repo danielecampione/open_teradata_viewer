@@ -40,6 +40,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.UIUtil;
@@ -162,6 +163,8 @@ public class FileIO {
         // letters) whenever the file was written on a different machine or
         // with a different editor
         final String content = new String(FileIO.readFile(file), StandardCharsets.UTF_8);
+        // The name of the file tells how its text is highlighted
+        final String syntaxStyle = FileSyntaxStyle.forFile(file);
         SwingUtilities.invokeAndWait(() -> {
             ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
             // The file is opened in a tab of its own, or in the empty one that
@@ -172,13 +175,22 @@ public class FileIO {
             }
             document.getState().setOpenedFile(file);
             RSyntaxTextArea textArea = document.getTextArea();
+            // The style is set before the text, so that the text is tokenized
+            // once with the right style and not again when the style changes
+            textArea.setSyntaxEditingStyle(syntaxStyle);
             textArea.setText(content);
             textArea.setCaretPosition(0);
             // The text of the file is where the document starts from: it must
             // not be possible to undo it
             textArea.discardAllEdits();
             document.setModified(false);
+            // Only the documents of some syntax styles have a source tree
             document.refreshSourceTree();
+            // The menu shows the syntax style of the document that is shown
+            ApplicationMenuBar menuBar = applicationFrame.getApplicationMenuBar();
+            if (menuBar != null && document == applicationFrame.getCurrentDocument()) {
+                menuBar.selectSyntaxStyle(syntaxStyle);
+            }
             applicationFrame.refreshTabTitles();
         });
     }

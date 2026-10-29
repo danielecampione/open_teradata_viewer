@@ -6,7 +6,7 @@
 </HEAD>
 <BODY bgcolor="#FFFFFF">
 <PRE>
-0.4a (28/10/2026)
+0.4a (30/10/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The "View as (highlighting file type)" menu now uses up to 90% of the
       usable screen height instead of showing only 10 rows at a time.
@@ -50,6 +50,13 @@
       (Ctrl+Shift+W) and to show the next (Ctrl+PageDown) and the previous
       (Ctrl+PageUp) tab, which work also when the focus is in the editor.
     - The tabs can be dragged with the mouse to change their order.
+    - A file that is opened is now highlighted according to its extension
+      (Java, JavaScript, XML, HTML, Python, PowerShell, VHDL, ...) instead of
+      always as SQL. The file types known by RSyntaxTextArea are recognized,
+      plus PowerShell (.ps1, .psm1, .psd1) and VHDL (.vhd, .vhdl).
+      Unrecognized files (e.g. .txt) are still highlighted as SQL.
+      The "View as (highlighting file type)" menu shows the style chosen
+      and the source tree is shown for Java, JavaScript and XML files.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
