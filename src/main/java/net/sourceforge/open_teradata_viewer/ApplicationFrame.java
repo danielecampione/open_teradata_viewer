@@ -220,7 +220,15 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         LanguageManager.getInstance().addLanguageChangeListener(this);
     }
 
-    public void drawIt() {
+    /**
+     * Shows the splash screen and then the window. The window is created
+     * later, on the event thread: when this method returns it does not exist
+     * yet.
+     *
+     * @param filesToOpen The files to open in the editor once the window is
+     *        shown, in the given order.
+     */
+    public void drawIt(List<File> filesToOpen) {
         // Create the splash screen, if this application has one
         final SplashScreen splashScreen = createSplashScreen();
         if (splashScreen != null) {
@@ -229,7 +237,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
         // Do the rest of this stuff "later", so that the EDT has time to
         // actually display the splash screen and update it
-        SwingUtilities.invokeLater(new StartupRunnable(splashScreen));
+        SwingUtilities.invokeLater(new StartupRunnable(splashScreen, filesToOpen));
     }
 
     public void installPlugins() {
@@ -1149,6 +1157,23 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Shows the document of a file, if the file is open. Must be called from
+     * the Swing event thread.
+     *
+     * @param file A file.
+     * @return <code>true</code> if the file is open, and its document has been
+     *         shown.
+     */
+    public boolean showOpenedFile(File file) {
+        EditorDocument existing = documentTabs.findDocument(file);
+        if (existing == null) {
+            return false;
+        }
+        documentTabs.select(existing);
+        return true;
+    }
+
+    /**
      * Chooses the document a file is going to be opened in: the one it is
      * already open in, which is shown, otherwise the current one if it is empty,
      * otherwise a new one, shown in a new tab. Must be called from the Swing
@@ -1160,9 +1185,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      *         is already open in a document, which has just been shown.
      */
     public EditorDocument getDocumentForOpening(File file) {
-        EditorDocument existing = documentTabs.findDocument(file);
-        if (existing != null) {
-            documentTabs.select(existing);
+        if (showOpenedFile(file)) {
             return null;
         }
         EditorDocument current = documentTabs.getCurrent();
@@ -1618,17 +1641,20 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      *         return <code>true</code> if and only if this file is larger
      *         than their threshold and they chose not to open it.
      */
-    private boolean getFileIsTooLarge(String fileName) {
+    private boolean getFileIsTooLarge(String fileName) throws Exception {
         if (getDoFileSizeCheck()) {
             File file = new File(fileName);
             float fileSizeMB = file.length() / 1000000.0f;
             float maxFileSizeMB = getMaxFileSize();
             if (fileSizeMB > maxFileSizeMB) {
                 String desc = "The following file is very large and may cause problems in the editor:\n{0}\nAre you sure you want to open it?";
-                desc = MessageFormat.format(desc, file.getAbsolutePath());
-                int rc = JOptionPane.showConfirmDialog(this, desc, Main.APPLICATION_NAME + " - Confirmation",
-                        JOptionPane.YES_NO_OPTION);
-                if (rc != JOptionPane.YES_OPTION) {
+                final String message = MessageFormat.format(desc, file.getAbsolutePath());
+                // Files are opened by actions, which run on a thread of their
+                // own: the question must be asked on the event thread
+                final int[] answer = new int[1];
+                FileIO.runOnEventThread(() -> answer[0] = JOptionPane.showConfirmDialog(this, message,
+                        Main.APPLICATION_NAME + " - Confirmation", JOptionPane.YES_NO_OPTION));
+                if (answer[0] != JOptionPane.YES_OPTION) {
                     return true;
                 }
             }
@@ -2121,8 +2147,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
 
         private SplashScreen splashScreen;
 
-        public StartupRunnable(SplashScreen splashScreen) {
+        private final List<File> filesToOpen;
+
+        public StartupRunnable(SplashScreen splashScreen, List<File> filesToOpen) {
             this.splashScreen = splashScreen;
+            this.filesToOpen = filesToOpen;
         }
 
         @Override
@@ -2229,6 +2258,18 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 splashScreen.dispose();
             }
             setVisible(true);
+
+            // The files to open are opened by an action, as when the user
+            // chooses them. It goes on while the connection dialog, shown by
+            // the action below, waits for the user
+            if (!filesToOpen.isEmpty()) {
+                new ThreadedAction() {
+                    @Override
+                    protected void execute() throws Exception {
+                        FileIO.openFiles(filesToOpen);
+                    }
+                };
+            }
 
             Actions.CONNECT.actionPerformed(new ActionEvent(this, 0, null));
         }

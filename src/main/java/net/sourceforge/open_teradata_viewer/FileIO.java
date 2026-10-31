@@ -30,12 +30,15 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.MessageFormat;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.*;
 
+import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
 
@@ -193,6 +196,50 @@ public class FileIO {
             }
             applicationFrame.refreshTabTitles();
         });
+    }
+
+    /**
+     * Opens some files one after the other, as if the user had chosen them
+     * with the Open command: each one in a tab of its own, the first one in
+     * the empty tab that is shown, if there is one. A file that does not
+     * exist, or that cannot be opened, is reported and does not stop the
+     * others. When all of them are open, the first one is the one that is
+     * shown, as in RText. Like {@link #openFile(File)}, it must not be called
+     * from the Swing event thread.
+     *
+     * @param files The files to open, in the order they have to be opened.
+     */
+    public static void openFiles(List<File> files) {
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        LanguageManager langManager = LanguageManager.getInstance();
+        for (File file : files) {
+            if (!file.isFile()) {
+                applicationFrame.getConsole().println(
+                        MessageFormat.format(langManager.getString("message.not_an_existing_file"), file.getPath()),
+                        ApplicationFrame.WARNING_FOREGROUND_COLOR_LOG);
+                continue;
+            }
+            try {
+                applicationFrame.openFile(FileLocation.create(file));
+            } catch (Exception e) {
+                ExceptionDialog.showException(e);
+            }
+        }
+        if (files.size() > 1) {
+            // A file that has not been opened (it was too large and the user
+            // gave up, or it could not be read) has no document to show
+            try {
+                runOnEventThread(() -> {
+                    for (File file : files) {
+                        if (applicationFrame.showOpenedFile(file)) {
+                            break;
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                ExceptionDialog.showException(e);
+            }
+        }
     }
 
     /**

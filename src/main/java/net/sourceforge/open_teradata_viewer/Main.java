@@ -36,18 +36,13 @@ import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
  * Entry point for the application.
- * 
+ *
  * @author <A HREF="mailto:nonametekno@gmail.com">D. Campione</A>
  *
  */
 public class Main {
 
     public static final String APPLICATION_NAME = "Open Teradata Viewer";
-
-    /** Prints a usage statement. */
-    private static void printUsage() {
-        System.err.println("Usage: java net.sourceforge.open_teradata_viewer.Main");
-    }
 
     public static void main(final String[] args) {
         // Start of the anti-blur trick for hi-dpi
@@ -78,8 +73,15 @@ public class Main {
             System.exit(-1);
         }
 
-        if (args.length > 0) {
-            printUsage();
+        final CommandLine commandLine = CommandLine.parse(args);
+        if (commandLine.isHelpRequested()) {
+            System.out.println(CommandLine.getUsage());
+            System.exit(0);
+        }
+        if (commandLine.getInvalidOption() != null) {
+            System.err.println("Unknown option: " + commandLine.getInvalidOption());
+            System.err.println();
+            System.err.println(CommandLine.getUsage());
             System.exit(-2);
         }
 
@@ -229,7 +231,7 @@ public class Main {
             Toolkit.getDefaultToolkit().setDynamicLayout(true);
             ApplicationFrame applicationFrame = new ApplicationFrame();
             applicationFrame.initLookAndFeelManager(lafManager);
-            applicationFrame.drawIt();
+            applicationFrame.drawIt(commandLine.getFiles());
         });
     }
 

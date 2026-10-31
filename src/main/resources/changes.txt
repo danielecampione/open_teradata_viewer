@@ -1,4 +1,4 @@
-0.4a (30/10/2026)
+0.4a (31/10/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The "View as (highlighting file type)" menu now uses up to 90% of the
       usable screen height instead of showing only 10 rows at a time.
@@ -49,6 +49,13 @@
       Unrecognized files (e.g. .txt) are still highlighted as SQL.
       The "View as (highlighting file type)" menu shows the style chosen
       and the source tree is shown for Java, JavaScript and XML files.
+    - Files can now be given on the command line: each one is opened in a tab
+      of the editor, the first one being shown, and a file that does not
+      exist is reported in the console without stopping the others. The -h
+      and --help options print the usage statement, which is also printed
+      when an option is not known.
+    - The confirmation asked before opening a very large file is now shown
+      on the event thread.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
