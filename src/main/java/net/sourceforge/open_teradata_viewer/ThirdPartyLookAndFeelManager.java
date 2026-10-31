@@ -115,11 +115,20 @@ public class ThirdPartyLookAndFeelManager {
 
     /**
      * Built-in Look and Feels that are no longer shipped. Their entries are
-     * dropped once from an existing file that is older than the revision that
-     * retired them, so that the menu does not offer a Look and Feel that can
-     * no longer be loaded.
+     * removed from the XML file every time they are found there, whatever the
+     * revision of the file is, so that the menu does not offer a Look and Feel
+     * that can no longer be loaded.
      */
     private static final String[] RETIRED_CLASSES = { "com.incors.plaf.kunststoff.KunststoffLookAndFeel" };
+
+    /**
+     * Prefixes of the class names of the Look and Feels that are no longer
+     * shipped, for the families that are too large to be listed one by one:
+     * the Substance skins, which have been replaced by the Radiance ones (their
+     * package, <code>org.pushingpixels.radiance</code>, does not match). They
+     * are handled like {@link #RETIRED_CLASSES}.
+     */
+    private static final String[] RETIRED_CLASS_PREFIXES = { "org.pushingpixels.substance." };
 
     /** The Office Look and Feels are built on top of the Windows one. */
     private static final String WINDOWS_ONLY_CLASS_PREFIX = "org.fife.plaf.";
@@ -193,6 +202,30 @@ public class ThirdPartyLookAndFeelManager {
 
     public ClassLoader getLAFClassLoader() {
         return lafLoader;
+    }
+
+    /**
+     * Tells whether a Look and Feel is no longer shipped: it is neither
+     * offered nor kept in the XML file, and it cannot be the one the
+     * application starts with.
+     *
+     * @param className The class name of the Look and Feel.
+     * @return <code>true</code> if the Look and Feel has been retired.
+     */
+    public static boolean isRetired(String className) {
+        if (className == null) {
+            return false;
+        }
+        String name = className.trim();
+        if (Arrays.asList(RETIRED_CLASSES).contains(name)) {
+            return true;
+        }
+        for (String prefix : RETIRED_CLASS_PREFIXES) {
+            if (name.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -334,6 +367,12 @@ public class ThirdPartyLookAndFeelManager {
                     if (add && !IS_WINDOWS && className.startsWith(WINDOWS_ONLY_CLASS_PREFIX)) {
                         add = false;
                     }
+                    // A retired Look and Feel can no longer be loaded: it is
+                    // not offered even when its entry could not be removed
+                    // from the file (e.g. a read-only file)
+                    if (add && isRetired(className)) {
+                        add = false;
+                    }
                     if (add) {
                         lafInfo.add(new ExtendedLookAndFeelInfo(name, className));
                     }
@@ -400,11 +439,14 @@ public class ThirdPartyLookAndFeelManager {
     }
 
     /**
-     * Brings an already existing XML file up to date with the built-in list:
-     * the Look and Feels that were introduced after the revision the file was
-     * last synchronized with are added, and the ones that have been retired
-     * since are removed. This is done once per revision, so that an entry the
-     * user removes later on is never put back.
+     * Brings an already existing XML file up to date with the built-in list.
+     * The Look and Feels that have been retired are removed every time the
+     * file is read, even when it is already at the current revision, so that
+     * a retired entry that is there again (it was never removed, or an older
+     * version of the application or a manual edit put it back) does not stay
+     * in the file. The Look and Feels that were introduced after the revision
+     * the file was last synchronized with are added only once per revision,
+     * so that an entry the user removes later on is never put back.
      *
      * @param file The XML file of the 3rd party Look and Feels.
      */
@@ -426,39 +468,42 @@ public class ThirdPartyLookAndFeelManager {
                     ExceptionDialog.hideException(nfe);
                 }
             }
-            if (revision >= DEFAULTS_REVISION) {
-                return;
-            }
 
             Set<String> presentClasses = new HashSet<>();
             List<Element> retired = new ArrayList<>();
-            List<String> retiredClasses = Arrays.asList(RETIRED_CLASSES);
             NodeList children = rootElement.getElementsByTagName(LOOK_AND_FEEL);
             for (int i = 0; i < children.getLength(); i++) {
                 Element lookAndFeel = (Element) children.item(i);
                 String className = lookAndFeel.getAttribute(CLASS).trim();
-                if (retiredClasses.contains(className)) {
+                if (isRetired(className)) {
                     retired.add(lookAndFeel);
                 } else {
                     presentClasses.add(className);
                 }
             }
             for (Element lookAndFeel : retired) {
-                rootElement.removeChild(lookAndFeel);
+                lookAndFeel.getParentNode().removeChild(lookAndFeel);
             }
 
-            for (String[] defaultLookAndFeel : readDefaultLookAndFeels()) {
-                int since = 1;
-                try {
-                    since = Integer.parseInt(defaultLookAndFeel[3]);
-                } catch (NumberFormatException nfe) {
-                    ExceptionDialog.hideException(nfe);
-                }
-                if (since > revision && !presentClasses.contains(defaultLookAndFeel[1])) {
-                    rootElement.appendChild(createLookAndFeelElement(doc, defaultLookAndFeel));
-                }
+            boolean outdated = revision < DEFAULTS_REVISION;
+            if (retired.isEmpty() && !outdated) {
+                return;
             }
-            rootElement.setAttribute(DEFAULTS_REVISION_ATTRIBUTE, String.valueOf(DEFAULTS_REVISION));
+
+            if (outdated) {
+                for (String[] defaultLookAndFeel : readDefaultLookAndFeels()) {
+                    int since = 1;
+                    try {
+                        since = Integer.parseInt(defaultLookAndFeel[3]);
+                    } catch (NumberFormatException nfe) {
+                        ExceptionDialog.hideException(nfe);
+                    }
+                    if (since > revision && !presentClasses.contains(defaultLookAndFeel[1])) {
+                        rootElement.appendChild(createLookAndFeelElement(doc, defaultLookAndFeel));
+                    }
+                }
+                rootElement.setAttribute(DEFAULTS_REVISION_ATTRIBUTE, String.valueOf(DEFAULTS_REVISION));
+            }
 
             // Drop the blank text nodes of the old formatting, the transformer
             // indents the whole file again

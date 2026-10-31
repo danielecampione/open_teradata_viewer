@@ -56,6 +56,13 @@
       when an option is not known.
     - The confirmation asked before opening a very large file is now shown
       on the event thread.
+    - Fixed the obsolete Substance entries (the Radiance Look and Feels have
+      replaced them) being left in open_teradata_viewer_lookandfeels.xml: the
+      Look and Feels that are no longer shipped (Substance and Kunststoff) are
+      now removed from the file every time the application starts, even when
+      the file is already up to date, and are never offered in the menu. If
+      one of them was saved as the Look and Feel to start with, the default
+      one is used instead.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.

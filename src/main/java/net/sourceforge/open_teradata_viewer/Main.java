@@ -118,6 +118,16 @@ public class Main {
             String rootDir = Utilities.getRootDir();
             ThirdPartyLookAndFeelManager lafManager = new ThirdPartyLookAndFeelManager(rootDir + File.separator);
 
+            // The Look and Feel saved at the last run may have been retired in
+            // the meantime (e.g. a Substance skin, replaced by the Radiance
+            // ones): it can no longer be loaded and, as it is not listed any
+            // more, it would be skipped silently at every startup. Handle it
+            // as if the user had never chosen one
+            if (!noSavedLookAndFeel && ThirdPartyLookAndFeelManager.isRetired(lafName)) {
+                noSavedLookAndFeel = true;
+                lafName = UIManager.getSystemLookAndFeelClassName();
+            }
+
             // The user has never chosen a Look and Feel: use the default one
             // (the Office Visual Studio 2005 one on Windows, the system one
             // elsewhere) and remember it, exactly as the system one used to be
