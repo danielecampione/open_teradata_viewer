@@ -6,31 +6,23 @@
 </HEAD>
 <BODY bgcolor="#FFFFFF">
 <PRE>
-0.4a (31/10/2026)
+0.4a (01/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
-    - The "View as (highlighting file type)" menu now uses up to 90% of the
-      usable screen height instead of showing only 10 rows at a time.
-    - Grouped the parts that make up an editor document (text area, scroll
-      pane, source tree and auto-completion) in a dedicated class, as the
-      first step towards a multi-tab editor.
-    - Each editor document now holds its own file, query and results, and the
-      table showing them, instead of one set shared by the whole application,
-      as the second step towards a multi-tab editor.
-    - The settings of the editor (theme, font size, line wrapping, line
-      numbers, auto-completion options, spell checking, ...) are now applied
-      to all its documents instead of only the current one, as the third step
-      towards a multi-tab editor.
-    - The editor now has tabs: each one holds a document, with its own text,
-      syntax and results. A new tab is opened from the File menu or with
+    - The editor now has tabs. Each one holds a document: a dedicated class
+      groups its text area, scroll pane, source tree and auto-completion, and
+      the document has its own file, text, syntax, query and results, and the
+      table showing them, instead of one set shared by the whole application.
+      The results shown below the editor are the ones of the current tab. The
+      settings of the editor (theme, font size, line wrapping, line numbers,
+      auto-completion options, spell checking, ...) are applied to all the
+      tabs instead of only the current one, so a new tab starts with the same
+      settings as the others. A new tab is opened from the File menu or with
       Ctrl+N, and closed with its close button, the middle mouse button, the
       File menu or Ctrl+W (a tab with some text asks for confirmation first).
-      The results shown below the editor are the ones of the current tab, and
-      a new tab starts with the same settings as the others. The tabs cannot
-      be changed while an action, like a query, is being executed.
+      The tabs cannot be changed while an action, like a query, is being
+      executed.
     - Disconnecting from the database now releases the results of all the
       tabs.
-    - Fixed a possible NullPointerException in the label that shows the
-      position of the caret.
     - Files are now opened in a tab of their own, or in the empty tab that is
       shown, and a file that is already open is not opened twice: its tab is
       shown.
@@ -71,6 +63,10 @@
       the file is already up to date, and are never offered in the menu. If
       one of them was saved as the Look and Feel to start with, the default
       one is used instead.
+    - The "View as (highlighting file type)" menu now uses up to 90% of the
+      usable screen height instead of showing only 10 rows at a time.
+    - Fixed a possible NullPointerException in the label that shows the
+      position of the caret.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
