@@ -88,6 +88,19 @@ public class DocumentTabs {
         void documentClosed(EditorDocument document);
 
         /**
+         * Called when a document is shown whose file has been written after the
+         * document read it, by saving another document in it: the text of the
+         * document is not the one of the file anymore. The host asks the user
+         * whether to load the file again, and does it if the answer is yes.
+         *
+         * @param document The document shown, which is the current one.
+         * @return <code>true</code> if the document has been loaded again;
+         *         <code>false</code> if its text has been kept, so that the
+         *         document is shown as changed.
+         */
+        boolean reloadOutOfDate(EditorDocument document);
+
+        /**
          * @return <code>true</code> if the documents cannot be changed right
          *         now, because a long running action is using the current one.
          */
@@ -126,6 +139,11 @@ public class DocumentTabs {
     private volatile EditorDocument current;
     private boolean updating;
     private boolean programmatic;
+    // The host is asking what to do with a document that is going to be closed:
+    // its tab is shown for that, and it must not be asked anything else
+    private boolean confirmingClose;
+    // The host is asking whether to load a file again
+    private boolean askingToReload;
 
     // The title of a tab follows the state of its document
     private final PropertyChangeListener modifiedListener = event -> {
@@ -243,20 +261,35 @@ public class DocumentTabs {
     /**
      * @param file A file.
      * @return The document that was opened from the file, or <code>null</code>
-     *         if there is none.
+     *         if there is none. If there are several (see
+     *         {@link #findDocuments(File)}), the first one in the order of the
+     *         tabs.
      */
     public EditorDocument findDocument(File file) {
+        List<EditorDocument> found = findDocuments(file);
+        return found.isEmpty() ? null : found.get(0);
+    }
+
+    /**
+     * @param file A file.
+     * @return The documents that hold the file, in the order of the tabs: more
+     *         than one when the text of a document has been saved in a file
+     *         that another document was already holding. The list is empty if
+     *         there is none.
+     */
+    public List<EditorDocument> findDocuments(File file) {
         if (file == null) {
-            return null;
+            return Collections.emptyList();
         }
         File wanted = normalize(file);
+        List<EditorDocument> found = new ArrayList<>();
         for (EditorDocument document : documents) {
             File opened = document.getState().getOpenedFile();
             if (opened != null && normalize(opened).equals(wanted)) {
-                return document;
+                found.add(document);
             }
         }
-        return null;
+        return found;
     }
 
     private static File normalize(File file) {
@@ -282,7 +315,7 @@ public class DocumentTabs {
             Toolkit.getDefaultToolkit().beep();
             return false;
         }
-        if (!host.confirmClose(document)) {
+        if (!confirmClose(document)) {
             return false;
         }
 
@@ -352,11 +385,71 @@ public class DocumentTabs {
      */
     public boolean confirmCloseAll() {
         for (EditorDocument document : getDocuments()) {
-            if (!host.confirmClose(document)) {
+            if (!confirmClose(document)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean confirmClose(EditorDocument document) {
+        boolean previous = confirmingClose;
+        confirmingClose = true;
+        try {
+            return host.confirmClose(document);
+        } finally {
+            confirmingClose = previous;
+        }
+    }
+
+    /**
+     * Tells that a file has been written, so that the documents holding it,
+     * other than the one the text comes from, do not keep an old text
+     * unnoticed: each of them is marked as {@link EditorDocument#isOutOfDate()
+     * out of date}, and the host asks the user, when it is shown, whether to
+     * load the file again. If one of them is the document shown, it is asked
+     * at once.
+     *
+     * @param file The file that has been written.
+     * @param source The document whose text, or part of it, has been written,
+     *        or <code>null</code>. It is left as it is.
+     */
+    public void fileWritten(File file, EditorDocument source) {
+        for (EditorDocument document : findDocuments(file)) {
+            if (document != source) {
+                document.setOutOfDate(true);
+                if (document == current) {
+                    SwingUtilities.invokeLater(() -> offerReload(document));
+                }
+            }
+        }
+    }
+
+    /**
+     * Lets the host ask whether to load again the file of a document that is
+     * out of date. Nothing is asked if things have changed since the question
+     * was scheduled (the document has been closed, or another one is shown) or
+     * if the user is already being asked something else: the question is
+     * repeated the next time the document is shown. If the user does not want
+     * to load the file again, the text is kept and the document is marked as
+     * changed, because it is not the one of the file anymore: closing it asks
+     * whether to save it.
+     */
+    private void offerReload(EditorDocument document) {
+        if (!document.isOutOfDate() || document != current || confirmingClose || askingToReload) {
+            return;
+        }
+        document.setOutOfDate(false);
+        boolean reloaded;
+        askingToReload = true;
+        try {
+            reloaded = host.reloadOutOfDate(document);
+        } finally {
+            askingToReload = false;
+        }
+        if (!reloaded) {
+            document.setModified(true);
+        }
     }
 
     /**
@@ -526,5 +619,9 @@ public class DocumentTabs {
         }
         current = selected;
         host.documentShown(selected);
+        if (selected.isOutOfDate()) {
+            // The question is asked once the tab has been shown completely
+            SwingUtilities.invokeLater(() -> offerReload(selected));
+        }
     }
 }

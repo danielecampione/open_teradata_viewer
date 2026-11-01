@@ -78,6 +78,7 @@ public class EditorDocument {
     private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private volatile boolean modified;
+    private volatile boolean outOfDate;
     private int number;
     private AutoCompletion autoCompletion;
     private AbstractSourceTree tree;
@@ -226,6 +227,24 @@ public class EditorDocument {
         boolean old = this.modified;
         this.modified = modified;
         propertyChangeSupport.firePropertyChange(MODIFIED_PROPERTY, old, modified);
+    }
+
+    /**
+     * @return <code>true</code> if the file of the document has been written
+     *         after the document read it or wrote it, because the text of
+     *         another document has been saved in it: the text of this document
+     *         is not the one of the file anymore.
+     */
+    public boolean isOutOfDate() {
+        return outOfDate;
+    }
+
+    /**
+     * @param outOfDate Whether the file of the document has been written after
+     *        the document read it or wrote it, see {@link #isOutOfDate()}.
+     */
+    public void setOutOfDate(boolean outOfDate) {
+        this.outOfDate = outOfDate;
     }
 
     /**

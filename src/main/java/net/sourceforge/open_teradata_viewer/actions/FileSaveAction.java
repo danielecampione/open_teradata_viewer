@@ -64,7 +64,12 @@ public class FileSaveAction extends CustomAction {
             // file later reopened on a different OS/locale (or written back
             // with any character outside plain ASCII)
             File openedFile = Context.getInstance().getOpenedFile();
-            FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), selectedText.getBytes(StandardCharsets.UTF_8));
+            File savedFile = FileIO.saveFile(openedFile == null ? "" : openedFile.toString(),
+                    selectedText.getBytes(StandardCharsets.UTF_8));
+            if (savedFile != null) {
+                // The other tabs holding that file have an old text now
+                applicationFrame.fileWritten(savedFile, applicationFrame.getCurrentDocument());
+            }
         }
     }
 }

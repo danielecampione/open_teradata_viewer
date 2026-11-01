@@ -1129,7 +1129,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * Saves the whole text of a document in a file chosen by the user, which
      * becomes the file of the document, unless it is written as a web page (see
      * {@link FileIO#saveFile(String, byte[])}): it does not hold the text of
-     * the document then. Can be called from any thread.
+     * the document then. The other documents holding that file have an old text
+     * after that, see {@link #fileWritten(File, EditorDocument)}. Can be called
+     * from any thread.
      *
      * @param document The document to save, that must be the current one.
      * @return <code>false</code> if the user gave up, and the text has not been
@@ -1146,14 +1148,33 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             return false;
         }
         String name = file.getName().toLowerCase();
-        if (!name.endsWith(".htm") && !name.endsWith(".html")) {
-            FileIO.runOnEventThread(() -> {
+        final boolean webPage = name.endsWith(".htm") || name.endsWith(".html");
+        FileIO.runOnEventThread(() -> {
+            documentTabs.fileWritten(file, document);
+            if (!webPage) {
                 document.getState().setOpenedFile(file);
                 document.setModified(false);
+                document.setOutOfDate(false);
                 refreshTabTitles();
-            });
-        }
+            }
+        });
         return true;
+    }
+
+    /**
+     * Tells that a file has been written, so that the documents holding it,
+     * other than the one the text comes from, do not keep an old text unnoticed:
+     * each of them asks the user, when it is shown, whether to load the file
+     * again, see {@link DocumentTabs#fileWritten(File, EditorDocument)}. Can be
+     * called from any thread.
+     *
+     * @param file The file that has been written.
+     * @param source The document whose text, or part of it, has been written, or
+     *        <code>null</code>. It is left as it is.
+     * @throws Exception If the event thread cannot be waited for.
+     */
+    public void fileWritten(final File file, final EditorDocument source) throws Exception {
+        FileIO.runOnEventThread(() -> documentTabs.fileWritten(file, source));
     }
 
     /**
@@ -1237,6 +1258,31 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         @Override
         public void documentClosed(EditorDocument document) {
             document.dispose();
+        }
+
+        @Override
+        public boolean reloadOutOfDate(EditorDocument document) {
+            File file = document.getState().getOpenedFile();
+            if (file == null) {
+                return true;
+            }
+            LanguageManager languageManager = LanguageManager.getInstance();
+            // The changes made to the tab are lost if the file is loaded again
+            boolean hasChanges = document.isModified();
+            String message = MessageFormat.format(languageManager.getString(
+                    hasChanges ? "tab.file_changed_discard_changes" : "tab.file_changed"), file.getName());
+            int answer = Dialog.show(languageManager.getString("dialog.warning.title"), message,
+                    hasChanges ? Dialog.WARNING_MESSAGE : Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION);
+            if (answer != Dialog.YES_OPTION) {
+                return false;
+            }
+            try {
+                FileIO.reloadFile(document);
+                return true;
+            } catch (Exception e) {
+                ExceptionDialog.showException(e);
+                return false;
+            }
         }
 
         @Override

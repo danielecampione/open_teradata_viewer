@@ -199,6 +199,37 @@ public class FileIO {
     }
 
     /**
+     * Replaces the text of a document with the one of its file, for instance
+     * because the file has been written after the document read it. Unlike
+     * {@link #openFile(File)}, the syntax style of the document is kept, and so
+     * is the position of the caret as far as the new text allows. As when a file
+     * is opened, the new text cannot be undone and the document is not shown as
+     * changed. The file is read on the calling thread, which must be the Swing
+     * event thread, as the text area is changed too.
+     *
+     * @param document The document to reload. Nothing is done if it is not the
+     *        document of a file.
+     * @throws Exception If the file cannot be read: the document is left as it
+     *         is.
+     */
+    public static void reloadFile(EditorDocument document) throws Exception {
+        File file = document.getState().getOpenedFile();
+        if (file == null) {
+            return;
+        }
+        // The same charset as when the file is opened
+        String content = new String(readFile(file), StandardCharsets.UTF_8);
+        RSyntaxTextArea textArea = document.getTextArea();
+        int caretPosition = textArea.getCaretPosition();
+        textArea.setText(content);
+        textArea.setCaretPosition(Math.min(caretPosition, textArea.getDocument().getLength()));
+        textArea.discardAllEdits();
+        document.setModified(false);
+        // Only the documents of some syntax styles have a source tree
+        document.refreshSourceTree();
+    }
+
+    /**
      * Opens some files one after the other, as if the user had chosen them
      * with the Open command: each one in a tab of its own, the first one in
      * the empty tab that is shown, if there is one. A file that does not

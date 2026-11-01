@@ -49,6 +49,15 @@
       Unrecognized files (e.g. .txt) are still highlighted as SQL.
       The "View as (highlighting file type)" menu shows the style chosen
       and the source tree is shown for Java, JavaScript and XML files.
+    - The ten interface strings added with the tabs and the command line (the
+      tab commands of the File menu, the tab labels, tooltips and
+      confirmation, and the message about a file that does not exist) are now
+      translated into the 20 languages that did not have them.
+    - Saving the text of a tab in a file that is already open in another tab
+      no longer leaves that tab with the old text: when it is shown, it asks
+      whether to reload the content of the file (the changes made to that tab
+      are lost if it is reloaded). If the answer is no, the text is kept and
+      the tab is marked as changed.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h
@@ -67,10 +76,6 @@
       usable screen height instead of showing only 10 rows at a time.
     - Fixed a possible NullPointerException in the label that shows the
       position of the caret.
-    - The ten interface strings added with the tabs and the command line (the
-      tab commands of the File menu, the tab labels, tooltips and
-      confirmation, and the message about a file that does not exist) are now
-      translated into the 20 languages that did not have them.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
