@@ -59,6 +59,10 @@
       usable screen height instead of showing only 10 rows at a time.
     - Fixed a possible NullPointerException in the label that shows the
       position of the caret.
+    - The ten interface strings added with the tabs and the command line (the
+      tab commands of the File menu, the tab labels, tooltips and
+      confirmation, and the message about a file that does not exist) are now
+      translated into the 20 languages that did not have them.
 
 0.39c (11/10/2026)
     - Added Slovak (sk) language support to the UI internationalization.
