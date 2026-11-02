@@ -1,4 +1,4 @@
-0.4a (01/11/2026)
+0.4a (02/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -45,11 +45,13 @@
       tab commands of the File menu, the tab labels, tooltips and
       confirmation, and the message about a file that does not exist) are now
       translated into the 20 languages that did not have them.
-    - Saving the text of a tab in a file that is already open in another tab
-      no longer leaves that tab with the old text: when it is shown, it asks
-      whether to reload the content of the file (the changes made to that tab
-      are lost if it is reloaded). If the answer is no, the text is kept and
-      the tab is marked as changed.
+    - When the application writes a file that is open in a tab, whether by
+      saving the text of another tab, by saving only a selection or by an
+      export (text, XML, PDF, Excel and LOB), that tab no longer keeps the old
+      text unnoticed: when it is shown (at once, if it is the tab already
+      shown), it asks whether to reload the content of the file (the changes
+      made to that tab are lost if it is reloaded). If the answer is no, the
+      text is kept and the tab is marked as changed.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

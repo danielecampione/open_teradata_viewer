@@ -1128,10 +1128,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /**
      * Saves the whole text of a document in a file chosen by the user, which
      * becomes the file of the document, unless it is written as a web page (see
-     * {@link FileIO#saveFile(String, byte[])}): it does not hold the text of
-     * the document then. The other documents holding that file have an old text
-     * after that, see {@link #fileWritten(File, EditorDocument)}. Can be called
-     * from any thread.
+     * {@link FileIO#saveFile(String, byte[], EditorDocument)}): it does not hold
+     * the text of the document then. The other documents holding that file have
+     * an old text after that, see {@link #fileWritten(File, EditorDocument)}:
+     * {@link FileIO#saveFile(String, byte[], EditorDocument)} tells it. Can be
+     * called from any thread.
      *
      * @param document The document to save, that must be the current one.
      * @return <code>false</code> if the user gave up, and the text has not been
@@ -1143,21 +1144,20 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         // An explicit charset is required here, to stay symmetric with
         // FileIO#openFile(File)
         byte[] bytes = document.getTextArea().getText().getBytes(StandardCharsets.UTF_8);
-        final File file = FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), bytes);
+        final File file = FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), bytes, document);
         if (file == null) {
             return false;
         }
         String name = file.getName().toLowerCase();
         final boolean webPage = name.endsWith(".htm") || name.endsWith(".html");
-        FileIO.runOnEventThread(() -> {
-            documentTabs.fileWritten(file, document);
-            if (!webPage) {
+        if (!webPage) {
+            FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
                 document.setModified(false);
                 document.setOutOfDate(false);
                 refreshTabTitles();
-            }
-        });
+            });
+        }
         return true;
     }
 
@@ -1165,7 +1165,8 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * Tells that a file has been written, so that the documents holding it,
      * other than the one the text comes from, do not keep an old text unnoticed:
      * each of them asks the user, when it is shown, whether to load the file
-     * again, see {@link DocumentTabs#fileWritten(File, EditorDocument)}. Can be
+     * again, see {@link DocumentTabs#fileWritten(File, EditorDocument)}. The
+     * writers go through {@link FileIO#fileWritten(File, EditorDocument)}. Can be
      * called from any thread.
      *
      * @param file The file that has been written.
@@ -1174,7 +1175,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * @throws Exception If the event thread cannot be waited for.
      */
     public void fileWritten(final File file, final EditorDocument source) throws Exception {
-        FileIO.runOnEventThread(() -> documentTabs.fileWritten(file, source));
+        FileIO.runOnEventThread(() -> {
+            // There are no documents until the window has been built
+            if (documentTabs != null) {
+                documentTabs.fileWritten(file, source);
+            }
+        });
     }
 
     /**

@@ -55,6 +55,7 @@ import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
 import net.sourceforge.open_teradata_viewer.ExceptionDialog;
+import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.Main;
 import net.sourceforge.open_teradata_viewer.UISupport;
 import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerLayeredDigraphAutoLayout;
@@ -62,16 +63,16 @@ import net.sourceforge.open_teradata_viewer.graphic_viewer.layout.GraphicViewerN
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
 public class GraphicViewer extends JFrame
         implements
-            Runnable,
-            IGraphicViewerViewListener,
-            IGraphicViewerDocumentListener {
+        Runnable,
+        IGraphicViewerViewListener,
+        IGraphicViewerDocumentListener {
 
     private static final long serialVersionUID = 2780998114828445957L;
 
@@ -1299,7 +1300,7 @@ public class GraphicViewer extends JFrame
             if (i == 155) {
                 localRectangle = this.myView.getViewRect();
                 insertNode(new Point(localRectangle.x + localRectangle.width
-                        / 2, localRectangle.y + localRectangle.height / 2),
+                                / 2, localRectangle.y + localRectangle.height / 2),
                         this.myNodeCounter % 2 == 0);
             } else if (i == 36) {
                 localRectangle = this.myView.getDocument().computeBounds();
@@ -1364,7 +1365,7 @@ public class GraphicViewer extends JFrame
     }
 
     public GraphicViewerBasicNode insertNode(Point paramPoint,
-            boolean paramBoolean) {
+                                             boolean paramBoolean) {
         GraphicViewerDocument localGraphicViewerDocument = this.myView
                 .getDocument();
         localGraphicViewerDocument.startTransaction();
@@ -1389,7 +1390,7 @@ public class GraphicViewer extends JFrame
     Color getRandomColor(int paramInt) {
         return new Color(paramInt + (int) ((250 - paramInt) * Math.random()),
                 paramInt + (int) ((250 - paramInt) * Math.random()), paramInt
-                        + (int) ((250 - paramInt) * Math.random()));
+                + (int) ((250 - paramInt) * Math.random()));
     }
 
     public OTVView getCurrentView() {
@@ -1493,8 +1494,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -1797,8 +1798,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -1898,8 +1899,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -1967,10 +1968,10 @@ public class GraphicViewer extends JFrame
                 // Check for special subgraph children
                 if (graphicviewerobject2 != graphicviewersubgraph.getHandle()
                         && graphicviewerobject2 != graphicviewersubgraph
-                                .getLabel()
+                        .getLabel()
                         && !(graphicviewerobject2 instanceof GraphicViewerPort)
                         && graphicviewerobject2 != graphicviewersubgraph
-                                .getCollapsedObject()) {
+                        .getCollapsedObject()) {
                     arraylist1.add(graphicviewerobject2);
                 }
             } while (true);
@@ -2005,8 +2006,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -2041,8 +2042,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -2088,8 +2089,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -2277,8 +2278,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -2320,8 +2321,8 @@ public class GraphicViewer extends JFrame
         GraphicViewerListPosition graphicviewerlistposition;
         for (graphicviewerlistposition = graphicviewerselection
                 .getFirstObjectPos(); graphicviewerobject != null
-                && (graphicviewerobject instanceof GraphicViewerLink)
-                && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
+                     && (graphicviewerobject instanceof GraphicViewerLink)
+                     && graphicviewerlistposition != null; graphicviewerlistposition = graphicviewerselection
                 .getNextObjectPos(graphicviewerlistposition)) {
             graphicviewerobject = graphicviewerselection
                     .getObjectAtPos(graphicviewerlistposition);
@@ -2818,7 +2819,7 @@ public class GraphicViewer extends JFrame
         startTransaction();
         Point point = getDefaultLocation();
         setDefaultLocation(null); // Position everything at absolute default
-                                  // locations
+        // locations
         GraphicViewerPort graphicviewerport2 = fixedSizeCenterLabelBasicNodeAction();
         GraphicViewerPort graphicviewerport4 = fixedSizeTextNodeAction();
         multiPortNodeAction();
@@ -3201,7 +3202,7 @@ public class GraphicViewer extends JFrame
     }
 
     void addMultiSpotPort(GraphicViewerArea graphicviewerarea,
-            GraphicViewerObject graphicviewerobject, int i) {
+                          GraphicViewerObject graphicviewerobject, int i) {
         GraphicViewerPort graphicviewerport = new GraphicViewerPort();
         graphicviewerport.setSize(6, 6);
         graphicviewerport.setStyle(5);
@@ -3350,13 +3351,13 @@ public class GraphicViewer extends JFrame
             } catch (IOException ioe) {
                 String msg = "Open Document Error: "
                         + ((ioe.getMessage() == null) ? ioe.toString() : ioe
-                                .getMessage());
+                        .getMessage());
                 UISupport.getDialogs().showErrorMessage(msg);
                 return null;
             } catch (Exception e) {
                 String msg = "Loading Document Exception: "
                         + ((e.getMessage() == null) ? e.toString() : e
-                                .getMessage());
+                        .getMessage());
                 UISupport.getDialogs().showErrorMessage(msg);
                 return null;
             } finally {
@@ -3386,7 +3387,7 @@ public class GraphicViewer extends JFrame
             } catch (Exception e) {
                 String msg = "Save Document Error: "
                         + ((e.getMessage() == null) ? e.toString() : e
-                                .getMessage());
+                        .getMessage());
                 UISupport.getDialogs().showErrorMessage(msg);
             } finally {
                 try {
@@ -3395,6 +3396,11 @@ public class GraphicViewer extends JFrame
                     }
                 } catch (Exception e) {
                     ExceptionDialog.ignoreException(e);
+                }
+                if (fstream != null) {
+                    // The file has been written: a tab of the editor that holds
+                    // it has an old text now
+                    FileIO.fileWritten(new File(myDoc.getLocation()), null);
                 }
                 myDoc.setModified(false);
             }
@@ -3414,7 +3420,7 @@ public class GraphicViewer extends JFrame
         graphicviewerdocument1.setSuspendUpdates(true);
 
         myDoc = graphicviewerdocument1; // Temporarily, so objects get created
-                                        // in palette
+        // in palette
         myBackgroundLayer = graphicviewerdocument1.getDefaultLayer();
         myMainLayer = graphicviewerdocument1.getDefaultLayer();
         myForegroundLayer = graphicviewerdocument1.getDefaultLayer();
@@ -3652,7 +3658,7 @@ public class GraphicViewer extends JFrame
 
     // Create an image for a GraphicViewerObject.
     public BufferedImage getObjectImage(GraphicViewerObject obj,
-            GraphicViewerView view) {
+                                        GraphicViewerView view) {
         Rectangle r = new Rectangle(obj.getBoundingRect());
         obj.expandRectByPenWidth(r);
         BufferedImage img = new BufferedImage(r.width, r.height,
@@ -3664,7 +3670,7 @@ public class GraphicViewer extends JFrame
         g2.dispose();
         return img;
     }
-    
+
     /**
      * Refresh the language of all GUI components
      */
@@ -3672,7 +3678,7 @@ public class GraphicViewer extends JFrame
         // Update window title
         String title = myDoc.getName() + " - " + LanguageManager.getInstance().getString("app.name") + " ( " + this + " )";
         setTitle(title);
-        
+
         // Update menu texts
         if (filemenu != null) {
             filemenu.setText(LanguageManager.getInstance().getString("menu.file"));
@@ -3689,43 +3695,43 @@ public class GraphicViewer extends JFrame
         if (helpmenu != null) {
             helpmenu.setText(LanguageManager.getInstance().getString("menu.help"));
         }
-        
+
         // Update toolbar/menu action names (New, Open, Cut, Copy, Zoom, Align, etc.)
         AppAction[] actionsToRefresh = {
-            FileNewAction, FileOpenAction, FileSaveAsAction, InsertStuffAction,
-            InsertRectangleAction, InsertRoundedRectangleAction, InsertEllipseAction, InsertMultiPortNodeAction,
-            InsertSimpleNodeAction, InsertIconicNodeAction, InsertBasicNodeAction, InsertRectBasicNodeAction,
-            InsertMultiSpotNodeAction, InsertGeneralNodeAction, AddLeftPortAction, AddRightPortAction,
-            InsertTextNodeAction, InsertFixedSizeTextNodeAction, InsertRoundTextNodeAction, InsertMultiTextNodeAction,
-            InsertListAreaAction, InsertRecordNodeAction, InsertStrokeAction, InsertPolygonAction,
-            InsertDiamondAction, InsertTextAction, Insert3DRectAction, InsertCommentAction,
-            Insert10000Action, InsertDrawingStrokeAction, InsertGraphOfGraphsAction, CutAction,
-            CopyAction, PasteAction, SelectAllAction, MoveToFrontAction,
-            MoveToBackAction, ChangeLayersAction, GroupAction, SubgraphAction,
-            UngroupAction, InspectAction, PropertiesAction, ZoomInAction,
-            ZoomOutAction, ZoomNormalAction, ZoomToFitAction, PrintPreviewAction,
-            PrintAction, GridAction, OverviewAction, LeftAction,
-            HorizontalAction, RightAction, TopAction, BottomAction,
-            VerticalAction, SameWidthAction, SameHeightAction, SameBothAction,
-            LayeredDigraphAutoLayoutAction, UndoAction, RedoAction
+                FileNewAction, FileOpenAction, FileSaveAsAction, InsertStuffAction,
+                InsertRectangleAction, InsertRoundedRectangleAction, InsertEllipseAction, InsertMultiPortNodeAction,
+                InsertSimpleNodeAction, InsertIconicNodeAction, InsertBasicNodeAction, InsertRectBasicNodeAction,
+                InsertMultiSpotNodeAction, InsertGeneralNodeAction, AddLeftPortAction, AddRightPortAction,
+                InsertTextNodeAction, InsertFixedSizeTextNodeAction, InsertRoundTextNodeAction, InsertMultiTextNodeAction,
+                InsertListAreaAction, InsertRecordNodeAction, InsertStrokeAction, InsertPolygonAction,
+                InsertDiamondAction, InsertTextAction, Insert3DRectAction, InsertCommentAction,
+                Insert10000Action, InsertDrawingStrokeAction, InsertGraphOfGraphsAction, CutAction,
+                CopyAction, PasteAction, SelectAllAction, MoveToFrontAction,
+                MoveToBackAction, ChangeLayersAction, GroupAction, SubgraphAction,
+                UngroupAction, InspectAction, PropertiesAction, ZoomInAction,
+                ZoomOutAction, ZoomNormalAction, ZoomToFitAction, PrintPreviewAction,
+                PrintAction, GridAction, OverviewAction, LeftAction,
+                HorizontalAction, RightAction, TopAction, BottomAction,
+                VerticalAction, SameWidthAction, SameHeightAction, SameBothAction,
+                LayeredDigraphAutoLayoutAction, UndoAction, RedoAction
         };
         String[] actionKeysToRefresh = {
-            "graphic.action.new", "graphic.action.open", "graphic.action.save_as", "graphic.action.stuff",
-            "graphic.action.rectangle", "graphic.action.rounded_rectangle", "graphic.action.ellipse", "graphic.action.multiport_node",
-            "graphic.action.simple_node", "graphic.action.iconic_node", "graphic.action.basic_node", "graphic.action.rect_basic_node",
-            "graphic.action.multispot_node", "graphic.action.general_node", "graphic.action.add_left_port", "graphic.action.add_right_port",
-            "graphic.action.text_node", "graphic.action.fixed_size_text_node", "graphic.action.rounded_text_node", "graphic.action.multitext_node",
-            "graphic.action.list_area", "graphic.action.record_nodes", "graphic.action.stroke", "graphic.action.polygon",
-            "graphic.action.diamond", "graphic.action.text", "graphic.action.3d_rectangle", "graphic.action.comment",
-            "graphic.action.10000_objects", "graphic.action.draw_stroke", "graphic.action.graph_of_graphs", "graphic.action.cut",
-            "graphic.action.copy", "graphic.action.paste", "graphic.action.select_all", "graphic.action.move_to_front",
-            "graphic.action.move_to_back", "graphic.action.change_layers", "graphic.action.group", "graphic.action.make_subgraph",
-            "graphic.action.ungroup", "graphic.action.inspect", "graphic.action.properties", "graphic.action.zoom_in",
-            "graphic.action.zoom_out", "graphic.action.zoom_normal", "graphic.action.zoom_to_fit", "graphic.action.print_preview",
-            "graphic.action.print", "graphic.action.grid", "graphic.action.overview", "graphic.action.align_left",
-            "graphic.action.align_horizontal_centers", "graphic.action.align_right", "graphic.action.align_top", "graphic.action.align_bottom",
-            "graphic.action.align_vertical_centers", "graphic.action.same_width", "graphic.action.same_height", "graphic.action.same_both",
-            "graphic.action.auto_layout", "graphic.action.undo", "graphic.action.redo"
+                "graphic.action.new", "graphic.action.open", "graphic.action.save_as", "graphic.action.stuff",
+                "graphic.action.rectangle", "graphic.action.rounded_rectangle", "graphic.action.ellipse", "graphic.action.multiport_node",
+                "graphic.action.simple_node", "graphic.action.iconic_node", "graphic.action.basic_node", "graphic.action.rect_basic_node",
+                "graphic.action.multispot_node", "graphic.action.general_node", "graphic.action.add_left_port", "graphic.action.add_right_port",
+                "graphic.action.text_node", "graphic.action.fixed_size_text_node", "graphic.action.rounded_text_node", "graphic.action.multitext_node",
+                "graphic.action.list_area", "graphic.action.record_nodes", "graphic.action.stroke", "graphic.action.polygon",
+                "graphic.action.diamond", "graphic.action.text", "graphic.action.3d_rectangle", "graphic.action.comment",
+                "graphic.action.10000_objects", "graphic.action.draw_stroke", "graphic.action.graph_of_graphs", "graphic.action.cut",
+                "graphic.action.copy", "graphic.action.paste", "graphic.action.select_all", "graphic.action.move_to_front",
+                "graphic.action.move_to_back", "graphic.action.change_layers", "graphic.action.group", "graphic.action.make_subgraph",
+                "graphic.action.ungroup", "graphic.action.inspect", "graphic.action.properties", "graphic.action.zoom_in",
+                "graphic.action.zoom_out", "graphic.action.zoom_normal", "graphic.action.zoom_to_fit", "graphic.action.print_preview",
+                "graphic.action.print", "graphic.action.grid", "graphic.action.overview", "graphic.action.align_left",
+                "graphic.action.align_horizontal_centers", "graphic.action.align_right", "graphic.action.align_top", "graphic.action.align_bottom",
+                "graphic.action.align_vertical_centers", "graphic.action.same_width", "graphic.action.same_height", "graphic.action.same_both",
+                "graphic.action.auto_layout", "graphic.action.undo", "graphic.action.redo"
         };
         for (int i = 0; i < actionsToRefresh.length; i++) {
             if (actionsToRefresh[i] != null) {
@@ -3733,13 +3739,13 @@ public class GraphicViewer extends JFrame
                         LanguageManager.getInstance().getString(actionKeysToRefresh[i]));
             }
         }
-        
+
         // Update border title
         if (myView != null && myView.getBorder() instanceof TitledBorder) {
             TitledBorder border = (TitledBorder) myView.getBorder();
             border.setTitle(LanguageManager.getInstance().getString("graphic.zoom") + ": " + (int) (myView.getScale() * 100D) + '%');
         }
-        
+
         // Refresh the entire frame
         revalidate();
         repaint();

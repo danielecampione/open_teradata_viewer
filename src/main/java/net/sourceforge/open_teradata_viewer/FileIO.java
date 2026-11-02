@@ -67,16 +67,107 @@ public class FileIO {
     private FileIO() {
     }
 
+    /**
+     * Saves some bytes in a file chosen by the user and then asks whether to
+     * open it with the application associated to it. The tabs holding the file
+     * are told that it has been written (see
+     * {@link #fileWritten(File, EditorDocument)}) after that question, so that
+     * the two do not ask the user something at the same time.
+     *
+     * @param fileName The name suggested to the user.
+     * @param bytes The content of the file.
+     * @throws Exception If the file cannot be written.
+     */
     public static void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
-        File file = saveFile(fileName, bytes);
-        LanguageManager langManager = LanguageManager.getInstance();
-        if (file != null && Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.open_file"),
-                langManager.getString("dialog.open_file.associated_application"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-            FileIO.openFile(file, true);
+        File file = chooseAndWriteFile(fileName, bytes);
+        if (file == null) {
+            return;
+        }
+        try {
+            LanguageManager langManager = LanguageManager.getInstance();
+            if (Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.open_file"),
+                    langManager.getString("dialog.open_file.associated_application"), Dialog.QUESTION_MESSAGE,
+                    Dialog.YES_NO_OPTION)) {
+                FileIO.openFile(file, true);
+            }
+        } finally {
+            fileWritten(file, null);
         }
     }
 
+    /**
+     * Saves some bytes in a file chosen by the user. The tabs holding the file
+     * are told that it has been written, see
+     * {@link #fileWritten(File, EditorDocument)}.
+     *
+     * @param fileName The name suggested to the user.
+     * @param bytes The content of the file.
+     * @return The file that has been written, or <code>null</code> if the user
+     *         gave up.
+     * @throws Exception If the file cannot be written.
+     */
     public static File saveFile(String fileName, byte[] bytes) throws Exception {
+        return saveFile(fileName, bytes, null);
+    }
+
+    /**
+     * Saves some bytes in a file chosen by the user. The tabs holding the file
+     * are told that it has been written, see
+     * {@link #fileWritten(File, EditorDocument)}.
+     *
+     * @param fileName The name suggested to the user.
+     * @param bytes The content of the file.
+     * @param source The document whose text, or part of it, is what is being
+     *        saved, or <code>null</code>: it is not told that the file has been
+     *        written, because the text is already its own.
+     * @return The file that has been written, or <code>null</code> if the user
+     *         gave up.
+     * @throws Exception If the file cannot be written.
+     */
+    public static File saveFile(String fileName, byte[] bytes, EditorDocument source) throws Exception {
+        File file = chooseAndWriteFile(fileName, bytes);
+        if (file != null) {
+            fileWritten(file, source);
+        }
+        return file;
+    }
+
+    /**
+     * Tells the editor that a file has been written, so that the tabs holding
+     * it, other than the one the text comes from, do not keep an old text
+     * unnoticed: each of them asks the user, when it is shown, whether to load
+     * the file again. The writes done by
+     * {@link #saveFile(String, byte[])} and
+     * {@link #saveAndOpenFile(String, byte[])} tell it on their own; whoever
+     * else writes a file that the user can have open in a tab, with
+     * {@link #writeFile(File, byte[])} or in some other way, has to call this
+     * method once it is done. Can be called from any thread. If the editor
+     * cannot be told, the write is not a failure: the reason is only logged.
+     *
+     * @param file The file that has been written.
+     * @param source The document whose text, or part of it, has been written,
+     *        or <code>null</code>. It is left as it is.
+     */
+    public static void fileWritten(File file, EditorDocument source) {
+        ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
+        if (file == null || applicationFrame == null) {
+            return;
+        }
+        try {
+            applicationFrame.fileWritten(file, source);
+        } catch (Exception e) {
+            ExceptionDialog.hideException(e);
+        }
+    }
+
+    /**
+     * Lets the user choose a file and writes some bytes in it, asking before it
+     * overwrites an existing one. Nobody is told about the write.
+     *
+     * @return The file that has been written, or <code>null</code> if the user
+     *         gave up.
+     */
+    private static File chooseAndWriteFile(String fileName, byte[] bytes) throws Exception {
         JFileChooser fileChooser = getFileChooser();
         File file = new File(fileName);
         try {
@@ -126,6 +217,15 @@ public class FileIO {
         return null;
     }
 
+    /**
+     * Writes some bytes in a file, replacing its content. Unlike
+     * {@link #saveFile(String, byte[])}, it does not tell the editor that the
+     * file has been written: see {@link #fileWritten(File, EditorDocument)}.
+     *
+     * @param file The file to write.
+     * @param bytes The content of the file.
+     * @throws Exception If the file cannot be written.
+     */
     public static void writeFile(File file, byte[] bytes) throws Exception {
         try (FileOutputStream out = new FileOutputStream(file)) {
             out.write(bytes);

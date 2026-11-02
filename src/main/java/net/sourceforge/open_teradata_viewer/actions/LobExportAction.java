@@ -46,8 +46,8 @@ import net.sourceforge.open_teradata_viewer.WaitingDialog;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -62,9 +62,9 @@ public class LobExportAction extends CustomAction {
                 && Context.getInstance().getResultSet() != null;
         boolean isLobSelected = hasResultSet
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+                .getSelectedColumn());
         setEnabled(isLobSelected);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("action.lob.export"));
@@ -78,7 +78,7 @@ public class LobExportAction extends CustomAction {
                 && Context.getInstance().getResultSet() != null;
         boolean isLobSelected = hasResultSet
                 && ResultSetTable.isLob(ResultSetTable.getInstance()
-                        .getSelectedColumn());
+                .getSelectedColumn());
         if (!isLobSelected) {
             ApplicationFrame
                     .getInstance()
@@ -100,24 +100,24 @@ public class LobExportAction extends CustomAction {
                 }
                 final AtomicReference<JList> listRef = new AtomicReference<>();
                 final AtomicReference<JScrollPane> scrollPaneRef = new AtomicReference<>();
-                
+
                 try {
                     SwingUtilities.invokeAndWait(() -> {
                         JList list = new JList(columnNames.toArray());
                         list.addMouseListener(LobExportAction.this);
                         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                         JScrollPane scrollPane = new JScrollPane(list);
-                        
+
                         listRef.set(list);
                         scrollPaneRef.set(scrollPane);
                     });
                 } catch (InterruptedException | InvocationTargetException ex) {
                     throw new Exception("Error creating UI components", ex);
                 }
-                
+
                 final JList list = listRef.get();
                 final JScrollPane scrollPane = scrollPaneRef.get();
-                
+
                 if (Dialog.OK_OPTION == Dialog.show("Column for file name",
                         scrollPane, Dialog.PLAIN_MESSAGE,
                         Dialog.OK_CANCEL_OPTION)) {
@@ -127,23 +127,31 @@ public class LobExportAction extends CustomAction {
                             selectedIndex++;
                         }
                         WaitingDialog waitingDialog = new WaitingDialog(null);
+                        List<File> writtenFiles = new ArrayList<>();
                         try {
                             waitingDialog.setText(String.format("0/%d",
                                     selectedRows.length));
                             for (int i = 0; i < selectedRows.length
                                     && waitingDialog.isVisible(); i++) {
                                 int selectedRow = selectedRows[i];
-                                FileIO.writeFile(
-                                        new File(dir, String.valueOf(table
-                                                .getValueAt(selectedRow,
-                                                        selectedIndex))),
-                                        getLob(selectedRow,
-                                                table.getSelectedColumn()));
+                                File lobFile = new File(dir,
+                                        String.valueOf(table.getValueAt(
+                                                selectedRow, selectedIndex)));
+                                FileIO.writeFile(lobFile, getLob(selectedRow,
+                                        table.getSelectedColumn()));
+                                writtenFiles.add(lobFile);
                                 waitingDialog.setText(String.format("%d/%d",
                                         i + 1, selectedRows.length));
                             }
                         } finally {
                             waitingDialog.hide();
+                            // The tabs holding some of these files have an old
+                            // text now. They are told once the progress dialog
+                            // is gone, so that what they ask the user is not
+                            // hidden behind it
+                            for (File writtenFile : writtenFiles) {
+                                FileIO.fileWritten(writtenFile, null);
+                            }
                         }
                     }
                 }
@@ -232,7 +240,7 @@ public class LobExportAction extends CustomAction {
         if (e.getClickCount() == 2) {
             if (e.getSource() instanceof JTable
                     && ResultSetTable.isLob(ResultSetTable.getInstance()
-                            .getSelectedColumn())) {
+                    .getSelectedColumn())) {
                 actionPerformed(null);
             } else {
                 super.mouseClicked(e);
