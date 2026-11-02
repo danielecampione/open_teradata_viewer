@@ -1,4 +1,4 @@
-0.4a (02/11/2026)
+0.4a (03/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -41,9 +41,10 @@
       Unrecognized files (e.g. .txt) are still highlighted as SQL.
       The "View as (highlighting file type)" menu shows the style chosen
       and the source tree is shown for Java, JavaScript and XML files.
-    - The ten interface strings added with the tabs and the command line (the
-      tab commands of the File menu, the tab labels, tooltips and
-      confirmation, and the message about a file that does not exist) are now
+    - The twelve interface strings added with the tabs and the command line
+      (the tab commands of the File menu, the tab labels, tooltips and
+      confirmation, the question asked when the file of a tab has been
+      modified, and the message about a file that does not exist) are now
       translated into the 20 languages that did not have them.
     - When the application writes a file that is open in a tab, whether by
       saving the text of another tab, by saving only a selection, by an export
