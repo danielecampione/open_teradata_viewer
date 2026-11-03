@@ -18,15 +18,9 @@
 
 package net.sourceforge.open_teradata_viewer;
 
-import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Font;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,16 +31,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.Token;
 
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
+import net.sourceforge.open_teradata_viewer.editor.WebPageBuilder;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
-import net.sourceforge.open_teradata_viewer.util.StringUtil;
-import net.sourceforge.open_teradata_viewer.util.UIUtil;
 
 /**
  *
@@ -79,7 +72,7 @@ public class FileIO {
      * @throws Exception If the file cannot be written.
      */
     public static void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
-        File file = chooseAndWriteFile(fileName, bytes);
+        File file = chooseAndWriteFile(fileName, bytes, null);
         if (file == null) {
             return;
         }
@@ -96,8 +89,10 @@ public class FileIO {
     }
 
     /**
-     * Saves some bytes in a file chosen by the user. The tabs holding the file
-     * are told that it has been written, see
+     * Saves some bytes in a file chosen by the user, exactly as they are, also
+     * when the file is a web page: the bytes are not the text of a document,
+     * see {@link #saveText(String, EditorDocument, boolean)}. The tabs holding
+     * the file are told that it has been written, see
      * {@link #fileWritten(File, EditorDocument)}.
      *
      * @param fileName The name suggested to the user.
@@ -107,29 +102,76 @@ public class FileIO {
      * @throws Exception If the file cannot be written.
      */
     public static File saveFile(String fileName, byte[] bytes) throws Exception {
-        return saveFile(fileName, bytes, null);
+        File file = chooseAndWriteFile(fileName, bytes, null);
+        if (file != null) {
+            fileWritten(file, null);
+        }
+        return file;
     }
 
     /**
-     * Saves some bytes in a file chosen by the user. The tabs holding the file
-     * are told that it has been written, see
-     * {@link #fileWritten(File, EditorDocument)}.
+     * Saves the text of a document, or only the selected part of it, in a file
+     * chosen by the user. If the file is a web page (see
+     * {@link #isWebPage(File)}), what is written is not the text but a page
+     * that shows it with the colors of its syntax highlighting, see
+     * {@link WebPageBuilder}. The tabs holding the file are told that it has
+     * been written, see {@link #fileWritten(File, EditorDocument)}: the
+     * document the text comes from is left as it is when the whole text has
+     * been saved, because the text is already its own, but not when only a part
+     * of it has been saved, because the file then holds something else than
+     * the text of the document. Can be called from any thread.
      *
      * @param fileName The name suggested to the user.
-     * @param bytes The content of the file.
-     * @param source The document whose text, or part of it, is what is being
-     *        saved, or <code>null</code>: it is not told that the file has been
-     *        written, because the text is already its own.
+     * @param document The document whose text is saved.
+     * @param selectionOnly <code>true</code> to save only what is selected in
+     *        the document, <code>false</code> to save all of its text.
      * @return The file that has been written, or <code>null</code> if the user
-     *         gave up.
+     *         gave up, or if only the selection had to be saved and nothing is
+     *         selected.
      * @throws Exception If the file cannot be written.
      */
-    public static File saveFile(String fileName, byte[] bytes, EditorDocument source) throws Exception {
-        File file = chooseAndWriteFile(fileName, bytes);
+    public static File saveText(String fileName, EditorDocument document, boolean selectionOnly) throws Exception {
+        // The text is read, and the selection with it, at the same time and on
+        // the thread that owns the text area
+        final AtomicReference<TextRange> rangeRef = new AtomicReference<>();
+        final AtomicReference<byte[]> bytesRef = new AtomicReference<>();
+        runOnEventThread(() -> {
+            RSyntaxTextArea textArea = document.getTextArea();
+            int start = selectionOnly ? textArea.getSelectionStart() : 0;
+            int end = selectionOnly ? textArea.getSelectionEnd() : textArea.getDocument().getLength();
+            if (selectionOnly && start == end) {
+                return;
+            }
+            try {
+                // An explicit charset is required here, to stay symmetric with
+                // openFile(File): the platform default one would silently
+                // mismatch a file reopened on a different OS or locale
+                bytesRef.set(textArea.getDocument().getText(start, end - start).getBytes(StandardCharsets.UTF_8));
+            } catch (BadLocationException ble) {
+                // The range comes from the text area itself
+                throw new IllegalStateException(ble);
+            }
+            rangeRef.set(new TextRange(document, start, end));
+        });
+        if (rangeRef.get() == null) {
+            return null;
+        }
+
+        File file = chooseAndWriteFile(fileName, bytesRef.get(), rangeRef.get());
         if (file != null) {
-            fileWritten(file, source);
+            fileWritten(file, selectionOnly ? null : document);
         }
         return file;
+    }
+
+    /**
+     * @param file A file.
+     * @return <code>true</code> if the name of the file is the one of a web
+     *         page (<code>.htm</code> or <code>.html</code>).
+     */
+    public static boolean isWebPage(File file) {
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".htm") || name.endsWith(".html");
     }
 
     /**
@@ -137,8 +179,8 @@ public class FileIO {
      * it, other than the one the text comes from, do not keep an old text
      * unnoticed: each of them asks the user, when it is shown, whether to load
      * the file again. The writes done by
-     * {@link #saveFile(String, byte[])} and
-     * {@link #saveAndOpenFile(String, byte[])} tell it on their own; whoever
+     * {@link #saveFile(String, byte[])}, {@link #saveText(String, EditorDocument, boolean)}
+     * and {@link #saveAndOpenFile(String, byte[])} tell it on their own; whoever
      * else writes a file that the user can have open in a tab, with
      * {@link #writeFile(File, byte[])} or in some other way, has to call this
      * method once it is done. Can be called from any thread. If the editor
@@ -161,13 +203,19 @@ public class FileIO {
     }
 
     /**
-     * Lets the user choose a file and writes some bytes in it, asking before it
-     * overwrites an existing one. Nobody is told about the write.
+     * Lets the user choose a file and writes in it, asking before it overwrites
+     * an existing one. Nobody is told about the write.
      *
+     * @param bytes What is written, unless the file is a web page and a range
+     *        of the text of a document is given.
+     * @param range The text, or the part of the text, of a document that the
+     *        bytes are, or <code>null</code> if the bytes are not the text of a
+     *        document: they are then written as they are, whatever the name of
+     *        the file.
      * @return The file that has been written, or <code>null</code> if the user
      *         gave up.
      */
-    private static File chooseAndWriteFile(String fileName, byte[] bytes) throws Exception {
+    private static File chooseAndWriteFile(String fileName, byte[] bytes, TextRange range) throws Exception {
         JFileChooser fileChooser = getFileChooser();
         File file = new File(fileName);
         try {
@@ -205,9 +253,8 @@ public class FileIO {
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
             if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.file_exists"),
                     langManager.getString("dialog.file_exists.overwrite_existing_file"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-                if (chosenFilePath.toLowerCase().endsWith(".htm") || chosenFilePath.toLowerCase().endsWith(".html")) {
-                    // Write output to the current filename
-                    writeFileAsWebPage(chosenFilePath);
+                if (range != null && isWebPage(selectedFile)) {
+                    writeFile(selectedFile, buildWebPage(chosenFilePath, range));
                 } else {
                     writeFile(selectedFile, bytes);
                 }
@@ -426,11 +473,14 @@ public class FileIO {
     }
 
     protected static JFileChooser getFileChooser() throws Exception {
-        // Ensure JFileChooser creation happens on EDT
+        // Ensure JFileChooser creation happens on EDT. The caller can already be
+        // the event thread: closing a tab that has been changed asks to save
+        // its text there, and invokeAndWait() cannot be called from the event
+        // thread
         final java.util.concurrent.atomic.AtomicReference<JFileChooser> chooserRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
-            SwingUtilities.invokeAndWait(() -> {
+            runOnEventThread(() -> {
                 if (fileChooser == null) {
                     fileChooser = new JFileChooser();
                     fileChooser.setAcceptAllFileFilterUsed(false);
@@ -452,63 +502,38 @@ public class FileIO {
         return chooserRef.get();
     }
 
-    private static void writeFileAsWebPage(String path) throws IOException {
-        String[] styles = new String[Token.DEFAULT_NUM_TOKEN_TYPES];
-        StringBuilder temp = new StringBuilder();
-        StringBuilder sb = new StringBuilder();
-
-        try (PrintWriter out = new PrintWriter(
-                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8")))) {
-            out.println(
-                    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
-            out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
-            out.println("<head>");
-            out.println("<!-- Generated by " + Main.APPLICATION_NAME + " -->");
-            out.println("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
-            out.println("<title>" + path + "</title>");
-
-            RSyntaxTextArea textArea = ApplicationFrame.getInstance().getTextComponent();
-            int lineCount = textArea.getLineCount();
-            for (int i = 0; i < lineCount; i++) {
-                Token token = textArea.getTokenListForLine(i);
-                while (token != null && token.isPaintable()) {
-                    if (styles[token.getType()] == null) {
-                        temp.setLength(0);
-                        temp.append(".s").append(token.getType()).append(" {\n");
-                        Font font = textArea.getFontForTokenType(token.getType());
-                        if (font.isBold()) {
-                            temp.append("font-weight: bold;\n");
-                        }
-                        if (font.isItalic()) {
-                            temp.append("font-style: italic;\n");
-                        }
-                        Color c = textArea.getForegroundForToken(token);
-                        temp.append("color: ").append(UIUtil.getHTMLFormatForColor(c)).append(";\n");
-                        temp.append("}");
-                        styles[token.getType()] = temp.toString();
-                    }
-                    sb.append("<span class=\"s" + token.getType() + "\">");
-                    sb.append(StringUtil.escapeForHTML(token.getLexeme(), "\n", true));
-                    sb.append("</span>");
-                    token = token.getNextToken();
-                }
-                sb.append('\n');
+    /**
+     * Builds the web page of a range of the text of a document. The text area
+     * is read on the Swing event thread.
+     *
+     * @param title The title of the page.
+     * @param range What the page shows.
+     * @return The page, encoded as it declares itself: UTF-8.
+     */
+    private static byte[] buildWebPage(String title, TextRange range) throws Exception {
+        final AtomicReference<String> pageRef = new AtomicReference<>();
+        runOnEventThread(() -> {
+            try {
+                pageRef.set(WebPageBuilder.build(title, range.document.getTextArea(), range.start, range.end));
+            } catch (BadLocationException ble) {
+                // The range comes from the text area itself
+                throw new IllegalStateException(ble);
             }
+        });
+        return pageRef.get().getBytes(StandardCharsets.UTF_8);
+    }
 
-            // Print CSS styles
-            out.println("<style type=\"text/css\">");
-            for (int i = 0; i < styles.length; i++) {
-                if (styles[i] != null) {
-                    out.println(styles[i]);
-                }
-            }
-            out.println("</style>");
+    /** A range of the text of a document: the one that is being saved. */
+    private static final class TextRange {
 
-            // Print the body
-            out.println("</head>");
-            out.println("<body>\n<pre>");
-            out.println(sb.toString());
-            out.println("</pre>\n</body>\n</html>");
+        private final EditorDocument document;
+        private final int start;
+        private final int end;
+
+        private TextRange(EditorDocument document, int start, int end) {
+            this.document = document;
+            this.start = start;
+            this.end = end;
         }
     }
 }

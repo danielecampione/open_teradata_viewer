@@ -39,7 +39,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -1128,29 +1127,24 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /**
      * Saves the whole text of a document in a file chosen by the user, which
      * becomes the file of the document, unless it is written as a web page (see
-     * {@link FileIO#saveFile(String, byte[], EditorDocument)}): it does not hold
-     * the text of the document then. The other documents holding that file have
-     * an old text after that, see {@link #fileWritten(File, EditorDocument)}:
-     * {@link FileIO#saveFile(String, byte[], EditorDocument)} tells it. Can be
+     * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
+     * hold the text of the document then. The other documents holding that file
+     * have an old text after that, see {@link #fileWritten(File, EditorDocument)}:
+     * {@link FileIO#saveText(String, EditorDocument, boolean)} tells it. Can be
      * called from any thread.
      *
-     * @param document The document to save, that must be the current one.
+     * @param document The document to save.
      * @return <code>false</code> if the user gave up, and the text has not been
      *         saved.
      * @throws Exception If the file cannot be written.
      */
     public boolean saveDocument(final EditorDocument document) throws Exception {
         File openedFile = document.getState().getOpenedFile();
-        // An explicit charset is required here, to stay symmetric with
-        // FileIO#openFile(File)
-        byte[] bytes = document.getTextArea().getText().getBytes(StandardCharsets.UTF_8);
-        final File file = FileIO.saveFile(openedFile == null ? "" : openedFile.toString(), bytes, document);
+        final File file = FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, false);
         if (file == null) {
             return false;
         }
-        String name = file.getName().toLowerCase();
-        final boolean webPage = name.endsWith(".htm") || name.endsWith(".html");
-        if (!webPage) {
+        if (!FileIO.isWebPage(file)) {
             FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
                 document.setModified(false);

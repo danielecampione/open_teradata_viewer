@@ -62,6 +62,19 @@
       reload the content of the file (the changes made to that tab are lost if
       it is reloaded). If the answer is no, the text is kept and the tab is
       marked as changed.
+    - Fixed some defects in the saving of text. Saving only the selected text
+      as a web page (.htm, .html) now writes the selection instead of the
+      whole text of the tab, and when the file is the one that the tab shown
+      holds, that tab now asks whether to reload the content of the file, like
+      the other tabs do, instead of staying as it was as if the file had not
+      been written. The exports (text, XML and LOB) saved with a name ending in
+      .htm or .html are now written as they are instead of being replaced by
+      the text of the tab shown, as a web page. A web page is now made from the
+      text of the tab that is saved, not from the one shown, and its title is
+      no longer malformed when the name of the file has special characters.
+      Saving the changes of a tab that is being closed (the answer "Yes" to the
+      question about saving them) no longer fails with an error when the file
+      is chosen.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

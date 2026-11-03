@@ -20,11 +20,11 @@ package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.Context;
 import net.sourceforge.open_teradata_viewer.FileIO;
+import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
@@ -50,25 +50,18 @@ public class FileSaveAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        String selectedText = applicationFrame.getSelectedText();
-        if (selectedText == null) {
+        EditorDocument document = applicationFrame.getCurrentDocument();
+        if (applicationFrame.getSelectedText() == null) {
             // The whole text of the document is saved, and the document is
             // then the one of that file
-            applicationFrame.saveDocument(applicationFrame.getCurrentDocument());
+            applicationFrame.saveDocument(document);
         } else {
-            // Only the selected text is saved: the file does not hold the
-            // document, which is left as it is.
-            // An explicit charset is required here too, to stay symmetric with
-            // FileIO#openFile(File): String#getBytes() with no argument uses
-            // the platform default charset, which would silently mismatch a
-            // file later reopened on a different OS/locale (or written back
-            // with any character outside plain ASCII)
+            // Only the selected text is saved: the file does not hold the text
+            // of the document, so no tab is left alone. If the file is the one
+            // of the document, its tab asks whether to load the file again,
+            // as any other tab holding it does
             File openedFile = Context.getInstance().getOpenedFile();
-            // The other tabs holding that file have an old text after that:
-            // FileIO#saveFile() tells them, and leaves alone the document the
-            // text comes from
-            FileIO.saveFile(openedFile == null ? "" : openedFile.toString(),
-                    selectedText.getBytes(StandardCharsets.UTF_8), applicationFrame.getCurrentDocument());
+            FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, true);
         }
     }
 }
