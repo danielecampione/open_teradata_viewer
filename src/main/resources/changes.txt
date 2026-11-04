@@ -1,4 +1,4 @@
-0.4a (03/11/2026)
+0.4a (04/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and

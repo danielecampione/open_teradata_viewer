@@ -22,9 +22,12 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
+
 /**
- * What an editor document holds besides its text: the file it was opened from,
- * the last query run on it and the results of that query.
+ * What an editor document holds besides its text: the file it was opened from
+ * and what that file was like, the last query run on it and the results of that
+ * query.
  * <p>
  * Everything that is shared by all the documents, like the database connection,
  * stays in {@link Context}, which exposes the state of the document currently
@@ -39,6 +42,7 @@ public final class DocumentState {
     private String[] columnTypeNames;
     private String query;
     private File openedFile;
+    private FileSnapshot fileSnapshot;
     private byte[][] savedLobs;
 
     public ResultSet getResultSet() {
@@ -107,8 +111,35 @@ public final class DocumentState {
         return openedFile;
     }
 
+    /**
+     * Sets the file of the document. What was known about the previous file is
+     * forgotten: {@link #setFileSnapshot(FileSnapshot)} has to be called
+     * afterwards, once the file has been read or written.
+     *
+     * @param openedFile The file the document was opened from or saved in, or
+     *        <code>null</code> if there is none.
+     */
     public void setOpenedFile(File openedFile) {
         this.openedFile = openedFile;
+        this.fileSnapshot = null;
+    }
+
+    /**
+     * @return What the file of the document was like when the document read it
+     *         or wrote it, or <code>null</code> if there is no file or it is not
+     *         known. Whoever changes the file of the document, or changes what
+     *         the file holds, has to keep it up to date.
+     */
+    public FileSnapshot getFileSnapshot() {
+        return fileSnapshot;
+    }
+
+    /**
+     * @param fileSnapshot What the file of the document is like, which is what
+     *        the document holds of it, or <code>null</code> if it is not known.
+     */
+    public void setFileSnapshot(FileSnapshot fileSnapshot) {
+        this.fileSnapshot = fileSnapshot;
     }
 
     public byte[][] getSavedLobs() {

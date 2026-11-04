@@ -114,6 +114,7 @@ import net.sourceforge.open_teradata_viewer.actions.ToggleSpellCheckingAction;
 import net.sourceforge.open_teradata_viewer.editor.DocumentTabs;
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.EditorSettings;
+import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.SearchMarks;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
@@ -1145,8 +1146,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             return false;
         }
         if (!FileIO.isWebPage(file)) {
+            // The file is what the document holds now: this is what it is like,
+            // so that it is not taken for a change made by someone else
+            final FileSnapshot snapshot = FileSnapshot.tryRead(file);
             FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
+                document.getState().setFileSnapshot(snapshot);
                 document.setModified(false);
                 document.setOutOfDate(false);
                 refreshTabTitles();

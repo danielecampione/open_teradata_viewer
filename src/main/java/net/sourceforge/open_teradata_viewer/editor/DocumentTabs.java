@@ -409,13 +409,26 @@ public class DocumentTabs {
      * out of date}, and the host asks the user, when it is shown, whether to
      * load the file again. If one of them is the document shown, it is asked
      * at once.
+     * <p>
+     * Every document holding the file, the source included, takes note of what
+     * the file is like now, so that the write is not taken for a change made by
+     * someone else, and so that the question is not asked again for the same
+     * write.
      *
      * @param file The file that has been written.
      * @param source The document whose text, or part of it, has been written,
      *        or <code>null</code>. It is left as it is.
      */
     public void fileWritten(File file, EditorDocument source) {
-        for (EditorDocument document : findDocuments(file)) {
+        List<EditorDocument> holders = findDocuments(file);
+        if (holders.isEmpty()) {
+            return;
+        }
+        // Read once, for all of them. It is the application that has just
+        // written the file, so nothing makes it unreachable or slow to read
+        FileSnapshot snapshot = FileSnapshot.tryRead(file);
+        for (EditorDocument document : holders) {
+            document.getState().setFileSnapshot(snapshot);
             if (document != source) {
                 document.setOutOfDate(true);
                 if (document == current) {

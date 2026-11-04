@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
 import net.sourceforge.open_teradata_viewer.editor.WebPageBuilder;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -312,7 +314,13 @@ public class FileIO {
         // corrupting any non-ASCII character (e.g. accented Italian
         // letters) whenever the file was written on a different machine or
         // with a different editor
-        final String content = new String(FileIO.readFile(file), StandardCharsets.UTF_8);
+        // What the file is like is noted down too, to know later whether it has
+        // been changed by someone else: its date is got before reading it, see
+        // FileSnapshot.lastModifiedOf(File)
+        final FileTime lastModified = FileSnapshot.lastModifiedOf(file);
+        final byte[] bytes = FileIO.readFile(file);
+        final FileSnapshot snapshot = FileSnapshot.of(lastModified, bytes);
+        final String content = new String(bytes, StandardCharsets.UTF_8);
         // The name of the file tells how its text is highlighted
         final String syntaxStyle = FileSyntaxStyle.forFile(file);
         SwingUtilities.invokeAndWait(() -> {
@@ -324,6 +332,7 @@ public class FileIO {
                 return;
             }
             document.getState().setOpenedFile(file);
+            document.getState().setFileSnapshot(snapshot);
             RSyntaxTextArea textArea = document.getTextArea();
             // The style is set before the text, so that the text is tokenized
             // once with the right style and not again when the style changes
@@ -352,7 +361,8 @@ public class FileIO {
      * is the position of the caret as far as the new text allows. As when a file
      * is opened, the new text cannot be undone and the document is not shown as
      * changed. The file is read on the calling thread, which must be the Swing
-     * event thread, as the text area is changed too.
+     * event thread, as the text area is changed too. What the document knows of
+     * its file is brought up to date, as it was with the text just read.
      *
      * @param document The document to reload. Nothing is done if it is not the
      *        document of a file.
@@ -364,13 +374,17 @@ public class FileIO {
         if (file == null) {
             return;
         }
+        // The date comes before the content, see openFile(File)
+        FileTime lastModified = FileSnapshot.lastModifiedOf(file);
+        byte[] bytes = readFile(file);
         // The same charset as when the file is opened
-        String content = new String(readFile(file), StandardCharsets.UTF_8);
+        String content = new String(bytes, StandardCharsets.UTF_8);
         RSyntaxTextArea textArea = document.getTextArea();
         int caretPosition = textArea.getCaretPosition();
         textArea.setText(content);
         textArea.setCaretPosition(Math.min(caretPosition, textArea.getDocument().getLength()));
         textArea.discardAllEdits();
+        document.getState().setFileSnapshot(FileSnapshot.of(lastModified, bytes));
         document.setModified(false);
         // Only the documents of some syntax styles have a source tree
         document.refreshSourceTree();
