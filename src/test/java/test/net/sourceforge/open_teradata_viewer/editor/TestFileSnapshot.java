@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
+import net.sourceforge.open_teradata_viewer.editor.FileSnapshot.Comparison;
+import net.sourceforge.open_teradata_viewer.editor.FileSnapshot.Outcome;
 
 /**
  *
@@ -191,5 +193,144 @@ public class TestFileSnapshot {
         File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
 
         assertEquals(FileSnapshot.read(file), FileSnapshot.tryRead(file));
+    }
+
+    @Test
+    public void test_compare_sameDateAndSizeIsUnchanged() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+
+        Comparison comparison = FileSnapshot.compare(file, baseline);
+
+        assertEquals(Outcome.UNCHANGED, comparison.getOutcome());
+        // Nothing has been read
+        assertNull(comparison.getCurrent());
+    }
+
+    @Test
+    public void test_compare_sameDateAndSizeIsNotLookedInto() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+
+        // A different content that leaves the date and the size as they were:
+        // the only change that is not noticed
+        write("a.sql", bytes("select 2;"), 1_700_000_000_000L);
+
+        assertEquals(Outcome.UNCHANGED, FileSnapshot.compare(file, baseline).getOutcome());
+    }
+
+    @Test
+    public void test_compare_sameContentWithAnotherDateIsTouched() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        write("a.sql", bytes("select 1;"), 1_700_000_100_000L);
+
+        Comparison comparison = FileSnapshot.compare(file, baseline);
+
+        assertEquals(Outcome.TOUCHED, comparison.getOutcome());
+        assertEquals(FileTime.fromMillis(1_700_000_100_000L), comparison.getCurrent().getLastModified());
+        assertTrue(comparison.getCurrent().hasSameContentAs(baseline));
+    }
+
+    @Test
+    public void test_compare_differentContentIsModified() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        write("a.sql", bytes("select 2;"), 1_700_000_100_000L);
+
+        Comparison comparison = FileSnapshot.compare(file, baseline);
+
+        assertEquals(Outcome.MODIFIED, comparison.getOutcome());
+        assertEquals(FileSnapshot.read(file), comparison.getCurrent());
+        assertFalse(comparison.getCurrent().hasSameContentAs(baseline));
+    }
+
+    @Test
+    public void test_compare_differentSizeWithTheSameDateIsModified() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        write("a.sql", bytes("select 1; select 2;"), 1_700_000_000_000L);
+
+        Comparison comparison = FileSnapshot.compare(file, baseline);
+
+        assertEquals(Outcome.MODIFIED, comparison.getOutcome());
+        assertEquals(19, comparison.getCurrent().getSize());
+    }
+
+    @Test
+    public void test_compare_anOlderDateIsAChangeToo() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        // An older copy put in place of the file
+        write("a.sql", bytes("select 2;"), 1_600_000_000_000L);
+
+        assertEquals(Outcome.MODIFIED, FileSnapshot.compare(file, baseline).getOutcome());
+    }
+
+    @Test
+    public void test_compare_whatIsFoundTakesTheFileBackToUnchanged() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        write("a.sql", bytes("select 2;"), 1_700_000_100_000L);
+
+        FileSnapshot current = FileSnapshot.compare(file, baseline).getCurrent();
+
+        // Once it has been taken note of, the same change is not found again
+        assertEquals(Outcome.UNCHANGED, FileSnapshot.compare(file, current).getOutcome());
+    }
+
+    @Test
+    public void test_compare_withoutBaselineTheFileIsDescribed() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+
+        Comparison comparison = FileSnapshot.compare(file, null);
+
+        assertEquals(Outcome.NO_BASELINE, comparison.getOutcome());
+        assertEquals(FileSnapshot.read(file), comparison.getCurrent());
+    }
+
+    @Test
+    public void test_compare_emptyFile() throws IOException {
+        File file = write("empty.sql", new byte[0], 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+
+        assertEquals(Outcome.UNCHANGED, FileSnapshot.compare(file, baseline).getOutcome());
+
+        write("empty.sql", bytes("select 1;"), 1_700_000_100_000L);
+
+        assertEquals(Outcome.MODIFIED, FileSnapshot.compare(file, baseline).getOutcome());
+    }
+
+    @Test
+    public void test_compare_missingFileIsUnavailable() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+        Files.delete(file.toPath());
+
+        Comparison comparison = FileSnapshot.compare(file, baseline);
+
+        assertEquals(Outcome.UNAVAILABLE, comparison.getOutcome());
+        assertNull(comparison.getCurrent());
+        assertEquals(Outcome.UNAVAILABLE, FileSnapshot.compare(file, null).getOutcome());
+    }
+
+    @Test
+    public void test_compare_directoryIsUnavailable() throws IOException {
+        File file = write("a.sql", bytes("select 1;"), 1_700_000_000_000L);
+        FileSnapshot baseline = FileSnapshot.read(file);
+
+        assertEquals(Outcome.UNAVAILABLE, FileSnapshot.compare(directory, baseline).getOutcome());
+        assertEquals(Outcome.UNAVAILABLE, FileSnapshot.compare(directory, null).getOutcome());
+    }
+
+    @Test
+    public void test_compare_invalidPathIsUnavailable() {
+        // A path that cannot be a path makes the file system throw an unchecked
+        // exception: it is not a reason to fail
+        File invalid = new File("invalid\u0000.sql");
+
+        assertEquals(Outcome.UNAVAILABLE, FileSnapshot.compare(invalid, null).getOutcome());
+        assertEquals(Outcome.UNAVAILABLE,
+                FileSnapshot.compare(invalid, FileSnapshot.of(FileTime.fromMillis(1_000L), bytes("a"))).getOutcome());
     }
 }

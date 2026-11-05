@@ -89,9 +89,10 @@ public class DocumentTabs {
 
         /**
          * Called when a document is shown whose file has been written after the
-         * document read it, by saving another document in it: the text of the
-         * document is not the one of the file anymore. The host asks the user
-         * whether to load the file again, and does it if the answer is yes.
+         * document read it, by the application (for instance by saving another
+         * document in it) or by another program: the text of the document is
+         * not the one of the file anymore. The host asks the user whether to
+         * load the file again, and does it if the answer is yes.
          *
          * @param document The document shown, which is the current one.
          * @return <code>true</code> if the document has been loaded again;
@@ -144,6 +145,8 @@ public class DocumentTabs {
     private boolean confirmingClose;
     // The host is asking whether to load a file again
     private boolean askingToReload;
+    // Looks whether the file of a document has been changed by another program
+    private final ExternalChangeChecker externalChangeChecker;
 
     // The title of a tab follows the state of its document
     private final PropertyChangeListener modifiedListener = event -> {
@@ -167,6 +170,23 @@ public class DocumentTabs {
         this.host = host;
         tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener(e -> selectionChanged());
+        externalChangeChecker = new ExternalChangeChecker(new ExternalChangeChecker.Client() {
+
+            @Override
+            public boolean isBusy() {
+                return host.isBusy();
+            }
+
+            @Override
+            public boolean isOpen(EditorDocument document) {
+                return documents.contains(document);
+            }
+
+            @Override
+            public void changedOutside(EditorDocument document) {
+                offerReload(document);
+            }
+        });
     }
 
     /** @return The component to add to the window. */
@@ -635,6 +655,11 @@ public class DocumentTabs {
         if (selected.isOutOfDate()) {
             // The question is asked once the tab has been shown completely
             SwingUtilities.invokeLater(() -> offerReload(selected));
+        } else {
+            // Another program may have changed the file while the tab was not
+            // shown. This is looked at in the background: if it has, the question
+            // is asked as soon as it is known, see ExternalChangeChecker
+            externalChangeChecker.request(selected);
         }
     }
 }

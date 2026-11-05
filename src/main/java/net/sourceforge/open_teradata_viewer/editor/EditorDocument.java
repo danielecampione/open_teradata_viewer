@@ -231,9 +231,10 @@ public class EditorDocument {
 
     /**
      * @return <code>true</code> if the file of the document has been written
-     *         after the document read it or wrote it, because the text of
-     *         another document has been saved in it: the text of this document
-     *         is not the one of the file anymore.
+     *         after the document read it or wrote it, because the application
+     *         has written it (the text of another document has been saved in
+     *         it, or an export) or because another program has changed it: the
+     *         text of this document is not the one of the file anymore.
      */
     public boolean isOutOfDate() {
         return outOfDate;
