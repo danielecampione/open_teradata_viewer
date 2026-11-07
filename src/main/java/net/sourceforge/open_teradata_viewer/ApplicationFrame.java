@@ -1161,6 +1161,35 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Saves the text of a document in a file chosen by the user. If some text is
+     * selected, only that is saved: the file does not hold the text of the
+     * document then, so the document is not associated with it and no tab is
+     * left alone (if the file is the one of the document, its tab asks whether
+     * to load the file again, as any other tab holding it does, see
+     * {@link FileIO#saveText(String, EditorDocument, boolean)}). Otherwise the
+     * whole text is saved and the document becomes the one of that file, see
+     * {@link #saveDocument(EditorDocument)}. Can be called from any thread.
+     *
+     * @param document The document to save.
+     * @return <code>false</code> if the user gave up, or if nothing has been
+     *         saved.
+     * @throws Exception If the file cannot be written.
+     */
+    public boolean saveDocumentAs(final EditorDocument document) throws Exception {
+        // The selection is read on the thread that owns the text area
+        final boolean[] hasSelection = new boolean[1];
+        FileIO.runOnEventThread(() -> {
+            RSyntaxTextArea textArea = document.getTextArea();
+            hasSelection[0] = textArea.getSelectionStart() != textArea.getSelectionEnd();
+        });
+        if (!hasSelection[0]) {
+            return saveDocument(document);
+        }
+        File openedFile = document.getState().getOpenedFile();
+        return FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, true) != null;
+    }
+
+    /**
      * Tells that a file has been written, so that the documents holding it,
      * other than the one the text comes from, do not keep an old text unnoticed:
      * each of them asks the user, when it is shown, whether to load the file

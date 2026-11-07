@@ -19,12 +19,8 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
-import net.sourceforge.open_teradata_viewer.Context;
-import net.sourceforge.open_teradata_viewer.FileIO;
-import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
@@ -50,18 +46,6 @@ public class FileSaveAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        EditorDocument document = applicationFrame.getCurrentDocument();
-        if (applicationFrame.getSelectedText() == null) {
-            // The whole text of the document is saved, and the document is
-            // then the one of that file
-            applicationFrame.saveDocument(document);
-        } else {
-            // Only the selected text is saved: the file does not hold the text
-            // of the document, so no tab is left alone. If the file is the one
-            // of the document, its tab asks whether to load the file again,
-            // as any other tab holding it does
-            File openedFile = Context.getInstance().getOpenedFile();
-            FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, true);
-        }
+        applicationFrame.saveDocumentAs(applicationFrame.getCurrentDocument());
     }
 }
