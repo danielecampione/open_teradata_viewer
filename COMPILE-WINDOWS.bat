@@ -18,6 +18,7 @@ if errorlevel 1 goto error
 
 :done
 echo COMPILATION COMPLETED.
+pause
 exit /b 0
 
 :error

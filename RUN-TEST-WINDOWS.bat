@@ -19,6 +19,7 @@ if errorlevel 1 goto error
 
 :done
 echo TESTS COMPLETED.
+pause
 exit /b 0
 
 :error

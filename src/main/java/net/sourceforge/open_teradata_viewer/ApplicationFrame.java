@@ -2240,6 +2240,13 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                         handleWindowClose();
                     }
                 }
+
+                @Override
+                public void windowActivated(WindowEvent e) {
+                    // The user may be back from another program, which may have
+                    // changed the files that the tabs hold
+                    documentTabs.checkExternalChanges();
+                }
             });
 
             // Create the console and configure it

@@ -467,6 +467,11 @@ public class DocumentTabs {
      * to load the file again, the text is kept and the document is marked as
      * changed, because it is not the one of the file anymore: closing it asks
      * whether to save it.
+     * <p>
+     * The file may be written again while the user is being asked, and that
+     * marks the document as out of date again. If the document is loaded
+     * afterwards, it has read the file as it is now and is up to date; if it
+     * is not, the user is asked again when it is shown next.
      */
     private void offerReload(EditorDocument document) {
         if (!document.isOutOfDate() || document != current || confirmingClose || askingToReload) {
@@ -480,8 +485,45 @@ public class DocumentTabs {
         } finally {
             askingToReload = false;
         }
-        if (!reloaded) {
+        if (reloaded) {
+            // What has marked the document as out of date while the user was
+            // being asked has been read with the rest of the file
+            document.setOutOfDate(false);
+        } else {
             document.setModified(true);
+        }
+    }
+
+    /**
+     * Looks, in the background, at the files of all the documents, to find
+     * out which ones another program has changed since the document read or
+     * wrote them, see {@link ExternalChangeChecker}. The window calls it when
+     * it is activated, which is what happens when the user comes back from
+     * another program. The document shown is asked for first, so that the
+     * question about it is not held up by the other files.
+     * <p>
+     * What is found out is dealt with like when a tab is shown: the question
+     * about the document shown is asked as soon as the change is known, and
+     * any other document is marked as {@link EditorDocument#isOutOfDate() out
+     * of date}, to be asked about when its tab is shown. A document that is out
+     * of date already is left out, as it is going to be asked about whatever
+     * its file is like now, and so is a document that has no file. Nothing is
+     * done while an action is running, which may be writing a file of a
+     * document without having told it yet: the files are looked at again the
+     * next time the window is activated or a tab is shown.
+     */
+    public void checkExternalChanges() {
+        if (host.isBusy()) {
+            return;
+        }
+        EditorDocument shown = current;
+        if (shown != null && !shown.isOutOfDate()) {
+            externalChangeChecker.request(shown);
+        }
+        for (EditorDocument document : documents) {
+            if (document != shown && !document.isOutOfDate()) {
+                externalChangeChecker.request(document);
+            }
         }
     }
 
