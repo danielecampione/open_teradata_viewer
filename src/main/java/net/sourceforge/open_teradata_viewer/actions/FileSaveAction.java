@@ -18,7 +18,11 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -37,7 +41,8 @@ public class FileSaveAction extends CustomAction {
     private static final long serialVersionUID = -9193848167596376935L;
 
     protected FileSaveAction() {
-        super(LanguageManager.getInstance().getString("menu.file.save"), "filesave.png", null, null);
+        super(LanguageManager.getInstance().getString("menu.file.save"), "filesave.png",
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), null);
         setEnabled(true);
 
         // Add language change listener to update the action name when language changes
