@@ -18,12 +18,8 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.util.Locale;
-
-import javax.swing.KeyStroke;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.ConnectionData.DatabaseType;
@@ -36,8 +32,8 @@ import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -46,8 +42,7 @@ public class SelectFromAction extends CustomAction {
     private static final long serialVersionUID = 5489248195539100092L;
 
     protected SelectFromAction() {
-        super(LanguageManager.getInstance().getString("action.select_all"), null, KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), null);
+        super(LanguageManager.getInstance().getString("action.select_all"));
         setEnabled(true);
 
         // Add language change listener to update the action name when language changes

@@ -79,6 +79,7 @@ public class EditorDocument {
 
     private volatile boolean modified;
     private volatile boolean outOfDate;
+    private volatile long changeCount;
     private int number;
     private AutoCompletion autoCompletion;
     private AbstractSourceTree tree;
@@ -137,6 +138,8 @@ public class EditorDocument {
     }
 
     private void textChanged() {
+        // The text is only changed on the Swing event thread
+        changeCount++;
         if (!modified) {
             setModified(true);
         }
@@ -227,6 +230,19 @@ public class EditorDocument {
         boolean old = this.modified;
         this.modified = modified;
         propertyChangeSupport.firePropertyChange(MODIFIED_PROPERTY, old, modified);
+    }
+
+    /**
+     * @return How many times the text of the document has been changed since
+     *         the document was created, whether the document was already
+     *         modified or not. Whoever reads the text to write it somewhere
+     *         while the user can still type, takes this number with it, and
+     *         clears the {@link #setModified(boolean) modified} state only if
+     *         the number is still the same afterwards: otherwise the text that
+     *         has been typed meanwhile would be taken for saved.
+     */
+    public long getChangeCount() {
+        return changeCount;
     }
 
     /**

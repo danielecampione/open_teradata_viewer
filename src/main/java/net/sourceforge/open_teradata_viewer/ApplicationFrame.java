@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
@@ -73,6 +75,7 @@ import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.LayerUI;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreeNode;
 
@@ -1126,20 +1129,107 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Saves a document as the Save command does. If some text is selected, only
+     * that is saved, in a file chosen by the user, see
+     * {@link #saveDocumentAs(EditorDocument)}. Otherwise the whole text is
+     * saved: in the file of the document, without asking for anything, if it
+     * has one, as it is (a web page is not built, whatever the name of the
+     * file), else in a file chosen by the user, which becomes the file of the
+     * document. Can be called from any thread.
+     *
+     * @param document The document to save.
+     * @return <code>false</code> if the user gave up, or if nothing has been
+     *         saved.
+     * @throws Exception If the file cannot be written: the document is left as
+     *         it is.
+     */
+    public boolean saveDocument(final EditorDocument document) throws Exception {
+        if (hasSelection(document)) {
+            return saveSelection(document);
+        }
+        return saveWholeText(document);
+    }
+
+    /**
+     * Saves the text of a document in a file chosen by the user, which is
+     * always asked for, also when the document has a file already. If some text
+     * is selected, only that is saved: the file does not hold the text of the
+     * document then, so the document is not associated with it and no tab is
+     * left alone (if the file is the one of the document, its tab asks whether
+     * to load the file again, as any other tab holding it does, see
+     * {@link FileIO#saveText(String, EditorDocument, boolean)}). Otherwise the
+     * whole text is saved and the document becomes the one of that file, unless
+     * it is written as a web page. Can be called from any thread.
+     *
+     * @param document The document to save.
+     * @return <code>false</code> if the user gave up, or if nothing has been
+     *         saved.
+     * @throws Exception If the file cannot be written.
+     */
+    public boolean saveDocumentAs(final EditorDocument document) throws Exception {
+        if (hasSelection(document)) {
+            return saveSelection(document);
+        }
+        return saveWholeTextInChosenFile(document);
+    }
+
+    /**
+     * @return <code>true</code> if some text is selected in the document. The
+     *         selection is read on the thread that owns the text area.
+     */
+    private boolean hasSelection(final EditorDocument document) throws Exception {
+        final boolean[] hasSelection = new boolean[1];
+        FileIO.runOnEventThread(() -> {
+            RSyntaxTextArea textArea = document.getTextArea();
+            hasSelection[0] = textArea.getSelectionStart() != textArea.getSelectionEnd();
+        });
+        return hasSelection[0];
+    }
+
+    /**
+     * Saves only the selected text of a document in a file chosen by the user.
+     * The document is not associated with the file, see
+     * {@link #saveDocumentAs(EditorDocument)}.
+     *
+     * @return <code>false</code> if the user gave up, or if nothing is selected
+     *         anymore.
+     */
+    private boolean saveSelection(final EditorDocument document) throws Exception {
+        File openedFile = document.getState().getOpenedFile();
+        return FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, true) != null;
+    }
+
+    /**
+     * Saves the whole text of a document, whatever is selected: in its own file
+     * if it has one, otherwise in a file chosen by the user. This is also what
+     * is done when the user wants to save the changes of a tab that is being
+     * closed, as the question is about the text of the tab, not about a part of
+     * it.
+     *
+     * @return <code>false</code> if the user gave up, and the text has not been
+     *         saved.
+     */
+    private boolean saveWholeText(final EditorDocument document) throws Exception {
+        File openedFile = document.getState().getOpenedFile();
+        if (openedFile == null) {
+            return saveWholeTextInChosenFile(document);
+        }
+        saveWholeTextInOpenedFile(document, openedFile);
+        return true;
+    }
+
+    /**
      * Saves the whole text of a document in a file chosen by the user, which
      * becomes the file of the document, unless it is written as a web page (see
      * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
      * hold the text of the document then. The other documents holding that file
      * have an old text after that, see {@link #fileWritten(File, EditorDocument)}:
-     * {@link FileIO#saveText(String, EditorDocument, boolean)} tells it. Can be
-     * called from any thread.
+     * {@link FileIO#saveText(String, EditorDocument, boolean)} tells it.
      *
-     * @param document The document to save.
      * @return <code>false</code> if the user gave up, and the text has not been
      *         saved.
-     * @throws Exception If the file cannot be written.
      */
-    public boolean saveDocument(final EditorDocument document) throws Exception {
+    private boolean saveWholeTextInChosenFile(final EditorDocument document) throws Exception {
         File openedFile = document.getState().getOpenedFile();
         final File file = FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, false);
         if (file == null) {
@@ -1161,32 +1251,56 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
-     * Saves the text of a document in a file chosen by the user. If some text is
-     * selected, only that is saved: the file does not hold the text of the
-     * document then, so the document is not associated with it and no tab is
-     * left alone (if the file is the one of the document, its tab asks whether
-     * to load the file again, as any other tab holding it does, see
-     * {@link FileIO#saveText(String, EditorDocument, boolean)}). Otherwise the
-     * whole text is saved and the document becomes the one of that file, see
-     * {@link #saveDocument(EditorDocument)}. Can be called from any thread.
+     * Writes the whole text of a document in its own file, replacing its
+     * content, without asking for anything. The text is written as it is, also
+     * when the file is a web page (see {@link FileIO#isWebPage(File)}): the file
+     * is the one the text was read from, so it holds the text, not a page made
+     * from it, which only {@link #saveDocumentAs(EditorDocument)} writes. Then
+     * the document is not out of date anymore and, unless its text has been
+     * changed while the file was being written, it is not modified anymore. The
+     * other documents holding the file are told that it has been written, see
+     * {@link #fileWritten(File, EditorDocument)}.
      *
      * @param document The document to save.
-     * @return <code>false</code> if the user gave up, or if nothing has been
-     *         saved.
-     * @throws Exception If the file cannot be written.
+     * @param file The file of the document.
+     * @throws Exception If the file cannot be written: the document is left as
+     *         it is.
      */
-    public boolean saveDocumentAs(final EditorDocument document) throws Exception {
-        // The selection is read on the thread that owns the text area
-        final boolean[] hasSelection = new boolean[1];
+    private void saveWholeTextInOpenedFile(final EditorDocument document, final File file) throws Exception {
+        // The text is read, and how many times it has been changed with it, on
+        // the thread that owns the text area
+        final AtomicReference<byte[]> bytesRef = new AtomicReference<>();
+        final long[] changeCount = new long[1];
         FileIO.runOnEventThread(() -> {
             RSyntaxTextArea textArea = document.getTextArea();
-            hasSelection[0] = textArea.getSelectionStart() != textArea.getSelectionEnd();
+            try {
+                // The same explicit charset as FileIO.saveText(), which is the
+                // one FileIO.openFile(File) reads with
+                bytesRef.set(textArea.getDocument().getText(0, textArea.getDocument().getLength())
+                        .getBytes(StandardCharsets.UTF_8));
+            } catch (BadLocationException ble) {
+                // The range comes from the text area itself
+                throw new IllegalStateException(ble);
+            }
+            changeCount[0] = document.getChangeCount();
         });
-        if (!hasSelection[0]) {
-            return saveDocument(document);
-        }
-        File openedFile = document.getState().getOpenedFile();
-        return FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, true) != null;
+        FileIO.writeFile(file, bytesRef.get());
+
+        // The file is what the document holds: this is what it is like, so that
+        // it is not taken for a change made by someone else
+        final FileSnapshot snapshot = FileSnapshot.tryRead(file);
+        FileIO.runOnEventThread(() -> {
+            document.getState().setFileSnapshot(snapshot);
+            // What has been typed while the file was being written is not in it.
+            // The title of the tab follows the modified state, and the name of
+            // the file does not change
+            if (document.getChangeCount() == changeCount[0]) {
+                document.setModified(false);
+            }
+            document.setOutOfDate(false);
+        });
+        // The other documents holding the file do not have this text
+        FileIO.fileWritten(file, document);
     }
 
     /**
@@ -1280,7 +1394,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             if (answer == Dialog.YES_OPTION) {
                 try {
                     // The document is closed only if the text has been saved
-                    return saveDocument(document);
+                    return saveWholeText(document);
                 } catch (Exception e) {
                     ExceptionDialog.showException(e);
                     return false;

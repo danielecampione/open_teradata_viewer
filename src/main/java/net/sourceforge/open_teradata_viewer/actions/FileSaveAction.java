@@ -24,10 +24,13 @@ import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- *
+ * Saves the text of the current document: in its own file, without asking for
+ * anything, if it has one and no text is selected; otherwise a file is asked
+ * for, as {@link FileSaveAsAction} does.
  *
  * @author D. Campione
  *
+ * @see ApplicationFrame#saveDocument(net.sourceforge.open_teradata_viewer.editor.EditorDocument)
  */
 public class FileSaveAction extends CustomAction {
 
@@ -46,6 +49,6 @@ public class FileSaveAction extends CustomAction {
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
         ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
-        applicationFrame.saveDocumentAs(applicationFrame.getCurrentDocument());
+        applicationFrame.saveDocument(applicationFrame.getCurrentDocument());
     }
 }
