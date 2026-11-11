@@ -90,6 +90,17 @@
       tab. Ctrl+S now saves the tab; the "SELECT * FROM" command, which had
       that shortcut, no longer has one and is available from the Schema
       Browser menu.
+    - Files are no longer assumed to be in UTF-8. The encoding of a file that
+      is opened is the one of its byte order mark (BOM), if it has one;
+      otherwise UTF-8, if the file is valid UTF-8; otherwise the one of the
+      system, or ISO-8859-1 if that does not suit either. So a file is read
+      without losing anything and written back with the same bytes, BOM
+      included, instead of having its accented letters replaced. The tab
+      remembers the encoding and Save writes the text in it; text that cannot
+      be represented in it is not saved (no question marks are written in its
+      place). "Save file as..." has an Encoding list that suggests the one of
+      the tab, and the chosen one becomes the one of the tab (a web page is
+      always UTF-8, so it does not change it).
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

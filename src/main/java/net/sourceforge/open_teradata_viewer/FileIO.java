@@ -18,14 +18,18 @@
 
 package net.sourceforge.open_teradata_viewer;
 
+import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,6 +44,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
+import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 import net.sourceforge.open_teradata_viewer.editor.WebPageBuilder;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
@@ -74,7 +79,7 @@ public class FileIO {
      * @throws Exception If the file cannot be written.
      */
     public static void saveAndOpenFile(String fileName, byte[] bytes) throws Exception {
-        File file = chooseAndWriteFile(fileName, bytes, null);
+        File file = chooseAndWriteFile(fileName, bytes);
         if (file == null) {
             return;
         }
@@ -104,7 +109,7 @@ public class FileIO {
      * @throws Exception If the file cannot be written.
      */
     public static File saveFile(String fileName, byte[] bytes) throws Exception {
-        File file = chooseAndWriteFile(fileName, bytes, null);
+        File file = chooseAndWriteFile(fileName, bytes);
         if (file != null) {
             fileWritten(file, null);
         }
@@ -112,31 +117,76 @@ public class FileIO {
     }
 
     /**
+     * What {@link #saveText(String, EditorDocument, boolean)} has written, and
+     * where.
+     */
+    public static final class SavedText {
+
+        private final File file;
+        private final String encoding;
+        private final boolean bom;
+
+        private SavedText(File file, String encoding, boolean bom) {
+            this.file = file;
+            this.encoding = encoding;
+            this.bom = bom;
+        }
+
+        /** @return The file that has been written. */
+        public File getFile() {
+            return file;
+        }
+
+        /**
+         * @return The name of the encoding the user chose for the file. It is
+         *         not the one of the text that is written when the file is a
+         *         web page (see {@link FileIO#isWebPage(File)}): a web page is
+         *         always written in UTF-8.
+         */
+        public String getEncoding() {
+            return encoding;
+        }
+
+        /** @return <code>true</code> if the file starts with a BOM. */
+        public boolean hasBom() {
+            return bom;
+        }
+    }
+
+    /**
      * Saves the text of a document, or only the selected part of it, in a file
-     * chosen by the user. If the file is a web page (see
+     * chosen by the user, who also chooses the encoding of the file: the one of
+     * the document is the one that is suggested. If the file is a web page (see
      * {@link #isWebPage(File)}), what is written is not the text but a page
      * that shows it with the colors of its syntax highlighting, see
-     * {@link WebPageBuilder}. The tabs holding the file are told that it has
-     * been written, see {@link #fileWritten(File, EditorDocument)}: the
-     * document the text comes from is left as it is when the whole text has
-     * been saved, because the text is already its own, but not when only a part
-     * of it has been saved, because the file then holds something else than
-     * the text of the document. Can be called from any thread.
+     * {@link WebPageBuilder}, and it is in UTF-8 whatever the user chose. The
+     * tabs holding the file are told that it has been written, see
+     * {@link #fileWritten(File, EditorDocument)}: the document the text comes
+     * from is left as it is when the whole text has been saved, because the
+     * text is already its own, but not when only a part of it has been saved,
+     * because the file then holds something else than the text of the document.
+     * The encoding and the BOM of the document are left as they are too: it is
+     * up to the caller to give them what has been written, if the file becomes
+     * the one of the document. Can be called from any thread.
      *
      * @param fileName The name suggested to the user.
      * @param document The document whose text is saved.
      * @param selectionOnly <code>true</code> to save only what is selected in
      *        the document, <code>false</code> to save all of its text.
-     * @return The file that has been written, or <code>null</code> if the user
-     *         gave up, or if only the selection had to be saved and nothing is
+     * @return What has been written, or <code>null</code> if the user gave up,
+     *         or if only the selection had to be saved and nothing is
      *         selected.
-     * @throws Exception If the file cannot be written.
+     * @throws Exception If the file cannot be written, or if the text has
+     *         characters that cannot be represented in the encoding the user
+     *         chose (nothing is written then).
      */
-    public static File saveText(String fileName, EditorDocument document, boolean selectionOnly) throws Exception {
-        // The text is read, and the selection with it, at the same time and on
-        // the thread that owns the text area
+    public static SavedText saveText(String fileName, EditorDocument document, boolean selectionOnly) throws Exception {
+        // The text is read, and the selection and the encoding with it, at the
+        // same time and on the thread that owns the text area
         final AtomicReference<TextRange> rangeRef = new AtomicReference<>();
-        final AtomicReference<byte[]> bytesRef = new AtomicReference<>();
+        final AtomicReference<String> textRef = new AtomicReference<>();
+        final String[] documentEncoding = new String[1];
+        final boolean[] documentBom = new boolean[1];
         runOnEventThread(() -> {
             RSyntaxTextArea textArea = document.getTextArea();
             int start = selectionOnly ? textArea.getSelectionStart() : 0;
@@ -145,25 +195,55 @@ public class FileIO {
                 return;
             }
             try {
-                // An explicit charset is required here, to stay symmetric with
-                // openFile(File): the platform default one would silently
-                // mismatch a file reopened on a different OS or locale
-                bytesRef.set(textArea.getDocument().getText(start, end - start).getBytes(StandardCharsets.UTF_8));
+                textRef.set(textArea.getDocument().getText(start, end - start));
             } catch (BadLocationException ble) {
                 // The range comes from the text area itself
                 throw new IllegalStateException(ble);
             }
             rangeRef.set(new TextRange(document, start, end));
+            documentEncoding[0] = document.getState().getEncoding();
+            documentBom[0] = document.getState().hasBom();
         });
         if (rangeRef.get() == null) {
             return null;
         }
 
-        File file = chooseAndWriteFile(fileName, bytesRef.get(), rangeRef.get());
-        if (file != null) {
-            fileWritten(file, selectionOnly ? null : document);
+        // The BOM of the file the text comes from is kept, as long as the
+        // encoding is the same
+        final String text = textRef.get();
+        final Chosen chosen = chooseAndWrite(fileName, documentEncoding[0], rangeRef.get(),
+                encoding -> encodeText(text, encoding, writesBom(encoding, documentEncoding[0], documentBom[0])));
+        if (chosen == null) {
+            return null;
         }
-        return file;
+        fileWritten(chosen.file, selectionOnly ? null : document);
+        return new SavedText(chosen.file, chosen.encoding,
+                writesBom(chosen.encoding, documentEncoding[0], documentBom[0]));
+    }
+
+    private static boolean writesBom(String encoding, String documentEncoding, boolean documentBom) {
+        return TextFileCodec.writesBom(encoding, documentBom && encoding.equals(documentEncoding));
+    }
+
+    /**
+     * Turns some text into the bytes of a file.
+     *
+     * @param text The text.
+     * @param encoding The name of the encoding.
+     * @param bom <code>true</code> to write the BOM of the encoding first, if
+     *        it has one.
+     * @return The bytes.
+     * @throws IOException If the text has characters that cannot be represented
+     *         in the encoding: its message tells it to the user, and nothing is
+     *         written in place of those characters.
+     */
+    public static byte[] encodeText(String text, String encoding, boolean bom) throws IOException {
+        try {
+            return TextFileCodec.encode(text, encoding, bom);
+        } catch (CharacterCodingException cce) {
+            throw new IOException(MessageFormat.format(
+                    LanguageManager.getInstance().getString("message.cannot_encode"), encoding), cce);
+        }
     }
 
     /**
@@ -217,7 +297,42 @@ public class FileIO {
      * @return The file that has been written, or <code>null</code> if the user
      *         gave up.
      */
-    private static File chooseAndWriteFile(String fileName, byte[] bytes, TextRange range) throws Exception {
+    private static File chooseAndWriteFile(String fileName, byte[] bytes) throws Exception {
+        Chosen chosen = chooseAndWrite(fileName, null, null, encoding -> bytes);
+        return chosen == null ? null : chosen.file;
+    }
+
+    /** What is written in the file the user chose, given its encoding. */
+    private interface BytesProvider {
+        byte[] bytesFor(String encoding) throws Exception;
+    }
+
+    private static final class Chosen {
+
+        private final File file;
+        private final String encoding;
+
+        private Chosen(File file, String encoding) {
+            this.file = file;
+            this.encoding = encoding;
+        }
+    }
+
+    /**
+     * Asks the user for a file, and an encoding if the text is saved, and
+     * writes it, after asking whether to replace it if it exists.
+     *
+     * @param fileName The name suggested to the user.
+     * @param initialEncoding The encoding that is suggested, or
+     *        <code>null</code> if the user is not asked for one.
+     * @param range What is written if the file is a web page, instead of what
+     *        <code>provider</code> gives, or <code>null</code>.
+     * @param provider What is written, when the encoding is known.
+     * @return The file and its encoding (<code>null</code> if the user was not
+     *         asked), or <code>null</code> if the user gave up.
+     */
+    private static Chosen chooseAndWrite(String fileName, String initialEncoding, TextRange range,
+                                         BytesProvider provider) throws Exception {
         JFileChooser fileChooser = getFileChooser();
         File file = new File(fileName);
         try {
@@ -230,18 +345,33 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
         final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<String> encodingRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
             runOnEventThread(() -> {
-                int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
-                resultRef.set(result);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    selectedFileRef.set(fileChooser.getSelectedFile());
-                    try {
-                        currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                final JComboBox<String> encodingCombo = initialEncoding == null ? null
+                        : createEncodingCombo(initialEncoding);
+                if (encodingCombo != null) {
+                    fileChooser.setAccessory(createEncodingAccessory(encodingCombo));
+                }
+                try {
+                    int result = fileChooser.showSaveDialog(ApplicationFrame.getInstance());
+                    resultRef.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef.set(fileChooser.getSelectedFile());
+                        try {
+                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        if (encodingCombo != null) {
+                            encodingRef.set((String) encodingCombo.getSelectedItem());
+                        }
                     }
+                } finally {
+                    // The chooser is shared with the commands that do not ask
+                    // for an encoding
+                    fileChooser.setAccessory(null);
                 }
             });
         } catch (Exception ex) {
@@ -258,12 +388,35 @@ public class FileIO {
                 if (range != null && isWebPage(selectedFile)) {
                     writeFile(selectedFile, buildWebPage(chosenFilePath, range));
                 } else {
-                    writeFile(selectedFile, bytes);
+                    writeFile(selectedFile, provider.bytesFor(encodingRef.get()));
                 }
-                return selectedFile;
+                return new Chosen(selectedFile, encodingRef.get());
             }
         }
         return null;
+    }
+
+    private static JComboBox<String> createEncodingCombo(String selected) {
+        List<String> encodings = new ArrayList<>(TextFileCodec.getEncodings());
+        if (!encodings.contains(selected)) {
+            encodings.add(selected);
+        }
+        JComboBox<String> combo = new JComboBox<>(encodings.toArray(new String[0]));
+        combo.setSelectedItem(selected);
+        return combo;
+    }
+
+    private static JComponent createEncodingAccessory(JComboBox<String> combo) {
+        JLabel label = new JLabel(LanguageManager.getInstance().getString("dialog.encoding"));
+        label.setLabelFor(combo);
+        JPanel form = new JPanel(new BorderLayout(0, 4));
+        form.add(label, BorderLayout.NORTH);
+        form.add(combo, BorderLayout.CENTER);
+        // The chooser gives the accessory all the height there is
+        JPanel accessory = new JPanel(new BorderLayout());
+        accessory.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+        accessory.add(form, BorderLayout.NORTH);
+        return accessory;
     }
 
     /**
@@ -308,19 +461,20 @@ public class FileIO {
         // RSyntaxTextArea/Document instance stayed broken for the rest of
         // that run, which is why every subsequent open (including of a file
         // that had opened fine moments before) kept failing too
-        // An explicit charset is required here: relying on the platform
-        // default (as new String(byte[]) does) makes the decoded text
-        // depend on the OS/locale the JVM happens to run under, silently
-        // corrupting any non-ASCII character (e.g. accented Italian
+        // The encoding is the one of the BOM, or it is guessed, but it is never
+        // the platform default blindly, see TextFileCodec.decode(byte[]): that
+        // would silently corrupt any non-ASCII character (e.g. accented Italian
         // letters) whenever the file was written on a different machine or
-        // with a different editor
+        // with a different editor, and what is written back would not be the
+        // file that was read
         // What the file is like is noted down too, to know later whether it has
         // been changed by someone else: its date is got before reading it, see
         // FileSnapshot.lastModifiedOf(File)
         final FileTime lastModified = FileSnapshot.lastModifiedOf(file);
         final byte[] bytes = FileIO.readFile(file);
         final FileSnapshot snapshot = FileSnapshot.of(lastModified, bytes);
-        final String content = new String(bytes, StandardCharsets.UTF_8);
+        final TextFileCodec.Decoded decoded = TextFileCodec.decode(bytes);
+        final String content = decoded.getText();
         // The name of the file tells how its text is highlighted
         final String syntaxStyle = FileSyntaxStyle.forFile(file);
         SwingUtilities.invokeAndWait(() -> {
@@ -333,6 +487,8 @@ public class FileIO {
             }
             document.getState().setOpenedFile(file);
             document.getState().setFileSnapshot(snapshot);
+            document.getState().setEncoding(decoded.getEncoding());
+            document.getState().setBom(decoded.hasBom());
             RSyntaxTextArea textArea = document.getTextArea();
             // The style is set before the text, so that the text is tokenized
             // once with the right style and not again when the style changes
@@ -377,14 +533,17 @@ public class FileIO {
         // The date comes before the content, see openFile(File)
         FileTime lastModified = FileSnapshot.lastModifiedOf(file);
         byte[] bytes = readFile(file);
-        // The same charset as when the file is opened
-        String content = new String(bytes, StandardCharsets.UTF_8);
+        // The encoding the document had is kept, see TextFileCodec.decodeAgain()
+        TextFileCodec.Decoded decoded = TextFileCodec.decodeAgain(bytes, document.getState().getEncoding());
+        String content = decoded.getText();
         RSyntaxTextArea textArea = document.getTextArea();
         int caretPosition = textArea.getCaretPosition();
         textArea.setText(content);
         textArea.setCaretPosition(Math.min(caretPosition, textArea.getDocument().getLength()));
         textArea.discardAllEdits();
         document.getState().setFileSnapshot(FileSnapshot.of(lastModified, bytes));
+        document.getState().setEncoding(decoded.getEncoding());
+        document.getState().setBom(decoded.hasBom());
         document.setModified(false);
         // Only the documents of some syntax styles have a source tree
         document.refreshSourceTree();

@@ -39,7 +39,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,6 +118,7 @@ import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.EditorSettings;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.SearchMarks;
+import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.editor.autocomplete.SQLCellRenderer;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
@@ -1219,8 +1219,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
-     * Saves the whole text of a document in a file chosen by the user, which
-     * becomes the file of the document, unless it is written as a web page (see
+     * Saves the whole text of a document in a file chosen by the user, in the
+     * encoding chosen by the user, which become the file and the encoding of the
+     * document, unless it is written as a web page (see
      * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
      * hold the text of the document then. The other documents holding that file
      * have an old text after that, see {@link #fileWritten(File, EditorDocument)}:
@@ -1231,10 +1232,12 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      */
     private boolean saveWholeTextInChosenFile(final EditorDocument document) throws Exception {
         File openedFile = document.getState().getOpenedFile();
-        final File file = FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document, false);
-        if (file == null) {
+        final FileIO.SavedText saved = FileIO.saveText(openedFile == null ? "" : openedFile.toString(), document,
+                false);
+        if (saved == null) {
             return false;
         }
+        final File file = saved.getFile();
         if (!FileIO.isWebPage(file)) {
             // The file is what the document holds now: this is what it is like,
             // so that it is not taken for a change made by someone else
@@ -1242,6 +1245,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
                 document.getState().setFileSnapshot(snapshot);
+                // What the file is written in, is what the document is read
+                // and written in from now on
+                document.getState().setEncoding(saved.getEncoding());
+                document.getState().setBom(saved.hasBom());
                 document.setModified(false);
                 document.setOutOfDate(false);
                 refreshTabTitles();
@@ -1269,22 +1276,26 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     private void saveWholeTextInOpenedFile(final EditorDocument document, final File file) throws Exception {
         // The text is read, and how many times it has been changed with it, on
         // the thread that owns the text area
-        final AtomicReference<byte[]> bytesRef = new AtomicReference<>();
+        final AtomicReference<String> textRef = new AtomicReference<>();
+        final String[] encoding = new String[1];
+        final boolean[] bom = new boolean[1];
         final long[] changeCount = new long[1];
         FileIO.runOnEventThread(() -> {
             RSyntaxTextArea textArea = document.getTextArea();
             try {
-                // The same explicit charset as FileIO.saveText(), which is the
-                // one FileIO.openFile(File) reads with
-                bytesRef.set(textArea.getDocument().getText(0, textArea.getDocument().getLength())
-                        .getBytes(StandardCharsets.UTF_8));
+                textRef.set(textArea.getDocument().getText(0, textArea.getDocument().getLength()));
             } catch (BadLocationException ble) {
                 // The range comes from the text area itself
                 throw new IllegalStateException(ble);
             }
+            encoding[0] = document.getState().getEncoding();
+            bom[0] = document.getState().hasBom();
             changeCount[0] = document.getChangeCount();
         });
-        FileIO.writeFile(file, bytesRef.get());
+        // In the encoding the file was read in, with its BOM if it had one: it
+        // is the same file, but for what the user has changed. Nothing is
+        // written if the text cannot be represented in that encoding
+        FileIO.writeFile(file, FileIO.encodeText(textRef.get(), encoding[0], TextFileCodec.writesBom(encoding[0], bom[0])));
 
         // The file is what the document holds: this is what it is like, so that
         // it is not taken for a change made by someone else

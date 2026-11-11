@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
+import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 
 /**
  * What an editor document holds besides its text: the file it was opened from
@@ -43,6 +44,8 @@ public final class DocumentState {
     private String query;
     private File openedFile;
     private FileSnapshot fileSnapshot;
+    private String encoding = TextFileCodec.UTF_8;
+    private boolean bom;
     private byte[][] savedLobs;
 
     public ResultSet getResultSet() {
@@ -140,6 +143,28 @@ public final class DocumentState {
      */
     public void setFileSnapshot(FileSnapshot fileSnapshot) {
         this.fileSnapshot = fileSnapshot;
+    }
+
+    /**
+     * @return The name of the encoding the text of the document is read and
+     *         written in, UTF-8 unless the file it comes from is in another
+     *         one.
+     */
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    /** @return <code>true</code> if the file the text comes from has a BOM. */
+    public boolean hasBom() {
+        return bom;
+    }
+
+    public void setBom(boolean bom) {
+        this.bom = bom;
     }
 
     public byte[][] getSavedLobs() {
