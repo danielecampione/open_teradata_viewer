@@ -19,7 +19,6 @@
 package net.sourceforge.open_teradata_viewer.actions;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 
 import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -29,19 +28,19 @@ import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
 public class FileOpenAction extends CustomAction implements SyntaxConstants {
 
     private static final long serialVersionUID = -2948843917732757209L;
-    
+
     protected FileOpenAction() {
         super(LanguageManager.getInstance().getString("menu.file.open"), "fileopen.png", null, null);
         setEnabled(true);
-        
+
         // Add language change listener to update the action name when language changes
         LanguageManager.getInstance().addLanguageChangeListener((newLocale, newBundle) -> {
             putValue(NAME, newBundle.getString("menu.file.open"));
@@ -50,11 +49,11 @@ public class FileOpenAction extends CustomAction implements SyntaxConstants {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        File file = FileIO.chooseFile();
-        if (file != null) {
+        FileIO.ChosenTextFile chosen = FileIO.chooseTextFile();
+        if (chosen != null) {
             ApplicationFrame app = ApplicationFrame.getInstance();
-            FileLocation loc = FileLocation.create(file);
-            app.openFile(loc);
+            FileLocation loc = FileLocation.create(chosen.getFile());
+            app.openFile(loc, chosen.getEncoding());
         }
     }
 }

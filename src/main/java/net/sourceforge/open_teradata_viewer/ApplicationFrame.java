@@ -1900,13 +1900,28 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     public void openFile(FileLocation loc) throws Exception {
+        openFile(loc, null);
+    }
+
+    /**
+     * Opens a file in the editor, as {@link #openFile(FileLocation)} does,
+     * reading it in a given encoding.
+     *
+     * @param loc The file to open.
+     * @param encoding The name of the encoding to read the file in, or
+     *        <code>null</code> if the encoding is to be guessed.
+     * @throws Exception If the file cannot be read, or if it is not valid in the
+     *         given encoding.
+     * @see FileIO#openFile(File, String)
+     */
+    public void openFile(FileLocation loc, String encoding) throws Exception {
         String fileFullPath = loc.getFileFullPath();
         // If opening a local file that exists, or a remote file..
         if (loc.isLocalAndExists()) {
             if (loc.isLocal() && getFileIsTooLarge(fileFullPath)) {
                 return;
             }
-            FileIO.openFile(new File(fileFullPath));
+            FileIO.openFile(new File(fileFullPath), encoding);
         }
     }
 

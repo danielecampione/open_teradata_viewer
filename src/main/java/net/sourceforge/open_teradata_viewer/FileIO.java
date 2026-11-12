@@ -406,6 +406,20 @@ public class FileIO {
         return combo;
     }
 
+    /**
+     * @return The list of encodings of the dialog to open a file: "Automatic"
+     *         first, and selected, then the encodings that can be used, see
+     *         {@link TextFileCodec#getEncodings()}.
+     */
+    private static JComboBox<String> createOpeningEncodingCombo() {
+        List<String> items = new ArrayList<>();
+        items.add(LanguageManager.getInstance().getString("dialog.encoding.automatic"));
+        items.addAll(TextFileCodec.getEncodings());
+        JComboBox<String> combo = new JComboBox<>(items.toArray(new String[0]));
+        combo.setSelectedIndex(0);
+        return combo;
+    }
+
     private static JComponent createEncodingAccessory(JComboBox<String> combo) {
         JLabel label = new JLabel(LanguageManager.getInstance().getString("dialog.encoding"));
         label.setLabelFor(combo);
@@ -442,7 +456,36 @@ public class FileIO {
         }
     }
 
+    /**
+     * Opens a file as a document of the editor, reading it in the encoding that
+     * is guessed, see {@link TextFileCodec#decode(byte[])}.
+     *
+     * @param file The file to open.
+     * @throws Exception If the file cannot be read.
+     * @see #openFile(File, String)
+     */
     public static void openFile(File file) throws Exception {
+        openFile(file, (String) null);
+    }
+
+    /**
+     * Opens a file as a document of the editor, in the tab of the file if it is
+     * already open (it is shown, and nothing is read again, so the encoding
+     * does not matter then), otherwise in the empty tab that is shown or in a
+     * new one. Must not be called from the Swing event thread.
+     *
+     * @param file The file to open.
+     * @param encoding The name of the encoding the file is read in, or
+     *        <code>null</code> to guess it, see
+     *        {@link TextFileCodec#decode(byte[])}. A BOM, if the file has one,
+     *        tells the encoding without doubt and wins over it.
+     * @throws IOException If the file is not valid in the encoding: nothing is
+     *         replaced by a substitute character, as it would be lost saving
+     *         the file again, and no tab is opened or changed. The message
+     *         tells it to the user.
+     * @throws Exception If the file cannot be read.
+     */
+    public static void openFile(File file, String encoding) throws Exception {
         if (file == null) {
             return;
         }
@@ -461,19 +504,19 @@ public class FileIO {
         // RSyntaxTextArea/Document instance stayed broken for the rest of
         // that run, which is why every subsequent open (including of a file
         // that had opened fine moments before) kept failing too
-        // The encoding is the one of the BOM, or it is guessed, but it is never
-        // the platform default blindly, see TextFileCodec.decode(byte[]): that
-        // would silently corrupt any non-ASCII character (e.g. accented Italian
-        // letters) whenever the file was written on a different machine or
-        // with a different editor, and what is written back would not be the
-        // file that was read
+        // The encoding is the one of the BOM, or the one the user chose, or it
+        // is guessed, but it is never the platform default blindly, see
+        // TextFileCodec.decode(byte[]): that would silently corrupt any
+        // non-ASCII character (e.g. accented Italian letters) whenever the file
+        // was written on a different machine or with a different editor, and
+        // what is written back would not be the file that was read
         // What the file is like is noted down too, to know later whether it has
         // been changed by someone else: its date is got before reading it, see
         // FileSnapshot.lastModifiedOf(File)
         final FileTime lastModified = FileSnapshot.lastModifiedOf(file);
         final byte[] bytes = FileIO.readFile(file);
         final FileSnapshot snapshot = FileSnapshot.of(lastModified, bytes);
-        final TextFileCodec.Decoded decoded = TextFileCodec.decode(bytes);
+        final TextFileCodec.Decoded decoded = decodeFile(file, bytes, encoding);
         final String content = decoded.getText();
         // The name of the file tells how its text is highlighted
         final String syntaxStyle = FileSyntaxStyle.forFile(file);
@@ -508,6 +551,29 @@ public class FileIO {
             }
             applicationFrame.refreshTabTitles();
         });
+    }
+
+    /**
+     * Reads the text of a file, in the encoding the user chose if there is
+     * one, otherwise in the one that is guessed.
+     *
+     * @param file The file the bytes come from (only to name it to the user).
+     * @param bytes The content of the file.
+     * @param encoding The name of the encoding the user chose, or
+     *        <code>null</code> if the encoding is to be guessed.
+     * @return The text, and how it was encoded.
+     * @throws IOException If the file is not valid in the chosen encoding.
+     */
+    private static TextFileCodec.Decoded decodeFile(File file, byte[] bytes, String encoding) throws IOException {
+        if (encoding == null) {
+            return TextFileCodec.decode(bytes);
+        }
+        try {
+            return TextFileCodec.decode(bytes, encoding);
+        } catch (CharacterCodingException cce) {
+            throw new IOException(MessageFormat.format(
+                    LanguageManager.getInstance().getString("message.cannot_decode"), file.getPath(), encoding), cce);
+        }
     }
 
     /**
@@ -609,25 +675,99 @@ public class FileIO {
         }
     }
 
+    /**
+     * Asks the user for a file, for the commands that do something else than
+     * opening it as text (checksum, import of a LOB, ...).
+     *
+     * @return The file, or <code>null</code> if the user gave up.
+     */
     public static File chooseFile() throws Exception {
+        ChosenTextFile chosen = chooseForOpening(false);
+        return chosen == null ? null : chosen.getFile();
+    }
+
+    /**
+     * Asks the user for a file to open as text, and for the encoding to read it
+     * in: the dialog has a list of encodings, which starts with "Automatic"
+     * (the encoding is guessed, see {@link TextFileCodec#decode(byte[])}) every
+     * time it is shown, so that what was chosen for a file does not apply to
+     * the next one. Can be called from any thread.
+     *
+     * @return The file and the encoding, or <code>null</code> if the user gave
+     *         up.
+     */
+    public static ChosenTextFile chooseTextFile() throws Exception {
+        return chooseForOpening(true);
+    }
+
+    /** A file the user chose to open as text, and how to read it. */
+    public static final class ChosenTextFile {
+
+        private final File file;
+        private final String encoding;
+
+        private ChosenTextFile(File file, String encoding) {
+            this.file = file;
+            this.encoding = encoding;
+        }
+
+        /** @return The file. */
+        public File getFile() {
+            return file;
+        }
+
+        /**
+         * @return The name of the encoding the user chose to read the file in,
+         *         or <code>null</code> if the user left the encoding to be
+         *         guessed.
+         */
+        public String getEncoding() {
+            return encoding;
+        }
+    }
+
+    /**
+     * Shows the dialog to open a file and remembers the folder it was left in.
+     *
+     * @param askEncoding <code>true</code> to let the user choose the encoding
+     *        too, in a list the dialog gets for the occasion: the dialog is
+     *        shared with the commands that do not need it, so it is taken away
+     *        when the dialog is closed.
+     * @return The file and, if the user chose one, the encoding, or
+     *         <code>null</code> if the user gave up.
+     */
+    private static ChosenTextFile chooseForOpening(boolean askEncoding) throws Exception {
         JFileChooser fileChooser = getFileChooser();
 
         // Ensure JFileChooser.showOpenDialog is called on EDT
         final AtomicInteger resultRef = new AtomicInteger();
         final AtomicReference<File> selectedFileRef = new AtomicReference<>();
         final AtomicReference<String> currentDirRef = new AtomicReference<>();
+        final AtomicReference<String> encodingRef = new AtomicReference<>();
 
         try {
-            SwingUtilities.invokeAndWait(() -> {
-                int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
-                resultRef.set(result);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    selectedFileRef.set(fileChooser.getSelectedFile());
-                    try {
-                        currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+            runOnEventThread(() -> {
+                final JComboBox<String> encodingCombo = askEncoding ? createOpeningEncodingCombo() : null;
+                if (encodingCombo != null) {
+                    fileChooser.setAccessory(createEncodingAccessory(encodingCombo));
+                }
+                try {
+                    int result = fileChooser.showOpenDialog(ApplicationFrame.getInstance());
+                    resultRef.set(result);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFileRef.set(fileChooser.getSelectedFile());
+                        try {
+                            currentDirRef.set(fileChooser.getCurrentDirectory().getCanonicalPath());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        // The first choice is "Automatic": no encoding
+                        if (encodingCombo != null && encodingCombo.getSelectedIndex() > 0) {
+                            encodingRef.set((String) encodingCombo.getSelectedItem());
+                        }
                     }
+                } finally {
+                    fileChooser.setAccessory(null);
                 }
             });
         } catch (Exception ex) {
@@ -636,7 +776,7 @@ public class FileIO {
 
         if (JFileChooser.APPROVE_OPTION == resultRef.get()) {
             Config.saveLastUsedDir(currentDirRef.get());
-            return selectedFileRef.get();
+            return new ChosenTextFile(selectedFileRef.get(), encodingRef.get());
         }
         return null;
     }

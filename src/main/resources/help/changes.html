@@ -6,7 +6,7 @@
 </HEAD>
 <BODY bgcolor="#FFFFFF">
 <PRE>
-0.4a (11/11/2026)
+0.4a (12/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -101,9 +101,13 @@
     - Files are no longer assumed to be in UTF-8. The encoding of a file that
       is opened is the one of its byte order mark (BOM), if it has one;
       otherwise UTF-8, if the file is valid UTF-8; otherwise the one of the
-      system, or ISO-8859-1 if that does not suit either. So a file is read
-      without losing anything and written back with the same bytes, BOM
-      included, instead of having its accented letters replaced. The tab
+      system, or ISO-8859-1 if that does not suit either. The "Open" dialog
+      has an Encoding list, which starts with "Automatic" (the rules above)
+      and can be used to read the file in the chosen encoding instead (a BOM
+      still decides): a file that is not valid in it is not opened and the
+      user is told so, instead of having some characters replaced. So a file
+      is read without losing anything and written back with the same bytes,
+      BOM included, instead of having its accented letters replaced. The tab
       remembers the encoding and Save writes the text in it; text that cannot
       be represented in it is not saved (no question marks are written in its
       place). "Save file as..." has an Encoding list that suggests the one of
