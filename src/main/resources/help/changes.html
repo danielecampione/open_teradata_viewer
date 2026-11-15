@@ -6,7 +6,7 @@
 </HEAD>
 <BODY bgcolor="#FFFFFF">
 <PRE>
-0.4a (12/11/2026)
+0.4a (15/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -113,6 +113,16 @@
       place). "Save file as..." has an Encoding list that suggests the one of
       the tab, and the chosen one becomes the one of the tab (a web page is
       always UTF-8, so it does not change it).
+    - Saving a tab in a file ("Save file as...", or Save when the tab has no
+      file yet) now changes the syntax highlighting too, as when a file is
+      opened: the text is highlighted according to the name of the new file
+      (e.g. a tab saved as Query.java is highlighted as Java). The style
+      chosen by the user is kept when the new name is of the same kind as
+      the previous one, e.g. when the tab is saved again under the same name
+      to change its encoding. The spell checking marks of a tab are also
+      checked again whenever its syntax style changes, including from the
+      "View as (highlighting file type)" menu, instead of keeping the ones
+      of the previous style until the text is edited.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

@@ -27,8 +27,8 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
  *
  */
@@ -49,7 +49,6 @@ public class ChangeSyntaxStyleAction extends AbstractAction {
         RSyntaxTextArea textArea = applicationFrame.getTextComponent();
 
         textArea.setCaretPosition(0);
-        textArea.setSyntaxEditingStyle(style);
-        applicationFrame.refreshSourceTree();
+        applicationFrame.changeSyntaxStyle(applicationFrame.getCurrentDocument(), style);
     }
 }

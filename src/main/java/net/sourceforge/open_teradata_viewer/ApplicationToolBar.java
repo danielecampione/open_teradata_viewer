@@ -60,6 +60,7 @@ public class ApplicationToolBar extends JToolBar {
         add(Actions.COPY);
         add(Actions.PASTE);
         addSeparator();
+        add(Actions.FILE_NEW_TAB);
         add(Actions.FILE_OPEN);
         add(Actions.FILE_SAVE);
         add(Actions.FAVORITES);

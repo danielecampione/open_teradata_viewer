@@ -68,6 +68,29 @@ public final class FileSyntaxStyle {
         return SyntaxConstants.SYNTAX_STYLE_NONE.equals(style) ? DEFAULT_STYLE : style;
     }
 
+    /**
+     * Tells how the text of a document is highlighted after it has been saved
+     * in a file that becomes the file of the document. The style follows the
+     * name of the new file, as it does when a file is opened, but only if that
+     * name tells another kind of file than the one of the document before: a
+     * text that is saved again under the same name, for instance to change its
+     * encoding, or in another file of the same kind, keeps the style it has,
+     * which may have been chosen by the user.
+     *
+     * @param previous The file the document had, or <code>null</code> if it had
+     *        none.
+     * @param file The file the text has been saved in.
+     * @return The style the text gets, one of {@link SyntaxConstants}, or
+     *         <code>null</code> if the text keeps the style it has.
+     */
+    public static String forSavedAs(File previous, File file) {
+        String style = forFile(file);
+        if (previous != null && style.equals(forFile(previous))) {
+            return null;
+        }
+        return style;
+    }
+
     private static Map<String, List<String>> createFilters() {
         Map<String, List<String>> filters = FileTypeUtil.get().getDefaultContentTypeToFilterMap();
 

@@ -37,7 +37,7 @@ public class FileNewTabAction extends CustomAction {
     private static final long serialVersionUID = 5461772583914606283L;
 
     protected FileNewTabAction() {
-        super(LanguageManager.getInstance().getString("menu.file.new_tab"), null,
+        super(LanguageManager.getInstance().getString("menu.file.new_tab"), "text.png",
                 KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), null);
         setEnabled(true);
 

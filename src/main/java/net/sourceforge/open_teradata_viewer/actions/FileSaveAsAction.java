@@ -18,10 +18,14 @@
 
 package net.sourceforge.open_teradata_viewer.actions;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import net.sourceforge.open_teradata_viewer.ApplicationFrame;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
+
+import javax.swing.*;
 
 /**
  * Saves the text of the current document in a file chosen by the user, which
@@ -36,7 +40,7 @@ public class FileSaveAsAction extends CustomAction {
     private static final long serialVersionUID = 4873016259384710652L;
 
     protected FileSaveAsAction() {
-        super(LanguageManager.getInstance().getString("menu.file.save_as"), null, null, null);
+        super(LanguageManager.getInstance().getString("menu.file.save_as"), "filesave.png", null, null);
         setEnabled(true);
 
         // Add language change listener to update the action name when language changes

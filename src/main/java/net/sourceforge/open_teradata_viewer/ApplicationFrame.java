@@ -117,6 +117,7 @@ import net.sourceforge.open_teradata_viewer.editor.DocumentTabs;
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.EditorSettings;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
+import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
 import net.sourceforge.open_teradata_viewer.editor.SearchMarks;
 import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
@@ -930,6 +931,35 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         currentDocument.refreshSourceTree();
     }
 
+    /**
+     * Changes the syntax style of the text of a document and brings up to date
+     * what depends on it: the source tree, the menu that shows the style (if the
+     * document is the one shown) and the spell checking. The latter is not
+     * done by the text area when the style changes, and it depends on the style:
+     * the whole text is checked if it is not highlighted, and only its comments
+     * and the like otherwise. Nothing is done if the document already has that
+     * style. Must be called on the Swing event thread.
+     *
+     * @param document The document.
+     * @param style The new style, one of {@link SyntaxConstants}.
+     */
+    public void changeSyntaxStyle(EditorDocument document, String style) {
+        RSyntaxTextArea textArea = document.getTextArea();
+        if (style.equals(textArea.getSyntaxEditingStyle())) {
+            return;
+        }
+        textArea.setSyntaxEditingStyle(style);
+        document.refreshSourceTree();
+        // The parser is shared by all the documents, and is not installed on the
+        // ones where the spell checking is off: then nothing is done
+        if (spellingParser != null) {
+            textArea.forceReparsing(spellingParser);
+        }
+        if (menubar != null && document == currentDocument) {
+            menubar.selectSyntaxStyle(style);
+        }
+    }
+
     public static ApplicationFrame getInstance() {
         return APPLICATION_FRAME;
     }
@@ -1223,8 +1253,11 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * encoding chosen by the user, which become the file and the encoding of the
      * document, unless it is written as a web page (see
      * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
-     * hold the text of the document then. The other documents holding that file
-     * have an old text after that, see {@link #fileWritten(File, EditorDocument)}:
+     * hold the text of the document then. The text is highlighted as the name of
+     * the file says, if it is another kind of file than the document had, see
+     * {@link FileSyntaxStyle#forSavedAs(File, File)}. The other documents holding
+     * that file have an old text after that, see
+     * {@link #fileWritten(File, EditorDocument)}:
      * {@link FileIO#saveText(String, EditorDocument, boolean)} tells it.
      *
      * @return <code>false</code> if the user gave up, and the text has not been
@@ -1242,6 +1275,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             // The file is what the document holds now: this is what it is like,
             // so that it is not taken for a change made by someone else
             final FileSnapshot snapshot = FileSnapshot.tryRead(file);
+            // The name of the file tells how the text is highlighted, if it is
+            // another kind of file than the document had
+            final String syntaxStyle = FileSyntaxStyle.forSavedAs(openedFile, file);
             FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
                 document.getState().setFileSnapshot(snapshot);
@@ -1251,6 +1287,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 document.getState().setBom(saved.hasBom());
                 document.setModified(false);
                 document.setOutOfDate(false);
+                if (syntaxStyle != null) {
+                    changeSyntaxStyle(document, syntaxStyle);
+                }
                 refreshTabTitles();
             });
         }

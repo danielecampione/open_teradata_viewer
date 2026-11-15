@@ -19,6 +19,7 @@
 package test.net.sourceforge.open_teradata_viewer.editor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 
@@ -136,5 +137,59 @@ public class TestFileSyntaxStyle {
         assertEquals(SyntaxConstants.SYNTAX_STYLE_MAKEFILE, styleOf("Makefile"));
         assertEquals(SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, styleOf("Dockerfile"));
         assertEquals(SyntaxConstants.SYNTAX_STYLE_RUBY, styleOf("Vagrantfile"));
+    }
+
+    private static String savedAs(String previous, String file) {
+        return FileSyntaxStyle.forSavedAs(previous == null ? null : new File(previous), new File(file));
+    }
+
+    @Test
+    public void test_forSavedAs_documentWithoutFileGetsTheStyleOfTheName() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_JAVA, savedAs(null, "Main.java"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, savedAs(null, "tool.py"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, savedAs(null, "query.sql"));
+    }
+
+    @Test
+    public void test_forSavedAs_documentWithoutFileAndUnknownNameGetsTheDefaultStyle() {
+        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs(null, "notes.txt"));
+        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs(null, "script"));
+    }
+
+    @Test
+    public void test_forSavedAs_anotherKindOfFileChangesTheStyle() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_JAVA, savedAs("query.sql", "Main.java"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, savedAs("Main.java", "query.sql"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, savedAs("data.json", "data.xml"));
+    }
+
+    @Test
+    public void test_forSavedAs_fromAKnownKindToAnUnknownOneGivesTheDefaultStyle() {
+        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs("Main.java", "notes.txt"));
+    }
+
+    @Test
+    public void test_forSavedAs_theSameNameKeepsTheStyle() {
+        assertNull(savedAs("Main.java", "Main.java"));
+        assertNull(savedAs("notes.txt", "notes.txt"));
+    }
+
+    @Test
+    public void test_forSavedAs_anotherFileOfTheSameKindKeepsTheStyle() {
+        assertNull(savedAs("Main.java", "Other.java"));
+        assertNull(savedAs("a" + File.separator + "tool.py", "b" + File.separator + "tool2.py"));
+    }
+
+    @Test
+    public void test_forSavedAs_unknownNamesTellTheSameKind() {
+        assertNull(savedAs("notes.txt", "output.log"));
+        assertNull(savedAs("script", "notes.txt"));
+    }
+
+    @Test
+    public void test_forSavedAs_caseAndBackupExtensionsDoNotChangeTheKind() {
+        assertNull(savedAs("MAIN.JAVA", "Main.java"));
+        assertNull(savedAs("Main.java", "Main.java.bak"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, savedAs("Main.java", "pom.xml.old"));
     }
 }
