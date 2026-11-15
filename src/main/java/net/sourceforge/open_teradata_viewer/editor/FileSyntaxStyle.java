@@ -32,19 +32,13 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
  * <p>
  * The name is looked up in the file types known by RSyntaxTextArea, with those
  * of the syntax styles the editor offers and the library does not know the
- * files of. A file that is not recognized, such as a <code>.txt</code> file or
- * a script of the database with any other extension, gets the style every
- * document of the editor starts with: SQL.
+ * files of. A file that is not recognized, such as a <code>.txt</code> file, a
+ * file with any other extension or a file without extension, is not
+ * highlighted.
  *
  * @author D. Campione
  */
 public final class FileSyntaxStyle {
-
-    /**
-     * The style of a text that is not known to be of any other kind. It is the
-     * style every document of the editor starts with.
-     */
-    public static final String DEFAULT_STYLE = SyntaxConstants.SYNTAX_STYLE_SQL;
 
     /** The file types looked up: the ones of the library plus the ones added. */
     private static final Map<String, List<String>> FILTERS = createFilters();
@@ -60,12 +54,11 @@ public final class FileSyntaxStyle {
      *
      * @param file The file, which may be <code>null</code>.
      * @return One of {@link SyntaxConstants}: the style that matches the name
-     *         of the file, or {@link #DEFAULT_STYLE} if the name does not tell.
-     *         It is never <code>null</code>.
+     *         of the file, or {@link SyntaxConstants#SYNTAX_STYLE_NONE} if the
+     *         name does not tell. It is never <code>null</code>.
      */
     public static String forFile(File file) {
-        String style = FileTypeUtil.get().guessContentType(file, FILTERS);
-        return SyntaxConstants.SYNTAX_STYLE_NONE.equals(style) ? DEFAULT_STYLE : style;
+        return FileTypeUtil.get().guessContentType(file, FILTERS);
     }
 
     /**
@@ -75,7 +68,9 @@ public final class FileSyntaxStyle {
      * name tells another kind of file than the one of the document before: a
      * text that is saved again under the same name, for instance to change its
      * encoding, or in another file of the same kind, keeps the style it has,
-     * which may have been chosen by the user.
+     * which may have been chosen by the user. The names that do not tell the
+     * kind of file count as one kind: a text that is saved from one of them in
+     * another one keeps its style too.
      *
      * @param previous The file the document had, or <code>null</code> if it had
      *        none.

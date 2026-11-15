@@ -41,36 +41,31 @@ public class TestFileSyntaxStyle {
     }
 
     @Test
-    public void test_forFile_defaultStyleIsSql() {
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, FileSyntaxStyle.DEFAULT_STYLE);
-    }
-
-    @Test
     public void test_forFile_sql() {
         assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("query.sql"));
     }
 
     @Test
-    public void test_forFile_unknownExtensionKeepsSql() {
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("script.bteq"));
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("create_tables.ddl"));
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("notes.txt"));
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("output.log"));
+    public void test_forFile_unknownExtensionIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("script.bteq"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("create_tables.ddl"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("notes.txt"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("output.log"));
     }
 
     @Test
-    public void test_forFile_noExtensionKeepsSql() {
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("script"));
+    public void test_forFile_noExtensionIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("script"));
     }
 
     @Test
-    public void test_forFile_nullFileKeepsSql() {
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, FileSyntaxStyle.forFile(null));
+    public void test_forFile_nullFileIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, FileSyntaxStyle.forFile(null));
     }
 
     @Test
     public void test_forFile_onlyTheNameOfTheFileCounts() {
-        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, styleOf("project.java" + File.separator + "script"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, styleOf("project.java" + File.separator + "script"));
     }
 
     @Test
@@ -151,9 +146,9 @@ public class TestFileSyntaxStyle {
     }
 
     @Test
-    public void test_forSavedAs_documentWithoutFileAndUnknownNameGetsTheDefaultStyle() {
-        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs(null, "notes.txt"));
-        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs(null, "script"));
+    public void test_forSavedAs_documentWithoutFileAndUnknownNameIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "notes.txt"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "script"));
     }
 
     @Test
@@ -164,8 +159,15 @@ public class TestFileSyntaxStyle {
     }
 
     @Test
-    public void test_forSavedAs_fromAKnownKindToAnUnknownOneGivesTheDefaultStyle() {
-        assertEquals(FileSyntaxStyle.DEFAULT_STYLE, savedAs("Main.java", "notes.txt"));
+    public void test_forSavedAs_fromAKnownKindToAnUnknownOneIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs("Main.java", "notes.txt"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs("query.sql", "notes.txt"));
+    }
+
+    @Test
+    public void test_forSavedAs_fromAnUnknownKindToAKnownOneChangesTheStyle() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, savedAs("notes.txt", "query.sql"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_JAVA, savedAs("script", "Main.java"));
     }
 
     @Test
