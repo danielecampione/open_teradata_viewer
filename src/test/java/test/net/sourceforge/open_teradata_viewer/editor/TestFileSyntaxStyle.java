@@ -194,4 +194,166 @@ public class TestFileSyntaxStyle {
         assertNull(savedAs("Main.java", "Main.java.bak"));
         assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, savedAs("Main.java", "pom.xml.old"));
     }
+
+    private static String contentStyle(String text) {
+        return FileSyntaxStyle.forContent(text);
+    }
+
+    @Test
+    public void test_forContent_shebang() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/bash\necho hi\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/sh\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/usr/bin/env bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/bash -e\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PERL, contentStyle("#!/usr/bin/perl -w\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PHP, contentStyle("#!/usr/bin/env php\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/env python\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_RUBY, contentStyle("#!/usr/bin/ruby\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_LUA, contentStyle("#!/usr/bin/env lua\n"));
+    }
+
+    @Test
+    public void test_forContent_shebangWithTheVersionOfTheInterpreter() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/env python3\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/python3\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/python3.11 -u\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/env python3.11\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PHP, contentStyle("#!/usr/bin/env php8.1\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PERL, contentStyle("#!/usr/bin/perl5.34.0\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_LUA, contentStyle("#!/usr/bin/env lua5.4\n"));
+    }
+
+    @Test
+    public void test_forContent_shebangOfAnUnknownInterpreter() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!/usr/bin/env node\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!/usr/bin/awk -f\n"));
+    }
+
+    @Test
+    public void test_forContent_xmlDeclaration() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, contentStyle("<?xml version=\"1.0\"?>\n<a/>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML,
+                contentStyle("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<a/>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, contentStyle("<?xml version=\"1.0\"?>"));
+    }
+
+    @Test
+    public void test_forContent_htmlDocumentType() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML, contentStyle("<!doctype html>\n<html></html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML, contentStyle("<!DOCTYPE html>\n<html></html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML,
+                contentStyle("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n<html></html>\n"));
+    }
+
+    @Test
+    public void test_forContent_lineBreakOfWindowsAndOfOldMacs() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/bash\r\necho hi\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/bash\recho hi\r"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, contentStyle("<?xml version=\"1.0\"?>\r\n<a/>\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML, contentStyle("<!DOCTYPE html>\r\n<html></html>\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, contentStyle("#!/usr/bin/env python3\r\nprint(1)\r\n"));
+    }
+
+    @Test
+    public void test_forContent_spacesAtTheEndOfTheFirstLine() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, contentStyle("<?xml version=\"1.0\"?> \t \n<a/>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, contentStyle("#!/bin/bash  \necho hi\n"));
+    }
+
+    @Test
+    public void test_forContent_onlyTheFirstLineCounts() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("\n#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("some text\n#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("<!-- a comment -->\n<!DOCTYPE html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle(" <?xml version=\"1.0\"?>\n"));
+    }
+
+    @Test
+    public void test_forContent_textThatTellsNothing() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("hello\nworld\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("select 1 from dual;\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("<html></html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("<?xml version=\"1.0\"\n?>\n"));
+    }
+
+    @Test
+    public void test_forContent_noTextOrAnOddFirstLine() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle(null));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle(""));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!/usr/bin/env"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!/usr/bin/env "));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#!/usr/bin/env   \n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle("#! /bin/bash\n"));
+    }
+
+    @Test
+    public void test_forContent_veryLongFirstLine() {
+        StringBuilder sb = new StringBuilder("{\"data\":[");
+        for (int i = 0; i < 20000; i++) {
+            sb.append(i).append(',');
+        }
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, contentStyle(sb.toString()));
+        // What follows the interpreter in a #! line does not matter, however long
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+                contentStyle("#!/bin/bash " + "x".repeat(2000) + "\necho hi\n"));
+    }
+
+    private static String openedStyle(String fileName, String text) {
+        return FileSyntaxStyle.forFileAndContent(fileName == null ? null : new File(fileName), text);
+    }
+
+    @Test
+    public void test_forFileAndContent_nameWithoutExtensionTellsNothingSoTheContentDoes() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, openedStyle("deploy", "#!/bin/bash\necho hi\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, openedStyle("config", "<?xml version=\"1.0\"?>\r\n<a/>\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML, openedStyle("index", "<!DOCTYPE html>\n<html></html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, openedStyle("tool", "#!/usr/bin/env python3\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+                openedStyle("SCRIPT", "#!/bin/bash\necho hi\n"));
+    }
+
+    @Test
+    public void test_forFileAndContent_noContentEitherIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("deploy", "just some text\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("deploy", ""));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("deploy", null));
+    }
+
+    @Test
+    public void test_forFileAndContent_theNameWinsOverTheContent() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, openedStyle("tool.py", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, openedStyle("query.sql", "<?xml version=\"1.0\"?>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_DOCKERFILE, openedStyle("Dockerfile", "<?xml version=\"1.0\"?>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_MAKEFILE, openedStyle("Makefile", "#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forFileAndContent_aNameWithAnExtensionIsTrusted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("notes.txt", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("script.bteq", "<?xml version=\"1.0\"?>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle(".profile", "#!/bin/sh\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("archive.tar.gz", "<!DOCTYPE html>\n"));
+    }
+
+    @Test
+    public void test_forFileAndContent_theExtensionOfABackupCopyDoesNotCount() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, openedStyle("deploy.bak", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, openedStyle("DEPLOY.OLD", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, openedStyle("deploy.orig", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_JAVA, openedStyle("Main.java.bak", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle("notes.txt.bak", "#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forFileAndContent_onlyTheNameOfTheFileCounts() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL,
+                openedStyle("project.d" + File.separator + "deploy", "#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forFileAndContent_noFile() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, openedStyle(null, "#!/bin/bash\n"));
+    }
 }

@@ -518,8 +518,6 @@ public class FileIO {
         final FileSnapshot snapshot = FileSnapshot.of(lastModified, bytes);
         final TextFileCodec.Decoded decoded = decodeFile(file, bytes, encoding);
         final String content = decoded.getText();
-        // The name of the file tells how its text is highlighted
-        final String syntaxStyle = FileSyntaxStyle.forFile(file);
         SwingUtilities.invokeAndWait(() -> {
             ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
             // The file is opened in a tab of its own, or in the empty one that
@@ -532,6 +530,9 @@ public class FileIO {
             document.getState().setFileSnapshot(snapshot);
             document.getState().setEncoding(decoded.getEncoding());
             document.getState().setBom(decoded.hasBom());
+            // The name of the file tells how its text is highlighted or, if it
+            // has no extension, the first line of the text may
+            String syntaxStyle = FileSyntaxStyle.forFileAndContent(file, content);
             RSyntaxTextArea textArea = document.getTextArea();
             // The style is set before the text, so that the text is tokenized
             // once with the right style and not again when the style changes
