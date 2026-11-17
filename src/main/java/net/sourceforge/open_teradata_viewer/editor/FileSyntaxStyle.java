@@ -132,26 +132,29 @@ public final class FileSyntaxStyle {
     /**
      * Tells how the text of a document is highlighted after it has been saved
      * in a file that becomes the file of the document. The style follows the
-     * name of the new file, as it does when a file is opened, but only if that
-     * name tells another kind of file than the one of the document before: a
+     * file as it does when a file is opened, see
+     * {@link #forFileAndContent(File, String)}, but only if the name of the new
+     * file tells another kind of file than the one of the document before: a
      * text that is saved again under the same name, for instance to change its
      * encoding, or in another file of the same kind, keeps the style it has,
-     * which may have been chosen by the user. The names that do not tell the
-     * kind of file count as one kind: a text that is saved from one of them in
-     * another one keeps its style too.
+     * which may have been chosen by the user, and its text does not count. The
+     * names that do not tell the kind of file count as one kind: a text that is
+     * saved from one of them in another one keeps its style too. Must be called
+     * on the Swing event thread, as the text may be looked at, see
+     * {@link #forContent(String)}.
      *
      * @param previous The file the document had, or <code>null</code> if it had
      *        none.
      * @param file The file the text has been saved in.
+     * @param text The text that has been saved, which may be <code>null</code>.
      * @return The style the text gets, one of {@link SyntaxConstants}, or
      *         <code>null</code> if the text keeps the style it has.
      */
-    public static String forSavedAs(File previous, File file) {
-        String style = forFile(file);
-        if (previous != null && style.equals(forFile(previous))) {
+    public static String forSavedAs(File previous, File file, String text) {
+        if (previous != null && forFile(file).equals(forFile(previous))) {
             return null;
         }
-        return style;
+        return forFileAndContent(file, text);
     }
 
     /**

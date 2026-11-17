@@ -125,11 +125,13 @@ public class FileIO {
         private final File file;
         private final String encoding;
         private final boolean bom;
+        private final String text;
 
-        private SavedText(File file, String encoding, boolean bom) {
+        private SavedText(File file, String encoding, boolean bom, String text) {
             this.file = file;
             this.encoding = encoding;
             this.bom = bom;
+            this.text = text;
         }
 
         /** @return The file that has been written. */
@@ -150,6 +152,16 @@ public class FileIO {
         /** @return <code>true</code> if the file starts with a BOM. */
         public boolean hasBom() {
             return bom;
+        }
+
+        /**
+         * @return The text that has been saved, as it was when it was read from
+         *         the document: all of it, or only the selected part. When the
+         *         file is a web page, it is the text the page shows, not what
+         *         is written.
+         */
+        public String getText() {
+            return text;
         }
     }
 
@@ -218,7 +230,7 @@ public class FileIO {
         }
         fileWritten(chosen.file, selectionOnly ? null : document);
         return new SavedText(chosen.file, chosen.encoding,
-                writesBom(chosen.encoding, documentEncoding[0], documentBom[0]));
+                writesBom(chosen.encoding, documentEncoding[0], documentBom[0]), text);
     }
 
     private static boolean writesBom(String encoding, String documentEncoding, boolean documentBom) {

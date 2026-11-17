@@ -134,8 +134,13 @@ public class TestFileSyntaxStyle {
         assertEquals(SyntaxConstants.SYNTAX_STYLE_RUBY, styleOf("Vagrantfile"));
     }
 
+    private static String savedAs(String previous, String file, String text) {
+        return FileSyntaxStyle.forSavedAs(previous == null ? null : new File(previous), new File(file), text);
+    }
+
+    /** The text does not tell anything, only the names count. */
     private static String savedAs(String previous, String file) {
-        return FileSyntaxStyle.forSavedAs(previous == null ? null : new File(previous), new File(file));
+        return savedAs(previous, file, "just some text\n");
     }
 
     @Test
@@ -193,6 +198,70 @@ public class TestFileSyntaxStyle {
         assertNull(savedAs("MAIN.JAVA", "Main.java"));
         assertNull(savedAs("Main.java", "Main.java.bak"));
         assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, savedAs("Main.java", "pom.xml.old"));
+    }
+
+    @Test
+    public void test_forSavedAs_documentWithoutFileAndNameWithoutExtensionGetsTheStyleOfTheContent() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, savedAs(null, "deploy", "#!/bin/bash\necho hi\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_XML, savedAs(null, "config", "<?xml version=\"1.0\"?>\r\n<a/>\r\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_HTML, savedAs(null, "index", "<!DOCTYPE html>\n<html></html>\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, savedAs(null, "tool", "#!/usr/bin/env python3\nprint(1)\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, savedAs(null, "SCRIPT", "#!/bin/bash\r\necho hi\r\n"));
+    }
+
+    @Test
+    public void test_forSavedAs_documentWithoutFileAndNoContentEitherIsNotHighlighted() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "deploy", "select 1\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "deploy", ""));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "deploy", null));
+        // Only the first line is looked at
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "deploy", "\n#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forSavedAs_aNameWithAnExtensionIsTrustedWhateverTheContentIs() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "notes.txt", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs("query.sql", "notes.txt", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_SQL, savedAs(null, "query.sql", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_JAVA, savedAs("notes.txt", "Main.java", "<?xml version=\"1.0\"?>\n"));
+    }
+
+    @Test
+    public void test_forSavedAs_anotherKindOfFileToANameWithoutExtensionGetsTheStyleOfTheContent() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, savedAs("query.sql", "deploy", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_PYTHON, savedAs("Main.java", "tool", "#!/usr/bin/env python3\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs("query.sql", "deploy", "select 1\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs("query.sql", "deploy", null));
+    }
+
+    @Test
+    public void test_forSavedAs_theSameKindOfFileKeepsTheStyleWhateverTheContentIs() {
+        // Names that do not tell are one kind, so the content does not count
+        assertNull(savedAs("notes.txt", "deploy", "#!/bin/bash\n"));
+        assertNull(savedAs("script", "deploy", "#!/bin/bash\n"));
+        assertNull(savedAs("deploy", "deploy", "#!/bin/bash\n"));
+        assertNull(savedAs("Main.java", "Main.java", "#!/bin/bash\n"));
+        assertNull(savedAs("Main.java", "Other.java", "<?xml version=\"1.0\"?>\n"));
+        assertNull(savedAs("Main.java", "Main.java.bak", "#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forSavedAs_theExtensionOfABackupCopyDoesNotCountForTheContent() {
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, savedAs(null, "deploy.bak", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, savedAs("query.sql", "DEPLOY.OLD", "#!/bin/bash\n"));
+        assertEquals(SyntaxConstants.SYNTAX_STYLE_NONE, savedAs(null, "notes.txt.bak", "#!/bin/bash\n"));
+    }
+
+    @Test
+    public void test_forSavedAs_theStyleIsTheOneOfOpeningTheFile() {
+        // Saving a text in a file gives the style that opening the file gives
+        String[][] cases = { { "deploy", "#!/bin/bash\necho hi\n" }, { "config", "<?xml version=\"1.0\"?>\n<a/>\n" },
+                { "index", "<!DOCTYPE html>\n" }, { "notes.txt", "#!/bin/bash\n" }, { "query.sql", "#!/bin/bash\n" },
+                { "deploy.bak", "#!/bin/bash\n" }, { "script", "just some text\n" } };
+        for (String[] oneCase : cases) {
+            assertEquals(FileSyntaxStyle.forFileAndContent(new File(oneCase[0]), oneCase[1]),
+                    savedAs(null, oneCase[0], oneCase[1]), oneCase[0]);
+        }
     }
 
     private static String contentStyle(String text) {

@@ -1,4 +1,4 @@
-0.4a (16/11/2026)
+0.4a (17/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -116,12 +116,18 @@
       "View as (highlighting file type)" menu, instead of keeping the ones
       of the previous style until the text is edited.
     - A file whose name has no extension (for example "deploy" or "index") is
-      now highlighted according to its first line when that line tells what the
-      file is: a #! line that names the interpreter of a shell, Perl, PHP,
+      now highlighted according to its first line when that line tells what
+      the file is: a #! line that names the interpreter of a shell, Perl, PHP,
       Python, Ruby or Lua script (the version of the interpreter, as in
       python3, is ignored), an XML declaration or an HTML DOCTYPE, in upper or
-      lower case. Files saved on Windows are recognized too. The name of a file
-      with an extension always decides, so a .txt file is never examined.
+      lower case. Files saved on Windows are recognized too. The first line is
+      also looked at when a tab is saved in such a file ("Save file as...", or
+      Save when the tab has no file yet), provided that the name is of a
+      different kind from that of the file the tab had: a new tab that starts
+      with a #! line and is saved as "deploy" is highlighted as a shell
+      script, whereas a tab saved again under a name of the same kind keeps
+      its style. The name of a file with an extension always decides, so a
+      .txt file is never examined.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

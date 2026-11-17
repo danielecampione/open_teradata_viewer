@@ -1254,9 +1254,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * document, unless it is written as a web page (see
      * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
      * hold the text of the document then. The text is highlighted as the name of
-     * the file says, if it is another kind of file than the document had, see
-     * {@link FileSyntaxStyle#forSavedAs(File, File)}. The other documents holding
-     * that file have an old text after that, see
+     * the file says or, when the name does not tell, as the first line of the
+     * text does, if the name is another kind of file than the document had, see
+     * {@link FileSyntaxStyle#forSavedAs(File, File, String)}. The other
+     * documents holding that file have an old text after that, see
      * {@link #fileWritten(File, EditorDocument)}:
      * {@link FileIO#saveText(String, EditorDocument, boolean)} tells it.
      *
@@ -1275,9 +1276,6 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             // The file is what the document holds now: this is what it is like,
             // so that it is not taken for a change made by someone else
             final FileSnapshot snapshot = FileSnapshot.tryRead(file);
-            // The name of the file tells how the text is highlighted, if it is
-            // another kind of file than the document had
-            final String syntaxStyle = FileSyntaxStyle.forSavedAs(openedFile, file);
             FileIO.runOnEventThread(() -> {
                 document.getState().setOpenedFile(file);
                 document.getState().setFileSnapshot(snapshot);
@@ -1287,6 +1285,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
                 document.getState().setBom(saved.hasBom());
                 document.setModified(false);
                 document.setOutOfDate(false);
+                // The file tells how the text is highlighted, if its name is
+                // another kind of file than the document had. A text area is
+                // built to look at the text, so it is done on this thread
+                String syntaxStyle = FileSyntaxStyle.forSavedAs(openedFile, file, saved.getText());
                 if (syntaxStyle != null) {
                     changeSyntaxStyle(document, syntaxStyle);
                 }
