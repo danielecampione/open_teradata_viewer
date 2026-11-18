@@ -22,8 +22,8 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import net.sourceforge.open_teradata_viewer.editor.DefaultEncoding;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
-import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 
 /**
  * What an editor document holds besides its text: the file it was opened from
@@ -44,7 +44,7 @@ public final class DocumentState {
     private String query;
     private File openedFile;
     private FileSnapshot fileSnapshot;
-    private String encoding = TextFileCodec.UTF_8;
+    private String encoding = DefaultEncoding.get();
     private boolean bom;
     private byte[][] savedLobs;
 
@@ -147,8 +147,9 @@ public final class DocumentState {
 
     /**
      * @return The name of the encoding the text of the document is read and
-     *         written in, UTF-8 unless the file it comes from is in another
-     *         one.
+     *         written in: the one that new files are saved in (see
+     *         {@link DefaultEncoding}) when the document was created, unless
+     *         the file it comes from is in another one.
      */
     public String getEncoding() {
         return encoding;

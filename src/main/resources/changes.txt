@@ -1,4 +1,4 @@
-0.4a (17/11/2026)
+0.4a (19/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -128,6 +128,12 @@
       script, whereas a tab saved again under a name of the same kind keeps
       its style. The name of a file with an extension always decides, so a
       .txt file is never examined.
+    - The File menu has a new command, "Default encoding of new files...",
+      that lets the user choose the encoding that new files are saved in. It
+      is UTF-8 until the user changes it, it is kept in the configuration
+      file, it is suggested by "Save file as..." for a tab that has no file,
+      and it is taken at once by the tabs that are still empty. A file that
+      is opened keeps its own encoding.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import net.sourceforge.open_teradata_viewer.editor.DefaultEncoding;
 import net.sourceforge.open_teradata_viewer.util.RadianceUtil;
 import net.sourceforge.open_teradata_viewer.util.StringUtil;
 import net.sourceforge.open_teradata_viewer.util.SwingUtil;
@@ -239,6 +240,8 @@ public class Main {
             SwingUtil.scaleAllFonts();
 
             Toolkit.getDefaultToolkit().setDynamicLayout(true);
+            // The documents that the window creates start with it
+            DefaultEncoding.load();
             ApplicationFrame applicationFrame = new ApplicationFrame();
             applicationFrame.initLookAndFeelManager(lafManager);
             applicationFrame.drawIt(commandLine.getFiles());

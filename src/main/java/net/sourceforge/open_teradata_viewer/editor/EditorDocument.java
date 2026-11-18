@@ -273,6 +273,20 @@ public class EditorDocument {
         return !modified && state.getOpenedFile() == null && textArea.getDocument().getLength() == 0;
     }
 
+    /**
+     * Gives the document the encoding that new files are saved in, see
+     * {@link DefaultEncoding}, if it still is a new file (see
+     * {@link #isPristine()}): nothing has been typed in it and no file has been
+     * chosen for it, so no encoding has been chosen either. The encoding of any
+     * other document is left as it is. Must be called from the Swing event
+     * thread.
+     */
+    public void adoptDefaultEncoding() {
+        if (isPristine()) {
+            state.setEncoding(DefaultEncoding.get());
+        }
+    }
+
     /** @param listener A listener of the changes of {@link #MODIFIED_PROPERTY}. */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);

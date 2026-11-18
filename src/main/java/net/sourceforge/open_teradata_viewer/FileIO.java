@@ -408,7 +408,14 @@ public class FileIO {
         return null;
     }
 
-    private static JComboBox<String> createEncodingCombo(String selected) {
+    /**
+     * @param selected The name of the encoding that is selected, which is added
+     *        to the list if it is not one of the encodings that can be used.
+     * @return The list of the encodings that can be used to write a text, see
+     *         {@link TextFileCodec#getEncodings()}. Must be called from the
+     *         Swing event thread.
+     */
+    public static JComboBox<String> createEncodingCombo(String selected) {
         List<String> encodings = new ArrayList<>(TextFileCodec.getEncodings());
         if (!encodings.contains(selected)) {
             encodings.add(selected);
