@@ -56,10 +56,10 @@ import org.xml.sax.SAXException;
 import net.sourceforge.open_teradata_viewer.util.Utilities;
 
 /**
- * 
- * 
+ *
+ *
  * @author D. Campione
- * 
+ *
  */
 public final class Config {
 
@@ -221,21 +221,38 @@ public final class Config {
      * Used by plug-ins.
      */
     public static void saveSetting(String name, String value) throws Exception {
+        saveSettings(Collections.singletonMap(name, value));
+    }
+
+    /**
+     * Saves several settings at once: the configuration file is written one
+     * time, so either all of them are kept or, if it cannot be written, none
+     * of them is. Nothing is written if every setting already has its value.
+     *
+     * @param values The values of the settings, by name.
+     * @throws Exception If the configuration file cannot be written.
+     */
+    public static void saveSettings(Map<String, String> values) throws Exception {
         Element config = getConfig();
         NodeList list = config.getElementsByTagName("settings");
+        Element settings;
+        boolean changed = false;
         if (list.getLength() > 0) {
-            Element settings = (Element) list.item(0);
-            String currentValue = settings.getAttribute(name);
-            if (currentValue.equals(value)) {
-                return;
-            }
-            settings.setAttribute(name, value);
+            settings = (Element) list.item(0);
         } else {
-            Element settings = config.getOwnerDocument().createElement("settings");
-            settings.setAttribute(name, value);
+            settings = config.getOwnerDocument().createElement("settings");
             config.appendChild(settings);
+            changed = true;
         }
-        Config.saveConfig(config);
+        for (Map.Entry<String, String> value : values.entrySet()) {
+            if (!settings.getAttribute(value.getKey()).equals(value.getValue())) {
+                settings.setAttribute(value.getKey(), value.getValue());
+                changed = true;
+            }
+        }
+        if (changed) {
+            Config.saveConfig(config);
+        }
     }
 
     protected static Element getConfig() throws ParserConfigurationException, IOException, SAXException {

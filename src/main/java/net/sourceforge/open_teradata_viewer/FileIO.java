@@ -42,6 +42,7 @@ import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.EncodingChoice;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
 import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
@@ -149,7 +150,12 @@ public class FileIO {
             return encoding;
         }
 
-        /** @return <code>true</code> if the file starts with a BOM. */
+        /**
+         * @return <code>true</code> if the file starts with a BOM: the user
+         *         chose UTF-8 with a BOM, or an encoding that always has one.
+         *         It does not tell what a web page starts with, see
+         *         {@link #getEncoding()}.
+         */
         public boolean hasBom() {
             return bom;
         }
@@ -167,9 +173,10 @@ public class FileIO {
 
     /**
      * Saves the text of a document, or only the selected part of it, in a file
-     * chosen by the user, who also chooses the encoding of the file: the one of
-     * the document is the one that is suggested. If the file is a web page (see
-     * {@link #isWebPage(File)}), what is written is not the text but a page
+     * chosen by the user, who also chooses the encoding of the file and, for
+     * UTF-8, whether it starts with a BOM (see {@link EncodingChoice}): the ones
+     * of the document are the ones that are suggested. If the file is a web page
+     * (see {@link #isWebPage(File)}), what is written is not the text but a page
      * that shows it with the colors of its syntax highlighting, see
      * {@link WebPageBuilder}, and it is in UTF-8 whatever the user chose. The
      * tabs holding the file are told that it has been written, see
@@ -197,8 +204,7 @@ public class FileIO {
         // same time and on the thread that owns the text area
         final AtomicReference<TextRange> rangeRef = new AtomicReference<>();
         final AtomicReference<String> textRef = new AtomicReference<>();
-        final String[] documentEncoding = new String[1];
-        final boolean[] documentBom = new boolean[1];
+        final AtomicReference<EncodingChoice> documentChoiceRef = new AtomicReference<>();
         runOnEventThread(() -> {
             RSyntaxTextArea textArea = document.getTextArea();
             int start = selectionOnly ? textArea.getSelectionStart() : 0;
@@ -213,28 +219,22 @@ public class FileIO {
                 throw new IllegalStateException(ble);
             }
             rangeRef.set(new TextRange(document, start, end));
-            documentEncoding[0] = document.getState().getEncoding();
-            documentBom[0] = document.getState().hasBom();
+            documentChoiceRef.set(EncodingChoice.of(document.getState().getEncoding(), document.getState().hasBom()));
         });
         if (rangeRef.get() == null) {
             return null;
         }
 
-        // The BOM of the file the text comes from is kept, as long as the
-        // encoding is the same
+        // The user chooses the BOM together with the encoding, starting from
+        // the ones of the document
         final String text = textRef.get();
-        final Chosen chosen = chooseAndWrite(fileName, documentEncoding[0], rangeRef.get(),
-                encoding -> encodeText(text, encoding, writesBom(encoding, documentEncoding[0], documentBom[0])));
+        final Chosen chosen = chooseAndWrite(fileName, documentChoiceRef.get(), rangeRef.get(),
+                choice -> encodeText(text, choice.getEncoding(), choice.writesBom()));
         if (chosen == null) {
             return null;
         }
         fileWritten(chosen.file, selectionOnly ? null : document);
-        return new SavedText(chosen.file, chosen.encoding,
-                writesBom(chosen.encoding, documentEncoding[0], documentBom[0]), text);
-    }
-
-    private static boolean writesBom(String encoding, String documentEncoding, boolean documentBom) {
-        return TextFileCodec.writesBom(encoding, documentBom && encoding.equals(documentEncoding));
+        return new SavedText(chosen.file, chosen.choice.getEncoding(), chosen.choice.writesBom(), text);
     }
 
     /**
@@ -310,40 +310,44 @@ public class FileIO {
      *         gave up.
      */
     private static File chooseAndWriteFile(String fileName, byte[] bytes) throws Exception {
-        Chosen chosen = chooseAndWrite(fileName, null, null, encoding -> bytes);
+        Chosen chosen = chooseAndWrite(fileName, null, null, choice -> bytes);
         return chosen == null ? null : chosen.file;
     }
 
-    /** What is written in the file the user chose, given its encoding. */
+    /**
+     * What is written in the file the user chose, given the encoding and the
+     * BOM the user chose.
+     */
     private interface BytesProvider {
-        byte[] bytesFor(String encoding) throws Exception;
+        byte[] bytesFor(EncodingChoice choice) throws Exception;
     }
 
     private static final class Chosen {
 
         private final File file;
-        private final String encoding;
+        private final EncodingChoice choice;
 
-        private Chosen(File file, String encoding) {
+        private Chosen(File file, EncodingChoice choice) {
             this.file = file;
-            this.encoding = encoding;
+            this.choice = choice;
         }
     }
 
     /**
-     * Asks the user for a file, and an encoding if the text is saved, and
-     * writes it, after asking whether to replace it if it exists.
+     * Asks the user for a file, and an encoding (with its BOM) if the text is
+     * saved, and writes it, after asking whether to replace it if it exists.
      *
      * @param fileName The name suggested to the user.
-     * @param initialEncoding The encoding that is suggested, or
-     *        <code>null</code> if the user is not asked for one.
+     * @param initialChoice The encoding and the BOM that are suggested, or
+     *        <code>null</code> if the user is not asked for them.
      * @param range What is written if the file is a web page, instead of what
      *        <code>provider</code> gives, or <code>null</code>.
      * @param provider What is written, when the encoding is known.
-     * @return The file and its encoding (<code>null</code> if the user was not
-     *         asked), or <code>null</code> if the user gave up.
+     * @return The file and the encoding the user chose (<code>null</code> if
+     *         the user was not asked), or <code>null</code> if the user gave
+     *         up.
      */
-    private static Chosen chooseAndWrite(String fileName, String initialEncoding, TextRange range,
+    private static Chosen chooseAndWrite(String fileName, EncodingChoice initialChoice, TextRange range,
                                          BytesProvider provider) throws Exception {
         JFileChooser fileChooser = getFileChooser();
         File file = new File(fileName);
@@ -357,12 +361,12 @@ public class FileIO {
         final java.util.concurrent.atomic.AtomicInteger resultRef = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicReference<File> selectedFileRef = new java.util.concurrent.atomic.AtomicReference<>();
         final java.util.concurrent.atomic.AtomicReference<String> currentDirRef = new java.util.concurrent.atomic.AtomicReference<>();
-        final java.util.concurrent.atomic.AtomicReference<String> encodingRef = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<EncodingChoice> encodingRef = new java.util.concurrent.atomic.AtomicReference<>();
 
         try {
             runOnEventThread(() -> {
-                final JComboBox<String> encodingCombo = initialEncoding == null ? null
-                        : createEncodingCombo(initialEncoding);
+                final JComboBox<EncodingItem> encodingCombo = initialChoice == null ? null
+                        : createEncodingCombo(initialChoice);
                 if (encodingCombo != null) {
                     fileChooser.setAccessory(createEncodingAccessory(encodingCombo));
                 }
@@ -377,7 +381,7 @@ public class FileIO {
                             throw new RuntimeException(ex);
                         }
                         if (encodingCombo != null) {
-                            encodingRef.set((String) encodingCombo.getSelectedItem());
+                            encodingRef.set(getSelectedEncoding(encodingCombo));
                         }
                     }
                 } finally {
@@ -409,20 +413,77 @@ public class FileIO {
     }
 
     /**
-     * @param selected The name of the encoding that is selected, which is added
+     * An item of the list of the encodings a text can be saved in: the choice
+     * of the user, and the words that tell it in the language of the user (the
+     * name of the encoding, but for UTF-8 with a BOM). It is what the list
+     * shows and what it gives back.
+     */
+    public static final class EncodingItem {
+
+        private final EncodingChoice choice;
+        private final String label;
+
+        private EncodingItem(EncodingChoice choice, String label) {
+            this.choice = choice;
+            this.label = label;
+        }
+
+        /** @return The encoding, and the BOM if it is UTF-8. */
+        public EncodingChoice getChoice() {
+            return choice;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof EncodingItem && choice.equals(((EncodingItem) obj).choice);
+        }
+
+        @Override
+        public int hashCode() {
+            return choice.hashCode();
+        }
+    }
+
+    /**
+     * @param selected The encoding (and BOM) that is selected, which is added
      *        to the list if it is not one of the encodings that can be used.
      * @return The list of the encodings that can be used to write a text, see
-     *         {@link TextFileCodec#getEncodings()}. Must be called from the
+     *         {@link EncodingChoice#getChoices()}: UTF-8 with a BOM is an item
+     *         of its own, right after UTF-8 without it. Must be called from the
      *         Swing event thread.
      */
-    public static JComboBox<String> createEncodingCombo(String selected) {
-        List<String> encodings = new ArrayList<>(TextFileCodec.getEncodings());
-        if (!encodings.contains(selected)) {
-            encodings.add(selected);
+    public static JComboBox<EncodingItem> createEncodingCombo(EncodingChoice selected) {
+        List<EncodingChoice> choices = new ArrayList<>(EncodingChoice.getChoices());
+        if (!choices.contains(selected)) {
+            choices.add(selected);
         }
-        JComboBox<String> combo = new JComboBox<>(encodings.toArray(new String[0]));
-        combo.setSelectedItem(selected);
+        List<EncodingItem> items = new ArrayList<>();
+        EncodingItem selectedItem = null;
+        for (EncodingChoice choice : choices) {
+            EncodingItem item = new EncodingItem(choice, EncodingChoice.UTF_8_WITH_BOM.equals(choice)
+                    ? LanguageManager.getInstance().getString("dialog.encoding.utf8_with_bom")
+                    : choice.getEncoding());
+            items.add(item);
+            if (choice.equals(selected)) {
+                selectedItem = item;
+            }
+        }
+        JComboBox<EncodingItem> combo = new JComboBox<>(items.toArray(new EncodingItem[0]));
+        combo.setSelectedItem(selectedItem);
         return combo;
+    }
+
+    /**
+     * @param combo A list made by {@link #createEncodingCombo(EncodingChoice)}.
+     * @return The encoding (and BOM) that is selected in it.
+     */
+    public static EncodingChoice getSelectedEncoding(JComboBox<EncodingItem> combo) {
+        return ((EncodingItem) combo.getSelectedItem()).getChoice();
     }
 
     /**
@@ -439,7 +500,7 @@ public class FileIO {
         return combo;
     }
 
-    private static JComponent createEncodingAccessory(JComboBox<String> combo) {
+    private static JComponent createEncodingAccessory(JComboBox<?> combo) {
         JLabel label = new JLabel(LanguageManager.getInstance().getString("dialog.encoding"));
         label.setLabelFor(combo);
         JPanel form = new JPanel(new BorderLayout(0, 4));

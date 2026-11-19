@@ -31,10 +31,12 @@ import net.sourceforge.open_teradata_viewer.Dialog;
 import net.sourceforge.open_teradata_viewer.FileIO;
 import net.sourceforge.open_teradata_viewer.editor.DefaultEncoding;
 import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.EncodingChoice;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
 
 /**
- * Lets the user choose the encoding that new files are saved in, see
+ * Lets the user choose the encoding that new files are saved in, and whether
+ * they start with a BOM (UTF-8 with a BOM is a choice of its own), see
  * {@link DefaultEncoding}. The tabs that are still empty and have no file take
  * it at once; the other tabs and the files that are opened keep their own.
  *
@@ -57,12 +59,12 @@ public class FileDefaultEncodingAction extends CustomAction {
 
     @Override
     protected void performThreaded(ActionEvent e) throws Exception {
-        final String[] chosen = new String[1];
+        final EncodingChoice[] chosen = new EncodingChoice[1];
         // The components are created and shown on the event thread; this one
         // waits for the user
         SwingUtilities.invokeAndWait(() -> {
             LanguageManager langManager = LanguageManager.getInstance();
-            JComboBox<String> encodingCombo = FileIO.createEncodingCombo(DefaultEncoding.get());
+            JComboBox<FileIO.EncodingItem> encodingCombo = FileIO.createEncodingCombo(DefaultEncoding.getChoice());
             JLabel label = new JLabel(langManager.getString("dialog.encoding"));
             label.setLabelFor(encodingCombo);
             JPanel panel = new JPanel(new BorderLayout(8, 0));
@@ -70,7 +72,7 @@ public class FileDefaultEncodingAction extends CustomAction {
             panel.add(encodingCombo, BorderLayout.CENTER);
             if (Dialog.OK_OPTION == Dialog.show(langManager.getString("dialog.default_encoding"), panel,
                     Dialog.QUESTION_MESSAGE, Dialog.OK_CANCEL_OPTION)) {
-                chosen[0] = (String) encodingCombo.getSelectedItem();
+                chosen[0] = FileIO.getSelectedEncoding(encodingCombo);
             }
         });
         if (chosen[0] == null) {

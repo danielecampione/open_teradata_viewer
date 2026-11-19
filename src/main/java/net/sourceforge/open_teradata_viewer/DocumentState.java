@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import net.sourceforge.open_teradata_viewer.editor.DefaultEncoding;
+import net.sourceforge.open_teradata_viewer.editor.EncodingChoice;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 
 /**
@@ -44,9 +45,17 @@ public final class DocumentState {
     private String query;
     private File openedFile;
     private FileSnapshot fileSnapshot;
-    private String encoding = DefaultEncoding.get();
+    private String encoding;
     private boolean bom;
     private byte[][] savedLobs;
+
+    public DocumentState() {
+        // The encoding and the BOM are taken together: they are the ones that
+        // were chosen together
+        EncodingChoice defaultChoice = DefaultEncoding.getChoice();
+        encoding = defaultChoice.getEncoding();
+        bom = defaultChoice.hasBom();
+    }
 
     public ResultSet getResultSet() {
         return resultSet;
@@ -149,7 +158,8 @@ public final class DocumentState {
      * @return The name of the encoding the text of the document is read and
      *         written in: the one that new files are saved in (see
      *         {@link DefaultEncoding}) when the document was created, unless
-     *         the file it comes from is in another one.
+     *         the file it comes from is in another one, or the document has
+     *         been saved in a file in another one.
      */
     public String getEncoding() {
         return encoding;
@@ -159,7 +169,11 @@ public final class DocumentState {
         this.encoding = encoding;
     }
 
-    /** @return <code>true</code> if the file the text comes from has a BOM. */
+    /**
+     * @return <code>true</code> if the file the text comes from has a BOM or,
+     *         for a document that has no file yet, if UTF-8 with a BOM is what
+     *         new files are saved in (see {@link DefaultEncoding}).
+     */
     public boolean hasBom() {
         return bom;
     }

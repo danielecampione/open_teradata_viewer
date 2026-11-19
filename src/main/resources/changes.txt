@@ -1,4 +1,4 @@
-0.4a (19/11/2026)
+0.4a (20/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -133,7 +133,11 @@
       is UTF-8 until the user changes it, it is kept in the configuration
       file, it is suggested by "Save file as..." for a tab that has no file,
       and it is taken at once by the tabs that are still empty. A file that
-      is opened keeps its own encoding.
+      is opened keeps its own encoding. "UTF-8 with BOM" is a choice of its
+      own, next to "UTF-8", both in this command and in the Encoding list of
+      "Save file as...": the BOM of a UTF-8 file can now be added or removed
+      when a tab is saved in a file, instead of being kept only when the
+      encoding was not changed.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

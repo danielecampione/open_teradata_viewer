@@ -274,16 +274,19 @@ public class EditorDocument {
     }
 
     /**
-     * Gives the document the encoding that new files are saved in, see
-     * {@link DefaultEncoding}, if it still is a new file (see
+     * Gives the document the encoding and the BOM that new files are saved in,
+     * see {@link DefaultEncoding}, if it still is a new file (see
      * {@link #isPristine()}): nothing has been typed in it and no file has been
-     * chosen for it, so no encoding has been chosen either. The encoding of any
-     * other document is left as it is. Must be called from the Swing event
-     * thread.
+     * chosen for it, so no encoding has been chosen either. The encoding and
+     * the BOM of any other document are left as they are. Must be called from
+     * the Swing event thread.
      */
     public void adoptDefaultEncoding() {
         if (isPristine()) {
-            state.setEncoding(DefaultEncoding.get());
+            // Both come from the same choice, see DocumentState()
+            EncodingChoice defaultChoice = DefaultEncoding.getChoice();
+            state.setEncoding(defaultChoice.getEncoding());
+            state.setBom(defaultChoice.hasBom());
         }
     }
 
