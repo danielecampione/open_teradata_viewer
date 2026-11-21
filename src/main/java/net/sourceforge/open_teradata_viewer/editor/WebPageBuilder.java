@@ -122,6 +122,13 @@ public final class WebPageBuilder {
                 .append(newLine);
 
         page.append("<style type=\"text/css\">").append(newLine);
+        // The colors of the tokens are meant for the background of the text
+        // area: with a dark theme, some of them cannot be read on a white page
+        Color background = textArea.getBackground();
+        if (background != null) {
+            page.append("body {\nbackground-color: ").append(UIUtil.getHTMLFormatForColor(background))
+                    .append(";\n}").append(newLine);
+        }
         for (String style : styles) {
             if (style != null) {
                 page.append(style).append(newLine);

@@ -1204,6 +1204,28 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     }
 
     /**
+     * Exports the text of a document as a web page that shows it with the
+     * colors of its syntax highlighting, in a file chosen by the user: only the
+     * selected text if there is some, otherwise all of it. The page is not the
+     * text of the document, so the document is not associated with the file
+     * and it is left as it is, see
+     * {@link FileIO#exportHtml(String, EditorDocument, boolean)}. If the
+     * document has a file, the name that is suggested is its name followed by
+     * <code>.html</code>, so that the file itself is not the one suggested to
+     * be replaced by the page. Can be called from any thread.
+     *
+     * @param document The document whose text is exported.
+     * @return <code>false</code> if the user gave up, or if nothing has been
+     *         exported.
+     * @throws Exception If the file cannot be written.
+     */
+    public boolean exportDocumentAsHtml(final EditorDocument document) throws Exception {
+        File openedFile = document.getState().getOpenedFile();
+        return FileIO.exportHtml(openedFile == null ? "" : openedFile + ".html", document,
+                hasSelection(document)) != null;
+    }
+
+    /**
      * @return <code>true</code> if some text is selected in the document. The
      *         selection is read on the thread that owns the text area.
      */

@@ -206,35 +206,73 @@ public class FileIO {
         final AtomicReference<String> textRef = new AtomicReference<>();
         final AtomicReference<EncodingChoice> documentChoiceRef = new AtomicReference<>();
         runOnEventThread(() -> {
-            RSyntaxTextArea textArea = document.getTextArea();
-            int start = selectionOnly ? textArea.getSelectionStart() : 0;
-            int end = selectionOnly ? textArea.getSelectionEnd() : textArea.getDocument().getLength();
-            if (selectionOnly && start == end) {
+            TextRange toSave = rangeToSave(document, selectionOnly);
+            if (toSave == null) {
                 return;
             }
             try {
-                textRef.set(textArea.getDocument().getText(start, end - start));
+                textRef.set(document.getTextArea().getDocument().getText(toSave.start, toSave.end - toSave.start));
             } catch (BadLocationException ble) {
                 // The range comes from the text area itself
                 throw new IllegalStateException(ble);
             }
-            rangeRef.set(new TextRange(document, start, end));
+            rangeRef.set(toSave);
             documentChoiceRef.set(EncodingChoice.of(document.getState().getEncoding(), document.getState().hasBom()));
         });
-        if (rangeRef.get() == null) {
+        final TextRange range = rangeRef.get();
+        if (range == null) {
             return null;
         }
 
         // The user chooses the BOM together with the encoding, starting from
         // the ones of the document
         final String text = textRef.get();
-        final Chosen chosen = chooseAndWrite(fileName, documentChoiceRef.get(), rangeRef.get(),
-                choice -> encodeText(text, choice.getEncoding(), choice.writesBom()));
+        final Chosen chosen = chooseAndWrite(fileName, documentChoiceRef.get(),
+                (file, choice) -> isWebPage(file) ? buildWebPage(file.getAbsolutePath().trim(), range)
+                        : encodeText(text, choice.getEncoding(), choice.writesBom()));
         if (chosen == null) {
             return null;
         }
         fileWritten(chosen.file, selectionOnly ? null : document);
         return new SavedText(chosen.file, chosen.choice.getEncoding(), chosen.choice.writesBom(), text);
+    }
+
+    /**
+     * Exports the text of a document, or only the selected part of it, as a web
+     * page that shows it with the colors and the font styles of its syntax
+     * highlighting, see {@link WebPageBuilder}, in a file chosen by the user.
+     * The page is written whatever the name of the file is, and it is in UTF-8,
+     * as it declares itself, so the user is not asked for an encoding. A page
+     * is not the text of the document: the document is left as it is, and the
+     * tabs holding the file, the one the text comes from included, are told
+     * that it has been written, see {@link #fileWritten(File, EditorDocument)}.
+     * Can be called from any thread.
+     *
+     * @param fileName The name suggested to the user.
+     * @param document The document whose text is exported.
+     * @param selectionOnly <code>true</code> to export only what is selected in
+     *        the document, <code>false</code> to export all of its text.
+     * @return The file that has been written, or <code>null</code> if the user
+     *         gave up, or if only the selection had to be exported and nothing
+     *         is selected.
+     * @throws Exception If the file cannot be written.
+     */
+    public static File exportHtml(String fileName, EditorDocument document, boolean selectionOnly) throws Exception {
+        // The selection is read on the thread that owns the text area
+        final AtomicReference<TextRange> rangeRef = new AtomicReference<>();
+        runOnEventThread(() -> rangeRef.set(rangeToSave(document, selectionOnly)));
+        final TextRange range = rangeRef.get();
+        if (range == null) {
+            return null;
+        }
+        // The user is not asked for an encoding, and what is written is the
+        // page, not the text
+        final Chosen chosen = chooseAndWrite(fileName, null, (file, choice) -> buildWebPage(file.getName(), range));
+        if (chosen == null) {
+            return null;
+        }
+        fileWritten(chosen.file, null);
+        return chosen.file;
     }
 
     /**
@@ -297,29 +335,33 @@ public class FileIO {
     }
 
     /**
-     * Lets the user choose a file and writes in it, asking before it overwrites
-     * an existing one. Nobody is told about the write.
+     * Lets the user choose a file and writes some bytes in it, exactly as they
+     * are whatever the name of the file is, asking before it overwrites an
+     * existing one. Nobody is told about the write.
      *
-     * @param bytes What is written, unless the file is a web page and a range
-     *        of the text of a document is given.
-     * @param range The text, or the part of the text, of a document that the
-     *        bytes are, or <code>null</code> if the bytes are not the text of a
-     *        document: they are then written as they are, whatever the name of
-     *        the file.
+     * @param fileName The name suggested to the user.
+     * @param bytes What is written.
      * @return The file that has been written, or <code>null</code> if the user
      *         gave up.
      */
     private static File chooseAndWriteFile(String fileName, byte[] bytes) throws Exception {
-        Chosen chosen = chooseAndWrite(fileName, null, null, choice -> bytes);
+        Chosen chosen = chooseAndWrite(fileName, null, (file, choice) -> bytes);
         return chosen == null ? null : chosen.file;
     }
 
     /**
-     * What is written in the file the user chose, given the encoding and the
-     * BOM the user chose.
+     * What is written in the file the user chose, given the file, and the
+     * encoding and the BOM the user chose.
      */
     private interface BytesProvider {
-        byte[] bytesFor(EncodingChoice choice) throws Exception;
+
+        /**
+         * @param file The file the user chose.
+         * @param choice The encoding and the BOM the user chose, or
+         *        <code>null</code> if the user was not asked for them.
+         * @return What is written in the file.
+         */
+        byte[] bytesFor(File file, EncodingChoice choice) throws Exception;
     }
 
     private static final class Chosen {
@@ -340,15 +382,14 @@ public class FileIO {
      * @param fileName The name suggested to the user.
      * @param initialChoice The encoding and the BOM that are suggested, or
      *        <code>null</code> if the user is not asked for them.
-     * @param range What is written if the file is a web page, instead of what
-     *        <code>provider</code> gives, or <code>null</code>.
-     * @param provider What is written, when the encoding is known.
+     * @param provider What is written, when the file and the encoding are
+     *        known.
      * @return The file and the encoding the user chose (<code>null</code> if
      *         the user was not asked), or <code>null</code> if the user gave
      *         up.
      */
-    private static Chosen chooseAndWrite(String fileName, EncodingChoice initialChoice, TextRange range,
-                                         BytesProvider provider) throws Exception {
+    private static Chosen chooseAndWrite(String fileName, EncodingChoice initialChoice, BytesProvider provider)
+            throws Exception {
         JFileChooser fileChooser = getFileChooser();
         File file = new File(fileName);
         try {
@@ -401,11 +442,7 @@ public class FileIO {
             String chosenFilePath = selectedFile.getAbsolutePath().trim();
             if (!new File(chosenFilePath).exists() || Dialog.YES_OPTION == Dialog.show(langManager.getString("dialog.file_exists"),
                     langManager.getString("dialog.file_exists.overwrite_existing_file"), Dialog.QUESTION_MESSAGE, Dialog.YES_NO_OPTION)) {
-                if (range != null && isWebPage(selectedFile)) {
-                    writeFile(selectedFile, buildWebPage(chosenFilePath, range));
-                } else {
-                    writeFile(selectedFile, provider.bytesFor(encodingRef.get()));
-                }
+                writeFile(selectedFile, provider.bytesFor(selectedFile, encodingRef.get()));
                 return new Chosen(selectedFile, encodingRef.get());
             }
         }
@@ -915,6 +952,26 @@ public class FileIO {
             }
         });
         return pageRef.get().getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Works out what has to be saved of a document. Must be called from the
+     * Swing event thread, which owns the text area.
+     *
+     * @param document The document whose text is saved.
+     * @param selectionOnly <code>true</code> to save only what is selected,
+     *        <code>false</code> to save all the text.
+     * @return What is saved, or <code>null</code> if only the selection has to
+     *         be saved and nothing is selected.
+     */
+    private static TextRange rangeToSave(EditorDocument document, boolean selectionOnly) {
+        RSyntaxTextArea textArea = document.getTextArea();
+        int start = selectionOnly ? textArea.getSelectionStart() : 0;
+        int end = selectionOnly ? textArea.getSelectionEnd() : textArea.getDocument().getLength();
+        if (selectionOnly && start == end) {
+            return null;
+        }
+        return new TextRange(document, start, end);
     }
 
     /** A range of the text of a document: the one that is being saved. */

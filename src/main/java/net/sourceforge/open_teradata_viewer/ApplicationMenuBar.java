@@ -157,6 +157,7 @@ public class ApplicationMenuBar extends JMenuBar
         menu.add(Actions.FILE_OPEN);
         menu.add(Actions.FILE_SAVE);
         menu.add(Actions.FILE_SAVE_AS);
+        menu.add(Actions.FILE_EXPORT_HTML);
         menu.add(Actions.FILE_DEFAULT_ENCODING);
         menu.addSeparator();
         menu.add(Actions.CALCULATE_MD5_CHECKSUM);

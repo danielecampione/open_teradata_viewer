@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Color;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -158,6 +159,26 @@ public class TestWebPageBuilder {
         String page = build(textArea, 0, textArea.getDocument().getLength());
         assertTrue(page.contains("&lt;b&gt;&amp;&lt;/b&gt;"));
         assertFalse(page.contains("<b>"));
+    }
+
+    @Test
+    public void test_build_pageHasTheBackgroundOfTheTextArea() throws BadLocationException {
+        RSyntaxTextArea textArea = sqlArea("SELECT 1;");
+        // The colors of a dark theme are meant for a dark background: they
+        // cannot be read on the white one of a page that does not set it
+        textArea.setBackground(new Color(41, 49, 52));
+        String page = build(textArea, 0, 9);
+        assertTrue(page.contains("body {\nbackground-color: #293134;\n}"));
+        int style = page.indexOf("<style");
+        int rule = page.indexOf("background-color: #293134;");
+        assertTrue(style >= 0 && rule > style && rule < page.indexOf("</style>"));
+        // It is the one of the text area, not a fixed one, and a rule of its
+        // own: the rules of the tokens are not affected
+        textArea.setBackground(new Color(255, 250, 240));
+        String lightPage = build(textArea, 0, 9);
+        assertTrue(lightPage.contains("background-color: #fffaf0;"));
+        assertFalse(lightPage.contains("#293134"));
+        assertEquals(find(lightPage, "class=\"(s\\d+)\""), find(lightPage, "^\\.(s\\d+) \\{"));
     }
 
     @Test

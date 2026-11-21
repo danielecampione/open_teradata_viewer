@@ -1,4 +1,4 @@
-0.4a (20/11/2026)
+0.4a (22/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -138,6 +138,18 @@
       "Save file as...": the BOM of a UTF-8 file can now be added or removed
       when a tab is saved in a file, instead of being kept only when the
       encoding was not changed.
+    - The File menu has a new command, "Export as HTML with syntax
+      highlighting...", that saves the text of the tab (only the selected
+      text, if there is some) as a web page that shows it with the colors and
+      the font styles of its syntax highlighting. The page is written in the
+      file chosen by the user whatever its name is, so it can also have a name
+      that does not end in .htm or .html, and it is in UTF-8, so no encoding
+      is asked for. The text of the tab is not changed by the export and the
+      tab does not become the one of that file; if the file is open in a tab,
+      that tab asks whether to reload its content.
+    - Fixed the web pages made from the text of a tab: they now have the
+      background color of the editor, so that the text highlighted with a dark
+      theme can be read instead of being light text on a white page.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h
