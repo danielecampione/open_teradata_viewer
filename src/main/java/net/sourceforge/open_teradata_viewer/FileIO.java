@@ -97,10 +97,11 @@ public class FileIO {
     }
 
     /**
-     * Saves some bytes in a file chosen by the user, exactly as they are, also
-     * when the file is a web page: the bytes are not the text of a document,
-     * see {@link #saveText(String, EditorDocument, boolean)}. The tabs holding
-     * the file are told that it has been written, see
+     * Saves some bytes in a file chosen by the user, exactly as they are,
+     * whatever the name of the file is: the bytes are not the text of a
+     * document, so the user is not asked for an encoding, see
+     * {@link #saveText(String, EditorDocument, boolean)}. The tabs holding the
+     * file are told that it has been written, see
      * {@link #fileWritten(File, EditorDocument)}.
      *
      * @param fileName The name suggested to the user.
@@ -140,12 +141,7 @@ public class FileIO {
             return file;
         }
 
-        /**
-         * @return The name of the encoding the user chose for the file. It is
-         *         not the one of the text that is written when the file is a
-         *         web page (see {@link FileIO#isWebPage(File)}): a web page is
-         *         always written in UTF-8.
-         */
+        /** @return The name of the encoding the user chose for the file. */
         public String getEncoding() {
             return encoding;
         }
@@ -153,8 +149,6 @@ public class FileIO {
         /**
          * @return <code>true</code> if the file starts with a BOM: the user
          *         chose UTF-8 with a BOM, or an encoding that always has one.
-         *         It does not tell what a web page starts with, see
-         *         {@link #getEncoding()}.
          */
         public boolean hasBom() {
             return bom;
@@ -162,9 +156,7 @@ public class FileIO {
 
         /**
          * @return The text that has been saved, as it was when it was read from
-         *         the document: all of it, or only the selected part. When the
-         *         file is a web page, it is the text the page shows, not what
-         *         is written.
+         *         the document: all of it, or only the selected part.
          */
         public String getText() {
             return text;
@@ -175,11 +167,11 @@ public class FileIO {
      * Saves the text of a document, or only the selected part of it, in a file
      * chosen by the user, who also chooses the encoding of the file and, for
      * UTF-8, whether it starts with a BOM (see {@link EncodingChoice}): the ones
-     * of the document are the ones that are suggested. If the file is a web page
-     * (see {@link #isWebPage(File)}), what is written is not the text but a page
-     * that shows it with the colors of its syntax highlighting, see
-     * {@link WebPageBuilder}, and it is in UTF-8 whatever the user chose. The
-     * tabs holding the file are told that it has been written, see
+     * of the document are the ones that are suggested. The text is written as it
+     * is, whatever the name of the file is: a web page that shows it with the
+     * colors of its syntax highlighting is only made by
+     * {@link #exportHtml(String, EditorDocument, boolean)}. The tabs holding
+     * the file are told that it has been written, see
      * {@link #fileWritten(File, EditorDocument)}: the document the text comes
      * from is left as it is when the whole text has been saved, because the
      * text is already its own, but not when only a part of it has been saved,
@@ -202,7 +194,6 @@ public class FileIO {
     public static SavedText saveText(String fileName, EditorDocument document, boolean selectionOnly) throws Exception {
         // The text is read, and the selection and the encoding with it, at the
         // same time and on the thread that owns the text area
-        final AtomicReference<TextRange> rangeRef = new AtomicReference<>();
         final AtomicReference<String> textRef = new AtomicReference<>();
         final AtomicReference<EncodingChoice> documentChoiceRef = new AtomicReference<>();
         runOnEventThread(() -> {
@@ -216,20 +207,19 @@ public class FileIO {
                 // The range comes from the text area itself
                 throw new IllegalStateException(ble);
             }
-            rangeRef.set(toSave);
             documentChoiceRef.set(EncodingChoice.of(document.getState().getEncoding(), document.getState().hasBom()));
         });
-        final TextRange range = rangeRef.get();
-        if (range == null) {
+        // Nothing has been read if only the selection had to be saved and
+        // nothing is selected
+        final String text = textRef.get();
+        if (text == null) {
             return null;
         }
 
         // The user chooses the BOM together with the encoding, starting from
         // the ones of the document
-        final String text = textRef.get();
         final Chosen chosen = chooseAndWrite(fileName, documentChoiceRef.get(),
-                (file, choice) -> isWebPage(file) ? buildWebPage(file.getAbsolutePath().trim(), range)
-                        : encodeText(text, choice.getEncoding(), choice.writesBom()));
+                (file, choice) -> encodeText(text, choice.getEncoding(), choice.writesBom()));
         if (chosen == null) {
             return null;
         }
@@ -294,16 +284,6 @@ public class FileIO {
             throw new IOException(MessageFormat.format(
                     LanguageManager.getInstance().getString("message.cannot_encode"), encoding), cce);
         }
-    }
-
-    /**
-     * @param file A file.
-     * @return <code>true</code> if the name of the file is the one of a web
-     *         page (<code>.htm</code> or <code>.html</code>).
-     */
-    public static boolean isWebPage(File file) {
-        String name = file.getName().toLowerCase();
-        return name.endsWith(".htm") || name.endsWith(".html");
     }
 
     /**

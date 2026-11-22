@@ -54,19 +54,15 @@
       reload the content of the file (the changes made to that tab are lost if
       it is reloaded). If the answer is no, the text is kept and the tab is
       marked as changed.
-    - Fixed some defects in the saving of text. Saving only the selected text
-      as a web page (.htm, .html) now writes the selection instead of the
-      whole text of the tab, and when the file is the one that the tab shown
-      holds, that tab now asks whether to reload the content of the file, like
-      the other tabs do, instead of staying as it was as if the file had not
-      been written. The exports (text, XML and LOB) saved with a name ending in
-      .htm or .html are now written as they are instead of being replaced by
-      the text of the tab shown, as a web page. A web page is now made from the
-      text of the tab that is saved, not from the one shown, and its title is
-      no longer malformed when the name of the file has special characters.
-      Saving the changes of a tab that is being closed (the answer "Yes" to the
-      question about saving them) no longer fails with an error when the file
-      is chosen.
+    - Fixed some defects in the saving of text. When only the selected text
+      is saved in the file that the tab shown holds, that tab now asks whether
+      to reload the content of the file, like the other tabs do, instead of
+      staying as it was as if the file had not been written. The exports
+      (text, XML and LOB) saved with a name ending in .htm or .html are now
+      written as they are instead of being replaced by the text of the tab
+      shown, as a web page. Saving the changes of a tab that is being closed
+      (the answer "Yes" to the question about saving them) no longer fails
+      with an error when the file is chosen.
     - A file that another program has changed no longer leaves its tab with
       the old text unnoticed: when a tab is shown, and when the window is
       activated again (for instance when the user comes back from the other
@@ -79,17 +75,15 @@
       been deleted or that cannot be read is ignored.
     - Saving a tab that has a file now writes the text directly to that file
       instead of always asking for one, and the tab is no longer marked as
-      changed afterwards. The text is written as it is, also when the file is
-      a web page (.htm, .html). A file is still asked for when the tab has no
-      file yet or when some text is selected (only the selected text is saved
+      changed afterwards. A file is still asked for when the tab has no file
+      yet or when some text is selected (only the selected text is saved
       then). Saving the changes of a tab that is being closed (the answer
       "Yes") follows the same rule. Added the "Save file as..." command to
       the File menu: it always asks for the file where the text is saved
       (only the selected text, if there is some) and, when the whole text is
-      saved and the file is not a web page, that file becomes the one of the
-      tab. Ctrl+S now saves the tab; the "SELECT * FROM" command, which had
-      that shortcut, no longer has one and is available from the Schema
-      Browser menu.
+      saved, that file becomes the one of the tab. Ctrl+S now saves the tab;
+      the "SELECT * FROM" command, which had that shortcut, no longer has one
+      and is available from the Schema Browser menu.
     - Files are no longer assumed to be in UTF-8. The encoding of a file that
       is opened is the one of its byte order mark (BOM), if it has one;
       otherwise UTF-8, if the file is valid UTF-8; otherwise the one of the
@@ -103,8 +97,7 @@
       remembers the encoding and Save writes the text in it; text that cannot
       be represented in it is not saved (no question marks are written in its
       place). "Save file as..." has an Encoding list that suggests the one of
-      the tab, and the chosen one becomes the one of the tab (a web page is
-      always UTF-8, so it does not change it).
+      the tab, and the chosen one becomes the one of the tab.
     - Saving a tab in a file ("Save file as...", or Save when the tab has no
       file yet) now changes the syntax highlighting too, as when a file is
       opened: the text is highlighted according to the name of the new file
@@ -146,7 +139,11 @@
       that does not end in .htm or .html, and it is in UTF-8, so no encoding
       is asked for. The text of the tab is not changed by the export and the
       tab does not become the one of that file; if the file is open in a tab,
-      that tab asks whether to reload its content.
+      that tab asks whether to reload its content. The web page is made only
+      by this command: saving a file whose name ends in .htm or .html with
+      Save or "Save file as..." no longer builds a page, but writes the text
+      as it is, in the encoding chosen by the user, as for any other file,
+      and the tab becomes the one of that file.
     - Fixed the web pages made from the text of a tab: they now have the
       background color of the editor, so that the text highlighted with a dark
       theme can be read instead of being light text on a white page.

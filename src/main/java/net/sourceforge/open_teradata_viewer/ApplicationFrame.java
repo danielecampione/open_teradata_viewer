@@ -1163,9 +1163,9 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * that is saved, in a file chosen by the user, see
      * {@link #saveDocumentAs(EditorDocument)}. Otherwise the whole text is
      * saved: in the file of the document, without asking for anything, if it
-     * has one, as it is (a web page is not built, whatever the name of the
-     * file), else in a file chosen by the user, which becomes the file of the
-     * document. Can be called from any thread.
+     * has one, else in a file chosen by the user, which becomes the file of the
+     * document. The text is written as it is, whatever the name of the file
+     * is. Can be called from any thread.
      *
      * @param document The document to save.
      * @return <code>false</code> if the user gave up, or if nothing has been
@@ -1188,8 +1188,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
      * left alone (if the file is the one of the document, its tab asks whether
      * to load the file again, as any other tab holding it does, see
      * {@link FileIO#saveText(String, EditorDocument, boolean)}). Otherwise the
-     * whole text is saved and the document becomes the one of that file, unless
-     * it is written as a web page. Can be called from any thread.
+     * whole text is saved and the document becomes the one of that file. The
+     * text is written as it is, whatever the name of the file is: a web page is
+     * only made by {@link #exportDocumentAsHtml(EditorDocument)}. Can be called
+     * from any thread.
      *
      * @param document The document to save.
      * @return <code>false</code> if the user gave up, or if nothing has been
@@ -1273,11 +1275,10 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
     /**
      * Saves the whole text of a document in a file chosen by the user, in the
      * encoding chosen by the user, which become the file and the encoding of the
-     * document, unless it is written as a web page (see
-     * {@link FileIO#saveText(String, EditorDocument, boolean)}): it does not
-     * hold the text of the document then. The text is highlighted as the name of
-     * the file says or, when the name does not tell, as the first line of the
-     * text does, if the name is another kind of file than the document had, see
+     * document, see {@link FileIO#saveText(String, EditorDocument, boolean)}.
+     * The text is highlighted as the name of the file says or, when the name
+     * does not tell, as the first line of the text does, if the name is another
+     * kind of file than the document had, see
      * {@link FileSyntaxStyle#forSavedAs(File, File, String)}. The other
      * documents holding that file have an old text after that, see
      * {@link #fileWritten(File, EditorDocument)}:
@@ -1294,39 +1295,35 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             return false;
         }
         final File file = saved.getFile();
-        if (!FileIO.isWebPage(file)) {
-            // The file is what the document holds now: this is what it is like,
-            // so that it is not taken for a change made by someone else
-            final FileSnapshot snapshot = FileSnapshot.tryRead(file);
-            FileIO.runOnEventThread(() -> {
-                document.getState().setOpenedFile(file);
-                document.getState().setFileSnapshot(snapshot);
-                // What the file is written in, is what the document is read
-                // and written in from now on
-                document.getState().setEncoding(saved.getEncoding());
-                document.getState().setBom(saved.hasBom());
-                document.setModified(false);
-                document.setOutOfDate(false);
-                // The file tells how the text is highlighted, if its name is
-                // another kind of file than the document had. A text area is
-                // built to look at the text, so it is done on this thread
-                String syntaxStyle = FileSyntaxStyle.forSavedAs(openedFile, file, saved.getText());
-                if (syntaxStyle != null) {
-                    changeSyntaxStyle(document, syntaxStyle);
-                }
-                refreshTabTitles();
-            });
-        }
+        // The file is what the document holds now: this is what it is like, so
+        // that it is not taken for a change made by someone else
+        final FileSnapshot snapshot = FileSnapshot.tryRead(file);
+        FileIO.runOnEventThread(() -> {
+            document.getState().setOpenedFile(file);
+            document.getState().setFileSnapshot(snapshot);
+            // What the file is written in, is what the document is read and
+            // written in from now on
+            document.getState().setEncoding(saved.getEncoding());
+            document.getState().setBom(saved.hasBom());
+            document.setModified(false);
+            document.setOutOfDate(false);
+            // The file tells how the text is highlighted, if its name is
+            // another kind of file than the document had. A text area is built
+            // to look at the text, so it is done on this thread
+            String syntaxStyle = FileSyntaxStyle.forSavedAs(openedFile, file, saved.getText());
+            if (syntaxStyle != null) {
+                changeSyntaxStyle(document, syntaxStyle);
+            }
+            refreshTabTitles();
+        });
         return true;
     }
 
     /**
      * Writes the whole text of a document in its own file, replacing its
-     * content, without asking for anything. The text is written as it is, also
-     * when the file is a web page (see {@link FileIO#isWebPage(File)}): the file
-     * is the one the text was read from, so it holds the text, not a page made
-     * from it, which only {@link #saveDocumentAs(EditorDocument)} writes. Then
-     * the document is not out of date anymore and, unless its text has been
+     * content, without asking for anything. The text is written as it is, in
+     * the encoding of the document, whatever the name of the file is. Then the
+     * document is not out of date anymore and, unless its text has been
      * changed while the file was being written, it is not modified anymore. The
      * other documents holding the file are told that it has been written, see
      * {@link #fileWritten(File, EditorDocument)}.
