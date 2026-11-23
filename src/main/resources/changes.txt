@@ -1,4 +1,4 @@
-0.4a (22/11/2026)
+0.4a (23/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -152,6 +152,14 @@
     - Fixed the web pages made from the text of a tab: they now have the
       background color of the editor, so that the text highlighted with a dark
       theme can be read instead of being light text on a white page.
+    - Text files are now handled as Notepad++ does on Windows. Line endings:
+      the line ending of a file (CR LF, LF or CR, the one of its first line
+      break) is kept when the file is saved, so adding text at the end of a
+      line of a file written on Windows no longer leaves a stray carriage
+      return in the middle of the line; a file that has no line break, and a
+      new file, get the line ending of the system (CR LF on Windows); a file
+      whose lines end in different ways is saved with the line ending of its
+      first line.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

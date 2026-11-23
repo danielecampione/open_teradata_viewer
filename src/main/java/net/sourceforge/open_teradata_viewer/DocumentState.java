@@ -25,6 +25,7 @@ import java.sql.Statement;
 import net.sourceforge.open_teradata_viewer.editor.DefaultEncoding;
 import net.sourceforge.open_teradata_viewer.editor.EncodingChoice;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
+import net.sourceforge.open_teradata_viewer.editor.LineEnding;
 
 /**
  * What an editor document holds besides its text: the file it was opened from
@@ -47,6 +48,7 @@ public final class DocumentState {
     private FileSnapshot fileSnapshot;
     private String encoding;
     private boolean bom;
+    private LineEnding lineEnding = LineEnding.getDefault();
     private byte[][] savedLobs;
 
     public DocumentState() {
@@ -180,6 +182,21 @@ public final class DocumentState {
 
     public void setBom(boolean bom) {
         this.bom = bom;
+    }
+
+    /**
+     * @return The line ending the text of the document is written with: the
+     *         one of the file it comes from or, for a document that has no file
+     *         yet, the one of the files that are written on this platform. The
+     *         text itself never holds carriage returns, see
+     *         {@link LineEnding}.
+     */
+    public LineEnding getLineEnding() {
+        return lineEnding;
+    }
+
+    public void setLineEnding(LineEnding lineEnding) {
+        this.lineEnding = lineEnding;
     }
 
     public byte[][] getSavedLobs() {

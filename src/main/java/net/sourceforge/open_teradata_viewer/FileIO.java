@@ -45,6 +45,7 @@ import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.EncodingChoice;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
+import net.sourceforge.open_teradata_viewer.editor.LineEnding;
 import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 import net.sourceforge.open_teradata_viewer.editor.WebPageBuilder;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -178,7 +179,9 @@ public class FileIO {
      * because the file then holds something else than the text of the document.
      * The encoding and the BOM of the document are left as they are too: it is
      * up to the caller to give them what has been written, if the file becomes
-     * the one of the document. Can be called from any thread.
+     * the one of the document. The lines of the text end as the ones of the
+     * file the document comes from do, see {@link LineEnding}. Can be called
+     * from any thread.
      *
      * @param fileName The name suggested to the user.
      * @param document The document whose text is saved.
@@ -196,6 +199,7 @@ public class FileIO {
         // same time and on the thread that owns the text area
         final AtomicReference<String> textRef = new AtomicReference<>();
         final AtomicReference<EncodingChoice> documentChoiceRef = new AtomicReference<>();
+        final AtomicReference<LineEnding> lineEndingRef = new AtomicReference<>();
         runOnEventThread(() -> {
             TextRange toSave = rangeToSave(document, selectionOnly);
             if (toSave == null) {
@@ -208,6 +212,7 @@ public class FileIO {
                 throw new IllegalStateException(ble);
             }
             documentChoiceRef.set(EncodingChoice.of(document.getState().getEncoding(), document.getState().hasBom()));
+            lineEndingRef.set(document.getState().getLineEnding());
         });
         // Nothing has been read if only the selection had to be saved and
         // nothing is selected
@@ -219,7 +224,7 @@ public class FileIO {
         // The user chooses the BOM together with the encoding, starting from
         // the ones of the document
         final Chosen chosen = chooseAndWrite(fileName, documentChoiceRef.get(),
-                (file, choice) -> encodeText(text, choice.getEncoding(), choice.writesBom()));
+                (file, choice) -> encodeText(text, lineEndingRef.get(), choice.getEncoding(), choice.writesBom()));
         if (chosen == null) {
             return null;
         }
@@ -284,6 +289,26 @@ public class FileIO {
             throw new IOException(MessageFormat.format(
                     LanguageManager.getInstance().getString("message.cannot_encode"), encoding), cce);
         }
+    }
+
+    /**
+     * Turns some text of a document into the bytes of a file: its lines end as
+     * the ones of a file that has the given line ending do, see
+     * {@link LineEnding#toFile(String)}, and then it is encoded, see
+     * {@link #encodeText(String, String, boolean)}.
+     *
+     * @param text The text, or a part of it.
+     * @param lineEnding The line ending of the file.
+     * @param encoding The name of the encoding.
+     * @param bom <code>true</code> to write the BOM of the encoding first, if
+     *        it has one.
+     * @return The bytes.
+     * @throws IOException If the text has characters that cannot be represented
+     *         in the encoding, see {@link #encodeText(String, String, boolean)}.
+     */
+    public static byte[] encodeText(String text, LineEnding lineEnding, String encoding, boolean bom)
+            throws IOException {
+        return encodeText(lineEnding.toFile(text), encoding, bom);
     }
 
     /**
@@ -614,7 +639,13 @@ public class FileIO {
         final byte[] bytes = FileIO.readFile(file);
         final FileSnapshot snapshot = FileSnapshot.of(lastModified, bytes);
         final TextFileCodec.Decoded decoded = decodeFile(file, bytes, encoding);
-        final String content = decoded.getText();
+        // The lines of the text of a document all end with a line feed: the line
+        // ending of the file is kept apart, and given back when the text is
+        // written. A file that has no line ending (a single line, or nothing at
+        // all) gets the one of the files that are written on this platform
+        final LineEnding detectedLineEnding = LineEnding.detect(decoded.getText());
+        final LineEnding lineEnding = detectedLineEnding != null ? detectedLineEnding : LineEnding.getDefault();
+        final String content = LineEnding.normalize(decoded.getText());
         SwingUtilities.invokeAndWait(() -> {
             ApplicationFrame applicationFrame = ApplicationFrame.getInstance();
             // The file is opened in a tab of its own, or in the empty one that
@@ -627,6 +658,7 @@ public class FileIO {
             document.getState().setFileSnapshot(snapshot);
             document.getState().setEncoding(decoded.getEncoding());
             document.getState().setBom(decoded.hasBom());
+            document.getState().setLineEnding(lineEnding);
             // The name of the file tells how its text is highlighted or, if it
             // has no extension, the first line of the text may
             String syntaxStyle = FileSyntaxStyle.forFileAndContent(file, content);
@@ -699,7 +731,10 @@ public class FileIO {
         byte[] bytes = readFile(file);
         // The encoding the document had is kept, see TextFileCodec.decodeAgain()
         TextFileCodec.Decoded decoded = TextFileCodec.decodeAgain(bytes, document.getState().getEncoding());
-        String content = decoded.getText();
+        // The file may have been written with another line ending, but if it
+        // has no line ending at all the document keeps the one it had
+        LineEnding lineEnding = LineEnding.detect(decoded.getText());
+        String content = LineEnding.normalize(decoded.getText());
         RSyntaxTextArea textArea = document.getTextArea();
         int caretPosition = textArea.getCaretPosition();
         textArea.setText(content);
@@ -708,6 +743,9 @@ public class FileIO {
         document.getState().setFileSnapshot(FileSnapshot.of(lastModified, bytes));
         document.getState().setEncoding(decoded.getEncoding());
         document.getState().setBom(decoded.hasBom());
+        if (lineEnding != null) {
+            document.getState().setLineEnding(lineEnding);
+        }
         document.setModified(false);
         // Only the documents of some syntax styles have a source tree
         document.refreshSourceTree();

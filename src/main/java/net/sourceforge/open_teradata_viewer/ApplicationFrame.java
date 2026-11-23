@@ -118,6 +118,7 @@ import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
 import net.sourceforge.open_teradata_viewer.editor.EditorSettings;
 import net.sourceforge.open_teradata_viewer.editor.FileSnapshot;
 import net.sourceforge.open_teradata_viewer.editor.FileSyntaxStyle;
+import net.sourceforge.open_teradata_viewer.editor.LineEnding;
 import net.sourceforge.open_teradata_viewer.editor.SearchMarks;
 import net.sourceforge.open_teradata_viewer.editor.TextFileCodec;
 import net.sourceforge.open_teradata_viewer.editor.OTVSyntaxTextArea;
@@ -1339,6 +1340,7 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
         final AtomicReference<String> textRef = new AtomicReference<>();
         final String[] encoding = new String[1];
         final boolean[] bom = new boolean[1];
+        final LineEnding[] lineEnding = new LineEnding[1];
         final long[] changeCount = new long[1];
         FileIO.runOnEventThread(() -> {
             RSyntaxTextArea textArea = document.getTextArea();
@@ -1350,12 +1352,15 @@ public class ApplicationFrame extends JFrame implements SyntaxConstants, SearchL
             }
             encoding[0] = document.getState().getEncoding();
             bom[0] = document.getState().hasBom();
+            lineEnding[0] = document.getState().getLineEnding();
             changeCount[0] = document.getChangeCount();
         });
-        // In the encoding the file was read in, with its BOM if it had one: it
-        // is the same file, but for what the user has changed. Nothing is
-        // written if the text cannot be represented in that encoding
-        FileIO.writeFile(file, FileIO.encodeText(textRef.get(), encoding[0], TextFileCodec.writesBom(encoding[0], bom[0])));
+        // In the encoding the file was read in, with its BOM if it had one, and
+        // with its line ending: it is the same file, but for what the user has
+        // changed. Nothing is written if the text cannot be represented in that
+        // encoding
+        FileIO.writeFile(file, FileIO.encodeText(textRef.get(), lineEnding[0], encoding[0],
+                TextFileCodec.writesBom(encoding[0], bom[0])));
 
         // The file is what the document holds: this is what it is like, so that
         // it is not taken for a change made by someone else
