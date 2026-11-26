@@ -46,7 +46,13 @@ public final class TextFileCodec {
 
     private static final String ISO_8859_1 = "ISO-8859-1";
 
+    private static final String WINDOWS_1252 = "windows-1252";
+
     private static final byte[] NO_BYTES = new byte[0];
+
+    /** See {@link #getDefaultEncoding()}. */
+    private static final Charset SYSTEM_CHARSET = findSystemCharset(System.getProperty("os.name"),
+            System.getProperty("sun.jnu.encoding"), System.getProperty("native.encoding"), Charset.defaultCharset());
 
     private TextFileCodec() {
     }
@@ -96,32 +102,96 @@ public final class TextFileCodec {
     }
 
     /**
-     * @return The name of the encoding of the platform, which is the one of the
+     * @return The name of the encoding of the system, which is the one of the
      *         files that are not Unicode and that other programs of the same
-     *         computer write.
+     *         computer write: on Windows the ANSI code page, whatever the
+     *         default encoding of Java is, and elsewhere the default encoding
+     *         of Java. See {@link #findSystemCharset(String, String, String, Charset)}.
      */
     public static String getDefaultEncoding() {
-        return Charset.defaultCharset().name();
+        return SYSTEM_CHARSET.name();
+    }
+
+    /**
+     * Tells which encoding the files that are not Unicode are expected to be
+     * in. Elsewhere than on Windows it is the default encoding of Java.
+     * <p>
+     * On Windows it is not, as the default encoding of Java does not tell the
+     * encoding of the files that the other programs write: it is UTF-8 from
+     * Java 18 on, and before that the way the application is started can
+     * change it (<code>-Dfile.encoding=UTF-8</code>, which Gradle gives to the
+     * programs it runs when it is itself started with it). Those files are in
+     * the ANSI code page of Windows, which is what Notepad++ uses too:
+     * <code>sun.jnu.encoding</code> is that code page and the option above does
+     * not change it. If Windows is set to use UTF-8 for all the programs, the
+     * ANSI code page is UTF-8 and cannot be the encoding of a file that is not
+     * valid UTF-8: the code page that the language of the user has is used
+     * instead, which Java 17 and later tell as <code>native.encoding</code>,
+     * and Windows-1252 when it is not known.
+     * <p>
+     * The values of the properties are given instead of being read, so that
+     * the choice can be checked for a system other than the one that is
+     * running.
+     *
+     * @param osName The <code>os.name</code> property.
+     * @param jnuEncoding The <code>sun.jnu.encoding</code> property, or
+     *        <code>null</code>.
+     * @param nativeEncoding The <code>native.encoding</code> property, or
+     *        <code>null</code> (it does not exist before Java 17).
+     * @param defaultCharset The default encoding of Java.
+     * @return The encoding.
+     */
+    public static Charset findSystemCharset(String osName, String jnuEncoding, String nativeEncoding,
+                                            Charset defaultCharset) {
+        if (osName == null || !osName.startsWith("Windows")) {
+            return defaultCharset;
+        }
+        for (String name : new String[] { jnuEncoding, nativeEncoding }) {
+            Charset charset = codePageOrNull(name);
+            if (charset != null) {
+                return charset;
+            }
+        }
+        return Charset.forName(WINDOWS_1252);
+    }
+
+    /**
+     * @param name The name of an encoding, or <code>null</code>.
+     * @return The encoding, or <code>null</code> if there is no name, if this
+     *         Java platform does not know it or if it is one of Unicode, which
+     *         is not a code page.
+     */
+    private static Charset codePageOrNull(String name) {
+        if (name == null) {
+            return null;
+        }
+        try {
+            Charset charset = Charset.forName(name);
+            return charset.name().startsWith("UTF-") ? null : charset;
+        } catch (IllegalArgumentException iae) {
+            // An empty name, or one that this Java platform does not know
+            return null;
+        }
     }
 
     /**
      * Reads the text of a file, guessing its encoding: the one of the BOM, if
      * there is one; otherwise UTF-8, if the bytes are valid UTF-8 (this is the
      * case of every file that holds only ASCII characters, too); otherwise the
-     * encoding of the platform, if the bytes are valid in it; otherwise
-     * ISO-8859-1, which accepts every byte. So the text is always read without
-     * losing anything.
+     * encoding of the system, if the bytes are valid in it (see
+     * {@link #getDefaultEncoding()}); otherwise ISO-8859-1, which accepts every
+     * byte. So the text is always read without losing anything.
      *
      * @param bytes The content of the file.
      * @return The text, and how it was encoded.
      */
     public static Decoded decode(byte[] bytes) {
-        return decode(bytes, Charset.defaultCharset());
+        return decode(bytes, SYSTEM_CHARSET);
     }
 
     /**
      * Like {@link #decode(byte[])}, but the encoding that is tried after UTF-8
-     * is the given one instead of the one of the platform.
+     * is the given one instead of the one of the system.
      *
      * @param bytes The content of the file.
      * @param platformCharset The encoding the non Unicode files are expected to

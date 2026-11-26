@@ -6,7 +6,7 @@
 </HEAD>
 <BODY bgcolor="#FFFFFF">
 <PRE>
-0.4a (23/11/2026)
+0.4a (26/11/2026)
     - Added Hungarian (hu) language support to the UI internationalization.
     - The editor now has tabs. Each one holds a document: a dedicated class
       groups its text area, scroll pane, source tree and auto-completion, and
@@ -167,7 +167,13 @@
       return in the middle of the line; a file that has no line break, and a
       new file, get the line ending of the system (CR LF on Windows); a file
       whose lines end in different ways is saved with the line ending of its
-      first line.
+      first line. Encoding: a file that has no byte order mark and is not
+      valid UTF-8 is read in the ANSI code page of Windows (Windows-1252 in
+      Western Europe) instead of the default encoding of Java, which is UTF-8
+      when the application is started with Gradle or with Java 18 and later:
+      the euro sign, the curly quotes and the dashes of such a file are no
+      longer shown as control characters. On the other systems nothing
+      changes.
     - Files can now be given on the command line: each one is opened in a tab
       of the editor, the first one being shown, and a file that does not
       exist is reported in the console without stopping the others. The -h

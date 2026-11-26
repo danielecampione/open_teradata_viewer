@@ -203,4 +203,81 @@ public class TestTextFileCodec {
         }
         assertTrue(Charset.isSupported(TextFileCodec.getDefaultEncoding()));
     }
+
+    @Test
+    public void onWindowsTheSystemEncodingIsTheAnsiCodePage() {
+        Charset utf8 = StandardCharsets.UTF_8;
+        // The default encoding of Java does not matter: with -Dfile.encoding=UTF-8
+        // (or from Java 18 on) it is UTF-8, the code page is what is asked for
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 10", "Cp1252", null, utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 11", "Cp1252", "Cp1252", utf8));
+        assertEquals(Charset.forName("windows-1250"),
+                TextFileCodec.findSystemCharset("Windows 11", "Cp1250", "Cp1252", utf8));
+        assertEquals(Charset.forName("MS932"), TextFileCodec.findSystemCharset("Windows 10", "MS932", null, utf8));
+        assertEquals(WINDOWS_1252,
+                TextFileCodec.findSystemCharset("Windows Server 2022", "Cp1252", null, StandardCharsets.ISO_8859_1));
+    }
+
+    @Test
+    public void onWindowsSetToUtf8TheCodePageOfTheLanguageIsUsed() {
+        Charset utf8 = StandardCharsets.UTF_8;
+        // Java 17 and later tell it as native.encoding
+        assertEquals(Charset.forName("windows-1250"),
+                TextFileCodec.findSystemCharset("Windows 11", "UTF-8", "Cp1250", utf8));
+        // Java 11 does not: Windows-1252
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 11", "UTF-8", null, utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 11", "UTF-8", "UTF-8", utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 11", "UTF-8", "UTF-16LE", utf8));
+    }
+
+    @Test
+    public void onWindowsAnUnknownCodePageIsSkipped() {
+        Charset utf8 = StandardCharsets.UTF_8;
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 10", null, null, utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 10", "", "", utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 10", "NoSuchCodePage", null, utf8));
+        assertEquals(WINDOWS_1252, TextFileCodec.findSystemCharset("Windows 10", "not a name!", "?", utf8));
+        assertEquals(Charset.forName("windows-1251"),
+                TextFileCodec.findSystemCharset("Windows 10", "NoSuchCodePage", "Cp1251", utf8));
+    }
+
+    @Test
+    public void elsewhereTheSystemEncodingIsTheDefaultOfJava() {
+        // What Windows would say is not looked at
+        for (String os : new String[] { "Linux", "Mac OS X", "FreeBSD", "SunOS", "" }) {
+            assertEquals(StandardCharsets.UTF_8,
+                    TextFileCodec.findSystemCharset(os, "Cp1252", "Cp1252", StandardCharsets.UTF_8), os);
+            assertEquals(StandardCharsets.ISO_8859_1,
+                    TextFileCodec.findSystemCharset(os, "Cp1252", "Cp1252", StandardCharsets.ISO_8859_1), os);
+        }
+        assertEquals(StandardCharsets.UTF_8,
+                TextFileCodec.findSystemCharset(null, "Cp1252", "Cp1252", StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void aWindows1252FileIsReadAsSuchEvenIfJavaDefaultsToUtf8() {
+        // Euro sign, curly quotes and en dash: the bytes 0x80 to 0x9F, which
+        // ISO-8859-1 reads as control characters
+        byte[] file = bytes('a', ' ', 0x80, ' ', 0x93, 'b', 0x94, ' ', 0x96, ' ', 0xE8);
+        Charset system = TextFileCodec.findSystemCharset("Windows 10", "Cp1252", null, StandardCharsets.UTF_8);
+        Decoded decoded = TextFileCodec.decode(file, system);
+        assertEquals("windows-1252", decoded.getEncoding());
+        assertEquals("a \u20ac \u201cb\u201d \u2013 \u00e8", decoded.getText());
+
+        Decoded before = TextFileCodec.decode(file, StandardCharsets.UTF_8);
+        assertEquals("ISO-8859-1", before.getEncoding());
+        assertEquals("a \u0080 \u0093b\u0094 \u0096 \u00e8", before.getText());
+    }
+
+    @Test
+    public void theSystemEncodingOfThisJavaIsTheOneThatIsGuessed() {
+        Charset system = TextFileCodec.findSystemCharset(System.getProperty("os.name"),
+                System.getProperty("sun.jnu.encoding"), System.getProperty("native.encoding"), Charset.defaultCharset());
+        assertEquals(system.name(), TextFileCodec.getDefaultEncoding());
+        byte[] file = bytes('a', 0xE8, 0x80);
+        Decoded guessed = TextFileCodec.decode(file);
+        Decoded expected = TextFileCodec.decode(file, system);
+        assertEquals(expected.getEncoding(), guessed.getEncoding());
+        assertEquals(expected.getText(), guessed.getText());
+    }
 }
