@@ -211,9 +211,10 @@ public class EditorDocument {
     }
 
     /**
-     * @return <code>true</code> if the text of the document has been changed
-     *         since the document was created, or since it was last opened from
-     *         a file or saved in one.
+     * @return <code>true</code> if the text of the document has been changed,
+     *         or its line ending has (see
+     *         {@link #convertLineEnding(LineEnding)}), since the document was
+     *         created, or since it was last opened from a file or saved in one.
      */
     public boolean isModified() {
         return modified;
@@ -235,11 +236,14 @@ public class EditorDocument {
     /**
      * @return How many times the text of the document has been changed since
      *         the document was created, whether the document was already
-     *         modified or not. Whoever reads the text to write it somewhere
-     *         while the user can still type, takes this number with it, and
-     *         clears the {@link #setModified(boolean) modified} state only if
-     *         the number is still the same afterwards: otherwise the text that
-     *         has been typed meanwhile would be taken for saved.
+     *         modified or not. Changing the line ending of a text that has
+     *         more than one line counts as well, as it changes what is written,
+     *         see {@link #convertLineEnding(LineEnding)}. Whoever reads the text
+     *         to write it somewhere while the user can still type, takes this
+     *         number with it, and clears the {@link #setModified(boolean)
+     *         modified} state only if the number is still the same afterwards:
+     *         otherwise the text that has been typed meanwhile would be taken
+     *         for saved.
      */
     public long getChangeCount() {
         return changeCount;
@@ -288,6 +292,34 @@ public class EditorDocument {
             state.setEncoding(defaultChoice.getEncoding());
             state.setBom(defaultChoice.hasBom());
         }
+    }
+
+    /**
+     * Gives the document another line ending, the one its text is written
+     * with, see {@link LineEnding}. The text itself does not change, as it
+     * never holds line endings of its own, but what is written in a file does:
+     * if the text has more than one line the document becomes
+     * {@link #isModified() modified}, because its file does not hold its text
+     * anymore. If the text is on a single line there is no line ending to
+     * write, so the document is left as it is and only the lines that are added
+     * to it from now on end with the new line ending. Must be called from the
+     * Swing event thread.
+     *
+     * @param lineEnding The new line ending.
+     * @return <code>true</code> if the document had another line ending.
+     */
+    public boolean convertLineEnding(LineEnding lineEnding) {
+        if (lineEnding == state.getLineEnding()) {
+            return false;
+        }
+        state.setLineEnding(lineEnding);
+        // What is written changes only if there is a line ending to write. It
+        // counts as a change of the text, so that a save that has already read
+        // the old line ending does not clear the modified state
+        if (textArea.getLineCount() > 1) {
+            textChanged();
+        }
+        return true;
     }
 
     /** @param listener A listener of the changes of {@link #MODIFIED_PROPERTY}. */

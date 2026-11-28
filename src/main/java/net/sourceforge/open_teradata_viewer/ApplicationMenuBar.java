@@ -21,6 +21,7 @@ package net.sourceforge.open_teradata_viewer;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,6 +41,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.MenuElement;
 import javax.swing.UIManager;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -48,6 +51,7 @@ import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import net.sourceforge.open_teradata_viewer.actions.Actions;
+import net.sourceforge.open_teradata_viewer.actions.ChangeLineEndingAction;
 import net.sourceforge.open_teradata_viewer.actions.ChangeSyntaxStyleAction;
 import net.sourceforge.open_teradata_viewer.actions.FancyCellRenderingAction;
 import net.sourceforge.open_teradata_viewer.actions.LookAndFeelAction;
@@ -56,6 +60,8 @@ import net.sourceforge.open_teradata_viewer.actions.ParameterAssistanceAction;
 import net.sourceforge.open_teradata_viewer.actions.RunMacroAction;
 import net.sourceforge.open_teradata_viewer.actions.ShowDescriptionWindowAction;
 import net.sourceforge.open_teradata_viewer.actions.ThemeAction;
+import net.sourceforge.open_teradata_viewer.editor.EditorDocument;
+import net.sourceforge.open_teradata_viewer.editor.LineEnding;
 import net.sourceforge.open_teradata_viewer.editor.macros.Macro;
 import net.sourceforge.open_teradata_viewer.editor.macros.MacroManager;
 import net.sourceforge.open_teradata_viewer.i18n.LanguageManager;
@@ -104,6 +110,13 @@ public class ApplicationMenuBar extends JMenuBar
      */
     private final Map<String, JRadioButtonMenuItem> syntaxItems = new HashMap<>();
     private ButtonGroup syntaxGroup;
+
+    /**
+     * The items of the menu that shows the line ending of the text, by line
+     * ending, and the group that holds their selection.
+     */
+    private final Map<LineEnding, JRadioButtonMenuItem> lineEndingItems = new EnumMap<>(LineEnding.class);
+    private ButtonGroup lineEndingGroup;
 
     /**
      * These two toggle actions are created by RSTAUI's
@@ -224,6 +237,30 @@ public class ApplicationMenuBar extends JMenuBar
         menu.add(subMenu);
         subMenu.add(Actions.INCREASE_INDENT);
         subMenu.add(Actions.DECREASE_INDENT);
+        subMenu = createMenu("menu.eol_conversion");
+        menu.add(subMenu);
+        lineEndingGroup = new ButtonGroup();
+        addLineEndingItem("Windows (CR LF)", LineEnding.WINDOWS, subMenu);
+        addLineEndingItem("Unix (LF)", LineEnding.UNIX, subMenu);
+        addLineEndingItem("Macintosh (CR)", LineEnding.MAC, subMenu);
+        // The line ending is a property of each document, and it also changes
+        // when a file is opened or loaded again: the item that shows it is
+        // selected whenever the menu is about to be shown
+        subMenu.addMenuListener(new MenuListener() {
+
+            @Override
+            public void menuSelected(MenuEvent e) {
+                selectLineEnding();
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+            }
+        });
         menu.add(Actions.INCREASE_FONT_SIZES);
         menu.add(Actions.DECREASE_FONT_SIZES);
         menu.addSeparator();
@@ -557,6 +594,27 @@ public class ApplicationMenuBar extends JMenuBar
             item.setSelected(true);
         } else if (syntaxGroup != null) {
             syntaxGroup.clearSelection();
+        }
+    }
+
+    private void addLineEndingItem(String name, LineEnding lineEnding, JMenu menu) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(new ChangeLineEndingAction(name, lineEnding));
+        lineEndingGroup.add(item);
+        menu.add(item);
+        lineEndingItems.put(lineEnding, item);
+    }
+
+    /**
+     * Selects, in the menu that shows the line ending of the text, the item of
+     * the line ending of the document that is shown.
+     */
+    private void selectLineEnding() {
+        EditorDocument document = ApplicationFrame.getInstance().getCurrentDocument();
+        JRadioButtonMenuItem item = document == null ? null : lineEndingItems.get(document.getState().getLineEnding());
+        if (item != null) {
+            item.setSelected(true);
+        } else {
+            lineEndingGroup.clearSelection();
         }
     }
 
